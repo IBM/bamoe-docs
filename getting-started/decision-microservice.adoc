@@ -2,3 +2,114 @@
 IBM, KIE Community
 
 include::../partials/attributes.adoc[]
+
+This lab introduces you to the deployment of an existing Decision Model and Notation (DMN) and validation of it's decisions.
+
+- Explore an existing DMN file created using Business Central
+- Deploy the existing DMN project to Decision Server
+- Test the deployed DMN
+
+== Examine Existing DMN Diagram
+
+The following example describes an *insurance* price calculator based on an applicant’s age and accident history. This is a simple decision process based on the following decision table:
+
+.DMN Decision Table
+image::../images/99_images/business_automation/dmn/insurance-price-dt.png[Completed Decision Table,600]
+
+- The decision table was designed without using Business Central tools, but could be imported seemlesly due to the conformity with DMN specification.
+
+- The DMN decision table includes a *hit policy*, *inputs*, and *outputs*.
+
+- Unlike the drl based decision tables that can be created in Business Central, input and output names in DMN decision tables accept spaces.
+
+- The conditions for the `Age` input is defined using the Friendly Enough Expression Language (FEEL).
+
+The *decision* can also be represented by the following decision requirements diagram:
+
+image::../images/99_images/business_automation/dmn/insurance-price-drd.png[Insurance Pricing Requirements Diagram, 600]
+
+- In this decision requirements diagram, note that the applicant’s age and accident history are the required inputs for the decision table "Insurance Total Price".
+
+- The DMN component is currently stored in the https://github.com/timwuthenow/dmn-workshop-labs[DMN GitHub repository].
+
+## Import the DMN File into KIE Sandbox
+
+In this section, you will import the GitHub repository to KIE Sandbox directly.
+
+. Copy to this https://github.com/timwuthenow/dmn-workshop-labs/blob/master/policy-price/insurance-pricing.dmn[Raw DMN file] and click the Raw Button or simply copy the link from the below command.
++
+image::../images/99_images/business_automation/dmn/raw-dmn-button.png[Raw DMN click]
++
+----
+https://raw.githubusercontent.com/timwuthenow/dmn-workshop-labs/master/policy-price/insurance-pricing.dmn
+----
+
+. With this link navigate to the { product.sandbox }[{ sandbox.production }] and under **Import </> From URL** paste the link from the previous step and click **Import**.
++
+image::../images/99_images/business_automation/dmn/import-dmn.png[Import DMN]
+
+. When the project is imported, you will see the DMN Editor with the **insurance-pricing** DMN model displayed. If you instead of pointing to a particular DMN, pointed to an entire project, any DMN/BPMN models associated with it would be able to viewed/edited within {{ product.sandbox }}.
++
+image::../images/99_images/business_automation/dmn/imported-dmn.png[Sandbox Model]
+
+. You can then click the **Run** button to get a local copy of this DMN running within the browser session itself.
++
+image::../images/99_images/business_automation/dmn/dmn-run.png[Run DMN]
+
+. This will have a section of the browser turn into a form and you can run the model right there. Modifying the checkbox based on the boolean of `had previous incidents` and set an `Age` based on the data type being a number.
++
+[NOTE]
+====
+There is a known issue around the DMN Runner with forms that does not initially assume a non-checked box is false on the first successful execution.
+To quickly get around this, check and uncheck the checkbox and move forward with your testing
+====
++
+image::../images/99_images/business_automation/dmn/form-input-exec.png[Form inputs]
+
+. If you link your OpenShift login to the gear icon, you can even do a sample deployment of this as a service into OpenShift. For now this will conclude this section.
+
+== Importing a DMN in Business Central
+
+If you want to try this in Business Central, you can go through the following steps, but it is not required.
+
+. From the GitHub web page, click **Clone or download** on the right and then select **Download ZIP**:
+
+. Using your favorite file system navigation tool, locate the downloaded ZIP file and unzip it to a directory in your file system.
+
+    - From this point forward, this location is referred to as `$PROJECT_HOME`.
+
+. Log in to Business Central. You can use either `bamAdmin:ibmpam1!` or `pamadmin:pamadm1n` to do so or whatever login you have created on your instance.
+
+. Create a project in Business Central called `policy-price`.
+
+. In the empty project library view for the `policy-price` project, click **Import Asset**.
++
+image::../images/99_images/business_automation/dmn/policy-price-importing-items.png[Policy Pricing Import Asset,600px]
+
+. In the **Create new Uploaded file** dialog, enter `insurance-pricing.dmn` in the **Uploaded file** field:
++
+image::../images/99_images/business_automation/dmn/insurance-pricing-dmn-name.png[Filled out import,600px]
+
+. Using the browse button at the far right of the field labeled **Please select a file to upload**, navigate with the file browser to the `$PROJECT_HOME` directory where the unzipped Git repository is located.
+
+. Select the `$PROJECT_HOME\policy-price\insurance-pricing.dmn` file.
+
+. Click **Ok** to import the DMN asset.
+
+. The diagram will open and you will be able to see the DRD. Explore the diagram nodes to check the decision policies of this diagram. 
++
+image::../images/99_images/business_automation/dmn/insurance-pricing-drd-added.png[Pricing DRD,600]
+
+. Close the diagram. You should now be on the library view for the `policy-price` project.
+
+. You should see the `insurance-pricing` asset is added to your project assets:
++
+image::../images/99_images/business_automation/dmn/insurance-pricing-dmn-added.png[[Pricing imported,600]
+
+. From the `policy-price` project’s library view, click **Build**, then **Deploy** to deploy the project to the execution server.
+
+. After receiving the build confirmation, navigate to the container deployment list by clicking the "**View deployment details**" link in the confirmation pop-up, or by selecting **Menu → Deploy → Execution Servers**.
+
+. Verify that `policy-price_2.0.0` shows a *green* status:
++
+image::../images/99_images/business_automation/dmn/policy-price-container.png[Container deployed for DMN in KIE Server,600]
