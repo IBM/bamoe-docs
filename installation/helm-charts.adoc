@@ -2,3 +2,47 @@
 IBM, KIE Community
 
 include::../partials/attributes.adoc[]
+
+This chart can be used to deploy git CORS proxy image on a https://kubernetes.io[Kubernetes] cluster using the https://helm.sh[Helm package manager].
+
+== Installing the Chart
+
+To install the chart with the release name `git-cors-proxy`:
+
+[console]
+====
+$ helm install git-cors-proxy ./
+====
+
+== Uninstalling the Chart
+
+To uninstall the `git-cors-proxy` deployment:
+
+[console]
+====
+$ helm uninstall git-cors-proxy
+====
+
+## Passing Environmental variables
+
+This chart uses default environmental variables from `values.yaml` file. We can override those by passing it from command line.
+
+[console]
+====
+$ helm install git-cors-proxy ./ --set image.repository=quay.io
+====
+
+== Configuration
+
+The following table lists the configurable parameters of the git cors proxy chart and their default values.
+
+|===
+| Parameter | Description | Default
+
+| `image.registry`   | Name of image registry                                                    | `"quay.io"`              
+| `image.account`    | Account of image                                                          | `"kie-tools"`            
+| `image.tag`        | Overrides the git cors proxy image tag whose default is the chart version | `"latest"`               
+| `image.name`       | The name of image                                                         | `"git-cors-proxy-image"` 
+| `service.port`     | The http service port port                                                | `8080`                   
+| `service.nodePort` | The HTTP Service node port if type is NodePort                            | `32002`                  
+|===
