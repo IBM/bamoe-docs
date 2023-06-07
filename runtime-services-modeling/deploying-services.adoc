@@ -42,7 +42,6 @@ For example, {PRODUCT} is compatible with the following technologies:
 
 * *{OPENSHIFT}*, based on Kubernetes, is the target platform for building and managing containerized applications.
 * *Quarkus* is native Java stack for Kubernetes that you can use to build applications with {PRODUCT} services.
-* *Spring Boot* is also supported with {PRODUCT} so that you can use the Spring Framework with {PRODUCT}.
 * *GraalVM* with Quarkus enables you to use native compilation with {PRODUCT}, resulting in fast start-up times and minimal footprint. For example, a native {PRODUCT} service starts in about 0.003ms, about 100 times faster than a non-native start-up. Fast start-up is almost a necessity in a cloud ecosystem, especially if you need small serverless applications.
 * *Knative* enables you to build serverless applications with {PRODUCT} that you can scale up or down (to zero) as needed.
 * *Prometheus* and *Grafana* are compatible with {PRODUCT} services for monitoring and analytics with optional extensions.
@@ -72,40 +71,33 @@ image::kogito-run-quarkus-devmode-demo.gif[Demo of {PRODUCT} BPMN2 extension in 
 To deploy your services into the cloud, you can use the {URL_DEPLOYING_ON_OPENSHIFT}#con-kogito-operator-and-cli_kogito-deploying-on-openshift[{PRODUCT} Operator], which guides you through every step. The {PRODUCT} Operator is based on the https://sdk.operatorframework.io/[Operator SDK] and automates many of the deployment steps for you. For example, when you give the operator a link to the Git repository that contains your application, the operator can automatically configure the components required to build your project from source and deploy the resulting services. {PRODUCT} also offers a command-line interface (CLI) to simplify some of these deployment tasks.
 // end::con-kogito-automation[]
 
-// tag::con-kogito-quarkus-springboot[]
-[id="con-kogito-quarkus-springboot"]
-=== {PRODUCT} on Quarkus and Spring Boot
+=== {PRODUCT} on Quarkus
 
 [role="_abstract"]
-The primary Java frameworks that {PRODUCT} supports are Quarkus (recommended) and Spring Boot.
+The primary Java frameworks that {PRODUCT} supports is Quarkus.
 
 https://quarkus.io/[Quarkus] is a Kubernetes-native Java framework with a container-first approach to building Java applications, especially for Java virtual machines (JVMs) such as GraalVM and HotSpot. Quarkus optimizes Java specifically for Kubernetes by reducing the size of both the Java application and container image footprint, eliminating some of the Java programming workload from previous generations, and reducing the amount of memory required to run those images.
 
 For {PRODUCT} services, Quarkus is the preferred framework for optimal Kubernetes compatibility and enhanced developer features, such as live reload in development mode for advanced debugging.
-
-https://spring.io/projects/spring-boot[Spring Boot] is a Java-based framework for building standalone production-ready Spring applications. Spring Boot enables you to develop Spring applications with minimal configurations and without an entire Spring configuration setup.
-
-For {PRODUCT} services, Spring Boot is supported for developers who need to use {PRODUCT} in an existing Spring Framework environment.
-// end::con-kogito-quarkus-springboot[]
 
 // tag::ref-kogito-app-examples[]
 [id="ref-kogito-app-examples"]
 == Example applications with {PRODUCT} services
 
 [role="_abstract"]
-{PRODUCT} includes example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub. These example applications contain various types of {PRODUCT} services on Quarkus or Spring Boot to help you develop your own applications. The services use one or more Business Process Model and Notation (BPMN) process models, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, XLS spreadsheet decision tables, or Java classes to define the service logic.
+{PRODUCT} includes example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub. These example applications contain various types of {PRODUCT} services on Quarkus to help you develop your own applications. The services use one or more Business Process Model and Notation (BPMN) process models, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, XLS spreadsheet decision tables, or Java classes to define the service logic.
 
 For information about each example application and instructions for using them, see the `README` file in the relevant application folder.
 
-NOTE: In the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub, the example applications in the default `stable` branch use the latest version of {PRODUCT}. When you run examples in a local environment, ensure that the environment matches the requirements that are listed in the `README` file of the relevant application folder. Also, this might require making the necessary network ports available, as configured for Quarkus, Spring Boot, and docker-compose where applicable.
+NOTE: In the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub, the example applications in the default `stable` branch use the latest version of {PRODUCT}. When you run examples in a local environment, ensure that the environment matches the requirements that are listed in the `README` file of the relevant application folder. Also, this might require making the necessary network ports available, as configured for Quarkus and docker-compose where applicable.
 
 The following list describes some of the examples provided with {PRODUCT}:
 
 Decision services::
-* `dmn-quarkus-example` and `dmn-springboot-example`: A decision service (on Quarkus or Spring Boot) that uses DMN to determine driver penalty and suspension based on traffic violations.
+* `dmn-quarkus-example`: A decision service on Quarkus that uses DMN to determine driver penalty and suspension based on traffic violations.
 * `rules-quarkus-helloworld`: A Hello World decision service on Quarkus with a single DRL rule unit.
-* `ruleunit-quarkus-example` and `ruleunit-springboot-example`: A decision service (on Quarkus or Spring Boot) that uses DRL with rule units to validate a loan application and that exposes REST operations to view application status.
-* `dmn-event-driven-quarkus` and `dmn-event-driven-springboot`: A DMN decision service on Quarkus and Spring Boot that demonstrates the capability of the {PRODUCT} Event-Driven decisions add-on.
+* `ruleunit-quarkus-example`: A decision service on Quarkus that uses DRL with rule units to validate a loan application and that exposes REST operations to view application status.
+* `dmn-event-driven-quarkus`: A DMN decision service on Quarkus that demonstrates the capability of the {PRODUCT} Event-Driven decisions add-on.
 
 Decision services that use the {PRODUCT} Trusty Service and Explainability Service::
 * `dmn-tracing-quarkus`: A DMN decision service on Quarkus that uses the `kogito-addons-quarkus-tracing-decision` add-on to generate tracing events that the {PRODUCT} Trusty Service and Explainability Service can consume and expose.
@@ -113,33 +105,27 @@ Decision services that use the {PRODUCT} Trusty Service and Explainability Servi
 * `dmn-tracing-quarkus`: A DMN service on Quarkus to evaluate a loan approval and generate tracing events that might be consumed by the Trusty service.
 
 Process services::
-* `process-quarkus-example` and `process-springboot-example`: A process service (on Quarkus or Spring Boot) for ordering items and that exposes REST operations to create new orders or to list and delete active orders.
+* `process-quarkus-example`: A process service on Quarkus for ordering items and that exposes REST operations to create new orders or to list and delete active orders.
 * `onboarding-example`: A combination of a process service and two decision services that use DMN and DRL for onboarding new employees.
-* `flexible-process-quarkus` and `flexible-process-springboot`: A process service (on Quarkus or Spring Boot) that uses flexible processes for case management in {PRODUCT}.
-* `process-usertasks-quarkus-with-console` and `process-usertasks-springboot-with-console`: A process service with user tasks (on Quarkus or Spring Boot), displaying the entire user task lifecycle using the {PRODUCT} Management and Task Console.
-* `process-springboot-example`: A process service on Spring Boot for ordering items using add-ons.
+* `flexible-process-quarkus`: A process service on Quarkus that uses flexible processes for case management in {PRODUCT}.
+* `process-usertasks-quarkus-with-console`: A process service with user tasks on Quarkus, displaying the entire user task lifecycle using the {PRODUCT} Management and Task Console.
 * `process-usertasks-with-security-oidc-quarkus-with-console`: A quickstart project using add-ons to show typical user task orchestration.
 
 Process services that use Decision services::
 * `process-decision-quarkus`: A process service integrated with decisions services, using an embedded method, in which business rule tasks are used for communication. The decisions are declared with DMN and DRL.
 * `process-decision-rest-quarkus`: A process service integrated with decisions services, using REST endpoints for remote communication. The decisions are declared with DMN and DRL.
 
-////
-Process services that use {PRODUCT_OP}::
-* `process-optaplanner-quarkus` and `process-optaplanner-springboot`: A process service (on Quarkus or Spring Boot) that uses {PRODUCT_OP} to optimize airline flight schedules and seat assignments. For information about {PRODUCT_OP} integration with {PRODUCT}, see the https://docs.optaplanner.org/latestFinal/optaplanner-docs/html_single/index.html#integrationWithQuarkus[{PRODUCT_OP} documentation].
-////
-
 Process services for OpenShift deployment::
 * `kogito-travel-agency`: A combination of process services and decision services that use DRL and XLS for travel booking, intended for deployment on {OPENSHIFT}.
 
 Serverless Workflow services::
-* `serverless-workflow-greeting-quarkus` and `serverless-workflow-greeting-springboot`: A Serverless Workflow greeting service with both JSON and YAML workflow definitions.
-* `serverless-workflow-service-calls-quarkus` and `serverless-workflow-service-calls-springboot`: A Serverless Workflow service for returning country information.
+* `serverless-workflow-greeting-quarkus`: A Serverless Workflow greeting service with both JSON and YAML workflow definitions.
+* `serverless-workflow-service-calls-quarkus`: A Serverless Workflow service for returning country information.
 * `serverless-workflow-events-quarkus`: A Serverless Workflow service for processing job applicant approvals and that showcases event-driven services.
 * `serverless-workflow-github-showcase`:  A Serverless Workflow service deployed as a GitHub bot application that reacts upon a new PR being opened in a given GitHub project.
 
 Process services that use MongoDB::
-* `process-mongodb-persistence-quarkus` and `process-mongodb-persistence-springboot`: A quickstart project on (Quarkus and Spring Boot) using add-ons that process deals for travelers using MongoDB.
+* `process-mongodb-persistence-quarkus`: A quickstart project on Quarkus using add-ons that process deals for travelers using MongoDB.
 
 [id="proc-kogito-app-examples-running"]
 === Running the {PRODUCT} example applications
@@ -147,9 +133,10 @@ Process services that use MongoDB::
 [role="_abstract"]
 To get started quickly with {PRODUCT}, you can run any of the example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub and experiment with the {PRODUCT} services.
 
-For this procedure, use the https://github.com/kiegroup/kogito-examples/tree/stable/process-quarkus-example[`process-quarkus-example`] or https://github.com/kiegroup/kogito-examples/tree/stable/process-springboot-example[`process-springboot-example`] application. You can follow similar steps with the other {PRODUCT} examples on Quarkus or Spring Boot.
+For this procedure, use the https://github.com/kiegroup/kogito-examples/tree/stable/process-quarkus-example[`process-quarkus-example`] application. You can follow similar steps with the other {PRODUCT} examples on Quarkus.
 
-In the `process-quarkus-example` and `process-springboot-example` applications, the `orders.bpmn2` process describes the steps that need to be followed when ordering items. The process includes a script task for writing debug information and a call activity for invoking a subprocess, using a custom `Order` data object.
+In the `process-quarkus-example` applications, the `orders.bpmn2` process describes the steps that need to be followed when ordering items. 
+The process includes a script task for writing debug information and a call activity for invoking a subprocess, using a custom `Order` data object.
 
 .Example `orders.bpmn2` process
 image::bpmn-model-example-orders.png[Image of `orders.bpmn` example process]
@@ -171,13 +158,11 @@ Based on these processes and on application configurations, this example service
 . In a command terminal, navigate to the extracted `kogito-examples-__RELEASE__/process-__PLATFORM__-example` folder, and enter one of the following commands to build and run the example.
 +
 --
-Quarkus and Spring Boot support the following run modes:
+Quarkus support the following run modes:
 
 * *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
 * *JVM mode*: For compatibility with a Java virtual machine (JVM).
-ifdef::KOGITO-COMM[]
 * *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-endif::[]
 
 The command that you use depends on your preferred run mode and application environment:
 
@@ -189,12 +174,6 @@ The command that you use depends on your preferred run mode and application envi
 $ mvn clean compile quarkus:dev
 ----
 +
-.On Sprint Boot
-[source]
-----
-$ mvn clean compile spring-boot:run
-----
-+
 * For JVM mode:
 +
 .On Quarkus
@@ -204,14 +183,6 @@ $ mvn clean package
 $ java -jar target/quarkus-app/quarkus-run.jar
 ----
 +
-.On Spring Boot
-[source]
-----
-$ mvn clean package
-$ java -jar target/sample-kogito-1.0-SNAPSHOT-runner.jar
-----
-+
-ifdef::KOGITO-COMM[]
 * For native mode (requires GraalVM or Mandrel):
 +
 .On Quarkus only
@@ -220,8 +191,6 @@ ifdef::KOGITO-COMM[]
 $ mvn clean package -Dnative
 $ ./target/sample-kogito-1.0-SNAPSHOT-runner
 ----
-+
-endif::[]
 --
 . After the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI configured for the application (such as \http://localhost:8080/q/swagger-ui or \http://localhost:8080/swagger-ui.html) to send API requests with the following components:
 +
@@ -268,12 +237,7 @@ curl -X POST http://localhost:8080/orders -H 'content-type: application/json' -H
 image::kogito-swagger-example-jbpm.png[Image of Swagger UI for example application]
 
 NOTE: For the predefined {PRODUCT} example applications, the Swagger UI for interacting with service endpoints is available only on Quarkus examples that you run in
-ifdef::KOGITO-ENT[]
-development mode.
-endif::[]
-ifdef::KOGITO-COMM[]
 development mode or in native mode.
-endif::[]
 
 This example procedure uses the following curl commands for convenience:
 
@@ -352,13 +316,11 @@ NOTE: In each example application, the docker-compose starts the needed services
 . Enter one of the following commands to build and run the example:
 +
 --
-Quarkus and Spring Boot support the following run modes:
+Quarkus and support the following run modes:
 
 * *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
 * *JVM mode*: For compatibility with a Java virtual machine (JVM).
-ifdef::KOGITO-COMM[]
 * *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-endif::[]
 
 The command that you use depends on your preferred run mode and application environment:
 
@@ -370,12 +332,6 @@ The command that you use depends on your preferred run mode and application envi
 $ mvn clean compile quarkus:dev
 ----
 +
-.On Sprint Boot
-[source]
-----
-$ mvn clean compile spring-boot:run
-----
-+
 * For JVM mode:
 +
 .On Quarkus
@@ -385,14 +341,6 @@ $ mvn clean package
 $ java -jar target/quarkus-app/quarkus-run.jar
 ----
 +
-.On Spring Boot
-[source]
-----
-$ mvn clean package
-$ java -jar target/sample-kogito-1.0-SNAPSHOT-runner.jar
-----
-+
-ifdef::KOGITO-COMM[]
 * For native mode (requires GraalVM or Mandrel):
 +
 .On Quarkus only
@@ -401,8 +349,6 @@ ifdef::KOGITO-COMM[]
 $ mvn clean package -Dnative
 $ ./target/sample-kogito-1.0-SNAPSHOT-runner
 ----
-+
-endif::[]
 --
 . When the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI (if configured for the application) to start a new request.
 . Use the {PRODUCT} Management console to see the created process instance available by default at `http://localhost:8280`.
@@ -676,75 +622,9 @@ Alternatively, you can generate a project using the https://code.quarkus.io/?e=o
 mvn io.quarkus:quarkus-maven-plugin:create -DprojectGroupId=com.company -DprojectArtifactId=sample-kogito -Dextensions="kogito"
 ////
 
-[id="proc-kogito-creating-project-spring-boot"]
-.On Spring Boot
-[source,subs="attributes+"]
-----
-$ mvn archetype:generate \
-    -DarchetypeGroupId=org.kie.kogito \
-    -DarchetypeArtifactId=kogito-spring-boot-archetype \
-    -DgroupId=org.acme -DartifactId=sample-kogito \
-    -DarchetypeVersion={COMMUNITY_VERSION_FINAL} \
-    -Dversion=1.0-SNAPSHOT
-----
-
 These commands generate a `sample-kogito` Maven project and import the {PRODUCT} extension for all required dependencies and configurations to prepare your application for business automation.
 --
 . Open or import the project in your VSCode IDE to view the contents.
-
-[id="proc-customizing-spring-boot-project-creation"]
-=== Creating a custom {PRODUCT} Spring Boot project
-
-With Spring Boot, you can create custom Maven projects using {PRODUCT} Spring Boot archetype. This archetype enables adding {PRODUCT} Spring Boot starters or add-ons in the project creation. The {PRODUCT} Spring Boot starters include:
-
-* `decisions`
-* `processes`
-* `rules`
-* `serverless-workflows`
-* `predictions`
-
-.Procedure
-. In a command terminal, navigate to a local folder where you want to store the new {PRODUCT} project.
-. Enter any of the following command to generate a project using `starters` or `addons` property:
-* To generate a project based on {PRODUCT} process services using the `starters` property, enter the following command:
-+
---
-[source,subs="attributes+"]
-----
-$ mvn archetype:generate \
-    -DarchetypeGroupId=org.kie.kogito \
-    -DarchetypeArtifactId=kogito-springboot-archetype \
-    -DgroupId=org.acme -DartifactId=sample-kogito \
-    -DarchetypeVersion={COMMUNITY_VERSION_FINAL} \
-    -Dversion=1.0-SNAPSHOT
-    -Dstarters=processes
-----
-The new project includes the dependencies required to run {PRODUCT} process services. You can combine multiple {PRODUCT} Spring Boot starters using a comma-separated list. For example `starters=processes,rules`.
---
-
-* To generate a project containing Prometheus monitoring and Infinispan persistence using the {PRODUCT} `add-ons` property, enter the following command:
-+
---
-[source,subs="attributes+"]
-----
-$ mvn archetype:generate \
-    -DarchetypeGroupId=org.kie.kogito \
-    -DarchetypeArtifactId=kogito-springboot-archetype \
-    -DgroupId=org.acme -DartifactId=sample-kogito \
-    -DarchetypeVersion={COMMUNITY_VERSION_FINAL} \
-    -Dversion=1.0-SNAPSHOT
-    -Dstarters=processes
-    -Daddons=monitoring-prometheus,persistence-infinispan
-----
-////
-Add a link of Kogito-add-ons section when prepared.
-////
-
-NOTE: When you pass an add-on to the property, the add-on name does not require the `kogito-addons-springboot` prefix. Also, you can combine the `add-ons` and `starters` properties to customize the project.
---
-
-+
-. Open or import the project in your IDE to view the contents.
 
 [id="proc-kogito-creating-project-custom"]
 === Creating a custom {PRODUCT} project using code scaffolding
@@ -780,17 +660,6 @@ Alternatively, you can generate a project using the https://code.quarkus.io/?e=o
 mvn io.quarkus:quarkus-maven-plugin:create -DprojectGroupId=com.company -DprojectArtifactId=sample-kogito -Dextensions="kogito"
 ////
 
-.On Spring Boot
-[source,subs="attributes+"]
-----
-$ mvn archetype:generate \
-    -DarchetypeGroupId=org.kie.kogito \
-    -DarchetypeArtifactId=kogito-spring-boot-archetype \
-    -DgroupId=org.acme -DartifactId=sample-kogito \
-    -DarchetypeVersion={COMMUNITY_VERSION_FINAL} \
-    -Dversion=1.0-SNAPSHOT
-----
-
 This command generates a `sample-kogito` Maven project and imports the {PRODUCT} extension for all required dependencies and configurations to prepare your application for business automation.
 --
 . In the project `pom.xml` file, modify the project dependencies and plug-ins to disable code regeneration:
@@ -812,28 +681,6 @@ This command generates a `sample-kogito` Maven project and imports the {PRODUCT}
 ----
 +
 .Adding the `kogito-maven-plugin` plug-in
-[source,xml]
-----
-<build>
-  ...
-  <plugins>
-    ...
-    <plugin>
-      <groupId>org.kie.kogito</groupId>
-      <artifactId>kogito-maven-plugin</artifactId>
-      <configuration>
-        <onDemand>true</onDemand>
-      </configuration>
-    </plugin>
-    ...
-  </plugins>
-  ...
-</build>
-----
-
-* *On Spring Boot*: Modify the existing `kogito-maven-plugin` plug-in as shown in the following example:
-+
-.Modifying the `kogito-maven-plugin` plug-in
 [source,xml]
 ----
 <build>
@@ -1251,100 +1098,6 @@ $ curl -X POST \
 ----
 --
 
-[id="con-kogito-spring-boot-starters"]
-== Spring Boot Starters for your {PRODUCT} project
-
-The https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter[Spring Boot starters] are a set of dependency descriptors that you can include in your {PRODUCT} application. Using Spring Boot starters, you can eliminate the need to go through sample code, and copy and pasting dependency descriptors.
-
-When you create a project, the `pom.xml` file contains all the necessary starters. You can also include a new starter if required.
-
-[id="ref-kogito-spring-boot-starter"]
-=== {PRODUCT} Spring Boot Starters
-
-The {PRODUCT} Spring Boot starter is an all-in-one descriptor for the {PRODUCT} projects that require business automation engines provided by {PRODUCT}. The {PRODUCT} Spring Boot starter includes decisions, rules, processes, predictions, and the Serverless Workflow implementation.
-
-When your project consists of all the assets and you want a quick way to get started with {PRODUCT}, you can use the `kogito-spring-boot-starter`. For more granular approach, you can use the specific starters or a combination of starters.
-
-You can add a {PRODUCT} Spring Boot starter to your project as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-
-NOTE: If you plan to use Serverless Workflow with events, you can add `kogito-serverless-workflow-spring-boot-starter` to the project. The `kogito-serverless-workflow-spring-boot-starter` includes CloudEvents support required by Serverless Workflows.
-
-The following list describes the different Spring Boot starters:
-
-{PRODUCT} decisions Spring Boot starter::
-Starter for decisions such as DMN support for your {PRODUCT} Spring Boot project. You can add a {PRODUCT} decisions Spring Boot starter as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-decisions-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-{PRODUCT} predictions Spring Boot starter::
-Starter for predictions such as PMML support for your {PRODUCT} Spring Boot project. You can add a {PRODUCT} predictions Spring Boot starter as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-predictions-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-
-{PRODUCT} processes Spring Boot starter::
-Starter for processes such as BPMN support for your {PRODUCT} Spring Boot project. You can add a {PRODUCT} processes Spring Boot starter as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-processes-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-
-{PRODUCT} rules Spring Boot starter::
-Starter for rules such as DRL support for your {PRODUCT} Spring Boot project. You can add a {PRODUCT} rules Spring Boot starter as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-rules-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-
-{PRODUCT} Serverless Workflow Spring Boot starter::
-Starter for the Serverless Workflow support for your {PRODUCT} Spring Boot project. You can add a {PRODUCT} Serverless Workflow starter as follows:
-
-[source,xml]
-----
-<dependencies>
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-serverless-workflow-spring-boot-starter</artifactId>
-  </dependency>
-</dependencies>
-----
-
 // Add-Ons
 
 [id="ref-kogito-add-ons"]
@@ -1380,29 +1133,6 @@ The following tables list all the supported add-ons:
 |Source Files             | kogito-addons-quarkus-source-files                  |1.20.0
 |===
 
-.{PRODUCT} add-ons for Spring Boot
-[cols="20%,50%,20%"]
-|===
-|Name                 |Artifact Id                                    |Since
-
-|Messaging            |kogito-addons-springboot-messaging             |1.0.0
-|Events Decisions     |kogito-addons-springboot-events-decisions      |1.2.0
-|Events Kafka         |kogito-addons-springboot-events-kafka          |0.3.0
-|Explainability       |kogito-addons-springboot-explainability        |0.15.0
-|Jobs Management      |kogito-addons-springboot-jobs-management       |0.6.0
-|Mail                 |kogito-addons-springboot-mail                  |1.6.0
-|Elastic Monitoring   |kogito-addons-springboot-monitoring-elastic    |1.2.0
-|Prometheus Monitoring|kogito-addons-springboot-monitoring-prometheus |0.1.0
-|Process Management   |kogito-addons-springboot-process-management    |0.3.0
-|Process SVG          |kogito-addons-springboot-process-svg           |1.0.0
-|Task Management      |kogito-addons-springboot-task-management       |1.4.0
-|Task Notification    |kogito-addons-springboot-task-notification     |1.6.0
-|Tracing Decision     |kogito-addons-springboot-tracing-decision      |0.11.0
-|Events MongoDB       |kogito-addons-springboot-events-mongodb        |1.11.0
-
-|===
-
-
 === {PRODUCT} messaging add-on
 
 {PRODUCT} provides a messaging add-on, enabling a process to register an event listener. The messaging add-on uses events in the {PRODUCT} projects. 
@@ -1415,16 +1145,6 @@ To configure messaging capabilities for your Kogito services, you must add the m
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-messaging</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Project dependency to enable messaging operations in Spring Boot projects
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-messaging</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -1465,13 +1185,6 @@ kogito.addon.messaging.incoming.defaultName=<default channel name>
 kogito.addon.messaging.outgoing.defaultName=<default channel name>
 ----
 
-.Spring Boot
-[source]
-----
-kogito.addon.cloudevents.kafka.kogito_incoming_stream=<default channel name>
-kogito.addon.cloudevents.kafka.kogito_outgoing_stream=<default channel name>
-----
-
 Optionally, for Kafka connector, you can define the Kafka topic to be used for that channel using the following form:
 
 `mp.messaging.[incoming|outgoing].<channel name>.topic = <topic name>`
@@ -1503,15 +1216,6 @@ To use the DMN event-driven add-on, add the following code to the `pom.xml` file
 </dependency>
 ----
 
-.Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-events-decisions</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
 ////
 === {PRODUCT} explainability add-on
 
@@ -1525,16 +1229,6 @@ To use the explainability add-on, add the following code to the `pom.xml` file o
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-explainability</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-explainability</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -1556,16 +1250,6 @@ To use the Jobs Management add-on, add the following code to the `pom.xml` file 
 </dependency>
 ----
 
-.Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-jobs-management</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 === {PRODUCT} Knative Eventing add-on
 
 The Knative Eventing add-on is used in the {PRODUCT} project for messaging. The https://github.com/kiegroup/kogito-runtimes/tree/main/addons/common/knative/eventing[{PRODUCT} Knative Eventing] add-on enables your project to connect to a https://knative.dev/docs/developer/eventing/sinks/[sink] or make it a https://github.com/knative-sandbox/eventing-kogito#kogito-source[KogitoSource].
@@ -1574,7 +1258,6 @@ The add-on processes the https://knative.dev/development/developer/eventing/sour
 
 The service requires the https://github.com/kiegroup/kogito-runtimes/tree/main/addons/common/messaging[{PRODUCT} Messaging] and https://quarkus.io/guides/reactive-messaging-http.html[Quarkus HTTP connector] libraries to wire the {PRODUCT} service with a given sink. The {PRODUCT} Messaging and Quarkus HTTP connector perform as dependencies for the Knative Eventing add-on.
 
-NOTE: Spring Boot does not support Knative Eventing currently.
 
 To use the Knative Eventing add-on, add the following code to the `pom.xml` file of your project:
 
@@ -1741,16 +1424,6 @@ The mail add-on is used to send emails in a process project. To use the mail add
 </dependency>
 ----
 
-.Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-mail</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 === {PRODUCT} events add-on
 
 The events add-on provides a default implementation in supported target platforms for EventEmitter and EventReceiver interfaces. You can use EventEmitter and EventReceiver interfaces to enable messaging by process, serverless workflow events, and event decision handling. 
@@ -1792,26 +1465,6 @@ To use the events add-on, add the following code to the `pom.xml` file of your p
 </dependency>
 ----
 
-.Events Kafka add-on for Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-events-kafka</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Events decisions add-on for Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-events-decisions</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 === {PRODUCT} monitoring add-on
 
 The monitoring add-on provides monitoring capabilities in the {PRODUCT} project. 
@@ -1838,26 +1491,6 @@ To use the monitoring add-on, add the following code to the `pom.xml` file of yo
 </dependency>
 ----
 
-.Spring Boot dependency for elastic search
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-monitoring-elastic</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring Boot dependency for Prometheus
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-monitoring-prometheus</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 === {PRODUCT} persistence add-on
 
 The persistence add-on provides persistence capability in your {PRODUCT} project.
@@ -1874,32 +1507,12 @@ To use the Persistence add-on, add the following code to the `pom.xml` file of y
 </dependency>
 ----
 
-.Spring Boot dependency for persistence filesystem
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-filesystem</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 .Quarkus dependency for persistence Infinispan
 [source,xml,subs="attributes+"]
 ----
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-persistence-infinispan</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring Boot dependency for persistence Infinispan
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-infinispan</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -1914,32 +1527,12 @@ To use the Persistence add-on, add the following code to the `pom.xml` file of y
 </dependency>
 ----
 
-.Spring Boot dependency for persistence JDBC
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-jdbc</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 .Quarkus dependency for persistence MongoDB
 [source,xml,subs="attributes+"]
 ----
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-persistence-mongodb</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring Boot dependency for persistence MongoDB
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-mongodb</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -1954,32 +1547,12 @@ To use the Persistence add-on, add the following code to the `pom.xml` file of y
 </dependency>
 ----
 
-.Spring Boot dependency for persistence PostgreSQL
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-postgresql</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 .Quarkus dependency for persistence Kafka
 [source,xml,subs="attributes+"]
 ----
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-persistence-kafka</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring Boot dependency for persistence Kafka
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-persistence-kafka</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -2061,15 +1634,6 @@ To configure process SVG REST capabilities for your {PRODUCT} services, you can 
 </dependency>
 ----
 
-.Project dependency to enable process SVG REST operations in Spring Boot projects
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-process-svg</artifactId>
-</dependency>
-----
-
 The process SVG add-on provides the following set of configuration properties:
 
 .Process SVG add-on configuration properties in {PRODUCT}
@@ -2137,17 +1701,6 @@ To configure process event capabilities for your {PRODUCT} services, you can add
   <artifactId>kogito-addons-quarkus-events-process</artifactId>
 </dependency>
 ----
-
-.Project dependency to enable process event operations in Spring Boot projects
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  	<groupId>org.kie.kogito</groupId>
-  	<artifactId>kogito-addons-springboot-events-process-kafka</artifactId>
-</dependency>
-----
-
-NOTE: The {PRODUCT} process event add-on for Spring Boot is specific to Kafka. Therefore, you do not need to add additional dependencies to your `pom.xml` file to use an event broker.
 
 For Quarkus, the {PRODUCT} process event add-on implementation is based on https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/2/connectors/connectors.html[Smallrye Messaging] library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. Therefore, the {PRODUCT} process event add-on is not specifically combined with any event broker in Quarkus, but requires additional configuration to use a suitable Smallrye connector.
 
@@ -2219,16 +1772,6 @@ To use the Task Management add-on, add the following code to the `pom.xml` file 
 </dependency>
 ----
 
-.Spring Boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-task-management</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
 === {PRODUCT} tracing add-on
 
 The Tracing add-on provides Decision model and notation (DMN) services tracing capability.
@@ -2241,16 +1784,6 @@ To use the Tracing add-on, add the following code to the `pom.xml` file of your 
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-tracing-decision</artifactId>
-  <version>{PRODUCT_VERSION}</version>
-</dependency>
-----
-
-.Spring boot
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-tracing-decision</artifactId>
   <version>{PRODUCT_VERSION}</version>
 </dependency>
 ----
@@ -3465,13 +2998,11 @@ The expected results defined in the `Is underage` test scenario did not match th
 == Running a {PRODUCT} service
 
 [role="_abstract"]
-After you design the business decisions and processes for your {PRODUCT} service, you can run your Quarkus or Spring Boot application in one of the following modes:
+After you design the business decisions and processes for your {PRODUCT} service, you can run your Quarkus application in one of the following modes:
 
 * *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
 * *JVM mode*: For compatibility with a Java virtual machine (JVM).
-ifdef::KOGITO-COMM[]
 * *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-endif::[]
 
 .Procedure
 In a command terminal, navigate to the project that contains your {PRODUCT} service and enter one of the following commands, depending on your preferred run mode and application environment:
@@ -3484,12 +3015,6 @@ In a command terminal, navigate to the project that contains your {PRODUCT} serv
 ----
 $ mvn clean compile quarkus:dev
 ----
-
-.On Spring Boot
-[source]
-----
-$ mvn clean compile spring-boot:run
-----
 --
 * For JVM mode:
 +
@@ -3500,14 +3025,8 @@ $ mvn clean compile spring-boot:run
 $ mvn clean package
 $ java -jar target/quarkus-app/quarkus-run.jar
 ----
-.On Spring Boot
-[source]
-----
-$ mvn clean package
-$ java -jar target/sample-kogito-1.0-SNAPSHOT-runner.jar
-----
 --
-ifdef::KOGITO-COMM[]
+
 * For native mode (requires GraalVM):
 +
 --
@@ -3546,8 +3065,6 @@ $ mvn clean package -Dnative -Dquarkus.native.container-build -Dquarkus.native.b
 
 
 For further information about building a native image, see https://quarkus.io/guides/building-native-image#container-runtime[Quarkus - Building a Native Executable].
-
-endif::[]
 
 [id="proc-kogito-interacting-app"]
 == Interacting with a running {PRODUCT} service
@@ -3603,8 +3120,6 @@ This example procedure uses curl commands for convenience.
 
 .Procedure
 In a command terminal window that is separate from your running application, navigate to the project that contains your {PRODUCT} service and use any of the following curl commands with JSON requests to interact with your running service:
-
-NOTE: On Spring Boot, you might need to modify how your application exposes API endpoints in order for these example requests to function.
 
 * Add an adult person:
 +
@@ -3691,7 +3206,6 @@ curl -X POST http://localhost:8080/persons/8eef502b-012b-4628-acb7-73418a089c08/
 ----
 --
 
-ifdef::KOGITO-ENT[]
 // tag::ref-kogito-glossary[]
 [id="ref-kogito-glossary"]
 == {PRODUCT} glossary of terms
@@ -3701,10 +3215,6 @@ This glossary defines terms, concepts, or components that are referenced frequen
 
 BPMN model::
 A definition of a business process workflow based on the https://www.omg.org/spec/BPMN/2.0/About-BPMN[Business Process Model and Notation (BPMN) specification]. BPMN is a standard established by the Object Management Group (OMG) for describing and modeling business processes. BPMN defines an XML schema that enables BPMN models to be shared between BPMN-compliant platforms and across organizations so that business analysts and business process developers can collaborate in designing and implementing BPMN process services. The BPMN standard is similar to and can be used together with the Decision Model and Notation (DMN) standard for designing and modeling business decisions.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_PROCESS_SERVICES}#chap-kogito-developing-process-services[_{PROCESS_SERVICES}_]
 
 business domain API::
 An API that your business develops and implements within business applications that contain {PRODUCT} services.
@@ -3714,71 +3224,33 @@ The collection of BPMN process models, DMN decision models, DRL rules, XLS decis
 
 CloudEvents format::
 A specification for describing event data in a common way. {PRODUCT} runtime events for messages, processes, tasks, and other application activities are published in https://cloudevents.io/[CloudEvents] format so that they can be consumed efficiently by other entities, such as the {PRODUCT} Data Index Service.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-kogito-runtime-events_kogito-configuring[_{PRODUCT} runtime events_]
-* {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{PRODUCT} Data Index Service_]
 
 decision table::
 A set of business rules defined in a tabular format. Each row in a decision table is a rule, and each column is a condition, an action, or another rule attribute.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DECISION_SERVICES}#con-decision-tables_kogito-decision-tables[_Designing a decision service using spreadsheet decision tables_]
 
 development mode::
 A project build option that provides a fast feedback loop from code changes to a running system using hot reload. Development mode also enables debugging tools such as Swagger in {PRODUCT} runtime services.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CREATING_RUNNING}#proc-kogito-running-app_kogito-creating-running[_Running a {PRODUCT} service_]
-* https://quarkus.io/guides/maven-tooling[_Quarkus - Building applications with Maven_]
 
 DRL rule::
 A definition of a business rule in Drools Rule Language (DRL) format. DRL is a notation established by the https://www.drools.org/[Drools] open source business automation project for defining and describing business rules.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DECISION_SERVICES}#con-drl_kogito-drl-rules[_Designing a decision service using DRL rules_]
 
 DRL rule unit::
 A module for rules and a unit of execution. A rule unit collects a set of rules with the declaration of the type of facts that the rules act on. A rule unit also serves as a unique namespace for each group of rules. A single rule base can contain multiple rule units. You typically store all the rules for a unit in the same file as the unit declaration so that the unit is self-contained.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DECISION_SERVICES}#con-drl-rule-units_kogito-drl-rules[_Rule units in DRL_]
 
 DMN model::
 A definition of a business decision flow based on the https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification]. DMN is a standard established by the Object Management Group (OMG) for describing and modeling operational decisions. DMN defines an XML schema that enables DMN models to be shared between DMN-compliant platforms and across organizations so that business analysts and business rules developers can collaborate in designing and implementing DMN decision services. The DMN standard is similar to and can be used together with the Business Process Model and Notation (BPMN) standard for designing and modeling business processes.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DECISION_SERVICES}#con-dmn_kogito-dmn-models[_Designing a decision service using DMN models_]
 
 event listener::
 A procedure or function in a program that reacts to a specified event, such as a completed node in a process or an executed decision.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#proc-event-listeners-registering_kogito-configuring[_Registering event listeners_]
 
 intelligent application::
 An optimized, integrated solution that uses {PRODUCT} services to implement business-domain knowledge.
 
 {PRODUCT} Audit Investigation Console::
 A user interface for monitoring and investigating Decision Model and Notation (DMN) model executions in {PRODUCT}.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DECISION_SERVICES}#con-audit-console_kogito-dmn-models[_{PRODUCT} Audit Investigation Console_]
 
 {PRODUCT} CLI::
 A command-line interface (CLI) that enables you to interact with the {PRODUCT} Operator for deployment tasks. The {PRODUCT} CLI also enables you to deploy {PRODUCT} services from source instead of relying on custom resources and YAML files.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DEPLOYING_ON_OPENSHIFT}#proc-kogito-deploying-on-ocp-kogito-cli_kogito-deploying-on-openshift[_Deploying {PRODUCT} on {OPENSHIFT} using the {PRODUCT} CLI_]
 
 ////
 //@comment: Excluding for now due to current build issues with the extension and we aren't using it at this point. (Stetson, 2 Apr 2020)
@@ -3788,105 +3260,45 @@ An extension required to generate and build a Maven project for {PRODUCT} runtim
 
 {PRODUCT} Data Index Service::
 A dedicated service in {PRODUCT} that stores all {PRODUCT} events related to processes, tasks, and domain data. The Data Index Service uses Apache Kafka messaging to consume CloudEvents messages from {PRODUCT} services, and then indexes the returned data for future GraphQL queries and stores the data in the Infinispan or MongoDB persistence store. The Data Index Service is at the core of all {PRODUCT} search, insight, and management capabilities.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{PRODUCT} Data Index Service_]
 
 {PRODUCT} domain-specific service::
 A business automation service for your business domain that you create using {PRODUCT}. You define the logic of this service using BPMN process models, DMN decision models, or other business models, and any other supported runtime configurations. In {PRODUCT} documentation, the general term for _{PRODUCT} services_ that you create refers to this type of service.
 
 {PRODUCT} Explainability Service::
 A dedicated service in {PRODUCT} that provides an explanation for the decisions made in {PRODUCT} services, in conjunction with the _{PRODUCT} Trusty Service_.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-trusty-service_kogito-configuring[_{PRODUCT} Trusty Service and Explainability Service_]
 
 {PRODUCT} Jobs Service::
 A dedicated service in {PRODUCT} for scheduling BPMN process events that are configured to be executed at a specified time. These time-based events in a process model are known as _jobs_. The Jobs Service does not execute a job, but triggers a callback that might be an HTTP request on a given endpoint specified for the job request or any other configured callback. The Jobs Service receives requests for job scheduling and then sends a request at the time specified on the job request.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-jobs-service_kogito-configuring[_{PRODUCT} Jobs Service_]
 
 {PRODUCT} Management Console::
 A user interface for viewing the state of all available {PRODUCT} services and managing process instances.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_PROCESS_SERVICES}#con-management-console_kogito-developing-process-services[_{PRODUCT} Management Console_]
 
 {PRODUCT} Operator::
 An operator that deploys {PRODUCT} services and manages the required {PRODUCT} infrastructure services. The {PRODUCT} Operator is based on the https://sdk.operatorframework.io/[Operator SDK] and automates many of the deployment steps for you.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_DEPLOYING_ON_OPENSHIFT}#con-kogito-on-ocp_kogito-deploying-on-openshift[_{PRODUCT} on {OPENSHIFT}_]
 
 {PRODUCT} runtime event::
 A record of a significant change of state in the application domain at a point in time. {PRODUCT} emits runtime events as a result of successfully executed requests, or _units of work_, in a process instance or task instance in a process. {PRODUCT} can use these events to notify third parties about changes to the BPMN process instance and its data.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-kogito-runtime-events_kogito-configuring[_{PRODUCT} runtime events_]
 
 {PRODUCT} runtime persistence::
 An optional capability for preserving {PRODUCT} process data in your services across application restarts. {PRODUCT} persistence is based on https://infinispan.org/[Infinispan] and enables you to configure key-value storage definitions to persist data, such as active process nodes and process instance variables. Alternatively, https://www.mongodb.com/[MongoDB] can be used.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-persistence_kogito-configuring[_Persistence in {PRODUCT}_]
 
 {PRODUCT} supporting services::
 The collection of middleware infrastructure services and other dedicated services that help you build additional functionality in the {PRODUCT} domain-specific services that you develop. Key middleware infrastructure services in {PRODUCT} include Infinispan, MongoDB, or Kafka Streams persistence, and Apache Kafka reactive messaging. Dedicated services provided by {PRODUCT} include the {PRODUCT} Data Index Service, Jobs Service, Trusty Service, and Explainability Service.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{PRODUCT} Data Index Service_]
-* {URL_CONFIGURING_KOGITO}#con-jobs-service_kogito-configuring[_{PRODUCT} Jobs Service_]
-* {URL_CONFIGURING_KOGITO}#con-trusty-service_kogito-configuring[_{PRODUCT} Trusty Service and Explainability Service_]
-* {URL_CONFIGURING_KOGITO}#proc-infinispan-persistence-enabling_kogito-configuring[_Enabling Infinispan persistence for {PRODUCT} services_]
-* {URL_CONFIGURING_KOGITO}#proc-mongodb-persistence-enabling_kogito-configuring[_Enabling MongoDB persistence for {PRODUCT} services_]
-* {URL_CONFIGURING_KOGITO}#proc-kafka-streams-persistence-enabling_kogito-configuring[_Enabling Kafka Streams persistence for {PRODUCT} services_]
-* {URL_CONFIGURING_KOGITO}#proc-messaging-enabling_kogito-configuring[_Enabling messaging for {PRODUCT} services_]
 
 {PRODUCT} Task Console::
 A user interface for viewing and interacting with user tasks in {PRODUCT} process services.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_PROCESS_SERVICES}#con-task-console_kogito-developing-process-services[_{PRODUCT} Task Console_]
 
 {PRODUCT} Trusty Service::
 A dedicated service in {PRODUCT} for storing all {PRODUCT} tracing events related to decisions made in {PRODUCT} services. The _{PRODUCT} Explainability Service_ is typically used in conjunction with this service.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-trusty-service_kogito-configuring[_{PRODUCT} Trusty Service and Explainability Service_]
 
 message event::
 A specified point in a business process where a defined message is used as the input (received) or output (sent) as a result of the process execution. For example, a message event might be an email sent to a specified user after a task is complete.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-kogito-runtime-events_kogito-configuring[_{PRODUCT} runtime events_]
-* {URL_CONFIGURING_KOGITO}#proc-messaging-enabling_kogito-configuring[_Enabling messaging for {PRODUCT} services_]
 
 MicroProfile Reactive Messaging::
 A specification for sending and receiving messages within and between microservices using message brokers. {PRODUCT} supports https://github.com/eclipse/microprofile-reactive-messaging[MicroProfile Reactive Messaging] for messaging in {PRODUCT} services, such as message events used as either input or output of business process execution.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#proc-messaging-enabling_kogito-configuring[_Enabling messaging for {PRODUCT} services_]
 
 middleware infrastructure services::
 The collection of supplemental services in {PRODUCT} that provide capabilities such as persistence, messaging, and security. Key middleware infrastructure services in {PRODUCT} include Infinispan persistence and Apache Kafka reactive messaging.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#proc-infinispan-persistence-enabling_kogito-configuring[_Enabling Infinispan persistence for {PRODUCT} services_]
-* {URL_CONFIGURING_KOGITO}#proc-messaging-enabling_kogito-configuring[_Enabling messaging for {PRODUCT} services_]
 
 process definition::
 A model that defines the components, workflow, and functionality for a business process, such as a BPMN model.
@@ -3896,24 +3308,12 @@ An occurrence of a pending, running, or completed business process, based on the
 
 PROTO file (`.proto`)::
 A data library used for marshalling Java objects in protobuf (https://developers.google.com/protocol-buffers/[protocol buffers]) format. {PRODUCT} runtime persistence and communication with Infinispan or MongoDB are handled through a protobuf schema and generated marshallers.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-persistence_kogito-configuring[_Persistence in {PRODUCT}_]
 
 task lifecycle::
 A mechanism that moves a user task or custom task (work item) across various phases, such as *Active* -> *Claim* -> *Complete*. {PRODUCT} provides standard lifecycle phases for user tasks and also supports custom lifecycles or lifecycle phases.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_PROCESS_SERVICES}#con-task-lifecycle_kogito-developing-process-services[_Task lifecycle in {PRODUCT} processes_]
 
 unit of work::
 A component in {PRODUCT} that serves as the basis for {PRODUCT} runtime execution. Units of work capture all steps in a process and are used internally to move a process instance from one state to the next state. After all possible steps in a process are successfully executed, the final state is sent to the {PRODUCT} runtime as a runtime event. {PRODUCT} can then use these events to notify third parties about changes to the BPMN process instance and its data.
-+
-[role="_additional-resources"]
-.Additional resources
-* {URL_CONFIGURING_KOGITO}#con-kogito-runtime-events_kogito-configuring[_{PRODUCT} runtime events_]
 
 ////
 //@comment: Excluding for now due to current lack of support in Kogito. Will add once settled. (Stetson 2 Apr 2020)
@@ -3924,16 +3324,3 @@ Work item handler::
 A Java object that contains the implementation logic for a custom task (work item).
 ////
 // tag::ref-kogito-glossary[]
-endif::[]
-
-ifdef::KOGITO-ENT[]
-[role="_additional-resources"]
-== Additional resources
-* {URL_DEPLOYING_ON_OPENSHIFT}[_{DEPLOYING_ON_OPENSHIFT}_]
-* {URL_DECISION_SERVICES}[_{DECISION_SERVICES}_]
-* {URL_PROCESS_SERVICES}[_{PROCESS_SERVICES}_]
-* {URL_CONFIGURING_KOGITO}[_{CONFIGURING_KOGITO}_]
-endif::[]
-
-ifdef::parent-context[:context: {parent-context}]
-ifndef::parent-context[:!context:]

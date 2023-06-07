@@ -1870,7 +1870,7 @@ curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -
 }
 ----
 
-Note that for JSON marshaling, {PRODUCT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus] and https://docs.spring.io/spring-boot/docs/1.3.0.M3/reference/html/howto-spring-mvc.html#howto-customize-the-jackson-objectmapper[SpringBoot], which can be configured according to the specific requirements.
+Note that for JSON marshaling, {PRODUCT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
 // end::con-kogito-service-execution[]
 
 [id="ref-rest-dmn-endpoints"]
@@ -2265,15 +2265,6 @@ The {PRODUCT} Audit Investigation Console requires the following project depende
 </dependency>
 ----
 
-.Project dependency to enable tracing capability on SpringBoot
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-tracing-decision</artifactId>
-</dependency>
-----
-
 The tracing add-on enables the Trusty Service to interact with the decision-tracing data through the CloudEvents messages. The default configuration for the add-on pushes the decision-tracing events to the `kogito-tracing-decision` Apache Kafka topic and pushes the DMN models used by the {PRODUCT} service to the `kogito-tracing-model` topic under the group ID `kogito-runtimes`.
 
 To specify the Kafka bootstrap server for your {PRODUCT} service, set the following property in the `application.properties` file of your {PRODUCT} project:
@@ -2296,49 +2287,6 @@ For example, to change the topic name for the decision-tracing events, add the f
 mp.messaging.outgoing.kogito-tracing-decision.topic=my-kogito-tracing-decision
 ----
 
-On SpringBoot, to customize the tracing add-on configurations, set the following properties in the `application.properties` file of your {PRODUCT} project as needed:
-
-.Application properties for the tracing add-on on SpringBoot
-[cols="30%,70%", options="header"]
-|===
-|Property
-|Description
-
-| `kogito.addon.tracing.decision.kafka.bootstrapAddress`
-| Sets the address used in the initial connection to find a bootstrap server on the cluster of `n` brokers
-
-Default value: None (must be set by user)
-
-| `kogito.addon.tracing.decision.kafka.topic.name`
-| Sets the topic name for the decision-tracing events
-
-Default value: `kogito-tracing-decision`
-
-| `kogito.addon.tracing.decision.kafka.topic.partitions`
-| Sets the number of partitions to use for the decision-tracing events topic
-
-Default value: `1`
-
-| `kogito.addon.tracing.decision.kafka.topic.replicationFactor`
-| Sets the factor of the data for the decision-tracing events topic
-
-Default value: `1`
-
-| `kogito.addon.tracing.decision.asyncEnabled`
-| Enables asynchronous callback with the results of the send (success or failure) instead of waiting to complete
-
-Default value: `true`
-
-| `kogito.addon.tracing.model.kafka.topic.name`
-| Sets the topic name for the DMN models used by the {PRODUCT} service
-
-Default value: `kogito-tracing-model`
-|===
-
-[role="_additional-resources"]
-.Additional resources
-* https://quarkus.io/guides/kafka[Using Apache Kafka with Reactive Messaging] in Quarkus documentation
-* https://kafka.apache.org/documentation/#producerconfigs[Producer Configs] in Apache Kafka documentation
 
 [id="proc-audit-console-using"]
 === Using the {PRODUCT} Audit Investigation Console to view DMN model execution details
@@ -2357,15 +2305,6 @@ You can use the {PRODUCT} Audit Investigation Console to view DMN model executio
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-tracing-decision</artifactId>
-</dependency>
-----
-
-.Project dependency to enable tracing capability SpringBoot
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-springboot-tracing-decision</artifactId>
 </dependency>
 ----
 --
@@ -2727,12 +2666,6 @@ You can also set this property as a start-up option when you build your {PRODUCT
 [source]
 ----
 mvn compile quarkus:dev -Ddrools.trimCellsInDTable=false
-----
-
-.On Spring Boot
-[source]
-----
-mvn spring-boot:run -Ddrools.trimCellsInDTable=false
 ----
 ====
 
@@ -3136,12 +3069,6 @@ You can also set this property as a start-up option when you build your {PRODUCT
 ----
 mvn compile quarkus:dev -Ddrools.trimCellsInDTable=false
 ----
-
-.On Spring Boot
-[source]
-----
-mvn spring-boot:run -Ddrools.trimCellsInDTable=false
-----
 ====
 
 === RuleSet definitions
@@ -3403,4 +3330,4 @@ curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -
 }
 ----
 
-Note that for JSON marshaling, {PRODUCT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus] and https://docs.spring.io/spring-boot/docs/1.3.0.M3/reference/html/howto-spring-mvc.html#howto-customize-the-jackson-objectmapper[SpringBoot], which can be configured according to the specific requirements.
+Note that for JSON marshaling, {PRODUCT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
