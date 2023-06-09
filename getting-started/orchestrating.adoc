@@ -3,160 +3,181 @@ IBM, KIE Community
 
 include::../partials/attributes.adoc[]
 
-The following example is a real-world Serverless Workflow scenario in {PRODUCT} that demonstrates how you can use Serverless Workflow definitions to orchestrate your {PRODUCT} services. In this scenario, an order service uses Serverless Workflow to process orders from multiple sources and approve or deny orders.
+The following example is a workflow scenario in {PRODUCT} that demonstrates how you can use process definitions to orchestrate your {PRODUCT} decision services. The example of a traffic violations project describes how to use decisions within the processes and how to integrate decisions in an embedded way using the business rule tasks, which must be deployed with a process in the same application.
 
-NOTE: For more {PRODUCT} examples that use Serverless Workflow, see the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub.
+NOTE: {PRODUCT} supports Straight-Through-Processing (STP), where processes are integrating decisions without any safe points and without persistence. For more {PRODUCT} examples that use process capabilities, see the references below.
 
-The following diagram illustrates the basic architecture of this scenario:
+The following diagram illustrates how decisions are integrated with processes:
 
-.Example Serverless Workflow orchestration for processing orders in {PRODUCT}
-image::serverless-workflow-kogito-orders.png[Image of example Serverless Workflow orchestration for processing orders in Kogito]
+.Embedded method to integrate a process with decisions in {PRODUCT}
+image::process-decisions-embedded-integration.png[Image of embedded method to integrate a process with decisions in {PRODUCT}]
 
-New orders can come from different sources, such as web applications or messaging services. Each order is then converted into https://cloudevents.io/[CloudEvents] messages, which represent the events that need to trigger the workflow execution. The events are pushed to an Apache Kafka topic.
+To view the complete project, you can refer to the https://github.com/kiegroup/kogito-examples/tree/main/kogito-quarkus-examples/process-decisions-quarkus[`process-decisions-quarkus`] example application for Quarkus.
 
-New order events that are pushed to Kafka trigger new instances of the workflow. The workflow invokes a business rule service and a human task service to make the order approval decision. The business rule service can be a {PRODUCT} service with Decision Model and Notation (DMN) decision models or Drools Rule Language (DRL) rules, or it can be an external service. For this example, the rule service uses a DRL rules in {PRODUCT} to verify whether the order can be auto-approved. If the order cannot be auto-approved, then the workflow uses the human task service, which likewise can be a {PRODUCT} service or an external service, to notify a manager that the order requires human approval.
+The example of a traffic violations project describes how to use decisions within the processes and how to integrate decisions in an embedded way using the business rule tasks, which must be deployed with a process in the same application.
 
-After the order decision is made, the workflow generates an event in CloudEvents format that notifies other services or other workflows that a decision was made for a particular order.
+In Kogito, the decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets including BPMN, DMN, and DRL must be placed in the resources folder.
 
-To orchestrate these services in this way, the example uses the following `ordersworkflow.sw.json` Serverless Workflow definition:
+When the example application is running, there also must be different running processes, such as a process using a business rule task, containing the URL as `http://localhost:8080/traffic`.
 
-.Example `ordersworkflow.sw.json` workflow definition (JSON)
-[source,json]
+== Traffic violations example for embedded method
+
+The traffic violations project is based on the evaluation process of the traffic violations. In the traffic violations example, first, the information of the driver is fetched, and based on the fetched information, it is determined whether the driver has a valid driving license using a RuleUnit in a DRL. After the validation of the driving license, the violation evaluation is executed, which is defined as a DMN decision, and the output provides the information of whether the driver is suspended or not.
+
+.Traffic violations example
+image::traffic-rules-dmn.png[Image of traffic violations example]
+
+=== Processes in traffic violation example
+
+In the traffic violations project, the interactions with the defined decisions are executed using the decision engine. Also, the information that is required to execute the decision evaluation must be defined in the *Data Assignments* property of the business rule task.
+
+NOTE: The ID property of a process is used in the REST endpoint generation, which refers to the path that is used to interact with the process.
+
+Also, the classes in the process are used to define the Plain Old Java Objects (POJOs) that enable the interaction between the process and decisions. The process classes include `Violation`, `Driver`, `Fine`.
+
+=== Decisions in traffic violation example
+
+The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
+
+Example `LicenseValidationService.drl` file:
+[source]
 ----
-{
-  "id": "ordersworkflow",
-  "name": "Orders Workflow",
-  "version": "1.0",
-  "events": [
-    {
-      "name": "NewOrderEvent",
-      "source": "neworder",
-      "type": "kafka"
-    },
-    {
-      "name": "ApprovalDecisionEvent",
-      "source": "out-approvaldecision",
-      "type": "kafka"
+unit LicenseValidationService
+
+rule "Is driver license valid"
+when
+    $driver: /driver[licenseExpiration.after(currentTime)]
+then
+    $driver.setValidLicense(true);
+end
+
+rule "Is driver license expired"
+when
+    $driver: /driver[licenseExpiration.before(currentTime)]
+then
+    $driver.setValidLicense(false);
+end
+
+query "validation"
+  $driver : /driver
+end
+----
+
+Example `LicenseValidationService` class:
+[source,java]
+----
+public class LicenseValidationService implements RuleUnitData {
+    private SingletonStore<Driver> driver;
+
+    public LicenseValidationService() {
+        this(DataSource.createSingleton());
     }
-  ],
-  "functions": [
-    {
-      "name": "AutoAproveOrderFunction",
-      "type": "rule",
-      "metadata": {
-        "ruleflowgroup": "neworder"
-      }
-    },
-    {
-      "name": "OrderManagerApprovalFunction",
-      "type": "decision",
-      "metadata": {
-        "taskname": "managerApproval",
-        "actorid": "managers",
-        "groupid": "managers"
-      }
+
+    public LicenseValidationService(SingletonStore<Driver> driver) {
+        this.driver = driver;
     }
-  ],
-  "states": [
-    {
-      "name": "HandleNewOrder",
-      "type": "event",
-      "start": {
-        "kind": "default"
-      },
-      "eventsActions": [
-        {
-          "eventRefs": [
-            "NewOrderEvent"
-          ],
-          "actions": [
-            {
-              "functionRef": {
-                "refName": "AutoAproveOrderFunction"
-              }
-            }
-          ]
-        }
-      ],
-      "transition": {
-        "nextState": "CheckIfNeedManagerApproval"
-      }
-    },
-    {
-      "name": "CheckIfNeedManagerApproval",
-      "type": "switch",
-      "dataConditions": [
-        {
-          "path": "$.decision",
-          "value": "Approved",
-          "operator": "equals",
-          "transition": {
-            "nextState": "OrderAutoApproved"
-          }
-        },
-        {
-          "path": "$.decision",
-          "value": "NeedManagerApproval",
-          "operator": "equals",
-          "transition": {
-            "nextState": "OrderManagerApproval"
-          }
-        }
-      ],
-      "defaultCondition": {
-        "nextState": "OrderManagerApproval"
-      }
-    },
-    {
-      "name": "OrderAutoApproved",
-      "type": "inject",
-      "data": {
-        "finalDecision": "Approved"
-      },
-      "end": {
-        "kind": "event",
-        "produceEvent": {
-          "eventRef": "ApprovalDecisionEvent"
-        }
-      }
-    },
-    {
-      "name": "OrderManagerApproval",
-      "type": "operation",
-      "actionMode": "sequential",
-      "actions": [
-        {
-          "name": "managerAprovalAction",
-          "functionRef": {
-            "refName": "OrderManagerApprovalFunction"
-          }
-        }
-      ],
-      "end": {
-        "kind": "event",
-        "produceEvent": {
-          "eventRef": "ApprovalDecisionEvent"
-        }
-      }
+
+    public void setDriver(SingletonStore<Driver> driver) {
+        this.driver = driver;
     }
-  ]
+
+    public SingletonStore<Driver> getDriver() {
+        return driver;
+    }
+
+    public Date getCurrentTime() {
+        return new Date();
+    }
 }
 ----
 
-The following diagram illustrates the basic structure and sequence of this example workflow definition:
+After the license validation task, the traffic violations process contains traffic violation as a decision that is created using DMN. The traffic violation decision verifies whether the driver is suspended or not based on the points in the driver’s license.
 
-.Structure of the example `ordersworkflow.sw.json` workflow definition
-image::serverless-workflow-kogito-orders-structure.png[Image of `ordersworkflow.sw.json` workflow definition]
+The traffic violation decision is declared in the `TrafficViolation.dmn` file.
 
-The `HandleNewOrder` state is the workflow starting state. This state is an `event` type state that requires one or more events to be consumed before the workflow can be invoked. This event state defines the instances of this workflow that are created when the referenced `NewOrderEvent` is consumed. In this case, events are consumed using Kafka.
+.Example `TrafficViolation.dmn` file
+image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
 
-After the `NewOrderEvent` is consumed, the state defines a list of `actions` to be performed. Actions define all the functions or services that must be invoked as part of the workflow. In this case, a single `AutoApproveOrderFunction` function or service defines how to invoke the rule service.
+=== Data mapping between a process and decisions
 
-After the execution of the rule service is complete, the event state specifies that the workflow must transition to the `CheckIfNeedManagerApprvoal` state, which is a `switch` type state. The order is then either auto-approved if no manager approval is required, or is assigned to a manager to complete the remaining states of the workflow.
+To map the data between a process and decisions, you can align all the attributes names in a Java class, which is used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
 
-For more {PRODUCT} examples that use Serverless Workflow, see the following example applications in GitHub:
+Violation class defined in the Traffic Violations example:
+[source,java]
+----
+public class Violation {
 
-* https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/serverless-workflow-events-quarkus[`serverless-workflow-events-quarkus`]: A Serverless Workflow service for processing job applicant approvals and that showcases event-driven services
-* https://github.com/kiegroup/kogito-examples/tree/stable/serverless-workflow-greeting-quarkus[`serverless-workflow-greeting-quarkus`]: A Serverless Workflow greeting service with both JSON and YAML workflow definitions
-* https://github.com/kiegroup/kogito-examples/tree/stable/serverless-workflow-service-calls-quarkus[`serverless-workflow-service-calls-quarkus`]: A Serverless Workflow service for returning country information
-* https://github.com/kiegroup/kogito-examples/tree/stable/serverless-workflow-github-showcase[`serverless-workflow-github-showcase`]: In this example, a GitHub bot application is deployed, which reacts upon a new PR being opened in a given GitHub project. The bot is implemented using a service and event orchestration approach with {PRODUCT} implementation of the Serverless Workflow specification.
+    @JsonProperty("Code")
+    private String code;
+
+    @JsonProperty("Date")
+    private Date date;
+
+    @JsonProperty("Type")
+    private String type;
+
+    @JsonProperty("Speed Limit")
+    private BigDecimal speedLimit;
+
+    @JsonProperty("Actual Speed")
+    private BigDecimal actualSpeed;
+
+    //Getters / Setters
+}
+----
+
+.Violation data type in DMN
+image::violation-dmn-data-types.png[Image of violation data type in DMN]
+
+When the driver information is fetched, an external call to a service task is performed to retrieve the driver information from the database. In this case, the service task implementation is performed using the `DriverService` class. In the Data Assignments, `driverId` is defined as an input variable and `driver` is defined as an output variable, consisting of the driver information.
+
+Fetching the driver information leads to the license validation task, which represents the task of calling a DRL service.
+
+.License validation task (DRL)
+image::license-validation-drl-businessrule.png[Image of license validation task (DRL)]
+
+The properties that are required to set for the DRL service task include `Rule Language`, which must be set as `DRL` and the `Rule Flow Group`. You can set the value of `Rule Flow Group` using the following format:
+
+[source]
+----
+unit: + [the FQCN of the Rule Unit Data class] 
+----
+
+For example: 
+[source]
+----
+unit:org.kie.kogito.traffic.LicenseValidationService
+----
+
+In this case, the `driver` variable contains the license validation information.
+
+.License validation task data assignments
+image::license-validation-dmn-businessrule-data.png[Image of license validation task data assignments]
+
+Similar to the license validation task, the traffic violation task represents the task of calling a DMN service.
+
+.Traffic violation task (DMN)
+image::traffic-violation-dmn-businessrule.png[Image of traffic violation task (DMN)]
+
+The properties that are required to set for the DMN service task include `Rule Language`, which must be set as `DMN`. Also, you must set the values for `Namespace`, `Decision Name` and DMN Model Name` properties as defined in the DMN model, such as `TrafficViolation.dmn`. For example, you can set the following values:
+
+- Rule Language: `DMN`
+- Namespace: `https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF`
+- Decision Name: `Traffic Violation`
+- DMN Model Name: `Traffic Violation`
+
+The input for the traffic violation task includes `Driver` and `Violation` variables, and the output includes `Suspended` and `Fine` in the Data Assignment property.
+
+.Traffic Violation Task data assignment
+
+image::traffic-violation-dmn-businessrule-data.png[Image of Traffic Violation Task data assignment]
+
+In both cases, whether the driver is suspended or not, the related information is logged in the console.
+
+
+For more {PRODUCT} examples that use decisions orchestrated by processes, see the following example applications in GitHub:
+
+* https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-business-rules-quarkus[`process-business-rules-quarkus`]: A quickstart project that shows the use of business rules and processes
+* https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-decisions-rest-quarkus[`process-decisions-rest-quarkus`]: An example project that shows the usage of decisions within processes. The focus here is to show how to integrate decisions in a remote way using REST APIs where they can be deployed decoupled from the process service.
+* https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-decisions-rules-quarkus[`process-decisions-rules-quarkus`]: An example project that shows the usage of decisions within processes. The focus here is to show how to integrate decisions in an embedded way using Business Rule Task where they must be deployed together with the process.
+* https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-error-handling[`process-error-handling`]: A simple usage scenario of the Error Handling Strategy
