@@ -1,4 +1,68 @@
 = Docker Compose
-IBM, KIE Community
-
+IBM; KIE Community
 include::../partials/attributes.adoc[]
+
+KIE Sandbox and its related services can be run on a single machine using `docker-compose`.
+We can access the docker-compose file from the https://github.com/kiegroup/kie-tools/tree/main/packages/kie-sandbox-distribution[distribution package].
+
+== Build
+
+Before building the image, please set the following environment variable like so:
+
+[source,console]
+----
+$ export KIE_TOOLS_BUILD__buildContainerImages=true
+----
+
+For local builds, run the following in the root folder of the repository to build the package:
+
+[source,console]
+----
+$ pnpm -F @kie-tools/kie-sandbox-image... build:prod
+----
+
+Verify the image has correctly saved in your local set of Docker images:
+
+[source,console]
+----
+$ docker images
+----
+
+(Optional) Use the following environment variables:
+
+[source,console]
+----
+export KIE_SANDBOX_DISTRIBUTION__kieSandboxImageRegistry=<kieSandboxImageRegistry>
+export KIE_SANDBOX_DISTRIBUTION__kieSandboxImageAccount=<kieSandboxImageAccount>
+export KIE_SANDBOX_DISTRIBUTION__kieSandboxImageName=<kieSandboxImageName>
+export KIE_SANDBOX_DISTRIBUTION__kieSandboxImageTag=<kieSandboxImageTag>
+export KIE_SANDBOX_DISTRIBUTION__kieSandboxPort=<kieSandboxPort>
+export KIE_SANDBOX_DISTRIBUTION__extendedServicesImageRegistry=<extendedServicesImageRegistry>
+export KIE_SANDBOX_DISTRIBUTION__extendedServicesImageAccount=<extendedServicesImageAccount>
+export KIE_SANDBOX_DISTRIBUTION__extendedServicesImageName=<extendedServicesImageName>
+export KIE_SANDBOX_DISTRIBUTION__extendedServicesImageTag=<extendedServicesImageTag>
+export KIE_SANDBOX_DISTRIBUTION__extendedServicesPort=<extendedServicesPort>
+export KIE_SANDBOX_DISTRIBUTION__gitCorsProxyImageRegistry=<gitCorsProxyImageRegistry>
+export KIE_SANDBOX_DISTRIBUTION__gitCorsProxyImageAccount=<gitCorsProxyImageAccount>
+export KIE_SANDBOX_DISTRIBUTION__gitCorsProxyImageName=<gitCorsProxyImageName>
+export KIE_SANDBOX_DISTRIBUTION__gitCorsProxyImageTag=<gitCorsProxyImageTag>
+export KIE_SANDBOX_DISTRIBUTION__gitCorsProxyPort=<gitCorsProxyPort>
+----
+
+== Run
+
+Run KIE Sandbox with docker compose and current environment variables using pnpm:
+
+[source,console]
+----
+$ pnpm docker:start
+----
+
+KIE Sandbox will be available at http://localhost:9090.
+
+Run KIE Sandbox with docker compose and default environment variables
+
+[source,console]
+----
+$ docker compose --env-file .env up
+----
