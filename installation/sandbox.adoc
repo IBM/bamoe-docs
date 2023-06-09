@@ -1,5 +1,58 @@
-= Sandbox 
-IBM, KIE Community
-
+= BAMOE Canvas
+IBM; KIE Community
 include::../partials/attributes.adoc[]
 
+{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser.
+It depends on two backend applications:
+
+* Extended Services: This powers features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
+* Git CORS Proxy: Provides a proxy to allow BAMOE Canvas web app to communicate with Git providers, like github.com and bitbucket.org.
+
+BAMOE Canvas itself, as well as its two backend applications, are available as container images.
+These images are published to Quay.io and can be used to run containers locally or in any cloud provider.
+
+* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] *← Switch to version-specific link.*
+* Extended Services → https://quay.io/repository/bamoe/extended-services?tab=tags[https://quay.io/repository/bamoe/extended-services] *← Switch to version-specific link.*
+* Git CORS Proxy → https://quay.io/repository/bamoe/git-cors-proxy[https://quay.io/repository/bamoe/git-cors-proxy] *← Switch to version-specific link.*
+
+NOTE: The *exact same version* needs to be used for a deployment with these three images to work.
+
+== Configuring Extended Services
+
+Access the API through port 21345.
+No additional configuration is necessary.
+
+== Configuring Git CORS Proxy
+
+The API is accessible via port 8080.
+No additional configuration is necessary.
+
+== Configuring Canvas
+
+The HTTP server is accessed via port 8080.
+Several customization options are available.
+
+In particular, this image needs to be run with two environment variables that will enable it to communicate with its backend services:
+
+`KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
+
+`KIE_SANDBOX_GIT_CORS_PROXY_URL`:: E.g., https://git-cors-proxy.bamoe.company.com[https://git-cors-proxy.bamoe.my-company.com]
+
+[NOTE]
+====
+Those addresses need to be accessible from the users’ machines, as {CANVAS} will communicate with them directly.
+Using internal IP/DNS services will not work.
+Requests are made directly from the browser to both URLs listed above.
+====
+
+Another important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`. 
+
+This environment variable points to a container image that is used when creating a Dev deployment of a Decision.
+By default, {CANVAS} is configured to fetch this image from https://quay.io/repository/bamoe/dmn-dev-deployment-base[https://quay.io/repository/bamoe/dmn-dev-deployment-base] *← Switch to version-specific link*. 
+If you’re installing {CANVAS} to an air-gapped environment, you’re going to need to configure this to point to a registry where the Cloud providers used by {CANVAS} users can access.
+
+Imagine a user is deploying a Decision from {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
+This local Kubernetes instance needs to be able to download the image configured with `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
+The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev deployments for Decisions.
+
+For other customization options, please refer to the image’s README. *← Need a direct link to a page where the README is displayed, version-specific.*
