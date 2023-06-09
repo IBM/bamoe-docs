@@ -1,4 +1,204 @@
 = Tools 
-IBM, KIE Community
-
+IBM; KIE Community
 include::../partials/attributes.adoc[]
+
+{CANVAS} makes it possible to work with Decisions and Workflows, directly on the browser.
+It integrates with Git repositories and Cloud providers for a familiar and convenient development experience.
+It is based on the open source https://sandbox.kie.org/[KIE Sandbox], a project from the https://www.kie.org/[KIE community].
+
+Unlike most web applications, {CANVAS} does not feature its own authentication mechanism, instead, you authenticate with your Git and Cloud providers, so BAMOE Canvas can communicate with them to save your Decisions and Workflows in the Cloud, or deploy them during development.
+
+Another unconventional aspect of {CANVAS} is that it doesn't store any of your information in the Cloud.
+Instead, everything you do on {CANVAS} is persisted on your machine, inside your browser.
+This doesn't mean that you'll lose your work if you close your tab or restart your computer, as all changes made on {CANVAS} are persisted in your disk, so you can be assured that your files are safe.
+
+To share your Decisions and Workflows with others and collaborate, {CANVAS} allows you to push your changes to remote Git repositories, or deploy them to a Cloud provider.
+
+On {CANVAS}, Decisions are https://www.omg.org/dmn/[DMN] files, and Workflows are https://www.omg.org/bpmn/[BPMN] files.
+Both are open source standards defined by https://www.omg.org/[OMG].
+
+Let's dive in and see how you can start working on {CANVAS}.
+
+== Creating new projects
+
+From the Home page, you can create Decisions or Workflows, starting from scratch, or from a Sample provided by {CANVAS}.
+
+.Create section at the Home page of {CANVAS}
+image::tools/image24.png['Create section at the Home page of {CANVAS}']
+
+Once you select one of the two, you'll navigate automatically to a new project, containing just the one file you just created.
+Let's start with a new Decision.
+
+.Untitled Decision created from the “Create” section at the Home page of {CANVAS}
+image::tools/image29.png['Untitled Decision created from the “Create” section at the Home page of {CANVAS}']
+
+There's a lot of elements in this page, and we'll cover all of them here, but let's simplify things a little and talk about what controls are common to Decisions and Workflows first.
+
+.Editor page on {CANVAS} with highlighted common elements to Decisions and Workflows
+image::tools/image1.png[Editor page on {CANVAS} with highlighted common elements to Decisions and Workflows]
+
+
+[upperalpha]
+. *File switcher* → Here you can rename the current file.
+  Click on the arrow to display other files in your project.
+  You can search for files and even see their image previews.
+  You can also see the status of changes made to your files and revert those changes for files individually.
+. *File status indicator* → Non-clickable visual indicators that tell if the persistence status of your file.
+. *Accelerator select* → Allows you to apply a predefined template to your project, accelerating the creation of a runnable project powered by Kogito.
+. *New file menu* → Lets you add new files to your project.
+  From here, you can create empty Decisions and Workflows, a new Decision or Workflow sample, import from a URL or upload from your computer.
+  Note that when importing from a URL, only individual files can be imported.
+. *Kebab menu* → Additional operations.
+  From here you can create a new commit in your project or delete your file.
+. *“Problems” tab* → Lets you see what's wrong with your file, both statically, and when running it.
+  More on running Decisions at the “Running Decisions” section.
+
+From here, you can make this currently one-file project into a more complex project.
+Let's do that by creating another file using the “New file menu”. You'll see that there are new controls available on the screen.
+Let's look at them and they do.
+
+.Editor page on {CANVAS} with highlighted common elements to Decisions and Workflows, for multi-file projects
+image::tools/image14.jpg['Editor page on {CANVAS} with highlighted common elements to Decisions and Workflows, for multi-file projects']
+
+[upperalpha]
+. *Back to Home page button* → Clicking this button will navigate back to the “Home page”.
+. *Git authentication select →* Here you can select what account to use when performing Git operations.
+  More on that at “Working with Git”
+. *Repository type label →* Non-clickable label that tells you some information about your repository.
+  Possible values are “Ephemeral” -- meaning that this repository is not synced to any remote Git repository, and only exists in your browser. “Repository” -- meaning this repository is linked to a GitHub, Bitbucket, or GitLab repository, and “Git repository” -- meaning this repository is linked to a remote Git repository from an unknown Git provider.
+. *Repository name →* This is the name of your repository.
+  You can click this element to rename it.
+  This is specific to {CANVAS}, and will not change the remote repository name if you change it.
+  To change the name of your remote Git repository, go directly to the Git provider website, like GitHub.
+. *Repository status indicator* → Tells you the status of your repository.
+  The green check means that your local copy of your repository is synced with the latest reference you downloaded from your linked remote Git repository.
+  In Git terms, that would mean HEAD and origin are the same.
+  Note that it doesn't mean that you have the latest changes made to the remote Git repository.
+  To make sure you're synced, you need to do a Sync operation.
+  _M_ means “Modified”, and means that you have made changes since your last Commit.
+  More on all that at “Working with Git”. You can click this element to see all the changes you made to your repository since your last Commit and revert them all, if you want.
+  To revert changes to individual files, use the “File switcher”.
+
+Now that you're familiar with the elements of {CANVAS}, you can jump to “Authoring Decisions” or “Authoring Workflows” to start authoring Decisions and Workflows to create a Business Automation project. “Applying Accelerators” can also be interesting if you're starting a new project directly from BAMOE Canvas.
+
+== Importing existing projects
+
+From the Home page, you can import existing projects in many ways.
+They can come from a remote Git repository, a local file or folder from your computer, or even from a URL pointing to a specific Decision or Workflow file.
+GitHub Gists and Bitbucket Snippets are also supported.
+
+.Import section at the Home page of {CANVAS}
+image::tools/image27.png['Import section at the Home page of {CANVAS}']
+
+Let's see how to import files in each of those ways.
+
+=== Uploading files and folders
+
+Simply click on “Select files…” or “Select folder…” to upload your existing work that is stored in your computer.
+You can also drag & drop stuff from your computer there.
+
+Uploading Git repositories from your computer will ignore its `.git` directory, meaning that on {CANVAS}, you'll be starting a new repository, without any history.
+
+=== Importing a public Git repository
+
+Paste the your Git repository's URL on the input text.
+{CANVAS} will automatically detect the default branch and a matching connected account, based on your repository's URL.
+
+.“Import” section at the Home page of {CANVAS} shown for a public GitHub repository, with a connected account automatically inferred based on the repository URL.
+image::tools/image16.png['“Import” section at the Home page of {CANVAS} shown for a public GitHub repository, with a connected account automatically inferred based on the repository URL']
+
+If you want to change the connected account or the branch you're importing, click on “Change…” or “More options…”.
+
+=== Importing a private Git repository
+
+Before being able to import a private Git repository, you need to check if you have any connected account of your Git provider.
+This can be done directly from the “Import” section at {CANVAS} home page.
+Select “More options…” and paste your repository's URL.
+You should see a screen similar to this one:
+
+.Example of trying to import a private Git repository without a connected account selected.
+image::tools/image12.png['Example of trying to import a private Git repository without a connected account selected']
+
+To connect to an account, open the Authentication select and choose “+ Connect to an account…”.
+
+.“Authentication select” on the “More options…” import modal, from {CANVAS} Home page
+image::tools/image21.png['“Authentication select” on the “More options…” import modal, from {CANVAS} Home page']
+
+This will take you to the Accounts modal, where you can select your Git provider and connect.
+Once you're done, you'll be brought back to the Import modal, where you'll see your account select and the main branch already inferred:
+
+.Git import selection 
+image::tools/image22.png[Git import selection]
+
+Simply click “Clone” and your repository will be imported to {CANVAS}.
+
+{CANVAS} only supports importing private repositories from the predefined Git providers.
+
+=== Importing a GitHub Gist or Bitbucket Snippet
+
+GitHub Gists and Bitbucket Snippets are repositories.
+Simply paste the GitHub Gist or Bitbucket Snippet URL and click Clone.
+If your Gist is private, follow the steps above for private Git repositories.
+Individual Gist and Snippet files can be imported too.
+
+=== Importing an individual file from a URL
+
+{CANVAS} will try to import any URL you paste as a Git repository first.
+If it fails to do so, it will proceed to trying to import it as an individual file.
+It will look at the file extension of the URL to determine if it's importable or not.
+Supported extensions are “dmn”, “bpmn”, and “bpmn2”.
+
+== Applying Accelerators
+
+Accelerators are project templates that get applied on top of your existing Decisions and Workflows, allowing you to develop them with more control.
+{CANVAS} provides a useful set of Accelerators out of the box -- Decisions with Quarkus, and Business Automation with Quarkus (*← Not definitive names*).
+
+There are many ways to create a Business Automation project, and Accelerators are one of them.
+When you select one from the “Apply accelerator” select, you'll see a label displayed on your project.
+
+.“Accelerator label” shown for a multi-file project
+image::tools/image20.png[“Accelerator label” shown for a multi-file project]
+
+Clicking the Accelerator label will open a modal with some relevant information about it.
+
+.“Accelerator modal” shown for a multi-file project
+image::tools/image26.png[“Accelerator modal” shown for a multi-file project]
+
+The set of available Accelerators on {CANVAS} can be customized for your organization.
+If you have specific configurations that are common to all new Business Automation projects in your organization, refer to “Installation, {CANVAS}” for more information.
+
+== Working with Git
+
+{CANVAS} streamlines the usage of Git in order to simplify workflows and walk you through a contribution model that minimizes conflicts and spares you from the complexity of managing a Git repository.
+
+All Git repositories in {CANVAS} are stored in-browser, and can be synced with a remote Git repository by using a simplified set of operations, steering clear from complex choices you have to deal with when using Git from the Command Line.
+
+{CANVAS} auto-saves all changes you make and persists it to the disk.
+You can safely close your browser tabs and turn off your computer.
+Your work will be there when you come back.
+We recommend that you Push your work after you're done for the development session, as should something happen to your computer, your changes will be safely stored with your Git provider.
+
+Each card that appears on the Home page is a separate Git repository, and can contain any amount of files, nested directories, and file types.
+{CANVAS} can handle large repositories, with our internal tests being capable of handling 10,000 files.
+Although supported, we do not encourage users to create such large repositories, as {CANVAS} is optimized for working with micro-services that are deployed to a Cloud environment.
+
+=== Branches
+
+You can select which branch you want to work with when importing a remote Git repository.
+For projects that were created directly on {CANVAS}, the default `main` branch is used.
+Changing branches of Git repositories on {CANVAS} is not possible.
+If you want to work on two separate branches at the same time, you can use import your repository again selecting a different branch.
+
+=== Conflict resolution
+
+Although rare if you're working on a feature branch, conflicts still can happen if you made changes externally or if you're sharing a branch with a peer.
+
+When you Sync your repository on {CANVAS}, if there's a conflict, you'll see an alert similar to this one:
+
+.Conflict error dialog
+image::tools/image8.png[Conflict error dialog]
+
+{CANVAS} does not provide a way for you to resolve conflicts, instead, it lets you switch to a new branch temporarily, ignore the conflict and continue working.
+
+If you want, you can solve your conflicts externally using your preferred method and tool, Push, go back to {CANVAS} and Pull.
+You can pick up right where you left off.
