@@ -39,7 +39,8 @@ Also, the classes in the process are used to define the Plain Old Java Objects (
 
 The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
-Example `LicenseValidationService.drl` file:
+--
+.Example `LicenseValidationService.drl` file:
 [source]
 ----
 unit LicenseValidationService
@@ -62,8 +63,10 @@ query "validation"
   $driver : /driver
 end
 ----
+--
 
-Example `LicenseValidationService` class:
+--
+.Example `LicenseValidationService` class:
 [source,java]
 ----
 public class LicenseValidationService implements RuleUnitData {
@@ -90,6 +93,7 @@ public class LicenseValidationService implements RuleUnitData {
     }
 }
 ----
+--
 
 After the license validation task, the traffic violations process contains traffic violation as a decision that is created using DMN. The traffic violation decision verifies whether the driver is suspended or not based on the points in the driver’s license.
 
@@ -103,6 +107,7 @@ image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
 To map the data between a process and decisions, you can align all the attributes names in a Java class, which is used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
 
 Violation class defined in the Traffic Violations example:
+--
 [source,java]
 ----
 public class Violation {
@@ -125,6 +130,7 @@ public class Violation {
     //Getters / Setters
 }
 ----
+--
 
 .Violation data type in DMN
 image::violation-dmn-data-types.png[Image of violation data type in DMN]
