@@ -1,19 +1,23 @@
 = Initial Project Setup and Walkthrough
 IBM, KIE Community
-
 include::../partials/attributes.adoc[]
 
 First step: Install Apache Maven.
 You can find instructions for doing so at https://maven.apache.org/install.html[the Apache Maven website].
+
+[IMPORTANT]
+====
+Due to https://github.com/quarkusio/quarkus/issues/31011, we recommend using the latest Apache Maven 3.8 version.
+====
 
 == Using Apache Maven to Setup the Project
 Next, we'll create a project using the following steps:
 
 . We're going to create the service in Quarkus with the Maven commands below, this will create a Quarkus project called `quick-kogito` that will be versioned `1.0.0-SNAPSHOT` including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health` which will create a Quarkus DMN project with the openapi components to get the OpenAPI end points easily with health checks when deploying to OpenShift.
 +
-[source,console]
+[source,console,subs="+attributes"]
 ----
-mvn io.quarkus:quarkus-maven-plugin:create \
+mvn io.quarkus:quarkus-maven-plugin:{QUARKUS_VERSION_SHORT}:create \
     -DprojectGroupId=com.ibm.sample -DprojectArtifactId=quick-kogito \
     -DprojectVersion=1.0.0-SNAPSHOT -Dextensions=kogito-quarkus,dmn,resteasy-reactive-jackson,\
     quarkus-smallrye-openapi,quarkus-smallrye-health
