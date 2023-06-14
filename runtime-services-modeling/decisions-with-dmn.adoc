@@ -539,19 +539,9 @@ All Friendly Enough Expression Language (FEEL) expressions that you use in your 
 ==== DMN decision tables
 
 [role="_abstract"]
-A decision table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input) and outcome (output) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
+A decision table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input, light blue in the picture below) and outcome (output, dark blue in the picture below) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
 
-For example, the following decision table determines credit score ratings based on a defined range of a loan applicant's credit score:
-
-.Decision table for credit score rating
-image::dmn-decision-table-example.png[]
-
-The following decision table determines the next step in a lending strategy for applicants depending on applicant loan eligibility and the bureau call type:
-
-.Decision table for lending strategy
-image::dmn-decision-table-example2.png[]
-
-The following decision table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
+For example, the following decision table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
 
 .Decision table for loan prequalification
 image::dmn-decision-table-example3.png[]
@@ -628,7 +618,7 @@ image::dmn-relation-expression-example.png[]
 [role="_abstract"]
 A boxed function expression in DMN is a parameterized boxed expression containing a literal FEEL expression, a nested context expression of an external JAVA or PMML function, or a nested boxed expression of any type. By default, all business knowledge models are defined as boxed function expressions. You use boxed function expressions to call functions on your decision logic and to define all business knowledge models.
 
-For example, the following boxed function expression determines airline flight capacity in a flight-rebooking decision model:
+For example, the following boxed function expression determines airline flight capacity is enough in a flight-rebooking decision model:
 
 .Boxed function expression for flight capacity
 image::dmn-function-expression-example.png[]
@@ -828,19 +818,19 @@ The following is the DMN source file for this decision model:
         <dmn:text>reassign next passenger</dmn:text>
       </dmn:literalExpression>
       <dmn:binding>
-        <dmn:parameter name="Waiting List"/>
+        <dmn:parameter name="Waiting List" typeRef="tPassengerTable"/>
         <dmn:literalExpression>
           <dmn:text>Prioritized Waiting List</dmn:text>
         </dmn:literalExpression>
       </dmn:binding>
       <dmn:binding>
-        <dmn:parameter name="Reassigned Passengers List"/>
+        <dmn:parameter name="Reassigned Passengers List" typeRef="tPassengerTable"/>
         <dmn:literalExpression>
           <dmn:text>[]</dmn:text>
         </dmn:literalExpression>
       </dmn:binding>
       <dmn:binding>
-        <dmn:parameter name="Flights"/>
+        <dmn:parameter name="Flights" typeRef="tFlightTable"/>
         <dmn:literalExpression>
           <dmn:text>Flight List</dmn:text>
         </dmn:literalExpression>
