@@ -189,66 +189,6 @@ quarkus.swagger-ui.always-include=true
 This is a build time property, it cannot be changed at runtime after your application is built.
 ====
 
-[id="proc-kogito-app-examples-with-console-running"]
-=== Interacting with {PRODUCT} Management and Task Console using example applications
-
-You can interact with the {PRODUCT} Management and Task Console to run the processes using the example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub. The example applications containing the `with-consoles` suffix, allow you to experiment with the {PRODUCT} services and {PRODUCT} Management and Task Console.
-
-The Management and Task Console need to interact with the {PRODUCT} Data Index service using minimal persistence configuration, which you can perform using docker-compose configuration. The example applications provide docker-compose configuration to configure and start the required services, including Kafka, Infinispan, {PRODUCT} Data Index, {PRODUCT} Management Console, and {PRODUCT} Task Console.
-
-.Default services started by docker-compose 'with-console' example applications
-image::docker-compose.png[Image of default services started by docker-compose 'with-console' examples]
-
-NOTE: In each example application, the docker-compose starts the needed services to run the project. The docker-compose also configures additional services such as Keycloak (process-usertasks-with-security-oidc-PLATFORM-with-console) or {PRODUCT} Jobs (process-usertasks-timer-quarkus-with-console).
-
-.Procedure
-. Download the latest https://github.com/kiegroup/kogito-examples/releases[`kogito-examples`] release to a local directory and extract the file.
-. In a command terminal, navigate to the extracted `kogito-examples-__RELEASE__/process-usertask-PLATFORM__-with-console` folder
-. Compile the project to generate the persistence file descriptor, which docker-compose uses.
-. From the docker-compose folder, execute `./startServices.sh` to start the containers with the services needed in each case.
-. Enter one of the following commands to build and run the example:
-+
---
-Quarkus and support the following run modes:
-
-* *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
-* *JVM mode*: For compatibility with a Java virtual machine (JVM).
-* *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-
-The command that you use depends on your preferred run mode and application environment:
-
-* For development mode:
-+
-.On Quarkus
-[source]
-----
-$ mvn clean compile quarkus:dev
-----
-+
-* For JVM mode:
-+
-.On Quarkus
-[source]
-----
-$ mvn clean package
-$ java -jar target/quarkus-app/quarkus-run.jar
-----
-+
-* For native mode (requires GraalVM or Mandrel):
-+
-.On Quarkus only
-[source]
-----
-$ mvn clean package -Dnative
-$ ./target/sample-kogito-1.0-SNAPSHOT-runner
-----
---
-. When the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI (if configured for the application) to start a new request.
-. Use the {PRODUCT} Management console to see the created process instance available by default at `http://localhost:8280`.
-. Use the {PRODUCT} Task console available by default at `http://localhost:8380` to execute the user tasks.
-
-In case some ports need to be changed, you can find the configuration of the containers in the `docker-compose/docker-compose.yml` file.
-
 [id="con-kogito-modelers"]
 == {PRODUCT} BPMN and DMN modelers
 
