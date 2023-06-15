@@ -200,27 +200,25 @@ This is a build time property, it cannot be changed at runtime after your applic
 
 
 [id="proc-kogito-creating-project"]
-== Creating a Maven project for a {PRODUCT} service
+== Creating a Maven project for a {PRODUCT} service using {CANVAS}
 
 [role="_abstract"]
 Before you can begin developing {PRODUCT} services, you need to create a Maven project where you can build your {PRODUCT} assets and any other related resources for your application.
 
 .Procedure
-. In a command terminal, navigate to a local folder where you want to store the new {PRODUCT} project.
-. Enter the following command to generate a project within a defined folder:
-+
---
-.On Quarkus
-[source,subs="attributes+"]
-----
-$ mvn io.quarkus:quarkus-maven-plugin:2.16.7.Final:create \
-    -DprojectGroupId=org.acme -DprojectArtifactId=sample-kogito \
-    -DprojectVersion=1.0.0-SNAPSHOT -Dextensions=kogito-quarkus
-----
+. Run {CANVAS} - see the xref:installation/canvas.adoc[installation] chapter for more details on how to install and run it
+. If you don't already have a project or an asset file, create a DMN or BPMN file
+. Use the xref:tools/applying-accelerators.adoc[accelerator] functionality in {CANVAS} to create a project that is buildable and deployable
 
-This command generates a `sample-kogito` Maven project and import the {PRODUCT} extension for all required dependencies and configurations to prepare your application for business automation.
---
-. Open or import the project in your {CANVAS} environment or VSCode IDE to view the contents.
+[NOTE]
+====
+If you build a native image, add the following property to `application.properties` for the ILMT library to work properly:
+
+[source]
+----
+quarkus.native.resources.includes=**swidtag
+----
+====
 
 // Add-Ons
 
