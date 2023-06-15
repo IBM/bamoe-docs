@@ -539,19 +539,9 @@ All Friendly Enough Expression Language (FEEL) expressions that you use in your 
 ==== DMN decision tables
 
 [role="_abstract"]
-A decision table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input) and outcome (output) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
+A decision table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input, light blue in the picture below) and outcome (output, dark blue in the picture below) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
 
-For example, the following decision table determines credit score ratings based on a defined range of a loan applicant's credit score:
-
-.Decision table for credit score rating
-image::dmn-decision-table-example.png[]
-
-The following decision table determines the next step in a lending strategy for applicants depending on applicant loan eligibility and the bureau call type:
-
-.Decision table for lending strategy
-image::dmn-decision-table-example2.png[]
-
-The following decision table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
+For example, the following decision table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
 
 .Decision table for loan prequalification
 image::dmn-decision-table-example3.png[]
@@ -628,7 +618,7 @@ image::dmn-relation-expression-example.png[]
 [role="_abstract"]
 A boxed function expression in DMN is a parameterized boxed expression containing a literal FEEL expression, a nested context expression of an external JAVA or PMML function, or a nested boxed expression of any type. By default, all business knowledge models are defined as boxed function expressions. You use boxed function expressions to call functions on your decision logic and to define all business knowledge models.
 
-For example, the following boxed function expression determines airline flight capacity in a flight-rebooking decision model:
+For example, the following boxed function expression determines airline flight capacity is enough in a flight-rebooking decision model:
 
 .Boxed function expression for flight capacity
 image::dmn-function-expression-example.png[]
@@ -828,19 +818,19 @@ The following is the DMN source file for this decision model:
         <dmn:text>reassign next passenger</dmn:text>
       </dmn:literalExpression>
       <dmn:binding>
-        <dmn:parameter name="Waiting List"/>
+        <dmn:parameter name="Waiting List" typeRef="tPassengerTable"/>
         <dmn:literalExpression>
           <dmn:text>Prioritized Waiting List</dmn:text>
         </dmn:literalExpression>
       </dmn:binding>
       <dmn:binding>
-        <dmn:parameter name="Reassigned Passengers List"/>
+        <dmn:parameter name="Reassigned Passengers List" typeRef="tPassengerTable"/>
         <dmn:literalExpression>
           <dmn:text>[]</dmn:text>
         </dmn:literalExpression>
       </dmn:binding>
       <dmn:binding>
-        <dmn:parameter name="Flights"/>
+        <dmn:parameter name="Flights" typeRef="tFlightTable"/>
         <dmn:literalExpression>
           <dmn:text>Flight List</dmn:text>
         </dmn:literalExpression>
@@ -1237,18 +1227,15 @@ You can use the {PRODUCT} DMN modeler in VSCode to design DMN decision requireme
 
 .Prerequisites
 * https://code.visualstudio.com/[VSCode] 1.46.0 or later is installed.
-* The *{PRODUCT} Bundle* VSCode extension is installed and enabled in your VSCode IDE.
+* The *{VS_CODE_BUNDLE}* extension is installed and enabled in your VSCode IDE.
 * You have created a {PRODUCT} project and have included any Java objects required for your {PRODUCT} service.
 
 .Procedure
 . In your VSCode IDE, create or import a DMN file in the relevant folder of your {PRODUCT} project, typically in `src/main/resources`.
-+
-NOTE: For a new DMN file, you can also enter `dmn.new` in a web browser to design your decision model in the {PRODUCT} online DMN modeler. When you finish creating your decision model, you can click *Download* in the online modeler page to import your DMN file into your {PRODUCT} project.
-
 . Open the new or imported DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1364,7 +1351,7 @@ You can use the {PRODUCT} DMN modeler in VSCode to define decision logic for you
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1481,7 +1468,7 @@ Custom data types that you create for a boxed expression can be simple or struct
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1554,10 +1541,8 @@ image::dmn-manage-data-types-blank.png[]
 --
 When you save the new structured data type, the first sub-field appears so that you can begin defining nested data fields in this parent data type. You can use these sub-fields in association with the parent structured data type in boxed expressions, such as nested column headers in decision tables or nested table parameters in context or function expressions.
 
-For additional sub-fields, select the addition icon next to the *Loan_Qualification* data type:
+For additional sub-fields, select the addition icon next to the *Loan_Qualification* data type.
 
-.Adding a new structured data type with nested fields
-image::dmn-manage-data-types-structured.png[]
 --
 . For this example, under the structured *Loan_Qualification* data type, add a *Qualification* field with `"Qualified"` and `"Not Qualified"` enumeration constraints, and a *Reason* field with no constraints. Add also a simple *Back_End_Ratio* and a *Front_End_Ratio* data type, both with `"Sufficient"` and `"Insufficient"` enumeration constraints.
 +
@@ -1615,7 +1600,7 @@ You cannot include DMN models from different directories within your {PRODUCT} p
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1665,7 +1650,7 @@ You cannot include PMML models from different directories within your {PRODUCT} 
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1716,13 +1701,11 @@ For complex DMN models, you can use the {PRODUCT} DMN modeler in VSCode to desig
 
 .Procedure
 . In your VSCode IDE, create or import a DMN file in the relevant folder of your {PRODUCT} project, typically in `src/main/resources`.
-+
-NOTE: For a new DMN file, you can also enter `dmn.new` in a web browser to design your decision model in the {PRODUCT} online DMN modeler. When you finish creating your decision model, you can click *Download* in the online modeler page to import your DMN file into your {PRODUCT} project.
 
 . Open the new or imported DMN file to view the DRD in the {PRODUCT} DMN modeler, and begin designing or modifying the DRD using the DMN nodes in the left toolbar.
 +
 --
-If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{PRODUCT} Bundle* VSCode extension.
+If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the *{VS_CODE_BUNDLE}* extension.
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -2998,11 +2981,6 @@ In order for a decision table to be compiled in your {PRODUCT} project, the tabl
 Spreadsheet decision tables (XLS or XLSX) require two key areas that define rule data: a `RuleSet` area and a `RuleTable` area. The `RuleSet` area of the spreadsheet defines elements that you want to apply globally to all rules in the same package (not only the spreadsheet), such as a rule set name or universal rule attributes. The `RuleTable` area defines the actual rules (rows) and the conditions, actions, and other rule attributes (columns) that constitute that rule table within the specified rule set. A spreadsheet of decision tables can contain multiple `RuleTable` areas, but only one `RuleSet` area.
 
 IMPORTANT: For each {PRODUCT} project, try to include only one spreadsheet of decision tables, containing all necessary `RuleTable` definitions. Although you can include separate decision table spreadsheets, including multiple spreadsheets in the same project package can cause compilation errors from conflicting `RuleSet` or `RuleTable` attributes and is therefore not recommended.
-
-Refer to the following sample spreadsheet as you define your decision table:
-
-.Sample spreadsheet decision table for shipping charges
-image::kogito/decision-tables/decision-table-example-02.png[Decision table example]
 
 .Prerequisites
 * You have added the following dependency to the `pom.xml` file of your {PRODUCT} project to enable decision tables for decision services:
