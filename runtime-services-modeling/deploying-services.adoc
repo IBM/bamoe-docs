@@ -2335,7 +2335,7 @@ business models::
 The collection of BPMN process models, DMN decision models, DRL rules, XLS decision tables, and any other assets that define the business logic for a {PRODUCT} service.
 
 CloudEvents format::
-A specification for describing event data in a common way. {PRODUCT} runtime events for messages, processes, tasks, and other application activities are published in https://cloudevents.io/[CloudEvents] format so that they can be consumed efficiently by other entities, such as the {PRODUCT} Data Index Service.
+A specification for describing event data in a common way. {PRODUCT} runtime events for messages, processes, tasks, and other application activities are published in https://cloudevents.io/[CloudEvents] format so that they can be consumed efficiently by other entities.
 
 decision table::
 A set of business rules defined in a tabular format. Each row in a decision table is a rule, and each column is a condition, an action, or another rule attribute.
@@ -2358,11 +2358,15 @@ A procedure or function in a program that reacts to a specified event, such as a
 intelligent application::
 An optimized, integrated solution that uses {PRODUCT} services to implement business-domain knowledge.
 
+////
 {PRODUCT} Audit Investigation Console::
 A user interface for monitoring and investigating Decision Model and Notation (DMN) model executions in {PRODUCT}.
+////
 
+////
 {PRODUCT} CLI::
 A command-line interface (CLI) that enables you to interact with the {PRODUCT} Operator for deployment tasks. The {PRODUCT} CLI also enables you to deploy {PRODUCT} services from source instead of relying on custom resources and YAML files.
+////
 
 ////
 //@comment: Excluding for now due to current build issues with the extension and we aren't using it at this point. (Stetson, 2 Apr 2020)
@@ -2370,15 +2374,20 @@ A command-line interface (CLI) that enables you to interact with the {PRODUCT} O
 An extension required to generate and build a Maven project for {PRODUCT} runtime services on the Quarkus Java framework. You can add the {PRODUCT} extension during project creation using the Quarkus Maven plugin or using the https://code.quarkus.io/[Code with Quarkus] extension manager.
 ////
 
+////
 {PRODUCT} Data Index Service::
 A dedicated service in {PRODUCT} that stores all {PRODUCT} events related to processes, tasks, and domain data. The Data Index Service uses Apache Kafka messaging to consume CloudEvents messages from {PRODUCT} services, and then indexes the returned data for future GraphQL queries and stores the data in the Infinispan or MongoDB persistence store. The Data Index Service is at the core of all {PRODUCT} search, insight, and management capabilities.
+////
 
 {PRODUCT} domain-specific service::
 A business automation service for your business domain that you create using {PRODUCT}. You define the logic of this service using BPMN process models, DMN decision models, or other business models, and any other supported runtime configurations. In {PRODUCT} documentation, the general term for _{PRODUCT} services_ that you create refers to this type of service.
 
+////
 {PRODUCT} Explainability Service::
 A dedicated service in {PRODUCT} that provides an explanation for the decisions made in {PRODUCT} services, in conjunction with the _{PRODUCT} Trusty Service_.
+////
 
+////
 {PRODUCT} Jobs Service::
 A dedicated service in {PRODUCT} for scheduling BPMN process events that are configured to be executed at a specified time. These time-based events in a process model are known as _jobs_. The Jobs Service does not execute a job, but triggers a callback that might be an HTTP request on a given endpoint specified for the job request or any other configured callback. The Jobs Service receives requests for job scheduling and then sends a request at the time specified on the job request.
 
@@ -2387,21 +2396,28 @@ A user interface for viewing the state of all available {PRODUCT} services and m
 
 {PRODUCT} Operator::
 An operator that deploys {PRODUCT} services and manages the required {PRODUCT} infrastructure services. The {PRODUCT} Operator is based on the https://sdk.operatorframework.io/[Operator SDK] and automates many of the deployment steps for you.
+////
 
 {PRODUCT} runtime event::
 A record of a significant change of state in the application domain at a point in time. {PRODUCT} emits runtime events as a result of successfully executed requests, or _units of work_, in a process instance or task instance in a process. {PRODUCT} can use these events to notify third parties about changes to the BPMN process instance and its data.
 
+////
 {PRODUCT} runtime persistence::
 An optional capability for preserving {PRODUCT} process data in your services across application restarts. {PRODUCT} persistence is based on https://infinispan.org/[Infinispan] and enables you to configure key-value storage definitions to persist data, such as active process nodes and process instance variables. Alternatively, https://www.mongodb.com/[MongoDB] can be used.
+////
 
+////
 {PRODUCT} supporting services::
 The collection of middleware infrastructure services and other dedicated services that help you build additional functionality in the {PRODUCT} domain-specific services that you develop. Key middleware infrastructure services in {PRODUCT} include Infinispan, MongoDB, or Kafka Streams persistence, and Apache Kafka reactive messaging. Dedicated services provided by {PRODUCT} include the {PRODUCT} Data Index Service, Jobs Service, Trusty Service, and Explainability Service.
+////
 
+////
 {PRODUCT} Task Console::
 A user interface for viewing and interacting with user tasks in {PRODUCT} process services.
 
 {PRODUCT} Trusty Service::
 A dedicated service in {PRODUCT} for storing all {PRODUCT} tracing events related to decisions made in {PRODUCT} services. The _{PRODUCT} Explainability Service_ is typically used in conjunction with this service.
+////
 
 message event::
 A specified point in a business process where a defined message is used as the input (received) or output (sent) as a result of the process execution. For example, a message event might be an email sent to a specified user after a task is complete.
@@ -2421,8 +2437,10 @@ An occurrence of a pending, running, or completed business process, based on the
 PROTO file (`.proto`)::
 A data library used for marshalling Java objects in protobuf (https://developers.google.com/protocol-buffers/[protocol buffers]) format. {PRODUCT} runtime persistence and communication with Infinispan or MongoDB are handled through a protobuf schema and generated marshallers.
 
+////
 task lifecycle::
 A mechanism that moves a user task or custom task (work item) across various phases, such as *Active* -> *Claim* -> *Complete*. {PRODUCT} provides standard lifecycle phases for user tasks and also supports custom lifecycles or lifecycle phases.
+////
 
 unit of work::
 A component in {PRODUCT} that serves as the basis for {PRODUCT} runtime execution. Units of work capture all steps in a process and are used internally to move a process instance from one state to the next state. After all possible steps in a process are successfully executed, the final state is sent to the {PRODUCT} runtime as a runtime event. {PRODUCT} can then use these events to notify third parties about changes to the BPMN process instance and its data.
