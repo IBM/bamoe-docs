@@ -6,33 +6,83 @@ include::../partials/attributes.adoc[]
 === Running the {PRODUCT} example applications
 
 [role="_abstract"]
-To get started quickly with {PRODUCT}, you can run any of the example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub and experiment with the {PRODUCT} services.
+To get started quickly with {PRODUCT}, you can run any of the example applications in the bamoe-{VERSION}-kogito-examples.zip archive and experiment with the {PRODUCT} services.
 
-For this procedure, use the https://github.com/kiegroup/kogito-examples/tree/stable/process-quarkus-example[`process-quarkus-example`] application. You can follow similar steps with the other {PRODUCT} examples on Quarkus.
+For this procedure, use the `process-decisions-quarkus` application. You can follow similar steps with the other {PRODUCT} examples on Quarkus.
 
-In the `process-quarkus-example` applications, the `orders.bpmn2` process describes the steps that need to be followed when ordering items. 
-The process includes a script task for writing debug information and a call activity for invoking a subprocess, using a custom `Order` data object.
+In the `process-decisions-quarkus` applications, the `traffic-rules-dmn.bpmn` process describes the steps that need to be followed when verifying a driver's potential suspension.
+The process includes a service node to call to a Java service `DriverService.java` that is used to fetch information about a driver using a custom `Driver` object, Business Rule nodes to call decisions defined in `DMN` and `DRL` format as well as script tasks for writing debug information.
 
-.Example `orders.bpmn2` process
-image::bpmn-model-example-orders.png[Image of `orders.bpmn` example process]
+.Example `traffic-rules-dmn.bpmn` process
+image::traffic-rules-dmn.png[Image of `traffic-rules-dmn.bpmn` example process]
 
-The `Add items` subprocess invokes the following `orderItems.bpmn2` process, which uses a `CalculationService.calculateTotal` custom Java service and a user task to verify the order.
+The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
-.Example `orderItems.bpmn2` process invoked as a subprocess
-image::bpmn-model-example-order-items.png[Image of `orderItems.bpmn` example process]
+Example `LicenseValidationService.drl` file:
+[source]
+----
+unit LicenseValidationService
 
-The `persons.bpmn2` process invokes a Drools Rule Language (DRL) rule unit in a business rule task to determine customer age, followed by a user task for special handling requirements for children, if applicable.
+rule "Is driver license valid"
+when
+    $driver: /driver[licenseExpiration.after(currentTime)]
+then
+    $driver.setValidLicense(true);
+end
 
-.Example `persons.bpmn2` process invoked as a subprocess
-image::kogito-bpmn-example-person.png[Image of `persons` process diagram]
+rule "Is driver license expired"
+when
+    $driver: /driver[licenseExpiration.before(currentTime)]
+then
+    $driver.setValidLicense(false);
+end
 
-Based on these processes and on application configurations, this example service exposes REST operations to create new orders, to list and delete active orders, and to determine the age of a specified person.
+query "validation"
+  $driver : /driver
+end
+----
+
+Example `LicenseValidationService` class:
+[source,java]
+----
+public class LicenseValidationService implements RuleUnitData {
+    private SingletonStore<Driver> driver;
+
+    public LicenseValidationService() {
+        this(DataSource.createSingleton());
+    }
+
+    public LicenseValidationService(SingletonStore<Driver> driver) {
+        this.driver = driver;
+    }
+
+    public void setDriver(SingletonStore<Driver> driver) {
+        this.driver = driver;
+    }
+
+    public SingletonStore<Driver> getDriver() {
+        return driver;
+    }
+
+    public Date getCurrentTime() {
+        return new Date();
+    }
+}
+----
+
+After the license validation task, the traffic violations process contains traffic violation as a decision that is created using DMN. The traffic violation decision verifies whether the driver is suspended or not based on the points in the driver’s license.
+
+The traffic violation decision is declared in the `TrafficViolation.dmn` file.
+
+.Example `TrafficViolation.dmn` file
+image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
+
+Based on this process, this example service exposes REST operations to create new traffic incidents, to list and delete active traffic incidents, and to invoke the license validation service endpoint.
 
 .Procedure
-. Download the latest https://github.com/kiegroup/kogito-examples/releases[`kogito-examples`] release to a local directory and extract the file.
-. In a command terminal, navigate to the extracted `kogito-examples-__RELEASE__/process-__PLATFORM__-example` folder, and enter one of the following commands to build and run the example.
-+
---
+. Download the bamoe-{VERSION}-kogito-examples.zip archive to a local directory and extract the file.
+. In a command terminal, navigate to the extracted `kogito-quarkus-examples/process-decisions-quarkus` folder, and enter one of the following commands to build and run the example.
+
 Quarkus support the following run modes:
 
 * *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
@@ -64,172 +114,79 @@ $ java -jar target/quarkus-app/quarkus-run.jar
 [source]
 ----
 $ mvn clean package -Dnative
-$ ./target/sample-kogito-1.0-SNAPSHOT-runner
+$ ./target/process-decisions-quarkus-runner
 ----
---
-. After the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI configured for the application (such as \http://localhost:8080/q/swagger-ui or \http://localhost:8080/swagger-ui.html) to send API requests with the following components:
-+
---
+
+. After the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI configured for the application - http://localhost:8080/q/swagger-ui - to send API requests with the following components:
+
+
 * *URL*: `\http://localhost:8080/`
 * *HTTP headers*: For `POST` and `PUT` requests only:
 ** `accept`: `application/json`
 ** `content-type`: `application/json`
 * *HTTP methods*: `GET`, `POST`, `PUT` or `DELETE`
 
-.Example POST request body to create an order (JSON)
+.Example POST request body to create a traffic incident (JSON)
 [source,json]
 ----
 {
-  "approver": "john",
-  "order": {
-    "orderNumber": "12345",
-    "shipped": false
-  }
+    "driverId": "12345",
+    "violation":{
+        "Type":"speed",
+        "Speed Limit": 100,
+        "Actual Speed":140
+    }
 }
 ----
 
-.Example curl command to create an order
+.Example curl command to create a traffic incident
 [source]
 ----
-curl -X POST http://localhost:8080/orders -H 'content-type: application/json' -H 'accept: application/json' -d '{"approver" : "john", "order" : {"orderNumber" : "12345", "shipped" : false}}'
+curl -X POST -H 'Content-Type:application/json' -H 'Accept:application/json' -d '{"driverId": "12345","violation":{"Type":"speed","Speed Limit": 100,"Actual Speed":140}}' http://localhost:8080/traffic
 ----
 
 .Example response (JSON)
 [source,json]
 ----
 {
-  "approver": "john",
-  "id": "6b53c227-6d5e-40b7-8c8c-a541a2a47d58",
-  "order": {
-    "orderNumber": "12345",
-    "shipped": false,
-    "total": 0.3845152065899532
-  }
+   "driver" : {
+      "Age" : 30,
+      "City" : "Campinas",
+      "Name" : "Arthur",
+      "Points" : 13,
+      "State" : "SP",
+      "licenseExpiration" : "2023-06-15T11:02:17.610-06:00",
+      "validLicense" : true
+   },
+   "driverId" : "12345",
+   "fine" : {
+      "Amount" : 1000,
+      "Points" : 7
+   },
+   "id" : "d9ac9587-40dc-4f0b-8034-274db5bca832",
+   "suspended" : "Yes",
+   "violation" : {
+      "Actual Speed" : 140,
+      "Code" : null,
+      "Date" : null,
+      "Speed Limit" : 100,
+      "Type" : "speed"
+   }
 }
 ----
 
-.Swagger UI to interact with all application endpoints (such as \http://localhost:8080/q/swagger-ui or \http://localhost:8080/swagger-ui.html)
+.Swagger UI to interact with all application endpoints - \http://localhost:8080/q/swagger-ui 
 image::kogito-swagger-example-jbpm.png[Image of Swagger UI for example application]
 
-NOTE: For the predefined {PRODUCT} example applications, the Swagger UI for interacting with service endpoints is available only on Quarkus examples that you run in
-development mode or in native mode.
-
-This example procedure uses the following curl commands for convenience:
-
-* Create an order:
-+
-.Example request
+[NOTE]
+====
+For the predefined {PRODUCT} example applications, by default the Swagger UI is only available when Quarkus is started in dev or test mode. If you want to make it available in production too, you can include the following configuration in your `application.properties`: 
 [source]
 ----
-curl -X POST http://localhost:8080/orders -H 'content-type: application/json' -H 'accept: application/json' -d '{"approver" : "john", "order" : {"orderNumber" : "12345", "shipped" : false}}'
+quarkus.swagger-ui.always-include=true
 ----
-+
-.Example response
-[source]
-----
-{"approver":"john","id":"6b53c227-6d5e-40b7-8c8c-a541a2a47d58","order":{"orderNumber":"12345","shipped":false,"total":0.3845152065899532}}
-----
-+
-The new order has an `"id"` field with a generated UUID that you can use to retrieve details about this specific order, if needed.
-
-* View active orders:
-+
-.Example request
-[source]
-----
-curl -X GET http://localhost:8080/orders -H 'content-type: application/json' -H 'accept: application/json'
-----
-+
-.Example response
-[source]
-----
-[{"approver":"john","id":"6b53c227-6d5e-40b7-8c8c-a541a2a47d58","order":{"orderNumber":"12345","shipped":false,"total":0.3845152065899532}}]
-----
-
-* View order details using the returned UUID:
-+
-.Example request
-[source]
-----
-curl -X GET http://localhost:8080/orders/6b53c227-6d5e-40b7-8c8c-a541a2a47d58 -H 'content-type: application/json' -H 'accept: application/json'
-----
-+
-.Example response
-[source]
-----
-{"approver":"john","id":"6b53c227-6d5e-40b7-8c8c-a541a2a47d58","order":{"orderNumber":"12345","shipped":false,"total":0.3845152065899532}}
-----
-+
-You use the `"id"` value for the order that was returned when you created the order or when you retrieved active orders.
-
-* Cancel the order using the returned UUID:
-+
-.Example request
-[source]
-----
-curl -X DELETE http://localhost:8080/orders/6b53c227-6d5e-40b7-8c8c-a541a2a47d58 -H 'content-type: application/json' -H 'accept: application/json'
-----
---
-
-[id="proc-kogito-app-examples-with-console-running"]
-=== Interacting with {PRODUCT} Management and Task Console using example applications
-
-You can interact with the {PRODUCT} Management and Task Console to run the processes using the example applications in the https://github.com/kiegroup/kogito-examples[`kogito-examples`] repository in GitHub. The example applications containing the `with-consoles` suffix, allow you to experiment with the {PRODUCT} services and {PRODUCT} Management and Task Console.
-
-The Management and Task Console need to interact with the {PRODUCT} Data Index service using minimal persistence configuration, which you can perform using docker-compose configuration. The example applications provide docker-compose configuration to configure and start the required services, including Kafka, Infinispan, {PRODUCT} Data Index, {PRODUCT} Management Console, and {PRODUCT} Task Console.
-
-.Default services started by docker-compose 'with-console' example applications
-image::docker-compose.png[Image of default services started by docker-compose 'with-console' examples]
-
-NOTE: In each example application, the docker-compose starts the needed services to run the project. The docker-compose also configures additional services such as Keycloak (process-usertasks-with-security-oidc-PLATFORM-with-console) or {PRODUCT} Jobs (process-usertasks-timer-quarkus-with-console).
-
-.Procedure
-. Download the latest https://github.com/kiegroup/kogito-examples/releases[`kogito-examples`] release to a local directory and extract the file.
-. In a command terminal, navigate to the extracted `kogito-examples-__RELEASE__/process-usertask-PLATFORM__-with-console` folder
-. Compile the project to generate the persistence file descriptor, which docker-compose uses.
-. From the docker-compose folder, execute `./startServices.sh` to start the containers with the services needed in each case.
-. Enter one of the following commands to build and run the example:
-+
---
-Quarkus and support the following run modes:
-
-* *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
-* *JVM mode*: For compatibility with a Java virtual machine (JVM).
-* *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-
-The command that you use depends on your preferred run mode and application environment:
-
-* For development mode:
-+
-.On Quarkus
-[source]
-----
-$ mvn clean compile quarkus:dev
-----
-+
-* For JVM mode:
-+
-.On Quarkus
-[source]
-----
-$ mvn clean package
-$ java -jar target/quarkus-app/quarkus-run.jar
-----
-+
-* For native mode (requires GraalVM or Mandrel):
-+
-.On Quarkus only
-[source]
-----
-$ mvn clean package -Dnative
-$ ./target/sample-kogito-1.0-SNAPSHOT-runner
-----
---
-. When the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI (if configured for the application) to start a new request.
-. Use the {PRODUCT} Management console to see the created process instance available by default at `http://localhost:8280`.
-. Use the {PRODUCT} Task console available by default at `http://localhost:8380` to execute the user tasks.
-
-In case some ports need to be changed, you can find the configuration of the containers in the `docker-compose/docker-compose.yml` file.
+This is a build time property, it cannot be changed at runtime after your application is built.
+====
 
 [id="con-kogito-modelers"]
 == {PRODUCT} BPMN and DMN modelers
@@ -237,669 +194,31 @@ In case some ports need to be changed, you can find the configuration of the con
 [role="_abstract"]
 {PRODUCT} provides the following extensions or applications that you can use to design Business Process Model and Notation (BPMN) process models and Decision Model and Notation (DMN) decision models for your {PRODUCT} services using graphical modelers.
 
-* *{PRODUCT} VSCode extension*: (Recommended) Enables you to view and design BPMN models, DMN models, and test scenario files in Visual Studio Code (VSCode). The VSCode extension in the {PRODUCT} Business Modeler Hub requires VSCode 1.46.0 or later.
-+
-To install the {PRODUCT} VSCode extension directly in VSCode without the {PRODUCT} Business Modeler Hub, select the *Extensions* menu option in VSCode and search for and install the *{PRODUCT} Bundle* extension.
-* *{PRODUCT} GitHub Chrome extension*: Enables you to view and design BPMN and DMN models in GitHub repositories in Google Chrome.
-+
-To install the {PRODUCT} GitHub Chrome extension without the {PRODUCT} Business Modeler Hub, you can download and extract the `chrome_extension_kogito_kie_editors___VERSION__.zip` file from the https://github.com/kiegroup/kie-tools/releases[`kogito-tooling`] releases page in GitHub, and then in the upper-right corner in Chrome, go to *Customize and control* -> *Settings* -> *Extensions* -> *Load unpacked* and open the extracted `dist` folder.
+* *{CANVAS}*: (Recommended) Enables you to work with Decisions and Workflows, directly on the browser. See the xref:../tools/canvas.html[Canvas] chapter for further details.
 
-* *Business Modeler online viewer*: Enables you to view and design BPMN and DMN models online at `https://sandbox.kie.org/`.
-* *Business Modeler standalone editors*: Enable you to view and design BPMN and DMN models embedded in your web applications. To download the necessary files, you can either use the NPM artifacts from the https://www.npmjs.com/package/@kie-tools/kie-editors-standalone[Kie Tools repository] or download the JavaScript files directly for the DMN standalone editor library at `https://sandbox.kie.org/standalone/dmn/index.js` and for the BPMN standalone editor library at `https://sandbox.kie.org/standalone/bpmn/index.js`.
+* *{PRODUCT_SHORT} VSCode extension*: Enables you to view and design BPMN and DMN models in Visual Studio Code (VSCode). See the xref:../tools/developer-tools-for-vscode.adoc[VSCode extension] chapter for further details.
 
-[id="proc-kogito-standalone-editors"]
-=== Configuring the {PRODUCT} standalone editors
-
-[role="_abstract"]
-The {PRODUCT} standalone editors are distributed in a self-contained library that provides an all-in-one JavaScript file for each editor. The JavaScript file uses a comprehensive API to set and control the editor.
-
-You can install the standalone editors in three ways:
-
-* Use hosted JavaScript files directly
-* Download each JavaScript file manually
-* Use the NPM package
-
-.Procedure
-. Install the {PRODUCT} standalone editors using one of the following methods:
-+
---
-*Use hosted JavaScript files directly*: For this method, add the following `<script>` tags to your HTML page:
-
-.Script tags for your HTML page
-[source]
-----
-<script src="https://sandbox.kie.org/standalone/dmn/index.js"></script>
-<script src="https://sandbox.kie.org/standalone/bpmn/index.js"></script>
-----
-
-*Download each JavaScript file manually*: For this method, follow these steps:
-
-.. Download the JavaScript files:
-** For the DMN editor, go to https://sandbox.kie.org/standalone/dmn/index.js.
-** For the BPMN editor, go to https://sandbox.kie.org/standalone/bpmn/index.js.
-.. Add the downloaded Javascript files to your hosted application.
-.. Add the following `<script>` tag to your HTML page:
-+
-.Script tag for your HTML page
-[source]
-----
-<script src="https://<YOUR_PAGE>/dmn/index.js"></script>
-----
-
-*Use the NPM package*: For this method, follow these steps:
-
-.. Go to the https://www.npmjs.com/package/@kogito-tooling/kie-editors-standalone[Kogito tooling repository] in NPM and download the NPM package.
-.. Add the NPM package to your `package.json` file:
-+
-.Adding the NPM package
-[source]
-----
-npm install @kogito-tooling/kie-editors-standalone
-----
-.. Import each editor library to your TypeScript file:
-+
-.Importing each editor
-[source]
-----
-import * as DmnEditor from "@kogito-tooling/kie-editors-standalone/dist/dmn"
-import * as BpmnEditor from "@kogito-tooling/kie-editors-standalone/dist/bpmn"
-----
---
-. After you install the standalone editors, open the required editor by using the provided editor API, as shown in the following example for opening a DMN editor. The API is the same for each editor.
-+
---
-.Opening the DMN standalone editor
-[source,java]
-----
-const editor = DmnEditor.open({
-  container: document.getElementById("dmn-editor-container"),
-  initialContent: Promise.resolve(""),
-  readOnly: false,
-  origin: "",
-  resources: new Map([
-    [
-      "MyIncludedModel.dmn",
-      {
-        contentType: "text",
-        content: Promise.resolve("")
-      }
-    ]
-  ])
-});
-----
-
-Use the following parameters with the editor API:
-
-.Example parameters
-[cols="40%,60%", options="header"]
-|===
-|Parameter
-|Description
-
-|`container`
-|HTML element in which the editor is appended.
-
-|`initialContent`
-a|Promise to a DMN model content. This parameter can be empty, as shown in the following examples:
-
-* `Promise.resolve("")`
-* `Promise.resolve("<DIAGRAM_CONTENT_DIRECTLY_HERE>")`
-* `fetch("MyDmnModel.dmn").then(content => content.text())`
-
-|`readOnly` (Optional)
-a|Enables you to allow changes in the editor. Set to `false` (default) to allow content editing and `true` for read-only mode in editor.
-
-|`origin` (Optional)
-|Origin of the repository. The default value is `window.location.origin`.
-
-|`resources` (Optional)
-a|Map of resources for the editor. For example, this parameter is used to provide included models for the DMN editor or work item definitions for the BPMN editor. Each entry in the map contains a resource name and an object that consists of `content-type` (`text` or `binary`) and `content` (similar to the `initialContent` parameter).
-|===
-
-The returned object contains the methods that are required to manipulate the editor.
-
-.Returned object methods
-[cols="40%,60%", options="header"]
-|===
-|Method
-|Description
-
-|`getContent(): Promise<string>`
-|Returns a promise containing the editor content.
-
-|`setContent(path: string, content: string): void`
-|Sets the content of the editor.
-
-|`getPreview(): Promise<string>`
-|Returns a promise containing an SVG string of the current diagram.
-
-|`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`
-|Sets a callback to be called when the content changes in the editor and returns the same callback to be used for unsubscription.
-
-|`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`
-|Unsubscribes the passed callback when the content changes in the editor.
-
-|`markAsSaved(): void`
-|Resets the editor state that indicates that the content in the editor is saved. Also, it activates the subscribed callbacks related to content change.
-
-|`undo(): void`
-|Undoes the last change in the editor. Also, it activates the subscribed callbacks related to content change.
-
-|`redo(): void`
-|Redoes the last undone change in the editor. Also, it activates the subscribed callbacks related to content change.
-
-|`close(): void`
-|Closes the editor.
-
-|`getElementPosition(selector: string): Promise<Rect>`
-|Provides an alternative to extend the standard query selector when an element lives inside a canvas or a video component. The `selector` parameter must follow the `<PROVIDER>:::<SELECT>` format, such as `Canvas:::MySquare` or `Video:::PresenterHand`. This method returns a `Rect` representing the element position.
-
-|`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`
-|This is an advanced editor API. For more information about advanced editor API, see https://github.com/kiegroup/kogito-tooling/blob/master/packages/envelope-bus/src/api/index.ts#L43-L56[MessageBusClientApi] and https://github.com/kiegroup/kogito-tooling/blob/master/packages/editor/src/api/KogitoEditorEnvelopeApi.ts#L34-L41[KogitoEditorEnvelopeApi].
-|===
---
 
 [id="proc-kogito-creating-project"]
-== Creating a Maven project for a {PRODUCT} service
+== Creating a Maven project for a {PRODUCT} service using {CANVAS}
 
 [role="_abstract"]
 Before you can begin developing {PRODUCT} services, you need to create a Maven project where you can build your {PRODUCT} assets and any other related resources for your application.
 
 .Procedure
-. In a command terminal, navigate to a local folder where you want to store the new {PRODUCT} project.
-. Enter the following command to generate a project within a defined folder:
-+
---
-.On Quarkus
-[source,subs="attributes+"]
-----
-$ mvn io.quarkus:quarkus-maven-plugin:create \
-    -DprojectGroupId=org.acme -DprojectArtifactId=sample-kogito \
-    -DprojectVersion=1.0.0-SNAPSHOT -Dextensions=kogito-quarkus
-----
+. Run {CANVAS} - see the xref:../installation/canvas.adoc[installation] chapter for more details on how to install and run it
+. If you don't already have a project or an asset file, create a DMN or BPMN file
+. Use the xref:../tools/applying-accelerators.adoc[accelerator] functionality in {CANVAS} to create a project that is buildable and deployable
 
-Alternatively, you can generate a project using the https://code.quarkus.io/?e=org.kie.kogito%3Akogito-quarkus[Quarkus website].
-////
-@comment: The following standard command for Quarkus isn't working currently but may be restored for Dev Preview
+[NOTE]
+====
+If you build a native image, add the following property to `application.properties` for the ILMT library to work properly:
 
-mvn io.quarkus:quarkus-maven-plugin:create -DprojectGroupId=com.company -DprojectArtifactId=sample-kogito -Dextensions="kogito"
-////
-
-These commands generate a `sample-kogito` Maven project and import the {PRODUCT} extension for all required dependencies and configurations to prepare your application for business automation.
---
-. Open or import the project in your VSCode IDE to view the contents.
-
-[id="proc-kogito-creating-project-custom"]
-=== Creating a custom {PRODUCT} project using code scaffolding
-
-WARNING: This feature is experimental and might be substantially modified or removed in a future release. This feature also requires a special project setup. The generated code uses APIs that are not final in {PRODUCT} and will not function the same way in future releases.
-
-[role="_abstract"]
-The Quarkus extension and Maven plug-in within a standard {PRODUCT} project generate all the required code and boilerplate for your {PRODUCT} services so that you do not have to write the project setup code yourself. By default, a {PRODUCT} project generates a REST service from business assets automatically. The generated service usually exposes default REST endpoints using the information that is inferred from the business assets that you include in your project.
-
-If you want to customize the code for your {PRODUCT} project, such as adding more REST endpoints, you can use _code scaffolding_ to generate the project code to a specified user directory and then modify the code as needed.
-
-With code scaffolding, you generate your {PRODUCT} project with the {PRODUCT} Maven archetype as usual, but you disable the project ability to automatically regenerate the project code and explicitly instruct {PRODUCT} to generate the code in a custom target directory. The code is generated one time in the specified target directory and is not regenerated at build time unless you explicitly request it. You can customize the project code in the specified target directory as needed.
-
-NOTE: On Quarkus, disabling code regeneration also disables hot reload of business assets in development mode. This limitation will be improved in a future release.
-
-.Procedure
-. In a command terminal, navigate to a local folder where you want to store the custom {PRODUCT} project and enter the following command to generate your {PRODUCT} project with the {PRODUCT} Maven archetype as usual:
-+
---
-.On Quarkus
-[source,subs="attributes+"]
-----
-$ mvn io.quarkus:quarkus-maven-plugin:create \
-    -DprojectGroupId=org.acme -DprojectArtifactId=sample-kogito \
-    -DprojectVersion=1.0.0-SNAPSHOT -Dextensions=kogito-quarkus
-----
-
-Alternatively, you can generate a project using the https://code.quarkus.io/?e=org.kie.kogito%3Akogito-quarkus[Quarkus website].
-
-////
-@comment: The following standard command for Quarkus isn't working currently but may be restored for Dev Preview
-
-mvn io.quarkus:quarkus-maven-plugin:create -DprojectGroupId=com.company -DprojectArtifactId=sample-kogito -Dextensions="kogito"
-////
-
-This command generates a `sample-kogito` Maven project and imports the {PRODUCT} extension for all required dependencies and configurations to prepare your application for business automation.
---
-. In the project `pom.xml` file, modify the project dependencies and plug-ins to disable code regeneration:
-+
---
-* *On Quarkus*: Delete the `kogito-quarkus` dependency and add the `kogito-maven-plugin` plug-in, as shown in the following examples:
-+
-.Deleting the `kogito-quarkus` dependency
-[source,xml]
-----
-<dependencies>
-  ...
-  <dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-quarkus</artifactId>
-  </dependency>
-  ...
-</dependencies>
-----
-+
-.Adding the `kogito-maven-plugin` plug-in
-[source,xml]
-----
-<build>
-  ...
-  <plugins>
-    ...
-    <plugin>
-      <groupId>org.kie.kogito</groupId>
-      <artifactId>kogito-maven-plugin</artifactId>
-      <configuration>
-        <onDemand>true</onDemand>
-      </configuration>
-    </plugin>
-    ...
-  </plugins>
-  ...
-</build>
-----
---
-. In a command terminal, navigate to the root of your {PRODUCT} project and enter the following command to generate your modified project using code scaffolding:
-+
---
-.Generating the {PRODUCT} project using code scaffolding
 [source]
 ----
- $ mvn compile kogito:scaffold
+quarkus.native.resources.includes=**swidtag
 ----
-
-This command compiles the assets in your project and generates the code in the `src/main/java` directory. In the automatic {PRODUCT} project build, the default directory is `target/generated-sources/kogito`.
-
-If you want to override the default location for code generation, use the following command to define a custom target directory:
-
-.Generating the {PRODUCT} project using code scaffolding with a custom directory
-[source]
-----
- $ mvn compile kogito:scaffold -Dkogito.codegen.sources.directory=src/main/generated-java
-----
-
-The `kogito.codegen.sources.directory` parameter defines the custom target directory where you want the code to be generated, such as `src/main/generated-java` in this example.
-
-WARNING: If you invoke the generation command again with the same target directory, the files are overwritten. This limitation will be fixed in a future release.
-
-After you run the scaffolding command, either the default `src/main/java` directory or the custom target directory that you defined now contains the following resources:
-
-* Your existing project files
-* Generated data classes corresponding to process variables or Decision Model and Notation (DMN) definitions
-* Generated REST endpoints
-
-This example project contains a `persons` Business Process Model and Notation (BPMN) process model, so the generated REST endpoints are modified as shown in the following Java object:
-
-.Modified REST endpoints for a `person` BPMN process model
-[source,java]
-----
-package org.acme.travels;
-
-// Imports
-
-@Path("/persons")
-@ApplicationScoped
-public class PersonsResource {
-
-    @Inject
-    @Named("persons")
-    Process<PersonsModel> process;
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public PersonsModelOutput createResource_persons(
-            @Context HttpHeaders httpHeaders,
-            @QueryParam("businessKey") String businessKey,
-            @Valid @NotNull PersonsModelInput resource) {
-        ...
-    }
-
-    // Other endpoints
-}
-----
-
-The `PersonsModel`, `PersonsModelInput`, and `PersonsModelOutput` elements are the generated data models. These models are inferred automatically from the process variables in the process. Input and output models are inferred by how you tagged your process variables.
-
-Similar endpoints are generated for any available rule units. This example project contains a `PersonValidationService` class for a rule unit model, so the generated REST endpoints are modified as shown in the following Java object:
-
-.Modified REST endpoints for a `PersonValidationService` rule unit class
-[source,java]
-----
-package org.acme.travels;
-
-// Imports
-
-@Path("/persons-validation-service")
-@ApplicationScoped
-public class PersonsValidationServiceResource {
-
-    @Inject
-    RuleUnit<PersonValidationService> unit;
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public QueryResult fireRules(PersonValidationService resource) {
-        ...
-    }
-
-    // Other endpoints
-}
-----
---
-
-[id="proc-kogito-custom-rest-endpoint-api"]
-== Creating custom REST endpoints using {PRODUCT} API
-
-{PRODUCT} enables you to create custom REST endpoints using {PRODUCT} API.
-
-.Prerequisites
-* JDK 11 or later is installed.
-* Apache Maven is installed.
-
-NOTE: The {PRODUCT} API is only available for Quarkus and is currently experimental. This feature is available to the adopters to collect feedback and modify in a future release.
-
-.Procedure
-. Create a {PRODUCT} project using the Maven plugin or Quarkus CLI.
-+
---
-.Example project using the Quarkus Maven plugin
-[source,subs="attributes+"]
-----
-mvn io.quarkus:quarkus-maven-plugin:create \
-   -DprojectGroupId=com.company \
-   -DprojectArtifactId=sample-kogito \
-   -Dextensions="kogito"
-----
---
-
-. Add a business asset to the `resource` folder such as a DMN file. To create the example DMN model, copy the following `PersonDecisions.dmn` file content:
-+
---
-.Example `PersonDecisions.dmn` file
-[source,xml]
-----
-<dmn:definitions xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/" xmlns="https://kiegroup.org/dmn/rest-example" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="http://www.drools.org/kie/dmn/1.2" xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/" id="_84B432F5-87E7-43B1-9101-1BAFE3D18FC5" name="PersonDecisions" typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/" namespace="https://kiegroup.org/dmn/rest-example">
-  <dmn:extensionElements/>
-  <dmn:inputData id="_F9685B74-0C69-4982-B3B6-B04A14D79EDB" name="age">
-    <dmn:extensionElements/>
-    <dmn:variable id="_0E345A3C-BB1F-4FB2-B00F-C5691FD1D36C" name="age" typeRef="number"/>
-  </dmn:inputData>
-  <dmn:decision id="_0D2BD7A9-ACA1-49BE-97AD-19699E0C9852" name="adult">
-    <dmn:extensionElements/>
-    <dmn:variable id="_54CD509F-452F-40E5-941C-AFB2667D4D45" name="adult" typeRef="boolean"/>
-    <dmn:informationRequirement id="_2F819B03-36B7-4DEB-AED6-2B46AE3ADB75">
-      <dmn:requiredInput href="#_F9685B74-0C69-4982-B3B6-B04A14D79EDB"/>
-    </dmn:informationRequirement>
-    <dmn:decisionTable id="_58370567-05DE-4EC0-AC2D-A23803C1EAAE" hitPolicy="UNIQUE" preferredOrientation="Rule-as-Row">
-      <dmn:input id="_ADEF36CD-286A-454A-ABD8-9CF96014021B">
-        <dmn:inputExpression id="_4930C2E5-7401-46DD-8329-EAC523BFA492" typeRef="number">
-          <dmn:text>age</dmn:text>
-        </dmn:inputExpression>
-      </dmn:input>
-      <dmn:output id="_9867E9A3-CBF6-4D66-9804-D2206F6B4F86"/>
-      <dmn:annotation name=""/>
-      <dmn:rule id="_59D6BFF0-35B4-4B7E-8D7B-E31CB0DB8242">
-        <dmn:inputEntry id="_7DC55D63-234F-497B-A12A-93DA358C0136">
-          <dmn:text>&gt; 18</dmn:text>
-        </dmn:inputEntry>
-        <dmn:outputEntry id="_B3BB5B97-05B9-464A-AB39-58A33A9C7C00">
-          <dmn:text>true</dmn:text>
-        </dmn:outputEntry>
-        <dmn:annotationEntry>
-          <dmn:text/>
-        </dmn:annotationEntry>
-      </dmn:rule>
-      <dmn:rule id="_8FCD63FE-8AD8-4F56-AD12-923E87AFD1B1">
-        <dmn:inputEntry id="_B4EF7F13-E486-46CB-B14E-1D21647258D9">
-          <dmn:text>&lt;= 18</dmn:text>
-        </dmn:inputEntry>
-        <dmn:outputEntry id="_F3A9EC8E-A96B-42A0-BF87-9FB1F2FDB15A">
-          <dmn:text>false</dmn:text>
-        </dmn:outputEntry>
-        <dmn:annotationEntry>
-          <dmn:text/>
-        </dmn:annotationEntry>
-      </dmn:rule>
-    </dmn:decisionTable>
-  </dmn:decision>
-  <dmndi:DMNDI>
-    <dmndi:DMNDiagram id="_8D228582-6DE6-4164-B7E9-52E249EB7F9F" name="DRG">
-      <di:extension>
-        <kie:ComponentsWidthsExtension>
-          <kie:ComponentWidths dmnElementRef="_58370567-05DE-4EC0-AC2D-A23803C1EAAE">
-            <kie:width>50</kie:width>
-            <kie:width>100</kie:width>
-            <kie:width>100</kie:width>
-            <kie:width>100</kie:width>
-          </kie:ComponentWidths>
-        </kie:ComponentsWidthsExtension>
-      </di:extension>
-      <dmndi:DMNShape id="dmnshape-drg-_F9685B74-0C69-4982-B3B6-B04A14D79EDB" dmnElementRef="_F9685B74-0C69-4982-B3B6-B04A14D79EDB" isCollapsed="false">
-        <dmndi:DMNStyle>
-          <dmndi:FillColor red="255" green="255" blue="255"/>
-          <dmndi:StrokeColor red="0" green="0" blue="0"/>
-          <dmndi:FontColor red="0" green="0" blue="0"/>
-        </dmndi:DMNStyle>
-        <dc:Bounds x="404" y="464" width="100" height="50"/>
-        <dmndi:DMNLabel/>
-      </dmndi:DMNShape>
-      <dmndi:DMNShape id="dmnshape-drg-_0D2BD7A9-ACA1-49BE-97AD-19699E0C9852" dmnElementRef="_0D2BD7A9-ACA1-49BE-97AD-19699E0C9852" isCollapsed="false">
-        <dmndi:DMNStyle>
-          <dmndi:FillColor red="255" green="255" blue="255"/>
-          <dmndi:StrokeColor red="0" green="0" blue="0"/>
-          <dmndi:FontColor red="0" green="0" blue="0"/>
-        </dmndi:DMNStyle>
-        <dc:Bounds x="613" y="324" width="100" height="50"/>
-        <dmndi:DMNLabel/>
-      </dmndi:DMNShape>
-      <dmndi:DMNEdge id="dmnedge-drg-_2F819B03-36B7-4DEB-AED6-2B46AE3ADB75" dmnElementRef="_2F819B03-36B7-4DEB-AED6-2B46AE3ADB75">
-        <di:waypoint x="504" y="489"/>
-        <di:waypoint x="613" y="349"/>
-      </dmndi:DMNEdge>
-    </dmndi:DMNDiagram>
-  </dmndi:DMNDI>
-</dmn:definitions>
-----
-
-The `PersonDecisions.dmn` file defines a DMN model with `https://kiegroup.org/dmn/_52CEF9FD-9943-4A89-96D5-6F66810CA4C1` namespace and `PersonDecisions` name.
---
-
-. Create a source file for the custom REST endpoint:
-+
---
-.Example REST endpoint
-[source,java]
-----
-package org.acme;
-
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.kie.kogito.incubation.application.AppRoot;
-import org.kie.kogito.incubation.common.DataContext;
-import org.kie.kogito.incubation.common.MapDataContext;
-import org.kie.kogito.incubation.decisions.DecisionIds;
-import org.kie.kogito.incubation.decisions.services.DecisionService;
-
-@Path("/hello")
-public class GreetingResource {
-
-    // Inject the application root
-    @Inject AppRoot appRoot;
-    // Inject a decision service
-    @Inject DecisionService svc;
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public DataContext hello(Map<String, Object> payload) {
-        var id = appRoot
-                .get(DecisionIds.class)
-                .get("https://kiegroup.org/dmn/_52CEF9FD-9943-4A89-96D5-6F66810CA4C1",
-                        "PersonDecisions");
-        var ctx = MapDataContext.from(payload);
-        return svc.evaluate(id, ctx);
-    }
-}
-----
-
-The previous example of REST endpoints contains the following aspects:
-
-* The `AppRoot` object is injected that is used to create identifiers for resources to be evaluated.
-* The `@Inject DecisionService svc` injects the `DecisionService`, which is used to evaluate a DMN model. The following list describes different types of services:
-
-** `StraightThroughProcessService` for BPMN processes that terminate immediately and do not suspend into intermediate states
-** `DecisionService` for DMN decision models
-** `PredictionService` for PMML predictive models
-** `RuleUnitService` for Rule Unit evaluation
-+
-Each service can be injected (`@inject`) and provides an `evaluate(Id, DataContext)` method. For more information about how to invoke the services, you can see `dmn-incubation-api-quarkus`, `pmml-incubation-api-quarkus`, `process-incubation-api-quarkus`, and `rules-incubation-api-quarkus` example applications.
-
-* The REST endpoint expects an arbitrary `Map<String, Object>` of values.
-* In the body of the REST handler, the `Map` is converted into a `DataContext`. Each service expects a `DataContext` to evaluate together with the identifier.
-* The `evaluate(id, ctx)` method returns a `DataContext`. The `DataContext` be returned directly by the REST handler: the system knows how to handle the response.
-
-A `DataContext` is a class that implements the `DataContext` interface. `DataContext` provides  `<T extends DataContext> T as(Class<T>)` method to convert a type of data context to another. The root type of data context provides the `as()` method only, because the root type does not contain additional behavior.
-
-In the previous example, `DataContext` is converted into a `MapDataContext` and `Person` object. The following is an example of using a `DataContext`:
-
-.Example of using a `DataContext`
-[source,java]
-----
-DataContext ctx = ...;
-MapDataContext mctx = ctx.as(MapDataContext.class);
-Person person = mctx.as(Person.class);
-----
-
-In the previous example, `MapDataContext` is a type of built-in data context (`Map<String, Object>`) and provides `get()` and `set()` methods to access the data. The `get()` method pulls the entered data by performing an internal conversion if applicable.
-
-.Example of using `MapDataContext`
-[source,java]
-----
-DataContext ctx = ...;
-MapDataContext mctx = ctx.as(MapDataContext.class);
-ctx.set("Paul", new Person("Paul", 79));
-Object o = ctx.get("Paul");
-Person p = ctx.get("Paul", Paul.class);
-----
-
-Also, you can customize the example REST endpoint further by expecting a `DataContext` in the method signature:
-
-.Example REST endpoint
-[source,java]
-----
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public DataContext hello(MapDataContext ctx) { // use ctx here
-        var id = appRoot
-                .get(DecisionIds.class)
-                .get("https://kiegroup.org/dmn/rest-example",
-                        "PersonDecisions");
-        return svc.evaluate(id, ctx);
-    }
-----
-
-In addition, you can transform the Map data context into a Java class. This mapping is performed automatically using field naming conventions as shown in the following example:
-
-.Example Java class
-[source,java]
-----
-import org.kie.kogito.incubation.common.*;
-public class Person implements DataContext, DefaultCastable {
-    String name;
-    int age;
-    // constructors...
-    // getters and setters...
-}
-----
-
-The `DataContext` interface marks the Java class as a bindable context, enabling you to convert another `DataContext` using the `as(Class<DataContext>)` method:
-
-.Example conversion of a `MapDataContext` into a `Person`
-[source,java]
-----
-    public DataContext hello(MapDataContext ctx) {
-        ...
-        Person person = ctx.as(Person.class);
-        return svc.evaluate(id, person);
-    }
-----
-
-Also, you can use the converted `DataContext` directly as an argument. In the following example, the `Person` is used as an argument:
-
-.Example REST endpoint using `Person` as an argument
-[source,java]
-----
-    public DataContext hello(Person person) {
-        ...
-        return svc.evaluate(id, ctx);
-    }
-----
-
-The custom data contexts can also be used in the return type as shown in the following example:
-
-.Example REST endpoint using `Person` as an argument and a custom return type
-[source,java]
-----
-    class MyCustomDataContext implements DataContext, DefaultCastable {...}
-    public MyCustomDataContext hello(Person person) {
-        ...
-        DataContext result = svc.evaluate(id, ctx);
-        MyCustomDataContext typedResult = result.as(MyCustomDataContext.class)
-        return result;
-    }
-----
---
-
-. Optionally, you can disable automated generation of the REST endpoint by setting `kogito.generate.rest.decisions` property to `false` in the `application.properties` file:
-+
---
-.`application.properties` file
-[source,subs="attributes+"]
-----
-kogito.generate.rest.decisions=false
-----
---
-
-. Test the created custom REST endpoint:
-+
---
-.Example of invoking a REST endpoint
-[source,subs="attributes+"]
-----
-# starts the application in devmode
-$ mvn quarkus:dev
-# invoke the REST service
-$ curl -X POST \
-    -H 'Accept: application/json' \
-    -H 'Content-Type: application/json' \
-    -d '{"name": "Paul" , "age" : 79}' \
-    http://localhost:8080/hello
-----
-
-.Example response
-[source,json,subs="attributes+"]
-----
-{
-  "name":"Paul",
-  "adult":true,
-  "age":79
-}
-----
---
+====
 
 // Add-Ons
 
@@ -907,9 +226,9 @@ $ curl -X POST \
 == {PRODUCT} add-ons
 
 [role="_abstract"]
-You can extend {PRODUCT} core capabilities by using add-ons modules. The add-on modules extend persistence, monitoring, messaging, and other features of {PRODUCT} services.
+You can extend {PRODUCT} core capabilities by using add-ons modules. The add-on modules extend monitoring, messaging, and other features of {PRODUCT} services.
 
-The following tables list all the supported add-ons:
+The following tables list all the supported add-ons in {PRODUCT}:
 
 .{PRODUCT} add-ons for Quarkus
 [cols="20%,50%,20%"]
@@ -919,20 +238,20 @@ The following tables list all the supported add-ons:
 |Messaging                | kogito-addons-quarkus-messaging                     |1.0.0
 |Events Decisions         | kogito-addons-quarkus-events-decisions              |1.2.0
 |Events Process           | kogito-addons-quarkus-events-process                |0.3.0
-|Explainability           | kogito-addons-quarkus-explainability                |0.15.0
-|Jobs Management          | kogito-addons-quarkus-jobs-management               |0.6.0
+// |Explainability           | kogito-addons-quarkus-explainability                |0.15.0
+// |Jobs Management          | kogito-addons-quarkus-jobs-management               |0.6.0
 |Knative Eventing         | kogito-addons-quarkus-knative-eventing              |1.10.0
 |Mail                     | kogito-addons-quarkus-mail                          |1.6.0
 |Elastic Monitoring       | kogito-addons-quarkus-monitoring-elastic            |1.2.0
 |Prometheus Monitoring    | kogito-addons-quarkus-monitoring-prometheus         |0.1.0
-|Persistence ISPN Health  | kogito-addons-quarkus-persistence-infinispan-health |0.8.0
-|Persistence Kafka        | kogito-addons-quarkus-persistence-kafka             |1.4.0
-|Process Management       | kogito-addons-quarkus-process-management            |0.3.0
-|Process SVG              | kogito-addons-quarkus-process-svg                   |1.0.0
-|Task Management          | kogito-addons-quarkus-task-management               |1.4.0
-|Task Notification        | kogito-addons-quarkus-task-notification             |1.6.0
+// |Persistence ISPN Health  | kogito-addons-quarkus-persistence-infinispan-health |0.8.0
+// |Persistence Kafka        | kogito-addons-quarkus-persistence-kafka             |1.4.0
+// |Process Management       | kogito-addons-quarkus-process-management            |0.3.0
+// |Process SVG              | kogito-addons-quarkus-process-svg                   |1.0.0
+// |Task Management          | kogito-addons-quarkus-task-management               |1.4.0
+// |Task Notification        | kogito-addons-quarkus-task-notification             |1.6.0
 |Tracing Decision         | kogito-addons-quarkus-tracing-decision              |0.11.0
-|Events MongoDB           | kogito-addons-quarkus-events-mongodb                |1.11.0
+// |Events MongoDB           | kogito-addons-quarkus-events-mongodb                |1.11.0
 |Source Files             | kogito-addons-quarkus-source-files                  |1.20.0
 |===
 
@@ -1034,6 +353,7 @@ To use the explainability add-on, add the following code to the `pom.xml` file o
 ----
 ////
 
+////
 === {PRODUCT} jobs management add-on
 
 The Jobs Management add-on provides integration and configuration for a project using the supporting services related to Jobs. 
@@ -1048,6 +368,7 @@ To use the Jobs Management add-on, add the following code to the `pom.xml` file 
   <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
 </dependency>
 ----
+////
 
 === {PRODUCT} Knative Eventing add-on
 
@@ -1284,6 +605,7 @@ To use the monitoring add-on, add the following code to the `pom.xml` file of yo
 </dependency>
 ----
 
+////
 === {PRODUCT} persistence add-on
 
 The persistence add-on provides persistence capability in your {PRODUCT} project.
@@ -1390,7 +712,9 @@ HTTP code : 404
   "message" : "Process instance with id c6862071-0f2e-4f21-9bc8-586245a76c3aa not found"
 }
 ----
+////
 
+////
 === {PRODUCT} process SVG add-on
 
 [role="_abstract"]
@@ -1463,6 +787,7 @@ The {PRODUCT} process SVG add-on provides REST support for the following basic o
 
 * *Process Diagram*: Return the process SVG diagram
 * *Process instance diagram*: Return the process SVG diagram displaying the executed path of a specific process instance
+////
 
 === {PRODUCT} process event add-on
 
@@ -1474,9 +799,9 @@ You can use the {PRODUCT} process event add-on to build a historical representat
 
 By default, the event format follows https://cloudevents.io/[CloudEvent] specification. The CloudEvent specification allows sending information using the data field, which contains a JSON of one of the following types:
 
-* https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-services/src/main/java/org/kie/kogito/services/event/impl/ProcessInstanceEventBody.java[ProcessInstanceEvent]: This event is published when a process instance is created, modified, or completed.
-* https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-services/src/main/java/org/kie/kogito/services/event/impl/UserTaskInstanceEventBody.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
-* https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-services/src/main/java/org/kie/kogito/services/event/impl/VariableInstanceEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
+* https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceEventBody.java[ProcessInstanceEvent]: This event is published when a process instance is created, modified, or completed.
+// * https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/UserTaskInstanceEventBody.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
+* https://github.com/kiegroup/kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/VariableInstanceEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
 
 To configure process event capabilities for your {PRODUCT} services, you can add the process event add-on as a dependency in the `pom.xml` file of your {PRODUCT} project:
 
@@ -1543,6 +868,7 @@ kogito.events.usertasks.enabled=false
 kogito.events.variables.enabled=false
 ----
 
+////
 === {PRODUCT} task management add-on
 
 The Task Management add-on provides integration with the https://github.com/kiegroup/kogito-apps/tree/master/task-console[Task Console].
@@ -1557,6 +883,7 @@ To use the Task Management add-on, add the following code to the `pom.xml` file 
   <artifactId>kogito-addons-quarkus-task-management</artifactId>
 </dependency>
 ----
+////
 
 === {PRODUCT} tracing add-on
 
