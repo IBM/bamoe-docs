@@ -242,7 +242,10 @@ image::dmn-example-drd.png[]
 [role="_abstract"]
 Friendly Enough Expression Language (FEEL) is an expression language defined by the Object Management Group (OMG) DMN specification. FEEL expressions define the logic of a decision in a DMN model. FEEL is designed to facilitate both decision modeling and execution by assigning semantics to the decision model constructs. FEEL expressions in decision requirements diagrams (DRDs) occupy table cells in boxed expressions for decision nodes and business knowledge models.
 
-For more information about FEEL in DMN, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation specification].
+For more information about FEEL in DMN, see:
+
+* The OMG https://www.omg.org/spec/DMN[Decision Model and Notation specification].
+* link:https://kiegroup.github.io/dmn-feel-handbook/[DMN FEEL Handbook]
 
 [id="ref-dmn-feel-data-types"]
 ==== Data types in FEEL
@@ -250,18 +253,18 @@ For more information about FEEL in DMN, see the OMG https://www.omg.org/spec/DMN
 [role="_abstract"]
 Friendly Enough Expression Language (FEEL) supports the following data types:
 
-* Numbers
-* Strings
-* Boolean values
-* Dates
-* Time
-* Date and time
-* Days and time duration
-* Years and months duration
-* Functions
-* Contexts
-* Ranges (or intervals)
-* Lists
+* https://kiegroup.github.io/dmn-feel-handbook/#number[Numbers]
+* https://kiegroup.github.io/dmn-feel-handbook/#string[Strings]
+* https://kiegroup.github.io/dmn-feel-handbook/#boolean[Boolean values]
+* https://kiegroup.github.io/dmn-feel-handbook/#date[Dates]
+* https://kiegroup.github.io/dmn-feel-handbook/#time[Time]
+* https://kiegroup.github.io/dmn-feel-handbook/#date-and-time[Date and time]
+* https://kiegroup.github.io/dmn-feel-handbook/#days-and-time-duration[Days and time duration]
+* https://kiegroup.github.io/dmn-feel-handbook/#years-and-month-duration[Years and months duration]
+* https://kiegroup.github.io/dmn-feel-handbook/#function[Functions]
+* https://kiegroup.github.io/dmn-feel-handbook/#context[Contexts]
+* https://kiegroup.github.io/dmn-feel-handbook/#range-or-interval[Ranges (or intervals)]
+* https://kiegroup.github.io/dmn-feel-handbook/#list[Lists]
 
 NOTE: The DMN specification currently does not provide an explicit way of declaring a variable as a `function`, `context`, `range`, or `list`, but {PRODUCT} extends the DMN built-in types to support variables of these types.
 
@@ -512,13 +515,13 @@ Boxed expressions in DMN are tables that you use to define the underlying logic 
 
 The following are the types of DMN boxed expressions:
 
-* Decision tables
-* Literal expressions
-* Contexts
-* Relations
-* Functions
-* Invocations
-* Lists
+* link:#con-dmn-decision-tables[Decision tables]
+* link:#con-dmn-literal-expressions[Literal expressions]
+* link:#con-dmn-context-expressions[Contexts]
+* link:#con-dmn-relation-expressions[Relations]
+* link:#con-dmn-function-expressions[Functions]
+* link:#con-dmn-invocation-expressions[Invocations]
+* link:#con-dmn-list-expressions[Lists]
 
 All Friendly Enough Expression Language (FEEL) expressions that you use in your boxed expressions must conform to the FEEL syntax requirements in the OMG https://www.omg.org/spec/DMN[Decision Model and Notation specification].
 
@@ -655,6 +658,7 @@ The following boxed list expression also identifies approved credit score agenci
 .Boxed list expression using FEEL logic for approved credit score agency status
 image::dmn-list-expression-example2.png[]
 
+.DMN diagram for approved credit score agency status
 image::dmn-list-expression-example2a.png[]
 
 [id="ref-dmn-model-example"]
@@ -697,6 +701,7 @@ Some boxed expressions are more complex with greater detail and calculation, suc
 .Boxed function expression for passenger reassignment
 image::dmn-reassign-passenger.png[]
 
+// replace with https://raw.githubusercontent.com/kiegroup/drools/8.39.0.Final/kie-dmn/kie-dmn-core/src/test/resources/org/kie/dmn/core/0019-flight-rebooking.dmn ?
 The following is the DMN source file for this decision model:
 
 [source,xml]
@@ -1223,14 +1228,7 @@ If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displ
 .Adding DRD components
 image::dmn-drag-decision-node.png[]
 
-The following DRD components are available:
-
-* *Decision*: Use this node for a DMN decision, where one or more input elements determine an output based on defined decision logic.
-* *Business knowledge model*: Use this node for reusable functions with one or more decision elements. Decisions that have the same logic but depend on different sub-input data or sub-decisions use business knowledge models to determine which procedure to follow.
-* *Knowledge source*: Use this node for external authorities, documents, committees, or policies that regulate a decision or business knowledge model. Knowledge sources are references to real-world factors rather than executable business rules.
-* *Input data*: Use this node for information used in a decision node or a business knowledge model. Input data usually includes business-level concepts or objects relevant to the business, such as loan applicant data used in a lending strategy.
-* *Text annotation*: Use this node for explanatory notes associated with an input data node, decision node, business knowledge model, or knowledge source.
-* *Decision service*: Use this node to enclose a set of reusable decisions implemented as a decision service for invocation. A decision service can be used in other DMN models and can be invoked from an external application or a BPMN business process.
+The following DRD link:#_dmn_decision_requirements_diagram_drd_components[components] are available.
 
 --
 . In the DMN modeler canvas, double-click the new DRD node to enter an informative node name.
@@ -1291,11 +1289,18 @@ image::dmn-input-connection-example2.png[]
 . Continue adding and defining the remaining DRD components of your decision model and save the completed DRD.
 +
 --
+// here we finished some 'partial' steps how some diagram is designed
+// how to add conections
+// how to fill in some of expression types
+// in the end we provide some picture, but no source or link to source of complete diagram
 The following is an example DRD for a loan prequalification decision model:
 
 .Completed DRD for loan prequalification
 image::dmn-example-drd.png[]
 
+// here we provide an example of a decision service node
+// but in the procedure above, we do not guide any step that would lead to a decision service in the picture below
+// placement of this picutre seems as 'random'
 The following is an example DRD for a phone call handling decision model using a reusable decision service:
 
 .Completed DRD for phone call handling with a decision service
@@ -1370,6 +1375,8 @@ image::dmn-custom-data-type-add.png[]
 .Adding constraints to the new data type
 image::dmn-custom-data-type-constraints.png[]
 
+// documenting that user can change order of enums doesn't seems to me as bringign much value
+// taking into account we use a picture for it, it prolongs the documentation, we repeat it twice in the docuemntation
 To change the order of data type constraints, you can click the left end of the constraint row and drag the row as needed:
 
 .Dragging constraints to change constraint order
@@ -1426,11 +1433,15 @@ Custom data types that you create for a boxed expression can be simple or struct
 * *Simple* data types have only a name and a type assignment. Example: `Age (number)`.
 * *Structured* data types contain multiple fields associated with a parent data type. Example: A single type `Person` containing the fields `Name (string)`, `Age (number)`, `Email (string)`.
 
+// if we read the procedure, it repeats also steps for creating boxed expression, that is already demonstrated earlier
+// - we could link creating/defining expression
+// - we could link code snippets on gist/github to able users play with similar models quicker instead of creating them from scratch
 .Procedure
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
 +
 --
 If the DRD does not open in the {PRODUCT} DMN modeler, ensure that you have installed and enabled the {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*].
+// extract this snippet in a seaprate .adoc and reuse, it is repeated 6x
 
 If the {PRODUCT} DMN modeler opens only the XML source of the DMN file and displays an error message, review the reported errors and the DMN model file to ensure that all DMN elements are correctly defined.
 --
@@ -1513,7 +1524,8 @@ Click the check mark to the right of each data type that you create to save your
 
 .Adding nested data types with constraints
 image::dmn-manage-data-types-structured2.png[]
-
+// doesn't bring much value from my point of view and prolongs the documentaiton
+// furthermore the screenshot is example of maintanance costs example, as is outdated
 To change the order or nesting of data types, you can click the left end of the data type row and drag the row as needed:
 
 .Dragging data types to change data type order or nesting
@@ -1544,6 +1556,7 @@ image::dmn-manage-data-types-structured3b.png[]
 In {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*], you can use the *Included Models* tab to include other DMN models and Predictive Model Markup Language (PMML) models from your project in a specified DMN file. When you include a DMN model within another DMN file, you can use all of the nodes and logic from both models in the same decision requirements diagram (DRD). When you include a PMML model within a DMN file, you can invoke that PMML model as a boxed function expression for a DMN decision node or business knowledge model node.
 
 You cannot include DMN or PMML models from different directories within your {PRODUCT} project or from other {PRODUCT} projects.
+// add some note about https://github.ibm.com/dba/bamoe-issues/issues/65
 
 [id="proc-dmn-included-models-dmn"]
 ==== Including other DMN models within a DMN file in {VS_CODE_BUNDLE}
@@ -1599,6 +1612,8 @@ IMPORTANT: When you remove an included model, any nodes from that included model
 In the {PRODUCT} DMN modeler in VSCode, you can include Predictive Model Markup Language (PMML) models from your project in a specified DMN file. When you include a PMML model within a DMN file, you can invoke that PMML model as a boxed function expression for a DMN decision node or business knowledge model node. If you update the source file for an included PMML model, you must remove and re-include the PMML model in the DMN file to apply the source changes.
 
 You cannot include PMML models from different directories within your {PRODUCT} project or from other {PRODUCT} projects.
+
+// add note about https://github.ibm.com/dba/bamoe-issues/issues/65
 
 .Procedure
 . In your VSCode IDE, open the DMN file to view the decision requirements diagram (DRD) in the {PRODUCT} DMN modeler.
@@ -1687,6 +1702,8 @@ For example, the following DRD for a loan prequalification decision model contai
 image::dmn-example-drd.png[]
 
 Alternatively, by following the steps in this procedure, you can divide this example DRD into multiple nested DRDs to better organize the decision requirements, as shown in the following example:
+// the procedure bellow demonstrates spliting one DMN diagram into more DRDs, however we use a lot of screenshots , not much instructions.
+// probably we could replace this with short text and link for complete dmn source file
 
 .Multiple nested DRDs for loan prequalification
 image::dmn-drd-multiple.png[]
@@ -2282,6 +2299,7 @@ IMPORTANT: For each {PRODUCT} project, try to include only one spreadsheet of de
 
 Refer to the following sample spreadsheet as you define your decision table:
 
+// do not put same picture twice, as they are big and very close each other, use reference to previous one
 .Sample spreadsheet decision table for shipping charges
 image::decision-table-example-02.png[Decision table example]
 
@@ -2311,6 +2329,7 @@ If you need to add more rule tables to this decision table spreadsheet, skip a r
 
 NOTE: Only the first worksheet in a spreadsheet workbook is processed as a decision table when you include the spreadsheet in your {PRODUCT} project. Each `RuleSet` name combined with the `RuleTable` name must be unique across all decision table files in the same package.
 
+// as we do not have spreadhseet editor in BAMO, probably not rendered, but translated,interpreted/....?
 After you include the decision table in your {PRODUCT} project, the rules are rendered as DRL rules like the following example, from the sample spreadsheet:
 
 ----
@@ -2559,6 +2578,7 @@ image::decision-table-example-03.png[Example decision table with definitions use
 [role="_abstract"]
 Spreadsheet decision tables are XLS or XLSX spreadsheet files that contain business rules defined in a tabular format. You can include spreadsheet decision tables as part of your {PRODUCT} project. Each row in a decision table is a rule, and each column is a condition, an action, or another rule attribute. After you create and include your spreadsheet decision tables in your project, the rules you defined are compiled into Drools Rule Language (DRL) rules for the decision service.
 
+// remove, this is duplicate
 === Decision table use case
 
 [role="_abstract"]
@@ -2929,9 +2949,11 @@ Example: `AUTO-FOCUS true`
 Example: `LOCK-ON-ACTIVE true`
 |===
 
+// already used in docs, maybe use just reference
 .Sample decision table spreadsheet with attribute columns
 image::decision-table-example-03.png[Example decision table with definitions used]
 
+// remove, it is duplicated
 == {PRODUCT} service execution
 
 [role="_abstract"]
