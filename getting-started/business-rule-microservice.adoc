@@ -15,7 +15,7 @@ The example for this procedure is a basic Kogito microservice that provides a RE
 
 The business decision contains the decision logic of the {PRODUCT} service. You can define business rules and decisions in different ways, such as with DMN models or DRL rules. The example for this procedure uses a DMN model.
 
-. In the Maven project that you generated for your {PRODUCT} service, navigate to the `src/main/java/org/acme` folder and add the following `Person.java` file:
+. In the Maven project that you generated for your {PRODUCT} service, navigate to the `src/main/java/com/ibm` folder and add the following `Person.java` file:
 +
 --
 .Example person Java object
@@ -64,24 +64,9 @@ public class Person {
 ----
 This example Java object sets and retrieves a person's name, age, and adult status.
 --
-. Navigate to the `src/main/resources` folder and add the following `PersonDecisions.dmn` DMN decision model:
+. Navigate to the `src/main/resources` folder and add the following `PersonDecisions.dmn` DMN decision model or continue to create it from scratch:
 +
 --
-.Example `PersonDecisions` DMN decision requirements diagram (DRD)
-image::kogito-dmn-example-person.png[Image of PersonDecisions decision diagram]
-
-.Example DMN boxed expression for `isAdult` decision
-image::kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
-
-.Example DMN data types
-image::kogito-dmn-example-person-data-types.png[Image of PersonDecisions data types]
-
-This example DMN model consists of a basic DMN input node and a decision node defined by a DMN decision table with a custom structured data type.
-
-In VSCode, you can add the {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*] to design the decision requirements diagram (DRD), boxed expression, and data types with the DMN modeler.
-
-To create this example DMN model quickly, you can copy the following `PersonDecisions.dmn` file content:
-
 .Example DMN file
 [source,xml]
 ----
@@ -171,12 +156,27 @@ To create this example DMN model quickly, you can copy the following `PersonDeci
   </dmndi:DMNDI>
 </dmn:definitions>
 ----
+This example DMN model consists of a basic DMN input node and a decision node defined by a DMN decision table with a custom structured data type.
 
-To create this example DMN model in VSCode using the DMN modeler, follow these steps:
+In VS Code, you can add the {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*] to design the decision requirements diagram (DRD), boxed expression, and data types with the DMN modeler.
 
-.. Open the empty `PersonDecisions.dmn` file, click the *Properties* icon in the upper-right corner of the DMN modeler, and confirm that the DMN model *Name* is set to `PersonDecisions`.
+To create this DMN model example in VSCode using the DMN modeler, follow these steps:
+
+.. Create a `PersonDecisions.dmn` file, after the editor finish to load, click the *Properties* icon in the upper-right corner of the DMN modeler, and confirm that the DMN model *Name* is set to `PersonDecisions`.
 .. In the left palette, select *DMN Input Data*, drag the node to the canvas, and double-click the node to name it `Person`.
 .. In the left palette, drag the *DMN Decision* node to the canvas, double-click the node to name it `isAdult`, and link to it from the input node.
++
+.Example `PersonDecisions` DMN decision requirements diagram (DRD)
+image::kogito-dmn-example-person.png[Image of PersonDecisions decision diagram]
+
+.. In the upper tab options, select the *Data Types* tab and add the following `tPerson` structured data type and nested data types:
++
+.Example DMN data types
+image::kogito-dmn-example-person-data-types.png[Image of PersonDecisions data types]
+.. After you define the data types, select the *Editor* tab to return to the DMN modeler canvas.
+.. Select the *Person* input node, click the *Properties* icon, and under *Information item*, set the *Data type* to `tPerson`.
+.. Select the *isAdult* decision node, click the *Properties* icon, and under *Information item*, confirm that the *Data type* is still set to `boolean`.
+
 .. Select the decision node to display the node options and click the *Edit* icon to open the DMN boxed expression editor to define the decision logic for the node.
 .. Click the _undefined expression_ field and select *Decision Table*.
 .. Click the upper-left corner of the decision table to set the hit policy to *Unique*.
@@ -184,12 +184,13 @@ To create this example DMN model in VSCode using the DMN modeler, follow these s
 +
 .Example DMN decision table for `isAdult` decision
 image::kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
-.. In the upper tab options, select the *Data Types* tab and add the following `tPerson` structured data type and nested data types:
-+
-.Example DMN data types
-image::kogito-dmn-example-person-data-types.png[Image of PersonDecisions data types]
-.. After you define the data types, select the *Editor* tab to return to the DMN modeler canvas.
-.. Select the *Person* input node, click the *Properties* icon, and under *Information item*, set the *Data type* to `tPerson`.
-.. Select the *isAdult* decision node, click the *Properties* icon, and under *Information item*, confirm that the *Data type* is still set to `boolean`. You previously set this data type when you created the decision table.
 .. Save the DMN decision file.
 --
+. With everything in place, you can start the Quarkus server with the following command in the project root:
++
+[source,console]
+----
+mvn quarkus:dev
+----
++
+Then you can check the application Swagger UI at `http://localhost:8080/q/swagger-ui/#/`
