@@ -1,25 +1,25 @@
 include::../partials/attributes.adoc[]
-== Migrating to {PRODUCT_LONG} v{PRODUCT_VERSION}
+= Migrating to {PRODUCT_LONG} v{PRODUCT_VERSION}
 
 {PRODUCT} v{VERSION} is optimized for a hybrid cloud environment and adapts to your domain and tooling needs. The core objective of {PRODUCT_SHORT} is to help you mold a set of business processes and decisions into your own domain-specific cloud-native set of services.
 
-=== Overview
+== Overview
 
 This section covers migration of existing applications to version {PRODUCT_VERSION} of {PRODUCT_LONG}.
 
-=== Prerequisites
+== Prerequisites
 
 The following tools are required in order to migrate to {PRODUCT_SHORT} v{VERSION}:
 
-include::prerequisites.adoc[]
+include::../partials/prerequisites.adoc[]
 
-=== Procedure
+== Procedure
 
 While it is possible to migrate an existing **Knowledge Jar (KJAR)** project it is highly recommended that you simply start your project from scratch, since the Maven configuration for {PRODUCT_SHORT} v{VERSION} is significantly different from that of {PRODUCT_SHORT} v{VERSION_OLD} or even {RH_DM} v7.  The good news is that this process is relatively painless, as it's driven by Maven, and Quarkus specifically.  
 
 The first step is to generate a new Maven project so that you have a place to migrate your existing business automation assets into the new {PRODUCT_SHORT} architecture.  There are several ways to create Maven projects, however the easiest is to use a published Maven archetype.  In order to do that you must first ensure that you have Maven setup properly:
 
-==== Step 1: Update Maven Configuration
+=== Step 1: Update Maven Configuration
 
 {MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.  {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications. For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
 
@@ -44,9 +44,9 @@ If you need to create user-specific settings from scratch, it's easiest to copy 
 
 Coming from {PRODUCT} v8 or Red Hat's v7, you might be familiar with product dependencies hosted by https://maven.repository.redhat.com/ga/com/redhat/ba/[Red Hat's Maven repository]. However this is no longer needed as the product dependencies are now hosted by https://central.sonatype.com/search?q=bamoe[Maven Central].  There is no need to include an additional repository in `pom.xml` or `settings.xml`, however the following is an example of a Maven settings file that points to Maven Central in case you need to build one....
 
-include::settings-maven-central.adoc[]
+include::../partials/settings-maven-central.adoc[]
 
-==== Step 2: Generate a New Maven Project using Apache Maven
+=== Step 2: Generate a New Maven Project using Apache Maven
 
 Now that we have Maven properly configured, we can move onto the next step, which is to generate a new Maven project:
 
@@ -130,7 +130,7 @@ It is highly recommended to use a bill of materials (BOM) to manage project depe
 
 A bill of materails (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
 
-include::maven-bom-now.adoc[]
+include::../partials/maven-bom-now.adoc[]
 
 When a bill of materials (BOM) is used it is no longer necessary to specify the depenency's version, as that comes from the BOM, so your depenencies end up looking like this:
 
@@ -162,7 +162,7 @@ If, during the course of your Maven dependency update, you encounter any depende
 
 The following table is useful in determining which community release is bound to is section details the mapping of https://www.kie.org/[KIE Community] releases to the current {PRODUCT_LONG} enterprise release.
 
-include::version-mapping-next.adoc[]
+include::../partials/version-mapping-next.adoc[]
 
 [start=5]
 . Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required in order to report on subscription entitlement usage within the system)_:
@@ -223,11 +223,15 @@ As you can see from the figure above, a Maven compliant project has been generat
 - Excel Decision Tables (XLS) Files (.xls)
 - Standard Property Files (.properties)
 
-==== Step 3: Add Business Automation Assets
+=== Step 3: Add Business Automation Assets
 
 If your project was migrated from a previous version of the product you can simply add the business automation files from that previous project to the `src/main/resources` folder of the new project by simply copying the file(s).  If you need to create a new file, simply use VS Code's `File : New File` option, making sure to specify the file extension properly in order to associate the new file with the appropriate editor.
 
-==== Step 4: Compile, Build, Test, Deploy
+=== Step 4: Compile, Build, Test, Deploy
 
 At this point you can simply follow the standard guidance on how to maintain your decision service project, including how to build using Maven and deploy to your target Kubernetes-based environment.  This would include not only creating and publishing the new project to an enterprise GIT repository as well as configuring your CI/CD pipeline to pull from GIT, perform a Maven build/test/deploy, etc.
 
+[NOTE]
+====
+Once you have completed migration of the project, you may want to consider migrating your technical rules in order to take advantage of new language features, such as `rule units` or `OOPATH syntax`.  Please refer to xref:drl.html[Drools Rule Language Migration] for migration to the latest version of Drools Rule Language (DLR).
+====
