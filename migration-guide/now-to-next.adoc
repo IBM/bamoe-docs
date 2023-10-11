@@ -1,0 +1,233 @@
+include::../partials/attributes.adoc[]
+== Migrating to {PRODUCT_LONG} v{PRODUCT_VERSION}
+
+{PRODUCT} v{VERSION} is optimized for a hybrid cloud environment and adapts to your domain and tooling needs. The core objective of {PRODUCT_SHORT} is to help you mold a set of business processes and decisions into your own domain-specific cloud-native set of services.
+
+=== Overview
+
+This section covers migration of existing applications to version {PRODUCT_VERSION} of {PRODUCT_LONG}.
+
+=== Prerequisites
+
+The following tools are required in order to migrate to {PRODUCT_SHORT} v{VERSION}:
+
+include::prerequisites.adoc[]
+
+=== Procedure
+
+While it is possible to migrate an existing **Knowledge Jar (KJAR)** project it is highly recommended that you simply start your project from scratch, since the Maven configuration for {PRODUCT_SHORT} v{VERSION} is significantly different from that of {PRODUCT_SHORT} v{VERSION_OLD} or even {RH_DM} v7.  The good news is that this process is relatively painless, as it's driven by Maven, and Quarkus specifically.  
+
+The first step is to generate a new Maven project so that you have a place to migrate your existing business automation assets into the new {PRODUCT_SHORT} architecture.  There are several ways to create Maven projects, however the easiest is to use a published Maven archetype.  In order to do that you must first ensure that you have Maven setup properly:
+
+==== Step 1: Update Maven Configuration
+
+{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.  {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications. For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
+
+You can read all about **Maven Archetypes** https://maven.apache.org/guides/introduction/introduction-to-archetypes.html#:~:text=In%20short%2C%20Archetype%20is%20a,means%20of%20generating%20Maven%20projects[here].  Since {PRODUCT_SHORT} v{VERSION} is based on Quarkus 2, the easiest route is to use the Quarkus Maven Archetype and then adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.  You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
+
+==== Update Maven Settings
+
+The settings element in the *_settings.xml_* file contains data used to define values which configure Maven execution in various ways, like the *_pom.xml_*, but should not be bundled to any specific project, or distributed to an audience. These include values such as the local repository location, alternate remote repository servers, and authentication information.  There are two locations where a settings.xml file may live:
+
+- **The Maven install**: *_${maven.home}/conf/settings.xml_*
+- **A user's install**: *_${user.home}/.m2/settings.xml_*
+
+[NOTE]
+====
+The former `settings.xml` are also called global settings, the latter `settings.xml` are referred to as user settings. If both files exists, their contents gets merged, with the user-specific `settings.xml` being dominant.
+====
+
+[TIP] 
+====
+If you need to create user-specific settings from scratch, it's easiest to copy the global settings from your Maven installation to your *_${user.home}/.m2_* directory. Maven's default *_settings.xml_* is a template with comments and examples so you can quickly tweak it to match your needs.  _If you are looking to learn more about how to manage your various Maven settings, please visit the https://maven.apache.org/settings.html[Maven Settings Reference]._
+====
+
+Coming from {PRODUCT} v8 or Red Hat's v7, you might be familiar with product dependencies hosted by https://maven.repository.redhat.com/ga/com/redhat/ba/[Red Hat's Maven repository]. However this is no longer needed as the product dependencies are now hosted by https://central.sonatype.com/search?q=bamoe[Maven Central].  There is no need to include an additional repository in `pom.xml` or `settings.xml`, however the following is an example of a Maven settings file that points to Maven Central in case you need to build one....
+
+include::settings-maven-central.adoc[]
+
+==== Step 2: Generate a New Maven Project using Apache Maven
+
+Now that we have Maven properly configured, we can move onto the next step, which is to generate a new Maven project:
+
+[start=1]
+. In a terminal window, create a new local folder to for the new Maven project, example: `/Users/developer`, and then naviate to that folder.
+
+. Create the project using Quarkus with the Maven commands below, this will create a Quarkus project called `my-sample-decision-service`, which will be versioned `1.0.0-SNAPSHOT`, including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.  This will create a Quarkus DMN project with the OpenAPI components to get the OpenAPI end points easily with health checks when deploying to Kubernetes:
+
++
+[source,console,subs="+attributes"]
+----
+mvn io.quarkus:quarkus-maven-plugin:2.16.7.Final:create \
+    -DprojectGroupId=com.ibm.bamoe.samples \
+    -DprojectArtifactId=my-sample-decision-service \
+    -DprojectVersion=1.0.0-SNAPSHOT \
+    -DplatformVersion=2.16.7.Final \
+    -Dextensions=kogito-quarkus,dmn,resteasy-reactive-jackson,quarkus-smallrye-openapi,quarkus-smallrye-health
+----
+
+[NOTE]
+====
+As you can see from the Maven command above, there are a number of possible `extensions` that can be added to the project in order to add some sort of specific functionality.  You can find more information on available extensions at the following locations:  https://quarkus.io/extensions/[Quarkus Extensions] and https://quarkus.io/extensions/?search-regex=kogito[Kogito Extensions].
+====
+
+When you create this project you should get a bunch of Maven artifacts start to stream in your console that are being pulled and ultimately are left with a console message like below:
+
+[source,console]
+----
+[INFO]
+[INFO] ========================================================================================
+[INFO] Your new application has been created in /Users/developer/my-sample-decision-service
+[INFO] Navigate into this directory and launch your application with mvn quarkus:dev
+[INFO] Your application will be accessible on http://localhost:8080
+[INFO] ========================================================================================
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  24.548 s
+[INFO] Finished at: 2022-09-27T10:22:31-04:00
+[INFO] ------------------------------------------------------------------------
+----
+
+[start=3]
+.  Add the following `properties` to the `pom.xml` file, using the row numbers below as a guide.  This specifiies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated depenency versions to a specific {PRODUCT_SHORT} release:
+
+[source,xml]
+----
+17        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+18  +++   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
+19  +++   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
+20  +++   <kogito.bom.version>9.0.0.Final</kogito.bom.version>
+21      </properties>
+----
+
+[start=4]
+. Replace lines 29-31, which is essentially just adding the `bamoe-bom` to the list of imported dependencies:
+
++
+[source,xml]
+----
+28      <dependency>
+29  ---   <groupId>${quarkus.platform.group-id}</groupId>
+30  ---   <artifactId>quarkus-kogito-bom</artifactId>
+31  ---   <version>${quarkus.platform.version}</version>
+29  +++   <groupId>${kogito.bom.group-id}</groupId>
+30  +++   <artifactId>${kogito.bom.artifact-id}</artifactId>
+31  +++   <version>${kogito.bom.version}</version>
+32        <type>pom</type>
+33        <scope>import</scope>
+34      </dependency>
+----
++
+A bill of materials (BOM) is a list of the parts or components that are required to build a product.  BOMs are ordinary `pom.xml` files — they contain no source code and their only purpose is to declare their bundled modules.
+
+.Always use the Maven Bill-of-Materials (BOM)
+[IMPORTANT]
+====
+It is highly recommended to use a bill of materials (BOM) to manage project depencencies, as it simplifies the dependency management by organizing a group of depdenencies under a single version. 
+====
+
+A bill of materails (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
+
+include::maven-bom-now.adoc[]
+
+When a bill of materials (BOM) is used it is no longer necessary to specify the depenency's version, as that comes from the BOM, so your depenencies end up looking like this:
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+    </dependency>
+</dependencies>
+----
+
+[NOTE]
+====
+If, during the course of your Maven dependency update, you encounter any dependencies that are *not* included in the bill of materials (BOM), then use the Maven Library Version noted in the table below, such as:
+====
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+        <version>8.40.0.Final</version>
+    </dependency>
+</dependencies>
+----
+
+The following table is useful in determining which community release is bound to is section details the mapping of https://www.kie.org/[KIE Community] releases to the current {PRODUCT_LONG} enterprise release.
+
+include::version-mapping-next.adoc[]
+
+[start=5]
+. Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required in order to report on subscription entitlement usage within the system)_:
++
+[source,xml]
+----
+77  +++   <dependency>
+78  +++     <groupId>com.ibm.bamoe</groupId>
+79  +++     <artifactId>bamoe-ilmt-compliance-quarkus-dmmoe</artifactId>
+80  +++   </dependency>
+81      </dependencies>
+----
+
+[NOTE]
+====
+You will notice that the newly added Maven dependency includes the `groupId` and `artifactId` portions of the Maven coordinates, but does not specifcy a `version` tag.  This is due to importing the `bamoe-bom` into the project, where the various dependency versions are managed.
+====
+
+[start=6]
+. Build the project in the root folder:
++
+[source,console]
+----
+mvn clean package
+----
++
+You will get some Maven streaming text once again, and at the end of it you should have:
++
+[source,console]
+----
+[INFO] Analysing decision tables in DMN Model 'pricing' ...
+[INFO]  analysis for decision table 'Base price':
+[INFO]   Decision Table Analysis of table 'Base price' finished with no messages to be reported.
+[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 3012ms
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.084 s
+[INFO] Finished at: 2023-06-28T14:22:02-03:00
+[INFO] ------------------------------------------------------------------------
+----
+
+[NOTE]
+====
+The choice of extensions determines the imported behavior of the project, including adding sample models or testing related code.  For example, by adding the 'dmn' extension not only adds the proper dependencies, but also adds a sample `.dmn` model to the project, which acts as a template to work from.
+====
+
+Once the project has been generated, you should see a project structure in VS Code, similar to the following diagram:
+
+.Example Maven Project in VS Code
+image::maven-project.png[Example Maven Project in VS Code]
+
+As you can see from the figure above, a Maven compliant project has been generated, including all of the standard folders typically found in a Maven project.  The most significant folder is the `resources` folder, which is where new or migrated business automation asset files should be stored.  Examples of supported business automation assets are:
+
+- Decision Model & Notation (DMN) Models (.dmn)
+- Drools Rule Language (DLR) Files (.drl)
+- Business Process Modeling & Notation (BPMN) Models (.bpmn)
+- Excel Decision Tables (XLS) Files (.xls)
+- Standard Property Files (.properties)
+
+==== Step 3: Add Business Automation Assets
+
+If your project was migrated from a previous version of the product you can simply add the business automation files from that previous project to the `src/main/resources` folder of the new project by simply copying the file(s).  If you need to create a new file, simply use VS Code's `File : New File` option, making sure to specify the file extension properly in order to associate the new file with the appropriate editor.
+
+==== Step 4: Compile, Build, Test, Deploy
+
+At this point you can simply follow the standard guidance on how to maintain your decision service project, including how to build using Maven and deploy to your target Kubernetes-based environment.  This would include not only creating and publishing the new project to an enterprise GIT repository as well as configuring your CI/CD pipeline to pull from GIT, perform a Maven build/test/deploy, etc.
+

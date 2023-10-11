@@ -1,0 +1,129 @@
+include::../partials/attributes.adoc[]
+== Migrating from Business Central to IBM {DEV_TOOLS}
+
+=== Overview
+
+Business Central was a web-based platform for authoring business automation assets such as data objects, rules, processes, cases, and planning entities. It included capabilities for monitoring, administration, and management of business automation assets.  With the release of IBM {DEV_TOOLS} as well as IBM {CANVAS}, which unlike Business Central was designed from the ground up to be cloud-native, most of these asset management capabilities have been replaced or in some cases take a different approach altogether.  This section covers migration of business assets created in Business Central so that they are able to be maintained by developers using either {DEV_TOOLS} and/or {CANVAS}.
+
+=== Prerequisites
+
+The following tools are required in order to migrate from Business Central to {DEV_TOOLS}.  It is assumed that you have a current version of Business Central running in order to be able to export certain types of assets to their supported form in {PRODUCT_SHORT}:
+
+include::prerequisites.adoc[]
+
+=== Business Automation Assets in Businss Central
+
+The following types of business automation assets were available within Business Central, with particular attention paid to those assets which are deprecated in v9 as well as an indication of how to manage those assets in abscense of Business Central:
+
+.Business Central Asset Types
+[cols="2,1,4,3,3"]
+|===
+| Asset Name | Asset Type | Description | v9 Supported Tools | Additional Info.
+
+| Business Process | Process (.bpmn) | Modeled as Business Process & Notation (BPMN) diagrams | {DEV_TOOLS} +
+{CANVAS} | Also used for straight-through-processing (STP) as well as rule-flow
+| Decision Model | Decision (.dmn) | Modeled as Decision Modeling & Notation (DMN) diagrams | {DEV_TOOLS} +
+{CANVAS} |
+| Technical Rule | Decision (.drl) | Drools Rule Language, used for technical rules | {DEV_TOOLS} |
+| Decision Table (Spreadsheet) | Decision (.xls) | DRL-based decision table, modeled as an Excel spreadsheet | {DEV_TOOLS} +
+MS Excel Online |
+| Test Scenario | Decision (.scesim) | Test scenario used for decision unit testing | {DEV_TOOLS} |
+| Data Object | Model (.java) | Java data object used by rules and processes | {DEV_TOOLS} | Define as separate Maven dependency project
+| Global Variable(s) | Decision (.drl) | Vocabulary definition | {DEV_TOOLS} | Managed directly in .drl files
+| Domain Specific Language Definition | Decision (.dsl) | Vocabulary definition | **Deprecated** |
+| Enumeration | Model | Vocabulary definition | {DEV_TOOLS} | Managed directly in .drl files
+| Form | Forms (.frm) | Human Form | **Deprecated** | New form builder in future release
+| Guided Decision Table | Decision (.gdst) | Guided Decisison Table | **Deprecated** | **Export** from BC to Decision Table Spreadsheet (XLS)
+| Guided Decision Table Graph | Decision (.gdst-set) | Guided Decision Table Graph| **Deprecated** | 
+| Guided Rule | Decision (.rdrl) | Guided Technical Rule | {DEV_TOOLS} | **Copy** source from BC to new Technical Rule (.drl) file
+| Guided Rule Template | Decision (.template) | Template for guided rules | **Deprecated** |
+| Test Scenario (Legacy)| Decision (.scenario) | Legacy (guided) test scenario used for rule unit testing | **Deprecated** |
+
+|===
+
+
+[NOTE]
+====
+At this time `Test Scenarios` are not directly supported in {CANVAS}, as it has its own test scenario asset.  There will be comptability between test scenarios included in a future release of {PRODUCT}.
+====
+
+=== Migration of Deprecated Assets
+
+While it is the case that all guided editors have been deprecated in {PRODUCT} v{VERSION}, that does not mean that you will loose all your effort into building those assets.  It is possible to convert certain guided assets to their non-guided and supported form.  The following table indicates the mapping from guided to non-guided form:
+
+.Business Central Guided Asset Types
+[cols="2,3,3"]
+|===
+| Asset Name & Type | Description | v9 Non-Guided Form
+| Guided Decision Table (.gdst) | Guided Decisison Table | **Export** from BC to Decision Table Spreadsheet (.xls)
+| Guided Rule (.rdrl) | Technical Rule (.drl) | **Copy** source from BC to new Technical Rule (.drl) file
+|===
+
+=== How to **Copy** the asset Source from Business Central
+
+It is important to keep in mind that all guided assets are Drools Rule Language (.drl) files under the cover.  In most situations a guided asset can be refactored into a non-guided asset by simply copying the source from the source tab in Business Central into a file with the file extension of `.drl`.  With that in mind, here is an example of how to accomplish this, using a `Guided Rule` as an example:
+
+.Example Guided Rule in Business Central
+image::bc-example-guided-rule.png[Example Guided Rule in Business Central]
+
+As you can see this is the default tab `(Model)` in Business Central's guided rule editor.  If you simply navigate over to the `Source` tab, you will quickly see that the guided rule is simply a editor view on top of a standard `technical rule` written using `Drools Rule Language (DLR)`, as in the following example:
+
+.Example Guided Rule in Business Central (Source Tab)
+image::bc-example-guided-rule-source.png[Example Guided Rule in Business Central]
+
+In order to turn this rule into non-guided form so that it can be modified by {DEV_TOOLS}, follow these steps:
+
+. Copy the contents of the rule in the `Source` tab
+. Create a new text file and paste the contents from the `Source` tab into the new file
+. Give this file an extenssion of `.drl`
+. Add this file to the `src/main/resources` folder of your Maven project.
+
+[NOTE]
+====
+Some guided rules when authored with the guided rule editor create additional rule attributes which may or may not continue to be relevant to your rule execution pattern.  Examples of these types of attriutes are `salience`, `dialect`, `no-loop`, & `lock-on-active`.  While these attributes play a unique role in guided rules they may impact the overall behavior of your ruleset.
+====
+
+At this point you are free to modify the new `technical rule` to your liking, such as updating to use `rule units`, using `OOPATH syntax` vs `mvel`, etc. 
+
+=== How to **Export** the asset from Business Central
+
+Guided Decision Tables are a wizard-led alternative to uploaded decision table spreadsheets for defining business rules in a tabular format. With guided decision tables, you are led by a UI-based wizard in Business Central that helps you define rule attributes, metadata, conditions, and actions based on specified data objects in your project. After you create your guided decision tables, the rules you defined are compiled into Drools Rule Language (DRL) rules as with all other rule assets.
+
+Since the `Guided Decision Table` editor in Business Central is deprecated, users will need to export guided decision tables to Excel format.  With that in mind, here is an example of how to accmoplish this, using a `Guided Decision Table` as an example:
+
+.Example Guided Decision Table in Business Central
+image::bc-example-guided-dt.png[Example Guided Decision Table in Business Central]
+
+In order to turn this decision table into non-guided form so that it can be modified by {DEV_TOOLS}, follow these steps:
+
+. Convert to XLS using the Business Central option on the button bar
+. Select the newly created `.xls` file in the Project Explorer
+. Select one of the `Download` options on the button bar
+. Add this file to the `src/main/resources` folder of your Maven project.
+
+As you can see in from this diagram, this is the default tab `(Model)` in Business Central's guided decision table editor.  If you navigate over to the `Source` tab, you will quickly see that the guided decision table is simply a editor view on top of a standard `technical rule` written using `Drools Rule Language (DLR)`, as in the following example:
+
+.Example Guided Decision Table in Business Central (Source Tab)
+image::bc-example-guided-dt-source.png[Example Guided Decision Table in Business Central]
+
+At this point the user has a choice, they can either take the same approach as with guided rules or they can export this table to Excel format, simply by clicking a button _(**Convert to XLS**)_, as in the following example:
+
+.Exporting a Guided Decision Table in Business Central
+image::bc-example-guided-dt-export.png[Exporting a Guided Decision Table in Business Central]
+
+Once the table has been converted to XLS format, the new file is added to the Business Central `Project Explorer` view:
+
+.Converted Guided Decision Table in Business Central
+image::bc-example-guided-dt-export-navigator.png[Converting a Guided Decision Table in Business Central]
+
+From there it is simply a matter of selecting the converted file and pressing one of the `Download` buttons in Business Central, which will download the converted spreadsheet file to your local machine so the file can be added to your project's `src/main/resources` folder of your Maven project.
+
+.Converted Guided Decision Table in Business Central
+image::bc-example-guided-dt-export-download.png[Exporting a Guided Decision Table in Business Central]
+
+[NOTE]
+====
+Guided decision tables are, under the covers, a collection of technical rules generated using .DRL syntax.  The number of rows in a decision table will equal the number of individual technical rules generated, one for each row.  Rules make use of `salience` in order to orchestrate the execution of each `row` of the decision table.  It is possible replace a decision table directly with technical rules vs exporting to Excel format, provided you follow the pattern that the rules were generated to.
+====
+
+
