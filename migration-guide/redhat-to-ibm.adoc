@@ -1,20 +1,25 @@
 include::../partials/attributes.adoc[]
 = Migrating from Red Hat to {PRODUCT_LONG}
 
-The offering formally known as {RH_PAM} / {RH_DM} were transitioned to IBM in 2022, where the product was re-branded as {PRODUCT_LONG}.  While the Red Hat offerings are now officially in _maintenance_ mode, both Red Hat and IBM continue to produce quarterly releases of both products in order to support their existing customer base, by providing critical bug fixes and in some situations customer patches.  
+The offerings formally known as {RH_PAM} / {RH_DM} were transitioned to IBM in 2022, where the product was re-branded as {PRODUCT_LONG}.
+While the Red Hat offerings are now officially in _maintenance_ mode, both Red Hat and IBM continue to produce quarterly releases of both products in order to support their existing customer base, by providing critical bug fixes and in some situations customer patches.  
 
 == Overview
 
-{PRODUCT} v{VERSION_OLD} provides a seemless upgrade path for customers and workloads formally leveraging the Red Hat offerings.  By remaining a functionally equivalent product to the Red Hat offering, customers can easily migrate from the former Red Hat offering once they have purchased an IBM subscription for {PRODUCT}.  This section provides guidance on how to migrate from the former Red Hat offerings of {RH_PAM} / {RH_DM} to {PRODUCT} v{VERSION_OLD}.  It is recommended that you follow this migration path before attempting to migrate to the next generation of the product known as {PRODUCT} v{VERSION}.  
+{PRODUCT} v{VERSION_OLD} provides a seemless upgrade path for customers and workloads formally leveraging the Red Hat offerings.
+By remaining a functionally equivalent product to the Red Hat offering, customers can easily migrate from the former Red Hat offering once they have purchased an IBM subscription for {PRODUCT}.
+This section provides guidance on how to migrate from the former Red Hat offerings of {RH_PAM} / {RH_DM} to {PRODUCT} v{VERSION_OLD}.
+It is recommended that you follow this migration path before attempting to migrate to the next generation of the product known as {PRODUCT} v{VERSION}.  
 
 == Prerequisites
 
-If your current application is based on the legacy product known as {RH_BPMS} you must first bring your installation up to the latest release of {RH_PAM} / {RH_DM} v7 before performing any migration to {PRODUCT}.  Please refer to the existing https://access.redhat.com/documentation/en-us/red_hat_process_automation_manager/7.0/html/migrating_from_red_hat_jboss_bpm_suite_6.4_to_red_hat_process_automation_manager_7.0/index[Red Hat Documentation] in order to facilitate migrating from {RH_BPMS} to {RH_PAM}/{RH_DM} v7.x.  From there you are free to migrate to any release of {PRODUCT}.
+If your current application is based on the legacy product known as {RH_BPMS} you must first bring your installation up to the latest release of {RH_PAM} / {RH_DM} v7 before performing any migration to {PRODUCT}.
+Please refer to the existing https://access.redhat.com/documentation/en-us/red_hat_process_automation_manager/7.0/html/migrating_from_red_hat_jboss_bpm_suite_6.4_to_red_hat_process_automation_manager_7.0/index[Red Hat Documentation] in order to facilitate migrating from {RH_BPMS} to {RH_PAM}/{RH_DM} v7.x.
+From there you are free to migrate to any release of {PRODUCT}.
 
 The following tools are required in order to migrate to {PRODUCT_SHORT} v{VERSION}:
 
 include::../partials/prerequisites.adoc[]
-
 
 == Procedure
 
@@ -22,12 +27,14 @@ The following steps are typically involved with migrating from {RH_PAM} / {RH_DM
 
 === Step 1: Download Product Archives
 
-The first step in migration is to to download the product archives from the either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.  From there, depending on what you need to get, you will download a few files _(replace with most current version)_. The most common ones are highlighted below, but download what makes the most sense for your environment. 
+The first step in migration is to to download the product archives from the either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
+From there, depending on what you need to get, you will download a few files _(replace with most current version)_.
+The most common ones are highlighted below, but download what makes the most sense for your environment. 
 
 .{PRODUCT_SHORT} Product Archives
 image::bamoe-downloads.png[Product Archives]
 
-The following archives are tyipcally used in migrating to {PRODUCT_SHORT}...
+The following archives are tyipcally used in migrating to {PRODUCT_SHORT}:
 
 .Common Product Archives
 |===
@@ -61,27 +68,35 @@ The following archives are tyipcally used in migrating to {PRODUCT_SHORT}...
 In the table above, you should replace **VERSION** with the version of {PRODUCT_SHORT} you are migrating to, such as 8.0.3.
 ====
 
-_Now that we have those files we can start to migrate our environment..._
+_Now that we have those files we can start to migrate our environment._
 
 === Step 2: Update Maven Configuration
 
-{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.  {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications. For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].
+{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool.
+Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
+{PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications.
+For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].
 
 === Update Maven Settings
 
-The settings element in the *_settings.xml_* file contains data used to define values which configure Maven execution in various ways, like the *_pom.xml_*, but should not be bundled to any specific project, or distributed to an audience. These include values such as the local repository location, alternate remote repository servers, and authentication information.  There are two locations where a settings.xml file may live:
+The settings element in the *_settings.xml_* file contains data used to define values which configure Maven execution in various ways, like the *_pom.xml_*, but should not be bundled to any specific project, or distributed to an audience.
+These include values such as the local repository location, alternate remote repository servers, and authentication information.
+There are two locations where a settings.xml file may live:
 
 - **The Maven install**: *_${maven.home}/conf/settings.xml_*
 - **A user's install**: *_${user.home}/.m2/settings.xml_*
 
 [NOTE]
 ====
-The former `settings.xml` are also called global settings, the latter `settings.xml` are referred to as user settings. If both files exists, their contents gets merged, with the user-specific `settings.xml` being dominant.
+The former `settings.xml` are also called global settings, the latter `settings.xml` are referred to as user settings.
+If both files exists, their contents gets merged, with the user-specific `settings.xml` being dominant.
 ====
 
 [TIP] 
 ====
-If you need to create user-specific settings from scratch, it's easiest to copy the global settings from your Maven installation to your *_${user.home}/.m2_* directory. Maven's default *_settings.xml_* is a template with comments and examples so you can quickly tweak it to match your needs.  _If you are looking to learn more about how to manage your various Maven settings, please visit the https://maven.apache.org/settings.html[Maven Settings Reference]._
+If you need to create user-specific settings from scratch, it's easiest to copy the global settings from your Maven installation to your *_${user.home}/.m2_* directory.
+Maven's default *_settings.xml_* is a template with comments and examples so you can quickly tweak it to match your needs.
+_If you are looking to learn more about how to manage your various Maven settings, please visit the https://maven.apache.org/settings.html[Maven Settings Reference]._
 ====
 
 {PRODUCT_LONG} v{VERSION_OLD} product dependencies are hosted by {RH_MAVEN_URL_BASE}[Red Hat's Maven repository], so you need to ensure that your `settings.xml` reflects that, as seen in the following example:
@@ -90,7 +105,8 @@ include::../partials/settings-redhat-maven.adoc[]
 
 === Update to use the Maven Bill of Materials (BOM)
 
-A bill of materials (BOM) is a list of the parts or components that are required to build a product.  BOMs are ordinary `pom.xml` files — they contain no source code and their only purpose is to declare their bundled modules.
+A bill of materials (BOM) is a list of the parts or components that are required to build a product.
+BOMs are ordinary `pom.xml` files — they contain no source code and their only purpose is to declare their bundled modules.
 
 .Always use the Maven Bill-of-Materials (BOM)
 [IMPORTANT]
@@ -113,7 +129,6 @@ When a bill of materials (BOM) is used it is no longer necessary to specify the 
     </dependency>
 </dependencies>
 ----
-
 
 [NOTE]
 ====
@@ -141,27 +156,33 @@ include::../partials/version-mapping-now.adoc[]
 
 == Step 3: Update Tooling & Runtime
 
-Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components of {PRODUCT}, such as Decision/Business Central, KIE Server, and the headless controller. Other {PRODUCT} artifacts, such as the decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
+Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components of {PRODUCT}, such as Decision/Business Central, KIE Server, and the headless controller.
+Other {PRODUCT} artifacts, such as the decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
 
 [NOTE]
 ====
 You can deploy the latest version of {PRODUCT} as either a new installation or as a patch update from one of the previous {PRODUCT} patch releases.
 ====
 
-You can use the same automated update tool to apply both patch updates and minor release upgrades to {PRODUCT} v{VERSION_OLD}. Patch updates of {PRODUCT}, such as an update from version 8.0 to 8.0.3, include the latest security updates and bug fixes. Minor release upgrades, such as an upgrade from version 8.0.x to 8.1, will include enhancements, security updates, and bug fixes.
+You can use the same automated update tool to apply both patch updates and minor release upgrades to {PRODUCT} v{VERSION_OLD}.
+Patch updates of {PRODUCT}, such as an update from version 8.0 to 8.0.3, include the latest security updates and bug fixes.
+Minor release upgrades, such as an upgrade from version 8.0.x to 8.1, will include enhancements, security updates, and bug fixes.
 
 [NOTE]
 ====
-Only updates for {PRODUCT} are included in the {PRODUCT} update tools. Updates to {EAP} must be applied using {EAP} patch distributions. For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
+Only updates for {PRODUCT} are included in the {PRODUCT} update tools.
+Updates to {EAP} must be applied using {EAP} patch distributions.
+For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
 ====
 
 == Prerequisites
 
-Your Decision/Business Central and KIE Server instances are not running. Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
+Your Decision/Business Central and KIE Server instances are not running.
+Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
 
 == Procedure
 
-. Navigate to the {PRODUCT_DOWNLOAD_PAGE}[{PRODUCT_LONG} v{VERSION_OLD} Downloads Page] and follow the instructions to download the {PRODUCT} **Update Tool**.  
+. Navigate to the {PRODUCT_DOWNLOAD_PAGE}[{PRODUCT_LONG} v{VERSION_OLD} Downloads Page] and follow the instructions to download the {PRODUCT} **Update Tool**.
 
 + 
 If you are upgrading to a new minor release of {PRODUCT}, first apply the latest patch update to your current version of {PRODUCT} and then follow this procedure again to upgrade to the new minor release.
@@ -169,12 +190,15 @@ If you are upgrading to a new minor release of {PRODUCT}, first apply the latest
 . Extract the downloaded file to a temporary directory.
 
 +
-This update tool automates the update of certain components of {PRODUCT}, such as Decision/Business Central, KIE Server, and the headless controller. Use this update tool first to apply updates and then install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
+This update tool automates the update of certain components of {PRODUCT}, such as Decision/Business Central, KIE Server, and the headless controller.
+Use this update tool first to apply updates and then install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
 
 . If you want to preserve any files from being updated by the update tool, navigate to the extracted `bamoe-$VERSION-update` folder, open the `blacklist.txt` file, and add the relative paths to the files that you do not want to be updated.
 
 +
-When a file is listed in the `blacklist.txt` file, the update script does not replace the file with the new version but instead leaves the file in place and in the same location adds the new version with a `.new` suffix. If you block files that are no longer being distributed, the update tool creates an empty marker file with a `.removed` suffix. You can then choose to retain, merge, or delete these new files manually.
+When a file is listed in the `blacklist.txt` file, the update script does not replace the file with the new version but instead leaves the file in place and in the same location adds the new version with a `.new` suffix.
+If you block files that are no longer being distributed, the update tool creates an empty marker file with a `.removed` suffix.
+You can then choose to retain, merge, or delete these new files manually.
 
 + 
 Example files to be excluded in `blacklist.txt` file:
@@ -204,7 +228,8 @@ base.css base.css.removed
 +
 [IMPORTANT]
 ====
-Make sure that your Decision/Business Central and KIE Server instances are not running before you apply updates. Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
+Make sure that your Decision/Business Central and KIE Server instances are not running before you apply updates.
+Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
 ====
 
 +
@@ -226,7 +251,8 @@ $ .\apply-updates.bat $DISTRO_PATH $DISTRO_TYPE
 ----
 
 +
-The `$DISTRO_PATH` portion is the path to the relevant distribution directory and the `$DISTRO_TYPE` portion is the type of distribution that you are updating with this update.  The following distribution types are supported in {PRODUCT} update tool:
+The `$DISTRO_PATH` portion is the path to the relevant distribution directory and the `$DISTRO_TYPE` portion is the type of distribution that you are updating with this update.
+The following distribution types are supported in {PRODUCT} update tool:
 
 +
 
@@ -368,11 +394,16 @@ $ ./elytron/kie-fs-realm-patch.bat ~/$JBOSS_HOME/standalone/configuration/kie-fs
 
 +
 
-If you encounter errors or notice any missing data in Decision/Business Central, you can restore the contents in the backup folder within the `bamoe-$VERSION-update` folder to revert the update tool changes. You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}. After restoring your previous distribution, you can try again to run the update.
+If you encounter errors or notice any missing data in Decision/Business Central, you can restore the contents in the backup folder within the `bamoe-$VERSION-update` folder to revert the update tool changes.
+You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}.
+After restoring your previous distribution, you can try again to run the update.
 
 == Step 3: Update Persistence
 
-For applications based on {RH_PAM} you may be required to update the runtime database.  For migrating the database, the easiest way is to do it in sequence as most of the jobs are *very* small (re: 2-4 lines of SQL). They are all mapped by the version progression so it would be fairly quick. So for instance, if we're running a PostgreSQL database, what we would need to do is the following:
+For applications based on {RH_PAM} you may be required to update the runtime database.
+For migrating the database, the easiest way is to do it in sequence as most of the jobs are *very* small (re: 2-4 lines of SQL).
+They are all mapped by the version progression so it would be fairly quick.
+So for instance, if we're running a PostgreSQL database, what we would need to do is the following:
 
 . Connect to your database instance in your method of preference
 . Apply the SQL scripts appropriate for the version you are migrating from up to RHPAM 7.13.
@@ -388,7 +419,8 @@ $ psql -h $dbhost -U $user < rhpam-7.13.2-to-7.13.3.sql
 
 [NOTE]
 ====
-{PRODUCT_SHORT} {VERSION_OLD}'s database is compatible with {RH_PAM} 7.13, so all you need to do is update the database to that level and you will be set to migraet the rest of your application
+{PRODUCT_SHORT} {VERSION_OLD}'s database is compatible with {RH_PAM} 7.13, so all you need to do is update the database to that level and you will be set to migraet the rest of your application.
 ====
 
-Once you have executed these SQL statements, your datasource is now up to date. If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice, the files should largely be the same.
+Once you have executed these SQL statements, your datasource is now up to date.
+If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice, the files should largely be the same.
