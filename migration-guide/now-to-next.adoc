@@ -110,12 +110,12 @@ When you create this project you should get a bunch of Maven artifacts start to 
 .  Add the following `properties` to the `pom.xml` file, using the row numbers below as a guide.
 This specifiies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated depenency versions to a specific {PRODUCT_SHORT} release:
 
-[source,xml]
+[source,xml,subs="attributes+"]
 ----
 17        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
 18  +++   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
 19  +++   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20  +++   <kogito.bom.version>9.0.0.Final</kogito.bom.version>
+20  +++   <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
 21      </properties>
 ----
 
@@ -166,13 +166,13 @@ When a bill of materials (BOM) is used it is no longer necessary to specify the 
 ====
 If, during the course of your Maven dependency update, you encounter any dependencies that are *not* included in the bill of materials (BOM), then use the Maven Library Version noted in the table below, such as:
 
-[source,xml]
+[source,xml,subs="attributes+"]
 ----
 <dependencies>
     <dependency>
         <groupId>org.drools</groupId>
         <artifactId>drools-compiler</artifactId>
-        <version>8.40.0.Final</version>
+        <version>{BOM_VERSION_OLD}</version>
     </dependency>
 </dependencies>
 ----
@@ -180,6 +180,7 @@ If, during the course of your Maven dependency update, you encounter any depende
 
 The following table is useful in determining which community release is bound to is section details the mapping of https://www.kie.org/[KIE Community] releases to the current {PRODUCT_LONG} enterprise release.
 
+[id=mapping-next]
 include::../partials/version-mapping-next.adoc[]
 
 [start=5]
@@ -244,6 +245,7 @@ Examples of supported business automation assets are:
 - Business Process Modeling & Notation (BPMN) Models (.bpmn)
 - Excel Decision Tables (XLS) Files (.xls)
 - Standard Property Files (.properties)
+- Test Scenario Files (.scesim)
 
 === Step 3: Add Business Automation Assets
 
