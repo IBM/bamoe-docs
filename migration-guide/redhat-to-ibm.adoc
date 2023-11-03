@@ -87,24 +87,27 @@ _Now that we have those files we can start to migrate our environment._
 
 === Step 2: Update Maven Configuration
 
-{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool.
-Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
+MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
 {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications.
-For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].
+For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
 
 === Update Maven Settings
 
-The settings element in the *_settings.xml_* file contains data used to define values which configure Maven execution in various ways, like the *_pom.xml_*, but should not be bundled to any specific project, or distributed to an audience.
-These include values such as the local repository location, alternate remote repository servers, and authentication information.
-There are two locations where a settings.xml file may live:
+The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from `pom.xml` by its non-association with particular projects.
 
-- **The Maven install**: *_${maven.home}/conf/settings.xml_*
-- **A user's install**: *_${user.home}/.m2/settings.xml_*
+This file includes configurations such as the location of the local repository, alternative sources for remote repositories, inputting credentials, among others.
+
+There are two directories for the storage of the settings.xml file:
+
+- Maven Installation Directory: Found at ${Maven.home}/conf/settings.xml, this location reflects the settings applied universally across all Maven projects on the system.
+- User-Specific Configuration: Located at ${user.home}/.m2/settings.xml, this directory allows for the storage of user-specific Maven settings.
+
+Users can tailor their Maven environment to better suit their development needs by using these configurations.
 
 [NOTE]
 ====
-The former `settings.xml` are also called global settings, the latter `settings.xml` are referred to as user settings.
-If both files exists, their contents gets merged, with the user-specific `settings.xml` being dominant.
+The first `settings.xml` is also referred to as `global settings`, the second is referenced as user settings, both are combined
+with users taking precedence.
 ====
 
 [TIP] 
