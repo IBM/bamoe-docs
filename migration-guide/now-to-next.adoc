@@ -21,7 +21,7 @@ The good news is that this process is relatively painless, as it's driven by Mav
 
 The first step is to generate a new Maven project so that you have a place to migrate your existing business automation assets into the new {PRODUCT_SHORT} architecture.
 There are several ways to create Maven projects, however the easiest is to use a published Maven plugin.
-In order to do that you must first ensure that you have Maven setup properly:
+In order to do that you must first ensure that you have Maven setup properly:   
 
 === Step 1: Update Maven Configuration
 
@@ -69,7 +69,7 @@ Now that we have Maven properly configured, we can move onto the next step, whic
 [start=1]
 . In a terminal window, create a new local folder to for the new Maven project, example: `/Users/developer`, and then naviate to that folder.
 
-. Create the project using Quarkus with the Maven commands below, this will create a Quarkus project called `my-sample-decision-service`, which will be versioned `1.0.0-SNAPSHOT`, including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
+. Create the project using Quarkus with the Maven commands below, this creates a Quarkus project called `my-sample-decision-service`, which will be versioned `1.0.0-SNAPSHOT`, including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
 This will create a Quarkus DMN project with the OpenAPI components to get the OpenAPI end points easily with health checks when deploying to Kubernetes:
 
 +
@@ -90,7 +90,7 @@ mvn io.quarkus:quarkus-maven-plugin:2.16.7.Final:create \
 As you can see from the Maven command above, there are a number of possible `extensions` that can be added to the project in order to add some sort of specific functionality.  You can find more information on available extensions at the following locations:  https://quarkus.io/extensions/[Quarkus Extensions] and https://quarkus.io/extensions/?search-regex=kogito[Kogito Extensions].
 ====
 
-When you create this project you should get a bunch of Maven artifacts start to stream in your console that are being pulled and ultimately are left with a console message like below:
+When you create this project you might get a bunch of Maven artifacts start to stream in your console that are being pulled and ultimately are left with a console message like below:
 
 [source,console]
 ----
@@ -111,7 +111,7 @@ When you create this project you should get a bunch of Maven artifacts start to 
 
 [start=3]
 .  Add the following `properties` to the `pom.xml` file, using the row numbers below as a guide.
-This specifiies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated depenency versions to a specific {PRODUCT_SHORT} release:
+This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated depenency versions to a specific {PRODUCT_SHORT} release:
 
 [source,xml,subs="attributes+"]
 ----
@@ -123,7 +123,7 @@ This specifiies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mate
 ----
 
 [start=4]
-. Replace lines 29-31, which is essentially just adding the `bamoe-bom` to the list of imported dependencies:
+. Replace lines 29-31, which is essentially adding the `bamoe-bom` to the list of imported dependencies:
 
 +
 [source,xml]
@@ -146,16 +146,16 @@ BOMs are ordinary `pom.xml` files — they contain no source code and their only
 .Always use the Maven Bill-of-Materials (BOM)
 [IMPORTANT]
 ====
-It is highly recommended to use a bill of materials (BOM) to manage project depencencies, as it simplifies the dependency management by organizing a group of depdenencies under a single version. 
+It is highly recommended to use a bill of materials (BOM) to manage project dependencies, as it simplifies the dependency management by organizing a group of dependencies under a single version. 
 
-It should be noted that the use of Maven bill-of-materials (BOM) does not add any actual dependencies to the project, they are only definition that will help resolve properly (versions) the dependendies (and transient dependencies).
+It should be noted that the use of Maven bill-of-materials (BOM) does not add any actual dependencies to the project, they are only definition that will help resolve properly (versions) the dependencies (and transient dependencies).
 ====
 
 A bill of materails (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
 
 include::../partials/maven-bom-now.adoc[]
 
-When a bill of materials (BOM) is used it is no longer necessary to specify the depenency's version, as that comes from the BOM, so your depenencies end up looking like this:
+When a bill of materials (BOM) is used it is no longer necessary to specify the dependency's version, as that appears from the BOM, so your dependencies end up looking like this:
 
 [source,xml]
 ----
@@ -169,7 +169,7 @@ When a bill of materials (BOM) is used it is no longer necessary to specify the 
 
 [NOTE]
 ====
-If, during the course of your Maven dependency update, you encounter any dependencies that are *not* included in the bill of materials (BOM), then use the Maven Library Version noted in the table below, such as:
+If, during the course of your Maven dependency update, you encounter any dependencies that are not included in the bill of materials (BOM), then use the Maven Library Version noted in the table below, such as:
 
 [source,xml,subs="attributes+"]
 ----
