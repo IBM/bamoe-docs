@@ -1,0 +1,42 @@
+= Tracking BAMOE License use in IBM License Metric Tool
+include::../partials/attributes.adoc[]
+//tag::ilmt-overview-description[]
+You can maintain an up-to-date inventory of software assets that are installed in your infrastructure, gather information about your hardware, and ensure license compliance of your enterprise by using ILMT. 
+You get to know the softwares that are existing in your system, and where or how it is used. 
+By monitoring consumption of PVU, VPC, and RVU MAPC metrics by IBM® products under full and subcapacity licensing terms, you can understand the current license consumption. 
+You can also predict the future license consumption, thus providing the means to optimize your license costs.
+//end::vscode-extensions-description[]
+
+== Configuring IBM License Metric Tool
+
+IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) subcapacity license terms. 
+License Metric Tool can calculate VPC consumption only when software identification tags exist and are activated by the customer. 
+The optman global option licenseType must be set to perServer (default value) to activate Virtual Processor Core consumption tracking. 
+You can also set the optman global option licenseType to byWorkstation to specify that the licensing type (either perServer or perJob) is specified at creation time for each workstation.
+
+
+License Metric Tool automatically detects the following IBM Business Automation Manager Open Editions 9.0.x release chargeable components that are part of the product:
+
+|=== 
+| Chargeable Software Components
+
+|	Process Automation Manager Open Edition
+|	Decision Manager Open Edition
+|===
+
+To detect and count remote nodes that are managed by IBM Business Automation Manager Open Editions chargeable components, you must manually deploy software tags because no product code is present on those nodes. 
+License Metric Tool generates and assigns dedicated software tags during the creation of the Readiness Package for the latest release of IBM Business Automation Manager.
+
+The following IBM Business Automation Manager chargeable components require manual deployment of software tags, for example 9.0.1:
+
+|=== 
+| Chargeable Software Components | Assigned Software tags
+
+|	Process Automation Manager Open Edition
+|   ibm.com_IBM_Process_Automation_Manager_Open_Edition-9.0.1.swidtag
+|	Decision Manager Open Edition
+|   ibm.com_IBM_Decision_Manager_Open_Edition-9.0.1.swidtag
+|===
+
+NOTE: The IBM Business Automation Manager Open Editions 9.0 license can be used for all the IBM Business Automation Manager access methods and application plug-ins available on the Automation Hub and its 9.0.x fix releases.
+
