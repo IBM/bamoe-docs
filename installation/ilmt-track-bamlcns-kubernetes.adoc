@@ -6,24 +6,24 @@ include::../partials/attributes.adoc[]
 Install the License Service by following the https://www.ibm.com/docs/en/cloud-paks/foundational-services/3.23?topic=software-installing-license-service-stand-alone[tutorial].
 
 == Tracking BAMOE License
-After installing BAMOE Canvas and its dependencies following the installation tutorial, run the following commands depending on where BAMOE Canvas was installed.
+After installing {CANVAS} and its dependencies following the installation tutorial, run the following commands depending on where {CANVAS} was installed.
 
-* OpenShift
+* OpenShift[source, shell]
 ----
 oc patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
   
-* Kubernetes
+* Kubernetes[source, shell]
 ----
 kubectl patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
-  Where <bamoe-canvas_deployment_name> is the name of the Deployment resource created when you installed BAMOE Canvas.
+  Where 'bamoe-canvas_deployment_name' is the name of the Deployment resource created when you installed {CANVAS}.
 
 * Alternative
 
-If you have installed BAMOE Canvas by using .yaml resources, the deployment resource must be edited to add the following lines:
+If you have installed {CANVAS} by using [source, yaml] resources, the deployment resource must be edited to add the following lines:
 ----
 spec:
   ...
