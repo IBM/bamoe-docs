@@ -2,7 +2,7 @@ include::../../partials/attributes.adoc[]
 
 = {PRODUCT_LONG}, {VERSION901}, release notes
 
-The release notes contain information to ensure the successful installation and operation of {PRODUCT_LONG}, Version {VERSION901} fix release. Last updated 31st October 2023.
+The release notes contain information to ensure the successful installation and operation of {PRODUCT_LONG}, Version {VERSION901} fix release. Last updated 16th November 2023.
 
 == Contents
 
@@ -12,6 +12,7 @@ The release notes contain information to ensure the successful installation and 
 - <<Fix lists>>
 - <<Known limitations>>
 - <<Download documents>>
+- <<Upgrade {PRODUCT_SHORT} from Version 9.0.0 to Version 9.0.1>>
 
 
 == Description
@@ -24,7 +25,7 @@ The release notes contain information to ensure the successful installation and 
 - Documented instructions for patch update from {VERSION} to {VERSION901}
 - Delivered Migration guide for Version 9.0
 - Delivered Security bulletin for {CANVAS} and runtime libraries
-- Support for Quarkus 2.16.12
+- Support for Quarkus Version 2.16.12
 
 == System requirements
 
@@ -35,8 +36,6 @@ See https://spcr-prod-preview.dal1a.cirrus.ibm.com/software/reports/compatibilit
 
 == Fix lists
 The summary list of fixes that are included in Version {VERSION901} fix release.
-
-=== {CANVAS}
 
 - git-cors-proxy-image and kie-sandbox-image on macOS ARM processors
 - MvelCompiler is not coercing type double apache or incubator-kie-issues
@@ -55,7 +54,21 @@ The issues that arise will be reported through this source.
 
 == Download documents
 
-The document contains information for obtaining {PRODUCT_LONG} ({PRODUCT_SHORT}) {VERSION}, earlier release and its fix releases, currently {VERSION901}. 
+The document contains information for obtaining {PRODUCT_LONG} ({PRODUCT_SHORT}) {VERSION}, earlier release and its fix releases, currently Version {VERSION901}. 
 {PRODUCT_SHORT} versions are designated with a numerical Major.Minor.Patch following Open Source community Semantic Versioning principle. 
 Fixes for on-premise installs are available through IBM Fix Central, and {CANVAS} container images are available through Quay Container Registry.
 For more inforamation, see https://www.ibm.com/support/pages/node/7001673
+
+== Upgrade {PRODUCT_SHORT} from Version 9.0.0 to Version 9.0.1
+
+To upgrade {PRODUCT_SHORT} from Version 9.0.0 to Version 9.0.1, follow these steps:
+
+- Update QUARKUS Version to {QUARKUS_VERSION_SHORT_12_FINAL}
+- Update pom file from their projects with Version 9.0.1 {PRODUCT_SHORT} BOM
+- For direct library components, use Version 8.40.1 for drools or Version 1.40.2 for kogito libraries.
+- Rebuild projects and re-deploy as regular software rollout.
+
+For Canvas:
+
+The new containers are the drop-in replacements for the existing. 
+You can use https://docs.openshift.com/container-platform/4.14/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue/green deployment]

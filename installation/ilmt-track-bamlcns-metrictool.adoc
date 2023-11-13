@@ -1,42 +1,37 @@
-= Tracking BAMOE License use in IBM License Metric Tool
+= Tracking the BAMOE License use in IBM License Metric Tool (ILMT)
 include::../partials/attributes.adoc[]
 
-You can maintain an up-to-date inventory of software assets that are installed in your infrastructure, gather information about your hardware, and ensure license compliance of your enterprise by using ILMT. 
-You get to know the softwares that are existing in your system, and where or how it is used. 
-By monitoring consumption of PVU, VPC, and RVU MAPC metrics by IBM® products under full and subcapacity licensing terms, you can understand the current license consumption. 
-You can also predict the future license consumption, thus providing the means to optimize your license costs.
-
-
-== Configuring IBM License Metric Tool
-
-IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) subcapacity license terms. 
+IBM® License Metric Tool generate reports to help you maintain compliance with your Virtual Processor Core (VPC) subcapacity license terms. 
 License Metric Tool can calculate VPC consumption only when software identification tags exist and are activated by the customer. 
-The 'optman' global option 'licenseType' must be set to 'perServer' (default value) to activate Virtual Processor Core consumption tracking. 
-You can also set the 'optman' global option 'licenseType' to byWorkstation to specify that the licensing type (either 'perServer' or 'perJob') is specified at creation time for each workstation.
 
+For guidelines on installing ILMT, follow the link: https://www.ibm.com/support/pages/downloading-ibm-license-metric-tool-92
+
+== Using and Configuring BAMOE ILMT Libraries
 
 License Metric Tool automatically detects the following {PRODUCT_LONG} {VERSION90X} release chargeable components that are part of the product:
 
 |=== 
-|Chargeable Software Components
+|Chargeable Software Components| Library
 
-|Process Automation Manager Open Edition
-|Decision Manager Open Edition
+|Process Automation Manager Open Edition|ilmt-compliance-quarkus-pamoe
+|Decision Manager Open Edition|ilmt-compliance-quarkus-dmoe
 |===
 
-To detect and count remote nodes that are managed by {PRODUCT_LONG} chargeable components, you must manually deploy software tags because no product code is present on those nodes. 
-License Metric Tool generates and assigns dedicated software tags during the creation of the Readiness Package for the latest release of {PRODUCT_LONG}.
+The respective libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
+If the SWIDTAG_DIR is not set, the library defaults to the home directory of the hosting application.
 
-The following {PRODUCT_LONG} chargeable components require manual deployment of software tags, for example {VERSION901}:
+It is important to note that if the SWIDTAG_DIR environment variable contains invalid content or an invalid path, the hosting application fails to deploy.
 
-|=== 
-| Chargeable Software Components | Assigned Software tags
+The swidtag file is an XML file content based on ISO/IEC 19770-2:2015 specification. 
+Following is an example of the swidtag file content:
 
-|	'Process Automation Manager Open Edition'
-|   ibm.com_IBM_Process_Automation_Manager_Open_Edition-9.0.1.swidtag
-|	'Decision Manager Open Edition'
-|   ibm.com_IBM_Decision_Manager_Open_Edition-9.0.1.swidtag
-|===
-
-NOTE: The {PRODUCT_LONG} 9.0 license can be used for all the {PRODUCT_LONG} access methods and application plug-ins available on the Automation Hub and its {VERSION90X} fix releases.
+----
+xml
+<?xml version="1.0" encoding="UTF-8"?>
+<SoftwareIdentity name="IBM Decision Manager Open Edition" tagId="ibm.com-3d9d28f19d0f45fda113c07fb481e3ea-9.0.0" version="9.0.0" versionScheme="multipartnumeric" xml:lang="en" xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.iso.org/iso/19770/-2/2015-current/schema.xsd schema.xsd">
+    <Meta persistentId="3d9d28f19d0f45fda113c07fb481e3ea"/>
+    <Meta generator="4-1-20210113"/>
+    <Entity name="IBM" regid="ibm.com" role="licensor tagCreator softwareCreator"/>
+</SoftwareIdentity>
+----
 
