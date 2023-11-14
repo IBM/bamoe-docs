@@ -1,0 +1,374 @@
+= Migrating to the Latest Version of Drools Rule Language (DRL)
+include::../partials/attributes.adoc[]
+
+When migrating to {PRODUCT_LONG} v{PRODUCT_VERSION} you may be faced with the task of migrating your technical rules, which are currently represented by **Drools Rule Language** (DRL) files.
+
+== Overview
+
+This section describes how to migrate your technical rules in order to take advantage of the new features of Drools Rule Language (DRL) v8.
+It should be noted that {PRODUCT_SHORT} v{PRODUCT_VERSION} is based, in part, on Drools Rule Language v8 and supports the previous version of the `DRL` language API's as well as syntax, so it may not be necessary to migrate your rules at all unless there is a new language feature that you'd like to take advantage of.
+
+== Prerequisites
+
+The following tools are required in order to migrate to {PRODUCT_SHORT} v{VERSION}:
+
+include::../partials/prerequisites.adoc[]
+
+== Maven Dependencies
+
+Typical Drools v6 or early Drools v7 projects have `pom.xml` dependencies like this:
+
+[source,xml]
+----
+</dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-core</artifactId>
+        <version>${version.org.drools}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+        <version>${version.org.drools}</version>
+    </dependency>
+  </dependencies>
+----
+
+But since Drools v7.45.0, `drools-engine` and `drools-engine-classic` have been introduced as aggregator dependencies.
+The dependencies `drools-engine-classic`, `drools-mvel` are **deprecated** starting with Drools v8, hence use `drools-engine` as in the following example:
+
+[source,xml]
+----
+</dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-engine</artifactId>
+        <version>${version.org.drools}</version>
+    </dependency>
+  </dependencies>
+----
+
+Drools v8 included some module refactoring, so you may find some difficulty in collecting dependencies.
+This aggregator dependency will certainly help.
+
+== Rule Units
+
+As previously introduced, using `Rule Units` are _**a recommended style**_ for implementing rules in Drools v8.
+It will require some modifications to your codebase, but if you are going to develop cloud-native applications, Rule Units are _**recommended**_, because Kogito also works with Rule Units.
+Rule units represent a purely declarative approach to partition a rules set into smaller units, binding different data sources to those units and orchestrate the execution of the individual 
+unit. A rule unit is an aggregate of data sources, global variables and rules.
+
+In order to utilize Rule Units, simply add the following dependency, which is required for using Rule Unit API's:
+
+[source,xml]
+----
+</dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-ruleunits-engine</artifactId>
+        <version>${version.org.drools}</version>
+    </dependency>
+  </dependencies>
+----
+
+Regarding related Java API usage, in Drools v7, you create a `KieSession` from rule assets.
+Then insert facts and fire rules, as in the following example:
+
+.Traditional DRL API
+[source,java]
+----
+KieServices ks = KieServices.Factory.get();
+KieContainer kcontainer = ks.getKieClasspathContainer();
+KieBase kbase = kcontainer.getKieBase();
+KieSession ksession = kbase.newKieSession();
+try {
+    ksession.insert(new Measurement("color", "red"));
+    ksession.insert(new Measurement("color", "green"));
+    ksession.fireAllRules();
+} finally {
+    ksession.dispose();
+}
+----
+
+However, using Rule Unit API's, the resulting Java snippet would be like this:
+
+.Rule Unit API
+[source,java]
+----
+MeasurementUnit measurementUnit = new MeasurementUnit();
+RuleUnitInstance<MeasurementUnit> instance = RuleUnitProvider.get().createRuleUnitInstance(measurementUnit);
+
+try {
+    measurementUnit.getMeasurements().add(new Measurement("color", "red"));
+    measurementUnit.getMeasurements().add(new Measurement("color", "green"));
+    instance.fire();
+} finally {
+    instance.dispose();
+}
+----
+
+In Rule Unit, instantiate `RuleUnitInstance` instead of `KieSession`. Add facts to `DataSource` property instead of `insert`. Generic KIE API calls (e.g. KieServices, KieContainer, KieBase …​ ) are no longer needed. Instead, one more class Unit has to be defined:
+
+.Rule Unit Java Class
+[source,java]
+----
+public class MeasurementUnit implements RuleUnitData {
+
+    private final DataStore<Measurement> measurements;
+    private final Set<String> controlSet = new HashSet<>();
+
+    public MeasurementUnit() {
+        this(DataSource.createStore());
+    }
+
+    public MeasurementUnit(DataStore<Measurement> measurements) {
+        this.measurements = measurements;
+    }
+
+    public DataStore<Measurement> getMeasurements() {
+        return measurements;
+    }
+
+    public Set<String> getControlSet() {
+        return controlSet;
+    }
+}
+----
+
+This Rule Unit class associates rules (DRL) and inserted facts (DataSource), so it helps you to manage the relationship.
+In addition to the API, the DRL syntax style also changes from traditional DRL, as in the following example:
+
+.Traditional DRL
+[source,drl]
+----
+global java.util.Set controlSet;
+
+rule "will execute per each Measurement having ID color"
+when
+	Measurement( id == "color", $colorVal : val )
+then
+	controlSet.add($colorVal);
+end
+----
+
+to Rule Unit DRL, as in the following example:
+
+.Rule Unit DRL
+[source,drl]
+----
+unit MeasurementUnit;
+
+rule "will execute per each Measurement having ID color"
+when
+	/measurements[ id == "color", $colorVal : val ]
+then
+	controlSet.add($colorVal);
+end
+----
+
+Firstly, declare `unit`, don't need to declare `global`, because `controlSet` is a field of `MeasurementUnit`.
+Traditional global usage would become the Unit's field.
+In addition, the main difference is `OOPath notation` in left hand side (LHS) of the rule.
+It is described in detail at Rule conditions in DRL.
+You should change from the class name (Measurement) to the DataSource property name in the Unit class (measurements).
+
+In addition, you need to take care of the insert in the right hand side (RHS) of the rule.
+The `insert` method inserts a fact into a DEFAULT entry-point, but in Rule Unit use cases, you must specify a DataSource where you want to insert the fact.
+Hence, you must call `DataStore.add` or `DataStream.append` instead of insert.
+
+.Traditional DRL
+[source,drl]
+----
+rule "Insert another Measurement"
+when
+	Measurement( id == "color", $colorVal : val )
+then
+	insert(new Measurement("monochrome", "false"));
+end
+----
+
+to Rule Unit DRL, as in the following example:
+
+.Rule Unit DRL
+[source,drl]
+----
+unit MeasurementUnit;
+
+rule "Insert another Measurement"
+when
+	/measurements[ id == "color", $colorVal : val ]
+then
+	measurements.add(new Measurement("monochrome", "false"));
+end
+----
+
+[NOTE]
+====
+You don't need to re-write update, modify and delete, because they work for a fact in its DataSource expectedly.
+These changes are not negligible, but hopefully, as this migration guide demonstrated, they are not so difficult to implement either.
+====
+
+== Migration from non-executable model to executable model
+
+The `drools-engine-classic` and `drools-mvel` dependencies execute rules with **non executable model**.
+`drools-engine` executes rules with **executable model**.  The executable model allows the user to pre-compile the model so that at runtime sessions are easier to create, basically speeding up the entire rule execution process.
+In general, from an external perspective, rule evaluation and rule consequence execution results can be expected to be the same using either the non-executable model or the executable model.
+You may however encounter a few edge cases during compile time or runtime.
+If you find any issues, please report them.
+
+=== Invalid Cast
+
+When you specify dialect `mvel` in a rule, the non-executable model is tolerant of invalid type cast, because of type coercion behavior in MVEL.
+For example:
+
+[source,drl]
+----
+global MyUtils myUtils;
+
+rule Rule1
+dialect "mvel"
+when
+  $p : Person()
+then
+  myUtils.doWork((String) $p.age )));
+end
+----
+
+This rule can be built with non-executable model even if `$p.age` is int which is not acceptable in Java syntax.
+
+With executable model, the rule fails with a build error: `Cannot cast from int to String`, so in this case, the rule can be easily fixed by using valid Java syntax.
+For example:
+
+[source,drl]
+----
+...
+then
+  myUtils.doWork(java.util.Objects.toString( $p.age ));
+end
+----
+
+=== Generics Support
+The non-executable model is tolerant of generics type.
+For example:
+
+[source,drl]
+----
+rule Rule1
+  no-loop true
+  when
+    $fact : Fact( str == "ADD", $val : "100" )
+  then
+    modify($fact) {
+      bdList.add($val);
+    }
+end
+----
+
+The non-executable model allows to add a String object to `bdList` even if `Fact.bdList` is `List<BigDecimal>` which is not acceptable in Java syntax.
+With executable model, the rule fails with a build error `The method add(BigDecimal) in the type List<BigDecimal> is not applicable for the arguments (String)`.
+In this case, the rule can be easily fixed by using valid Java syntax.
+For example:
+
+[source,drl]
+----
+...
+then
+  modify($fact) {
+    bdList.add(new BigDecimal($val));
+  }
+end
+----
+
+=== Invalid Coercion
+
+For example, Java allows coercion from int to long.
+However, Java doesn't allow coercion from int to Long.
+If you have the rule to call the setWrapperLong method which accepts Long:
+
+[source,drl]
+----
+rule Rule1
+dialect "mvel"
+when
+  $f : Fact()
+then
+  $f.setWrapperLong(10);
+end
+----
+
+The non-executable model coerces 10 to Long, so it doesn't throw an Exception.
+However, the executable model throws a build error: `The method setWrapperLong(Long) in the type Fact is not applicable for the arguments (int)`. 
+In this case, the rule can be easily fixed by using valid Java syntax. For example:
+
+[source.java]
+----
+...
+then
+  $f.setWrapperLong(10L);
+end
+----
+
+Generics return type resolution, assuming you have classes below:
+
+.Parent Class
+[source.java]
+----
+public abstract class Vehicle<TEngine extends Engine> {
+    // ...
+
+	public abstract TEngine getEngine();
+
+	public TEngine getMotor() {
+		return getEngine();
+	}
+----
+
+.Sub Class
+[source,java]
+----
+public class DieselCar extends Vehicle<DieselEngine> {
+	private final DieselEngine engine;
+
+	public DieselCar(String maker, String model, int kw, boolean adBlueRequired) {
+		super(maker, model);
+		this.engine = new DieselEngine(kw, adBlueRequired);
+	}
+
+	@Override
+	public DieselEngine getEngine() {
+		return engine;
+	}
+}
+----
+
+.Java Class
+[source,java]
+----
+public class DieselEngine extends Engine {
+
+	private final boolean adBlueRequired;
+----
+
+.Rule
+[source,drl]
+----
+rule Rule1
+	when
+		$v : DieselCar(motor.adBlueRequired == true)
+	then
+		// do something
+end
+----
+
+The non-executable model can dynamically resolve that motor is DieselEngine so the rule works.
+However, the executable model resolves motor to TEngine, so a build error is thrown:  `Unknown field adBlueRequired on TEngine`.
+In this case, the rule can be fixed by specifying the subtype with the # operator.
+For example:
+
+[source,drl]
+----
+...
+when
+	$v : DieselCar(motor#DieselEngine.adBlueRequired == true)
+----
