@@ -1,0 +1,104 @@
+= Contributing Guide
+Jason Porter jporter@ibm.com
+:imagesdir: images
+
+The documentation found in this repository is written in Asciidoc.
+While many tools will work with Asciidoc, as it is purely text, the recommended setup can be done using only VS Code and a small set of extensions.
+Below, you will find the recommended setup, as well as some conventions that are being used in this repository.
+
+== Tool Setup
+
+Visual Studio Code (available at https://code.visualstudio.com), known colloquially as VS Code, is a simple code editor.
+On its own, it will work fine, however, you can improve your experience by adding the Asciidoc extension.
+Adding this extension will provide you with syntax highlighting, live preview, and snippets.
+
+.VS Code AsciiDoc extension
+image::contributing/vscode-asciidoc-extension.png[AsciiDoc VS Code Extension]
+
+This extension can be installed by visiting https://marketplace.visualstudio.com/items?itemName=asciidoctor.asciidoctor-vscode, by using the "Quick Open" and pasting `ext install asciidoctor.asciidoctor-vscode`, or by using the built-in extension browser within VS Code.
+
+There are other extensions which can provide additional insight or aid in the contribution process, but they are not required.
+These extensions are "GitHub Pull Requests and Issues" and "GitLens."
+Of those two, "GitHub Pull Requests" is more helpful than "GitLens."
+
+== Git Workflow
+
+The BAMOE Documentation in this repository utilizes feature or topic branches for work.
+You can read more about those at https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow[Git feature branch workflow] by Atlassian and https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows[Branching Workflows] on the main git website.
+
+Essentially, this means all work should be done on its own feature branch.
+The quick and dirty way of doing this is to simply create a new git branch from the `main` (or other version branch i.e. 9.x, 10.x, etc.).
+On the command line, this can be accomplished by running `git checkout <base branch name>` followed by `git checkout -b <name of new branch>`.
+Other tools have different ways of create a branch.
+Later in this guide, the way of doing this using VS Code will be explained and demonstrated.
+
+=== Forking
+
+The main repository, `ibm/bamoe-docs` on GitHub, must first be forked to your own GitHub account so Pull Requests (pr) can be made from your fork of the original repository.
+The method of doing so can be found on the https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo[GitHub Docs website].
+
+=== Cloning Locally
+
+Once you have your own fork of a repository, you will need to clone that repository locally to your own machine.
+
+.Cloning a repository locally via CLI
+[source,bash]
+----
+git clone <git repository URL>
+----
+
+Using VS Code, selecting the Source Control section on the left will present two buttons "Open Folder" and "Clone Repository".
+
+.VS Code Clone Button within Source Control
+image::contributing/vscode-local-clone-button.png[Cloning Button VS Code]
+
+Clicking the "Clone Repository" button will provide a dropdown where you can specify the location of the remote repository.
+
+.VS Code Remote Repository Dropdown
+image::contributing/vscode-local-clone.png[Remote Repository Clone Dropdown]
+
+It is highly recommended to add the upstream, the original repository, to your list of git remotes and periodically merging (or pull) changes from that repository into your local copy.
+The process of performing a merge is detailed later in this documentation.
+
+==== Adding a remote
+
+The standard convention for git is to call the first repository cloned `origin`.
+The `origin` in this guide will be your own fork.
+This name can be changed, however, it is out of the scope for this contributing guide.
+The second repository that should be added to your local repository is called `upstream`.
+This should be the `ibm/bamoe-docs` repository.
+
+.Adding a remote via CLI
+[source,bash]
+----
+git remote add upstream <repository url>
+----
+
+Adding a remote in VS Code is done by:
+
+. Clicking the ellipsis menu on the ending right side of the cloned repository.
+. Navigating to the "Remote" section.
+. Clicking on the "Add Remote..." menu entry
+
+.VS Code Adding a Remote repository
+image::contributing/vscode-repo-add-remote.png[]
+
+You will then be presented with a similar dropdown to supply a repository name and URL as when you originally cloned.
+
+.VS Code Add remote dialog
+image::contributing/vscode-repo-add-remote-dialog.png[]
+
+When working within VS Code, it is recommended to have VS Code periodically sync or fetch the upstream repository so your local copy is kept up to date.
+
+.VS Code periodically running git fetch
+image::contributing/vscode-repo-git-fetch.png[]
+
+=== Rebase
+
+=== Pushing
+
+=== Pull Request
+
+=== Merging
+
+== Conventions
