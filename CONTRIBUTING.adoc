@@ -95,10 +95,81 @@ image::contributing/vscode-repo-git-fetch.png[]
 
 === Rebase
 
+[WARNING]
+====
+Rebasing should *ONLY* be performed on your own feature branches and *ONLY* before a pull request has been submitted.
+*NEVER* after a pull request has been created.
+====
+
+https://git-scm.com/book/en/v2/Git-Branching-Rebasing[Rebasing] is essentially taking your changes in a branch, saving them, merging something new into the branch, then applying those same changes on top of the merge.
+It creates different commits and commit ids and can really mess with history of published branches.
+For simplicity both for yourself and others, don't use rebasing.
+A preferred alternative is to merge the other branch into your feature branch and push the whole thing together in one pull request.
+
 === Pushing
+
+Publishing, or pushing, a branch is the process of making it available on a different remote.
+Typically, that would GitHub, however, it could be any other remote.
+The process is very simply from the command line:
+
+[source, bash]
+--
+git push <remote name> <branch name>
+--
+
+If you wish to set the upstream for the branch to the remote branch, use the `--set-upstream` option.
+
+Within VS Code, this is done using the Source Repo -> Branch -> Publish Branch menu item, as shown:
+
+.Publish a branch in VS Code
+image::contributing/vscode-repo-publish-branch-menu.png[Publishing a Branch]
+
+Once selected, you will be prompted with a menu to select which configured remotes you would like to use:
+
+.Publish to a defined remote
+image::contributing/vscode-repo-publish-branch-dialog.png[Select a configured remote]
 
 === Pull Request
 
+Pull requests are often done in the browser for GitHub.
+Read more about creating a pull request in the https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request[documentation].
+
+You may also install the "GitHub Pull Requests and Issues" extension for VS Code:
+
+.GitHub Pull Request and Issues Extension
+image::contributing/vscode-github-pr-extension.png[Pull Request Extension]
+
+This extension will add a new icon on the left side, the GitHub logo, it also allows you to create new pull requests and work with GitHub Issues without leaving VS Code.
+
+Creating a new pull request is done by selecting the GitHub Icon on the left and clicking the "Create Pull Request" button at the top.
+
+.Create a new Pull Request
+image::contributing/vscode-github-create-pr-menu.png[]
+
+You can then select the base, the remote and branch, you want to merge into, and the branch that has been published.
+You should also create a title and description for the pull request.
+
+.Pull Request details
+image::contributing/vscode-github-create-pr-dialog-base.png[Pull Request details]
+
 === Merging
+
+Merging and pulling within VS Code are synonymous.
+However, within the command line, a pull is actually a fetch and a merge.
+Within VS Code, your main branch should already be configured to periodically be synced with the upstream.
+Should you need to merge some other remote branch into your working local branch, this can be done using the Source Repo -> Pull menu.
+
+.VS Code Source Repo Pull menu
+image::contributing/vscode-repo-pull.png[Pull menu]
+
+This will pull from whichever remote branch is set as the upstream.
+If the "Pull from..." menu is selected, you will be presented with the familiar dialog to select a remote branch to pull and merge.
+
+On the command line, this action is done using:
+
+[source, bash]
+----
+git pull <remote name> <branch name>
+----
 
 == Conventions
