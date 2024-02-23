@@ -1,0 +1,188 @@
+include::../partials/attributes.adoc[]
+= {FORM_GENERATION_TOOL}
+
+*{FORM_GENERATION_TOOL}* generates web forms needed for Workflows execution.
+
+Before you start using *{FORM_GENERATION_TOOL}*, please be sure you understand xref:../tools/authoring-workflows.adoc[Workflows], formerly known as Business Processes, properly.
+
+== Tool Installation
+Before you begin the installation, please be sure your machine meets the following prerequisites:
+
+*Installation prerequisites*
+
+- Node 18 (To install it, follow these https://nodejs.org/en/download/package-manager/[instructions])
+
+
+Once the prerequisites are met, it is super simple to install *{FORM_GENERATION_TOOL}*.
+It is available as `@kie-tools/form-generation-tool` `npm` https://www.npmjs.com/package/@kie-tools/form-generation-tool[package].
+To installl this package, simply issue the `npm` command below or any other command you use for installing `npm` packages:
+
+[source,bash]
+----
+npm install -g @kie-tools/form-generation-tool
+----
+
+
+[NOTE]
+Please use version higher than *0.32.0*.
+
+
+Once the installation is done, you can start using *{FORM_GENERATION_TOOL}* from your command line. Simply type command below to double-check successful installation.
+
+[source,bash]
+----
+form-generation-tool
+----
+
+
+== Form Generation
+
+You can generate forms using *{FORM_GENERATION_TOOL}* for any Workflow, that requires input data.
+However, for this documentation we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie] community projects stored https://github.com/apache/incubator-kie-kogito-examples[here], especially those that have a process in the project name, e.g. `process-quarkus-example`. Or you can use your own project.
+
+
+Browsing linked examples, you may notice the projects use Maven. So when Maven builds an https://incubator.apache.org/projects/kie.html[Apache Kie] project, Kie generates JSON schemas to represent the data models for both Workflows and User Tasks.
+Then *{FORM_GENERATION_TOOL}* locates those JSON Schemas in the project and taking advantage of the Uniforms APIs, processes them and generates static forms as a resource in the project `src/main/resources/forms` folder.
+
+*Generation Prerequisities*
+
+- Make sure your https://incubator.apache.org/projects/kie.html[Apache Kie] project has been compiled, otherwise the CLI won't be able to find all the form schemas.
+
+As we installed the *{FORM_GENERATION_TOOL}* globally, we can run the command from anywhere.
+[source,bash]
+----
+form-generation-tool
+----
+
+This will start a wizard to help you generate the forms:
+
+First, set the path to your https://incubator.apache.org/projects/kie.html[Apache Kie] Project. We will use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/process-quarkus-example[process-quarkus-example].
+
+[source,bash]
+----
+Kogito Form Generation CLI
+===========================
+ 
+This tool will help you generate forms for the Processes and User Tasks in your Kogito Projects.
+The tool will search for the User Tasks JSON schemas generated in your project, so make sure the project is build.
+The generated forms will be stored as resources in your project (in src/main/resources/forms folder).
+ 
+? Type your Kogito Project path:---> /path/to/my/projects/process-quarkus-example <---
+----
+
+Select one of the available Form types (Patternfly or Bootstrap 4). We will use Bootstrap 4. Use arrow keys to change the selection.
+
+[source,bash]
+----
+? Select the Form type:
+  patternfly
+❯ bootstrap
+----
+
+Confirm Selection, type *Y*, to start the Form Generation process.
+
+[source,bash]
+----
+Current selection:
+Project path: /path/to/my/projects/process-quarkus-example
+Form type: bootstrap
+ 
+? Do you want to continue? (Y/n) Y
+----
+
+Once the generation is done, let's browse `/path/to/my/projects/process-quarkus-example/src/main/resources/forms` folder.
+
+[source,bash]
+----
+ls /path/to/my/projects/process-quarkus-example/src/main/resources/forms/
+ 
+demo_orderItems.config
+demo_orderItems.html
+demo_orderItems_Verify_order.config
+demo_orderItems_Verify_order.html
+demo_orders.config
+demo_orders.html  
+persons.config
+persons.html
+persons_ChildrenHandling.config
+persons_ChildrenHandling.html
+----
+
+One question that may come to your mind, is why there are so many forms. We have only three Workflows in `process-quarkus-example` project. 
+Well spotted. It is because not only Workflows can have their forms, but also User Tasks, as special nodes that require input from users, can have their own forms.
+
+== Form UI
+For Quarkus based https://incubator.apache.org/projects/kie.html[Apache Kie] projects, you can use and test them by using the *jBPM Quarkus DevUI - Deployment* extension.
+
+To do so, just add the following dependency in your project `pom.xml`:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-quarkus-devui-deployment</artifactId>
+    <version>${version}</version>
+</dependency>
+----
+
+[NOTE]
+Please use version *Apache Kie 10* or higher.
+
+And start the project in Dev mode with the command:
+
+[source,bash]
+----
+mvn clean quarkus:dev
+----
+
+Then in your browser, please navigate to:
+[source,bash]
+----
+http://localhost:8080/q/dev-ui/extensions
+----
+
+[NOTE]
+Currently there is an https://github.com/apache/incubator-kie-issues/issues/836[issue]. As a workaround, please use a url `http://localhost:8080/q/dev-v1/`.
+
+On the displayed page, find there this card and click *Forms*.
+
+.jBPM Runtime Tools Quarkus Dev UI Card
+image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Runtime Tools Quarkus Dev UI Card]
+
+
+Now we should see see a list of all available forms that we listed already via the commadn line earlier in this documentation.
+
+.Forms list
+image::tools/forms.png[Forms list]
+
+Then, if we choose any form, we will have an option to adjust it.
+
+Let's say we open the form - *persons*. On the left side there is the form source code, on the right side there is the form UI.
+
+.Persons form
+image::tools/persons.png[Persons form]
+
+Let's change this piece of the source code
+[source,html]
+----
+<div class="form-check">
+  <input type="checkbox" id="person.adult" name="person.adult" class="form-check-input" />
+  <label class="form-check-label" for="person.adult">Adult</label>
+</div>
+----
+
+to
+[source,html]
+----
+<div class="form-check">
+  <input type="checkbox" id="person.adult" name="person.adult" class="form-check-input" />
+  <label class="form-check-label" for="person.adult">Is Adult?</label>
+</div>
+----
+
+and click the *Execute form* button. We will immediately see the result.
+
+.Updated persons form
+image::tools/persons-updated.png[Updated persons form]
+
+The same functionality is available for the `React` forms.
