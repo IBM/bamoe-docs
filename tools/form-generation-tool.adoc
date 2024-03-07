@@ -14,8 +14,8 @@ Before you begin the installation, please be sure your machine meets the followi
 - Node 18 (To install it, follow these https://nodejs.org/en/download/package-manager/[instructions])
 
 
-Once the prerequisites are met, it is super simple to install *{FORM_GENERATION_TOOL}*.
-It is available as `@kie-tools/form-generation-tool` `npm` https://www.npmjs.com/package/@kie-tools/form-generation-tool[package].
+Once the prerequisites are met, it is easy to install *{FORM_GENERATION_TOOL}*.
+It is available as the `@kie-tools/form-generation-tool` `npm` https://www.npmjs.com/package/@kie-tools/form-generation-tool[package].
 To installl this package, simply issue the `npm` command below or any other command you use for installing `npm` packages:
 
 [source,bash]
@@ -24,11 +24,11 @@ npm install -g @kie-tools/form-generation-tool
 ----
 
 
-[NOTE]
-Please use version higher than *0.32.0*.
+NOTE: Please use version higher than *0.32.0*.
 
 
-Once the installation is done, you can start using *{FORM_GENERATION_TOOL}* from your command line. Simply type command below to double-check successful installation.
+Once the installation is done, you can start using *{FORM_GENERATION_TOOL}* from your command line.
+Type command below to double-check successful installation.
 
 [source,bash]
 ----
@@ -38,11 +38,13 @@ form-generation-tool
 
 == Form Generation
 
-You can generate forms using *{FORM_GENERATION_TOOL}* for any Workflow, that requires input data.
-However, for this documentation we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie] community projects stored https://github.com/apache/incubator-kie-kogito-examples[here], especially those that have a process in the project name, e.g. `process-quarkus-example`. Or you can use your own project.
+You can generate forms using *{FORM_GENERATION_TOOL}* for any Workflow that requires input data.
+However, for this documentation we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie] community projects stored https://github.com/apache/incubator-kie-kogito-examples[here], especially those that have a process in the project name, e.g. `process-quarkus-example`.
+Or you can use your own project.
 
 
-Browsing linked examples, you may notice the projects use Maven. So when Maven builds an https://incubator.apache.org/projects/kie.html[Apache Kie] project, Kie generates JSON schemas to represent the data models for both Workflows and User Tasks.
+Browsing linked examples, you may notice the projects use Maven.
+So when Maven builds an https://incubator.apache.org/projects/kie.html[Apache Kie] project, Kie generates JSON schemas to represent the data models for both Workflows and User Tasks.
 Then *{FORM_GENERATION_TOOL}* locates those JSON Schemas in the project and taking advantage of the Uniforms APIs, processes them and generates static forms as a resource in the project `src/main/resources/forms` folder.
 
 *Generation Prerequisities*
@@ -57,7 +59,8 @@ form-generation-tool
 
 This will start a wizard to help you generate the forms:
 
-First, set the path to your https://incubator.apache.org/projects/kie.html[Apache Kie] Project. We will use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/process-quarkus-example[process-quarkus-example].
+First, set the path to your https://incubator.apache.org/projects/kie.html[Apache Kie] Project.
+We will use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/process-quarkus-example[process-quarkus-example].
 
 [source,bash]
 ----
@@ -71,7 +74,9 @@ The generated forms will be stored as resources in your project (in src/main/res
 ? Type your Kogito Project path:---> /path/to/my/projects/process-quarkus-example <---
 ----
 
-Select one of the available Form types (Patternfly or Bootstrap 4). We will use Bootstrap 4. Use arrow keys to change the selection.
+Select one of the available Form types (Patternfly or Bootstrap 4).
+We will use Bootstrap 4.
+Use arrow keys to change the selection.
 
 [source,bash]
 ----
@@ -91,7 +96,7 @@ Form type: bootstrap
 ? Do you want to continue? (Y/n) Y
 ----
 
-Once the generation is done, let's browse `/path/to/my/projects/process-quarkus-example/src/main/resources/forms` folder.
+Once the generation is done, browse to `/path/to/my/projects/process-quarkus-example/src/main/resources/forms` folder.
 
 [source,bash]
 ----
@@ -109,8 +114,10 @@ persons_ChildrenHandling.config
 persons_ChildrenHandling.html
 ----
 
-One question that may come to your mind, is why there are so many forms. We have only three Workflows in `process-quarkus-example` project. 
-Well spotted. It is because not only Workflows can have their forms, but also User Tasks, as special nodes that require input from users, can have their own forms.
+One question that may come to your mind, is why there are so many forms.
+We have only three Workflows in `process-quarkus-example` project. 
+User Tasks also have forms generated.
+Even though there only three Workflows in the process-quarkus-example project, there are more than three HTML files due to the User Task generated forms.
 
 == Form UI
 For Quarkus based https://incubator.apache.org/projects/kie.html[Apache Kie] projects, you can use and test them by using the *jBPM Quarkus DevUI - Deployment* extension.
@@ -136,22 +143,25 @@ And start the project in Dev mode with the command:
 mvn clean quarkus:dev
 ----
 
-Then in your browser, please navigate to:
+Then in your browser, navigate to:
 [source,bash]
 ----
 http://localhost:8080/q/dev-ui/extensions
 ----
 
 [NOTE]
-Currently there is an https://github.com/apache/incubator-kie-issues/issues/836[issue]. As a workaround, please use a url `http://localhost:8080/q/dev-v1/`.
+====
+Currently there is an https://github.com/apache/incubator-kie-issues/issues/836[issue] blocking users from navigating to the *Forms* view.
+As a workaround, please use a url `http://localhost:8080/q/dev-v1/`.
+====
 
-On the displayed page, find there this card and click *Forms*.
+On the displayed page, find this card and click *Forms*.
 
 .jBPM Runtime Tools Quarkus Dev UI Card
 image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Runtime Tools Quarkus Dev UI Card]
 
 
-Now we should see see a list of all available forms that we listed already via the commadn line earlier in this documentation.
+Now we should see a list of all available forms that we listed already via the commadn line earlier in this documentation.
 
 .Forms list
 image::tools/forms.png[Forms list]
