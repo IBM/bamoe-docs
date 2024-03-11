@@ -1,23 +1,29 @@
-# KIE Sandbox Helm Chart
+= BAMOE CANVAS Helm Chart
 include::../partials/attributes.adoc[]
 
-This chart can be used to deploy KIE Sandbox image on a https://kubernetes.io[Kubernetes] cluster using the https://helm.sh[Helm package manager].
+Helm Charts is a technology that can enable you to install the multi-container services with a single command: Helm, https://helm.sh/[the package manager for kubernetes].
 
-## Additional requirements
+Helm helps you manage Kubernetes applications and Helm Charts help you define, install, and upgrade even the most complex Kubernetes application.
+
+Charts are easy to create, version, share, and publish instead of using copy-and-paste.
+
+This chart can be used to deploy {CANVAS} image on a https://kubernetes.io[Kubernetes] cluster using the https://helm.sh[Helm package manager].
+
+== Additional requirements
 
 * Podman (for Linux)
 * Docker (for macOS)
 * Minikube
 
-## Components
+== Components
 
-* KIE Sandbox: Main application
+* {CANVAS}: Main application
 * Extended Services: Powers the DMN Runner and validator
 * CORS Proxy: Intended to solve CORS issues
 
-## Installing the Chart
+== Installing the Chart
 
-### Default install
+=== Default install
 
 Follow the command to install the chart with the release name `kie-sandbox`:
 
@@ -59,7 +65,7 @@ In order to get KIE sandbox running you need to run these commands:
 
 Run the mentioned commands to forward container ports to your system ports. After this, the KIE Sandbox can be accessible via http://127.0.0.1:8080
 
-### Minikube install
+=== Minikube install
 
 Follow the command to install the chart with the release name `kie-sandbox`:
 
@@ -88,7 +94,7 @@ Run the following commands:
   echo "$MINIKUBE_IP kie-sandbox.local" | sudo tee -a /etc/hosts
 ----
 
-### Kubernetes install
+=== Kubernetes install
 
 Follow the command to install the chart with the release name `kie-sandbox`:
 
@@ -115,9 +121,10 @@ NOTES:
   http://kie-sandbox.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
 ----
 
-You need not run any commands. The KIE Sandbox can be accessible via https://kie-sandbox.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+You need not run any commands. The {CANVAS}
+ can be accessible via https://kie-sandbox.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
 
-### OpenShift install
+=== OpenShift install
 
 First, you may need to get the default OpenShift domain for your routes with the following command:
 
@@ -153,20 +160,20 @@ NOTES:
   https://kie-sandbox.<YOUR_OCP_ROUTE_DOMAIN>
 ----
 
-You need not run any commands. The KIE Sandbox must be accessible via https://kie-sandbox.<YOUR_OCP_ROUTE_DOMAIN>
+You need not run any commands. The BAMOE CANVAS must be accessible via https://kie-sandbox.<YOUR_OCP_ROUTE_DOMAIN>
 
-## Installing a released version from the OCI registry:
+== Installing a released version from the OCI registry:
 
 It is very similar to the way you install the chart from source code. You can also install a released version available on quay.io registry:
 
-### Default install
+=== Default install
 
 [source, shell]
 ----
 $ helm install kie-sandbox oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0
 ----
 
-### Minikube install
+=== Minikube install
 
 [source, shell]
 ----
@@ -174,7 +181,7 @@ $ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --unt
 $ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-minikube-nginx.yaml
 ----
 
-### Kubernetes install
+=== Kubernetes install
 
 [source, shell]
 ----
@@ -182,7 +189,7 @@ $ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --unt
 $ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
 
-### OpenShift install
+=== OpenShift install
 
 [source, shell]
 ----
@@ -190,7 +197,7 @@ $ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --unt
 $ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
-## Uninstalling the Chart
+== Uninstalling the Chart
 
 Follow the command to uninstall the `kie-sandbox` deployment:
 
@@ -199,7 +206,7 @@ Follow the command to uninstall the `kie-sandbox` deployment:
 $ helm uninstall kie-sandbox
 ----
 
-## Passing Environmental variables
+== Passing Environmental variables
 
 This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing it through the command line.
 
@@ -208,9 +215,10 @@ This chart uses default environmental variables from `values.yaml` file. You can
 $ helm install kie-sandbox ./src --set image.repository=quay.io
 ----
 
-## Configuration
+== Configuration
 
-The following table lists the configurable parameters of the KIE Sandbox chart and their default values.
+The following table lists the configurable parameters of the {CANVAS}
+ chart and their default values.
 
 |===
 | Key | Type | Default |Description
