@@ -302,14 +302,14 @@ If the topic property is not found, then the topic name is considered to be the 
 
 ==== Providing a key for a Kafka record
 
-To specify the key to your Kafka record, you can use a custom https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/quarkus/addons/messaging/common/src/main/java/org/kie/kogito/addon/quarkus/messaging/common/message/MessageDecorator.java[MessageDecorator] implementation. 
+To specify the key to your Kafka record, you can use a custom https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/quarkus/addons/common/reactive-messaging/src/main/java/org/kie/kogito/addon/quarkus/common/reactive/messaging/MessageDecorator.java[MessageDecorator] implementation. 
 
 For an example, see https://github.com/apache/incubator-kie-kogito-examples/blob/main/kogito-quarkus-examples/process-kafka-avro-multi-quarkus/src/main/java/org/acme/travel/StringKeyDecorator.java[StringKeyDecorator.java]
 
 ==== Customizing message format
 
 By default, {PRODUCT} uses Cloud event JSON format for messaging. However, you can change the default format by providing your own https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/EventMarshaller.java[event marshaler] implementation. 
-For an example, see https://github.com/apache/incubator-kie-kogito-examples/blob/main/kogito-quarkus-examples/process-kafka-avro-multi-quarkus/src/main/java/org/acme/travel/AvroEventMarshaller.java[AvroEventMarshaller.java example] 
+For an example, see https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/marshallers/avro/src/main/java/org/kie/kogito/event/avro/AvroEventMarshaller.java[AvroEventMarshaller.java example] 
 
 
 === {PRODUCT} Decision Model and Notation (DMN) event-driven add-on
@@ -327,7 +327,7 @@ To use the DMN event-driven add-on, add the following code to the `pom.xml` file
 ////
 === {PRODUCT} explainability add-on
 
-The Explainability add-on in {PRODUCT} provides integration with Explainability and Trusty Services. You can also use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/trusty-demonstration[`trusty-demonstration`] example application.
+The Explainability add-on in {PRODUCT} provides integration with Explainability and Trusty Services. You can also use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/trusty-demonstration[`trusty-demonstration`] example application.
 
 To use the explainability add-on, add the following code to the `pom.xml` file of your project:
 
@@ -535,7 +535,7 @@ The mail add-on is used to send emails in a process project. To use the mail add
 The events add-on provides a default implementation in supported target platforms for EventEmitter and EventReceiver interfaces. You can use EventEmitter and EventReceiver interfaces to enable messaging by process, serverless workflow events, and event decision handling. 
 
 ==== Implementing message payload decorator
-Any dependant add-on can implement the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/common/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecorator.java[MessagePayloadDecorator].
+Any dependant add-on can implement the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecorator.java[MessagePayloadDecorator].
 
 .Prerequisites
 
@@ -547,7 +547,7 @@ Any dependant add-on can implement the https://github.com/apache/incubator-kie-k
 . Enter the full name of your implementation class in the file.
 . Save the file.
 
-The `MessagePayloadDecoratorProvider` loads the file upon application startup and adds the file to the decoration chain. When {PRODUCT} calls the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/common/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecoratorProvider.java[MessagePayloadDecoratorProvider#decorate], your implementation is part of the decoration algorithm.
+The `MessagePayloadDecoratorProvider` loads the file upon application startup and adds the file to the decoration chain. When {PRODUCT} calls the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecoratorProvider.java[MessagePayloadDecoratorProvider#decorate], your implementation is part of the decoration algorithm.
 
 To use the events add-on, add the following code to the `pom.xml` file of your project:
 
@@ -787,9 +787,9 @@ You can use the {PRODUCT} process event add-on to build a historical representat
 
 By default, the event format follows https://cloudevents.io/[CloudEvent] specification. The CloudEvent specification allows sending information using the data field, which contains a JSON of one of the following types:
 
-* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceEventBody.java[ProcessInstanceEvent]: This event is published when a process instance is created, modified, or completed.
-// * https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/UserTaskInstanceEventBody.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
-* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/VariableInstanceEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
+* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceEventMetadata.java[ProcessInstanceEvent]: This event is published when a process instance is created, modified, or completed.
+// * https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/usertask/UserTaskInstanceEventMetadata.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
+* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceVariableEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
 
 To configure process event capabilities for your {PRODUCT} services, you can add the process event add-on as a dependency in the `pom.xml` file of your {PRODUCT} project:
 
