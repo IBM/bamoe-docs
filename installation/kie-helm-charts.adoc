@@ -21,108 +21,32 @@ This chart can be used to deploy {CANVAS} image on a https://kubernetes.io[Kuber
 * Extended Services: Powers the DMN Runner and validator
 * CORS Proxy: Intended to solve CORS issues
 
-== Installing the Chart
+== Installing a released version from the OCI registry:
+
+It is very similar to the way you install the chart from source code. You can also install a released version available on quay.io registry:
 
 === Default install
 
-Follow the command to install the chart with the release name `kie-sandbox`:
-
 [source, shell]
 ----
-$ helm install kie-sandbox ./src
+$ helm install my-bamoe-canvas oci://quay.io/kie-tools/my-bamoe-canvas-helm-chart --version=0.0.0
 ----
-
-Following message must be displayed on your console.
-
-[source, shell]
-----
-NAME: kie-sandbox
-LAST DEPLOYED: Wed Nov 29 17:09:04 2023
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-NOTES:
-In order to get KIE sandbox running you need to run these commands:
-
-1. Run the following commands in a separate terminal to port-forward CORS Proxy component:
-  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=cors-proxy,app.kubernetes.io/instance=kie-sandbox" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "CORS Proxy URL: http://127.0.0.1:8081"
-  kubectl --namespace default port-forward $POD_NAME 8081:$CONTAINER_PORT
-
-2. Run the following commands in a separate terminal to port-forward Extendend Services component:
-  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=extended-services,app.kubernetes.io/instance=kie-sandbox" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Extended Services URL: http://127.0.0.1:21345"
-  kubectl --namespace default port-forward $POD_NAME 21345:$CONTAINER_PORT
-
-3. Run the following commands in a separate terminal to port-forward Sanxbox component and get the application URL:
-  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=kie-sandbox,app.kubernetes.io/instance=kie-sandbox" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "KIE Sandbox URL http://127.0.0.1:8080"
-  kubectl --namespace default port-forward $POD_NAME 8080:$CONTAINER_PORT
-----
-
-Run the mentioned commands to forward container ports to your system ports. After this, the KIE Sandbox can be accessible via http://127.0.0.1:8080
 
 === Minikube install
 
-Follow the command to install the chart with the release name `kie-sandbox`:
-
 [source, shell]
 ----
-$ helm install kie-sandbox ./src --values ./src/values-minikube-nginx.yaml
-----
-
-Following message must be displayed on your console.
-
-[source, shell]
-----
-NAME: kie-sandbox
-LAST DEPLOYED: Wed Nov 29 17:09:04 2023
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-NOTES:
-You may need to add the above hostnames to your /etc/hosts file, mapping them to your minikube ip.
-
-Run the following commands:
-  export MINIKUBE_IP=$(minikube ip)
-  echo "\n# Minikube KIE Sandbox Helm Chart hostnames" | sudo tee -a /etc/hosts
-  echo "$MINIKUBE_IP cors-proxy.local" | sudo tee -a /etc/hosts
-  echo "$MINIKUBE_IP extended-services.local" | sudo tee -a /etc/hosts
-  echo "$MINIKUBE_IP kie-sandbox.local" | sudo tee -a /etc/hosts
+$ helm pull oci://quay.io/kie-tools/my-bamoe-canvas-helm-chart --version=0.0.0 --untar
+$ helm install my-bamoe-canvas ./my-bamoe-canvas-helm-chart --values ./my-bamoe-canvas-helm-chart/values-minikube-nginx.yaml
 ----
 
 === Kubernetes install
 
-Follow the command to install the chart with the release name `kie-sandbox`:
-
 [source, shell]
 ----
-$ helm install kie-sandbox ./src --values ./src/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+$ helm pull oci://quay.io/kie-tools/my-bamoe-canvas-helm-chart --version=0.0.0 --untar
+$ helm install my-bamoe-canvas ./my-bamoe-canvas-helm-chart --values ./my-bamoe-canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
-
-Following message must be displayed on your console.
-
-[source, shell]
-----
-NAME: kie-sandbox
-LAST DEPLOYED: Wed Nov 29 17:09:04 2023
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-NOTES:
-1. CORS Proxy available at:
-  http://cors-proxy.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
-2. Extended Services available at:
-  http://extended-services.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
-3. KIE Sandbox available at:
-  http://kie-sandbox.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
-----
-
-You need not run any commands. The {CANVAS}
- can be accessible via https://kie-sandbox.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
 
 === OpenShift install
 
@@ -135,18 +59,139 @@ $ oc get ingresses.config cluster --output jsonpath={.spec.domain}
 
 If you do not have access rigths to this configutation, try creating a dummy Route resource and check its domain.
 
-Follow the command to install the chart with the release name `kie-sandbox`:
+[source, shell]
+----
+$ helm pull oci://quay.io/kie-tools/my-bamoe-canvas-helm-chart --version=0.0.0 --untar
+$ helm install my-bamoe-canvas ./my-bamoe-canvas-helm-chart --values ./my-bamoe-canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+----
+
+
+== Installing the Chart from source
+
+=== Default install
+
+Follow the command to install the chart with the release name `my-bamoe-canvas`:
 
 [source, shell]
 ----
-$ helm install kie-sandbox ./src --values ./src/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+$ helm install my-bamoe-canvas ./src
 ----
 
 Following message must be displayed on your console.
 
 [source, shell]
 ----
-NAME: kie-sandbox
+NAME: my-bamoe-canvas
+LAST DEPLOYED: Wed Nov 29 17:09:04 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+In order to get BAMOE Canvas running you need to run these commands:
+
+1. Run the following commands in a separate terminal to port-forward CORS Proxy component:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=cors-proxy,app.kubernetes.io/instance=my-bamoe-canvas" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "CORS Proxy URL: http://127.0.0.1:8081"
+  kubectl --namespace default port-forward $POD_NAME 8081:$CONTAINER_PORT
+
+2. Run the following commands in a separate terminal to port-forward Extendend Services component:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=extended-services,app.kubernetes.io/instance=my-bamoe-canvas" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Extended Services URL: http://127.0.0.1:21345"
+  kubectl --namespace default port-forward $POD_NAME 21345:$CONTAINER_PORT
+
+3. Run the following commands in a separate terminal to port-forward Sanxbox component and get the application URL:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=kie_sandbox,app.kubernetes.io/component=my-bamoe-canvas,app.kubernetes.io/instance=my-bamoe-canvas" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "BAMOE Canvas URL http://127.0.0.1:8080"
+  kubectl --namespace default port-forward $POD_NAME 8080:$CONTAINER_PORT
+----
+
+Run the mentioned commands to forward container ports to your system ports. After this, the BAMOE Canvas can be accessible via http://127.0.0.1:8080
+
+=== Minikube install
+
+Follow the command to install the chart with the release name `my-bamoe-canvas`:
+
+[source, shell]
+----
+$ helm install my-bamoe-canvas ./src --values ./src/values-minikube-nginx.yaml
+----
+
+Following message must be displayed on your console.
+
+[source, shell]
+----
+NAME: my-bamoe-canvas
+LAST DEPLOYED: Wed Nov 29 17:09:04 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+You may need to add the above hostnames to your /etc/hosts file, mapping them to your minikube ip.
+
+Run the following commands:
+  export MINIKUBE_IP=$(minikube ip)
+  echo "\n# Minikube BAMOE Canvas Helm Chart hostnames" | sudo tee -a /etc/hosts
+  echo "$MINIKUBE_IP cors-proxy.local" | sudo tee -a /etc/hosts
+  echo "$MINIKUBE_IP extended-services.local" | sudo tee -a /etc/hosts
+  echo "$MINIKUBE_IP my-bamoe-canvas.local" | sudo tee -a /etc/hosts
+----
+
+=== Kubernetes install
+
+Follow the command to install the chart with the release name `my-bamoe-canvas`:
+
+[source, shell]
+----
+$ helm install my-bamoe-canvas ./src --values ./src/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+----
+
+Following message must be displayed on your console.
+
+[source, shell]
+----
+NAME: my-bamoe-canvas
+LAST DEPLOYED: Wed Nov 29 17:09:04 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. CORS Proxy available at:
+  http://cors-proxy.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+2. Extended Services available at:
+  http://extended-services.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+3. BAMOE Canvas available at:
+  http://my-bamoe-canvas.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+----
+
+You need not run any commands. The {CANVAS}
+ can be accessible via https://my-bamoe-canvas.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+
+=== OpenShift install
+
+First, you may need to get the default OpenShift domain for your routes with the following command:
+
+[source, shell]
+----
+$ oc get ingresses.config cluster --output jsonpath={.spec.domain}
+----
+
+If you do not have access rigths to this configutation, try creating a dummy Route resource and check its domain.
+
+Follow the command to install the chart with the release name `my-bamoe-canvas`:
+
+[source, shell]
+----
+$ helm install my-bamoe-canvas ./src --values ./src/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+----
+
+Following message must be displayed on your console.
+
+[source, shell]
+----
+NAME: my-bamoe-canvas
 LAST DEPLOYED: Wed Nov 29 17:09:04 2023
 NAMESPACE: default
 STATUS: deployed
@@ -156,54 +201,20 @@ NOTES:
   https://cors-proxy.<YOUR_OCP_ROUTE_DOMAIN>
 2. Extended Services available at:
   https://extended-services.<YOUR_OCP_ROUTE_DOMAIN>
-3. KIE Sandbox available at:
-  https://kie-sandbox.<YOUR_OCP_ROUTE_DOMAIN>
+3. BAMOE Canvas available at:
+  https://my-bamoe-canvas.<YOUR_OCP_ROUTE_DOMAIN>
 ----
 
-You need not run any commands. The BAMOE CANVAS must be accessible via https://kie-sandbox.<YOUR_OCP_ROUTE_DOMAIN>
+You need not run any commands. The BAMOE CANVAS must be accessible via https://my-bamoe-canvas.<YOUR_OCP_ROUTE_DOMAIN>
 
-== Installing a released version from the OCI registry:
-
-It is very similar to the way you install the chart from source code. You can also install a released version available on quay.io registry:
-
-=== Default install
-
-[source, shell]
-----
-$ helm install kie-sandbox oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0
-----
-
-=== Minikube install
-
-[source, shell]
-----
-$ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --untar
-$ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-minikube-nginx.yaml
-----
-
-=== Kubernetes install
-
-[source, shell]
-----
-$ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --untar
-$ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
-----
-
-=== OpenShift install
-
-[source, shell]
-----
-$ helm pull oci://quay.io/kie-tools/kie-sandbox-helm-chart --version=0.0.0 --untar
-$ helm install kie-sandbox ./kie-sandbox-helm-chart --values ./kie-sandbox-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
-----
 
 == Uninstalling the Chart
 
-Follow the command to uninstall the `kie-sandbox` deployment:
+Follow the command to uninstall the `my-bamoe-canvas` deployment:
 
 [source, shell]
 ----
-$ helm uninstall kie-sandbox
+$ helm uninstall my-bamoe-canvas
 ----
 
 == Passing Environmental variables
@@ -212,7 +223,7 @@ This chart uses default environmental variables from `values.yaml` file. You can
 
 [source, shell]
 ----
-$ helm install kie-sandbox ./src --set image.repository=quay.io
+$ helm install my-bamoe-canvas ./src --set image.repository=quay.io
 ----
 
 == Configuration
@@ -315,7 +326,7 @@ The following table lists the configurable parameters of the {CANVAS}
 
 | extended_services.image 
 | object  
-| {"account":"kie-tools","name":"kie-sandbox-extended-services-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
+| {"account":"kie-tools","name":"my-bamoe-canvas-extended-services-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
 | Image source configuration for the Extended Services image
 
 | extended_services.imagePullSecrets 
@@ -356,11 +367,11 @@ The following table lists the configurable parameters of the {CANVAS}
 | kie_sandbox.autoscaling 
 | object  
 | {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
-| KIE Sandbox HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+| BAMOE Canvas HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 | kie_sandbox.env 
 | list  
 |[{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}]  
-| Env variables for KIE Sandbox deployment
+| Env variables for BAMOE Canvas deployment
 
 | kie_sandbox.fullnameOverride 
 | string  
@@ -369,23 +380,23 @@ The following table lists the configurable parameters of the {CANVAS}
 
 | kie_sandbox.image 
 | object  
-| {"account":"kie-tools","name":"kie-sandbox-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
-| Image source configuration for the KIE Sandbox image
+| {"account":"kie-tools","name":"my-bamoe-canvas-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
+| Image source configuration for the BAMOE Canvas image
 
 | kie_sandbox.imagePullSecrets 
 | list  
 | []  
-| Pull secrets used when pulling KIE Sandbox image
+| Pull secrets used when pulling BAMOE Canvas image
 
 | kie_sandbox.ingress 
 | object  
-| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"kie-sandbox.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
-| KIE Sandbox Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
+| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"my-bamoe-canvas.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
+| BAMOE Canvas Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
 | kie_sandbox.name 
 | string  
-| "kie-sandbox"  
-| The KIE Sandbox application name
+| "my-bamoe-canvas"  
+| The BAMOE Canvas application name
 
 | kie_sandbox.nameOverride 
 | string  
@@ -394,16 +405,16 @@ The following table lists the configurable parameters of the {CANVAS}
 
 | kie_sandbox.openshiftRoute 
 | object  
-| {"annotations":{},"enabled":false,"host":"kie-sandbox.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}} 
-| KIE Sandbox OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+| {"annotations":{},"enabled":false,"host":"my-bamoe-canvas.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}} 
+| BAMOE Canvas OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
 
 | kie_sandbox.service 
 | object  
 | {"nodePort":"","port":8080,"type":"ClusterIP"} 
-| KIE Sandbox Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+| BAMOE Canvas Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
 
 | kie_sandbox.serviceAccount 
 | object  
 | {"annotations":{},"create":true,"name":""} 
-| KIE Sandbox ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+| BAMOE Canvas ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
 |===
