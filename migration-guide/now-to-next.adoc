@@ -6,7 +6,7 @@ The core objective of {PRODUCT_SHORT} is to help you mold a set of business proc
 
 == Overview
 
-This section describes migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}.
+This section describes the migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}.
 
 == Prerequisites
 
@@ -16,11 +16,11 @@ include::../partials/prerequisites.adoc[]
 
 == Procedure
 
-While it is possible to migrate an existing **Knowledge Jar (KJAR)** project, it is recommended that you start your project from scratch, since the Maven configuration for {PRODUCT_SHORT} v {VERSION_901} is significantly different from that of {PRODUCT_SHORT} v {VERSION_80} or {RH_DM} Version 7.
-Note that the process is simple, as it is driven by Maven, and Quarkus specifically.  
+While it is possible to migrate an existing **Knowledge Jar (KJAR)** project, it is recommended that you start your project from scratch since the Maven configuration for {PRODUCT_SHORT} v {VERSION_901} is significantly different from that of {PRODUCT_SHORT} v {VERSION_80} or {RH_DM} Version 7.
+Note that the process is simple, as it is driven by Maven and Quarkus specifically.  
 
 The first step is to generate a new Maven project so that there is a place to migrate your existing business automation assets into the new {PRODUCT_SHORT} architecture.
-There are several ways to create Maven projects, however the approach is to use a published Maven plugin.
+There are several ways to create Maven projects; however this approach uses a published Maven plugin.
 Follow the procedure to ensure that the Maven project is setup properly:   
 
 === Step 1: Update Maven Configuration
@@ -34,7 +34,7 @@ You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-too
 
 ==== Update Maven Settings
 
-The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from `pom.xml` by its non-association with particular projects.
+The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from the `pom.xml` by its non-association with particular projects.
 This file includes configurations such as the location of the local repository, alternative sources for remote repositories, and inputting credentials, among others.
 
 There are two directories for the storage of the settings.xml file:
@@ -66,10 +66,10 @@ There is no need to include an additional repository in `pom.xml` or `settings.x
 Now that we have Maven properly configured, we can move onto the next step, which is to generate a new Maven project:
 
 [start=1]
-. In a terminal window, create a new local folder for the new Maven project, for example, `/Users/developer`, and naviate to the folder.
+. In a terminal window, create a new local folder for the new Maven project, for example, `/Users/developer`, and navigate to that folder.
 
 . Create the project by using Quarkus and the following Maven commands. 
-This creates a Quarkus project called `my-sample-decision-service`, which is versioned `1.0.0-SNAPSHOT`, including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
+This creates a Quarkus project called `my-sample-decision-service`, which is versioned `1.0.0-SNAPSHOT`, and includes the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
 This also creates a Quarkus DMN project with the OpenAPI components to get the OpenAPI end points easily with health checks when deploying to Kubernetes:
 
 +
@@ -91,7 +91,7 @@ As you can see from the Maven command, there are a number of possible `extension
 You can find more information on available extensions at the following locations:  https://quarkus.io/extensions/[Quarkus Extensions], and https://quarkus.io/extensions/?search-regex=kogito[Kogito Extensions].
 ====
 
-When you create this project, you might get a bunch of Maven artifacts start to stream in your console that are being pulled and ultimately are left with a console message like the following:
+When you create this project, you might get a bunch of Maven artifacts start to stream in your console that are being pulled, and ultimately, you are left with a console message like the following:
 
 [source,console]
 ----
@@ -112,7 +112,7 @@ When you create this project, you might get a bunch of Maven artifacts start to 
 
 [start=3]
 .  Add the following `properties` to the `pom.xml` file by using the row numbers as a guide.
-This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated depenency versions to a specific {PRODUCT_SHORT} release:
+This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated dependency versions for a specific {PRODUCT_SHORT} release:
 
 [source,xml,subs="attributes+"]
 ----
@@ -124,36 +124,36 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 ----
 
 [start=4]
-. Replace lines 29-31, which is essentially adding the `bamoe-bom` to the list of imported dependencies:
+. Replace lines 32-34, which are essentially adding the `bamoe-bom` to the list of imported dependencies:
 
 +
 [source,xml]
 ----
-28      <dependency>
-29  ---   <groupId>${quarkus.platform.group-id}</groupId>
-30  ---   <artifactId>quarkus-kogito-bom</artifactId>
-31  ---   <version>${quarkus.platform.version}</version>
-29  +++   <groupId>${kogito.bom.group-id}</groupId>
-30  +++   <artifactId>${kogito.bom.artifact-id}</artifactId>
-31  +++   <version>${kogito.bom.version}</version>
-32        <type>pom</type>
-33        <scope>import</scope>
-34      </dependency>
+31      <dependency>
+32  ---   <groupId>${quarkus.platform.group-id}</groupId>
+33  ---   <artifactId>quarkus-kogito-bom</artifactId>
+34  ---   <version>${quarkus.platform.version}</version>
+32  +++   <groupId>${kogito.bom.group-id}</groupId>
+33  +++   <artifactId>${kogito.bom.artifact-id}</artifactId>
+34  +++   <version>${kogito.bom.version}</version>
+35        <type>pom</type>
+36        <scope>import</scope>
+37      </dependency>
 ----
 +
 A bill of materials (BOM) is a list of parts or components that are required to build a product.
-BOMs are ordinary `pom.xml` files that contain no source code and the only purpose is to declare their bundled modules.
+BOMs are ordinary `pom.xml` files that contain no source code, and their only purpose is to declare their bundled modules.
 
 .Always use the Maven Bill-of-Materials (BOM)
 [IMPORTANT]
 ====
-It is recommended to use bill of materials (BOM) to manage project dependencies, as it simplifies the dependency management by organizing a group of dependencies under a single version. 
+It is recommended to use a bill of materials (BOM) to manage project dependencies, as it simplifies dependency management by organizing a group of dependencies under a single version. 
 
-It must be noted that the use of Maven bill-of-materials (BOM) does not add any dependencies to the project.
-They are only the definitions that help resolve (versions) the dependencies (and transient dependencies).
+It must be noted that the use of a Maven bill-of-materials (BOM) does not add any dependencies to the project.
+Rather, it functions as a reference for managing the versions of your project's dependencies (and transient dependencies).
 ====    
 
-A bill of materails (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
+A bill of materials (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
 
 include::../partials/maven-bom-now.adoc[]
 
@@ -199,7 +199,7 @@ include::../partials/version-mapping-next.adoc[]
 ----
 77  +++   <dependency>
 78  +++     <groupId>com.ibm.bamoe</groupId>
-79  +++     <artifactId>bamoe-ilmt-compliance-quarkus-dmmoe</artifactId>
+79  +++     <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
 80  +++   </dependency>
 81      </dependencies>
 ----
@@ -268,11 +268,11 @@ If you need to create a new file, use VS Code's `File : New File` option, making
 
 === Step 4: Compile, Build, Test, Deploy
 
-You can follow the standard guidance on how to maintain your decision service project including how to build using Maven and deploy to your target Kubernetes-based environment.
-This includes not only creating and publishing the new project to an enterprise GIT repository and configuring your CI/CD pipeline to pull from GIT, perform a Maven build/test/deploy, etc.
+You can follow the standard guidance on how to maintain your decision service project, including how to build using Maven and how to deploy to your target Kubernetes-based environment.
+This includes not only creating and publishing the new project to an enterprise GIT repository but also configuring your CI/CD pipeline to pull from GIT and performing a Maven build/test/deploy, etc.
 
 [NOTE]
 ====
 After completing the migration of the project, you might want to consider migrating your technical rules to use new language features, such as `rule units` or `OOPATH syntax`.
-Refer to xref:drl.html[Drools Rule Language Migration] for migration to the latest version of Drools Rule Language (DLR).
+Refer to xref:drl.html[Drools Rule Language Migration] for information on migrating to the latest version of Drools Rule Language (DLR).
 ====
