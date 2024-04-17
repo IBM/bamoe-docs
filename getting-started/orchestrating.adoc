@@ -14,13 +14,13 @@ To view the complete project, you can refer to the https://github.com/kiegroup/k
 
 The example of a traffic violations project describes how to use decisions within the processes and how to integrate decisions in an embedded way using the business rule tasks, which must be deployed with a process in the same application.
 
-In Kogito, the decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets including BPMN, DMN, and DRL must be placed in the resources folder.
+In Kogito, the decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets, including BPMN, DMN, and DRL must be placed in the resources folder.
 
 When the example application is running, there also must be different running processes, such as a process using a business rule task, containing the URL as `http://localhost:8080/traffic`.
 
 == Traffic violations example for embedded method
 
-The traffic violations project is based on the evaluation process of the traffic violations. In the traffic violations example, first, the information of the driver is fetched, and based on the fetched information, it is determined whether the driver has a valid driving license using a RuleUnit in a DRL. After the validation of the driving license, the violation evaluation is executed, which is defined as a DMN decision, and the output provides the information of whether the driver is suspended or not.
+The traffic violations project is based on the evaluation process of traffic violations. In the traffic violations example, first, the information of the driver is fetched, and based on the fetched information, it is determined whether the driver has a valid driving license using a RuleUnit in a DRL. After the validation of the driving license, the violation evaluation is executed, which is defined as a DMN decision, and the output provides information on whether the driver is suspended or not.
 
 .Traffic violations example
 image::traffic-rules-dmn.png[Image of traffic violations example]
@@ -35,7 +35,7 @@ Also, the classes in the process are used to define the Plain Old Java Objects (
 
 === Decisions in traffic violation example
 
-The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
+The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify whether the license is expired or not. The result of the license validation is added to the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
 Example `LicenseValidationService.drl` file:
 [source]
@@ -98,7 +98,7 @@ image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
 
 === Data mapping between a process and decisions
 
-To map the data between a process and decisions, you can align all the attributes names in a Java class, which is used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
+To map the data between a process and decisions, you can align all the attribute names in a Java class, which are used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
 
 Violation class defined in the Traffic Violations example:
 [source,java]
@@ -134,7 +134,7 @@ Fetching the driver information leads to the license validation task, which repr
 .License validation task (DRL)
 image::license-validation-drl-businessrule.png[Image of license validation task (DRL)]
 
-The properties that are required to set for the DRL service task include `Rule Language`, which must be set as `DRL` and the `Rule Flow Group`. You can set the value of `Rule Flow Group` using the following format:
+The properties that are required to be set for the DRL service task include `Rule Language`, which must be set as `DRL` and the `Rule Flow Group`. You can set the value of `Rule Flow Group` using the following format:
 
 [source]
 ----
@@ -157,7 +157,7 @@ Similar to the license validation task, the traffic violation task represents th
 .Traffic violation task (DMN)
 image::traffic-violation-dmn-businessrule.png[Image of traffic violation task (DMN)]
 
-The properties that are required to set for the DMN service task include `Rule Language`, which must be set as `DMN`. Also, you must set the values for `Namespace`, `Decision Name` and DMN Model Name` properties as defined in the DMN model, such as `TrafficViolation.dmn`. For example, you can set the following values:
+The properties that are required to be set for the DMN service task include `Rule Language`, which must be set as `DMN`. Also, you must set the values for `Namespace`, `Decision Name` and DMN Model Name` properties as defined in the DMN model, such as `TrafficViolation.dmn`. For example, you can set the following values:
 
 - Rule Language: `DMN`
 - Namespace: `https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF`
@@ -185,7 +185,7 @@ Then you can check the application Swagger UI at `http://localhost:8080/q/swagge
 
 === Other examples
 
-For more {PRODUCT} examples that use decisions orchestrated by processes, see the following example applications in GitHub:
+For more {PRODUCT} examples that use decisions orchestrated by processes, see the following example applications on GitHub:
 
 * https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-business-rules-quarkus[`process-business-rules-quarkus`]: A quickstart project that shows the use of business rules and processes
 * https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/process-decisions-rest-quarkus[`process-decisions-rest-quarkus`]: An example project that shows the usage of decisions within processes. The focus here is to show how to integrate decisions in a remote way using REST APIs where they can be deployed decoupled from the process service.
