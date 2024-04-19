@@ -1,12 +1,46 @@
-= Deploying a stateful business process service
+= Deploying a stateful process service
 include::../partials/attributes.adoc[]
 
-More information about the historical/auditing query capabilities - https://github.com/kiegroup/kogito-apps/blob/main/data-audit/README.md and setting the right dependencies for your service.
+This section describes how to deploy a stateful process service and elements to be aware of compared to a straight through process service. 
+
+The historical/auditing query capabilities - https://github.com/kiegroup/kogito-apps/blob/main/data-audit/README.md and setting the right dependencies for your service.
 
 // TODO: Document components used in Compact Architecture
 == Using data audit in compact architecture
+Adds the Data Index Persistence capability
+Listens for the events fired by the Kogito Runtime and Persist it into the the Data Index DDBB
+Removes the need of sending events to Data Index Service
+Maven Dependency:
+
 
 == Using data index in compact architecture
 
+* Adds the Data Index Persistence capability
+
+* Listens for the events fired by the Kogito Runtime and Persist it into the the Data Index DDBB
+
+* Removes the need of sending events to Data Index Service
+
+* Maven Dependency:
+`+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-addons-quarkus-data-index-persistence-postgresql</artifactId>
+</dependency>+`
+
+
+
 == Using job service in compact architecture
+
+* Collocates the Job Scheduler into the Kogito Runtime
+* Enables direct communication between both services inside the Kogito App.
+* Uses the Data Source as the Kogito App.
+* Maven Dependencies:
+`+<dependency>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-addons-quarkus-jobs</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>jobs-service-postgresql-common</artifactId>
+  </dependency>+`
 
