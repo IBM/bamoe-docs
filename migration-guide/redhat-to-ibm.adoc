@@ -27,9 +27,9 @@ The following steps are typically involved with migrating from {RH_PAM} / {RH_DM
 
 === Step 1: Download Product Archives
 
-The first step in migration is to download the product archives from either the {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
-From there, depending on what you need to get, you will download a few files _(replace with most current version)_.
-The most common ones are highlighted below, but download what makes the most sense for your environment. 
+The first step in migration is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
+From there, depending on what you need to get, you will download a few files _(replace with the most current version)_.
+The most common ones are highlighted below, but download whichever makes the most sense for your environment. 
 
 .{PRODUCT_SHORT} Product Archives
 image::bamoe-downloads.png[Product Archives]
@@ -71,7 +71,7 @@ The following archives are typically used in migrating to {PRODUCT_SHORT}:
 | This archive facilitates preparing a Maven mirror repository for offline use.
 
 | bamoe-**{VERSION**}-kogito-maven-repository.zip   
-| This archive is the Kogito Maven repository that contains many of the requirements that Java developers typically use to build Kogito based applications.
+| This archive is the Kogito Maven repository, which contains many of the requirements that Java developers typically use to build Kogito-based applications.
 
 | bamoe-**{VERSION**}-openshift-templates.zip
 | This archive facilitates building a custom KIE Server extension image for an external database.
@@ -80,20 +80,20 @@ The following archives are typically used in migrating to {PRODUCT_SHORT}:
 [NOTE]
 ====
 
-In the table above, you should replace **VERSION** with the version of {PRODUCT_SHORT} you are migrating to, such as 8.0.3.
+In the table above, you should replace **VERSION** with the version of {PRODUCT_SHORT} you are migrating to, such as {VERSION_8_LATEST}.
 ====
 
 _Now that we have those files we can start to migrate our environment._
 
 === Step 2: Update Maven Configuration
 
-MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
+{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
 {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications.
 For a quick start see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
 
 === Update Maven Settings
 
-The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from `pom.xml` by its non-association with particular projects.
+The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from the `pom.xml` by its non-association with particular projects.
 
 This file includes configurations such as the location of the local repository, alternative sources for remote repositories, inputting credentials, among others.
 
@@ -106,8 +106,8 @@ Users can tailor their Maven environment to better suit their development needs 
 
 [NOTE]
 ====
-The first `settings.xml` is also referred to as `global settings`, the second is referenced as user settings, both are combined
-with users taking precedence.
+The first `settings.xml` is also referred to as `global settings`, and the second is referenced as user settings.
+Both are combined with users taking precedence.
 ====
 
 [TIP] 
@@ -129,14 +129,14 @@ BOMs are ordinary `pom.xml` files — they contain no source code and their only
 .Always use the Maven Bill-of-Materials (BOM)
 [IMPORTANT]
 ====
-It is highly recommended to use a bill of materials (BOM) to manage project depencencies, as it simplifies the dependency management by organizing a group of depdenencies under a single version. 
+It is highly recommended to use a bill of materials (BOM) to manage project dependencies, as it simplifies dependency management by organizing a group of dependencies under a single version. 
 ====
 
-A bill of materails (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
+A bill of materials (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
 
 include::../partials/maven-bom-now.adoc[]
 
-When a bill of materials (BOM) is used it is no longer necessary to specify the depenency's version, as that comes from the BOM, so your depenencies end up looking like this:
+When a bill of materials (BOM) is used, it is not necessary to specify the dependency's version, as that appears from the BOM, so your dependencies end up like the following:
 
 [source,xml]
 ----
@@ -320,7 +320,7 @@ The update script creates a backup folder in the extracted `bamoe-$VERSION-updat
 +
 For files that already exist in your {PRODUCT} distribution, such as .`jar` files for the decision engine or other add-ons, replace the existing version of the file with the new version from the {PRODUCT_SUPPORT_PAGE}[IBM Support] page.
 
-. If you use the standalone {PRODUCT_LONG} v{VERSION_80} - Maven Repository artifact (`bamoe-8.0.3-maven-repository.zip`), such as in air-gap environments, download I{PRODUCT_LONG} v{VERSION_80} - Maven Repository and extract the downloaded `bamoe-8.0.3-maven-repository.zip` file to your existing `~/maven-repository` directory to update the relevant contents.
+. If you use the standalone {PRODUCT_LONG} v{VERSION_80} - Maven Repository artifact (`bamoe-{VERSION_8_LATEST}-maven-repository.zip`), such as in air-gap environments, download{PRODUCT_LONG} v{VERSION_80} - Maven Repository and extract the downloaded `bamoe-{VERSION_8_LATEST}-maven-repository.zip` file to your existing `~/maven-repository` directory to update the relevant contents.
 
 +
 Example Maven repository update:
@@ -328,7 +328,7 @@ Example Maven repository update:
 +
 [source,shell,subs="attributes+"]
 ----
-unzip -o bamoe-8.0.3-maven-repository.zip 'rhba-8.0.2.GA-maven-repository/maven-repository/*' -d /tmp/rhbaMavenRepoUpdate
+unzip -o bamoe-{VERSION_8_LATEST}-maven-repository.zip 'rhba-8.0.2.GA-maven-repository/maven-repository/*' -d /tmp/rhbaMavenRepoUpdate
 
 $ mv /tmp/rhbaMavenRepoUpdate/rhba-8.0.2.GA-maven-repository/maven-repository/ $REPO_PATH/
 ----
@@ -417,12 +417,12 @@ After restoring your previous distribution, you can try again to run the update.
 
 == Step 3: Update Persistence
 
-For applications based on {RH_PAM} you may be required to update the runtime database.
-For migrating the database, the easiest way is to do it in sequence as most of the jobs are *very* small (re: 2-4 lines of SQL).
-They are all mapped by the version progression so it would be fairly quick.
-So for instance, if we're running a PostgreSQL database, what we would need to do is the following:
+For applications based on {RH_PAM}, you may be required to update the runtime database.
+For migrating the database, the easiest way is to do it in sequence, as most of the jobs are *very* small (re: 2-4 lines of SQL).
+They are all mapped by the version progression, so it will be fairly quick.
+So, for instance, if we're running a PostgreSQL database, what we would need to do is the following:
 
-. Connect to your database instance in your method of preference
+. Connect to your database instance using your method of preference
 . Apply the SQL scripts appropriate for the version you are migrating from up to RHPAM 7.13.
 
 [source,shell,subs="attributes+"]
@@ -436,8 +436,8 @@ $ psql -h $dbhost -U $user < rhpam-7.13.2-to-7.13.3.sql
 
 [NOTE]
 ====
-{PRODUCT_SHORT} {VERSION_80}'s database is compatible with {RH_PAM} 7.13, so all you need to do is update the database to that level and you will be set to migraet the rest of your application.
+{PRODUCT_SHORT} {VERSION_80}'s database is compatible with {RH_PAM} 7.13, so all you need to do is update the database to that level, and you will be set to migrate the rest of your application.
 ====
 
 Once you have executed these SQL statements, your datasource is now up to date.
-If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice, the files should largely be the same.
+If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice; the files should largely be the same.
