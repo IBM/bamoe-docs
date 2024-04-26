@@ -58,3 +58,79 @@ Loading an input file with unmatching input names and/or Data Types will ignore 
 * Undo/redo operations are not yet supported on the DMN Runner.
 * Changing a Data Type can potentially erase all the values you have for an input.
 * Renaming an input will delete the input values previously saved.
+
+== Reusing logic example
+For solving a problem in any domain, it is always helpfull to be able reuse some existing logic.
+To make some logic reusable in the DMN, we use BKM or Decision Service nodes.
+For this purpose, we will take a closer look on the Decision Service node.
+Using this node we will define once a logic, that can be reused unlimitedly in our DMN models or models that will import our Decision Service node.
+
+The Decision Service node allows wrapping and structuring a larger set of Decision nodes, while producing a single output.
+We will not start from the scracth, rather we will reuse and existing community example https://raw.githubusercontent.com/apache/incubator-kie-kogito-examples/8123b27b7fb64d6a0a4c4561d97487e2b6253cf7/kogito-quarkus-examples/onboarding-example/payroll/src/main/resources/org/kie/kogito/examples/payroll/taxRate.dmn[taxRate.dmn].
+
+NOTE: The `taxRate.dmn` link was introduced with {PRODUCT_SHORT} 9.1.0. and you may update the url commit sha accordingly or simply search for that file in the github repository to see the latest version.
+
+After opening `taxRate.dmn`, you will see a node `rate` containing two nodes `compute Payroll` and `taxRate`.
+Using only single **encapsulated** node `taxRate` and single **output** node `compute Payroll` does not demonstrate the Decision Service node power enough.
+We will elaborate this example a little bit.
+
+As a first step, move `compute Payroll` node out of the `rate` node and remove its connection with the `taxRate` node.
+We will use this node later to invoke the logic wrapped in the Decision Service node.
+We can also change model name from `taxes` to `payroll`.
+
+image::tools/runningDecisions/reusing-logic-checkpoint-1.png[]
+
+Now, lets make the Decision Service node `rate` bigger as we will add more content to it.
+We will introduce a logic similar to `taxRate` node for computing vacation days and payment date.
+Please add two new Decision nodes into the **output** section of the `rate` node and name them as: `vacationDays` and `paymentDate`.
+Connect the existing `employee` node with both added nodes.
+Move also the existing `taxRate` node from the **encapsulated** into the **output** section.
+
+image::tools/runningDecisions/reusing-logic-checkpoint-2.png[]
+
+We sucessfuly changed the structure of the logic, as we moved all Decision nodes into the **output** section, the Decision Service node will return Complex data, not Simple data.
+
+NOTE: See xref:adding-data-type[] to learn more about data types.
+
+Now, we need to define logic for the new nodes.
+Set the `vacationDays` and `paymentDate` data type as `number`.
+We do not use `date` for the `paymentDate` because in our example the `paymentDate` is a day of the month.
+
+Both `vacationDays` and `paymentDate` will be implemented as a decision table very similar to the `taxRate` decision table.
+It is a good opportunity to use copy and paste feature we have.
+This feature is available after click to the top left corner of the node expression.
+In other words, click on the node expression type.
+Copy the existing `taxRate` expression and paste it into `vacationDays` and `paymentDate` nodes or create the decison tables from scratch.
+
+NOTE: If you decided to use copy and paste feature, you will need to rename nodes back to `vacationDays` and `paymentDate`.
+
+Lets finish the new decision tables.
+Lets return **38** vacation days for **"US"** and **"33"** vacation days for **"UK"**.
+Lets return **15** as a payment date for **"US"** and **"10"** as a payment date for **"UK"**.
+
+For a moment, switch to the **Data types** tab.
+Add new Complex type `tPayroll` with these properties: `taxRate: number`, `vacationDays: number` and `paymentDate: number`.
+
+NOTE: See xref:adding-data-type[] to learn more Complex data types.
+
+image::tools/runningDecisions/reusing-logic-checkpoint-3.png[]
+
+Switch back to the **Editor** tab.
+Rename the `rate` node to `payroll` and sets its Data type as `tPayroll`.
+Now connect the `payroll` with the `compute Payroll`.
+
+Open the `compute Payroll` node and **Reset** its expression to be an **Invocation**.
+For the Invocation we need to specify function name as `payroll` and the single parameter `employee` with passed value `employee`.
+In this case, the `compute Payroll` Data type will be `tPayroll`.
+
+NOTE: List of paramaters that Decision Service node requires from the Invocation node can be also seen in the Properties panel **Input data** section of the `payroll` node.
+
+image::tools/runningDecisions/reusing-logic-checkpoint-4.png[]
+
+Then if we open the **DMN Runner** and input the employee's country, we should see the payroll computed accordingly.
+
+NOTE: See xref:running-decisions.adoc[DMN Runner page] to learn more details.
+
+There is availavle source code of the https://TODO-ADD-v0.0.1.com[payroll.dmn] example model.
+
+image::tools/runningDecisions/reusing-logic-checkpoint-5.png[]
