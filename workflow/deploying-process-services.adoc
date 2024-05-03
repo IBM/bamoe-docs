@@ -1,40 +1,64 @@
 = Deploying a stateful process service
 include::../partials/attributes.adoc[]
 
-This section describes how to deploy a stateful process service and elements to be aware of compared to a straight through process service. 
+This section describes how to deploy a stateful process service and the difference in the deployment architecture to simplify event management and ensure stable and robust stateful applications. The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
+
+The new Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (data index persistance, data audit, job scheduler) in the runtime. This architecture simplifies the application configuration and minimizes the communication between components.
+
+== The Data Audit subsystem
+
+This section describes the elements of the {PRODUCT} Audit subystem. The subsystem enables the storage of events issued by the following process elements:
+
+* process engine
+* user task
+* job service
+
+The main features of this system are that it:
+* runs as colocated services with Quarkus and Springboot 
+* contains a module enabling you to implement your own subsystem. 
+* contains graphql modules to query data
+* provides extension points to develop new storage easily
+* provides extension points to develop new queries extending graphql definitions
 
 The historical/auditing query capabilities - https://github.com/kiegroup/kogito-apps/blob/main/data-audit/README.md and setting the right dependencies for your service.
 
-// TODO: Document components used in Compact Architecture
-== Using data audit in compact architecture
-Adds the Data Index Persistence capability
-Listens for the events fired by the Kogito Runtime and Persist it into the the Data Index DDBB
-Removes the need of sending events to Data Index Service
-Maven Dependency:
+== More about the Data Audit add-on
+Collocates Data Audit Subsystem within the {PRODUCT} Runtime
+and it listens for the events fired by the Runtime, persisting it into the Data Index DDBB
 
+Maven Dependencies you will need to set to access the Data Audit functionality:
 
-== Using data index in compact architecture
+`+<dependency>
+  <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-addons-data-audit-jpa-quarkus</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-addons-data-audit-quarkus</artifactId>
+</dependency>+``
+
+== More about the Data Index add-on
 
 * Adds the Data Index Persistence capability
 
-* Listens for the events fired by the Kogito Runtime and Persist it into the the Data Index DDBB
+* Listens for the events fired by the {PRODUCT} Runtime and persists it into the the Data Index DDBB
 
-* Removes the need of sending events to Data Index Service
+* Removes the need to send events to Data Index Service
 
 * Maven Dependency:
+
 `+<dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>kogito-addons-quarkus-data-index-persistence-postgresql</artifactId>
 </dependency>+`
 
-
-
-== Using job service in compact architecture
+== More about the Job Service add-on
 
 * Collocates the Job Scheduler into the Kogito Runtime
 * Enables direct communication between both services inside the Kogito App.
 * Uses the Data Source as the Kogito App.
 * Maven Dependencies:
+
 `+<dependency>
     <groupId>org.kie.kogito</groupId>
     <artifactId>kogito-addons-quarkus-jobs</artifactId>
