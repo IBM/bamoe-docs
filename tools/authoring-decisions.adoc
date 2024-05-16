@@ -80,6 +80,7 @@ image::tools/authoringDecisions/overview-1.5-alternative-input-data-node.png[wid
 
 General::
 
+[id="import-to-default-namespace"]
 Import to default namespace:::
 +
 Adds the possibility to import a new DMN into the default namespace.
@@ -193,6 +194,9 @@ image::tools/authoringDecisions/new-editor-diagram-palette-all-drg-nodes.gif[wid
 .d. External nodes
 
 All nodes that are part of the included models can be found here.
+
+NOTE: See the <<included-models, Included models>> section to learn more about **Included models**.
+
 Clicking on it will open a modal showing all nodes separated by namespace, where you can filter the nodes by name.
 
 .Dragging an external Input Data node
@@ -272,7 +276,7 @@ Each node has a minimal width and height, trying to resize it to a smaller size 
 .Resize node
 image::tools/authoringDecisions/new-editor-diagram-node-resize.gif[width=500px]
 
-.Decision Service
+===== Decision Service
 The **Decision Service** node, similar to the BKM node, is useful for reusing logic.
 However, it also allows for the wrapping and structuring of a larger set of Decision nodes while producing a single output.
 
@@ -307,9 +311,22 @@ The **Decision Service** node needs to be selected in order to see its context m
 It is not enough to hover over the **Decision Service** node, as it is for other DMN node types.
 
 
-.Unkown node
+===== Unknown node
 
-. TODO
+Is a node with an invalid DMN element reference(`dmnElementRef`).
+We cannot render such a node properly as the reference couldn't be found on the current model.
+For such nodes, users will see a placeholder node.
+
+image::tools/authoringDecisions/new-editor-unknown-node.png[]
+
+(1) Reference is the `dmnElementRef` value that could not resolve to a node.
+The editor does not provide a feature to change this value.
+To change this value, open and edit the file manually outside the editor.
+The `dmnElementRef` has a `QName` value, with the `namespaceDeclarationName:nodeId` format.
+For elements that are referenced on the current namespace, `namespaceDeclarationName` isn't present, meaning the `dmnElementRef` will have the `nodeId` format.
+
+- The `namespaceDeclarationName` part should be equal to the declaration name of the included model namespace, which must be included on the <<included-models, Included models>> tab.
+- The `nodeId` should then refer to one of the nodes from the included model.
 
 ==== 3. DRD
 
@@ -511,9 +528,45 @@ We have the expression constraint which accepts a FEEL expression, the enumerati
 The last two create the equivalent FEEL expression as well.
 Depending on the base type, the enumeration and range will not be available.
 
+[id="included-models"]
 === C. Included models
 
-. TODO
+By default, there is no included model and you should see an empty state screen on the **Included models** tab.
+
+image::tools/authoringDecisions/included-models-tab-empty-state.png[Included models tab empty state]
+
+To include an initial model, click the **(1) Include model** button.
+Once the button was clicked a modal will appear.
+The modal allows you to include all **DMN** and **PMML** models from the current workspace.
+
+image::tools/authoringDecisions/included-models-tab-modal.png[Include model modal]
+
+**(1) all models** is the current workspace name indicator.
+The **all models** is the workspace name used only for this demo.
+You can choose any workspace name you need.
+
+**(2) Model** is a dropdown that will list all **DMN** and **PMML** models from the **all models** workspace.
+
+**(3) Name** is a namespace we give to the included model, which will be used for referencing included nodes and data types.
+
+NOTE: With DMN 1.5. we can keep this empty to use the <<import-to-default-namespace, default namespace>> feature.
+
+**(4) Include model** is the button for confirming the include operation.
+Upon confirmation, the selected model(s) will be displayed below the **Included models** tab as a card.
+
+image::tools/authoringDecisions/included-models-tab-cards.png[Included models cards]
+
+**(1)** indicates the number of included models in your model.
+The number **3** indicates three included models.
+
+**(2)** is a card displaying details of the included model.
+
+**(3)** is the namespace we gave to the included model.
+We can change the namespace **includedLogic** by double-clicking on this value and typing a new namespace value.
+
+**(4)** gives an option to remove the included model.
+
+**(5)** is a card displaying an included model not found in the current workspace.
 
 == Legacy Editor
 
