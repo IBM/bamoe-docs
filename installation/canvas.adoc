@@ -62,7 +62,7 @@ oc label deployments/$APP_NAME_GIT_CORS_PROXY app.openshift.io/runtime=nodejs
 ----
 oc new-app quay.io/bamoe/canvas:{VERSION} --name=$APP_NAME_BAMOE_CANVAS \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
-  -e KIE_SANDBOX_GIT_CORS_PROXY_URL=https://$(oc get route $APP_NAME_GIT_CORS_PROXY --output jsonpath={.spec.host})
+  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_GIT_CORS_PROXY --output jsonpath={.spec.host})
 oc create route edge --service=$APP_NAME_BAMOE_CANVAS
 oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
@@ -108,14 +108,14 @@ In particular, this image needs to be run with two environment variables that wi
 
 `KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
 
-`KIE_SANDBOX_GIT_CORS_PROXY_URL`:: E.g., https://git-cors-proxy.bamoe.company.com[https://git-cors-proxy.bamoe.my-company.com]
+`KIE_SANDBOX_CORS_PROXY_URL`:: E.g., https://git-cors-proxy.bamoe.company.com[https://git-cors-proxy.bamoe.my-company.com]
 
 If you're running locally, following the previous steps, use this command to start your {CANVAS} instance with the backend services:
 [source,shell,subs="attributes+"]
 ----
 docker run -p 8080:8080 -it \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=http://localhost:21345 \
-  -e KIE_SANDBOX_GIT_CORS_PROXY_URL=http://localhost:8090 \
+  -e KIE_SANDBOX_CORS_PROXY_URL=http://localhost:8090 \
   quay.io/bamoe/canvas:{VERSION}
 # Add the -d flag to run in detached mode.
 ----
