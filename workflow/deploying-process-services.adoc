@@ -7,26 +7,28 @@ The new Compact Architecture consists of applications built using a new set of {
 
 == The Data Audit subsystem
 
-This section describes the elements of the {PRODUCT} Audit subystem. The subsystem enables the storage of events issued by the following process elements:
+The Data Audit subystem enables the storage of events issued by the following process elements:
 
 * process engine
 * user task
 * job service
 
 The main features of this system are that it:
+
 * runs as colocated services with Quarkus and Springboot 
 * contains a module that enables you to implement your own subsystem
 * contains graphql modules to query data
 * provides extension points to develop new storage easily
 * provides extension points to develop new queries extending graphql definitions
 
+image::../images/data-audit-design.png[]
+
 The historical/auditing query capabilities - https://github.com/kiegroup/kogito-apps/blob/main/data-audit/README.md and setting the right dependencies for your service.
 
 == More about the Data Audit add-on
-Collocates Data Audit Subsystem within the {PRODUCT} Runtime
-and it listens for the events fired by the Runtime, persisting it into the Data Index DDBB
+Collocates Data Audit Subsystem within the {PRODUCT_SHORT} Runtime, and listens for the events fired by the Runtime, persisting it into the Data Index DDBB
 
-Maven Dependencies you will need to set to access the Data Audit functionality:
+Maven dependencies you will need to set to access the Data Audit functionality:
 
 `+<dependency>
   <groupId>org.kie.kogito</groupId>
@@ -38,14 +40,9 @@ Maven Dependencies you will need to set to access the Data Audit functionality:
 </dependency>+``
 
 == More about the Data Index add-on
+Adds the Data Index Persistence capability, and listens for the events fired by the {PRODUCT_SHORT} Runtime and persists it into the the Data Index DDBB. This add-on removes the need to send events to Data Index Service
 
-* Adds the Data Index Persistence capability
-
-* Listens for the events fired by the {PRODUCT} Runtime and persists it into the the Data Index DDBB
-
-* Removes the need to send events to Data Index Service
-
-* Maven Dependency:
+Maven dependencies you will need to set to access the Data Index add-on:
 
 `+<dependency>
   <groupId>org.kie.kogito</groupId>
@@ -53,11 +50,9 @@ Maven Dependencies you will need to set to access the Data Audit functionality:
 </dependency>+`
 
 == More about the Job Service add-on
+Collocates the Job Scheduler into the {PRODUCT_SHORT} Runtime. The Job Service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App. It uses the Data Source as the app.
 
-* Collocates the Job Scheduler into the Kogito Runtime
-* Enables direct communication between both services inside the Kogito App.
-* Uses the Data Source as the Kogito App.
-* Maven Dependencies:
+Maven dependencies you will need to set to access the Jpb Service add-on:
 
 `+<dependency>
     <groupId>org.kie.kogito</groupId>
