@@ -1,4 +1,149 @@
 = DMN Reference
 include::../partials/attributes.adoc[]
 
-Please see the https://docs.drools.org/8.39.0.Final/drools-docs/docs-website/drools/DMN/index.html[full reference guide] available at drools.org.
+[id="con-dmn-conformance-levels"]
+== DMN conformance levels
+
+[role="_abstract"]
+The DMN specification defines three incremental levels of conformance in a software implementation. A product that claims compliance at one level must also be compliant with any preceding levels. For example, a conformance level 3 implementation must also include the supported components in conformance levels 1 and 2. For the formal definitions of each conformance level, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation specification].
+
+The following list summarizes the three DMN conformance levels:
+
+Conformance level 1::
+A DMN conformance level 1 implementation supports decision requirement diagrams (DRDs), decision logic, and decision tables, but decision models are not executable. Any language can be used to define the expressions, including natural, unstructured languages.
+
+Conformance level 2::
+A DMN conformance level 2 implementation includes the requirements in conformance level 1, and supports Simplified Friendly Enough Expression Language (S-FEEL) expressions and fully executable decision models.
+
+Conformance level 3::
+A DMN conformance level 3 implementation includes the requirements in conformance levels 1 and 2, and supports Friendly Enough Expression Language (FEEL) expressions, the full set of boxed expressions, and fully executable decision models.
+
+{PRODUCT} provides runtime support for DMN 1.1, 1.2, 1.3, 1.4 and 1.5 models at conformance level 3 and design support for DMN 1.5 models at conformance level 3. You can design your DMN models with {CANVAS} or import existing DMN models into your {PRODUCT} projects for deployment and execution. Any DMN models that you import and open in the DMN designer, are converted to DMN 1.5 models.
+
+[id="con-dmn-1.5"]
+== DMN 1.5
+
+The BAMOE 9.1 Release introduce support for DMN v 1.5.
+
+The following are the new features.
+
+
+Add support for negation of duration::
+
+Before this version, it was not possible to use the following declaration:
+----
+-duration("PT1H")
+----
+
+Add a new "list replace" function::
+
+Implemented the following specification:
+
+[cols="25%,25%,25%,25%" options="header"]
+|===
+|Definitions
+|Parameters
+|Behaviour
+|Examples
+|list replace(_list_, _position_, _newItem_)
+
+list replace(_list_, _match_, _newItem_)
+
+|list, number or boolean function(_item_, _newItem_), any element including _null_
+
+|return new list with _newItem_ replaced at _position_ (if _position_ is a number) or return a new list where _newItem_ is replaced at all positions where the _match_ function returned _true_
+
+|list replace( [2, 4, 7, 8], 3, 6) = [2, 4, 6, 8]
+
+list replace ( [2, 4, 7, 8], function(item, newItem) item < newItem, 5) = [5, 5, 7, 8]
+|===
+
+Add support for iteration of date ranges::
+
+Implemented the following specification:
+
+__An iteration context may either be an expression that returns a list of elements, or two expressions that return  integers connected by "..". __
+
+Examples of valid iteration contexts are:
+
+----
+[…]
+
+@”2021-01-01”..@”2022-01-01”
+----
+
+Allow importing into the default namespace::
+
+Before this modification, it was not possible to import a DMN file into another DMN file, specifying an empty string in the name attribute for the import. With this feature, the following snippet become valid
+[source,xml]
+----
+<semantic:import xmlns:drools="http://www.drools.org/kie/dmn/1.1"
+                    xmlns:triso="http://www.trisotech.com/2015/triso/modeling"
+                    importType="http://www.omg.org/spec/DMN1-2Alpha/20160929/MODEL"
+                    namespace="http://www.trisotech.com/dmn/definitions/_f27bb64b-6fc7-4e1f-9848-11ba35e0df36"
+                    name="" />
+----
+
+and all the definitions from the imported model get registered as belonging to the importing model.
+
+Add implicit type conversion of date to date and time when necessary::
+
+Implemented the following specification:
+
+_In implicit type conversions, the data type is converted automatically without loss of information. There are several
+possible implicit type conversions:_
+
+* _[…]_
+* _from date to date and time: When the type of the expression is date and the target type is date and time, the expression is converted to a date time value in which the time of day is UTC midnight (00:00:00)_
+
+
+
+Option to use alternative image for InputData::
+
+Implemented the following specification:
+
+[cols="50%,50%" options="header"]
+|===
+|Definition
+|Behaviour
+|useAlternativeInputDataShape: Boolean [0..1]
+|If the DMNShape depicts an Input Data element then it is represented either using the paper sheet symbol, harmonized with BPMN and CMMN notations (true) or using the backwards compatible oval symbol (false).
+|===
+
+
+Support new attribute typeConstraint in ItemDefinition::
+
+Implemented the following specification:
+
+[cols="50%,50%" options="header"]
+|===
+|Definition
+|Behaviour
+|typeConstraint: UnaryTests [0..1]
+|This attribute is a UnaryTests that restricts the values in the base type that are allowed in this ItemDefinition. In case of a collection, it directly constrains the collection and is not projected on the collection elements.
+|===
+
+These new feature allows an interesting use case, i.e. filtering a base type based on its value, and then filtering a collection of the above element based on size (or other attribute) of the  collection itself.
+
+Example
+[source,xml]
+----
+<dmn:itemDefinition label="tInterest" name="tInterest">
+      <dmn:typeRef>string</dmn:typeRef>
+      <dmn:typeConstraint >
+        <dmn:text>"Golf","Computer","Hockey","Jogging"</dmn:text>
+     </dmn:typeConstraint>
+</dmn:itemDefinition>
+<dmn:itemDefinition isCollection="true" label="tInterests" name="tInterests">
+      <dmn:typeRef>tInterest</dmn:typeRef>
+      <dmn:typeConstraint >
+       <dmn:text> count (?) = 1 </dmn:text>
+     </dmn:typeConstraint>
+</dmn:itemDefinition>
+----
+
+Please note that the `allowedValues` tag has been deprecated in the 1.5 DMN version.
+
+'''
+
+For official DMN specifications, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation specification].
