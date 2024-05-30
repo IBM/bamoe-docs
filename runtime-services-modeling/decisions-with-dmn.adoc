@@ -3,14 +3,13 @@ include::../partials/attributes.adoc[]
 
 [role="_abstract"]
 
-IMPORTANT: TO BE MOVED UNDER RUNTIME v ?
 // tag::con-kogito-service-execution[]
 [id="con-kogito-service-execution"]
 
 [role="_abstract"]
-After you design your {PRODUCT} service, you can build and run your application and then send REST API requests to the application to execute your services. The exact REST API requests that you can use depend on how you set up the application.
+After you design your {PRODUCT} service, you can build and run your application, sending REST API requests to the application to execute your services. The exact REST API requests that you can use depend on how you set up the application.
 
-For example, consider a {PRODUCT} service that is set up to generate a `/persons` REST API endpoint and determines whether a specified customer is an adult or is underage. In this example, you can send the following `POST` request using a REST client or curl utility to add an adult and execute the service:
+For example, consider a {PRODUCT} service that is set up to generate a `/persons` REST API endpoint and that determines whether a specified customer is an adult or is underage. In this example, you can send the following `POST` request using a REST client or curl utility to add an adult and execute the service:
 
 .Example POST request body to add an adult (JSON)
 [source,json]
@@ -43,14 +42,14 @@ curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -
 }
 ----
 
-Note that for JSON marshaling, {PRODUCT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
+Note that for JSON marshaling, {PRODUCT_SHORT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
 // end::con-kogito-service-execution[]
 
 [id="ref-rest-dmn-endpoints"]
 === REST endpoints for DMN models in {PRODUCT}
 
 [role="_abstract"]
-For each DMN model in a {PRODUCT} application, the following REST endpoints are automatically generated based on the content of the model:
+For each DMN model in a {PRODUCT_SHORT} application, the following REST endpoints are automatically generated based on the content of the model:
 
 * `[POST] /\{modelName\}`: A business-domain endpoint for evaluating the entire DMN model
 * `[POST] /\{modelName\}/\{decisionServiceName\}`: A business-domain endpoint for evaluating a specified decision service component in the DMN model
@@ -58,9 +57,9 @@ For each DMN model in a {PRODUCT} application, the following REST endpoints are 
 * `[POST] /\{modelName\}/\{decisionServiceName\}/dmnresult`: An endpoint for evaluating a specified decision service component in the DMN model and returning a `DMNResult` response, including the business-domain context, helper messages, and helper decision pointers for the decision service
 * `[GET] /\{modelName\}`: An endpoint for returning the DMN XML without decision logic, typically for DMN model introspection
 
-You can use these endpoints to interact with a DMN model or a specific decision service within a model. As you decide between using business-domain and `dmnresult` variants of these REST endpoints, review the following considerations:
+You can use these endpoints to interact with a DMN model or a specific decision service within a model. To help you decide between using business-domain and `dmnresult` variants of these REST endpoints, review the following considerations:
 
-* *REST business-domain endpoints*: Use this endpoint type if a client application is only concerned with a positive evaluation outcome, is not interested in parsing `Info` or `Warn` messages, and only needs an HTTP 5xx response for any errors. This type of endpoint is also helpful for single-page application-like clients, due to singleton coercion of decision service results that resemble the DMN modeling behavior.
+* *REST business-domain endpoints*: Use this endpoint type if a client application only requires a positive evaluation outcome, doesn't need to parse `Info` or `Warn` messages, and only needs an HTTP 5xx response for any errors. This type of endpoint is also helpful for single-page application-like clients, due to singleton coercion of decision service results that resemble the DMN modeling behavior.
 * *REST `dmnresult` endpoints*: Use this endpoint type if a client needs to parse `Info`, `Warn`, or `Error` messages in all cases.
 
 For each endpoint, use a REST client, curl utility, or Swagger UI (if configured for the application) to send requests with the following components:
@@ -77,7 +76,7 @@ For each endpoint, use a REST client, curl utility, or Swagger UI (if configured
 
 The examples in the following endpoints are based on a `Traffic Violation` DMN model that contains a `TrafficViolationDecisionService` decision service component.
 
-For all of these endpoints, if a DMN evaluation `Error` message occurs, a `DMNResult` response is returned along with an HTTP 5xx error. If a DMN `Info` or `Warn` message occurs, the relevant response is returned along with the business-domain REST body, in the `X-{PRODUCT}-decision-messages` extended HTTP header, to be used for client-side business logic. When more refined client-side business logic is required, the client can use the `dmnresult` variant of the endpoints.
+For all of these endpoints, if a DMN evaluation `Error` message occurs, a `DMNResult` response is returned along with an HTTP 5xx error. If a DMN `Info` or `Warn` message occurs, the relevant response is returned with the business-domain REST body, in the `X-{PRODUCT}-decision-messages` extended HTTP header, to be used for client-side business logic. When more refined client-side business logic is required, the client can use the `dmnresult` variant of the endpoints.
 
 Return the DMN XML without decision logic::
 +
