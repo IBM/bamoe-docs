@@ -1,0 +1,45 @@
+= Overview stateful process technology preview
+
+include::../partials/attributes.adoc[]
+
+As a developer of business processes, you can use BAMOE to develop process services using Business Process Model and Notation (BPMN) 2.0 models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with Canvas or the Kogito BPMN modeler in VSCode. Alternatively you can import existing BPMN processes into your BAMOE projects for deployment and execution. 
+
+This technology preview enables you to go further in the BPMN workflows that you implement enabling you to integrate new elements such as process variables, events, service tasks, script and decision tasks, timers and Human-tasks. 
+
+This section also describes the components and architecture of stateful workflow service which will be referred to as the Compact Architecture. This is a new way to setup the BAMOE environment using a new set of Addons to colocate certain services directly in the Runtime. This architecture simplifies the application configuration and minimizes the communication between components which ensures that Kogito applications are stable and robust in a Business Process environment. 
+
+== Compact architecture 
+Compact architecture is a way to enable a workflow to run everything in an integrated way within the same
+deployment. In this architecture the communication with required or optional subsystems is via internal VM
+communication.
+
+A "deployment" is considered to be a consistent functional program that provides a set of defined functionalities that enable workflow execution.
+
+A "stateful process" is one that is able to persist the process instance state into a database or other type of storage. 
+
+A "stateless process" or "straight-through process" – (STP) is one whose process instance
+state cannot be stored in database. Stateless processes are a subset of stateful process.
+
+image::../images/wf-compact-arch.png[]
+
+From the component's subsystem point of view, the following table shows the mandatory components to implement a stateful workflow.
+
+
+|=== 
+|Subsystem | Type | Stateful process (compact) | Stateless (STP) 
+|Engine | System | mandatory | mandatory 
+|Storage/persistence | System | mandatory | N/A
+|Data index | Addon | optional | N/A
+|Data audit | Addon | optional | N/A
+|Job | Addon | mandatory | N/A
+|Human task | Addon | mandatory | N/A
+|===
+
+
+
+// TODO: Complete overview content including diagrams
+
+
+
+
+
