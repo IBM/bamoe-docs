@@ -1,19 +1,119 @@
 = IBM BAMOE Developer Tools for VS Code
 include::../partials/attributes.adoc[]
 
-{PRODUCT_SHORT} provides a handy VS Code Extension that bundles graphical Editors for BPMN and DMN files.
-The {PRODUCT_SHORT} Developer Tools extension can be downloaded from {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*].
+{PRODUCT_SHORT} provides a handy VS Code Extension that bundles graphical Editors for BPMN, DMN files, and SCESIM files.
+The {PRODUCT_SHORT} Developer Tools extension can be downloaded from the https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[VS Code Marketplace].
 
-The bundled BPMN and DMN Editors are made available through the KIE DMN Editor and KIE BPMN Editor extensions, and they feature all available features you have on {CANVAS}.
-Static file validation, DMN Runner, and Dev deployments are not available for {PRODUCT_SHORT} Developer Tools yet, but you can achieve a similar experience of DMN Runner with our Scenario Simulation Editor.
+The bundled BPMN, DMN and Test Scenario Editors are made available through the KIE DMN Editor and KIE BPMN Editor extensions, and they feature all available features you have on {CANVAS}.
+Static file validation, DMN Runner, and Dev deployments are not available for BAMOE Developer Tools yet, but you can achieve a similar experience of DMN Runner with our Test Scenario Editor.
 See how below.
 
-== Running unit tests with Scenario Simulation files
+== Running unit tests with Test Scenario
 
-Running Scenario Simulation (.scesim) files requires a configured Java project with the JUnit dependency available.
-Please follow this https://blog.kie.org/2021/04/how-to-use-test-scenario-editor-to-test-your-dmn-asset-in-vscode.html[blog post tutorial] to get started with Scenario Simulation on {PRODUCT_SHORT} Developer Tools.
+=== Overview
+This documentation provides a step-by-step guide on how to use the Test Scenario editor in VSCode to test DMN assets created with Kogito Tooling. For that scope, this guide will refer to an existing project that lives in the https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/dmn-pmml-quarkus-example[kie-kogito-examples] GitHub repo. However, this guide will provide the steps to enable Test Scenario in your own project
+
+NOTE: At the current time, BAMOE supports DMN-based Test Scenario only. Rule-based Test Scenario are not supported yet. It's still possible to **run** a Rule-based Test Scenario generated with BAMOE 8 in Business Central using the old APIs. You can find an example https://github.com/apache/incubator-kie-kogito-examples/tree/main/kogito-quarkus-examples/rules-legacy-scesim-quarkus-example[here]
+
+NOTE: All the DMN-based scesim assets created prior to version 9.1.0 will require a user action to update the related DMN file location. This is requested because the DMN file path is now managed in a relative format.
+
+=== Prerequisites
+* BAMOE 9.1.0
+* BAMOE Developer Tools 9.1.0
+* VSCode (1.66.0+)
+* Optional: Language Support for Java(TM) by Red Hat (1.32+) VSCode extension
+
+=== Project Setup
+==== Cloning the Example Project
+If you are a new BAMOE user and you don't have any project to set up yet, or you prefer having an out-of-the-box project to deal with, you can use the previously mentioned example in the `incubator-kie-kogito-examples` repository.
+
+1. Clone the `incubator-kie-kogito-examples` repository.
+2. Open VSCode and navigate to `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-pmml-quarkus-example`.
+This project contains all the necessary files and prerequisites for this tutorial.
+
+==== Setup any project
+To enable Test Scenario in your project, follow the below steps
+
+1. **Add the required Test Scenario dependency**:
+   Add the following dependency to your projects's `pom.xml` to enable the Test Scenario runner:
++
+[source,console]
+----
+   <dependency>
+     <groupId>org.kie.kogito</groupId>
+     <artifactId>kogito-scenario-simulation</artifactId>
+     <scope>test</scope>
+   </dependency>
+----
++
+2. **Create `KogitoScenarioJunitActivatorTest.java`**:
+   Create the `KogitoScenarioJunitActivatorTest.java` file in the `src/test/testscenario` directory:
++
+[source,console]
+----
+   package testscenario;
+
+   @org.junit.runner.RunWith(org.kogito.scenariosimulation.runner.KogitoJunitActivator.class)
+   public class KogitoScenarioJunitActivatorTest {
+   }
+----
++
+image::developer-tools/scesim-activator.png[]
+
+3. **Create Resources Directory**:
+   Create the `src/test/resources` directory for storing `.scesim` files.
+
+=== Creating a Test Scenario
+1. **Create a `.scesim` File**:
+   In the `src/test/resources` directory, create a new file with the `.scesim` extension.
++
+image::developer-tools/scesim-file-creation.png[]
+2. **Select DMN Asset**:
+   Open the `.scesim` file and select `DMN` type. Choose `KiePMMLRegression.dmn` from the list of DMN assets.
++
+image::developer-tools/scesim-dmn-selection.png[]
+3. **Configure Test Scenario**:
+   The editor will populate columns based on the DMN asset. `GIVEN` columns are for inputs and `EXPECT` columns are for outputs.
++
+image::developer-tools/scesim-empty-file.png[]
+4. **Define Test Cases**:
+   Fill in the test data. For example:
++
+[source,console]
+----
+   GIVEN fdl1 = 3, fdl2 = 2, fdl3 = "y"
+   EXPECT decision = 52.5
+----
++
+image::developer-tools/scesim-first-row.png[]
++
+Add additional test cases as needed by inserting new rows in the grid.
++
+image::developer-tools/scesim-all-tests.png[]
+
+=== Executing the Test Scenario
+1. **Save the File**:
+   Save the `.scesim` file (`CTRL+S`).
+2. **Run Tests**:
+   Open a terminal in your project's root directory (eg. the `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-pmml-quarkus-example`) and execute:
++
+[source,console]
+----
+   $ mvn clean test
+----
++
+
+Alternatively, if you installed the `Language Support for Java(TM) by Red Hat` extension, run the test from `KogitoScenarioJunitActivator.java` using the `Run Java` button in VSCode.
+3. **Verify Results**:
+   Check the results to ensure the scenarios pass. The test results will be visible in your Terminal after the completion of the `mvn clean test` command.
++
+image::developer-tools/scesim-runner-results.png[]
++
+Using the `Run Java` button provided by `Language Support for Java(TM) by Red Hat`, the test results will appear in the native VSCode `Test Results` window.
++
+image::developer-tools/scesim-java-test-runner-results.png[]
 
 == Importing DMN Data Types from Java classes
 
-{PRODUCT_SHORT} Developer Tools allows you to create DMN Data Types directly from Java POJOs.
+BAMOE Developer Tools allows you to create DMN Data Types directly from Java POJOs.
 Please follow this https://blog.kie.org/2022/05/dmn-types-from-java-classes.html[blog post tutorial] to get started.
