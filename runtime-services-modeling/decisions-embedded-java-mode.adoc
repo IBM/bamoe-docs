@@ -100,7 +100,7 @@ KieContainer kieContainer = kieServices.newKieContainer(releaseId);
 To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
 Please update your `pom.xml` in this way.
 
-
+// TODO is 9.1.0.rc2-ibm-0001 the final to use?
 [source,xml]
 ----
   <packaging>kjar</packaging>
@@ -117,11 +117,11 @@ Please update your `pom.xml` in this way.
   </build>
 ----
 
-== Execute DRL based rules
+== DRL based rules execution
 To execute DRL based rules in java, we need to understand KIE API.
 
 === KieBase
-The `KieBase` is a repository of all the application's knowledge definitions.
+The `KieBase` is a repository of all the application\'s knowledge definitions.
 It will contain rules, processes, functions, and type models.
 The `KieBase` itself does not contain data; instead, sessions are created from the `KieBase` into which data can be inserted and from which process instances may be started.
 The `KieBase` can be obtained from the `KieContainer` containing the `KieModule` where the `KieBase` has been defined.
@@ -148,7 +148,7 @@ The `KieRuntime` provides methods that are applicable to both rules and processe
 ==== Globals
 Globals are named objects that are made visible to the Drools rule engine, but in a way that is fundamentally different from the one for facts: changes in the object backing a global do not trigger reevaluation of rules.
 Still, globals are useful for providing static information, as an object offering services that are used in the RHS of a rule, or as a means to return objects from the Drools rule engine.
-When you use a global on the LHS of a rule, make sure it is immutable, or, at least, don't expect changes to have any effect on the behavior of your rules.
+When you use a global on the LHS of a rule, make sure it is immutable, or, at least, don\'t expect changes to have any effect on the behavior of your rules.
 
 A global must be declared in a rules file, and then it needs to be backed up with a Java object.
 
@@ -157,7 +157,7 @@ A global must be declared in a rules file, and then it needs to be backed up wit
 global java.util.List list
 ----
 
-With the KIE base now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global's name and an object, for any session, to associate the object with the global.
+With the KIE base now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global\'s name and an object, for any session, to associate the object with the global.
 Failure to declare the global type and identifier in DRL code will result in an exception being thrown from this call.
 
 [source,java]
@@ -201,7 +201,8 @@ ksession.addEventListener(new DebugRuleRuntimeEventListener());
 
 All emitted events implement the `KieRuntimeEvent` interface which can be used to retrieve the actual `KnowlegeRuntime` the event originated from.
 
-To see available events browse `org.kie.api.event.rule` https://github.com/apache/incubator-kie-drools/tree/999-20240521/kie-api/src/main/java/org/kie/api/event/rule[package].
+// TODO what branch/tag to use ? 999-20240521?
+NOTE: To see available events browse `org.kie.api.event.rule` https://github.com/apache/incubator-kie-drools/tree/999-20240521/kie-api/src/main/java/org/kie/api/event/rule[package].
 
 
 === KieRuntimeLogger
@@ -217,53 +218,40 @@ logger.close();
 
 === Commands and the CommandExecutor
 KIE has the concept of stateful or stateless sessions.
-Stateful sessions have already been covered, which use the standard `KieRuntime`, and can be worked with iteratively over time.
+Stateful sessions can be worked with iteratively over time.
 Stateless is a one-off execution of a `KieRuntime` with a provided data set.
 It may return some results, with the session being disposed at the end, prohibiting further iterative interactions.
 You can think of stateless as treating an engine like a function call with optional return results.
 
 The foundation for this is the `CommandExecutor` interface, which both the stateful and stateless interfaces extend.
 This returns an https://github.com/apache/incubator-kie-drools/blob/999-20240521/kie-api/src/main/java/org/kie/api/runtime/ExecutionResults.java[`ExecutionResults`].
+// TODO should I link all mentions of KIE classes in similar way ^ ?
 
-The CommandExecutor allows for commands to be executed on those sessions, the only difference being that the StatelessKieSession executes fireAllRules() at the end before disposing the session. The commands can be created using the CommandExecutor .The Javadocs provide the full list of the allowed commands using the CommandExecutor.
+The `CommandExecutor` allows for commands to be executed on those sessions, the only difference being that the `StatelessKieSession` executes `fireAllRules()` at the end before disposing the session.
+The commands can be created using the https://github.com/apache/incubator-kie-drools/blob/999-20240521/kie-internal/src/main/java/org/kie/internal/command/CommandFactory.java[`CommandFactory`].
 
-setGlobal and getGlobal are two commands relevant to both Drools and jBPM.
-
-Set Global calls setGlobal underneath. The optional boolean indicates whether the command should return the global's value as part of the ExecutionResults. If true it uses the same name as the global name. A String can be used instead of the boolean, if an alternative name is desired.
-
+//TODO replace with some non cheese example, more business like
 [source,java]
 ----
 StatelessKieSession ksession = kbase.newStatelessKieSession();
-ExecutionResults bresults =
+ExecutionResults results =
     ksession.execute(CommandFactory.newSetGlobal("stilton", new Cheese("stilton"), true);
-Cheese stilton = bresults.getValue("stilton");
+Cheese stilton = results.getValue("stilton");
 ----
 
-Allows an existing global to be returned.
-The second optional String argument allows for an alternative return name.
-
-[source,java]
-----
-StatelessKieSession ksession = kbase.newStatelessKieSession();
-ExecutionResults bresults =
-    ksession.execute(CommandFactory.getGlobal("stilton");
-Cheese stilton = bresults.getValue("stilton");
-----
-
-All the previous examples execute single commands.
+The previous example executes a single command.
 The `BatchExecution` represents a composite command, created from a list of commands.
 It will iterate over the list and execute each command in turn.
-This means you can insert some objects, start a process, call `fireAllRules` and execute a query, all in a single execute(…​) call, which is quite powerful.
+This means you can insert some objects, start a process, call `fireAllRules` and execute a query, all in a single `execute(…​)` call, which is quite powerful.
 
 The `StatelessKieSession` will execute `fireAllRules()` automatically at the end.
 However the keen-eyed reader probably has already noticed the `FireAllRules` command and wondered how that works with a `StatelessKieSession`.
 The `FireAllRules` command is allowed, and using it will disable the automatic execution at the end; think of using it as a sort of manual override function.
 
 Any command, in the batch, that has an out identifier set will add its results to the returned `ExecutionResults` instance.
-Let's look at a simple example to see how this works.
-The example presented includes command from the Drools and jBPM, for the sake of illustration.
-They are covered in more detail in the Drool and jBPM specific sections.
+Let\'s look at a simple example to see how this works.
 
+// TODO replace chceese example with more business like
 [source,java]
 ----
 StatelessKieSession ksession = kbase.newStatelessKieSession();
@@ -277,20 +265,20 @@ Cheese stilton = (Cheese) bresults.getValue("stilton");
 QueryResults qresults = (QueryResults) bresults.getValue("cheeses");
 ----
 
-In the previous example multiple commands are executed, two of which populate the ExecutionResults.
+In the previous example multiple commands are executed, two of which populate the `ExecutionResults`.
 The query command defaults to use the same identifier as the query name, but it can also be mapped to a different identifier.
 
 === StatelessKieSession
-The StatelessKieSession wraps the `KieSession`, instead of extending it.
+The `StatelessKieSession` wraps the `KieSession`, instead of extending it.
 Its main focus is on the decision service type scenarios.
 It avoids the need to call `dispose()`.
 Stateless sessions do not support iterative insertions and the method call `fireAllRules()` from Java code; the act of calling `execute()` is a single-shot method that will internally instantiate a `KieSession`, add all the user data and execute user commands, call `fireAllRules()`, and then call `dispose()`.
-While the main way to work with this class is via the `BatchExecution` (a subinterface of `Command`) as supported by the `CommandExecutor` interface, two convenience methods are provided for when simple object insertion is all that's required.
-The `CommandExecutor` and `BatchExecution` are talked about in detail in their own section.
+While the main way to work with this class is via the `BatchExecution` (a subinterface of `Command`) as supported by the `CommandExecutor` interface, two convenience methods are provided for when simple object insertion is all that\'s required.
 
 Our simple example shows a stateless session executing a given collection of Java objects using the convenience API.
 It will iterate the collection, inserting each element in turn.
 
+// TODO check if this snippet would be working with real `collection`
 [source,java]
 ----
 StatelessKieSession ksession = kbase.newStatelessKieSession();
@@ -299,12 +287,13 @@ ksession.execute(collection);
 
 If this was done as a single `Command` it would be as follows:
 
+// TODO check the code snippet
 [source,java]
 ----
 ksession.execute(CommandFactory.newInsertElements(collection));
 ----
 
-If you wanted to insert the collection itself, and the collection's individual elements, then `CommandFactory.newInsert(collection)` would do the job.
+If you wanted to insert the collection itself, and the collection\'s individual elements, then `CommandFactory.newInsert(collection)` would do the job.
 
 Methods of the `CommandFactory` create the supported commands, all of which can be marshalled using XStream and the `BatchExecutionHelper`.
 `BatchExecutionHelper` provides details on the XML format as well as how to use Drools Pipeline to automate the marshalling of `BatchExecution` and `ExecutionResults`.
@@ -359,5 +348,125 @@ results.getValue("person");
 results.getValue("Get People");
 ----
 
-== Execute DMN models
-Will be a maven project
+== DMN model execution
+You can create or import DMN files in your Drools project using KIE DMN Editor or package the DMN files as part of your project knowledge JAR (KJAR) file without KIE DMN Editor.
+
+After you implement your DMN files in your Drools project, you can execute the DMN decision service by instantiating a KIE container that contains it directly as a dependency of the calling application.
+Other options for creating and deploying DMN knowledge packages are also available, and most are similar for all types of knowledge assets, such as DRL files or process definitions.
+
+Alternatively, you could package your DMN files as part of a Kogito cloud-native microservice.
+
+For information about including external DMN assets with your project packaging and deployment method, see the Build, Deploy, Utilize and Run section.
+
+A KIE container is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Maven dependencies for the KJAR.
+You typically embed knowledge assets directly into a project if there is a tight relationship between the version of the code and the version of the DMN definition.
+Any changes to the decision take effect after you have intentionally updated and redeployed the application.
+A benefit of this approach is that proper operation does not rely on any external dependencies to the run time, which can be a limitation of locked-down environments.
+
+Using Maven dependencies enables further flexibility because the specific version of the decision can dynamically change, (for example, by using a `kmodule.xml` or a system property), and it can be periodically scanned for updates and automatically updated.
+This introduces an external dependency on the deploy time of the service, but executes the decision locally, reducing reliance on an external service being available during run time.
+
+=== Prerequisites
+You have built the DMN project as a KJAR artifact and deployed it to a Maven repository, or you have included your DMN assets as part of your project classpath:
+
+[source,bash]
+----
+mvn clean install
+----
+
+=== Procedure
+In your client application, add the following dependencies to the relevant classpath of your Java project:
+
+[source,xml]
+----
+<!-- Required for the DMN runtime API -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-dmn-core</artifactId>
+  <version>9.1.0.rc2-ibm-0001</version>
+</dependency>
+
+<!-- Required if not using classpath KIE container -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-ci</artifactId>
+  <version>9.1.0.rc2-ibm-0001</version>
+</dependency>
+----
+
+Instead of specifying a Drools `<version>` for individual dependencies, consider adding the Drools bill of materials (BOM) dependency to dependencyManagement section of your project pom.xml file.
+When you add the BOM files, the correct versions of transitive dependencies from the provided Maven repositories are included in the project.
+
+.Example BOM dependency:
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-dmn-bom</artifactId>
+  <version>9.1.0.rc2-ibm-0001</version>
+  <scope>import</scope>
+  <type>pom</type>
+</dependency>
+----
+
+.Create a KIE container from classpath or ReleaseId:
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+ReleaseId releaseId = kieServices.newReleaseId( "org.acme", "my-kjar", "1.0.0" );
+KieContainer kieContainer = kieServices.newKieContainer( releaseId );
+----
+
+.Alternative option:
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+.Obtain `DMNRuntime` from the KIE container and a reference to the DMN model to be evaluated, by using the model namespace and modelName:
+[source,java]
+----
+DMNRuntime dmnRuntime = KieRuntimeFactory.of(kieContainer.getKieBase()).get(DMNRuntime.class);
+
+String namespace = "http://www.redhat.com/_c7328033-c355-43cd-b616-0aceef80e52a";
+String modelName = "dmn-movieticket-ageclassification";
+
+DMNModel dmnModel = dmnRuntime.getModel(namespace, modelName);
+----
+.Execute the decision services for the desired model:
+[source,java]
+----
+DMNContext dmnContext = dmnRuntime.newContext();  
+
+for (Integer age : Arrays.asList(1,12,13,64,65,66)) {
+    dmnContext.set("Age", age);  
+    DMNResult dmnResult =
+        dmnRuntime.evaluateAll(dmnModel, dmnContext);  
+
+    for (DMNDecisionResult dr : dmnResult.getDecisionResults()) {  
+        log.info("Age: " + age + ", " +
+                 "Decision: '" + dr.getDecisionName() + "', " +
+                 "Result: " + dr.getResult());
+  }
+}
+----
+
+Instantiate a new DMN Context to be the input for the model evaluation.
+Note that this example is looping through the Age Classification decision multiple times.
+Assign input variables for the input DMN context.
+Evaluate all DMN decisions defined in the DMN model.
+Each evaluation may result in one or more results, creating the loop.
+This example prints the following output:
+
+[source,bash]
+----
+Age 1 Decision 'AgeClassification' : Child
+Age 12 Decision 'AgeClassification' : Child
+Age 13 Decision 'AgeClassification' : Adult
+Age 64 Decision 'AgeClassification' : Adult
+Age 65 Decision 'AgeClassification' : Senior
+Age 66 Decision 'AgeClassification' : Senior
+----
