@@ -5,6 +5,26 @@ This section lists the newly supported Business Process Model And Notation (BPMN
 
 New elements: process variables, events, service tasks a.k.a work item handlers, script and decision tasks, timers, Human-tasks 
 
+== BPMN Elements supported in a stateful workflow
+As this technology preview provides persistence to support stateful workflow execution, all BPMN elements that go through an idle state are supported. 
+
+|=== 
+|Element | Type | Description 
+|Intermediate Message | Event | Causes idle time till a message is provided 
+|Intermediate Signal | Event | Causes idle time till a signal is provided
+|Intermediate Timer  | Event | Causes idle time till timer times out
+|Human Task Node | Activity | Calls human task subsystem and waits till human completes the task
+|Human Task Notification | HT Event | Notifications HT
+|Human Task Deadline  | HT Event | Deadline notifications
+|Boundary Event Message   | Event | Causes branch a path in an ongoing activity execution when a message is reaches it (might cancel or not)
+|Boundary Event Signal  | Event | Boundary Event Signal
+|Boundary Event Timer  | Event | Causes branch a path in an ongoing activity execution when a timer timesout (might cancel or not)
+|Start Event Message  | Event | Causes to start an execution of a workflow when a message reaches the engine
+|Start Event Signal  | Event | Causes to start an execution of a workflow when a signal reaches the engine
+|Event Gateway  | Event | Causes several waiting at the same time
+|AdHoc Tasks  | Activity | Allows triggering tasks when there is no incoming connections
+|AdHoc Subprocess  | Event | Allows triggering a subprocess when there is no incoming connection to a subprocess
+|===
 
 For more information about BPMN, see the Object Management Group (OMG) Business Process Model and Notation 2.0 specification https://www.omg.org/spec/BPMN/2.0/About-BPMN 
 
