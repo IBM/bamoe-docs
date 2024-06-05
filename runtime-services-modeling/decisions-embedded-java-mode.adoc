@@ -1,15 +1,12 @@
 = Decisions Embedded Java mode
 include::../partials/attributes.adoc[]
 
-This documentation is a simplified version of the community documentation available https://docs.drools.org/8.44.0.Final/drools-docs/drools/KIE/index.html[here].
+Building a DRL based project makes use of Apache Maven and aligns with standard Apache Maven practices.
+These projects or modules are simply an Apache Maven Java project or module; with an additional metadata: file `META-INF/kmodule.xml`.
+The `kmodule.xml` file is the descriptor that selects resources to knowledge bases and configures those bases and sessions.
 
-Building Drools-based KIE project make use of Maven, and aligns with Maven practices.
-A KIE project or module is simply a Maven Java project or module; with an additional metadata file `META-INF/kmodule.xml`.
-The `kmodule.xml` file is the descriptor that selects resources to KIE bases and configures those KIE bases and sessions.
-We explain those later in this document.
-
-While standard Maven can build and package KIE resources, it will not provide validation at build time.
-There is a Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
+While standard Apache Maven can build and package these resources, it will not provide validation at build time.
+There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
 The plugin also generates many classes, making the runtime loading faster too.
 
 == kmodule.xml
@@ -36,8 +33,8 @@ KieContainer kieContainer = kieServices.getKieClasspathContainer();
 `KieServices` is the interface from where it is possible to access all the KIE building and runtime facilities.
 In the code above, all the Java sources and the KIE resources are compiled and deployed into the `KieContainer` which makes its contents available for use at runtime.
 
-The `kmodule.xml` allows to define and configure one or more `KieBase` s and for each `KieBase` all the different `KieSession` s that can be created from it, as showed by the https://docs.drools.org/8.44.0.Final/drools-docs/drools/KIE/index.html#_thekmodulexmlfile[example].
-Then it is possible to simply retrieve the `KieBase` s and `KieSession` s from the `KieContainer` using their names.
+The `kmodule.xml` allows to define and configure one or more `KieBase`s and for each `KieBase` all the different `KieSession`s that can be created from it, as showed by the https://docs.drools.org/8.44.0.Final/drools-docs/drools/KIE/index.html#_thekmodulexmlfile[example].
+Then it is possible to simply retrieve the `KieBase`s and `KieSession` s from the `KieContainer` using their names.
 
 .Obtaining KieBase and KieSession using their names from kmodule.xml
 [source,java]
@@ -52,10 +49,10 @@ StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2
 
 == pom.xml
 To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
-Also few KIE specific dependencies are needed.
+Also few a KIE specific dependencies are needed.
 Please update your `pom.xml` in the following way.
 
-// TODO is 9.1.0.rc2-ibm-0001 the final to use?
+// TODO is 9.1.0.rc3-ibm-0001 the final to use?
 [source,xml]
 ----
   <packaging>kjar</packaging>
@@ -64,30 +61,30 @@ Please update your `pom.xml` in the following way.
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-compiler</artifactId>
-      <version>9.1.0.rc2-ibm-0001</version>
+      <version>9.1.0.rc3-ibm-0001</version>
     </dependency>
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-model-compiler</artifactId>
-      <version>9.1.0.rc2-ibm-0001</version>
+      <version>9.1.0.rc3-ibm-0001</version>
     </dependency>
     <!-- For DebugRuleRuntimeEventListener.java -->
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-core</artifactId>
-      <version>9.1.0.rc2-ibm-0001</version>
+      <version>9.1.0.rc3-ibm-0001</version>
     </dependency>  
     <!-- For DRL files -->
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-mvel</artifactId>
-      <version>9.1.0.rc2-ibm-0001</version>
+      <version>9.1.0.rc3-ibm-0001</version>
     </dependency>
     <!-- For kmodule.xml -->
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-xml-support</artifactId>
-      <version>9.1.0.rc2-ibm-0001</version>
+      <version>9.1.0.rc3-ibm-0001</version>
     </dependency>
     <!-- Logging -->
     <dependency>
@@ -107,7 +104,7 @@ Please update your `pom.xml` in the following way.
       <plugin>
         <groupId>org.kie</groupId>
         <artifactId>kie-maven-plugin</artifactId>
-        <version>9.1.0.rc2-ibm-0001</version>
+        <version>9.1.0.rc3-ibm-0001</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>
@@ -115,14 +112,13 @@ Please update your `pom.xml` in the following way.
 ----
 
 == DRL based rules execution
-Before we execute DRL based rules in java, we will mention few KIE API classes.
+Before we execute DRL based rules in java, we will mention a few KIE API classes.
 
 === KieBase
-The `KieBase` is a repository of all the application\'s knowledge definitions.
+The `KieBase` is a repository of all the application's knowledge definitions.
 It will contain rules, processes, functions, and type models.
 The `KieBase` itself does not contain data; instead, sessions are created from the `KieBase` into which data can be inserted and from which process instances may be started.
 The `KieBase` can be obtained from the `KieContainer` containing the `KieModule` where the `KieBase` has been defined.
-
 
 [source,java]
 ----
@@ -134,8 +130,8 @@ The `KieSession` stores and executes on the runtime data.
 It is created from the `KieBase` and has two implementations.
 
 ==== Stateful
-The first one is https://docs.drools.org/8.44.0.Final/drools-docs/drools/rule-engine/index.html#kie-sessions-stateful-con_rule-engine[stateful].
-It is obtained using `newKieSession()` method.
+The first session https://docs.drools.org/8.44.0.Final/drools-docs/drools/rule-engine/index.html#kie-sessions-stateful-con_rule-engine[stateful].
+It is obtained using the `newKieSession()` method.
 Stateful sessions can be worked with iteratively over time.
 
 [source,java]
@@ -144,7 +140,7 @@ KieSession kieSession = kieBase.newKieSession();
 ----
 
 === Stateless
-The second one is https://docs.drools.org/8.44.0.Final/drools-docs/drools/rule-engine/index.html#kie-sessions-stateless-con_rule-engine[stateless].
+The session is https://docs.drools.org/8.44.0.Final/drools-docs/drools/rule-engine/index.html#kie-sessions-stateless-con_rule-engine[stateless].
 It is obtained using `newStatelessKieSession()` method.
 Stateless is a one-off execution of a `KieRuntime` with a provided data set.
 It may return some results, with the session being disposed at the end, prohibiting further iterative interactions.
@@ -162,16 +158,16 @@ The `KieRuntime` provides methods that are applicable to both rules and processe
 ==== Globals
 Globals are named objects that are made visible to the Drools rule engine, but in a way that is fundamentally different from the one for facts: changes in the object backing a global do not trigger reevaluation of rules.
 Still, globals are useful for providing static information, as an object offering services that are used in the RHS of a rule, or as a means to return objects from the Drools rule engine.
-When you use a global on the LHS of a rule, make sure it is immutable, or, at least, don\'t expect changes to have any effect on the behavior of your rules.
+When you use a global on the LHS of a rule, make sure it is immutable, or, at least, don't expect changes to have any effect on the behavior of your rules.
 
-A global must be declared in a rules file, and then it needs to be backed up with a Java object.
+A global must be declared in a rules file, then it needs to be backed up with a Java object.
 
 [source]
 ----
 global java.util.List list
 ----
 
-With the KIE base now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global\'s name and an object, for any session, to associate the object with the global.
+With the `KieBase` now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global\'s name and an object, for any session, to associate the object with the global.
 Failure to declare the global type and identifier in DRL code will result in an exception being thrown from this call.
 
 [source,java]
@@ -266,7 +262,7 @@ Please notice `"applicant"` and `"application"` identifiers in our example.
 Can be found https://github.com/bamoe/bamoe-docs-source-code-examples/pull/5[here].
 
 == DMN model execution
-You can create or import DMN files in your Drools project using xref:../tools/authoring-decisions.adoc[KIE DMN Editor].
+You can create or import DMN files in your Drools project using the xref:../tools/authoring-decisions.adoc[DMN Editor].
 
 After you implement your DMN files in your Drools project, you can execute the DMN decision service by instantiating a KIE container that contains it directly as a dependency of the calling application.
 Other options for creating and deploying DMN knowledge packages are also available, and most are similar for all types of knowledge assets, such as DRL files or process definitions.
@@ -278,7 +274,7 @@ You typically embed knowledge assets directly into a project if there is a tight
 Any changes to the decision take effect after you have intentionally updated and redeployed the application.
 A benefit of this approach is that proper operation does not rely on any external dependencies to the run time, which can be a limitation of locked-down environments.
 
-Using Maven dependencies enables further flexibility because the specific version of the decision can dynamically change, (for example, by using a `kmodule.xml` or a system property), and it can be periodically scanned for updates and automatically updated.
+Using Apache Maven dependencies enables further flexibility because the specific version of the decision can dynamically change, (for example, by using a `kmodule.xml` or a system property), and it can be periodically scanned for updates and automatically updated.
 This introduces an external dependency on the deploy time of the service, but executes the decision locally, reducing reliance on an external service being available during run time.
 
 === Prerequisites
