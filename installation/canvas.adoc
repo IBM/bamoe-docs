@@ -1,4 +1,4 @@
-= BAMOE Canvas
+= BAMOE canvas
 include::../partials/attributes.adoc[]
 
 //tag::canvas-description[]
@@ -8,20 +8,20 @@ include::../partials/attributes.adoc[]
 It depends on two backend applications to reach its full potential:
 
 * Extended Services: This powers features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
-* Git CORS Proxy: Provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
+* CORS Proxy: Provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
 
-{CANVAS} itself, as well as its two backend applications, are available as container images.
-These images are published to Quay.io and can be used to run containers locally or in any cloud provider.
+{CANVAS} and its two backend applications are available as container images.
+These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas?tab=tags] @ {VERSION}
-* Extended Services → https://quay.io/repository/bamoe/extended-services?tab=tags[https://quay.io/repository/bamoe/extended-services?tab=tags] @ {VERSION}
-* Git CORS Proxy → https://quay.io/repository/bamoe/git-cors-proxy[https://quay.io/repository/bamoe/git-cors-proxy?tab=tags] @ {VERSION}
+* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {VERSION}
+* Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {VERSION}
+* CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {VERSION}
 
 NOTE: The *exact same version* needs to be used for a deployment with these three images to work.
 
 == Deploying {CANVAS} to OpenShift
 
-If you have a OpenShift cluster and are logged in via the `oc` cli tool, follow these steps to deploy {CANVAS} and its dependencies.
+If you have an OpenShift cluster and are logged in via the `oc` cli tool, follow these steps to deploy {CANVAS} and its dependencies.
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources much easier.
 
@@ -31,7 +31,7 @@ NOTE: Labeling the resources is optional, but it will make organizing and identi
 ----
 export APP_PART_OF=bamoe-canvas-app
 export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
-export APP_NAME_GIT_CORS_PROXY=bamoe-git-cors-proxy
+export APP_NAME_CORS_PROXY=bamoe-cors-proxy
 export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 ----
 . Deploy Extended Services and label its resources
@@ -45,24 +45,24 @@ oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
 ----
-. Deploy Git CORS Proxy and label its resources
+. Deploy CORS Proxy and label its resources
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/git-cors-proxy:{VERSION} --name=$APP_NAME_GIT_CORS_PROXY
-oc create route edge --service=$APP_NAME_GIT_CORS_PROXY
-oc label services/$APP_NAME_GIT_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label routes/$APP_NAME_GIT_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_GIT_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_GIT_CORS_PROXY app.openshift.io/runtime=nodejs
+oc new-app quay.io/bamoe/cors-proxy:{VERSION} --name=$APP_NAME_CORS_PROXY
+oc create route edge --service=$APP_NAME_CORS_PROXY
+oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 ----
-. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the Extended Services and Git CORS Proxy backends.
+. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the Extended Services and CORS Proxy backends.
 +
 [source,shell,subs="attributes+"]
 ----
 oc new-app quay.io/bamoe/canvas:{VERSION} --name=$APP_NAME_BAMOE_CANVAS \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
-  -e KIE_SANDBOX_GIT_CORS_PROXY_URL=https://$(oc get route $APP_NAME_GIT_CORS_PROXY --output jsonpath={.spec.host})
+  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
 oc create route edge --service=$APP_NAME_BAMOE_CANVAS
 oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
@@ -79,7 +79,7 @@ Your {CANVAS} instance should be up and accessible via the route created in this
 oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
-NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the Extended Services and Git CORS Proxy backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the Extended Services and CORS Proxy backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 == Installing and configuring {CANVAS} images manually via Docker
 
@@ -93,11 +93,11 @@ docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{VERSION}
 Access the API through port 21345, no additional configuration is necessary.
 
 
-=== Configuring Git CORS Proxy
+=== Configuring CORS Proxy
 
 [source,shell,subs="attributes+"]
 ----
-docker run -p 8090:8080 -it quay.io/bamoe/git-cors-proxy:{VERSION}
+docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{VERSION}
 # Add the -d flag to run in detached mode.
 ----
 The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image), no additional configuration is necessary.
@@ -108,20 +108,20 @@ In particular, this image needs to be run with two environment variables that wi
 
 `KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
 
-`KIE_SANDBOX_GIT_CORS_PROXY_URL`:: E.g., https://git-cors-proxy.bamoe.company.com[https://git-cors-proxy.bamoe.my-company.com]
+`KIE_SANDBOX_CORS_PROXY_URL`:: E.g., https://cors-proxy.bamoe.company.com[https://cors-proxy.bamoe.my-company.com]
 
-If you're running locally, following the previous steps, use this command to start you {CANVAS} instance with the backend services:
+If you're running locally, following the previous steps, use this command to start your {CANVAS} instance with the backend services:
 [source,shell,subs="attributes+"]
 ----
 docker run -p 8080:8080 -it \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=http://localhost:21345 \
-  -e KIE_SANDBOX_GIT_CORS_PROXY_URL=http://localhost:8090 \
+  -e KIE_SANDBOX_CORS_PROXY_URL=http://localhost:8090 \
   quay.io/bamoe/canvas:{VERSION}
 # Add the -d flag to run in detached mode.
 ----
 The HTTP server is accessed via port 8080.
 
-Several customization options are available. Check more configurations available via environment variables here: https://quay.io/repository/bamoe/canvas?tab=info[https://quay.io/repository/bamoe/canvas?tab=info]
+Several customization options are available. Check out more configurations available via environment variables here: https://quay.io/repository/bamoe/canvas?tab=info[https://quay.io/repository/bamoe/canvas?tab=info]
 
 
 [NOTE]
@@ -139,12 +139,14 @@ By default, {CANVAS} is configured to fetch this image from https://quay.io/repo
 
 [IMPORTANT]
 ====
-The pre-configured image is NOT part of BAMOE, and comes from the open-source KIE community. People installing {CANVAS} must change `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to make sure the used image meets their requirements. For a reference on how to build your own image that is compatible with {CANVAS} Dev deployments, please go to the KIE community's source code for `dmn-dev-deployment-base-image` at https://github.com/kiegroup/kie-tools/tree/{KIE_TOOLS_COMMUNITY_VERSION}/packages/dmn-dev-deployment-base-image
+The pre-configured image is NOT part of {PRODUCT_SHORT}, and resides in the open-source Apache KIE community.
+If you are  installing {CANVAS}, you must change `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to make sure the used image meets your requirements.
+For a reference on how to build your own image that is compatible with {CANVAS} development deployments, please go to the Apache KIE community's source code for `dmn-dev-deployment-base-image` at https://github.com/apache/incubator-kie-tools/tree/{KIE_TOOLS_COMMUNITY_VERSION}/packages/dmn-dev-deployment-base-image.
 ====
 
-If you're installing {CANVAS} to an air-gapped environment, you're going to need to configure `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access.
+If you're installing {CANVAS} to an air-gapped environment, you're going to need to configure `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
-For example, imagine a user is creating Dev deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
+For example, imagine a user is creating development deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
 This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev deployments for Decisions.
 

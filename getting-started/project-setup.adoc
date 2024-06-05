@@ -1,4 +1,4 @@
-= Initial Project Setup and Walkthrough
+= Initial project setup and walkthrough
 include::../partials/attributes.adoc[]
 
 //tag::maven-setup[]
@@ -47,7 +47,7 @@ mvn io.quarkus:quarkus-maven-plugin:2.16.7.Final:create \
 ----
 
 
-. Add the `bamoe-bom`, `kogito-bom` and `bamoe-ilmt-compliance-quarkus-pamoe` dependency into the `pom.xml` file.
+. Add the `bamoe-bom`, `kogito-bom` and `bamoe-ilmt-compliance-quarkus-pamoe` dependencies to the `pom.xml` file.
 +
 [source,xml]
 ----
@@ -105,7 +105,7 @@ You will get some Maven stream once again, and at the end of it you should have:
 == Editing within VS Code
 
 . Open the project in VS Code.
-  From here we can see the workspace's contents and if we expand the contents of `/src/main` you will see the creation of several artifacts. 
+  From here we can see the workspace's contents, and if we expand the contents of `/src/main` you will see the creation of several artifacts. 
   Within `java` you will have a `GreetingResource.java` and within `resources` you will have an `application.properties` and `pricing.dmn` file. 
   These are sample files that can be later modified or deleted.
 +
@@ -113,28 +113,29 @@ image::workspace-layout.png[VSCode Workspace Layout]
 
 . Install {VS_CODE_BUNDLE_LINK}[*{VS_CODE_BUNDLE}*].
   This gives you access to the visual editors for DMN and BPMN files.
-  It also allows you to create and edit testing scenarios for project.
+  It also allows you to create and edit testing scenarios for projects.
 +
 image::bamoe-vscode-marketplace.png[{VS_CODE_BUNDLE} within the marketplace]
 
 . Let's first click the `pricing.dmn` file to open it. 
-  When you do so you may be greeted with a message similar to `This diagram does not have layout information. Click 'Yes' to compute optimal layout, it takes time according to the diagram size. 
+  When you do so, you may be greeted with a message similar to `This diagram does not have layout information. Click 'Yes' to compute optimal layout, it takes time according to the diagram size. 
   Click 'No' to proceed without layout. 
-  Please save the layout changes once diagram is opened.` - if so click `Yes` to automap the DMN locations.
+  Please save the layout changes once diagram is opened.` 
+  If so click `Yes` to automap the DMN locations.
 +
 image::automatic-layout.png[Automatic Layout]
 
 . When the diagram opens you will see something similar to below, so we will start exploring it. 
-  The DMN is made up of two inputs *Age* and *Previous incidents?*, which are used to make the decision, *Base price*.
+  The DMN is made up of two inputs: *Age* and *Previous incidents?*, which are used to make the decision, *Base price*.
 +
-image::workspace-layout.png[DMN First view]
+image::dmn-first-view.png[DMN First view]
 
 . If you click *Age* and then click the *Properties* icon on the right, you will open a pane for the input.
 +
 image::properties-open.png[DMN Properties]
 
-. Within this pane, you can see information about the input *Age*, this includes that it is a number and what the input name is. 
-  More can be changed around this object, including changing the color of the node, font size, etc.
+. Within this pane, you can see information about the input *Age*, which includes that it is a number and what the input name is. 
+  More can be changed around this object, including the color of the node, font size, etc.
 +
 image::properties-expanded.png[DMN Properties Expanded]
 
@@ -143,7 +144,7 @@ image::properties-expanded.png[DMN Properties Expanded]
 image::open-decision.png[Edit DMN Decision]
 
 . From here you will see the Decision Table that is associated with the Base Price decision. 
-  From here you will see two (2) input columns (`Age` and `Previous Incidents`), as well as one output column (`Base price`) all with their types below them. 
+  From here you will see two (*2*) input columns (`Age` and `Previous Incidents`), as well as one output column (`Base price`) all with their types below them. 
   These types are controlled from the properties panel similarly to how they were opened when looking at `Age` a few steps ago. 
   This decision has 4 different rows that could fire, with a Hit Policy of `UNIQUE` signified by the **U** in the top left corner of the table. 
   A decision writer could make any comments they want to the table and have them saved towards the decision here.
@@ -153,10 +154,11 @@ image::dt-stable.png[Viewing DMN Decision]
 
 == Create a GitHub repository for the project
 
-One last thing we're going to do is to create a GitHub repository for this service, so you have somewhere to store our changes and also take advantage of building it into a cloud service running on OpenShift. 
+One last thing we're going to do is create a GitHub repository for this service, so we have somewhere to store our changes and also take advantage of building it into a cloud service running on OpenShift. 
 
 . You can create a repository on https://github.com[GitHub]. 
-  To do this login to your GitHub username (or create one if you don't have one!) and from your home page and click the green `New` icon near the top left of the page (or you can navigate directly to https://github.com/new[here])
+  To do this, log in to your GitHub account (or create one if you don't have one!) 
+  From your home page, click the green `New` icon near the top left of the page (or you can navigate directly https://github.com/new[here])
 +
 image::new-repo.png[New Repo]
 
@@ -173,5 +175,15 @@ image::repo-form.png[Repo Form]
   GitHub has some recommendations, if you would like to follow them.
 +
 image::cli-create.png[Sample Command]
+
+. Add, commit, and push this project to your newly created repository via the following commands:
++
+[source,console]
+----
+git add -A
+git commit -m "Adding my project"
+git push origin
+----
++
 
 . When this is done, you are finsihed with this section. 
