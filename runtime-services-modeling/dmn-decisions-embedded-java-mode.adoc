@@ -1,31 +1,15 @@
-= DMN Decisions Embedded Java mode
+= DMN Decisions Execution in Embedded Java mode
 include::../partials/attributes.adoc[]
 
-== DMN model execution
 You can create or import DMN files in your Drools project using the xref:../tools/authoring-decisions.adoc[DMN Editor].
 
-After you implement your DMN files in your Drools project, you can execute the DMN decision service by instantiating a KIE container that contains it directly as a dependency of the calling application.
-Other options for creating and deploying DMN knowledge packages are also available, and most are similar for all types of knowledge assets, such as DRL files or process definitions.
+After you implement your DMN files in your Drools project, you can execute the DMN decision service by instantiating a https://github.com/apache/incubator-kie-drools/blob/999-20240521/kie-api/src/main/java/org/kie/api/runtime/KieContainer.java[`KieContainer`].
+It very similar to xref:drl-rules-embedded-java-mode.adoc[DRL Rules Execution in Embedded Java mode].
 
-Alternatively, you could package your DMN files as part of a Kogito cloud-native microservice.
-
-A KIE container is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Maven dependencies for the KJAR.
+A `KieContainer` is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Apache Maven dependencies for the KJAR.
 You typically embed knowledge assets directly into a project if there is a tight relationship between the version of the code and the version of the DMN definition.
-Any changes to the decision take effect after you have intentionally updated and redeployed the application.
-A benefit of this approach is that proper operation does not rely on any external dependencies to the run time, which can be a limitation of locked-down environments.
 
-Using Apache Maven dependencies enables further flexibility because the specific version of the decision can dynamically change, (for example, by using a `kmodule.xml` or a system property), and it can be periodically scanned for updates and automatically updated.
-This introduces an external dependency on the deploy time of the service, but executes the decision locally, reducing reliance on an external service being available during run time.
-
-=== Prerequisites
-You have built the DMN project as a KJAR artifact and deployed it to a Maven repository, or you have included your DMN assets as part of your project classpath:
-
-[source,bash]
-----
-mvn clean install
-----
-
-=== Procedure
+== pom.xml
 In your client application, add the following dependencies to the relevant classpath of your Java project:
 
 [source,xml]
@@ -36,19 +20,12 @@ In your client application, add the following dependencies to the relevant class
   <artifactId>kie-dmn-core</artifactId>
   <version>9.1.0.rc3-ibm-0001</version>
 </dependency>
-
-<!-- Required if not using classpath KIE container -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-ci</artifactId>
-  <version>9.1.0.rc3-ibm-0001</version>
-</dependency>
 ----
 
-Instead of specifying a Drools `<version>` for individual dependencies, consider adding the Drools bill of materials (BOM) dependency to dependencyManagement section of your project pom.xml file.
-When you add the BOM files, the correct versions of transitive dependencies from the provided Maven repositories are included in the project.
+Instead of specifying a Drools `<version>` for individual dependencies, consider adding the Drools bill of materials (BOM) dependency to dependencyManagement section of your project `pom.xml` file.
+When you add the BOM files, the correct versions of transitive dependencies from the provided Apache Maven repositories are included in the project.
 
-.Example BOM dependency:
+.Example BOM dependency
 [source,xml]
 ----
 <dependency>
@@ -60,16 +37,13 @@ When you add the BOM files, the correct versions of transitive dependencies from
 </dependency>
 ----
 
-.Create a KIE container from classpath or ReleaseId:
-[source,java]
-----
-KieServices kieServices = KieServices.Factory.get();
+== KieContainer
+It is a common entry point for an execution of all KIE assets.
+`KieContainer` determines where to search for KIE assets that will be loaded into our application.
 
-ReleaseId releaseId = kieServices.newReleaseId( "org.acme", "my-kjar", "1.0.0" );
-KieContainer kieContainer = kieServices.newKieContainer( releaseId );
-----
+In this example all assets from the `src/main/resources` will be loaded into our application.
 
-.Alternative option:
+.Create a KieContainer from classpath
 [source,java]
 ----
 KieServices kieServices = KieServices.Factory.get();
@@ -77,7 +51,23 @@ KieServices kieServices = KieServices.Factory.get();
 KieContainer kieContainer = kieServices.getKieClasspathContainer();
 ----
 
-.Obtain DMNRuntime from the KIE container and a reference to the DMN model to be evaluated, by using the model namespace and modelName:
+In this example all assets from the given Apache Maven dependency (`org.acme:my-kjar:1.0.0`) will be loaded into our application.
+
+.Create a KieContainer from ReleaseId
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+ReleaseId releaseId = kieServices.newReleaseId("org.acme", "my-kjar", "1.0.0");
+KieContainer kieContainer = kieServices.newKieContainer(releaseId);
+----
+
+== DMNModel
+To execute a DMN Decision we need to know the DMN model namespace and model name.
+Both can be found in the properties panel of the DMN Editor.
+In this example we use namespace and model name from the <<_complete_example>>.
+
+.Obtain DMNRuntime from the KIE container and a reference to the DMN model to be evaluated, by using the model namespace and modelName
 [source,java]
 ----
 DMNRuntime dmnRuntime = KieRuntimeFactory.of(kieContainer.getKieBase()).get(DMNRuntime.class);
@@ -87,12 +77,27 @@ String modelName = "loan-application-age-limit";
 
 DMNModel dmnModel = dmnRuntime.getModel(namespace, modelName);
 ----
-.Execute the decision services for the desired model:
+
+== DMNContext
+`DMNContext` is a holder for the input values.
+It should contain a value for each corresponding `InputData` node of or DMN model.
+In this example, `"Applicant"` and `"Application"` are `InputData` nodes from the <<_complete_example>>.
+
+.Prepare data for the DMN Model execution
 [source,java]
 ----
 DMNContext dmnContext = dmnRuntime.newContext();  
 dmnContext.set("Applicant", new Applicant("#0001", 20));  
 dmnContext.set("Application", new LoanApplication("#0001"));  
+----
+
+== DMNResult
+In the example below we execute the DMN model and consequently we iterate its results.
+We should be able to see results for all `Decision` nodes of the given DMN Model.
+
+.Execute the DMN Model
+[source,java]
+----
 DMNResult dmnResult = dmnRuntime.evaluateAll(dmnModel, dmnContext);  
 
 for (DMNDecisionResult dr : dmnResult.getDecisionResults()) {  
@@ -102,16 +107,13 @@ for (DMNDecisionResult dr : dmnResult.getDecisionResults()) {
 }
 ----
 
-Instantiate a new DMN Context to be the input for the model evaluation.
-Assign input variables for the input DMN context.
-Evaluate all DMN decisions defined in the DMN model.
-This example prints the similar output:
+For executing <<_complete_example>> model, we should see output like below.
 
 [source,bash]
 ----
 Decision: 'Approvement', Result: {approved=false, explanation=Underage}
 ----
 
-=== Complete example
+== Complete example
 // TODO update link once PR merged
 Can be found https://github.com/bamoe/bamoe-docs-source-code-examples/pull/5[here].
