@@ -1,0 +1,592 @@
+= Executing Services
+include::../partials/attributes.adoc[]
+
+[role="_abstract"]
+
+// tag::con-kogito-service-execution[]
+[id="con-kogito-service-execution"]
+
+[role="_abstract"]
+After you design your {PRODUCT} service, you can build and run your application, sending REST API requests to the application to execute your services. The exact REST API requests that you can use depend on how you set up the application.
+
+For example, consider a {PRODUCT} service that is set up to generate a `/persons` REST API endpoint and that determines whether a specified customer is an adult or is underage. In this example, you can send the following `POST` request using a REST client or curl utility to add an adult and execute the service:
+
+.Example POST request body to add an adult (JSON)
+[source,json]
+----
+{
+  "person": {
+    "name": "John Quark",
+    "age": 20
+  }
+}
+----
+
+.Example curl command to add an adult
+[source]
+----
+curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -H 'accept: application/json' -d '{"person": {"name":"John Quark", "age": 20}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "id": "3af806dd-8819-4734-a934-728f4c819682",
+  "person": {
+    "name": "John Quark",
+    "age": 20,
+    "adult": false
+  },
+  "isAdult": true
+}
+----
+
+Note that for JSON marshaling, {PRODUCT_SHORT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
+// end::con-kogito-service-execution[]
+
+[id="ref-rest-dmn-endpoints"]
+=== REST endpoints for DMN models in {PRODUCT}
+
+[role="_abstract"]
+For each DMN model in a {PRODUCT_SHORT} application, the following REST endpoints are automatically generated based on the content of the model:
+
+* `[POST] /\{modelName\}`: A business-domain endpoint for evaluating the entire DMN model
+* `[POST] /\{modelName\}/\{decisionServiceName\}`: A business-domain endpoint for evaluating a specified decision service component in the DMN model
+* `[POST] /\{modelName\}/dmnresult`: An endpoint for evaluating the entire DMN model and returning a `DMNResult` response, including the business-domain context, helper messages, and helper decision pointers for the DMN model
+* `[POST] /\{modelName\}/\{decisionServiceName\}/dmnresult`: An endpoint for evaluating a specified decision service component in the DMN model and returning a `DMNResult` response, including the business-domain context, helper messages, and helper decision pointers for the decision service
+* `[GET] /\{modelName\}`: An endpoint for returning the DMN XML without decision logic, typically for DMN model introspection
+
+You can use these endpoints to interact with a DMN model or a specific decision service within a model. To help you decide between using business-domain and `dmnresult` variants of these REST endpoints, review the following considerations:
+
+* *REST business-domain endpoints*: Use this endpoint type if a client application only requires a positive evaluation outcome, doesn't need to parse `Info` or `Warn` messages, and only needs an HTTP 5xx response for any errors. This type of endpoint is also helpful for single-page application-like clients, due to singleton coercion of decision service results that resemble the DMN modeling behavior.
+* *REST `dmnresult` endpoints*: Use this endpoint type if a client needs to parse `Info`, `Warn`, or `Error` messages in all cases.
+
+For each endpoint, use a REST client, curl utility, or Swagger UI (if configured for the application) to send requests with the following components:
+
+* *Base URL*: `http://__HOST__:__PORT__/\{modelName}`
+* *Path parameters*:
+** `\{modelName\}`: The string identifier of the DMN model, such as `Traffic Violation`
+** `\{decisionServiceName\}`: The string identifier of the decision service component in the DMN DRG, such as `TrafficViolationDecisionService`
+** `dmnresult`: The string identifier that enables the endpoint to return a full `DMNResult` response with more detailed `Info`, `Warn`, and `Error` messaging
+* *HTTP headers*: For `POST` requests only:
+** `accept`: `application/json`
+** `content-type`: `application/json`
+* *HTTP methods*: `GET` or `POST`
+
+The examples in the following endpoints are based on a `Traffic Violation` DMN model that contains a `TrafficViolationDecisionService` decision service component.
+
+For all of these endpoints, if a DMN evaluation `Error` message occurs, a `DMNResult` response is returned along with an HTTP 5xx error. If a DMN `Info` or `Warn` message occurs, the relevant response is returned with the business-domain REST body, in the `X-{PRODUCT}-decision-messages` extended HTTP header, to be used for client-side business logic. When more refined client-side business logic is required, the client can use the `dmnresult` variant of the endpoints.
+
+Return the DMN XML without decision logic::
++
+--
+`[GET] /\{modelName\}`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example curl request
+[source]
+----
+curl -X GET http://localhost:8080/Traffic Violation
+----
+
+.Example response (XML)
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<dmn:definitions xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/" xmlns="https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="http://www.drools.org/kie/dmn/1.2" xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/" xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="_1C792953-80DB-4B32-99EB-25FBE32BAF9E" name="Traffic Violation" expressionLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/" typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/" namespace="https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF">
+  <dmn:itemDefinition id="_63824D3F-9173-446D-A940-6A7F0FA056BB" name="tDriver" isCollection="false">
+    ...
+  </dmn:itemDefinition>
+  <dmn:itemDefinition id="_2D4F30EE-21A6-4A78-A524-A5C238D433AE" name="tFine" isCollection="false">
+    ...
+  </dmn:itemDefinition>
+  <dmn:decision id="_4055D956-1C47-479C-B3F4-BAEB61F1C929" name="Fine">
+    <dmn:variable id="_8C1EAC83-F251-4D94-8A9E-B03ACF6849CD" name="Fine" typeRef="tFine">
+    </dmn:variable>
+    <dmn:informationRequirement id="_800A3BBB-90A3-4D9D-BA5E-A311DED0134F">
+      <dmn:requiredInput href="#_1929CBD5-40E0-442D-B909-49CEDE0101DC">
+      </dmn:requiredInput>
+    </dmn:informationRequirement>
+  </dmn:decision>
+  <dmn:decision id="_8A408366-D8E9-4626-ABF3-5F69AA01F880" name="Should the driver be suspended?">
+    <dmn:question>Should the driver be suspended due to points on his license?</dmn:question>
+    <dmn:allowedAnswers>"Yes", "No"</dmn:allowedAnswers>
+    <dmn:variable id="_40387B66-5D00-48C8-BB90-E83EE3332C72" name="Should the driver be suspended?" typeRef="string">
+    </dmn:variable>
+    <dmn:informationRequirement id="_982211B1-5246-49CD-BE85-3211F71253CF">
+      <dmn:requiredInput href="#_1F9350D7-146D-46F1-85D8-15B5B68AF22A">
+      </dmn:requiredInput>
+    </dmn:informationRequirement>
+    <dmn:informationRequirement id="_AEC4AA5F-50C3-4FED-A0C2-261F90290731">
+      <dmn:requiredDecision href="#_4055D956-1C47-479C-B3F4-BAEB61F1C929">
+      </dmn:requiredDecision>
+    </dmn:informationRequirement>
+  </dmn:decision>
+  <dmn:inputData id="_1929CBD5-40E0-442D-B909-49CEDE0101DC" name="Violation">
+    <dmn:variable id="_C16CF9B1-5FAB-48A0-95E0-5FCD661E0406" name="Violation" typeRef="tViolation">
+    </dmn:variable>
+  </dmn:inputData>
+  <dmn:inputData id="_1F9350D7-146D-46F1-85D8-15B5B68AF22A" name="Driver">
+    <dmn:variable id="_A80F16DF-0DB4-43A2-B041-32900B1A3F3D" name="Driver" typeRef="tDriver">
+    </dmn:variable>
+  </dmn:inputData>
+</dmn:definitions>
+----
+--
+
+Evaluate a specified DMN model::
++
+--
+`[POST] /\{modelName\}`
+
+For this endpoint, the request body must contain all input data of the DMN model. The response is the resulting DMN context of the model, including the decision values, the original input values, and all other parametric DRG components in serialized form. For example, a business knowledge model is available in string-serialized form in its signature.
+
+.Example `Traffic Violation` DMN model
+image::dmn-model-traffic-violation.png[Image of Traffic Violation DMN model]
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "Violation": {
+    "Type": "speed",
+    "Speed Limit": 100,
+    "Actual Speed": 120
+  },
+  "Driver": {
+    "Points": 2
+  },
+  "Fine": {
+    "Points": 3,
+    "Amount": 500
+  },
+  "Should the driver be suspended?": "No"
+}
+----
+--
+
+Evaluate a specified decision service within a DMN model::
++
+--
+`[POST] /\{modelName\}/\{decisionServiceName\}`
+
+For this endpoint, the request body must contain all the requirements of the decision service. The response is the resulting DMN context of the decision service, including the decision values, the original input values, and all other parametric DRG components in serialized form. For example, a business knowledge model is available in string-serialized form in its signature.
+
+If the decision service is composed of a single-output decision, the response is the resulting value of that specific decision. This behavior provides an equivalent value at the API level of a specification feature when invoking the decision service in the model itself. As a result, you can, for example, interact with a DMN decision service from single-page web applications.
+
+.Example `TrafficViolationDecisionService` decision service with single-output decision
+image::dmn-model-traffic-violation-single-output.png[Image of decision service in Traffic Violation DMN model]
+
+.Example `TrafficViolationDecisionService` decision service with multiple-output decision
+image::dmn-model-traffic-violation-multi-output.png[Image of decision service in Traffic Violation DMN model]
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation/TrafficViolationDecisionService`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation/TrafficViolationDecisionService -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response for single-output decision (JSON)
+[source,json]
+----
+"No"
+----
+
+.Example response for multiple-output decision (JSON)
+[source,json]
+----
+{
+  "Violation": {
+    "Type": "speed",
+    "Speed Limit": 100,
+    "Actual Speed": 120
+  },
+  "Driver": {
+    "Points": 2
+  },
+  "Fine": {
+    "Points": 3,
+    "Amount": 500
+  },
+  "Should the driver be suspended?": "No"
+}
+----
+--
+
+Evaluate a specified DMN model and return a `DMNResult` response::
++
+--
+`[POST] /\{modelName\}/dmnresult`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "namespace": "https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF",
+  "modelName": "Traffic Violation",
+  "dmnContext": {
+    "Violation": {
+      "Type": "speed",
+      "Speed Limit": 100,
+      "Actual Speed": 120,
+      "Code": null,
+      "Date": null
+    },
+    "Driver": {
+      "Points": 2,
+      "State": null,
+      "City": null,
+      "Age": null,
+      "Name": null
+    },
+    "Fine": {
+      "Points": 3,
+      "Amount": 500
+    },
+    "Should the driver be suspended?": "No"
+  },
+  "messages": [],
+  "decisionResults": [
+    {
+      "decisionId": "_4055D956-1C47-479C-B3F4-BAEB61F1C929",
+      "decisionName": "Fine",
+      "result": {
+        "Points": 3,
+        "Amount": 500
+      },
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    },
+    {
+      "decisionId": "_8A408366-D8E9-4626-ABF3-5F69AA01F880",
+      "decisionName": "Should the driver be suspended?",
+      "result": "No",
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    }
+  ]
+}
+----
+--
+
+Evaluate a specified decision service within a DMN model and return a `DMNResult` response::
++
+--
+`[POST] /\{modelName\}/\{decisionServiceName\}/dmnresult`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation/TrafficViolationDecisionService`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation/TrafficViolationDecisionService -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "namespace": "https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF",
+  "modelName": "Traffic Violation",
+  "dmnContext": {
+    "Violation": {
+      "Type": "speed",
+      "Speed Limit": 100,
+      "Actual Speed": 120,
+      "Code": null,
+      "Date": null
+    },
+    "Driver": {
+      "Points": 2,
+      "State": null,
+      "City": null,
+      "Age": null,
+      "Name": null
+    },
+    "Should the driver be suspended?": "No"
+  },
+  "messages": [],
+  "decisionResults": [
+    {
+      "decisionId": "_8A408366-D8E9-4626-ABF3-5F69AA01F880",
+      "decisionName": "Should the driver be suspended?",
+      "result": "No",
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    }
+  ]
+}
+----
+--
+
+== Running the {PRODUCT} decision example applications
+
+[role="_abstract"]
+To get started with {PRODUCT}, you can run any of the example applications in the bamoe-{VERSION}-kogito-examples.zip archive and experiment with the {PRODUCT} services.
+
+For this procedure, use the `process-decisions-quarkus` application. You can follow similar steps with the other {PRODUCT} examples on Quarkus.
+
+In the `process-decisions-quarkus` applications, the `traffic-rules-dmn.bpmn` process describes the steps that need to be followed when verifying a driver's potential suspension.
+The process includes a service node to call to a Java service `DriverService.java` that is used to fetch information about a driver using a custom `Driver` object, Business Rule nodes to call decisions defined in `DMN` and `DRL` format as well as script tasks for writing debug information.
+
+.Example `traffic-rules-dmn.bpmn` process
+image::traffic-rules-dmn.png[Image of `traffic-rules-dmn.bpmn` example process]
+
+The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
+
+Example `LicenseValidationService.drl` file:
+[source]
+----
+unit LicenseValidationService
+
+rule "Is driver license valid"
+when
+$driver: /driver[licenseExpiration.after(currentTime)]
+then
+$driver.setValidLicense(true);
+end
+
+rule "Is driver license expired"
+when
+$driver: /driver[licenseExpiration.before(currentTime)]
+then
+$driver.setValidLicense(false);
+end
+
+query "validation"
+$driver : /driver
+end
+----
+
+Example `LicenseValidationService` class:
+[source,java]
+----
+public class LicenseValidationService implements RuleUnitData {
+private SingletonStore<Driver> driver;
+
+    public LicenseValidationService() {
+        this(DataSource.createSingleton());
+    }
+
+    public LicenseValidationService(SingletonStore<Driver> driver) {
+        this.driver = driver;
+    }
+
+    public void setDriver(SingletonStore<Driver> driver) {
+        this.driver = driver;
+    }
+
+    public SingletonStore<Driver> getDriver() {
+        return driver;
+    }
+
+    public Date getCurrentTime() {
+        return new Date();
+    }
+}
+----
+
+After the license validation task, the traffic violations process contains traffic violation as a decision that is created using DMN. The traffic violation decision verifies whether the driver is suspended or not based on the points in the driver’s license.
+
+The traffic violation decision is declared in the `TrafficViolation.dmn` file.
+
+.Example `TrafficViolation.dmn` file
+image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
+
+Based on this process, this example service exposes REST operations to create new traffic incidents, to list and delete active traffic incidents, and to invoke the license validation service endpoint.
+
+.Procedure
+. Download the bamoe-{VERSION}-kogito-examples.zip archive to a local directory and extract the file.
+. In a command terminal, navigate to the extracted `kogito-quarkus-examples/process-decisions-quarkus` folder, and enter one of the following commands to build and run the example.
+
+Quarkus support the following run modes:
+
+* *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
+* *JVM mode*: For compatibility with a Java virtual machine (JVM).
+* *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
+
+The command that you use depends on your preferred run mode and application environment:
+
+* For development mode:
++
+.On Quarkus
+[source]
+----
+$ mvn clean compile quarkus:dev
+----
++
+* For JVM mode:
++
+.On Quarkus
+[source]
+----
+$ mvn clean package
+$ java -jar target/quarkus-app/quarkus-run.jar
+----
++
+* For native mode (requires GraalVM or Mandrel):
++
+.On Quarkus only
+[source]
+----
+$ mvn clean package -Dnative
+$ ./target/process-decisions-quarkus-runner
+----
+
+. After the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI configured for the application - http://localhost:8080/q/swagger-ui - to send API requests with the following components:
+
+
+* *URL*: `\http://localhost:8080/`
+* *HTTP headers*: For `POST` and `PUT` requests only:
+** `accept`: `application/json`
+** `content-type`: `application/json`
+* *HTTP methods*: `GET`, `POST`, `PUT` or `DELETE`
+
+.Example POST request body to create a traffic incident (JSON)
+[source,json]
+----
+{
+    "driverId": "12345",
+    "violation":{
+        "Type":"speed",
+        "Speed Limit": 100,
+        "Actual Speed":140
+    }
+}
+----
+
+.Example curl command to create a traffic incident
+[source]
+----
+curl -X POST -H 'Content-Type:application/json' -H 'Accept:application/json' -d '{"driverId": "12345","violation":{"Type":"speed","Speed Limit": 100,"Actual Speed":140}}' http://localhost:8080/traffic
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+   "driver" : {
+      "Age" : 30,
+      "City" : "Campinas",
+      "Name" : "Arthur",
+      "Points" : 13,
+      "State" : "SP",
+      "licenseExpiration" : "2023-06-15T11:02:17.610-06:00",
+      "validLicense" : true
+   },
+   "driverId" : "12345",
+   "fine" : {
+      "Amount" : 1000,
+      "Points" : 7
+   },
+   "id" : "d9ac9587-40dc-4f0b-8034-274db5bca832",
+   "suspended" : "Yes",
+   "violation" : {
+      "Actual Speed" : 140,
+      "Code" : null,
+      "Date" : null,
+      "Speed Limit" : 100,
+      "Type" : "speed"
+   }
+}
+----
+
+.Swagger UI to interact with all application endpoints - \http://localhost:8080/q/swagger-ui
+image::kogito-swagger-example-jbpm.png[Image of Swagger UI for example application]
+
+[NOTE]
+====
+For the predefined {PRODUCT} example applications, by default the Swagger UI is only available when Quarkus is started in dev or test mode. If you want to make it available in production too, you can include the following configuration in your `application.properties`:
+[source]
+----
+quarkus.swagger-ui.always-include=true
+----
+This is a build time property, it cannot be changed at runtime after your application is built.
+====
+
+
