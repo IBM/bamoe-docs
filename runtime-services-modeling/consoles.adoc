@@ -3,41 +3,53 @@ include::../partials/attributes.adoc[]
 
 == {PRODUCT} Management Console
 
-[role="_abstract"]
-The {PRODUCT} Management Console is a user interface for viewing the state of all available {PRODUCT} services and managing process instances:
+The {PRODUCT} Management Console is a user interface for viewing the state of all available {PRODUCT_SHORT} services and managing process instances:
 
-.{PRODUCT} Management Console
+.{PRODUCT_SHORT} Management Console
 image::runtime-services-modeling/kogito-management-console.png[Image of Kogito Management Console]
 
 You can use the Management Console to view process, subprocess, and node instance details, abort process instances, and view domain-specific process data.
 
-The Management Console requires your {PRODUCT} services to use the following {PRODUCT} components:
+The Management Console requires your {PRODUCT_SHORT} services to use the following {PRODUCT_SHORT} components:
 
-* *{PRODUCT} Data Index Service*: Enables the Management Console to access stored events related to processes and domain data from your {PRODUCT} services. The {PRODUCT} Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT} service. For more information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
-* *{PRODUCT} process management add-on*: Enables the Management Console to interact with the process data from your {PRODUCT} services through the add-on REST endpoint `/management/processes`. If you do not enable this add-on for your {PRODUCT} service, the Management Console provides read-only access to your service data without the ability to modify instances, such as aborting process instances. For more information about the process management add-on, see xref:con-bpmn-process-management-addon_kogito-developing-process-services[].
+* *{PRODUCT_SHORT} Data Index Service*: Enables the Management Console to access stored events related to processes and domain data from your {PRODUCT_SHORT} services. The {PRODUCT_SHORT} Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
+//For more information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
+* *{PRODUCT_SHORT} process management add-on*: Enables the Management Console to interact with the process data from your {PRODUCT_SHORT} services through the add-on REST endpoint `/management/processes`.
+If you do not enable this add-on for your {PRODUCT_SHORT} service, the Management Console provides read-only access to your service data without the ability to modify instances, such as aborting process instances.
+//For more information about the process management add-on, see xref:../workflow/deploying-process-services.html[].
 
 To visualize the process instance execution path at the management console, add the following add-on:
 
-* *{PRODUCT} process SVG add-on*: Enables the process SVG diagram to visualize the process instance execution path. If this add-on is not enabled for your {PRODUCT} service, the management console does not display the diagram panel. For more information about the process SVG add-on, see xref:con-bpmn-process-svg-addon_kogito-developing-process-services[].
+* *{PRODUCT_SHORT} process SVG add-on*: Enables the process SVG diagram to visualize the process instance execution path.
+If this add-on is not enabled for your {PRODUCT_SHORT} service, the management console does not display the diagram panel.
+//For more information about the process SVG add-on, see xref:con-bpmn-process-svg-addon_kogito-developing-process-services[].
 
-=== Using the {PRODUCT} Management Console to manage process instances
+=== Using the {PRODUCT_SHORT} Management Console to manage process instances
 
-[role="_abstract"]
-You can use the {PRODUCT} Management Console to view and manage process instance details from your {PRODUCT} services. You can run the Management Console for local {PRODUCT} services or add it to your {PRODUCT} infrastructure on {OPENSHIFT}.
+You can use the {PRODUCT_SHORT} Management Console to view and manage process instance details from your {PRODUCT_SHORT} services.
+You can run the Management Console for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on {OPENSHIFT}.
 
 .Prerequisites
-* A {PRODUCT} Data Index Service instance is configured and running for your {PRODUCT} service. The Data Index Service enables the Management Console to access stored process data. The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT} service. For information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
-* The `pom.xml` file of your {PRODUCT} project contains the following dependency for the process management add-on. This add-on enables the Management Console to interact with the process data through the add-on REST endpoint `/management/processes`. For more information about the process management add-on, see xref:con-bpmn-process-management-addon_kogito-developing-process-services[].
+* A {PRODUCT_SHORT} Data Index Service instance is configured and running for your {PRODUCT_SHORT} service.
+The Data Index Service enables the Management Console to access stored process data.
+The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
+//For information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
+* The `pom.xml` file of your {PRODUCT_SHORT} project contains the following dependency for the process management add-on.
+This add-on enables the Management Console to interact with the process data through the add-on REST endpoint `/management/processes`.
+//For more information about the process management add-on, see xref:con-bpmn-process-management-addon_kogito-developing-process-services[].
 +
+// TODO: Fix up the maven gav if needed
 .Project dependency to enable process management REST operations
 [source,xml]
 ----
 <dependency>
   <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-quarkus-process-management</artifactId>
+  <artifactId>kie-addons-quarkus-process-management</artifactId>
 </dependency>
 ----
-* The `application.properties` file of your {PRODUCT} project contains the following system properties for the location where the {PRODUCT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support. These properties enable the Management Console to generate the URLs to execute the REST operations from the process management add-on.
+
+* The `application.properties` file of your {PRODUCT_SHORT} project contains the following system properties for the location where the {PRODUCT_SHORT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support.
+These properties enable the Management Console to generate the URLs to execute the REST operations from the process management add-on.
 +
 .Application properties for REST URLs
 [source,subs="+quotes"]
@@ -47,10 +59,9 @@ quarkus.http.cors=true
 ----
 
 .Procedure
-. Go to the https://repository.jboss.org/org/kie/kogito/management-console/[`management-console`] artifacts page, select the latest release of the {PRODUCT} Management Console, and download the `management-console-__VERSION__-runner.jar` file to a local directory.
+. Go to the https://repository.jboss.org/org/kie/kogito/management-console/[`management-console`] artifacts page, select the latest release of the {PRODUCT_SHORT} Management Console, and download the `management-console-__VERSION__-runner.jar` file to a local directory.
 . In a command terminal, navigate to the directory location of the downloaded `management-console-__VERSION__-runner.jar` file and enter the following command to run the Management Console:
 +
---
 .Running the Management Console
 [source,subs="+quotes"]
 ----
@@ -59,9 +70,10 @@ $ java -Dquarkus.http.port=8280 -jar management-console-__VERSION__-runner.jar
 
 [NOTE]
 ====
-The default port for the Management Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT} service running at port 8080.
+The default port for the Management Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
-Also, the Management Console uses the default Data Index Service port 8180. If you modified this port in your Data Index Service instance, you must also modify the port in the Management Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Management Console.
+Also, the Management Console uses the default Data Index Service port 8180.
+If you modified this port in your Data Index Service instance, you must also modify the port in the Management Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Management Console.
 ====
 
 To change the logging level of the Management Console, such as for debugging, you can specify the following start-up properties:
@@ -70,7 +82,8 @@ To change the logging level of the Management Console, such as for debugging, yo
 [source,subs="+quotes"]
 ----
 $ java  \
-  -Dquarkus.log.console.level=DEBUG -Dquarkus.log.category.\"org.kie.kogito\".min-level=DEBUG  \
+  -Dquarkus.log.console.level=DEBUG \
+  -Dquarkus.log.category.\"org.kie.kogito\".min-level=DEBUG  \
   -Dquarkus.log.category.\"org.kie.kogito\".level=DEBUG  \
   -Dquarkus.http.port=8280  \
   -jar management-console-__VERSION__-runner.jar
@@ -86,7 +99,7 @@ $ java  \
 .{PRODUCT_SHORT} Management Console
 image::runtime-services-modeling/kogito-management-console.png[Image of Kogito Management Console]
 
-In this example, the Management Console displays data for the `kogito-travel-agency` extended example application in the https://github.com/apache/incubator-kie-kogito-examples[`kogito-examples`] repository in GitHub.
+In this example, the Management Console displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
 
 ==== Process instances
 
@@ -95,7 +108,9 @@ The *Process Instances* tab displays the list of process instances and enables y
 .Process Instances tab
 image::runtime-services-modeling/kogito-management-console-process-instance-section.png[Image of process instance list section]
 
-When you select a process instance on the *Process Instances* page, it redirects you to the *Process Details* page, providing the process instance details including interactions with the process instance. You can access the *Process Details* page from a different {PRODUCT} Management Console tab, displaying the instance related data and enables you to perform the available actions. You can also sort the results based on the column headers.
+When you select a process instance on the *Process Instances* page, it redirects you to the *Process Details* page, providing the process instance details including interactions with the process instance.
+You can access the *Process Details* page from a different {PRODUCT_SHORT} Management Console tab, displaying the instance related data and enables you to perform the available actions.
+You can also sort the results based on the column headers.
 
 .Process Details page
 image::runtime-services-modeling/kogito-management-console-process-diagram.png[Image of Process Instance details in Management Console]
@@ -114,7 +129,8 @@ The *Process Details* page consists of the following panels:
 Process Diagram panel::
 +
 --
-This panel enables you to explore the process diagram and execution path of the related process instance. The execution path is displayed when the Management Console finds the `.svg` resources using the {PRODUCT} process SVG add-on configuration included in the {PRODUCT} Management Console.
+This panel enables you to explore the process diagram and execution path of the related process instance.
+The execution path is displayed when the Management Console finds the `.svg` resources using the {PRODUCT_SHORT} process SVG add-on configuration included in the {PRODUCT_SHORT} Management Console.
 
 .Process Diagram panel
 image::runtime-services-modeling/kogito-management-console-process-diagram-panel.png[Image of process instance diagram panel]
@@ -125,7 +141,8 @@ This panel includes different controls to view the process diagram, such as *Sel
 Details panel::
 +
 --
-This panel displays the basic process instance information and provides links to the related process runtime UI. If the process instance is related to other process instances, then links to the parent and subprocess instances are also available in the *Details* panel.
+This panel displays the basic process instance information and provides links to the related process runtime UI.
+If the process instance is related to other process instances, then links to the parent and subprocess instances are also available in the *Details* panel.
 
 .Details panel
 image::runtime-services-modeling/kogito-management-console-details-panel.png[Image of process instance details panel]
@@ -151,7 +168,8 @@ image::runtime-services-modeling/kogito-management-console-process-details-endpo
 Process Variables panel::
 +
 --
-The *Process Variables* panel displays the process instance domain data in a tree structure. When you hover the mouse on different elements, the available actions are displayed.
+The *Process Variables* panel displays the process instance domain data in a tree structure.
+When you hover the mouse on different elements, the available actions are displayed.
 
 .Process Variables panel
 image::runtime-services-modeling/kogito-management-console-process-variable-panel.png[Image of process variables panel  in Management Console]
@@ -171,18 +189,23 @@ image::runtime-services-modeling/kogito-management-console-process-variable-add.
 * Edit: Enables you to edit the selected element value.
 * Remove: Enables you to remove the selected element.
 
-If there are pending changes to be saved, the panel displays *Changes are not saved yet* message. To save the changes that you made to the process variable, click *Save*, or click *Abort* to abort the changes. If you want to revert the changes, click the refresh icon.
+If there are pending changes to be saved, the panel displays *Changes are not saved yet* message.
+To save the changes that you made to the process variable, click *Save*, or click *Abort* to abort the changes.
+If you want to revert the changes, click the refresh icon.
 --
 
 Timeline panel::
 +
 --
-The *Timeline* panel displays the list of node instances related to the process instance sorted by the start time. Each node consists of an icon, indicating the state of the node, such as active, completed, or error.
+The *Timeline* panel displays the list of node instances related to the process instance sorted by the start time.
+Each node consists of an icon, indicating the state of the node, such as active, completed, or error.
 
 .Timeline panel
 image::runtime-services-modeling/kogito-management-console-process-timeline-panel.png[Image of Timeline panel showing the related node instances]
 
-The actions that are available for an active node include retriggering and canceling a node. Whereas the actions for an error node include retrying and skipping the node. The node actions in the *Timeline* panel are connected with the {PRODUCT} runtime service to perform the requested action.
+The actions that are available for an active node include retriggering and canceling a node.
+Whereas the actions for an error node include retrying and skipping the node.
+The node actions in the *Timeline* panel are connected with the {PRODUCT_SHORT} runtime service to perform the requested action.
 
 If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*.
 --
@@ -190,7 +213,9 @@ If a node in the *Timeline* panel is associated with a job, then select the cloc
 Node Trigger panel::
 +
 --
-The *Node Trigger* panel displays the list of all process definition nodes in a drop-down. When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*. Click the *Trigger* button, to trigger the selected node.
+The *Node Trigger* panel displays the list of all process definition nodes in a drop-down.
+When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*.
+Click the *Trigger* button, to trigger the selected node.
 
 .Node Trigger panel
 image::runtime-services-modeling/kogito-management-console-node-trigger-panel.png[Image of node trigger panel in Management Console]
@@ -216,7 +241,8 @@ image::runtime-services-modeling/kogito-management-console-jobs-panel.png[Image 
 .Job details
 image::runtime-services-modeling/kogito-management-console-jobs-panel-details.png[Image of jobs panel details in Management Console]
 
-You can reschedule or cancel a job that is in scheduled or error state. You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
+You can reschedule or cancel a job that is in scheduled or error state.
+You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
 --
 
 [id="con-jobs-management"]
@@ -227,26 +253,30 @@ The *Jobs Management* tab displays the list of existing jobs, which you can filt
 .Jobs Management page
 image::runtime-services-modeling/kogito-management-console-jobs-management.png[Image of Jobs Management page in Management Console]
 
-You can also cancel the multiple jobs at the same time. To cancel multiple jobs, select the jobs to be canceled and click the *Cancel Selected* button.
+You can also cancel the multiple jobs at the same time.
+To cancel multiple jobs, select the jobs to be canceled and click the *Cancel Selected* button.
 
-[id="proc-management-console-security_{context}"]
-=== Configuring {PRODUCT} Management Console security
+=== Configuring {PRODUCT_SHORT} Management Console security
 
-[role="_abstract"]
-For security, the {PRODUCT} Management Console accesses Keycloak as an authentication service. Once a user is authenticated, Management Console uses bearer tokens to communicate with other {PRODUCT} services.The bearer tokens are issued using OpenID Connect and OAuth 2.0 compliant authorization servers such as https://www.keycloak.org/about.html[Keycloak].
+For security, the {PRODUCT_SHORT} Management Console can use an Identity Management (IdM) solution for authentication.
+Once a user is authenticated, Management Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
+The bearer tokens are issued using OpenID Connect and OAuth 2.0 compliant authorization servers such as https://www.keycloak.org/about.html[Keycloak], which will be used in this example.
 
-IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT} Management Console] repository in GitHub.
+// TODO: Not sure what to say here
+IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT_SHORT} Management Console] repository in GitHub.
 
 .Prerequisites
-* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT} Management Console] repository from GitHub.
-* An instance of Keycloak server is running.
+* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT_SHORT} Management Console] repository from GitHub.
+* An IdM solution running.
 
-IMPORTANT: Ensure that you log in to the administration console of the Keycloak, navigate to the respective client configuration, and add correct URLs of different applications. For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues. You can also add the origin URLs as a parameter to the *Web Origins*, which can prevent the issues related to `Access-Control-Allow-Origin`.
+IMPORTANT: Ensure that you log in to the administration console of the IdM, navigate to the respective client configuration, and add correct URLs of different applications.
+For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues.
+You can also add the origin URLs as a parameter to the *Web Origins*, which can prevent the issues related to `Access-Control-Allow-Origin`.
 
 image::runtime-services-modeling/kogito-consoles-keycloak-config.png[Image of client config in keycloak server]
 
 .Procedure
-. In a command terminal, navigate to the local clone of the {PRODUCT} Management Console repository and enter the following command to run the application with security enabled:
+. In a command terminal, navigate to the local clone of the {PRODUCT_SHORT} Management Console repository and enter the following command to run the application with security enabled:
 +
 --
 .Run the Management Console with security enabled
@@ -272,8 +302,8 @@ kogito.consoles.keycloak.config.health-check-url=http://localhost:8280/auth/real
 kogito.consoles.keycloak.config.disable-health-check=false
 kogito.consoles.keycloak.config.update-token-validity=30
 ----
-
 --
+
 . Replace any property definitions with those of your specific environment, especially the following properties:
 +
 * `kogito.consoles.keycloak.config.url`: The base URL of the Keycloak server, such as `https://localhost:8280/auth`. All other Keycloak server pages and service URLs are derived from the base URL.
@@ -286,29 +316,32 @@ kogito.consoles.keycloak.config.update-token-validity=30
 . In the same `application.properties` file, also configure the resources to be exposed and the required permissions for accessing the resources.
 +
 
-. Stop and restart the {PRODUCT} Management Console to ensure that the security changes are applied.
+. Stop and restart the {PRODUCT_SHORT} Management Console to ensure that the security changes are applied.
 
-== {PRODUCT} Task Console
+== {PRODUCT_SHORT} Task Console
 
-[role="_abstract"]
-The {PRODUCT} Task Console is a user interface for viewing and interacting with user tasks in {PRODUCT} process services.
+The {PRODUCT_SHORT} Task Console is a user interface for viewing and interacting with user tasks in {PRODUCT_SHORT} process services.
 
-.{PRODUCT} Task Console
+.{PRODUCT_SHORT} Task Console
 image::runtime-services-modeling/kogito-task-console.png[Image of Kogito Task Console]
 
-You can use the Task Console to view your list of assigned tasks, view the task details for each task, and move the task to the next phase of the task lifecycle. For more information about the task lifecycle, see xref:con-task-lifecycle_kogito-developing-process-services[].
+You can use the Task Console to view your list of assigned tasks, view the task details for each task, and move the task to the next phase of the task lifecycle.
 
-The Task Console requires your {PRODUCT} services to use the {PRODUCT} Data Index Service. The Data Index Service enables the Task Console to access stored events related to tasks and domain data from your {PRODUCT} services. The {PRODUCT} Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT} service. For more information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
+The Task Console requires your {PRODUCT_SHORT} services to use the {PRODUCT_SHORT} Data Index Service.
+The Data Index Service enables the Task Console to access stored events related to tasks and domain data from your {PRODUCT_SHORT} services.
+// TODO: Do we say PostgreSQL here?
+The {PRODUCT_SHORT} Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
 
-[id="proc-task-console-using_{context}"]
-=== Using the {PRODUCT} Task Console to interact with user tasks
+=== Using the {PRODUCT_SHORT} Task Console to interact with user tasks
 
-[role="_abstract"]
-You can use the {PRODUCT} Task Console to view and interact with user tasks in {PRODUCT} process services. You can run the Task Console for local {PRODUCT} services or add it to your {PRODUCT} infrastructure on {OPENSHIFT}.
+You can use the {PRODUCT_SHORT} Task Console to view and interact with user tasks in {PRODUCT_SHORT} process services.
+You can run the Task Console for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on {OPENSHIFT}.
 
 .Prerequisites
-* A {PRODUCT} Data Index Service instance is configured and running for your {PRODUCT} service. The Data Index Service enables the Task Console to access stored tasks and process data. The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT} service. For information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
-* The `application.properties` file of your {PRODUCT} project contains the following system properties for the location where the {PRODUCT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support.
+* A {PRODUCT_SHORT} Data Index Service instance is configured and running for your {PRODUCT_SHORT} service.
+  The Data Index Service enables the Task Console to access stored tasks and process data.
+  The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
+* The `application.properties` file of your {PRODUCT_SHORT} project contains the following system properties for the location where the {PRODUCT_SHORT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support.
 +
 .Application properties for REST URLs
 [source,subs="+quotes"]
@@ -318,7 +351,7 @@ quarkus.http.cors=true
 ----
 
 .Procedure
-. Go to the https://repository.jboss.org/org/kie/kogito/task-console/[`task-console`] artifacts page, select the latest release of the {PRODUCT} Task Console, and download the `task-console-__VERSION__-runner.jar` file to a local directory.
+. Go to the https://repository.jboss.org/org/kie/kogito/task-console/[`task-console`] artifacts page, select the latest release of the {PRODUCT_SHORT} Task Console, and download the `task-console-__VERSION__-runner.jar` file to a local directory.
 . In a command terminal, navigate to the directory location of the downloaded `task-console-__VERSION__-runner.jar` file and enter the following command to run the Task Console:
 +
 --
@@ -330,9 +363,10 @@ $ java -Dquarkus.http.port=8280 -jar task-console-__VERSION__-runner.jar
 
 [NOTE]
 ====
-The default port for the Task Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT} service running at port 8080.
+The default port for the Task Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
-Also, the Task Console uses the default Data Index Service port 8180. If you modified this port in your Data Index Service instance, you must also modify the port in the Task Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Task Console.
+Also, the Task Console uses the default Data Index Service port 8180.
+If you modified this port in your Data Index Service instance, you must also modify the port in the Task Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Task Console.
 ====
 
 To change the logging level of the Task Console, such as for debugging, you can specify the following start-up properties:
@@ -347,7 +381,7 @@ $ java  \
   -jar task-console-__VERSION__-runner.jar
 ----
 
-If your {PRODUCT} project has a custom task lifecycle that defines custom states, you can use the following properties to
+If your {PRODUCT_SHORT} project has a custom task lifecycle that defines custom states, you can use the following properties to
 configure the Task Console to use those states and show them in the filters:
 
 * `kogito.task.states.list`: Comma-separated list of values containing all the states that you want to show in the Task Console.
@@ -363,14 +397,14 @@ $ java  \
   -jar task-console-__VERSION__-runner.jar
 ----
 
-NOTE: For more information about task lifecycles, see xref:con-task-lifecycle_kogito-developing-process-services[].
-
-.{PRODUCT} Task Console
+.{PRODUCT_SHORT} Task Console
 image::runtime-services-modeling/kogito-task-console.png[Image of Kogito Task Console]
 
-In this example, the Task Console displays data for the `kogito-travel-agency` extended example application in the https://github.com/apache/incubator-kie-kogito-examples[`kogito-examples`] repository in GitHub.
+In this example, the Management Console displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
 
-The *Task Inbox* page lists the available user tasks that you can interact with. You can use the upper toolbar options to filter the tasks or use the column headers to sort the tasks as needed. You can also search for tasks by the full name or by partial name, such as `Apply`.
+The *Task Inbox* page lists the available user tasks that you can interact with.
+You can use the upper toolbar options to filter the tasks or use the column headers to sort the tasks as needed.
+You can also search for tasks by the full name or by partial name, such as `Apply`.
 
 .Tasks assigned to the current user
 image::runtime-services-modeling/kogito-task-console-inbox.png[Image of the tasks assigned to the current user]
@@ -380,10 +414,12 @@ image::runtime-services-modeling/kogito-task-console-filters-status.png[Image of
 
 .Applied filters
 image::runtime-services-modeling/kogito-task-console-filters.png[Image of status and names filtering on *Task Inbox*]
+
 --
 . Select a task name to view task details and interact with the task:
 +
 --
+
 .Task details
 image::runtime-services-modeling/kogito-task-console-details-page.png[Image of *Task Details* page]
 
@@ -395,24 +431,28 @@ For additional task details, you can select *View details*. This panel lists the
 image::runtime-services-modeling/kogito-task-console-details-expanded.png[Image of task details panel]
 --
 
-[id="proc-task-console-security_{context}"]
-=== Configuring {PRODUCT} Task Console security
+=== Configuring {PRODUCT_SHORT} Task Console security
 
-[role="_abstract"]
-For security, {PRODUCT} Task Console accesses Keycloak as an authentication service. Once a user is authenticated, Task Console uses bearer tokens to communicate with other {PRODUCT} services. These tokens are issued by OpenID Connect and OAuth 2.0 compliant authorization servers such as https://www.keycloak.org/about.html[Keycloak].
+For security, {PRODUCT_SHORT} Task Console utilizes an IdM solution, such as Keycloak, as an authentication service.
+Once a user is authenticated, Task Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
+These tokens are issued by OpenID Connect and OAuth 2.0 compliant authorization servers.
+In this example, we will be using Keycloak.
 
-IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT} Task Console] repository in GitHub.
+// TODO: Not sure what to do here
+IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT_SHORT} Task Console] repository in GitHub.
 
 .Prerequisites
-* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT} Task Console] repository from GitHub.
+* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT_SHORT} Task Console] repository from GitHub.
 * An instance of Keycloak server is running.
 
-IMPORTANT: Ensure that you log in to the administration console of the Keycloak, navigate to the respective client configuration, and add correct URLs of different applications. For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues. You can also add the origin URLs as a parameter to the *Web Origins*, which can prevent the issues related to `Access-Control-Allow-Origin`.
+IMPORTANT: Ensure that you log in to the administration console of the Keycloak, navigate to the respective client configuration, and add correct URLs of different applications.
+For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues.
+You can also add the origin URLs as a parameter to the *Web Origins*, which can prevent the issues related to `Access-Control-Allow-Origin`.
 
 image::runtime-services-modeling/kogito-consoles-keycloak-config.png[Image of client config in keycloak server]
 
 .Procedure
-. In a command terminal, navigate to the local clone of the {PRODUCT} Task Console repository and enter the following command to run the application with security enabled:
+. In a command terminal, navigate to the local clone of the {PRODUCT_SHORT} Task Console repository and enter the following command to run the application with security enabled:
 +
 --
 .Run the Task Console with security enabled
@@ -427,6 +467,7 @@ IMPORTANT: Ensure that the service is not started at the same port as the securi
 . Navigate to the `src/main/resources/application.properties` file of the Task Console project and add the following properties:
 +
 --
+
 .Required security properties in `applications.properties` file
 [source]
 ----
@@ -439,7 +480,6 @@ kogito.consoles.keycloak.config.disable-health-check=false
 kogito.consoles.keycloak.config.update-token-validity=30
 ----
 
---
 . Replace any property definitions with those of your specific environment, especially the following properties:
 +
 * `kogito.consoles.keycloak.config.url`: The base URL of the Keycloak server, such as `https://localhost:8280/auth`. All other Keycloak server pages and service URLs are derived from the base URL.
@@ -452,4 +492,4 @@ kogito.consoles.keycloak.config.update-token-validity=30
 . In the same `application.properties` file, also configure the resources to be exposed and the required permissions for accessing the resources.
 +
 
-. Stop and restart the {PRODUCT} Task Console to ensure that the security changes are applied.
+. Stop and restart the {PRODUCT_SHORT} Task Console to ensure that the security changes are applied.
