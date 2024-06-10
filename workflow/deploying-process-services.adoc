@@ -6,7 +6,7 @@ This section provides more detail on the deployment architecture to simplify eve
 The new Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Jobs, Data audit, Data index) in the runtime. This architecture simplifies the application configuration and minimizes the communication between components.
 
 == The Jobs subsystem
-The Jobs service is responsible for scheduling jobs taking  care of timers such as those from boundary events, SLA, or throw events relevant to timers. It is also used for human tasks notifications. 
+The Jobs service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers. It is also used for human tasks notifications. 
 
 By collocating the Job Scheduler within the {PRODUCT_SHORT} Runtime, the Job service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App. It uses the Data Source as the app.
 
@@ -21,7 +21,7 @@ When a client invokes the job service, the client component sends a message thro
 
 Where :
 
-transport:: the medium used to transfer a message between client component and job service. The transport could be http, kafka or in-vm at the moment.
+transport:: the medium used to transfer a message between client component and job service. The transport can be http, kafka or in-vm.
 
 sink:: is the client endpoint callback.
 
@@ -32,7 +32,7 @@ Job service:: it the main component containing the logic of scheduling a job and
 
 === Using the Job Service add-on
 
-To use the Job service add-on in your project you must include the dependency related to the transport tier (for in-vm):
+To use the Job service add-on in your project you must include the dependency related to the transport tier (in-vm):
 
 [source,xml]
 ----
@@ -47,7 +47,7 @@ To use the Job service add-on in your project you must include the dependency re
   </dependency>
 ----
 
-Following that you must include the storage to be used,  (for postgresql):
+Following that you must include the storage to be used,  (postgresql):
 
 [source,xml]
 ----
@@ -58,7 +58,7 @@ Following that you must include the storage to be used,  (for postgresql):
   </dependency>
 ----
 
-In this case for postgresql in-vm it your main available data source is automatically used. Here is an example of this configuration:
+In this case for postgresql in-vm, your main available data source is automatically used. Here is an example of this configuration:
 	
 [source,]
 ----
@@ -72,7 +72,7 @@ quarkus.datasource.reactive.url=${QUARKUS_DATASOURCE_REACTIVE_URL:postgresql://l
 
 NOTE: Use managed dependencies or specify the version of the dependencies. 
 
-NOTE: For ddl scripts for pgsql you can find it in `jobs-service-postgresql-common/src/main/resources/db/jobs-service`
+NOTE: You can find ddl scripts for pgsql in `jobs-service-postgresql-common/src/main/resources/db/jobs-service`
 
 == The Data Audit subsystem
 
@@ -150,17 +150,18 @@ curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POS
 }'|jq
 ----
 
-=== JPA implementation
+=== Java Persistence API (JPA) implementation
 
 The JPA implementation allows you to store the events to be stored in a database. To use this you will need to setup the datasource.
 
 === Extension Points
 
-There are extensions that depend to the runtime and others that don't.
+Some extensions depend on the runtime and others do not.
 
 org.kogito.kie.app.audit.spi.DataAuditContextFactory:: depends on the runtime and enables the creation of the context needed by a particular implementation.
 
 The following extension points do not depend on the runtime:
+
 org.kie.kogito.app.audit.spi.DataAuditStore:: stores the data in particular way.
 
 org.kie.kogito.app.audit.spi.GraphQLSchemaQuery<T>:: enables execution of a GraphQL query.
@@ -186,10 +187,10 @@ You need to add two different dependencies to your project  for a collocated ser
 </dependency>
 ----
 
-The first dependency is related how to you want to deploy it. In this case as collocated/embedded service
+The first dependency is related how to you want to deploy it. In this case it is deployed as a collocated/embedded service.
 The second dependency specifies the implementation you want to use.
 
-Each implementation might require additional dependencies. In our case for using JPA implementation we might require driver
+Each implementation might require additional dependencies. In this case a driver may be required to use a Java Persistence API (JPA) implementation.
 
 [source,xml]
 ----
@@ -209,7 +210,7 @@ image::../images/data-index.png[]
 
 The concepts to understand the above picture are:
 
-Transport:: the medium used to transfer events between the runtime and the data index service. The transport in-vm.
+Transport:: the medium used to transfer events between the runtime and the data index service. The transport is in-vm.
 
 Storage:: the persistence tier of the data index component.
 
