@@ -1,4 +1,4 @@
-= Architecture components and process deployment
+= Components of a process service
 include::../partials/attributes.adoc[]
 
 This section provides more detail on the deployment architecture to simplify event management and ensure stable and robust stateful applications. The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
@@ -84,7 +84,7 @@ The Data Audit subystem enables the storage of events issued by the following pr
 
 The system contains several modules and common modules to redistribute responsabilities. The main features of this system are:
 
-* runs as colocated services with Quarkus and Springboot 
+* runs as colocated services with Quarkus 
 * contains a module that enables you to implement your own subsystem
 * contains graphql modules to query data
 * provides extension points to develop new storage easily
@@ -97,14 +97,9 @@ Data Audit Common:: Provides the common framework to create implementations.
 
 Data Audit «Quarkus»:: Provides the wiring to use Data Audit with Quarkus as colocated service in a deployment.
 
-Data Audit «SpringBoot»:: Provides the wiring to use Data Audit with SpringBoot as colocated service in a deployment.
-
 Data Audit JPA Common:: Provides the common extension that doesn't depend on the runtime.
 
 Data Audit JPA «Quarkus»:: Provides the wiring between the specific implementation and Quarkus System.
-
-Data Audit JPA «SpringBoot»:: Provides the wiring between the specific implementation and Springboot colocated system.
-
 
 === Querying
 
@@ -240,16 +235,5 @@ Use the Data Index add-on to enable Quarkus to use in-vm transport tier. The sam
 </dependency>
 ----
 
-=== Distributed deployment
-
-For a distributed deployment you need to specify the addons and deploy the Data Index as a service that includes the event publisher.
-
-[source, xml]
-----
-<dependency>
-     <groupId>org.kie</groupId>
-    <artifactId>kie-addons-springboot-events-process-kafka</artifactId>
-</dependency>
-----
 
 
