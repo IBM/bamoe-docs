@@ -10,97 +10,31 @@ You can find instructions for doing so at https://maven.apache.org/install.html[
 Due to https://github.com/quarkusio/quarkus/issues/31011, we recommend using the latest Apache Maven 3.8 version.
 ====
 
-== Using Apache Maven to Setup the Project
-Create a project using the following steps:
+== Project Setup Options
+With the migration of the BAMOE product to Quarkus 3 the instructions on how to generate a new Maven project have changee.  Currently, there are a number of options:
 
-. You can create the service in Quarkus with the Maven commands below, this will create a Quarkus project called `quick-kogito` that will be versioned `1.0.0-SNAPSHOT` including the extensions `kogito-quarkus, dmn, resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health` which will create a Quarkus DMN project with the openapi components to get the OpenAPI end points easily with health checks when deploying to OpenShift.
-+
+* xref:../editing/creating-new-projects.adoc[Use BAMOE Canvas] to create a new project using Canvas' accelerator features..
+* **Create Project Manually**
+
+== Creating a BAMOE Project Manually
+Typically, Maven projects are created either using plugins or archetypes.  You can use a simple Maven archetype to generate a basic Maven project, for example:
+
 [source,console,subs="+attributes"]
 ----
-mvn io.quarkus:quarkus-maven-plugin:2.16.7.Final:create \
-    -DprojectGroupId=com.ibm \
-    -DprojectArtifactId=quick-kogito \
-    -DprojectVersion=1.0.0-SNAPSHOT \
-    -DplatformVersion=2.16.7.Final \
-    -DplatformGroupId=io.quarkus.platform \
-    -DplatformArtifactId=quarkus-bom \
-    -Dextensions=kogito-quarkus,dmn,resteasy-reactive-jackson,quarkus-smallrye-openapi,quarkus-smallrye-health
+mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-simple -DarchetypeVersion=1.4 -DinteractiveMode=false
 ----
 
-. When you create this project you should get a bunch of Maven artifacts start to stream in your console that are being pulled and ultimately are left with a console message like the below:
-+
-[source,console]
-----
-[INFO]
-[INFO] ========================================================================================
-[INFO] Your new application has been created in /Users/developer/quick-kogito
-[INFO] Navigate into this directory and launch your application with mvn quarkus:dev
-[INFO] Your application will be accessible on http://localhost:8080
-[INFO] ========================================================================================
-[INFO]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  24.548 s
-[INFO] Finished at: 2022-09-27T10:22:31-04:00
-[INFO] ------------------------------------------------------------------------
-----
+then update the project's `pom.xml` with content from one of the followin templates:
 
+xref:../partials/rules-sample-pom.adoc[Sample Rules/Decision Application POM Template] a sample POM that describes a typical rules/decisions project dependencies and plugins.
 
-. Add the `bamoe-bom`, `kogito-bom` and `bamoe-ilmt-compliance-quarkus-pamoe` dependencies to the `pom.xml` file.
-+
-[source,xml]
-----
-17        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-18  +++   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
-19  +++   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20  +++   <kogito.bom.version>9.0.0.Final</kogito.bom.version>
-21      </properties>
+xref:../partials/process-sample-pom.adoc[Sample Process Application POM Template] a sample POM that describes a typical process project dependencies and plugins.
 
-...
-28      <dependency>
-29  ---   <groupId>${quarkus.platform.group-id}</groupId>
-30  ---   <artifactId>quarkus-kogito-bom</artifactId>
-31  ---   <version>${quarkus.platform.version}</version>
-29  +++   <groupId>${kogito.bom.group-id}</groupId>
-30  +++   <artifactId>${kogito.bom.artifact-id}</artifactId>
-31  +++   <version>${kogito.bom.version}</version>
-32        <type>pom</type>
-33        <scope>import</scope>
-34      </dependency>
-
-...
-
-77  +++   <dependency>
-78  +++     <groupId>com.ibm.bamoe</groupId>
-79  +++     <artifactId>bamoe-ilmt-compliance-quarkus-pamoe</artifactId>
-80  +++   </dependency>
-81      </dependencies>
-----
-
-. Build the project in the root folder:
-+
+Build the project in the root folder:
 [source,console]
 ----
 mvn clean package
 ----
-+
-You will get some Maven stream once again, and at the end of it you should have:
-+
-[source,console]
-----
-[INFO] Analysing decision tables in DMN Model 'pricing' ...
-[INFO]  analysis for decision table 'Base price':
-[INFO]   Decision Table Analysis of table 'Base price' finished with no messages to be reported.
-[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 3012ms
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  16.084 s
-[INFO] Finished at: 2023-06-28T14:22:02-03:00
-[INFO] ------------------------------------------------------------------------
-----
-//end::maven-setup[]
 
 == Editing within VS Code
 
