@@ -1,7 +1,7 @@
 include::../partials/attributes.adoc[]
 = Migrating to {PRODUCT_LONG} version {VERSION_910}
 
-{PRODUCT} Version {VERSION_910} follows the {PRODUCT} Version {VERSION_901}, and is optimized for a hybrid cloud environment and adapts to your domain and tooling needs.
+{PRODUCT} Version {VERSION_910} follows the {PRODUCT} Version {VERSION_901}, is optimized for a hybrid cloud environment, and adapts to your domain and tooling needs.
 The core objective of {PRODUCT_SHORT} is to help you mold a set of business processes and decisions into your own domain-specific cloud-native set of services.
 
 == Overview
@@ -17,12 +17,11 @@ include::../partials/91x-prerequisites.adoc[]
 == Procedure
 
 The project migration from {PRODUCT_SHORT} Version {VERSION_90X} to {PRODUCT_SHORT} Version {VERSION_91X} requires a few steps.
-Before proceeding, ensure that all prerequisite tool are installed or updated, them we need to properly setup Maven.
+Before proceeding, ensure that all prerequisite tools are installed or updated, then we need to properly set up Maven.
 
-This migration guide will show two ways of migrating your project.
-On the first way, we will be creating a new project from scracth and them moving the assets to it.
-The second way, we will be updating an existing {PRODUCT_SHORT} Version {VERSION_90X} project.
-Either way, the first step is to setup the Maven configuration.
+This migration guide will show two ways of migrating your project. On the first way, we will be creating a new project from scratch and then moving the assets to it.
+The second way, we will be updating an existing BAMOE Version {VERSION_90X} project.
+Either way, the first step is to set up the Maven configuration.
 
 === Update Maven configuration
 
@@ -35,12 +34,12 @@ You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-too
 
 ==== Update Maven settings
 On the {PRODUCT} Version {VERSION_901} the dependencies were hosted on the https://central.sonatype.com/search?q=bamoe[Maven Central].
-Now the dependencies are distributed with a container image or a zip file. Please refer to the {PRODUCT_SHORT} Version {VERSION_910} Maven configuration.
+Now the dependencies are distributed with a container image or a zip file. Please refer to {PRODUCT_SHORT} Version {VERSION_910} Maven configuration.
 // TODO: add link to the setup page.
 
 === Creating a new project from scracth
 
-Now that we have Maven properly configured, we can move onto the first approach, which is to create a new project from scrath.
+Now that we have Maven properly configured, we can move onto the first approach, which is to create a new project from scratch.
 The first step is to generate a new Maven project so that there is a place to migrate your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION_910}.
 There are several ways to create Maven projects; however, this approach uses a published Maven plugin.
 
@@ -49,7 +48,6 @@ There are several ways to create Maven projects; however, this approach uses a p
 
 . Create the project by using Quarkus and the following Maven commands. 
 This creates a Quarkus project called `my-sample-decision-service`, which is versioned `1.0.0-SNAPSHOT`, and includes the extensions `resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
-
 +
 [source,console,subs="+attributes"]
 ----
@@ -61,15 +59,15 @@ mvn io.quarkus.platform:quarkus-maven-plugin:3.8.4:create \
     -DplatformArtifactId=quarkus-bom \
     -Dextensions=resteasy-reactive-jackson,quarkus-smallrye-openapi,quarkus-smallrye-health
 ----
-
++
 [NOTE]
 ====
 As you can see from the Maven command, there are a number of possible `extensions` that can be added to the project for the specific functionality. 
 You can find more information on available extensions at the following locations:  https://quarkus.io/extensions/[Quarkus Extensions], and https://quarkus.io/extensions/?search-regex=kogito[Kogito Extensions].
 ====
-
++
 When you create this project, you might get a bunch of Maven artifacts start to stream in your console that are being pulled, and ultimately, you are left with a console message like the following:
-
++
 [source,console]
 ----
 [INFO]
@@ -90,7 +88,7 @@ When you create this project, you might get a bunch of Maven artifacts start to 
 [start=3]
 .  Add the following `properties` to the `pom.xml` file by using the row numbers as a guide.
 This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated dependency versions for a specific {PRODUCT_SHORT} release:
-
++
 [source,xml,subs="attributes+"]
 ----
 17        <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
@@ -102,7 +100,6 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 
 [start=4]
 . Replace lines 31-37, which essentially add the `bamoe-bom` to the list of imported dependencies:
-
 +
 [source,xml]
 ----
@@ -185,7 +182,9 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 ====
 
 [start=6]
-. For this example, we will be creating a project with only DMN files.
+. Add the dependencies.
++
+For this example, we will be creating a project with only DMN files.
 So we must add the the Drools Kogito Quarkus dependency.
 In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, so please take a look into the rename table.
 // TODO: add link
@@ -228,7 +227,10 @@ Depending on the project files it will be required to add other dependencies. He
 ====
 
 [start=7]
-. Currently, the Quarkus Dev Services isn't fully supported, meaning that we need to disable it. To do that, please add the following line on the `application.properties` file:
+. Disable Quarkus Dev Services.
++
+Currently, the Quarkus Dev Services isn't fully supported, meaning that we need to disable it.
+To do that, please add the following line in the `application.properties` file:
 + 
 [source]
 ----
@@ -297,11 +299,11 @@ This is simply archive by replacing any `javax` instance over `jarkarta`, like t
 +
 [NOTE]
 ====
-Please refer the https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Please refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
 [start=10]
-. After making all necessary changes, build the project:
+. Build the project one more time.
 +
 [source,console]
 ----
@@ -324,13 +326,13 @@ That's it! Now, you can start using your {PRODUCT_SHORT} version {VERSION_910} p
 
 === Upgrading a {PRODUCT_SHORT} Version {VERSION_901} project
 
-Upgrading a {PRODUCT_SHORT} version {VERSION_901} project to version {VERSION_910} is straigtforward.
-The project sctructure didn't change, so we just need to update the project versions, some dependency names, and files.
+Upgrading a {PRODUCT_SHORT} version {VERSION_901} project to version {VERSION_910} is straightforward.
+The project structure  didn't change, so we just need to update the project versions, some dependency names, and files.
 
 [start=1]
 . Upgrade the Quarkus version.
 +
-In the {PRODUCT_SHORT} Version {VERSION_901} the Quarkus version was the 2.16 and now is 3.8.4.
+In the {PRODUCT_SHORT} Version {VERSION_901} the Quarkus version was 2.16 and now is 3.8.4.
 To make this upgrade, open the `pom.xml` file and do the following change:
 +
 [source,xml]
@@ -365,7 +367,7 @@ Update the following lines in your `pom.xml`:
 In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, so please take a look into the rename table.
 // TODO: rename table link
 +
-One of the renamed dependencies are the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
+One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +
 [source,xml]
 ----
@@ -377,13 +379,13 @@ One of the renamed dependencies are the `groupdId=org.kie.kogito` and `artifactI
        </dependency>
 ----
 +
-Bear in mind that it's required to make changes to any parent `pom.xml` if applied, but this will not be covered here as it depends on your the project setup.
-This ends the `pom.xml` changes, and now we move to another files.
+Bear in mind that it's required to make changes to any parent `pom.xml` if applied, but this will not be covered here as it depends on your project setup.
+This ends the `pom.xml` changes, and now we move to updating other files.
 
 [start=4]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} Version {VERSION_910} don't fully support the Quarkus Dev Services, due to that, it's required to disable this feature, and to do that, add the following line to the `application.properties` file:
+{PRODUCT_SHORT} Version {VERSION_910} doesn't fully support the Quarkus Dev Services, due to that, it's required to disable this feature and to do that, add the following line to the `application.properties` file:
 +
 [source]
 ----
@@ -393,7 +395,7 @@ This ends the `pom.xml` changes, and now we move to another files.
 [start=5]
 . Migrating the code to Quarkus 3.
 +
-A major Quarkus 3 change is uses Jakarta EE 10, meaning that we also need to update any `javax` import to `jakarta`.
+A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that we also need to update any `javax` import to `jakarta`.
 +
 This is simply archived by replacing any `javax` instance over `jarkarta`, like the following:
 +
@@ -405,7 +407,7 @@ This is simply archived by replacing any `javax` instance over `jarkarta`, like 
 +
 [NOTE]
 ====
-Please refer the https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Please refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
 [start=6]
