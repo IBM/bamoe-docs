@@ -2,31 +2,25 @@
 
 include::../partials/attributes.adoc[]
 
-The artifacts are shipped as part of the product in the following  consumable formats:
-
-* `bamoe-9.1.0-examples.zip` file: The ZIP file contains all the necessary artifacts that can be used locally. For instructions on setting up a local repository, see xref:../getting-started/projectsetup.html[Initial project setup and walkthrough].
-* Container image: You can use the container image directly. For configuration instructions, see <<#Container-configuration>>.
-
 With {PRODUCT_LONG} v9.1 aligning with its previous version {PRODUCT_SHORT} v8 in the downstream build model, the artifacts are no longer available in Maven Central.
 
-== Integration with Maven Repository Manager tools
+The artifacts are shipped as part of the product as Container Image and Maven repository inside the zip file in a  consumable formats.
 
 If you have a Maven Repository Manager tool like Artifactory or Nexus, you can import the BAMOE Maven repository ZIP content into Maven Repository Manager. For companies without such infrastructure, it is highly recommended to use the container image and make it available within the company for all developers and the continuous integration (CI) system.
 For companies already using a Maven Repository Manager tool, developers and the CI system are typically configured to connect with it. If using the container image, ensure that it is made available and provide the URL that developers and the CI system need to specify in their `settings.xml` file.
 
 NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
 
-[#Container-configuration]
 == Configuring Maven with the container image
 
 Follow the subsequent steps to Configuring Maven with the container Image:
 
 . Open the `Maven ~/.m2/settings.xml` file in a text editor or integrated development environment (IDE).
-
++
 NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `settings.xml` file from the `$MAVEN_HOME/.m2/conf/` directory into the `~/.m2/` directory.
 
 . Add the following lines to the `<profiles>` element of the `settings.xml` file:
-
++
 [source]
 ----
 <profile>
@@ -67,7 +61,7 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 
 == Downloading and configuring a local {PRODUCT_SHORT} Maven repository
 
-If you do not prefer to use the container option, you can download and configure the {PRODUCT_SHORT} Maven repository from `bamoe-9.1.0-examples.zip` file. The {PRODUCT_SHORT} Maven repository contains the required libraries that Java developers need to build {PRODUCT_SHORT} applications. 
+If you do not prefer to use the container option, you can download and configure the {PRODUCT_SHORT} Maven repository from the ZIP file. The {PRODUCT_SHORT} Maven repository contains the required libraries that Java developers need to build {PRODUCT_SHORT} applications. 
 
 Follow the subsequent steps to configure the {PRODUCT_SHORT} Maven repository locally:
 
@@ -75,7 +69,7 @@ Follow the subsequent steps to configure the {PRODUCT_SHORT} Maven repository lo
 . Extract the downloaded archive.
 . Navigate to the `~/.m2/` directory and open the Maven `settings.xml` file in a text editor or IDE.
 . Add the following lines to the `<profiles>` element of the Maven settings.xml file, where `<MAVEN_REPOSITORY>` is the path of the Maven repository that you downloaded. The format of `<MAVEN_REPOSITORY>` must be `file://$PATH`. For example, `file:///home/userX/bamoe-9.1.0-maven-repository/:`.
-
++
 [source]
 ----
 <profile>
@@ -114,7 +108,7 @@ Follow the subsequent steps to configure the {PRODUCT_SHORT} Maven repository lo
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
 
-NOTE: If your Maven repository contains outdated artifacts, you might encounter Maven error messages when building or deploying your project, such as:
+If your Maven repository contains outdated artifacts, you might encounter Maven error messages when building or deploying your project, such as:
 
 * `Missing artifact <PROJECT_NAME>`
 * `[ERROR] Failed to execute goal on project <ARTIFACT_NAME>; Could not resolve dependencies for <PROJECT_NAME>`
