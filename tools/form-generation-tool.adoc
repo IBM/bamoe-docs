@@ -7,39 +7,23 @@ The *{FORM_GENERATION_TOOL}* generates web forms needed for Workflows execution.
 Before you start using the *{FORM_GENERATION_TOOL}*, please be sure you properly understand xref:../tools/authoring-workflows.adoc[Workflows,window=_blank], formerly known as Business Processes.
 
 == Tool Installation
-Before you begin the installation, please be sure your machine meets the following prerequisites:
+// TODO: what url to use?
+Please download *{FORM_GENERATION_TOOL}* zip file available at https://www.ibm.com/support/pages/node/7151078[https://www.ibm.com/support/pages/node/7151078].
+The zip file contains three binary files of the same tool for multiple operating systems.
+Please choose the binary file according your operating system and extract it into desired destination.
+Then please make sure the binary file is executable.
 
-*Installation prerequisites*
-
-- Node 18 (To install it, follow these https://nodejs.org/en/download/package-manager/[instructions,window=_blank])
-
-
-Once the prerequisites are met, it is easy to install the *{FORM_GENERATION_TOOL}*.
-It is available as the `@kie-tools/form-generation-tool` `npm` https://www.npmjs.com/package/@kie-tools/form-generation-tool[package,window=_blank].
-To install this package, simply issue the `npm` command below or any other command you use for installing `npm` packages:
-
+.Make sure the binary file is executable - linux example
 [source,bash]
 ----
-npm install -g @kie-tools/form-generation-tool
+chmod a+x form-generation-cli-linux
 ----
-
-
-NOTE: Please use a version later than *0.32.0*.
-
-
-Once the installation is done, you can start using the *{FORM_GENERATION_TOOL}* from your command line.
-Type the command below to ensure installation was successful.
-
-[source,bash]
-----
-form-generation-tool
-----
-
 
 == Form Generation
 
 You can generate forms using the *{FORM_GENERATION_TOOL}* for any Workflow that requires input data.
-However, for this documentation, we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] community projects stored https://github.com/apache/incubator-kie-kogito-examples[here,window=_blank], especially those that have a process in the project name, e.g. `process-quarkus-example`.
+However, for this documentation, we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] *jbpm-compact-architecture-example* project available https://ibm.ent.box.com/file/1553555696995?s=9xpzcb3gsylinemjyvi0k7frk6aw5iw6[here,window=_blank].
+You will find more example projects in this zip file, however *jbpm-compact-architecture-example* requires the minimal effort to see forms in the action.
 Or you can use your own project.
 
 
@@ -51,16 +35,18 @@ The *{FORM_GENERATION_TOOL}* then locates those JSON Schemas in the project and,
 
 - Make sure your https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] project has been compiled, otherwise the CLI won't be able to find all the form schemas.
 
-As we installed the *{FORM_GENERATION_TOOL}* globally, we can run the command from anywhere.
+Once the *{FORM_GENERATION_TOOL}* binary file is extracted and executable you can start the *{FORM_GENERATION_TOOL}* from your command line.
+
+.Start the binary file - linux example
 [source,bash]
 ----
-form-generation-tool
+./form-generation-cli-linux
 ----
 
 This will start a wizard to help you generate the forms:
 
-First, set the path to your https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] Project.
-We will use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/process-quarkus-example[process-quarkus-example,window=_blank].
+First, set the path to your https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] project.
+We will use *jbpm-compact-architecture-example*.
 
 [source,bash]
 ----
@@ -71,7 +57,7 @@ This tool will help you generate forms for the Processes and User Tasks in your 
 The tool will search for the User Tasks JSON schemas generated in your project, so make sure the project is build.
 The generated forms will be stored as resources in your project (in src/main/resources/forms folder).
  
-? Type your Kogito Project path:---> /path/to/my/projects/process-quarkus-example <---
+? Type your Kogito Project path:---> /path/to/my/projects/jbpm-compact-architecture-example <---
 ----
 
 Select one of the available Form types (Patternfly or Bootstrap 4).
@@ -90,34 +76,36 @@ Confirm Selection, type *Y*, to start the Form Generation process.
 [source,bash]
 ----
 Current selection:
-Project path: /path/to/my/projects/process-quarkus-example
+Project path: /path/to/my/projects/jbpm-compact-architecture-example
 Form type: bootstrap
  
 ? Do you want to continue? (Y/n) Y
 ----
 
-Once the generation is done, browse to `/path/to/my/projects/process-quarkus-example/src/main/resources/forms` folder.
+
+[NOTE]
+====
+Currently there is an issue for the `Array` type.
+You will probably spot similar warning between log messages.
+This is a known and reported https://github.com/apache/incubator-kie-issues/issues/1313[issue].
+
+`Unsupported field type: Array`
+====
+
+
+Once the generation is done, browse to `/path/to/my/projects/jbpm-compact-architecture-example/src/main/resources/forms` folder.
 
 [source,bash]
 ----
-ls /path/to/my/projects/process-quarkus-example/src/main/resources/forms/
+ls /path/to/my/projects/jbpm-compact-architecture-example/src/main/resources/forms/
  
-demo_orderItems.config
-demo_orderItems.html
-demo_orderItems_Verify_order.config
-demo_orderItems_Verify_order.html
-demo_orders.config
-demo_orders.html  
-persons.config
-persons.html
-persons_ChildrenHandling.config
-persons_ChildrenHandling.html
+hiring.config
+hiring.html
+hiring_HRInterview.config
+hiring_HRInterview.html
+hiring_ITInterview.config
+hiring_ITInterview.html
 ----
-
-One question that may come to your mind is why there are so many forms.
-We have only three Workflows in the `process-quarkus-example` project. 
-User Tasks also have forms generated.
-Even though there are only three Workflows in the process-quarkus-example project, there are more than three *.html* files due to the User Task generated forms.
 
 === Form Type
 *{FORM_GENERATION_TOOL}* supports two form types:
@@ -146,16 +134,17 @@ To do so, just add the following dependency in your project `pom.xml`:
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-quarkus-devui</artifactId>
+    <version>9.1.0-ibm-0001</version>
 </dependency>
 ----
 
-NOTE: Please use version *Apache Kie 10* or higher.
+NOTE: This is already done for *jbpm-compact-architecture-example*.
 
 And start the project in Dev mode with the command:
 
 [source,bash]
 ----
-mvn clean quarkus:dev
+mvn clean -Pdevelopment quarkus:dev
 ----
 
 Then, in your browser, navigate to:
@@ -166,13 +155,16 @@ http://localhost:8080/q/dev-ui/extensions
 
 [NOTE]
 ====
-Currently there is an https://github.com/apache/incubator-kie-issues/issues/836[issue,window=_blank] blocking users from navigating to the *Forms* view. For more information, see xref:../introduction/release-notes/known-limitations.adoc[Known limitations].
+//TOD Add Link for the issue
+Currently *jbpm-compact-architecture-example* contains one wrong dependency that needs to be removed.
+Please remove `org.jbpm:jbpm-quarkus-devui-bom` from the project `pom.xml`.
+For more information, see xref:../introduction/release-notes/known-limitations.adoc[Known limitations].
 ====
 
 On the displayed page, find this card and click *Forms*.
 
-.jBPM Runtime Tools Quarkus Dev UI Card
-image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Runtime Tools Quarkus Dev UI Card]
+.jBPM Quarkus Dev UI Card
+image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Quarkus Dev UI Card]
 
 
 Now we should see a list of all available forms that we listed via the command line earlier in this documentation.
@@ -181,7 +173,7 @@ Now we should see a list of all available forms that we listed via the command l
 image::tools/forms.png[Forms list]
 
 Then, if we choose any form, we will have an option to adjust it. 
-We will continue with the *persons* form.
+We will continue with the *hiring* form.
 Please click on it to open it.
 Now we see two tabs: *Source* and *Connections*.
 
@@ -189,31 +181,27 @@ Now we see two tabs: *Source* and *Connections*.
 === Source
 The *Source* tab displays the form source code on the left side, while on the right side there is the form UI.
 
-.Persons form
-image::tools/persons.png[Persons form]
+.Hiring form
+image::tools/hiring.png[Hiring form]
 
-Let's change this piece of the source code
+Let's remove this piece of the source code
 [source,html]
 ----
-<div class="form-check">
-  <input type="checkbox" id="person.adult" name="person.adult" class="form-check-input" />
-  <label class="form-check-label" for="person.adult">Adult</label>
-</div>
-----
-
-to
-[source,html]
-----
-<div class="form-check">
-  <input type="checkbox" id="person.adult" name="person.adult" class="form-check-input" />
-  <label class="form-check-label" for="person.adult">Is Adult?</label>
+<div class="alert alert-warning" role="alert">
+  <h4 class="alert-heading">Unsupported field type: Array</h4>
+  <p>Cannot find form control for property <code>candidateData.skills</code> with type <code>Array</code>.</p>
+  <hr />
+  <p class="mb-0">
+    Some complex property types, such as <code>Array</code> aren't yet supported, however, you can still write your own component into
+    the form and manually bind it.
+  </p>
 </div>
 ----
 
 and click the *Execute form* button. We will immediately see the result.
 
-.Updated persons form
-image::tools/persons-updated.png[Updated persons form]
+.Updated hiring form
+image::tools/hiring-updated.png[Updated hiring form]
 
 The same functionality is available for the `React` forms.
 
@@ -224,7 +212,7 @@ IMPORTANT: This tab is for loading external resources only.
 
 We can try to load newer `bootstrap@5.1.3` version.
 
-To do it, we need to update the `persons.config` from:
+To do it, we need to update the `hiring.config` from:
 
 [source,json]
 ----
@@ -254,4 +242,4 @@ to:
 }
 ----
 
-After updating `persons.config` to use `bootstrap@5.1.3` instead of `bootstrap@4.0.0`, the form UI should be more compact, using smaller visual gaps between elements.
+After updating `hiring.config` to use `bootstrap@5.1.3` instead of `bootstrap@4.0.0`, the form UI should be more compact, using smaller visual gaps between elements.
