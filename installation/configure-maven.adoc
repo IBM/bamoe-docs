@@ -5,17 +5,18 @@ include::../partials/attributes.adoc[]
 The artifacts are shipped as part of the product in the following  consumable formats:
 
 * ZIP file: The ZIP file contains all the necessary artifacts that can be used locally. For instructions on setting up a local repository, see xref:../getting-started/projectsetup.html[Initial project setup and walkthrough].
-* Container image: You can use the container image directly. 
+* Container image: You can use the container image directly. For configuration instructions, see <<#Container-configuration>>.
 
 With {PRODUCT_LONG} v9.1 aligning with its previous version {PRODUCT_SHORT} v8 in the downstream build model, the artifacts are no longer available in Maven Central.
 
 == Integration with Maven Repository Manager tools
 
-If you have a Maven Repository Manager tool like Artifactory or Nexus, you can import the BAMOE Maven repository ZIP content into Maven Repository Manager. For companies without such infrastructure, it is highly recommended to use the container image and make it available within the company for all developers and the CI system.
+If you have a Maven Repository Manager tool like Artifactory or Nexus, you can import the BAMOE Maven repository ZIP content into Maven Repository Manager. For companies without such infrastructure, it is highly recommended to use the container image and make it available within the company for all developers and the continuous integration (CI) system.
 For companies already using a Maven Repository Manager tool, developers and the CI system are typically configured to connect with it. If using the container image, ensure that it is made available and provide the URL that developers and the CI system need to specify in their `settings.xml` file.
 
 NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
 
+[#Container-configuration]
 == Configuring Maven with the container image
 
 Follow the subsequent steps to Configuring Maven with the container Image:
@@ -113,14 +114,10 @@ Follow the subsequent steps to configure the {PRODUCT_SHORT} Maven repository lo
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
 
-NOTE: 
-====
-If your Maven repository contains outdated artifacts, you might encounter Maven error messages when building or deploying your project, such as:
+NOTE: If your Maven repository contains outdated artifacts, you might encounter Maven error messages when building or deploying your project, such as:
 
 * `Missing artifact <PROJECT_NAME>`
 * `[ERROR] Failed to execute goal on project <ARTIFACT_NAME>; Could not resolve dependencies for <PROJECT_NAME>`
 
 To resolve these issues, delete the cached version of your local repository located in the `~/.m2/repository` directory to force a download of the latest Maven artifacts.
-====
-
 
