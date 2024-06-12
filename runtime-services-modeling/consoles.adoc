@@ -24,60 +24,6 @@ To visualize the process instance execution path at the management console, add 
 If this add-on is not enabled for your {PRODUCT_SHORT} service, the management console does not display the diagram panel.
 //For more information about the process SVG add-on, see xref:con-bpmn-process-svg-addon_kogito-developing-process-services[].
 
-== {PRODUCT_SHORT} Management Console Docker Image
-
-The {PRODUCT_SHORT} Management Console image is published to Quay.io and can be used to run containers locally or with any cloud provider.
-
-* Management Console → https://quay.io/repository/bamoe/management-console[quay.io/bamoe/management-console] @ {VERSION}
-
-=== Configuration
-
-The following table lists the configuration envs of the {PRODUCT_SHORT} Management Console Image:
-
-|===
-| Name | Description | Type | Default
-
-| RUNTIME_TOOLS_MANAGEMENT_CONSOLE_KOGITO_ENV_MODE
-| Starts the Management Console in "PROD" or "DEV" Mode. "PROD" mode enables authentication.
-| string
-| "DEV"
-
-| RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT
-| Sets the Data Index Service GraphQL URL
-| string
-| "http://localhost:8180"
-
-| KOGITO_CONSOLES_KEYCLOAK_URL
-| The base URL of the Keycloak server. All other Keycloak server pages and service URLs are derived from the base URL.
-| string
-| "http://localhost:8280/auth"
-
-| KOGITO_CONSOLES_KEYCLOAK_REALM
-| Sets the realm, containing all the security configurations
-| string
-| "kogito"
-
-| KOGITO_CONSOLES_KEYCLOAK_CLIENT_ID
-| The client ID of the application. Each application contains a client ID that is used to identify the application.
-| string
-| "kogito-console-react"
-
-| KOGITO_CONSOLES_KEYCLOAK_HEALTH_CHECK_URL
-| The health check URL that is used to check if the Keycloak server started properly.
-| string
-| "http://localhost:8280/auth/realms/kogito/.well-known/openid-configuration"
-
-| KOGITO_CONSOLES_KEYCLOAK_DISABLE_HEALTH_CHECK
-| In "PROD" mode, disables the Keycloack health check
-| true/false
-| false
-
-| KOGITO_CONSOLES_KEYCLOAK_UPDATE_TOKEN_VALIDITY
-| The property indicates the minimum validity (in seconds) of the token. If the token expires within the specified time, the token is refreshed.
-| number
-| 30
-|===
-
 === Using the {PRODUCT_SHORT} Management Console to manage process instances
 
 You can use the {PRODUCT_SHORT} Management Console to view and manage process instance details from your {PRODUCT_SHORT} services.
@@ -113,12 +59,13 @@ quarkus.http.cors=true
 ----
 
 .Procedure
-.In a command terminal, enter the following command to run the Management Console:
+. Go to the https://repository.jboss.org/org/kie/kogito/management-console/[`management-console`] artifacts page, select the latest release of the {PRODUCT_SHORT} Management Console, and download the `management-console-__VERSION__-runner.jar` file to a local directory.
+. In a command terminal, navigate to the directory location of the downloaded `management-console-__VERSION__-runner.jar` file and enter the following command to run the Management Console:
 +
 .Running the Management Console
-[source,subs="attributes"]
+[source,subs="+quotes"]
 ----
-$ docker run -p 8280:8080 quay.io/bamoe/management-console:{VERSION_910}
+$ java -Dquarkus.http.port=8280 -jar management-console-__VERSION__-runner.jar
 ----
 
 [NOTE]
@@ -126,12 +73,21 @@ $ docker run -p 8280:8080 quay.io/bamoe/management-console:{VERSION_910}
 The default port for the Management Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
 Also, the Management Console uses the default Data Index Service port 8180.
-If you modified this port in your Data Index Service instance, you can set the new Data Index URL using the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
-[source,subs="attributes"]
-----
-$ docker run -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT=http:/_HOST_:_PORT_/graphql -p 8280:8080 quay.io/bamoe/management-console:{VERSION_910}
-----
+If you modified this port in your Data Index Service instance, you must also modify the port in the Management Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Management Console.
 ====
+
+To change the logging level of the Management Console, such as for debugging, you can specify the following start-up properties:
+
+.Modifying Management Console logging level for debugging
+[source,subs="+quotes"]
+----
+$ java  \
+  -Dquarkus.log.console.level=DEBUG \
+  -Dquarkus.log.category.\"org.kie.kogito\".min-level=DEBUG  \
+  -Dquarkus.log.category.\"org.kie.kogito\".level=DEBUG  \
+  -Dquarkus.http.port=8280  \
+  -jar management-console-__VERSION__-runner.jar
+----
 
 === {PRODUCT_SHORT} Management Console application
 
@@ -168,6 +124,7 @@ The *Process Details* page consists of the following panels:
 * Node Trigger panel
 * Milestones panel
 * Jobs panel
+
 
 Process Diagram panel::
 +
@@ -299,34 +256,67 @@ image::runtime-services-modeling/kogito-management-console-jobs-management.png[I
 You can also cancel the multiple jobs at the same time.
 To cancel multiple jobs, select the jobs to be canceled and click the *Cancel Selected* button.
 
-=== Enabling {PRODUCT_SHORT} Management Console security
+=== Configuring {PRODUCT_SHORT} Management Console security
 
-For security, the {PRODUCT_SHORT} Management Console relies on https://www.keycloak.org/about.html[Keycloak] solution for authentication.
+For security, the {PRODUCT_SHORT} Management Console can use an Identity Management (IdM) solution for authentication.
 Once a user is authenticated, Management Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
+The bearer tokens are issued using OpenID Connect and OAuth 2.0 compliant authorization servers such as https://www.keycloak.org/about.html[Keycloak], which will be used in this example.
 
-IMPORTANT: By default, To enable security it is required to run {PRODUCT_SHORT} Management Console in "PROD" mode.
+// TODO: Not sure what to say here
+IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT_SHORT} Management Console] repository in GitHub.
 
 .Prerequisites
-* You have a https://www.keycloak.org/about.html[Keycloak] server running.
+* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/management-console[{PRODUCT_SHORT} Management Console] repository from GitHub.
+* An IdM solution running.
 
-IMPORTANT: Ensure that you log in to the Keycloak administration console, navigate to the respective client configuration, and add correct URLs of different applications.
+IMPORTANT: Ensure that you log in to the administration console of the IdM, navigate to the respective client configuration, and add correct URLs of different applications.
 For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues.
 You can also add the origin URLs as a parameter to the *Web Origins*, which can prevent the issues related to `Access-Control-Allow-Origin`.
 
 image::runtime-services-modeling/kogito-consoles-keycloak-config.png[Image of client config in keycloak server]
 
 .Procedure
-In a command terminal, enter the following command to run the Management Console:
-
+. In a command terminal, navigate to the local clone of the {PRODUCT_SHORT} Management Console repository and enter the following command to run the application with security enabled:
++
+--
 .Run the Management Console with security enabled
-[source,subs="attributes"]
+[source]
 ----
-$ docker run -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_KOGITO_ENV_MODE=PROD
-  -e KOGITO_CONSOLES_KEYCLOAK_URL=http://localhost:8480/auth
-  -e KOGITO_CONSOLES_KEYCLOAK_REALM=kogito
-  -e KOGITO_CONSOLES_KEYCLOAK_CLIENT_ID=kogito-console-react
-  -p 8280:8080 quay.io/bamoe/management-console:{VERSION_910}
+mvn clean compile quarkus:dev
 ----
+
+IMPORTANT: Ensure that the service is not started at the same port as the security server. You can change the port by adding `-Dquarkus.http.port=__PORT_NUMBER__` to the start-up properties.
+
+--
+. Navigate to the `src/main/resources/application.properties` file of the Management Console project and add the following properties:
++
+--
+.Required security properties in `applications.properties` file
+[source]
+----
+# OpenID Connect configurations
+kogito.consoles.keycloak.config.realm=kogito
+kogito.consoles.keycloak.config.url=http://localhost:8280/auth/
+kogito.consoles.keycloak.config.client-id=kogito-console-quarkus
+kogito.consoles.keycloak.config.health-check-url=http://localhost:8280/auth/realms/kogito/.well-known/openid-configuration
+kogito.consoles.keycloak.config.disable-health-check=false
+kogito.consoles.keycloak.config.update-token-validity=30
+----
+--
+
+. Replace any property definitions with those of your specific environment, especially the following properties:
++
+* `kogito.consoles.keycloak.config.url`: The base URL of the Keycloak server, such as `https://localhost:8280/auth`. All other Keycloak server pages and service URLs are derived from the base URL.
+* `kogito.consoles.keycloak.config.client-id`: The client ID of the application. Each application contains a client ID that is used to identify the application.
+* `kogito.consoles.keycloak.config.realm`: The realm, containing all the security configurations.
+* `kogito.consoles.keycloak.config.health-check-url`: The health check URL that is used to check if the Keycloak server started properly.
+* `kogito.consoles.keycloak.config.disable-health-check`: The property to disable the health check. By default, the health check is enabled.
+* `kogito.consoles.keycloak.config.update-token-validity`: The property indicates the minimum validity (in seconds) of the token. If the token expires within the specified time, the token is refreshed.
+
+. In the same `application.properties` file, also configure the resources to be exposed and the required permissions for accessing the resources.
++
+
+. Stop and restart the {PRODUCT_SHORT} Management Console to ensure that the security changes are applied.
 
 == {PRODUCT_SHORT} Task Console
 
@@ -339,70 +329,8 @@ You can use the Task Console to view your list of assigned tasks, view the task 
 
 The Task Console requires your {PRODUCT_SHORT} services to use the {PRODUCT_SHORT} Data Index Service.
 The Data Index Service enables the Task Console to access stored events related to tasks and domain data from your {PRODUCT_SHORT} services.
-
-=== {PRODUCT_SHORT} Task Console Docker Image
-
-The {PRODUCT_SHORT} Task Console image is published to Quay.io and can be used to run containers locally or with any cloud provider.
-
-* Task Console → https://quay.io/repository/bamoe/task-console[quay.io/bamoe/task-console] @ {VERSION}
-
-==== Configuration
-
-The following table lists the configuration envs of the {PRODUCT_SHORT} task Console Image:
-
-|===
-| Name | Description | Type | Default
-
-| RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_ENV_MODE
-| Starts the Management Console in "PROD" or "DEV" Mode. "PROD" mode enables authentication.
-| string
-| "DEV"
-
-| RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT
-| Sets the Data Index Service GraphQL URL
-| string
-| "http://localhost:8180"
-
-| RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_STATES_LIST
-| Comma-separated list of all the possible `Task States` to be used in the `Task Inbox` filters.
-| string
-| "Ready,Reserved,Completed,Aborted,Skipped"
-
-| RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_ACTIVE_STATES_LIST
-| Comma-separated list of all the active `Task States` to be used in the `Task Inbox` filters.
-| string
-| "Ready,Reserved"
-
-| KOGITO_CONSOLES_KEYCLOAK_URL
-| The base URL of the Keycloak server. All other Keycloak server pages and service URLs are derived from the base URL.
-| string
-| "http://localhost:8280/auth"
-
-| KOGITO_CONSOLES_KEYCLOAK_REALM
-| Sets the realm, containing all the security configurations
-| string
-| "kogito"
-
-| KOGITO_CONSOLES_KEYCLOAK_CLIENT_ID
-| The client ID of the application. Each application contains a client ID that is used to identify the application.
-| string
-| "kogito-console-react"
-
-| KOGITO_CONSOLES_KEYCLOAK_HEALTH_CHECK_URL
-| The health check URL that is used to check if the Keycloak server started properly.
-| string
-| "http://localhost:8280/auth/realms/kogito/.well-known/openid-configuration"
-
-| KOGITO_CONSOLES_KEYCLOAK_DISABLE_HEALTH_CHECK
-| In "PROD" mode, disables the Keycloack health check
-| true/false
-| false
-
-| KOGITO_CONSOLES_KEYCLOAK_UPDATE_TOKEN_VALIDITY
-| The property indicates the minimum validity (in seconds) of the token. If the token expires within the specified time, the token is refreshed.
-| number
-| 30
-|===
+// TODO: Do we say PostgreSQL here?
+The {PRODUCT_SHORT} Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
 
 === Using the {PRODUCT_SHORT} Task Console to interact with user tasks
 
@@ -423,12 +351,14 @@ quarkus.http.cors=true
 ----
 
 .Procedure
-In a command terminal, enter the following command to run the Task Console:
+. Go to the https://repository.jboss.org/org/kie/kogito/task-console/[`task-console`] artifacts page, select the latest release of the {PRODUCT_SHORT} Task Console, and download the `task-console-__VERSION__-runner.jar` file to a local directory.
+. In a command terminal, navigate to the directory location of the downloaded `task-console-__VERSION__-runner.jar` file and enter the following command to run the Task Console:
++
 --
 .Running the Task Console
-[source,subs="attributes"]
+[source,subs="+quotes"]
 ----
-$ docker run -p 8280:8080 quay.io/bamoe/task-console:{VERSION_910}
+$ java -Dquarkus.http.port=8280 -jar task-console-__VERSION__-runner.jar
 ----
 
 [NOTE]
@@ -436,31 +366,41 @@ $ docker run -p 8280:8080 quay.io/bamoe/task-console:{VERSION_910}
 The default port for the Task Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
 Also, the Task Console uses the default Data Index Service port 8180.
-If you modified this port in your Data Index Service instance, you can set the new Data Index URL using the `RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
-[source,subs="attributes"]
-----
-$ docker run -e RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT=http:/_HOST_:_PORT_/graphql -p 8280:8080 quay.io/bamoe/task-console:{VERSION_910}
-----
+If you modified this port in your Data Index Service instance, you must also modify the port in the Task Console properties by using the start-up property `-Dkogito.dataindex.http.url=http://__HOST__:__PORT__/graphql` when you run the Task Console.
 ====
 
-If your {PRODUCT_SHORT} project has a custom task lifecycle that defines custom states, you can use the following environment
-variables to configure the Task Console to use those states and show them in the filters:
+To change the logging level of the Task Console, such as for debugging, you can specify the following start-up properties:
 
-* `RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_STATES_LIST`: Comma-separated list of values containing all the states that you want to show in the Task Console.
+.Modifying Task Console logging level for debugging
+[source,subs="+quotes"]
+----
+$ java  \
+  -Dquarkus.log.console.level=DEBUG -Dquarkus.log.category.\"org.kie.kogito\".min-level=DEBUG  \
+  -Dquarkus.log.category.\"org.kie.kogito\".level=DEBUG  \
+  -Dquarkus.http.port=8280  \
+  -jar task-console-__VERSION__-runner.jar
+----
+
+If your {PRODUCT_SHORT} project has a custom task lifecycle that defines custom states, you can use the following properties to
+configure the Task Console to use those states and show them in the filters:
+
+* `kogito.task.states.list`: Comma-separated list of values containing all the states that you want to show in the Task Console.
 Without this property, the Task Console shows the default lifecycle states `Ready`, `Reserved`, `Completed`, `Aborted`, and `Skipped`.
-* `RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_ACTIVE_STATES_LIST`: Comma-separated list of values containing the active task states.
-These states are used in the *Task Inbox* default filter. Without this property, the default active states are `Ready` and `Reserved`.
+* `kogito.task.active.states.list`: Comma-separated list of values containing the active task states. These states are used in the *Task Inbox* default filter. Without this property, the default active states are `Ready` and `Reserved`.
 
 .Configuring custom task states for the Task Console
-[source,subs="attributes"]
+[source,subs="+quotes"]
 ----
-$ docker run -e RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_STATES_LIST=Started,Pending,Finished,Cancelled -e RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_TASK_ACTIVE_STATES_LIST=Started,Pending -p 8280:8080 quay.io/bamoe/task-console:{VERSION_910}
+$ java  \
+  -Dkogito.task.states.list=Started,Pending,Finished,Cancelled \
+  -Dkogito.task.active.states.list=Started,Pending \
+  -jar task-console-__VERSION__-runner.jar
 ----
 
 .{PRODUCT_SHORT} Task Console
 image::runtime-services-modeling/kogito-task-console.png[Image of Kogito Task Console]
 
-In this example, the Task Console displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
+In this example, the Management Console displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
 
 The *Task Inbox* page lists the available user tasks that you can interact with.
 You can use the upper toolbar options to filter the tasks or use the column headers to sort the tasks as needed.
@@ -491,15 +431,19 @@ For additional task details, you can select *View details*. This panel lists the
 image::runtime-services-modeling/kogito-task-console-details-expanded.png[Image of task details panel]
 --
 
-=== Enabling {PRODUCT_SHORT} Task Console security
+=== Configuring {PRODUCT_SHORT} Task Console security
 
-For security, {PRODUCT_SHORT} Task Console relies on https://www.keycloak.org/about.html[Keycloak] solution for authentication.
+For security, {PRODUCT_SHORT} Task Console utilizes an IdM solution, such as Keycloak, as an authentication service.
 Once a user is authenticated, Task Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
+These tokens are issued by OpenID Connect and OAuth 2.0 compliant authorization servers.
+In this example, we will be using Keycloak.
 
-IMPORTANT: By default, To enable security it is required to run {PRODUCT_SHORT} Management Console in "PROD" mode.
+// TODO: Not sure what to do here
+IMPORTANT: This procedure applies only when you are using a locally cloned copy of the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT_SHORT} Task Console] repository in GitHub.
 
 .Prerequisites
-* You have a https://www.keycloak.org/about.html[Keycloak] server running.
+* You have cloned the https://github.com/apache/incubator-kie-kogito-apps/tree/master/task-console[{PRODUCT_SHORT} Task Console] repository from GitHub.
+* An instance of Keycloak server is running.
 
 IMPORTANT: Ensure that you log in to the administration console of the Keycloak, navigate to the respective client configuration, and add correct URLs of different applications.
 For easier configuration, you can add `*`  in the *Web Origins*, however, it can cause security issues.
@@ -508,14 +452,44 @@ You can also add the origin URLs as a parameter to the *Web Origins*, which can 
 image::runtime-services-modeling/kogito-consoles-keycloak-config.png[Image of client config in keycloak server]
 
 .Procedure
-In a command terminal, enter the following command to run the Task Console:
-
+. In a command terminal, navigate to the local clone of the {PRODUCT_SHORT} Task Console repository and enter the following command to run the application with security enabled:
++
+--
 .Run the Task Console with security enabled
-[source,subs="attributes"]
+[source]
 ----
-$ docker run -e RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_ENV_MODE=PROD
-  -e KOGITO_CONSOLES_KEYCLOAK_URL=http://localhost:8480/auth
-  -e KOGITO_CONSOLES_KEYCLOAK_REALM=kogito
-  -e KOGITO_CONSOLES_KEYCLOAK_CLIENT_ID=kogito-console-react
-  -p 8280:8080 quay.io/bamoe/task-console:{VERSION_910}
+mvn clean compile quarkus:dev
 ----
+
+IMPORTANT: Ensure that the service is not started at the same port as the security server. You can change the port by adding `-Dquarkus.http.port=__PORT_NUMBER__` to the start-up properties.
+
+--
+. Navigate to the `src/main/resources/application.properties` file of the Task Console project and add the following properties:
++
+--
+
+.Required security properties in `applications.properties` file
+[source]
+----
+# OpenID Connect configurations
+kogito.consoles.keycloak.config.realm=kogito
+kogito.consoles.keycloak.config.url=http://localhost:8280/auth/
+kogito.consoles.keycloak.config.client-id=kogito-console-quarkus
+kogito.consoles.keycloak.config.health-check-url=http://localhost:8280/auth/realms/kogito/.well-known/openid-configuration
+kogito.consoles.keycloak.config.disable-health-check=false
+kogito.consoles.keycloak.config.update-token-validity=30
+----
+
+. Replace any property definitions with those of your specific environment, especially the following properties:
++
+* `kogito.consoles.keycloak.config.url`: The base URL of the Keycloak server, such as `https://localhost:8280/auth`. All other Keycloak server pages and service URLs are derived from the base URL.
+* `kogito.consoles.keycloak.config.client-id`: The client ID of the application. Each application contains a client ID that is used to identify the application.
+* `kogito.consoles.keycloak.config.realm`: The realm, containing all the security configurations.
+* `kogito.consoles.keycloak.config.health-check-url`: The health check URL that is used to check if the Keycloak server started properly.
+* `kogito.consoles.keycloak.config.disable-health-check`: The property to disable the health check. By default, the health check is enabled.
+* `kogito.consoles.keycloak.config.update-token-validity`: The property indicates the minimum validity (in seconds) of the token. If the token expires within the specified time, the token is refreshed.
+
+. In the same `application.properties` file, also configure the resources to be exposed and the required permissions for accessing the resources.
++
+
+. Stop and restart the {PRODUCT_SHORT} Task Console to ensure that the security changes are applied.
