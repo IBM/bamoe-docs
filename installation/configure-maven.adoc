@@ -5,12 +5,17 @@ include::../partials/attributes.adoc[]
 With {PRODUCT_LONG} v9.1 aligning with its previous version {PRODUCT_SHORT} v8 in the downstream build model, the artifacts are no longer available in Maven Central.
 The artifacts are shipped as part of the product as a Container Image and Maven Repository inside the compressed file in a consumable format.
 
-If you have a Maven Repository Manager tool like Artifactory or Nexus, you can import the compressed BAMOE Maven repository content into Maven Repository Manager.
+If you have a Maven Repository Manager tool like Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
 For companies without such infrastructure, it is highly recommended to use the container image and make it available within the company for all developers and the continuous integration (CI) system.
 For companies that already use a Maven Repository Manager tool, developers and the CI system are typically configured to connect with it.
 If you are using the container image, ensure that it is made available and provide the URL that developers and the CI system need to specify in their `settings.xml` file.
 
 NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
+
+There are two ways to do this:
+
+* Set up a maven repository with a container image
+* Configure your local maven repository
 
 == Configuring Maven with the container image
 
@@ -19,11 +24,19 @@ There are a few options and your choice will depend on your work environment and
 
 === Deploying to OpenShift
 
-. Choose between using the **bamoe-9.1.0-maven-repository-image.tar.gz** or the hosted **quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}** image:
+Choose between using the
 
-.. **bamoe-9.1.0-maven-repository-image.tar.gz**
-... Enable the OpenShift registry and log into it using Docker:
-+
+* bamoe-9.1.0-maven-repository-image.tar.gz
+* quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
+
+[CAUTION]
+====
+The provided container images are created for Linux execution, running on a different architecture beside Linux x86_64 architecture, there may be a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested"
+====
+
+==== bamoe-9.1.0-maven-repository-image.tar.gz
+Enable the OpenShift registry and log into it using Docker:
+
 [source,shell,subs="attributes+"]
 ----
 oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
@@ -31,8 +44,8 @@ export REGISTRY=`oc get route default-route -n openshift-image-registry --templa
 docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
 ----
 
-... Import the image from the .tar.gz file, re-tag it, and push it to the OpenShift registry
-+
+Import the image from the .tar.gz file, re-tag it, and push it to the OpenShift registry
+
 [source,shell,subs="attributes+"]
 ----
 docker image load --input bamoe-9.1.0-maven-repository-image.tar.gz
@@ -41,33 +54,34 @@ docker push ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION_910}
 # Replace <PROJECT_NAME> with your OpenShift Project (namespace)
 ----
 
-... Set an env var with the image name
-+
+Set an env var with the image name
+
 [source,shell,subs="attributes+"]
 ----
 export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION_910}
 ----
 
-.. **quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}**
-... In this case, not much needs to be done, just set an env var with the image URL
-+
+==== quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
+In this case, not much needs to be done, just set an env var with the image URL
+
 [source,shell,subs="attributes+"]
 ----
 export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
 ----
 
-. Create a new Service Account and add `anyuid` permissions.
-  This is important because we'll need to run a container on port 80, which usually OpenShift blocks with the default Service Account:
-+
+Create a new Service Account and add `anyuid` permissions.
+This is important because we'll need to run a container on port 80, which usually OpenShift blocks with the default Service Account:
+
 [source,shell,subs="attributes+"]
 ----
 oc create sa maven-repo-root-user
 oc adm policy add-scc-to-user anyuid -z maven-repo-root-user
 ----
+
 NOTE: If you can't create a Service Account with elevated privileges, xref:../introduction/release-notes/build-maven-repo.adoc[learn how to build your own bamoe-maven-repository image using a different port].
 
-. Create the Deployment, Service, and Route
-+
+Create the Deployment, Service, and Route
+
 [source,shell,subs="attributes+"]
 ----
 oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
@@ -76,8 +90,8 @@ oc patch deployment/bamoe-maven-repo --type=json \
 oc create route edge --service=bamoe-maven-repo
 ----
 
-. Get the Maven repository URL to be used in the next steps:
-+
+Get the Maven repository URL to be used in the next steps:
+
 [source,shell,subs="attributes+"]
 ----
 oc get route bamoe-maven-repo --output jsonpath={.spec.host}
@@ -87,8 +101,8 @@ oc get route bamoe-maven-repo --output jsonpath={.spec.host}
 
 Choose between using
 
-* **bamoe-9.1.0-maven-repository-image.tar.gz**
-* the hosted **quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}** image:
+* bamoe-9.1.0-maven-repository-image.tar.gz
+* the hosted quay.io/bamoe/maven-repository:{IMAGE_VERSION_910} image
 
 ==== bamoe-9.1.0-maven-repository-image.tar.gz
 
@@ -215,7 +229,7 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
 
-== Downloading and configuring a local {PRODUCT_SHORT} Maven repository
+== Configuring a local Maven repository for {PRODUCT_SHORT}
 
 If you prefer not to use containers, you can download and configure the {PRODUCT_SHORT} Maven repository from the compressed file.
 The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers need to build {PRODUCT_SHORT} applications.
@@ -272,3 +286,5 @@ If your Maven repository contains outdated artifacts, you might encounter Maven 
 * `[ERROR] Failed to execute goal on project <ARTIFACT_NAME>; Could not resolve dependencies for <PROJECT_NAME>`
 
 To resolve these issues, delete the cached version of your local repository that is located in the  `~/.m2/repository` directory to force a download of the latest Maven artifacts.
+
+Your Maven repository is now properly configured and ready to build {PRODUCT_SHORT} based projects using a standard Maven workflow.
