@@ -11,15 +11,271 @@ include::../partials/maven-bom-techpreview.adoc[]
 
 After the technology preview bill of materials is added, individual features from it can be enabled by adding relevant dependencies declared in the technology preview bill of materials to the **_dependencies_** section of an existing POM file.
 
-== Creating a stateful Hiring process 
+== Creating and Configuring a BPMN Workflow
 
-In this section we will focus on how to build and configure the Hiring process in Canvas. The example README provides more information on how to configure the recommended architecture for stateful processes in the {PRODUCT_SHORT} environment: Compact Architecture because it enables the simplification of communication between services, removing the need for events (Kafka/HTTP). 
+In this section we will focus on how to build and configure the Hiring process in Canvas.
 
-The source for this sample can be found in your installation in the bamoe-9.1.0-examples.zip
+=== Create Process Variables
 
-// TODO: add procedural descriptions to enable users to understand how to create a stateful workflow application
+1. Open Canvas with workflow elements.
 
-Link to current sample readme: https://github.com/apache/incubator-kie-tools/tree/main/examples/jbpm-compact-architecture-example#readme
+2. Click anywhere in the canvas and then click on the properties tab to access the properties panel.
 
-Related PR: https://github.com/apache/incubator-kie-kogito-examples/pull/1833
+.Canvas for workflow showing properties
+image::wf-tutorial/canvas-wf-1.png[Canvas for workflow showing properties]
 
+3. Set the following properties:
+
+ * *Name*: Provide a label for the process.
+
+ * *ID*: Specify an identifier that will be used for endpoints.
+
+ * *Description*: Write a detailed description of the process.
+
+4. To add input variables:
+
+ * Click the plus button to add a new variable.
+
+ * Set the variable's name and data type. 
+ ** _Name_ is the ID and name of the variable which can be referenced via scripts or input/output of activities. 
+ ** Data type refers to a Java type. If you click Select Custom, the field turns into the fully qualified name of the class. 
+
+.Process properties
+image::wf-tutorial/input-data-2.png[Setting process properties]
+
+=== Define Workflow Elements
+
+Use the following elements to define your workflow:
+
+1. *Start Event*: Green circle indicating the starting point of the workflow.
+
+2. *Intermediate Events*: Yellow circle for events that occur between the start and end points.
+
+3. *End Events*: Red circle marking the end of the workflow.
+
+4. *Activities*: Empty rectangle representing tasks or activities in the workflow.
+
+5. *Subprocess*: Rectangle with a square for subprocesses.
+
+6. *Gateways*: Diamond shape for decision points.
+
+7. *Lanes*: Checklist icon to organize tasks by roles or departments.
+
+8. *Non-executable Items*: 3D cube for items not executed within the workflow.
+
+9. *Miscellaneous*: Engine icon for other workflow components.
+
+
+
+=== Adjust Properties and Add Process Variables
+
+1. Create a start node with a script to initialize variables:
+
++
+
+[source,java]
+
+----
+
+System.out.println("New Hiring has been created for candidate: " + candidateData.getFullName());
+
+kcontext.setVariable("hr_approval", false);
+
+kcontext.setVariable("it_approval", false);
+
+----
+
++
+
+2. Add an exclusive gateway for decision-making.
+
+3. Create a business rule task with specific properties and data assignments:
+
++
+
+[source,java]
+
+----
+
+System.out.println("###################################");
+
+System.out.println("Generated offer for candidate: " + candidateData.getFullName());
+
+System.out.println("Job Category: " + offer.getCategory());
+
+System.out.println("Base salary: " + offer.getSalary());
+
+System.out.println("###################################");
+
+----
+
++
+
+4. Create and configure human tasks and boundary events:
+
++
+
+[source,java]
+
+----
+
+System.out.println("###################################");
+
+System.out.println("HR Interview have been avoided after reasonable time");
+
+System.out.println("###################################");
+
+----
+
++
+
+5. Add scripts for various tasks and events to log important details and actions:
+
++
+
+[source,java]
+
+----
+
+System.out.println("###################################");
+
+System.out.println("To: " + candidateData.getEmail());
+
+System.out.println("Subject: Congratulations you made it!");
+
+System.out.println("Dear " + candidateData.getFullName() + ", we are happy to tell you that you've successfully went through the hiring process. You'll find the final Offer details in attached.");
+
+System.out.println("Job Category: " + offer.getCategory());
+
+System.out.println("Base salary: " + offer.getSalary());
+
+System.out.println("###################################");
+
+
+
+System.out.println("###################################");
+
+System.out.println("Candidate " + candidateData.getFullName() + " doesn't meet the requirements for the position but we'll keep it on records for the future!");
+
+System.out.println("###################################");
+
+----
+
+++
+
+== Using canvas to create a new project using accelerators
+
+For information on setting up Canvas see xref:../installation/canvas.adoc[Canvas installation]
+
+For information on setting up Developer Tools for VS Code see xref:https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[BAMOE Developer tools]
+
+1. Open Canvas
+
+1. Import `hiring.bpmn` using this link xref:../hiring.bpm[]
+//link to be added
+
+1. Click *Apply accelerator* -> *Quarkus (Full)*, and on the pop-up click *Apply*
++
+.New process project with accelerator
+image::wf-tutorial/1-new-process-project-with-accelerator.png[Process project with accelerator]
++
+1. Click "Untitled Project" and rename the project. In this example, the project 1. is named `process-service-sample`
++
+.Renaming project
+image::wf-tutorial/2-renaming-project.png[Renaming project]
+
+1. In this step, for learning purposes, download the project to the local development environment by clicking on *Share* -> *All files*.
+
+Note:: Users with pre-configured git authentication can syncronize the new project on git and push it to a new repository.
+
+== Running the project locally with VSCode
+
+With the process service now available in the local development environment, unzip the project. On a command line, the project can be extracted into a new folder with:
+
+`$ unzip process-service-sample.zip -d process-service-sample`
+
+Open the project `process-service-sample` using VSCode.
+
+When using IBM BAMOE Developer Tools extension, developers can seamlesly interact with business assets directly from the developer IDE:
+
+.Project in VS Code
+image::wf-tutorial/3-project-in-vscode.png[Project in VS Code]
+
+Notice the project includes the process definition and the `application.properties` file with generic sample configurations:
+
+```properties
+
+# Set up for the swagger-ui (Process-defintions)
+
+quarkus.http.cors=true
+
+quarkus.smallrye-openapi.path=/docs/openapi.json
+
+quarkus.swagger-ui.always-include=true
+
+kogito.generate.rest.decisions=true
+
+kogito.generate.rest.processes=true
+
+# list of users for task console
+
+quarkus.kogito-runtime-tools.users=jdoe,admin,user
+
+quarkus.kogito-runtime-tools.users.admin.groups=admin
+
+quarkus.kogito-runtime-tools.users.user.groups=user
+
+quarkus.kogito-runtime-tools.users.jdoe.groups=user,admin,IT,HR
+
+kogito.service.url=http://localhost:8080
+
+kogito.dataindex.http.url=http://localhost:8180
+
+kogito.dataindex.ws.url=ws://localhost:8180
+
+# Maximum Java heap to be used during the native image generation
+
+quarkus.native.native-image-xmx=6g
+
+kafka.bootstrap.servers=localhost:9092
+
+## main transport
+
+## metadata
+
+#mp.messaging.outgoing.kogito-processinstances-events.bootstrap.servers=localhost:9092
+
+mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
+
+mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
+
+mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+#mp.messaging.outgoing.kogito-usertaskinstances-events.bootstrap.servers=localhost:9092
+
+mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
+
+mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
+
+mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+#mp.messaging.outgoing.kogito-variables-events.bootstrap.servers=localhost:9092
+
+mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
+
+mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
+
+mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+```
+
+To execute the project in the local development environment, open a new terminal in VScode and execute:
+
+`mvn clean package`
+
+.Opening a terminal in VS Code
+image::wf-tutorial/4-new-terminal-vscode.png[Opening a terminal in VS Code]
+
+This command should compile and package the process service into a Quarkus executable Jar file. The resulting package is the service that can later be containerized and executed on cloud platforms. The process service generated using the accelerator brings in its `pom.xml` file a pre-configured set of add-ons. You will need to adapt this file to meet the requirements of your service.
+
+The first execution will download the artifacts that are not yet available on the development environment
