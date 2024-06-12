@@ -2,14 +2,15 @@
 include::../partials/attributes.adoc[]
 
 //tag::maven-setup[]
-First step: Install Apache Maven.
-You can find instructions for doing so at https://maven.apache.org/install.html[the Apache Maven website].
+== Requirements
+Set up your Maven environment, following these instructions for doing so xref:../installation/gav-mapping-rules.adoc[Configuring Maven with BAMOE binaries].
 
 == Project Setup Options
-With the migration of the BAMOE product to Quarkus 3 the instructions on how to generate a new Maven project have changee.  Currently, there are a number of options:
+With the migration of the BAMOE product to Quarkus 3 the instructions on how to generate a new Maven project have changed. You now have these options:
 
-* xref:../editing/creating-new-projects.adoc[Use BAMOE Canvas] to create a new project using Canvas' accelerator features..
-* **Create Project Manually**
+* Create a project manually
+* xref:../installation/configure-maven.adoc[Use BAMOE Canvas] to create a new project using the {CANVAS} accelerator functionality.
+
 
 == Creating a BAMOE Project Manually
 Typically, Maven projects are created either using plugins or archetypes.  You can use a simple Maven archetype to generate a basic Maven project, for example:
@@ -19,7 +20,7 @@ Typically, Maven projects are created either using plugins or archetypes.  You c
 mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-simple -DarchetypeVersion=1.4 -DinteractiveMode=false
 ----
 
-then update the project's `pom.xml` with content from one of the followin templates:
+then update the `pom.xml` for the project with content from one of the following templates:
 
 xref:../partials/rules-sample-pom.adoc[Sample Rules/Decision Application POM Template] a sample POM that describes a typical rules/decisions project dependencies and plugins.
 
@@ -34,8 +35,8 @@ mvn clean package
 == Editing within VS Code
 
 . Open the project in VS Code.
-  From here we can see the workspace's contents, and if we expand the contents of `/src/main` you will see the creation of several artifacts. 
-  Within `java` you will have a `GreetingResource.java` and within `resources` you will have an `application.properties` and `pricing.dmn` file. 
+  From here we can see the workspace contents, and if we expand the contents of `/src/main` you can see the creation of several artifacts. 
+  Within `java` you have a `GreetingResource.java` and within `resources` you have an `application.properties` and `pricing.dmn` file. 
   These are sample files that can be later modified or deleted.
 +
 image::workspace-layout.png[VSCode Workspace Layout]
@@ -53,7 +54,7 @@ image::bamoe-vscode-marketplace.png[{VS_CODE_BUNDLE} within the marketplace]
 image::automatic-layout.png[Automatic Layout]
 
 . When the diagram opens you will see something similar to below, and you can start exploring it. 
-  The DMN is made up of two inputs: *Age* and *Previous incidents?*, which are used to make the decision, *Base price*.
+  The DMN consists of two inputs: *Age* and *Previous incidents?*, which are used to make the decision, *Base price*.
 +
 image::dmn-first-view.png[DMN First view]
 
@@ -61,8 +62,8 @@ image::dmn-first-view.png[DMN First view]
 +
 image::properties-open.png[DMN Properties]
 
-. Within this pane, you can see information about the input *Age*, which includes that it is a number and what the input name is. 
-  More can be changed around this object, including the color of the node, font size, etc.
+. Within this pane, you can see information about the input *Age*, namely that it is a number and its input name. 
+  Other changes can be made to the object, including the color of the node, font size, etc.
 +
 image::properties-expanded.png[DMN Properties Expanded]
 
@@ -72,11 +73,11 @@ image::open-decision.png[Edit DMN Decision]
 
 . From here you will see the Decision Table that is associated with the Base Price decision. 
   From here you will see two (*2*) input columns (`Age` and `Previous Incidents`), as well as one output column (`Base price`) all with their types below them. 
-  These types are controlled from the properties panel similarly to how they were opened when looking at `Age` a few steps ago. 
+  These types are controlled from the properties panel similarly to how they were opened when we previously looked at `Age`. 
   This decision has 4 different rows that could fire, with a Hit Policy of `UNIQUE` signified by the **U** in the top left corner of the table. 
-  A decision writer could make any comments they want to the table and have them saved towards the decision here.
+  A decision writer could make any comments they want to the table and have them saved with the decision here.
 +
 image::dt-stable.png[Viewing DMN Decision]
 
 == Source Control
-This is a Java based project, and any tools regularly used for storing Java based source code into a source repository would be applicable here.
+This is a Java based project, and any tools regularly used for storing Java based source code in a source repository are applicable here.
