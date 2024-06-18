@@ -13,9 +13,9 @@ It depends on two backend applications to reach its full potential:
 {CANVAS} and its two backend applications are available as container images.
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ 9.1.0-ibm-0001
-* Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ 9.1.0-ibm-0001
-* CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ 9.1.0-ibm-0001
+* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION_910}
+* Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION_910}
+* CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION_910}
 
 NOTE: The *exact same version* needs to be used for a deployment with these three images to work.
 
@@ -38,7 +38,7 @@ export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/extended-services:{VERSION_910} --name=$APP_NAME_EXTENDED_SERVICES
+oc new-app quay.io/bamoe/extended-services:{IMAGE_VERSION_910} --name=$APP_NAME_EXTENDED_SERVICES
 oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
 oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
@@ -49,7 +49,7 @@ oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/cors-proxy:{VERSION_910} --name=$APP_NAME_CORS_PROXY
+oc new-app quay.io/bamoe/cors-proxy:{IMAGE_VERSION_910} --name=$APP_NAME_CORS_PROXY
 oc create route edge --service=$APP_NAME_CORS_PROXY
 oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
@@ -60,7 +60,7 @@ oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/canvas:{VERSION_910} --name=$APP_NAME_BAMOE_CANVAS \
+oc new-app quay.io/bamoe/canvas:{IMAGE_VERSION_910} --name=$APP_NAME_BAMOE_CANVAS \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
   -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
 oc create route edge --service=$APP_NAME_BAMOE_CANVAS
@@ -87,7 +87,7 @@ NOTE: All services will be available via `https`, which means that if you're dep
 
 [source,shell,subs="attributes+"]
 ----
-docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{VERSION_910}
+docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{IMAGE_VERSION_910}
 # Add the -d flag to run in detached mode.
 ----
 Access the API through port 21345, no additional configuration is necessary.
@@ -97,7 +97,7 @@ Access the API through port 21345, no additional configuration is necessary.
 
 [source,shell,subs="attributes+"]
 ----
-docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{VERSION_910}
+docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION_910}
 # Add the -d flag to run in detached mode.
 ----
 The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image), no additional configuration is necessary.
@@ -116,7 +116,7 @@ If you're running locally, following the previous steps, use this command to sta
 docker run -p 8080:8080 -it \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=http://localhost:21345 \
   -e KIE_SANDBOX_CORS_PROXY_URL=http://localhost:8090 \
-  quay.io/bamoe/canvas:{VERSION_910}
+  quay.io/bamoe/canvas:{IMAGE_VERSION_910}
 # Add the -d flag to run in detached mode.
 ----
 The HTTP server is accessed via port 8080.
@@ -131,7 +131,7 @@ Using internal IP/DNS services will not work.
 Requests are made directly from the user's browser to both URLs configured above.
 ====
 
-Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`. 
+Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 
 This environment variable points to a container image that is used when creating a Dev deployment for Decisions.
 
