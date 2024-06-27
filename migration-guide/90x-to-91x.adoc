@@ -34,7 +34,8 @@ You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-too
 
 ==== Update Maven settings
 On the {PRODUCT} Version {VERSION_901} the dependencies were hosted on the https://central.sonatype.com/search?q=bamoe[Maven Central].
-Now the dependencies are distributed with a container image or a zip file. Please refer to {PRODUCT_SHORT} Version {VERSION_910} xref:../installation/configure-maven.adoc[Maven configuration].
+Now the dependencies are distributed with a container image or a zip file.
+Refer to {PRODUCT_SHORT} Version {VERSION_910} xref:../installation/configure-maven.adoc[Maven configuration].
 
 
 === Creating a new project from scracth
@@ -91,11 +92,11 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml,subs="attributes+"]
 ----
-17        <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
-18  +++   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
-19  +++   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20  +++   <kogito.bom.version>{BOM_VERSION_910}</kogito.bom.version>
-21      </properties>
+17   <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
+18   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
+19   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
+20   <kogito.bom.version>{BOM_VERSION_910}</kogito.bom.version>
+21 </properties>
 ----
 
 [start=4]
@@ -103,13 +104,13 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml]
 ----
-31  +++ <dependency>
-32  +++   <groupId>${kogito.bom.group-id}</groupId>
-33  +++   <artifactId>${kogito.bom.artifact-id}</artifactId>
-34  +++   <version>${kogito.bom.version}</version>
-35  +++   <type>pom</type>
-36  +++   <scope>import</scope>
-37  +++ </dependency>
+31  <dependency>
+32    <groupId>${kogito.bom.group-id}</groupId>
+33    <artifactId>${kogito.bom.artifact-id}</artifactId>
+34    <version>${kogito.bom.version}</version>
+35    <type>pom</type>
+36    <scope>import</scope>
+37  </dependency>
 ----
 +
 A bill of materials (BOM) is a list of parts or components that are required to build a product.
@@ -166,11 +167,11 @@ include::../partials/version-mapping-next.adoc[]
 +
 [source,xml]
 ----
-40      <dependencies>
-41  +++   <dependency>
-42  +++     <groupId>com.ibm.bamoe</groupId>
-43  +++     <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
-44  +++   </dependency>
+40  <dependencies>
+41    <dependency>
+42      <groupId>com.ibm.bamoe</groupId>
+43      <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
+44    </dependency>
 ----
 
 [NOTE]
@@ -184,14 +185,14 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 +
 For this example, we will be creating a project with only DMN files.
 So we must add the the Drools Kogito Quarkus dependency.
-In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, so please take a look into the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 [source,xml]
 ----
-45 +++   <dependency>
-46 +++     <groupId>org.drools</groupId>
-47 +++     <artifactId>drools-quarkus-decisions</artifactId>
-48 +++   </dependency>
+45 <dependency>
+46   <groupId>org.drools</groupId>
+47   <artifactId>drools-quarkus-decisions</artifactId>
+48 </dependency>
 ----
 +
 [NOTE]
@@ -202,12 +203,12 @@ Depending on the project files it will be required to add other dependencies.
 [start=7]
 . Disable Quarkus Dev Services.
 +
-Currently, the Quarkus Dev Services isn't fully supported, meaning that we need to disable it.
-To do that, please add the following line in the `src/main/resources/application.properties` file:
+Currently, the Quarkus Dev Services isn't fully supported, meaning that it should be disabled.
+To do so, add the following line in the `src/main/resources/application.properties` file:
 + 
 [source]
 ----
- +++ quarkus.devservices.enabled=false
+quarkus.devservices.enabled=false
 ----
 
 [start=8]
@@ -262,9 +263,9 @@ The proper folder for unit test files is `src/test/resources`, as this is a test
 Now, copy all your assets from the {PRODUCT_SHORT} version {VERSION_901} project to the repesctive folders on the new project.
 As the new project uses Quarkus 3, we will also need make a few more updates.
 One of the biggest changes is that Quarkus 3 uses Jarkarta EE 10, meaning that we need to update all `javax` to `jakarta`.
-This is simply archive by replacing any `javax` instance over `jarkarta`, like the following:
+This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
 +
-[source]
+[source,diff]
 ----
  --- import javax.inject.Named;
  +++ import jakarta.inject.Named;
@@ -272,7 +273,7 @@ This is simply archive by replacing any `javax` instance over `jarkarta`, like t
 +
 [NOTE]
 ====
-Please refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
 [start=10]
@@ -300,7 +301,7 @@ That's it! Now, you can start using your {PRODUCT_SHORT} version {VERSION_910} p
 === Upgrading a {PRODUCT_SHORT} Version {VERSION_901} project
 
 Upgrading a {PRODUCT_SHORT} version {VERSION_901} project to version {VERSION_910} is straightforward.
-The project structure  didn't change, so we just need to update the project versions, some dependency names, and files.
+The project structure hasn't changed, updates only need to be made to the project versions, some dependency names, and files.
 
 [start=1]
 . Upgrade the Quarkus version.
@@ -337,7 +338,7 @@ Update the following lines in your `pom.xml`:
 [start=3]
 . Update the dependencies GAV.
 +
-In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, so please take a look into the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +
@@ -352,7 +353,7 @@ One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId
 ----
 +
 Bear in mind that it's required to make changes to any parent `pom.xml` if applied, but this will not be covered here as it depends on your project setup.
-This ends the `pom.xml` changes, and now we move to updating other files.
+This ends the `pom.xml` changes, next, files that need changes
 
 [start=4]
 . Update the `application.properties` file.
@@ -367,9 +368,9 @@ This ends the `pom.xml` changes, and now we move to updating other files.
 [start=5]
 . Migrating the code to Quarkus 3.
 +
-A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that we also need to update any `javax` import to `jakarta`.
+A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that package imports also need to update from `javax` to `jakarta`.
 +
-This is simply archived by replacing any `javax` instance over `jarkarta`, like the following:
+This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
 +
 [source]
 ----
@@ -379,7 +380,7 @@ This is simply archived by replacing any `javax` instance over `jarkarta`, like 
 +
 [NOTE]
 ====
-Please refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
 [start=6]
