@@ -19,25 +19,19 @@ For information on setting up Canvas see xref:../installation/canvas.adoc[Canvas
 
 === Create Process Variables
 
-1. Open Canvas with workflow elements.
+. Open Canvas with workflow elements.
 
-2. Click anywhere in the canvas and then click on the properties tab to access the properties panel.
-
+. Click anywhere in the canvas and then click on the properties tab to access the properties panel.
++
 .Canvas for workflow showing properties
 image::wf-tutorial/canvas-wf-1.png[Canvas for workflow showing properties]
 
-3. Set the following properties:
-
+. Set the following properties:
  * *Name*: Provide a label for the process.
-
  * *ID*: Specify an identifier that will be used for endpoints.
-
  * *Description*: Write a detailed description of the process.
-
-4. To add input variables:
-
+. To add input variables:
  * Click the plus button to add a new variable.
-
  * Set the variable's name and data type. 
  ** _Name_ is the ID and name of the variable which can be referenced via scripts or input/output of activities. 
  ** Data type refers to a Java type. If you click Select Custom, the field turns into the fully qualified name of the class. 
@@ -49,140 +43,80 @@ image::wf-tutorial/input-data-2.png[Setting process properties]
 
 Use the following elements to define your workflow:
 
-1. *Start Event*: Green circle indicating the starting point of the workflow.
-
-2. *Intermediate Events*: Yellow circle for events that occur between the start and end points.
-
-3. *End Events*: Red circle marking the end of the workflow.
-
-4. *Activities*: Empty rectangle representing tasks or activities in the workflow.
-
-5. *Subprocess*: Rectangle with a square for subprocesses.
-
-6. *Gateways*: Diamond shape for decision points.
-
-7. *Lanes*: Checklist icon to organize tasks by roles or departments.
-
-8. *Non-executable Items*: 3D cube for items not executed within the workflow.
-
-9. *Miscellaneous*: Engine icon for other workflow components.
+* *Start Event*: Green circle indicating the starting point of the workflow.
+* *Intermediate Events*: Yellow circle for events that occur between the start and end points.
+* *End Events*: Red circle marking the end of the workflow.
+* *Activities*: Empty rectangle representing tasks or activities in the workflow.
+* *Subprocess*: Rectangle with a square for subprocesses.
+* *Gateways*: Diamond shape for decision points.
+* *Lanes*: Checklist icon to organize tasks by roles or departments.
+* *Non-executable Items*: 3D cube for items not executed within the workflow.
+* *Miscellaneous*: Engine icon for other workflow components.
 
 === Adjust Properties and Add Process Variables
 
-1. Create a start node with a script to initialize variables:
-
+. Create a start node with a script to initialize variables:
 +
-
 [source,java]
-
 ----
-
 System.out.println("New Hiring has been created for candidate: " + candidateData.getFullName());
-
 kcontext.setVariable("hr_approval", false);
-
 kcontext.setVariable("it_approval", false);
-
 ----
-
+. Add an exclusive gateway for decision-making.
+. Create a business rule task with specific properties and data assignments:
 +
-
-2. Add an exclusive gateway for decision-making.
-
-3. Create a business rule task with specific properties and data assignments:
-
-+
-
 [source,java]
-
 ----
-
 System.out.println("###################################");
-
 System.out.println("Generated offer for candidate: " + candidateData.getFullName());
-
 System.out.println("Job Category: " + offer.getCategory());
-
 System.out.println("Base salary: " + offer.getSalary());
-
 System.out.println("###################################");
-
 ----
-
+. Create and configure human tasks and boundary events:
 +
-
-4. Create and configure human tasks and boundary events:
-
-+
-
 [source,java]
-
 ----
-
 System.out.println("###################################");
-
 System.out.println("HR Interview have been avoided after reasonable time");
-
 System.out.println("###################################");
-
 ----
-
+. Add scripts for various tasks and events to log important details and actions:
 +
-
-5. Add scripts for various tasks and events to log important details and actions:
-
-+
-
 [source,java]
-
 ----
-
 System.out.println("###################################");
-
 System.out.println("To: " + candidateData.getEmail());
-
 System.out.println("Subject: Congratulations you made it!");
-
 System.out.println("Dear " + candidateData.getFullName() + ", we are happy to tell you that you've successfully went through the hiring process. You'll find the final Offer details in attached.");
-
 System.out.println("Job Category: " + offer.getCategory());
-
 System.out.println("Base salary: " + offer.getSalary());
-
 System.out.println("###################################");
 
-
-
 System.out.println("###################################");
-
 System.out.println("Candidate " + candidateData.getFullName() + " doesn't meet the requirements for the position but we'll keep it on records for the future!");
-
 System.out.println("###################################");
 ----
-
 
 == Using canvas to create a new project using accelerators
 
 For information on setting up Developer Tools for VS Code see xref:https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[BAMOE Developer tools]
 
-1. Open Canvas
-
-1. Import `hiring.bpmn` (xref:hiring.bpmn.zip[sample hiring BPMN file])
-
-
-1. Click *Apply accelerator* -> *Quarkus (Full)*, and on the pop-up click *Apply*
+. Open Canvas.
+. Import `hiring.bpmn` (xref:hiring.bpmn.zip[sample hiring BPMN file]).
+. Click *Apply accelerator* -> *Quarkus (Full)*, and on the pop-up click *Apply*.
 +
 .New process project with accelerator
 image::wf-tutorial/1-new-process-project-with-accelerator.png[Process project with accelerator]
 +
-1. Click "Untitled Project" and rename the project. In this example, the project 1. is named `process-service-sample`
+. Click "Untitled Project" and rename the project. In this example, the project 1. is named `process-service-sample`
 +
 .Renaming project
 image::wf-tutorial/2-renaming-project.png[Renaming project]
+. In this step, for learning purposes, download the project to the local development environment by clicking on *Share* -> *All files*.
 
-1. In this step, for learning purposes, download the project to the local development environment by clicking on *Share* -> *All files*.
-
-Note:: Users with pre-configured git authentication can syncronize the new project on git and push it to a new repository.
+NOTE: Users with pre-configured git authentication can synchronize the new project on git and push it to a new repository.
 
 == Running the project locally with VSCode
 
@@ -199,40 +133,26 @@ image::wf-tutorial/3-project-in-vscode.png[Project in VS Code]
 
 Notice the project includes the process definition and the `application.properties` file with generic sample configurations:
 
-```properties
-
+[source,properties]
+----
 # Set up for the swagger-ui (Process-defintions)
-
 quarkus.http.cors=true
-
 quarkus.smallrye-openapi.path=/docs/openapi.json
-
 quarkus.swagger-ui.always-include=true
-
 kogito.generate.rest.decisions=true
-
 kogito.generate.rest.processes=true
 
 # list of users for task console
-
 quarkus.kogito-runtime-tools.users=jdoe,admin,user
-
 quarkus.kogito-runtime-tools.users.admin.groups=admin
-
 quarkus.kogito-runtime-tools.users.user.groups=user
-
 quarkus.kogito-runtime-tools.users.jdoe.groups=user,admin,IT,HR
-
 kogito.service.url=http://localhost:8080
-
 kogito.dataindex.http.url=http://localhost:8180
-
 kogito.dataindex.ws.url=ws://localhost:8180
 
 # Maximum Java heap to be used during the native image generation
-
 quarkus.native.native-image-xmx=6g
-
 kafka.bootstrap.servers=localhost:9092
 
 ## main transport
@@ -240,34 +160,25 @@ kafka.bootstrap.servers=localhost:9092
 ## metadata
 
 #mp.messaging.outgoing.kogito-processinstances-events.bootstrap.servers=localhost:9092
-
 mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
-
 mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
-
 mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
-
 #mp.messaging.outgoing.kogito-usertaskinstances-events.bootstrap.servers=localhost:9092
-
 mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
-
 mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
-
 mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
-
 #mp.messaging.outgoing.kogito-variables-events.bootstrap.servers=localhost:9092
-
 mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
-
 mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
-
 mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
-
-```
+----
 
 To execute the project in the local development environment, open a new terminal in VScode and execute:
 
-`mvn clean package`
+[source,bash]
+----
+mvn clean package
+----
 
 .Opening a terminal in VS Code
 image::wf-tutorial/4-new-terminal-vscode.png[Opening a terminal in VS Code]
