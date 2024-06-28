@@ -13,7 +13,7 @@ For convenience, one of the deployment options in {CANVAS} allows the user to in
 
 == Example 1: Using the Canvas Dev Deployment Base image
 
-Let's use the `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION_910}` image as a base since it already has the `dev-deployment-upload-service` pre-configured.
+The `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION_910}` image is used as a base since it already has the `dev-deployment-upload-service` pre-configured.
 
 === Containerfile
 
@@ -49,7 +49,7 @@ ENTRYPOINT ["/bin/bash", "-c"]
 
 == Example 2: Using an OpenJDK base image
 
-Using the `icr.io/appcafe/ibm-semeru-runtimes:open-17-jdk-ubi-minimal` image as a base, let's create a Dev Deployment image that follows all the requirements listed above and results in a Quarkus app running with the project files uploaded by {CANVAS}.
+Using the `icr.io/appcafe/ibm-semeru-runtimes:open-17-jdk-ubi-minimal` image as a base, create a Dev Deployment image that follows all the requirements listed above and results in a Quarkus app running with the project files uploaded by {CANVAS}.
 
 === Containerfile
 
@@ -117,26 +117,27 @@ ENTRYPOINT ["/bin/bash", "-c"]
 
 All that is needed to do is build and publish the image.
 
-== Using your custom image on {CANVAS}
+== Using the custom image on {CANVAS}
 
-For the following steps, let's assume you tagged and pushed your image to `quay.io/myUserName/myDevDeploymentImage:latest`.
+For the following steps, assume the image tagged and pushed to `quay.io/myUserName/myDevDeploymentImage:latest`.
 
-When creating a Dev Deployment on {CANVAS} you'll be met with this modal:
+When creating a Dev Deployment on {CANVAS}, this modal will display:
 
 .Deploy modal
 image::tools/devDeployments/deployment-option-kogito-quarkus-blank-app.png[]
 
-By default, it uses the pre-configured `Kogito Quarkus Blank App` option, but we want to use our custom image, so we need to open the dropdown and select `Custom Image`.
+By default, it uses the pre-configured `Kogito Quarkus Blank App` option. 
+To use the custom image, open the dropdown and select `Custom Image`.
 
 .Custom Image deployment option
 image::tools/devDeployments/deployment-option-custom-image.png[]
 
 Notice the `Docker Image` parameter; it must be changed to the custom image tag created (`quay.io/myUserName/myDevDeploymentImage:latest` in this example).
 
-Also, notice the `Command` parameter; it will execute `./mvnw quarkus:dev` inside the `$HOME_PATH/app` directory after the upload step is finished. Our container's resulting `CMD` will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
+Also, notice the `Command` parameter; it will execute `./mvnw quarkus:dev` inside the `$HOME_PATH/app` directory after the upload step is finished. 
+The container's resulting `CMD` will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
 
 When calling Maven, `./mvnw` is used as the Maven binary is not available globally in this image, and it's not possible to call `mvn` directly.
-
 
 [IMPORTANT]
 ====
@@ -146,5 +147,5 @@ When deploying to a local Kubernetes cluster configured via the Kubernetes Clust
 
 When deploying to an OpenShift cluster, `./mvnw quarkus:dev` will work without any flags.
 
-This is because the Ingress controller is configured to use sub-paths for each Dev Deployment instead of new subdomains on the Kubernetes cluster, so we need to ensure that the Quarkus app conforms to these sub-paths.
+This is because the Ingress controller is configured to use sub-paths for each Dev Deployment instead of new subdomains on the Kubernetes cluster, verify that the Quarkus app conforms to these sub-paths.
 ====
