@@ -135,16 +135,16 @@ Notice the `Docker Image` parameter; it must be changed to the custom image tag 
 
 Also, notice the `Command` parameter; it will execute `./mvnw quarkus:dev` inside the `$HOME_PATH/app` directory after the upload step is finished. Our container's resulting `CMD` will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
 
-When calling Maven, `./mvnw` is used by default since this will use the wrapped version of Maven from your project. However, the Maven binary is available globally in this image, and it's possible to call `mvn` directly.
+When calling Maven, `./mvnw` is used as the Maven binary is not available globally in this image, and it's not possible to call `mvn` directly.
 
 
 [IMPORTANT]
 ====
 When deploying to a local Kubernetes cluster configured via the Kubernetes Cluster Wizard from {CANVAS}, the `Command` will need a few more parameters for a Quarkus app:
 
-`mvn quarkus:dev -Dquarkus.http.non-application-root-path=/${{ devDeployment.uniqueName }}/q -Dquarkus.http.root-path=/${{ devDeployment.uniqueName }}"`
+`./mvnw quarkus:dev -Dquarkus.http.non-application-root-path=/${{ devDeployment.uniqueName }}/q -Dquarkus.http.root-path=/${{ devDeployment.uniqueName }}"`
 
-When deploying to an OpenShift cluster, `mvn quarkus:dev` will work without any flags.
+When deploying to an OpenShift cluster, `./mvnw quarkus:dev` will work without any flags.
 
 This is because the Ingress controller is configured to use sub-paths for each Dev Deployment instead of new subdomains on the Kubernetes cluster, so we need to ensure that the Quarkus app conforms to these sub-paths.
 ====
