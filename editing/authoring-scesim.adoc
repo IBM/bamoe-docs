@@ -11,7 +11,6 @@ See how below.
 
 == Creating unit tests with Test Scenario
 
-=== Overview
 Test scenarios in {PRODUCT} enable you to validate the functionality of business decisions and business decision data during project development. With a test scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
 
 You define test scenarios in `.scesim` (scenario simulation) files that you can model in Visual Studio Code (VSCode) using the {PRODUCT} https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[VSCode extension]. You can use one or multiple `.scesim` files in your {PRODUCT} project, and each `.scesim` file can contain one or multiple test scenarios based on the defined decision data.
@@ -28,7 +27,7 @@ NOTE: At the current time, {PRODUCT_SHORT} supports DMN-based Test Scenario only
 
 NOTE: All the DMN-based scesim assets created prior to version {VERSION_910} will require a user action to update the related DMN file location. This is requested because the DMN file path is now managed in a relative format.
 
-NOTE: All the DMN-based scesim assets are compatible only with DMN 1.2 models. Due to this, please use DMN Classic Editor instead of DMN New Editor to create DMN models, that will be tested using `.scesim` file.
+NOTE: All the DMN-based scesim assets are compatible only with DMN 1.2 models. Due to this, use DMN Classic Editor instead of DMN New Editor to create DMN models, that will be tested using `.scesim` file.
 
 === Prerequisites
 * {PRODUCT_SHORT} {VERSION_910}
@@ -77,9 +76,9 @@ image::developer-tools/scesim-activator.png[]
 Create the `src/test/resources` directory for storing `.scesim` files.
 
 === Creating a Test Scenario
-Please create `PersonDecisions.dmn` file under `src/main/resources` directory.
+Create `PersonDecisions.dmn` file under `src/main/resources` directory.
 Its content is available at xref:../getting-started/business-rule-microservice.adoc#example-person-decisions-dmn[Example PersonDecisions DMN file] section.
-This will be the first model we will test using `.scesim` file.
+This will be the first model that will tested using a `.scesim` file.
 
 Then, in the `src/test/resources` directory, create a new file with the `.scesim` extension.
 
@@ -88,13 +87,14 @@ For this example, the test scenario file corresponds to a `PersonDecisions.dmn` 
 
 The test scenario modeler automatically generates a scenario template based on the available DMN data types and fields that you defined in the DMN model.
 
-The *GIVEN* columns specify input conditions based on the corresponding decision service. The *EXPECT* column specifies the expected results of the decision service based on the defined *GIVEN* conditions. Each row in the table is a defined scenario with example values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
+The *GIVEN* columns specify input conditions based on the corresponding decision service.
+The *EXPECT* column specifies the expected results of the decision service based on the defined *GIVEN* conditions.
+Each row in the table is a defined scenario with example values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
 
 You can right-click the relevant header cells to insert or delete columns as needed to modify the table structure. You can also select the relevant header cells to modify or insert data objects from the *Test Tools* panel in the right toolbar.
---
-. Modify the generated test scenario header cells and specified data objects as needed to design the test scenario template. Many of the header cell values might already be defined for you.
-+
---
+
+Modify the generated test scenario header cells and specified data objects as needed to design the test scenario template. Many of the header cell values might already be defined for you.
+
 Use the following resources in the right toolbar of the test scenario modeler to help you design your test scenario header cells:
 
 * *Settings*: Use this panel to change the target *DMN model* selection if needed or to select the option to *Skip this simulation during the test*. This skip option excludes this test scenario file from being run when you run all test scenario files in the {PRODUCT} project. If you update these settings, you must save, close, and reopen the test scenario file for the changes to take effect.
@@ -108,10 +108,9 @@ For this example, the test scenario file defines the following parameters:
 
 .Example test scenario header cells
 image::test-scenarios/kogito-test-scenario-example-person-headers-create.png[Image of test scenario template]
---
-. In row 1, create a test scenario with values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
-+
---
+
+In row 1, create a test scenario with values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
+
 For this example, the test scenario specifies the following values:
 
 * *Scenario description*: `Is an adult`
@@ -122,10 +121,9 @@ For this example, the test scenario specifies the following values:
 ** *isAdult* -> *value*: `true`
 
 The corresponding `PersonDecisions.dmn` model in this example contains an `isAdult` DMN decision that determines that persons with more than 18 years of age are adults. This example test scenario tests whether the person John Quark with 20 years of age is correctly identified by the `isAdult` DMN decision as an adult (`true`), based on the decision logic.
---
-. Right-click any cell in row 1 and select *Insert row below* to create additional test scenarios as needed.
-+
---
+
+Right-click any cell in row 1 and select *Insert row below* to create additional test scenarios as needed.
+
 For this example, a second test scenario in row 2 specifies the following values:
 
 * *Scenario description*: `Is underage`
