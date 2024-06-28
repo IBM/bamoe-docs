@@ -126,7 +126,7 @@ When creating a Dev Deployment on {CANVAS}, this modal will display:
 .Deploy modal
 image::tools/devDeployments/deployment-option-kogito-quarkus-blank-app.png[]
 
-By default, it uses the pre-configured `Kogito Quarkus Blank App` option. 
+By default, it uses the pre-configured `Kogito Quarkus Blank App` option.
 To use the custom image, open the dropdown and select `Custom Image`.
 
 .Custom Image deployment option
@@ -134,10 +134,10 @@ image::tools/devDeployments/deployment-option-custom-image.png[]
 
 Notice the `Docker Image` parameter; it must be changed to the custom image tag created (`quay.io/myUserName/myDevDeploymentImage:latest` in this example).
 
-Also, notice the `Command` parameter; it will execute `./mvnw quarkus:dev` inside the `$HOME_PATH/app` directory after the upload step is finished. 
-The container's resulting `CMD` will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
+Also, notice the `Command` parameter; Its value is the command executed inside the `$HOME_PATH/app` directory after the upload step is finished.
+In other words, after the token interpolation is finished, the resulting command executed on the container will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
 
-When calling Maven, `./mvnw` is used as the Maven binary is not available globally in this image, and it's not possible to call `mvn` directly.
+This image does not provide the Maven binary globally, so it is not possible to call `mvn` directly. Instead, the image provides a Maven wrapper that can be called with `./mvnw` from the `$HOME_PATH` directory.
 
 [IMPORTANT]
 ====
