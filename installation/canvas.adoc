@@ -1,13 +1,13 @@
-= Development Canvas
+= BAMOE Canvas
 include::../partials/attributes.adoc[]
 
 //tag::canvas-description[]
-{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It allows users to create, edit and manage Decisions and Workflows, by providing editors and other tools, such as integrating with Git for syncing repositories, and integrating with OpenShift and Kubernetes for deploying your files, and much more.
+{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and tool integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your files.
 //end::canvas-description[]
 
 It depends on two backend applications to provide full functionality:
 
-* Extended Services: provides features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
+* Extended Services: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
 * CORS Proxy: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
 
 {CANVAS} and its two backend applications are available as container images.
@@ -17,13 +17,13 @@ These images are published to Quay.io and can be used to run containers locally 
 * Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION_910}
 * CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION_910}
 
-NOTE: The *exact same version* needs to be used for a deployment with these three images to work.
+NOTE: All three image versions must be the same for deployment to work.
 
 == Deploying {CANVAS} to OpenShift
 
 If you have an OpenShift cluster and are logged in via the `oc` cli tool, follow these steps to deploy {CANVAS} and its dependencies.
 
-NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources much easier.
+NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
 . Define some variables that will be useful to name and label the resources created.
 +
@@ -100,17 +100,17 @@ Access the API through port 21345, no additional configuration is necessary.
 docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION_910}
 # Add the -d flag to run in detached mode.
 ----
-The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image), no additional configuration is necessary.
+The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
 
 === Configuring Canvas
 
-In particular, this image needs to be run with two environment variables that will allow it to communicate with its backend services:
+This image must be run with two environment variables that will allow it to communicate with the two backend services:
 
 `KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
 
 `KIE_SANDBOX_CORS_PROXY_URL`:: E.g., https://cors-proxy.bamoe.company.com[https://cors-proxy.bamoe.my-company.com]
 
-If you're running locally, following the previous steps, use this command to start your {CANVAS} instance with the backend services:
+If you are running locally, following the previous steps, use this command to start your {CANVAS} instance with the backend services:
 [source,shell,subs="attributes+"]
 ----
 docker run -p 8080:8080 -it \
@@ -121,7 +121,7 @@ docker run -p 8080:8080 -it \
 ----
 The HTTP server is accessed via port 8080.
 
-Several customization options are available. Check out more configurations available via environment variables here: https://quay.io/repository/bamoe/canvas?tab=info[https://quay.io/repository/bamoe/canvas?tab=info]
+Several customization options are available. For more information on the configurations available via environment variables see https://quay.io/repository/bamoe/canvas?tab=info[https://quay.io/repository/bamoe/canvas?tab=info]
 
 
 [NOTE]
@@ -131,9 +131,9 @@ Using internal IP/DNS services will not work.
 Requests are made directly from the user's browser to both URLs configured above.
 ====
 
-Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
+Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment for Decisions.
 
-This environment variable points to a container image that is used when creating a Dev Deployment for Decisions.
+//only decisions? what about process?
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/repository/kie-tools/dmn-dev-deployment-base-image[https://quay.io/repository/kie-tools/dmn-dev-deployment-base-image] @ {KIE_TOOLS_COMMUNITY_VERSION}
 
@@ -144,13 +144,15 @@ If you are  installing {CANVAS}, you must change `KIE_SANDBOX_DMN_DEV_DEPLOYMENT
 For a reference on how to build your own image that is compatible with {CANVAS} development deployments, please go to the Apache KIE community's source code for `dmn-dev-deployment-base-image` at https://github.com/apache/incubator-kie-tools/tree/{KIE_TOOLS_COMMUNITY_VERSION}/packages/dmn-dev-deployment-base-image.
 ====
 
-If you're installing {CANVAS} to an air-gapped environment, you're going to need to configure `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
+//what pre-configured image? Should we say, A pre-configured image is available from the community but is not part of BAMOE? Are we really saying that users should build their custom image from the base image rather than a pre-configured one? 
+
+If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
 For example, imagine a user is creating development deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
 This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev Deployments for Decisions.
 
-For other customization options of {CANVAS}, please refer to the image's https://quay.io/repository/bamoe/canvas?tab=info[description].
+For other customization options of {CANVAS}, please refer to the https://quay.io/repository/bamoe/canvas?tab=info[description of the image].
 
 == Other installation methods
 
@@ -158,6 +160,4 @@ For other customization options of {CANVAS}, please refer to the image's https:/
 
 == Securing your Installation
 
-It's highly recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation. To enable that, please follow your Kubernetes distribution documentation on how to enable it.
-
-It's also recommended for all services that {CANVAS} will have access to, like remote git repositories or container orchestration like OpenShift, to have all access tokens have a token expiration policy.
+It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation as well as all services that {CANVAS} has access to, such as remote git repositories, or container orchestration like OpenShift. To enable that, please follow your Kubernetes distribution documentation on how to enable a secure protocol, ensuring that all access tokens have a token expiration policy.
