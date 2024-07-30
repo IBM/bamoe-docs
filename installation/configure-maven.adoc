@@ -31,7 +31,7 @@ Choose between using the
 
 [CAUTION]
 ====
-The provided container images are created for Linux execution, running on a different architecture beside Linux x86_64 architecture, there may be a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested"
+The container images provided are created for Linux execution, running on a different architecture beside Linux x86_64 architecture. As a consequence you may see a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested" which can be ignored.
 ====
 
 *Using bamoe-9.1.0-maven-repository-image.tar.gz*
@@ -45,7 +45,7 @@ export REGISTRY=`oc get route default-route -n openshift-image-registry --templa
 docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
 ----
 
-Import the image from the .tar.gz file, re-tag it, and push it to the OpenShift registry
+Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift registry
 
 [source,shell,subs="attributes+"]
 ----
@@ -55,7 +55,7 @@ docker push ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION_910}
 # Replace <PROJECT_NAME> with your OpenShift Project (namespace)
 ----
 
-Set an env var with the image name
+Set an environment variable with the image name
 
 [source,shell,subs="attributes+"]
 ----
@@ -64,7 +64,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION_910}
 
 *Using quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}*
 
-In this case, not much needs to be done, just set an env var with the image URL
+In this case, not much needs to be done, just set an environment variable with the image URL
 
 [source,shell,subs="attributes+"]
 ----
@@ -72,7 +72,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSIO
 ----
 
 Create a new Service Account and add `anyuid` permissions.
-This is important because we'll need to run a container on port 80, which usually OpenShift blocks with the default Service Account:
+This is important because you will need to run a container on port 80, which usually OpenShift blocks with the default Service Account:
 
 [source,shell,subs="attributes+"]
 ----
@@ -80,7 +80,7 @@ oc create sa maven-repo-root-user
 oc adm policy add-scc-to-user anyuid -z maven-repo-root-user
 ----
 
-NOTE: If you can't create a Service Account with elevated privileges, xref:../introduction/release-notes/build-maven-repo.adoc[learn how to build your own bamoe-maven-repository image using a different port].
+NOTE: If you cannot create a Service Account with elevated privileges, xref:../introduction/release-notes/build-maven-repo.adoc[learn how to build your own bamoe-maven-repository image using a different port].
 
 Create the Deployment, Service, and Route
 
