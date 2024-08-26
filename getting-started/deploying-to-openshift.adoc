@@ -88,10 +88,6 @@ quarkus.openshift.route.tls.insecure-edge-termination-policy=None
 
 [NOTE]
 ====
-**Replaceable Tokens**
-
-In this method, several tokens in the `application.properties` file need to be replaced with actual values:
-
 * `<image_registry>`: The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
 * `<registry_group_or_user>`: The group or user in the container image registry. Example: `myuser`.
 * `<image_name>`: The name of the Docker image to be built. Example: `myapp`.
@@ -106,8 +102,10 @@ Replace these tokens with appropriate values based on the environment setup.
 ----
 FROM icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal
 
+# Switch to root
 USER 0
 
+# Copy the compiled application files from the local `target` directory to the `/app/` directory inside the container.
 COPY target /app/
 
 # Support Arbitrary User IDs
@@ -115,6 +113,7 @@ COPY target /app/
 RUN chgrp -R 0 /app && \
   chmod -R g+rwX /app
 
+# Switch back to a non-root user
 USER 1001
 
 WORKDIR /app
@@ -166,10 +165,6 @@ quarkus.docker.buildx.platform=linux/amd64
 
 [NOTE]
 ====
-**Replaceable Tokens**
-
-In this method, several tokens in the `application.properties` file need to be replaced with actual values:
-
 * `<image_registry>`: The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
 * `<registry_group_or_user>`: The group or user in the container image registry. Example: `myuser`.
 * `<image_name>`: The name of the Docker image to be built. Example: `myapp`.
@@ -184,8 +179,10 @@ Replace these tokens with appropriate values based on the environment setup.
 ----
 FROM icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal
 
+# Switch to root
 USER 0
 
+# Copy the compiled application files from the local `target` directory to the `/app/` directory inside the container.
 COPY target /app/
 
 # Support Arbitrary User IDs
@@ -193,6 +190,7 @@ COPY target /app/
 RUN chgrp -R 0 /app && \
   chmod -R g+rwX /app
 
+# Switch back to a non-root user
 USER 1001
 
 WORKDIR /app
@@ -217,6 +215,11 @@ oc new-app --name=<deployment_name> <image_registry>/<registry_group_or_user>/<i
 oc create route edge --service=<deployment_name>
 ----
 
+[NOTE]
+====
+* `<deployment_name>`: Is the name of the OpenShift deployment that will be created. Example: `myapp-deployment`.
+====
+
 == Conclusion
 
 Choose the appropriate deployment method based on the development workflow and environment requirements. For further customization or troubleshooting, refer to the official Quarkus guides.
@@ -228,5 +231,5 @@ ___
 
 [NOTE]
 ====
-The first option will use an UBI OpenJDK base image from RedHat (usually `registry.access.redhat.com/ubi9/openjdk-17`) while the second and third options are based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the created Dockerfile in `src/main/docker`.
+The first option will use an UBI OpenJDK base image from RedHat (usually `registry.access.redhat.com/ubi9/openjdk-17`) while the second and third options are based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the `Dockerfile.jvm` file in `src/main/docker`.
 ====
