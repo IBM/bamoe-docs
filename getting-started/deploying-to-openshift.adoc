@@ -1,7 +1,9 @@
 = Deploying a BAMOE application to OpenShift using Quarkus
 include::../partials/attributes.adoc[]
 
-This guide provides instructions for deploying a business application to OpenShift using three different methods. Ensure that the following prerequisites are in place before proceeding.
+This guide provides instructions for deploying a business application to OpenShift using three different methods.
+
+Ensure that the following prerequisites are in place before proceeding.
 
 == Prerequisites
 
@@ -10,12 +12,13 @@ This guide provides instructions for deploying a business application to OpenShi
 
 == Deployment Options
 
-=== 1. Build and Deploy on OpenShift
+=== Build and Deploy on OpenShift
 
 Use this method to build and deploy the application directly on OpenShift.
 
-[.steps]
+It will use a UBI OpenJDK base image from Red Hat (usually `registry.access.redhat.com/ubi9/openjdk-17`) and add the compiled files from the Quarkus project to it before creating a Deployment.
 
+[.steps]
 . **Log in to OpenShift CLI:**
 +
 [source,shell]
@@ -30,7 +33,7 @@ oc login
 mvn quarkus:add-extension -Dextensions='quarkus-openshift'
 ----
 
-. **Update the `src/main/resources/application.properties` file to enable the creation of an OpenShift Route:**
+. **Update the `src/main/resources/application.properties` file to enable the creation of an OpenShift Route by adding the following properties (more info https://quarkus.io/guides/deploying-to-openshift#exposing_routes[here]):**
 +
 [source,properties]
 ----
@@ -48,12 +51,13 @@ quarkus.openshift.route.tls.insecure-edge-termination-policy=None
 mvn install -Dquarkus.openshift.deploy=true
 ----
 
-=== 2. Build Locally with Docker and Automatically Deploy on OpenShift
+=== Build Locally with Docker and Automatically Deploy on OpenShift
 
-This method involves building the container image for the application locally using Docker, pushing the image to registry, followed by an automatic deployment to OpenShift.
+This method involves building the application's container image locally using Docker, pushing the image to the registry, and then automatically deploying it to OpenShift.
+
+The image created in the process is based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the `Dockerfile.jvm` file in `src/main/docker`.
 
 [.steps]
-
 . **Log in to OpenShift CLI:**
 +
 [source,shell]
@@ -68,16 +72,16 @@ oc login
 mvn quarkus:add-extension -Dextensions='quarkus-openshift'
 ----
 
-. **Update the `src/main/resources/application.properties` file with the following properties to configure the image and enable the creation of an OpenShift Route:**
+. **Update the `src/main/resources/application.properties` file with the following properties to configure the image and enable the creation of an OpenShift Route (more info https://quarkus.io/guides/deploying-to-openshift#exposing_routes[here]):**
 +
 [source,properties]
 ----
 # Container Image Builder
 quarkus.container-image.builder=docker
-quarkus.container-image.registry=<image_registry>
-quarkus.container-image.group=<registry_group_or_user>
-quarkus.container-image.name=<image_name>
-quarkus.container-image.tag=<image_tag>
+quarkus.container-image.registry=<image_registry> <1>
+quarkus.container-image.group=<image_registry_group_or_user> <2>
+quarkus.container-image.name=<image_name> <3>
+quarkus.container-image.tag=<image_tag> <4>
 quarkus.docker.buildx.platform=linux/amd64
 # OpenShift
 quarkus.openshift.route.expose=true
@@ -85,16 +89,12 @@ quarkus.openshift.route.expose=true
 quarkus.openshift.route.tls.termination=edge
 quarkus.openshift.route.tls.insecure-edge-termination-policy=None
 ----
-
-[NOTE]
-====
-* `<image_registry>`: The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
-* `<registry_group_or_user>`: The group or user in the container image registry. Example: `myuser`.
-* `<image_name>`: The name of the Docker image to be built. Example: `myapp`.
-* `<image_tag>`: The tag of the Docker image. Example: `v1.0.0`.
+<1> The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
+<2> The group or user in the container image registry. Example: `myuser`.
+<3> The name of the Docker image to be built. Example: `myapp`.
+<4> The tag of the Docker image. Example: `v1.0.0`.
 
 Replace these tokens with appropriate values based on the environment setup.
-====
 
 . **Add the `Dockerfile.jvm` file to `src/main/docker`:**
 +
@@ -130,12 +130,13 @@ CMD ["java", "-jar", "quarkus-app/quarkus-run.jar"]
 mvn install -Dquarkus.openshift.deploy=true
 ----
 
-=== 3. Build Locally with Docker and Create Manual Deployment on OpenShift
+=== Build Locally with Docker and Create Manual Deployment on OpenShift
 
-This option provides a way to build the the container image for the application locally using Docker, push the image to a registry, and manually deploy it on OpenShift.
+This option provides a way to build the application's container image locally using Docker, push the image to a registry, and manually deploy it on OpenShift.
+
+The image created in the process is based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the `Dockerfile.jvm` file in `src/main/docker`.
 
 [.steps]
-
 . **Log in to OpenShift CLI:**
 +
 [source,shell]
@@ -156,22 +157,18 @@ mvn quarkus:add-extension -Dextensions='quarkus-container-image-docker'
 ----
 # Container Image Builder
 quarkus.container-image.builder=docker
-quarkus.container-image.registry=<image_registry>
-quarkus.container-image.group=<registry_group_or_user>
-quarkus.container-image.name=<image_name>
-quarkus.container-image.tag=<image_tag>
+quarkus.container-image.registry=<image_registry> <1>
+quarkus.container-image.group=<image_registry_group_or_user> <2>
+quarkus.container-image.name=<image_name> <3>
+quarkus.container-image.tag=<image_tag> <4>
 quarkus.docker.buildx.platform=linux/amd64
 ----
-
-[NOTE]
-====
-* `<image_registry>`: The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
-* `<registry_group_or_user>`: The group or user in the container image registry. Example: `myuser`.
-* `<image_name>`: The name of the Docker image to be built. Example: `myapp`.
-* `<image_tag>`: The tag of the Docker image. Example: `v1.0.0`.
+<1> The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
+<2> The group or user in the container image registry. Example: `myuser`.
+<3> The name of the Docker image to be built. Example: `myapp`.
+<4> The tag of the Docker image. Example: `v1.0.0`.
 
 Replace these tokens with appropriate values based on the environment setup.
-====
 
 . **Add the `Dockerfile.jvm` file to `src/main/docker`:**
 +
@@ -211,25 +208,20 @@ mvn install -Dquarkus.container-image.build=true -Dquarkus.container-image.push=
 +
 [source,shell]
 ----
-oc new-app --name=<deployment_name> <image_registry>/<registry_group_or_user>/<image_name>:<image_tag>
-oc create route edge --service=<deployment_name>
+oc new-app --name=<deployment_name> <1> <image_registry>/<image_registry_group_or_user>/<image_name>:<image_tag> <2> <3> <4> <5>
+oc create route edge --service=<deployment_name> <1>
 ----
-
-[NOTE]
-====
-* `<deployment_name>`: Is the name of the OpenShift deployment that will be created. Example: `myapp-deployment`.
-====
+<1> Is the name of the OpenShift deployment that will be created. Example: `myapp-deployment`.
+<2> The URL of the container image registry where the Docker image will be stored. Example: `docker.io`.
+<3> The group or user in the container image registry. Example: `myuser`.
+<4> The name of the Docker image to be built. Example: `myapp`.
+<5> The tag of the Docker image. Example: `v1.0.0`.
 
 == Conclusion
 
-Choose the appropriate deployment method based on the development workflow and environment requirements. For further customization or troubleshooting, refer to the official Quarkus guides.
+Choose the appropriate deployment method based on the development workflow and environment requirements.
+
+For further customization or troubleshooting, refer to the official Quarkus guides:
 
 - https://quarkus.io/guides/container-image
 - https://quarkus.io/guides/deploying-to-openshift
-
-___
-
-[NOTE]
-====
-The first option will use an UBI OpenJDK base image from RedHat (usually `registry.access.redhat.com/ubi9/openjdk-17`) while the second and third options are based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the `Dockerfile.jvm` file in `src/main/docker`.
-====
