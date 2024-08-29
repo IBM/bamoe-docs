@@ -1,4 +1,4 @@
-= DMN and BPMN Editors Libraries
+= DMN and BPMN Editors Javascript Libraries
 include::../partials/attributes.adoc[]
 
 The editors used in both {CANVAS} and {DEV_TOOLS} are also available as standalone Javascript libraries that can be imported into any frontend web application.
@@ -10,10 +10,168 @@ They are available from two separate libraries that can be installed from npm:
 
 == Classic DMN and BPMN Editors
 
-These are the classic GWT based editors,
+The classic GWT-based editors, bundled into an all-in-one Javascript file for each Editor.
 
 .DMN Editor classic
 image::tools/editorsLibraries/dmn-editor-classic.png[]
 
 .BPMN Editor classic
 image::tools/editorsLibraries/bpmn-editor-classic.png[]
+
+=== Installing and using the classic DMN and BPMN Editors
+
+Installing and using each Editor is the same, as they are built to expose the same generic API to set and get content, export preview SVGs, undo and redo edits, and more.
+
+First, add the library to the project's `package.json`:
+[source,shell,subs="+attributes"]
+----
+npm install @ibm/bamoe-standalone-bpmn-and-dmn-editors-classic@{NPM_VERSION}
+----
+
+Import each Editor to a JS file with the following:
+[source,javascript,subs="+attributes"]
+----
+import * as BpmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/bpmn"
+import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/dmn"
+----
+
+In the HTML add a `div` container for each Editor; that's where the library will load an iFrame with all the Editor's resources:
+
+[source,html,subs="+attributes"]
+----
+<div id="bpmn-editor-container"/>
+<div id="dmn-editor-container"/>
+----
+
+Then load each Editor, passing the reference to its respective `div` container:
+
+[source,javascript,subs="+attributes"]
+----
+const bpmnEditor = BpmnEditor.open({
+ container: document.getElementById("bpmn-editor-container"), <1>
+ initialContent: Promise.resolve(""), <2>
+ readOnly: false, <3>
+ origin: "*", <4>
+ onError: () => {}, <5>
+ resources: new Map([]) <6>
+});
+
+const dmnEditor = DmnEditor.open({
+ container: document.getElementById("dmn-editor-container"), <1>
+ initialContent: Promise.resolve(""), <2>
+ readOnly: false, <3>
+ origin: "*", <4>
+ onError: () => {}, <5>
+ resources: new Map([]) <6>
+});
+----
+<1> `container`: HTML element to which the Editor will be appended to.
+<2> `initialContent`: Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. Can be empty. Examples:
+ * `Promise.resolve("")`
+ * `Promise.resolve("<BPMN_OR_DMN_CONTENT_DIRECTLY_HERE>")`
+ * `fetch("MyBpmnFile.bpmn").then(content => content.text())`
+<3> `readOnly` (optional, defaults to `false`): Use `false` to allow content edition and `true` for read-only mode, in which the Editor will not allow changes.
+<4> `origin` (optional, defaults to `*` when accessing the application with the `file://` protocol, `window.location.origin` otherwise): If the application needs to change this parameter, use it.
+<5> `onError` (optional, defaults to `() => {}`): If there's an error opening the Editor, this function will be called.
+<6> `resources` (optional, defaults to an empty Map): Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as its key and an object containing the `content-type` (`text` or `binary`) and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Example:
+ * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
+ * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
+
+The returned objects (`bpmnEditor` and `dmnEditor`) will contain the methods needed to manipulate the Editor:
+
+* `getContent(): Promise<string>`: Returns a Promise containing the Editor's content.
+* `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+* `getPreview(): Promise<string>`: Returns a Promise containing the SVG string of the current diagram.
+* `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. Returns the same callback to be used for unsubscription.
+* `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: Unsubscribes the passed callback from content changes.
+* `markAsSaved(): void`: This resets the editor state, signaling that its content is saved. It also fires the subscribed callbacks for content changes.
+* `undo(): void`: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+* `redo(): void`: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+* `close(): void`: Closes the Editor.
+* `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`: Advanced Editor API.
+* `canvas`: Canvas API that exposes methods to manipulate the canvas.
+ ** `getNodeIds(): Promise<string[]>`: Returns a Promise containing the ID attributes of all nodes displayed in the editor canvas.
+ ** `getBackgroundColor(uuid: string): Promise<string>`: Returns a Promise containing the background color of a node with the provided UUID.
+ ** `setBackgroundColor(uuid: string, backgroundColor: string): Promise<void>`: Sets the background color of a node with the provided UUID.
+ ** `getBorderColor(uuid: string): Promise<string>`: Returns a Promise containing the border color of a node with the provided UUID.
+ ** `setBorderColor(uuid: string, borderColor: string): Promise<void>`: Sets the border color of a node with provided UUID.
+ ** `getLocation(uuid: string): Promise<number[]>`: Returns a Promise containing the canvas location of a node with the provided UUID.
+ ** `getAbsoluteLocation(uuid: string): Promise<number[]>`: Returns a Promise containing the window location for a node with the provided UUID.
+ ** `getDimensions(uuid: string): Promise<number[]>`: Returns a Promise containing the dimensions of a node with provided UUID.
+ ** `applyState(uuid: string, state: string): Promise<void>`: Applies state to a node given the UUID [None, Selected, Highlight, Invalid].
+ ** `centerNode(uuid: string): Promise<void>`: Centers node on viewable Canvas.
+
+== New DMN Editor
+
+The modern DMN Editor, built with React, is faster and supports up to DMN 1.5 specifications while maintaining the same simple-to-use API.
+
+.New DMN Editor
+image::tools/editorsLibraries/new-dmn-editor.png[]
+
+=== Installing and using the new DMN Editor
+
+First, add the library to the project's `package.json`:
+[source,shell,subs="+attributes"]
+----
+npm install @ibm/@ibm/bamoe-standalone-dmn-editor@{NPM_VERSION}
+----
+
+Import the editor library to a JS file with:
+[source,javascript,subs="+attributes"]
+----
+import * as NewDmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
+----
+
+In the HTML, add a `div` container for each Editor; that's where the library will load an iFrame with all the Editor's resources:
+
+[source,html,subs="+attributes"]
+----
+<div id="new-dmn-editor-container"/>
+----
+
+Then load the Editor, passing the reference to the `div` container:
+
+[source,javascript,subs="+attributes"]
+----
+const newDmnEditor = NewDmnEditor.open({
+ container: document.getElementById("new-dmn-editor-container"), <1>
+ initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.dmn" <2>
+ initialContent: Promise.resolve(""), <3>
+ readOnly: false, <4>
+ origin: "*", <5>
+ onError: () => {}, <6>
+ resources: new Map([]), <7>
+});
+----
+<1> `container`: HTML element to which the Editor will be appended to.
+<2> `initialContent`: Promise to the XML content of a DMN file for the DMN Editor. Can be empty. Examples:
+ * `Promise.resolve("")`
+ * `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
+ * `fetch("MyDecision.dmn").then(content => content.text())`
+<3> `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`: The POSIX path relative to the workspace root (`/` by default), including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). Examples:
+ * `model.dmn`
+ * `myPath/model.dmn`
+ * `parent/child/filename.dmn`
+<4> `readOnly` (optional, defaults to `false`): Use `false` to allow content edition and `true` for read-only mode, in which the Editor will not allow changes.
+<5> `origin` (optional, defaults to `*` when accessing the application with the `file://` protocol, `window.location.origin` otherwise): If the application needs to change this parameter, use it.
+<6> `onError` (optional, defaults to `() => {}`): If there's an error opening the Editor, this function will be called.
+<7> `resources` (optional, defaults to an empty Map): Map of resources that will be provided for the Editor. This can be used, for instance, to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as its key and an object containing the `content-type` (`text` or `binary`) and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Resources located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) won't be listed to be used as an Included Model. Examples:
+ * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
+ * `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
+
+NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The classic editors don't have the concept of relative paths, so every mapped resource is available.
+
+The returned object (`newDmnEditor`) will contain the methods needed to manipulate the Editor:
+
+- `getContent(): Promise<string>`: Returns a Promise containing the Editor's content.
+- `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+- `getPreview(): Promise<string>`: Returns a Promise containing the SVG string of the current diagram.
+- `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. Returns the same callback to be used for unsubscription.
+- `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: Unsubscribes the passed callback from content changes.
+- `markAsSaved(): void`: This resets the editor state, signaling that its content is saved. It also fires the subscribed callbacks for content changes.
+- `undo(): void`: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+- `redo(): void`: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+- `close(): void`: Closes the Editor.
+- `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`: Advanced Editor API.
+
+NOTE: For now, the new DMN Editor doesn't expose the `canvas` property.
