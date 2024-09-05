@@ -31,7 +31,7 @@ Choose between using the
 
 [CAUTION]
 ====
-The container images provided are created for Linux execution, running on a different architecture beside Linux x86_64 architecture. As a consequence you may see a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested" which can be ignored.
+The container images provided are created for Linux distribution, running on a different architecture beside Linux x86_64 architecture may display a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested" which can be ignored.
 ====
 
 *Using bamoe-9.1.0-maven-repository-image.tar.gz*
@@ -71,24 +71,11 @@ In this case, not much needs to be done, just set an environment variable with t
 export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
 ----
 
-Create a new Service Account and add `anyuid` permissions.
-This is important because you will need to run a container on port 80, which usually OpenShift blocks with the default Service Account:
-
-[source,shell,subs="attributes+"]
-----
-oc create sa maven-repo-root-user
-oc adm policy add-scc-to-user anyuid -z maven-repo-root-user
-----
-
-NOTE: If you cannot create a Service Account with elevated privileges, xref:../introduction/release-notes/build-maven-repo.adoc[learn how to build your own bamoe-maven-repository image using a different port].
-
-Create the Deployment, Service, and Route
+Create the Deployment and Route
 
 [source,shell,subs="attributes+"]
 ----
 oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
-oc patch deployment/bamoe-maven-repo --type=json \
-  -p='[{"op":"add", "path": "/spec/template/spec/securityContext", "value": { "runAsUser": 0 } }, {"op":"add", "path": "/spec/template/spec/serviceAccountName", "value": "maven-repo-root-user" }, {"op":"add", "path": "/spec/template/spec/serviceAccount", "value": "maven-repo-root-user" }]'
 oc create route edge --service=bamoe-maven-repo
 ----
 
@@ -136,21 +123,12 @@ In this case, not much needs to be done, just set an env var with the image URL
 export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
 ----
 
-Create and/or use a Service Account elevated privileges:
-
-Since our image runs on port 80, some clusters may require you to run the container as root.
-To do so, make sure you create and use a Service Account that can create Deployments/Pods that run as user 0 (root).
-
-For the following steps, wherever you see `<SERVICE_ACCOUNT_NAME>`` replace it with the Service Account created in this step.
-
-Create the Deployment, Service, and Ingress
+Create the Deployment and Ingress
 
 [source,shell,subs="attributes+"]
 ----
 kubectl create deployment bamoe-maven-repo --image=${BAMOE_MAVEN_REPOSITORY_IMAGE}
-kubectl patch deployment bamoe-maven-repo --type=json \
-  -p='[{"op":"add", "path": "/spec/template/spec/securityContext", "value": { "runAsUser": 0 } }, {"op":"add", "path": "/spec/template/spec/serviceAccountName", "value": "<SERVICE_ACCOUNT_NAME>" }, {"op":"add", "path": "/spec/template/spec/serviceAccount", "value": "<SERVICE_ACCOUNT_NAME>" }]'
-kubectl expose deployment bamoe-maven-repo --port=80 --target-port=80
+kubectl expose deployment bamoe-maven-repo --port=80 --target-port=8080
 kubectl create ingress bamoe-maven-repo --rule="<EXTERNAL_BAMOE_MAVEN_REPO_URL>/*=bamoe-maven-repo:80"
 # Replace <EXTERNAL_BAMOE_MAVEN_REPO_URL> with whatever URL is mapped to your cluster.
 # For Kind or Minikube you could use something like bamoe-maven-repo.localhost, and then map this hostname to the cluster IP on your /etc/hosts file.
@@ -179,12 +157,12 @@ Run the image mapping its port:
 
 [source,shell,subs="attributes+"]
 ----
-docker run -d -p <PORT>:80 quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
+docker run -d -p <PORT>:8080 quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
 # Replace <PORT> with whatever port you want the container to be mapped to on your host.
 ----
 --
 
-You can verify the repository is running by accessing the repository in your browser at http://localhost/com/ibm/bamoe.
+You can verify the repository is running by accessing the repository in your browser at http://localhost:<PORT>/com/ibm/bamoe.
 
 === Configure Maven with the container image URL:
 To configure Maven with a container image follow these steps:
