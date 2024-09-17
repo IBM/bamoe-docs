@@ -35,7 +35,7 @@ import * as BpmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/
 import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/dmn"
 ----
 
-In the HTML add a `div` container for each Editor; that's where the library will load an iFrame with all the Editor's resources:
+In the HTML add a `div` container for each Editor where the library loads an iFrame with all the Editor's resources:
 
 [source,html,subs="+attributes"]
 ----
@@ -43,7 +43,7 @@ In the HTML add a `div` container for each Editor; that's where the library will
 <div id="dmn-editor-container"/>
 ----
 
-Then load each Editor, passing the reference to its respective `div` container:
+Then load each Editor, passing the reference to the respective `div` container:
 
 [source,javascript,subs="+attributes"]
 ----
@@ -66,11 +66,11 @@ const dmnEditor = DmnEditor.open({
 });
 ----
 <1> `container`: HTML element to which the Editor will be appended to.
-<2> `initialContent`: Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. Can be empty. Examples:
+<2> `initialContent`: Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
  * `Promise.resolve("")`
  * `Promise.resolve("<BPMN_OR_DMN_CONTENT_DIRECTLY_HERE>")`
  * `fetch("MyBpmnFile.bpmn").then(content => content.text())`
-<3> `readOnly` (optional, defaults to `true`): Use `false` to allow content edition and `true` for read-only mode, in which the Editor will not allow changes.
+<3> `readOnly` (optional, defaults to `true`): Use `false` to allow content edition and `true` for read-only mode, where the editor will not allow changes.
 <4> `origin` (optional, defaults to `*` when accessing the application with the `file://` protocol, `window.location.origin` otherwise): If the application needs to change this parameter, use it.
 <5> `onError` (optional, defaults to `() => {}`): If there's an error opening the Editor, this function will be called.
 <6> `resources` (optional, defaults to an empty Map): Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as its key and an object containing the `content-type` (`text` or `binary`) and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Example:
@@ -82,7 +82,7 @@ The returned objects (`bpmnEditor` and `dmnEditor`) will contain the methods nee
 * `getContent(): Promise<string>`: Returns a Promise containing the Editor's content.
 * `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
 * `getPreview(): Promise<string>`: Returns a Promise containing the SVG string of the current diagram.
-* `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. Returns the same callback to be used for unsubscription.
+* `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. It returns the same callback to be used for unsubscription.
 * `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: Unsubscribes the passed callback from content changes.
 * `markAsSaved(): void`: This resets the editor state, signaling that its content is saved. It also fires the subscribed callbacks for content changes.
 * `undo(): void`: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
@@ -122,7 +122,7 @@ Import the editor library to a JS file with:
 import * as NewDmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
 ----
 
-In the HTML, add a `div` container for each Editor; that's where the library will load an iFrame with all the Editor's resources:
+In the HTML, add a `div` container for each Editor where the library loads an iFrame with all the Editor's resources:
 
 [source,html,subs="+attributes"]
 ----
@@ -159,14 +159,14 @@ const newDmnEditor = NewDmnEditor.open({
  * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
  * `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
 
-NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The classic editors don't have the concept of relative paths, so every mapped resource is available.
+NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The classic editors do not have the concept of relative paths, so every mapped resource is available.
 
 The returned object (`newDmnEditor`) will contain the methods needed to manipulate the Editor:
 
 - `getContent(): Promise<string>`: Returns a Promise containing the Editor's content.
 - `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
 - `getPreview(): Promise<string>`: Returns a Promise containing the SVG string of the current diagram.
-- `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. Returns the same callback to be used for unsubscription.
+- `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: Setup a callback to be called on every content change in the Editor. It returns the same callback to be used for unsubscription.
 - `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: Unsubscribes the passed callback from content changes.
 - `markAsSaved(): void`: This resets the editor state, signaling that its content is saved. It also fires the subscribed callbacks for content changes.
 - `undo(): void`: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
@@ -174,4 +174,4 @@ The returned object (`newDmnEditor`) will contain the methods needed to manipula
 - `close(): void`: Closes the Editor.
 - `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`: Advanced Editor API.
 
-NOTE: For now, the new DMN Editor doesn't expose the `canvas` property.
+NOTE: As of now, the new DMN Editor does not expose the `canvas` property.
