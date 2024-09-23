@@ -10,7 +10,7 @@ They are available from the following two separate libraries that can be install
 
 == Classic DMN and BPMN Editors
 
-The following classic GWT-based editors are available as Javascript file for each Editor.
+The following classic GWT-based editors are available as JavaScript file for each Editor.
 
 .DMN Editor classic
 image::tools/editorsLibraries/dmn-editor-classic.png[]
@@ -24,20 +24,20 @@ image::tools/editorsLibraries/bpmn-editor-classic.png[]
 
 Installing and using each Editor is the same, as they are built to expose the same generic API to set and get content, export preview SVGs, undo and redo edits, and more. Follow these steps to install the editors:
 
-<1> Add the following library to the project's `package.json`:
+* Add the following library to the project's `package.json`:
 [source,shell,subs="+attributes"]
 ----
 npm install @ibm/bamoe-standalone-bpmn-and-dmn-editors-classic@{NPM_VERSION}
 ----
 
-<2> Import each Editor to a JavaScript file with the following statements:
+* Import each Editor to a JavaScript file with the following statements:
 [source,javascript,subs="+attributes"]
 ----
 import * as BpmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/bpmn"
 import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/dmn"
 ----
 
-<3> Add a `div` container for each Editor in the HTML where the library loads an iFrame with all the Editor's resources:
+* Add a `div` container for each Editor in the HTML where the library loads an iFrame with all the Editor's resources:
 
 [source,html,subs="+attributes"]
 ----
@@ -45,7 +45,7 @@ import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/d
 <div id="dmn-editor-container"/>
 ----
 
-<4> Load each Editor by passing the reference to the respective `div` container as follows:
+* Load each Editor by passing the reference to the respective `div` container as follows:
 
 [source,javascript,subs="+attributes"]
 ----
@@ -71,14 +71,14 @@ const dmnEditor = DmnEditor.open({
 NOTE: The numbers represented against each statement is explained as follows:
 
 <1> `container`: Specifies the HTML element that is appended to which Editor.
-<2> `initialContent`: Assigns Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
+<2> `initialContent`: Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
  * `Promise.resolve("")`
  * `Promise.resolve("<BPMN_OR_DMN_CONTENT_DIRECTLY_HERE>")`
  * `fetch("MyBpmnFile.bpmn").then(content => content.text())`
 <3> `readOnly`: This parameter is optional and defaults to `true`. You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes.
-<4> `origin`: This parameter is optional and defaults to `*` when accessing the application with the `file://` protocol, `window.location.origin` otherwise. If the application needs to change this parameter, use it.
+<4> `origin`: This parameter is optional and defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol.
 <5> `onError`: This parameter is optional and defaults to `() => {}`): This function will be called if you come across an error while opening the Editor.
-<6> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object containing the `content-type` (`text` or `binary`), and the resource `content`, (Promise similar to the `initialContent` parameter) as its value. For example:
+<6> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. For example:
  * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
  * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
 
@@ -96,9 +96,10 @@ NOTE: The numbers represented against each statement is explained as follows:
 * `fetch("MyBpmnFile.bpmn").then(content => content.text())` 
 
 |3  | `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|   
-|4  | `origin` | This parameter defaults to * and the application uses `window.location.origin` as the origin when accessing the application with the file:// protocol. | Optional| 
+|4  | `origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional| 
 |5  | `onError` | This parameter defaults to `() => {}`): This function will be called if you come across an error while opening the Editor. | Optional  |  
-|6  | `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object containing the `content-type` (`text` or `binary`), and the resource `content`, (Promise similar to the `initialContent` parameter) as its value.  | Optional  | * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
+|6  | `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
+* `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
 
 * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`  |
 
@@ -185,6 +186,7 @@ const newDmnEditor = NewDmnEditor.open({
 <7> `resources` (optional, defaults to an empty Map): Map of resources that will be provided for the Editor. This can be used, for instance, to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as its key and an object containing the `content-type` (`text` or `binary`) and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Resources located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) won't be listed to be used as an Included Model. Examples:
  * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
  * `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
+
 
 NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The classic editors do not have the concept of relative paths, so every mapped resource is available.
 
