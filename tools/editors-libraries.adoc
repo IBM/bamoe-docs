@@ -50,44 +50,44 @@ import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/d
 [source,javascript,subs="+attributes"]
 ----
 const bpmnEditor = BpmnEditor.open({
- container: document.getElementById("bpmn-editor-container"),
- initialContent: Promise.resolve(""),
- readOnly: false,
- origin: "*",
- onError: () => {},
- resources: new Map([]) 
+ container: document.getElementById("bpmn-editor-container"), <1>
+ initialContent: Promise.resolve(""), <2>
+ readOnly: false, <3>
+ origin: "*", <4>
+ onError: () => {}, <5>
+ resources: new Map([]) <6>
 });
 
 const dmnEditor = DmnEditor.open({
- container: document.getElementById("dmn-editor-container"), 
- initialContent: Promise.resolve(""), 
- readOnly: false, 
- origin: "*", 
- onError: () => {}, 
- resources: new Map([]) 
+ container: document.getElementById("dmn-editor-container"), <1>
+ initialContent: Promise.resolve(""), <2>
+ readOnly: false, <3>
+ origin: "*", <4>
+ onError: () => {}, <5>
+ resources: new Map([]) <6>
 });
 ----
 
- <1> `container`: Specifies the HTML element that is appended to which Editor.
- <2> `initialContent`: Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
+NOTE: The numbers represented against each statement is explained as follows:
+
+<1> `container`: Specifies the HTML element that is appended to which Editor.
+<2> `initialContent`: Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
  * `Promise.resolve("")`
  * `Promise.resolve("<BPMN_OR_DMN_CONTENT_DIRECTLY_HERE>")`
  * `fetch("MyBpmnFile.bpmn").then(content => content.text())`
- <3> `readOnly`: This parameter is optional and defaults to `true`. You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes.
- <4> `origin`: This parameter is optional and defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol.
- <5> `onError`: This parameter is optional and defaults to `() => {}`): This function will be called if you come across an error while opening the Editor.
- <6> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Following are the examples:
+<3> `readOnly`: This parameter is optional and defaults to `true`. You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes.
+<4> `origin`: This parameter is optional and defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol.
+<5> `onError`: This parameter is optional and defaults to `() => {}`): This function will be called if you come across an error while opening the Editor.
+<6> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. Following are the examples:
  * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
  * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
-
-
 
 [%header,cols=5]
 [%autowidth]
 |===
-|Parameter | Description | Required/Optional | Examples
-|`container` | Specifies the HTML element that is appended to which Editor. | Mandatory |  
-|`initialContent` | Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. | Mandatory   | 
+|Number | Parameter | Description | Required/Optional | Examples
+|1  | `container` | Specifies the HTML element that is appended to which Editor. | Mandatory |  
+|2  | `initialContent` | Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. | Mandatory   | 
 * `Promise.resolve("")`
 
 * `Promise.resolve
@@ -95,10 +95,10 @@ const dmnEditor = DmnEditor.open({
 
 * `fetch("MyBpmnFile.bpmn").then(content => content.text())` 
 
-|`readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|   
-|`origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional| 
-|`onError` | This parameter defaults to `() => {}`): This function will be called if you come across an error while opening the Editor. | Optional  |  
-|`resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
+|3  | `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|   
+|4  | `origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional| 
+|5  | `onError` | This parameter defaults to `() => {}`): This function will be called if you come across an error while opening the Editor. | Optional  |  
+|6  | `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
 * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
 
 * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`  |
@@ -164,29 +164,29 @@ import * as NewDmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
 [source,javascript,subs="+attributes"]
 ----
 const newDmnEditor = NewDmnEditor.open({
- container: document.getElementById("new-dmn-editor-container"), 
- initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.dmn" 
- initialContent: Promise.resolve(""), 
- readOnly: false, 
- origin: "*", 
- onError: () => {}, 
- resources: new Map([]), 
+ container: document.getElementById("new-dmn-editor-container"), <1>
+ initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.dmn" <2>
+ initialContent: Promise.resolve(""), <3>
+ readOnly: false, <4>
+ origin: "*", <5>
+ onError: () => {}, <6>
+ resources: new Map([]), <7>
 });
 ----
 
- <1> `container`: Specifies the HTML element that is appended to which Editor.
- <2> `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`: Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). Following are the examples:
+<1> `container`: Specifies the HTML element that is appended to which Editor.
+<2> `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`: Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). Following are the examples:
  * `model.dmn`
  * `myPath/model.dmn`
  * `parent/child/filename.dmn`
- <3> `initialContent`: Assigns a Promise to the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
+<3> `initialContent`: Assigns a Promise to the XML content of a DMN file for the DMN Editor. It can be empty. Following are the examples:
  * `Promise.resolve("")`
  * `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
  * `fetch("MyDecision.dmn").then(content => content.text())`
- <4> `readOnly`: This parameter is optional and defaults to `true`. You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes.
- <5> `origin`: This parameter is optional and defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol.
- <6> `onError`: This parameter is optional and defaults to `() => {}`): This function will be called if you come across an error while opening the Editor.
- <7> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model. Following are the examples:
+<4> `readOnly`: This parameter is optional and defaults to `true`. You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes.
+<5> `origin`: This parameter is optional and defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol.
+<6> `onError`: This parameter is optional and defaults to `() => {}`): This function will be called if you come across an error while opening the Editor.
+<7> `resources`: This parameter is optional and defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model. Following are the examples:
  * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`
  * `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
 
