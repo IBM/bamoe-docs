@@ -200,17 +200,26 @@ Where the following table describes the parameters:
 
 NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The classic editors do not have the concept of relative paths, so every mapped resource is available.
 
-The returned object (`newDmnEditor`) will contain the methods needed to manipulate the Editor:
+The returned object (`newDmnEditor`) will contain the following methods needed to manipulate the Editor:
 
-- `getContent(): Promise<string>`: This method returns a Promise that contains the Editor's content.
-- `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: This method sets the content of the editor. The returning Promise will be rejected if setting the content fails.
-- `getPreview(): Promise<string>`: This method returns a Promise that contains the SVG string of the current diagram.
-- `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: This method will set up and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
-- `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: This method unsubscribes the passed callback from content changes.
-- `markAsSaved(): void`: This method resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
-- `undo(): void`: This method will undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
-- `redo(): void`: This method will redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
-- `close(): void`: This method closes the Editor.
-- `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`: This is an Advanced Editor API.
+`getContent(): Promise<string>`:: Returns a Promise that contains the Editor's content.
+
+`setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+
+`getPreview(): Promise<string>`:: Returns a Promise that contains the SVG string of the current diagram.
+
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Sets and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
+
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the passed callback from content changes.
+
+`markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
+
+`undo(): void`:: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`redo(): void`:: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`close(): void`:: Closes the Editor.
+
+`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: This is an Advanced Editor API.
 
 NOTE: As of now, the new DMN Editor does not expose the `canvas` property.
