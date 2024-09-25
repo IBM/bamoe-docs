@@ -95,20 +95,31 @@ Where the following table describes the parameters:
 
 |===
 
-The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the methods needed to manipulate the Editor:
+The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the following methods needed to manipulate the Editor:
 
-* `getContent(): Promise<string>`: This method returns a Promise that contains the Editor's content.
-* `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`: This method sets the content of the editor. The returning Promise will be rejected if setting the content fails.
-* `getPreview(): Promise<string>`: This method returns a Promise that contains the SVG string of the current diagram.
-* `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`: This method will set up and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
-* `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`: This method unsubscribes the passed callback from content changes.
-* `markAsSaved(): void`: This method resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
-* `undo(): void`: This method will undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
-* `redo(): void`: This method will redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
-* `close(): void`: This method closes the Editor.
-* `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`: This is an Advanced Editor API.
-* `canvas`: This is a Canvas API that exposes methods to manipulate the canvas.
- ** `getNodeIds(): Promise<string[]>`: This method returns a Promise that contains the ID attributes of all nodes displayed in the editor canvas.
+`getContent(): Promise<string>`:: This method returns a Promise that contains the Editor's content.
+
+`setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+
+`getPreview(): Promise<string>`:: Returns a Promise that contains the SVG string of the current diagram.
+
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Sets and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
+
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the passed callback from content changes.
+
+`markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
+
+`undo(): void`:: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`redo(): void`:: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`close(): void`:: Closes the Editor.
+
+`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
+
+`canvas`:: A canvas API that exposes the following methods to manipulate the canvas.
+
+ `getNodeIds(): Promise<string[]>`:: This method returns a Promise that contains the ID attributes of all nodes displayed in the editor canvas.
  ** `getBackgroundColor(uuid: string): Promise<string>`: This method returns a Promise that contains the background color of a node with the provided UUID.
  ** `setBackgroundColor(uuid: string, backgroundColor: string): Promise<void>`: This method sets the background color of a node with the provided UUID.
  ** `getBorderColor(uuid: string): Promise<string>`: This method returns a Promise that contains the border color of a node with the provided UUID.
@@ -220,6 +231,6 @@ The returned object (`newDmnEditor`) will contain the following methods needed t
 
 `close(): void`:: Closes the Editor.
 
-`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: This is an Advanced Editor API.
+`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
 
 NOTE: As of now, the new DMN Editor does not expose the `canvas` property.
