@@ -1,16 +1,12 @@
 = Known limitations
 include::../../partials/attributes.adoc[]
 
-Before you use {PRODUCT_LONG}, make sure that you are aware of the known limitations.
-
-For the most up-to-date information, see the support page which is regularly updated.
-
-This webpage is for known limitations in {PRODUCT_LONG} {VERSION} and its fix releases.
-When possible, workarounds will be included with the limitations. The following sections provide the known limitations by BAMOE capability.
+Before you use {PRODUCT_LONG}, see the known limitations. When possible, workarounds will be included with the limitations.
 
 * KIE Tools
 * Technology preview stateful process
 * {PRODUCT_SHORT} Maven repository image
+* Standalone editors
 
 Table 1. KIE Tools
 [%header,cols=2]
@@ -30,6 +26,10 @@ For more information, see https://github.com/apache/incubator-kie-issues/issues/
 |jBPM Quarkus Dev UI: Wrong behaviors on the Error notification in Start Process Form component
 |If we try to start a process instance in the `jbpm-quarkus-devui` and something goes wrong after submitting the form, it shows an error dialog providing some feedback to the user.
 For more information, see https://github.com/apache/incubator-kie-issues/issues/1314[issue,window=_blank].
+
+|BAMOE canvas cannot import files from Github using the raw URL, '/:org/:repo/refs/heads/:tree/:path*' does not work.
+|Due to the Github API change, the raw URL does not work. Use the URL, '/:org/:repo/:tree/:path*' to import files from Github, see https://jsw.ibm.com/browse/DBACLD-152881[issue,window=_blank]
+
 |===
 
 
@@ -55,4 +55,22 @@ Table 3. {PRODUCT_SHORT} Maven repository image
 |The container is configured to run the `httpd` service on port 80.
 This is an issue when deploying it to restrictive Kubernetes clusters (such as OpenShift) which restrict the usage of ports < 1024 except when made by a Service Account with elevated privileges (e.g. `anyuid` permission on OpenShift).
 To workaround this, xref:build-maven-repo.adoc[build your own container image].
+|===
+
+Table 4. Standalone editors
+[%header,cols=2]
+[%autowidth]
+|===
+
+|Limitation | Description
+
+|Standalone BPMN classic editor: read-only not applied to process variable tags
+|Process variable tags can be edited even if a BPMN diagram is set to read-only in the standalone classic BPMN editor.
+
+|Standalone BPMN classic editor: incorrect reference of state-control
+|Though BPMN is mentioned in the top toolbar with buttons for loading files, it refers to DMN
+
+|Standalone DMN classic editor: read-only not applied to boxed expressions
+|Boxed expressions can be edited even if a DMN diagram is set to read-only in the standalone classic DMN editor.
+
 |===
