@@ -39,7 +39,7 @@ import * as BpmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/
 import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/dist/dmn"
 ----
 
-. Add a `div` container for each Editor in the HTML where the library loads an iFrame with all the Editor's resources:
+. Add a 'div' element for the Editor in the HTML; the library uses this 'div' as a container to load an iFrame with the Editor's resources:
 +
 [source,html,subs="+attributes"]
 ----
@@ -76,8 +76,8 @@ Where the following table describes the parameters:
 [%autowidth]
 |===
 | Parameter | Description | Required/Optional | Examples
-|`container` | Specifies the HTML element that is appended to which Editor. | Mandatory |
-|`initialContent` | Assigns a Promise to a BPMN XML content for the BPMN Editor or the XML content of a DMN file for the DMN Editor. It can be empty. | Mandatory   |
+|`container` | Specifies the HTML element that the Editor is appended to. | Mandatory |
+|`initialContent` | Accepts a Promise that resolves to the contents of a .bpmn file for the BPMN Editor or the contents of a .dmn file for the DMN Editor. It can be an empty.  | Mandatory   |
 * `Promise.resolve("")`
 
 * `Promise.resolve
@@ -87,8 +87,8 @@ Where the following table describes the parameters:
 
 | `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|
 | `origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional|
-| `onError` | This parameter defaults to `() => {}`): This function will be called if you come across an error while opening the Editor. | Optional  | 
-| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `content-type`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
+| `onError` | Accepts a function that is called when the Editor encounters an error at any given moment. This parameter defaults to '() ⇒ {}'). | Optional  | 
+| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `contentType`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
 * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
 
 * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])`  |
@@ -97,15 +97,15 @@ Where the following table describes the parameters:
 
 The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the following methods needed to manipulate the Editor:
 
-`getContent(): Promise<string>`:: This method returns a Promise that contains the Editor's content.
+`getContent(): Promise<string>`:: Returns a Promise that resolves to the Editor’s content.
 
 `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
 
-`getPreview(): Promise<string>`:: Returns a Promise that contains the SVG string of the current diagram.
+`getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
 
-`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Sets and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Setup a callback function that is automatically called on every content change in the Editor. Returns the same function that needs to be used for unsubscription.
 
-`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the passed callback from content changes.
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
 
 `markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
 
@@ -164,7 +164,7 @@ npm install @ibm/@ibm/bamoe-standalone-dmn-editor@{NPM_VERSION}
 import * as NewDmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
 ----
 
-. Add a `div` container for each Editor in the HTML where the library loads an iFrame with all the Editor's resources:
+. Add a 'div' element for the Editor in the HTML; the library uses this 'div' as a container to load an iFrame with the Editor's resources:
 +
 [source,html,subs="+attributes"]
 ----
@@ -192,7 +192,7 @@ Where the following table describes the parameters:
 [%autowidth]
 |===
 | Parameter | Description | Required/Optional | Examples
-|`container` | Specifies the HTML element that is appended to which Editor. | Mandatory |
+|`container` | Specifies the HTML element that the Editor is appended to. | Mandatory |
 |`initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` | Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). | Mandatory | 
 * `model.dmn`
 
@@ -200,7 +200,7 @@ Where the following table describes the parameters:
 
 * `parent/child/filename.dmn`
 
-|`initialContent` | Assigns a Promise to the XML content of a DMN file for the DMN Editor. It can be empty.  | Mandatory   |
+|`initialContent` | Accepts a Promise that resolves to the contents of a .bpmn file for the BPMN Editor or the contents of a .dmn file for the DMN Editor. It can be an empty.  | Mandatory   |
 * `Promise.resolve("")`
 
 * `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
@@ -208,9 +208,9 @@ Where the following table describes the parameters:
 * `fetch("MyDecision.dmn").then(content => content.text())` 
 
 | `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|
-| `origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional|
-| `onError` | This parameter defaults to `() => {}`): This function will be called if you come across an error while opening the Editor. | Optional  |
-| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `content-type` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
+| `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
+| `onError` | Accepts a function that is called when the Editor encounters an error at any given moment. This parameter defaults to '() ⇒ {}'). | Optional  |
+| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `contentType` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
 * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])` 
 
 * `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`  |
@@ -226,11 +226,12 @@ The returned object (`newDmnEditor`) will contain the following methods needed t
 
 `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
 
-`getPreview(): Promise<string>`:: Returns a Promise that contains the SVG string of the current diagram.
+`getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
 
-`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Sets and retuns a callback that needs to be called on every content change in the Editor. The same callback is used for unsubscription.
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: 
+Setup a callback function that is automatically called on every content change in the Editor. Returns the same function that needs to be used for unsubscription.
 
-`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the passed callback from content changes.
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
 
 `markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
 
