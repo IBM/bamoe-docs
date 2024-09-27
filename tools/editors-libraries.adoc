@@ -86,8 +86,8 @@ Where the following table describes the parameters:
 * `fetch("MyBpmnFile.bpmn").then(content => content.text())`
 
 | `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|
-| `origin` | This parameter defaults to '*' and the application uses `window.location.origin` as the origin when accessing the application with the 'file://' protocol. | Optional|
-| `onError` | Accepts a function that is called when the Editor encounters an error at any given moment. This parameter defaults to '() ⇒ {}'). | Optional  | 
+| `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
+| `onError` | Accepts a function that is called when the Editor encounters an error at any  moment. This parameter defaults to () ⇒ {}). | Optional  | 
 | `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor or Work Item Definitions for the BPMN Editor. Each entry in the map has the resource name as the key and an object that contains the `contentType`(`text` or `binary`), and the resource `content`(Promise similar to the `initialContent` parameter) as its value.  | Optional  | 
 * `resources: new Map([["myWid.wid", { contentType: "text", content: Promise.resolve("<WID_CONTENTS_HERE>")}], [...], [...]])`
 
@@ -97,13 +97,13 @@ Where the following table describes the parameters:
 
 The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the following methods needed to manipulate the Editor:
 
-`getContent(): Promise<string>`:: Returns a Promise that resolves to the Editor’s content.
+`getContent(): Promise<string>`:: Returns a Promise that resolves to the Editor’s BPMN or DMN content.
 
 `setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
 
 `getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
 
-`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Setup a callback function that is automatically called on every content change in the Editor. Returns the same function that needs to be used for unsubscription.
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: Setup a callback function that is automatically called on every content change in the Editor. It returns the same function that needs to be used for unsubscription.
 
 `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
 
@@ -117,7 +117,7 @@ The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the following 
 
 `envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
 
-`canvas`:: A canvas API that exposes the following methods to manipulate the canvas:
+`canvas`:: An API that exposes the following methods to manipulate the canvas:
 
  `getNodeIds(): Promise<string[]>`:: Returns a Promise that contains the ID attributes of all nodes displayed in the editor canvas.
 
@@ -200,16 +200,16 @@ Where the following table describes the parameters:
 
 * `parent/child/filename.dmn`
 
-|`initialContent` | Accepts a Promise that resolves to the contents of a .bpmn file for the BPMN Editor or the contents of a .dmn file for the DMN Editor. It can be an empty.  | Mandatory   |
+|`initialContent` | Accepts a Promise that resolves to the contents of a .dmn file. It can be an empty.  | Mandatory   |
 * `Promise.resolve("")`
 
 * `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
 
 * `fetch("MyDecision.dmn").then(content => content.text())` 
 
-| `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `true`. | Optional|
+| `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `false`. | Optional|
 | `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
-| `onError` | Accepts a function that is called when the Editor encounters an error at any given moment. This parameter defaults to '() ⇒ {}'). | Optional  |
+| `onError` | Accepts a function that is called when the Editor encounters an error at any moment. This parameter defaults to () ⇒ {}). | Optional  |
 | `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `contentType` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
 * `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])` 
 
@@ -229,7 +229,7 @@ The returned object (`newDmnEditor`) will contain the following methods needed t
 `getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
 
 `subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: 
-Setup a callback function that is automatically called on every content change in the Editor. Returns the same function that needs to be used for unsubscription.
+Setup a callback function that is automatically called on every content change in the Editor. It returns the same function that needs to be used for unsubscription.
 
 `unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
 
