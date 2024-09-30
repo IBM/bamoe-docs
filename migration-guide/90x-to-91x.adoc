@@ -30,13 +30,13 @@ You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-too
 ==== Update Maven settings
 On the {PRODUCT} Version {VERSION_90x} the dependencies were hosted on the https://central.sonatype.com/search?q=bamoe[Maven Central].
 Now the dependencies are distributed with a container image or a zip file.
-Refer to {PRODUCT_SHORT} Version {VERSION_910} xref:../installation/configure-maven.adoc[Maven configuration].
+Refer to {PRODUCT_SHORT} Version {VERSION_91x} xref:../installation/configure-maven.adoc[Maven configuration].
 
 
 === Creating a new project from scracth
 
 Now that you have the Maven properly configured, you can move onto the first approach, which is to create a new project from scratch.
-The first step is to generate a new Maven project so that there is a place to migrate your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION_910}.
+The first step is to generate a new Maven project so that there is a place to migrate your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION_91x}.
 There are several ways to create Maven projects; however, this approach uses a published Maven plugin.
 
 [start=1]
@@ -47,7 +47,7 @@ This creates a Quarkus project called `my-sample-decision-service`, which is ver
 +
 [source,console,subs="+attributes"]
 ----
-mvn io.quarkus.platform:quarkus-maven-plugin:3.8.4:create \
+mvn io.quarkus.platform:quarkus-maven-plugin:3.8.6:create \
     -DprojectGroupId=com.ibm.bamoe.samples \
     -DprojectArtifactId=my-sample-decision-service \
     -DprojectVersion=1.0.0-SNAPSHOT \
@@ -180,7 +180,7 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 +
 For this example, you will be creating a project with only DMN files.
 So you must add the the Drools Kogito Quarkus dependency.
-In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} Version {VERSION_91x} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 [source,xml]
 ----
@@ -291,34 +291,34 @@ You might get Maven streaming text once again, and at the end of it you must hav
 [INFO] ------------------------------------------------------------------------
 ----
 +
-That's it! Now, you can start using your {PRODUCT_SHORT} version {VERSION_910} project.
+Now you can start using your {PRODUCT_SHORT} version {VERSION_91x} project.
 
-=== Upgrading a {PRODUCT_SHORT} Version {VERSION_901} project
+=== Upgrading a {PRODUCT_SHORT} Version {VERSION_90x} project
 
-Upgrading a {PRODUCT_SHORT} version {VERSION_901} project to version {VERSION_910} is straightforward.
+Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project to version {VERSION_91x} is straightforward.
 The project structure hasn't changed, updates only need to be made to the project versions, some dependency names, and files.
 
 [start=1]
 . Upgrade the Quarkus version.
 +
-In the {PRODUCT_SHORT} Version {VERSION_901} the Quarkus version was 2.16 and for Version {VERSION_911} it is 3.8.6.
+In the {PRODUCT_SHORT} Version {VERSION_90x} the Quarkus version was 2.16 and for Version {VERSION_91x} it is 3.8.6.
 To make this upgrade, open the `pom.xml` file and do the following change:
 +
 [source,xml]
 ----
  ---   <quarkus-plugin.version>2.16.10.Final</quarkus-plugin.version>
- +++   <quarkus-plugin.version>3.8.4</quarkus-plugin.version>
+ +++   <quarkus-plugin.version>3.8.6</quarkus-plugin.version>
        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
        <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
  ---   <quarkus.platform.version>2.16.12.Final</quarkus.platform.version>
- +++   <quarkus.platform.version>3.8.4</quarkus.platform.version>
+ +++   <quarkus.platform.version>3.8.6</quarkus.platform.version>
 ----
 
 [start=2]
 . Upgrade the BOM and Kogito versions.
 +
-Previously, the {PRODUCT_SHORT} Version {VERSION_901} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_901}.
-Now, both versions are {BOM_VERSION_910}.
+Previously, the {PRODUCT_SHORT} Version {VERSION_90x} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_90x}.
+Now, both versions are {BOM_VERSION_91x}.
 Update the following lines in your `pom.xml`:
 +
 [source,xml]
@@ -326,14 +326,14 @@ Update the following lines in your `pom.xml`:
        <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
  ---   <kogito.bom.version>9.0.1.Final</kogito.bom.version>
  ---   <version.org.kie.kogito>1.40.2.Final</version.org.kie.kogito>
- +++   <kogito.bom.version>9.1.0-ibm-0001</kogito.bom.version>
- +++   <version.org.kie.kogito>9.1.0-ibm-0001</version.org.kie.kogito>
+ +++   <kogito.bom.version>9.1.x-ibm-0001</kogito.bom.version>
+ +++   <version.org.kie.kogito>9.1.x-ibm-0001</version.org.kie.kogito>
 ----
 
 [start=3]
 . Update the dependencies GAV.
 +
-In the {PRODUCT_SHORT} Version {VERSION_910} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} Version {VERSION_91x} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +
@@ -353,7 +353,7 @@ This ends the `pom.xml` changes, next, files that need changes
 [start=4]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} Version {VERSION_910} does not fully support the Quarkus Dev Services, due to that, it's required to disable this feature and to do that, add the following line to the `src/main/resources/application.properties` file:
+{PRODUCT_SHORT} Version {VERSION_91x} does not fully support the Quarkus Dev Services, due to that, it's required to disable this feature and to do that, add the following line to the `src/main/resources/application.properties` file:
 +
 [source]
 ----
@@ -398,7 +398,7 @@ You might get Maven streaming text once again, and at the end of it you must hav
 [INFO] ------------------------------------------------------------------------
 ----
 +
-Now, you can start using your {PRODUCT_SHORT} version {VERSION_910} project.
+Now, you can start using your {PRODUCT_SHORT} version {VERSION_91x} project.
 
 === Compile, Build, Test, Deploy
 

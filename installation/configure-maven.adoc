@@ -26,7 +26,7 @@ There are a few options and your choice will depend on your work environment and
 
 Choose between using the
 
-* bamoe-9.1.0-maven-repository-image.tar.gz
+* bamoe-9.1.1-maven-repository-image.tar.gz
 * quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}
 
 [CAUTION]
@@ -34,7 +34,7 @@ Choose between using the
 The container images provided are created for Linux distribution, running on a different architecture beside Linux x86_64 architecture may display a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested" which can be ignored.
 ====
 
-*Using bamoe-9.1.0-maven-repository-image.tar.gz*
+*Using bamoe-9.1.1-maven-repository-image.tar.gz*
 
 Enable the OpenShift registry and log into it using Docker:
 
@@ -49,7 +49,7 @@ Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift
 
 [source,shell,subs="attributes+"]
 ----
-docker image load --input bamoe-9.1.0-maven-repository-image.tar.gz
+docker image load --input bamoe-9.1.x-maven-repository-image.tar.gz
 docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION_910} ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION_910}
 docker push ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION_910}
 # Replace <PROJECT_NAME> with your OpenShift Project (namespace)
@@ -90,16 +90,16 @@ oc get route bamoe-maven-repo --output jsonpath={.spec.host}
 
 Choose between using
 
-* bamoe-9.1.0-maven-repository-image.tar.gz
+* bamoe-9.1.x-maven-repository-image.tar.gz
 * the hosted quay.io/bamoe/maven-repository:{IMAGE_VERSION_910} image
 
-*Using bamoe-9.1.0-maven-repository-image.tar.gz*
+*Using bamoe-9.1.x-maven-repository-image.tar.gz*
 
 This step varies depending on your cluster configuration, but it may involve setting up (or using an already set up) image registry, loading and re-tagging the docker image, and then pushing it to the registry with the new tag.
 
 [source,shell,subs="attributes+"]
 ----
-docker image load --input bamoe-9.1.0-maven-repository-image.tar.gz
+docker image load --input bamoe-9.1.1-maven-repository-image.tar.gz
 docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION_910} <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION_910}
 docker push <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION_910}
 ----
@@ -138,11 +138,11 @@ kubectl create ingress bamoe-maven-repo --rule="<EXTERNAL_BAMOE_MAVEN_REPO_URL>/
 
 Start by loading the `tar.gz`` file or pulling the image from quay.io:
 
-* **bamoe-9.1.0-maven-repository-image.tar.gz**
+* **bamoe-9.1.x-maven-repository-image.tar.gz**
 +
 [source,shell,subs="attributes+"]
 ----
-docker image load --input bamoe-9.1.0-maven-repository-image.tar.gz
+docker image load --input bamoe-9.1.x-maven-repository-image.tar.gz
 ----
 
 * **quay.io/bamoe/maven-repository:{IMAGE_VERSION_910}**
@@ -167,7 +167,7 @@ You can verify the repository is running by accessing the repository in your bro
 === Configure Maven with the container image URL:
 To configure Maven with a container image follow these steps:
 
-. Download the dedicated M2 repository image container (`bamoe-9.1.0-maven-repository-image.tar.gz`).
+. Download the dedicated M2 repository image container (`bamoe-9.1.x-maven-repository-image.tar.gz`).
 . Open the Maven `~/.m2/settings.xml` file in a text editor or integrated development environment (IDE).
 +
 NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `settings.xml` file from the `$MAVEN_HOME/.m2/conf/` directory into the `~/.m2/` directory.
@@ -219,11 +219,11 @@ The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers
 
 To configure the {PRODUCT_SHORT} Maven repository locally follow these steps:
 
-. Download the {PRODUCT_SHORT} v{VERSION_910} Maven Repository (`bamoe-9.1.0-maven-repository.zip`).
+. Download the {PRODUCT_SHORT} v{VERSION_910} Maven Repository (`bamoe-9.1.x-maven-repository.zip`).
 . Extract the downloaded archive.
 . Go to the `~/.m2/` directory and open the Maven `settings.xml` file in a text editor or IDE.
 . Add the following lines to the `<profiles>` element of the Maven settings.xml file, where `<MAVEN_REPOSITORY>` is the path of the Maven repository that you downloaded.
-  The format of `<MAVEN_REPOSITORY>` must be `file://$PATH`. For example, `file:///home/userX/bamoe-9.1.0-maven-repository/:`.
+  The format of `<MAVEN_REPOSITORY>` must be `file://$PATH`. For example, `file:///home/userX/bamoe-9.1.x-maven-repository/:`.
 +
 [source]
 ----
