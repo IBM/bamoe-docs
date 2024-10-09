@@ -1,34 +1,423 @@
-= Configuration reference
+= Configuration Reference
+:icons: image
+:iconsdir: ../images/icons
 include::../partials/attributes.adoc[]
 
 == {PRODUCT} Configuration Properties
-include::configurations/config-group-org-kie-flyway-quarkus-kie-flyway-quarkus-runtime-config-kie-quarkus-flyway-named-module.adoc[]
-include::configurations/config-group-org-kie-kogito-addons-quarkus-knative-eventing-deployment-sink-configuration.adoc[]
-include::configurations/config-group-org-kie-kogito-quarkus-config-kogito-eventing-runtime-config.adoc[]
-include::configurations/config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-rpc-runtime-config.adoc[]
-include::configurations/config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-build-time-config.adoc[]
-include::configurations/config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config.adoc[]
-include::configurations/kie-flyway-general-config-items.adoc[]
-include::configurations/kie-flyway-org-kie-flyway-quarkus-kie-flyway-quarkus-runtime-config.adoc[]
-include::configurations/kie-flyway.adoc[]
-include::configurations/kogito-events-org-kie-kogito-events-config-events-runtime-config.adoc[]
-include::configurations/kogito-events.adoc[]
-include::configurations/kogito-general-config-items.adoc[]
-include::configurations/kogito-org-kie-kogito-quarkus-config-kogito-build-time-config.adoc[]
-include::configurations/kogito-org-kie-kogito-quarkus-config-kogito-runtime-config.adoc[]
-include::configurations/kogito-org-kie-kogito-quarkus-serverless-workflow-config-kogito-build-time-config.adoc[]
-include::configurations/kogito-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-runtime-config.adoc[]
-include::configurations/kogito.adoc[]
-include::configurations/org-kie-kogito-addons-knative-eventing-general-config-items.adoc[]
-include::configurations/org-kie-kogito-addons-knative-eventing-org-kie-kogito-addons-quarkus-knative-eventing-deployment-eventing-configuration.adoc[]
-include::configurations/org-kie-kogito-addons-knative-eventing.adoc[]
-include::configurations/quarkus-kogito-general-config-items.adoc[]
-include::configurations/quarkus-kogito-org-kie-kogito-quarkus-workflow-deployment-config-kogito-workflow-build-time-config.adoc[]
-include::configurations/quarkus-kogito.adoc[]
+
+[.configuration-legend]
+icon:lock[title=Fixed at build time] Configuration property fixed at build time - All other configuration properties are overridable at runtime
+[.configuration-reference.searchable, cols="80,.^10,.^10"]
+|===
+h|[[kie-flyway_configuration]]link:#kie-flyway_configuration[Configuration property]
+h|Type
+h|Default
 
 
-== DevUI Configuration Properties
-include::configurations/config-group-org-jbpm-quarkus-devui-runtime-config-user-config.adoc[]
-include::configurations/jbpm-devui-general-config-items.adoc[]
-include::configurations/jbpm-devui-org-jbpm-quarkus-devui-runtime-config-dev-console-runtime-config.adoc[]
-include::configurations/jbpm-devui.adoc[]
+a| [[kie-flyway_kie-flyway-enabled]]`link:#kie-flyway_kie-flyway-enabled[kie.flyway.enabled]`
+[.description]
+--
+Enables the execution of the Flyway initializer during the application startup
+
+Environment variable: `+++KIE_FLYWAY_ENABLED+++`
+--|boolean
+|`true`
+
+
+a| [[kie-flyway_kie-flyway-modules-modules-enabled]]`link:#kie-flyway_kie-flyway-modules-modules-enabled[kie.flyway.modules."modules".enabled]`
+[.description]
+--
+Enables the execution of the Flyway initializer for a specific Kie module
+
+Environment variable: `+++KIE_FLYWAY_MODULES__MODULES__ENABLED+++`
+--|boolean
+|`true`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-broker]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-broker[org.kie.kogito.addons.knative.eventing.broker]`
+
+[.description]
+--
+Name of the default Knative Broker deployed in the target Knative namespace.
+
+This broker is used as the reference to create the Knative Triggers responsible to delegate the events that this Kogito service will consume.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_BROKER+++`
+--|string
+|`default`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-auto-generate-broker]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-auto-generate-broker[org.kie.kogito.addons.knative.eventing.auto-generate-broker]`
+
+[.description]
+--
+Whether the extension should generate a default Knative Broker in memory to sink and dispatch the messages.
+
+Turn this property to `false` in case you already have a broker installed in your namespace rather than the default one. Note that you can use `org.kie.kogito.addons.knative.eventing.sink.++*++` to configure your custom Sink. If not defined, this auto generated Broker will work as the Sink.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_AUTO_GENERATE_BROKER+++`
+--|boolean
+|`true`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-generate-kogito-source]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-generate-kogito-source[org.kie.kogito.addons.knative.eventing.generate-kogito-source]`
+
+[.description]
+--
+Whether to generate the Knative ++[++KogitoSource++]++(https://github.com/knative-sandbox/eventing-kogito) instead of a Knative SinkBinding.
+
+KogitoSource is the custom SinkBinding created specifically to bound with the Kogito ecosystem such as Data Index, Jobs Service, and so on.
+
+For minimal configuration and setup, you can leave this property set to `false` (default).
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_GENERATE_KOGITO_SOURCE+++`
+--|boolean
+|`false`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-namespace]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-namespace[org.kie.kogito.addons.knative.eventing.sink.namespace]`
+
+[.description]
+--
+Namespace where the given Knative Sink is deployed. This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_SINK_NAMESPACE+++`
+--|string
+|
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-api-version]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-api-version[org.kie.kogito.addons.knative.eventing.sink.api-version]`
+
+[.description]
+--
+Kubernetes API Version of the given Knative Sink.
+
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_SINK_API_VERSION+++`
+--|string
+|`eventing.knative.dev/v1`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-name]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-name[org.kie.kogito.addons.knative.eventing.sink.name]`
+
+[.description]
+--
+Name of the given Knative Sink.
+
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_SINK_NAME+++`
+--|string
+|`default`
+
+a|icon:lock[title=Fixed at build time] [[org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-kind]]`link:#org-kie-kogito-addons-knative-eventing_org-kie-kogito-addons-knative-eventing-sink-kind[org.kie.kogito.addons.knative.eventing.sink.kind]`
+
+[.description]
+--
+Kubernetes Kind of the given Knative Sink.
+
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+
+Environment variable: `+++ORG_KIE_KOGITO_ADDONS_KNATIVE_EVENTING_SINK_KIND+++`
+--|string
+|`Broker`
+
+
+a| [[config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-rpc-runtime-config_kogito-grpc-enum-includedefault]]`link:#config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-rpc-runtime-config_kogito-grpc-enum-includedefault[kogito.grpc.enum.includeDefault]`
+
+[.description]
+--
+Indicates if default value of enumerations should be included in grpc response
+
+Environment variable: `+++KOGITO_GRPC_ENUM_INCLUDEDEFAULT+++`
+--|boolean
+|`false`
+
+
+a| [[config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-rpc-runtime-config_kogito-grpc-stream-timeout]]`link:#config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-rpc-runtime-config_kogito-grpc-stream-timeout[kogito.grpc.stream.timeout]`
+
+[.description]
+--
+Time to wait for response from server when using streams
+
+Environment variable: `+++KOGITO_GRPC_STREAM_TIMEOUT+++`
+--|int
+|`20`
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-build-time-config_kogito-sw-operationidstrategy]]`link:#config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-build-time-config_kogito-sw-operationidstrategy[kogito.sw.operationIdStrategy]`
+
+[.description]
+--
+Strategy for generating the configuration key of open API specifications. +
+Possible values are:
+
+- file_name. Uses the last element of the spec uri
+- full_uri. Uses the full path of the uri
+- spec_title. Uses the spec title
+- function_name. Uses the function name
+
+Environment variable: `+++KOGITO_SW_OPERATIONIDSTRATEGY+++`
+--|string
+|`file_name`
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-build-time-config_kogito-sw-states-foreach-outputvarname]]`link:#config-group-org-kie-kogito-quarkus-serverless-workflow-config-kogito-serverless-workflow-build-time-config_kogito-sw-states-foreach-outputvarname[kogito.sw.states.foreach.outputVarName]`
+
+[.description]
+--
+Variable name for foreach loop
+
+Environment variable: `+++KOGITO_SW_STATES_FOREACH_OUTPUTVARNAME+++`
+--|string
+|`_swf_eval_temp`
+
+
+a| [[config-group-org-kie-kogito-quarkus-config-kogito-eventing-runtime-config_kogito-quarkus-events-threads-poolsize]]`link:#config-group-org-kie-kogito-quarkus-config-kogito-eventing-runtime-config_kogito-quarkus-events-threads-poolsize[kogito.quarkus.events.threads.poolSize]`
+
+[.description]
+--
+Maximum number of threads to handle incoming events by channel
+
+Environment variable: `+++KOGITO_QUARKUS_EVENTS_THREADS_POOLSIZE+++`
+--|int
+|`10`
+
+
+a| [[config-group-org-kie-kogito-quarkus-config-kogito-eventing-runtime-config_kogito-quarkus-events-threads-queuesize]]`link:#config-group-org-kie-kogito-quarkus-config-kogito-eventing-runtime-config_kogito-quarkus-events-threads-queuesize[kogito.quarkus.events.threads.queueSize]`
+
+[.description]
+--
+Maximum size of queue to hold incoming events to be processed by threads in the pool
+
+Environment variable: `+++KOGITO_QUARKUS_EVENTS_THREADS_QUEUESIZE+++`
+--|int
+|`1`
+
+
+a| [[kogito-events_kogito-events-processinstances-enabled]]`link:#kogito-events_kogito-events-processinstances-enabled[kogito.events.processinstances.enabled]`
+
+[.description]
+--
+Enable publishing processes instances events
+
+Environment variable: `+++KOGITO_EVENTS_PROCESSINSTANCES_ENABLED+++`
+--|boolean
+|`true`
+
+
+a| [[kogito-events_kogito-events-processinstances-errors-propagate]]`link:#kogito-events_kogito-events-processinstances-errors-propagate[kogito.events.processinstances.errors.propagate]`
+
+[.description]
+--
+Propagate errors for process instance emitter
+
+Environment variable: `+++KOGITO_EVENTS_PROCESSINSTANCES_ERRORS_PROPAGATE+++`
+--|boolean
+|`false`
+
+
+a| [[kogito-events_kogito-events-processdefinitions-enabled]]`link:#kogito-events_kogito-events-processdefinitions-enabled[kogito.events.processdefinitions.enabled]`
+
+[.description]
+--
+Enable publishing processes definition events
+
+Environment variable: `+++KOGITO_EVENTS_PROCESSDEFINITIONS_ENABLED+++`
+--|boolean
+|`true`
+
+
+a| [[kogito-events_kogito-events-processdefinitions-errors-propagate]]`link:#kogito-events_kogito-events-processdefinitions-errors-propagate[kogito.events.processdefinitions.errors.propagate]`
+
+[.description]
+--
+Propagate errors for process definition emitter
+
+Environment variable: `+++KOGITO_EVENTS_PROCESSDEFINITIONS_ERRORS_PROPAGATE+++`
+--|boolean
+|`false`
+
+
+a| [[kogito-events_kogito-events-usertasks-enabled]]`link:#kogito-events_kogito-events-usertasks-enabled[kogito.events.usertasks.enabled]`
+
+[.description]
+--
+Enable publishing user task instances events
+
+Environment variable: `+++KOGITO_EVENTS_USERTASKS_ENABLED+++`
+--|boolean
+|`true`
+
+
+a| [[kogito-events_kogito-events-usertasks-errors-propagate]]`link:#kogito-events_kogito-events-usertasks-errors-propagate[kogito.events.usertasks.errors.propagate]`
+
+[.description]
+--
+Propagate errors for user task emitter
+
+Environment variable: `+++KOGITO_EVENTS_USERTASKS_ERRORS_PROPAGATE+++`
+--|boolean
+|`false`
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-port]]`link:#config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-port[quarkus.kogito.devservices.port]`
+
+[.description]
+--
+Optional fixed port the dev service will listen to.
+
+If not defined, 8180 will be used.
+
+Environment variable: `+++QUARKUS_KOGITO_DEVSERVICES_PORT+++`
+--|int
+|`8180`
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-image-name]]`link:#config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-image-name[quarkus.kogito.devservices.image-name]`
+
+[.description]
+--
+The Data Index image to use.
+
+Environment variable: `+++QUARKUS_KOGITO_DEVSERVICES_IMAGE_NAME+++`
+--|string
+|
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-shared]]`link:#config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-shared[quarkus.kogito.devservices.shared]`
+
+[.description]
+--
+Indicates if the Data Index instance managed by Quarkus Dev Services is shared. When shared, Quarkus looks for running containers using label-based service discovery. If a matching container is found, it is used, and so a second one is not started. Otherwise, Dev Services for a new Data Index instance.
+
+The discovery uses the `kogito-dev-service-data-index` label. The value is configured using the `service-name` property.
+
+Container sharing is only used in dev mode.
+
+Environment variable: `+++QUARKUS_KOGITO_DEVSERVICES_SHARED+++`
+--|boolean
+|`true`
+
+a|icon:lock[title=Fixed at build time] [[config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-service-name]]`link:#config-group-org-kie-kogito-quarkus-workflow-deployment-config-kogito-dev-services-build-time-config_quarkus-kogito-devservices-service-name[quarkus.kogito.devservices.service-name]`
+
+[.description]
+--
+The value of the `kogito-dev-service-data-index` label attached to the started container. This property is used when `shared` is set to `true`. In this case, before starting a container, Dev Services looks for a container with the `kogito-dev-service-data-index` label set to the configured value. If found, it will use this container instead of starting a new one. Otherwise, it starts a new container with the `kogito-dev-service-data-index` label set to the specified value.
+
+Environment variable: `+++QUARKUS_KOGITO_DEVSERVICES_SERVICE_NAME+++`
+--|string
+|`kogito-data-index`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-messaging-as-cloudevents]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-messaging-as-cloudevents[kogito.messaging.as-cloudevents]`
+
+[.description]
+--
+If this is enabled the service will use Cloud Events
+
+If not defined, true will be used.
+
+Environment variable: `+++KOGITO_MESSAGING_AS_CLOUDEVENTS+++`
+--|boolean
+|`true`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-jackson-fail-on-empty-bean]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-jackson-fail-on-empty-bean[kogito.jackson.fail-on-empty-bean]`
+
+[.description]
+--
+If this property is True, Jackson will fail on an empty bean
+
+If not defined, false will be used.
+
+Environment variable: `+++KOGITO_JACKSON_FAIL_ON_EMPTY_BEAN+++`
+--|boolean
+|`false`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-addon-messaging-incoming-defaultname]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-addon-messaging-incoming-defaultname[kogito.addon.messaging.incoming.defaultName]`
+
+[.description]
+--
+Incoming channel default name
+
+Environment variable: `+++KOGITO_ADDON_MESSAGING_INCOMING_DEFAULTNAME+++`
+--|string
+|`kogito_incoming_stream`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-addon-messaging-outgoing-defaultname]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-addon-messaging-outgoing-defaultname[kogito.addon.messaging.outgoing.defaultName]`
+
+[.description]
+--
+Outgoing channel default name
+
+Environment variable: `+++KOGITO_ADDON_MESSAGING_OUTGOING_DEFAULTNAME+++`
+--|string
+|`kogito_outgoing_stream`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-codegen-ignorehiddenfiles]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-codegen-ignorehiddenfiles[kogito.codegen.ignoreHiddenFiles]`
+
+[.description]
+--
+Whether to ignore hidden files when collecting files for code generation
+
+If not defined, true will be used.
+
+Environment variable: `+++KOGITO_CODEGEN_IGNOREHIDDENFILES+++`
+--|boolean
+|`true`
+
+a|icon:lock[title=Fixed at build time] [[kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-codegen-process-failonerror]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-build-time-config_kogito-codegen-process-failonerror[kogito.codegen.process.failOnError]`
+
+[.description]
+--
+Whether to fail when there are parsing/validation errors of process assets
+
+If not defined, true will be used.
+
+Environment variable: `+++KOGITO_CODEGEN_PROCESS_FAILONERROR+++`
+--|boolean
+|`true`
+
+
+a| [[kogito-org-kie-kogito-quarkus-config-kogito-runtime-config_kogito-service-url]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-runtime-config_kogito-service-url[kogito.service.url]`
+
+[.description]
+--
+The service URL needed to connect to the runtime endpoint from outside the service.
+
+Environment variable: `+++KOGITO_SERVICE_URL+++`
+--|string
+|
+
+
+a| [[kogito-org-kie-kogito-quarkus-config-kogito-runtime-config_kogito-process-instances-limit]]`link:#kogito-org-kie-kogito-quarkus-config-kogito-runtime-config_kogito-process-instances-limit[kogito.process.instances.limit]`
+
+[.description]
+--
+Maximum number of process instance to be returned by GET api
+
+Environment variable: `+++KOGITO_PROCESS_INSTANCES_LIMIT+++`
+--|short
+|`1000`
+
+a|icon:lock[title=Fixed at build time] [[quarkus-kogito_quarkus-kogito-devservices-enabled]]`link:#quarkus-kogito_quarkus-kogito-devservices-enabled[quarkus.kogito.devservices.enabled]`
+
+[.description]
+--
+If Dev Services for Kogito has been explicitly enabled or disabled. Dev Services are generally enabled by default, unless there is an existing configuration present.
+
+Environment variable: `+++QUARKUS_KOGITO_DEVSERVICES_ENABLED+++`
+--|boolean
+|
+
+
+a|icon:lock[title=Fixed at build time] [[quarkus-kogito_quarkus-kogito-logger-always-include]]`link:#quarkus-kogito_quarkus-kogito-logger-always-include[quarkus.kogito.logger.always-include]`
+
+[.description]
+--
+Always include the Workflow debug logger. By default, this will only be included in dev and test. Setting this to true will also include the Workflow debug logger in Prod
+
+Environment variable: `+++QUARKUS_KOGITO_LOGGER_ALWAYS_INCLUDE+++`
+--|boolean
+|`false`
+
+
+a|icon:lock[title=Fixed at build time] [[jbpm-devui_jbpm.devui.users.-user-config-by-user-.groups]]`link:#jbpm-devui_jbpm.devui.users.-user-config-by-user-.groups[jbpm.devui.users."user-config-by-user".groups]`
+
+[.description]
+--
+Groups which the user belong to.
+
+Environment variable: `+++JBPM_DEVUI_USERS__USER_CONFIG_BY_USER__GROUPS+++`
+--|list of string
+a|None, required
+|===
