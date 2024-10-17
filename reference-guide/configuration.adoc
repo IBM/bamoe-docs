@@ -1,4 +1,328 @@
 = Configuration Reference
+:icons: image
+:iconsdir: ../images/icons
 include::../partials/attributes.adoc[]
 
-Please see the full https://docs.kogito.kie.org/latest/html_single/#chap-kogito-configuring[configuration reference] at the Kogito Documentation page.
+== {PRODUCT} Configuration Properties
+
+[.configuration-legend]
+icon:lock[title=Fixed at build time] Configuration property fixed at build time - All other configuration properties are overridable at runtime
+[.configuration-reference.searchable, cols="80,.^10,.^10"]
+|===
+h|[[kie-flyway_configuration]]link:#kie-flyway_configuration[Configuration property]
+h|Type
+h|Default
+
+a| `process`
+[.description]
+--
+String prefix for Kogito CloudEvents type fields.
+Since this is a required field, the constructor will fill them with this default value.
+Ideally, callers would use #TYPE_FORMAT to fill this field using the process name and the signal node name, e.g: process.travelagency.visaapproved
+--
+| string
+| 
+a| `/process/%s`
+[.description]
+--
+String format for Kogito CloudEvents source fields.
+Since this is a required field, the constructor will fill them with default value, e.g.: /process/travelagency
+See more about the source format: https://github.com/cloudevents/spec/blob/v1.0/spec.md#source-1
+--
+| string
+| 
+a| `openApiDescriptor`
+[.description]
+--
+OpenAPI Generator Descriptors with information of every REST client generated indexed by the spec resource file.
+--
+| string
+| 
+a| `kogito.codegen.ignoreHiddenFiles`
+[.description]
+--
+--
+| boolean
+| true 
+a| `kogito.codegen.(engine_name)`
+[.description]
+--
+enable/disable engine code generation 
+--
+| boolean
+| true
+a| `kogito.rest.resource.type`
+[.description]
+--
+the type of generated rest (currently used only by processes); possible values: reactive
+--
+| string
+| 
+a| `kogito.sw.operationIdStrategy`
+[.description]
+--
+strategy for generating the configuration key of open API specifications; possible values are:
+file_name: uses the last element of the spec uri
+full_uri: uses the full path of the uri
+spec_title: uses the spec title
+function_name: uses the function name
+--
+| string
+| 
+a| `json`
+[.description]
+--
+--
+| 
+| 
+a| `yml`
+[.description]
+--
+--
+| 
+| 
+a| `transactionEnabled`
+[.description]
+--
+Flag used to configure transaction enabling.
+--
+| boolean 
+| true 
+a| `filesystem`
+[.description]
+--
+Type of persistence
+--
+| string
+| 
+a| `kogito.persistence.data-index.proto.generation`
+[.description]
+--
+enable/disable proto generation for DATA
+--
+| boolean
+| true
+a| `kogito.persistence.proto.marshaller`
+[.description]
+--
+enable/disable proto marshaller generation
+--
+| boolean
+| true
+a| `kogito.persistence.type`
+[.description]
+--
+kind of persistence used
+
+possible values: filesystem, infinispan, mongodb, postgresql, kafka, jdbcinfinispan
+--
+| string
+|
+a| `persistence`
+[.description]
+--
+Generic PersistenceGenerator constants
+--
+| string 
+| 
+a| `kogito.addon.tracing.decision.kafka.bootstrapAddress`
+[.description]
+--
+kafka bootstrap server address
+--
+| string
+| 
+a| `kogito.addon.tracing.decision.kafka.topic.name`
+[.description]
+--
+name of the decision topic
+--
+| string
+| kogito-tracing-decision
+a| `kogito.addon.tracing.decision.kafka.topic.partitions`
+[.description]
+--
+number of decision topic partitions
+--
+| integer
+| 1
+a| `kogito.addon.tracing.decision.kafka.topic.replicationFactor`
+[.description]
+--
+number of decision topic replication factor
+--
+| integer
+| 1
+a| `kogito.addon.tracing.decision.asyncEnabled`
+[.description]
+--
+enable/disable asynchronous collection of decision events
+--
+| boolean
+| true
+a| `kogito.workflow.version-strategy`
+[.description]
+--
+strategy to resolve a Process version to use
+
+possible values: project, workflow; if "project", requires project GAV; default is workflow
+--
+| string
+| 
+a| `kogito-dev-service-data-index`
+[.description]
+--
+This allows other applications to discover the running service and use it instead of starting a new instance.
+--
+| string
+| 
+
+a| `drools.clockType`
+[.description]
+--
+The property name for the clock type configuration
+--
+| string
+| 
+a| `drools.workItemHandlers`
+[.description]
+--
+The prefix for the property name for work item handlers
+--
+| string
+| 
+a| `drools.persistedsession`
+[.description]
+--
+The property name for the persisted session configuration
+--
+| string
+| 
+a| `drools.beliefSystem`
+[.description]
+--
+The property name for the belief system configuration
+--
+| string
+| 
+a| `drools.timerJobFactory`
+[.description]
+--
+The property name for the timer job factory manager configuration
+--
+| string
+| 
+a| `drools.dump.dir`
+[.description]
+--
+The property name for the drools dump directory configuration
+--
+| string
+| 
+a| `drools.dialect.default`
+[.description]
+--
+The property name for the default DIALECT
+--
+| string
+| 
+a| `drools.evaluator.`
+[.description]
+--
+The prefix for the property name for evaluators
+--
+| string
+| 
+a| `drools.parallelRulesBuildThreshold`
+[.description]
+--
+The property name for the parallel rules build threshold option
+--
+| string
+| 
+a| `drools.accumulate.function.`
+[.description]
+--
+The prefix for the property name for accumulate functions
+--
+| string
+| 
+a| `drools.defaultPackageName`
+[.description]
+--
+The property name for the default package name
+--
+| string
+| 
+a| `drools.consequenceExceptionHandler`
+[.description]
+--
+The property name for consequence exception handler configuration
+--
+| string
+| 
+a| `drools.alphaNodeHashingThreshold`
+[.description]
+--
+The property name for the Alpha Node Hashing Threshold
+--
+| integer
+| 
+a| `drools.jittingThreshold`
+[.description]
+--
+The property name for the constraint jitting option
+--
+| integer
+| 
+a| `drools.maxThreads`
+[.description]
+--
+The property name for the max threads
+--
+| integer
+| 
+a| `drools.alphaNodeRangeIndexThreshold`
+[.description]
+--
+The property name
+--
+| integer
+| 
+a| `drools.compositeKeyDepth`
+[.description]
+--
+The property name for the default DIALECT
+--
+| integer
+| 
+a| ``
+[.description]
+--
+The empty String `""`.
+--
+| 
+| 
+a| `kogito.generate.rest.(engine_name)`
+[.description]
+--
+enable/disable global rest endpoint generation
+--
+| boolean 
+| true
+a| `kogito.generate.di`
+[.description]
+--
+dependency injection is available and enabled 
+--
+| boolean
+| true
+a| `java:comp/TransactionSynchronizationRegistry`
+[.description]
+--
+Standard Java EE 5 JNDI location for the JTA TransactionSynchronizationRegistry.
+Autodetected when available.
+--
+| string
+| 
+|===
