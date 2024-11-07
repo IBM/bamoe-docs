@@ -1,21 +1,21 @@
 include::../partials/attributes.adoc[]
-= Migrating to {PRODUCT_LONG} version {VERSION_911}
+= Migrating to {PRODUCT_LONG} version 9.1
 
-This section describes the migration of existing Version {VERSION_90x} applications to Version {VERSION} of {PRODUCT_LONG}.
+This section describes the migration of existing version {VERSION_90x} applications to version {VERSION} of {PRODUCT_LONG}.
 
 == Prerequisites
 
-The following tools are required to migrate to {PRODUCT_SHORT} Version {VERSION}:
+The following tools are required to migrate to {PRODUCT_SHORT} version {VERSION}:
 
 include::../partials/91x-prerequisites.adoc[]
 
 == Procedure
 
-The project migration from {PRODUCT_SHORT} Version {VERSION_90X} to {PRODUCT_SHORT} Version {VERSION} requires a few steps.
+The project migration from {PRODUCT_SHORT} version {VERSION_90X} to {PRODUCT_SHORT} version {VERSION} requires a few steps.
 Before proceeding, ensure that all prerequisite tools are installed or updated, then you need to properly set up Maven.
 
 This migration guide will show two ways of migrating your project. On the first way, you will be creating a new project from scratch and then moving the assets to it.
-The second way, you will be updating an existing BAMOE Version {VERSION_90X} project.
+The second way, you will be updating an existing BAMOE version {VERSION_90X} project.
 Either way, the first step is to set up the Maven configuration.
 
 === Update Maven configuration
@@ -24,13 +24,13 @@ Either way, the first step is to set up the Maven configuration.
 {PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
 For a quick start, see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
 
-Since {PRODUCT_SHORT} Version {VERSION} is based on Quarkus 3, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
+Since {PRODUCT_SHORT} version {VERSION} is based on Quarkus 3, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
 You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
 
 ==== Update Maven settings
-On the {PRODUCT} Version {VERSION_90x} the dependencies were hosted on the https://central.sonatype.com/search?q=bamoe[Maven Central].
+On the {PRODUCT} version {VERSION_90x} the dependencies were hosted on the https://central.sonatype.com/search?q=bamoe[Maven Central].
 Now the dependencies are distributed with a container image or a zip file.
-Refer to {PRODUCT_SHORT} Version {VERSION} xref:../installation/configure-maven.adoc[Maven configuration].
+Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.adoc[Maven configuration].
 
 
 === Creating a new project from scracth
@@ -138,7 +138,7 @@ When a bill of materials (BOM) is used, it is not necessary to specify the depen
 
 [NOTE]
 ====
-During the course of your Maven dependency update, if you encounter any dependencies that are not included in the bill of materials (BOM), then use the Maven Library Version noted in the following table:
+During the course of your Maven dependency update, if you encounter any dependencies that are not included in the bill of materials (BOM), then use the Maven Library version noted in the following table:
 
 [source,xml,subs="attributes+"]
 ----
@@ -180,7 +180,7 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 +
 For this example, you will be creating a project with only DMN files.
 So you must add the the Drools Kogito Quarkus dependency.
-In the {PRODUCT_SHORT} Version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 [source,xml]
 ----
@@ -293,7 +293,7 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
-=== Upgrading a {PRODUCT_SHORT} Version {VERSION_90x} project
+=== Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project
 
 Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project to version {VERSION} is straightforward.
 The project structure hasn't changed, updates only need to be made to the project versions, some dependency names, and files.
@@ -301,7 +301,7 @@ The project structure hasn't changed, updates only need to be made to the projec
 [start=1]
 . Upgrade the Quarkus version.
 +
-In the {PRODUCT_SHORT} Version {VERSION_90x} the Quarkus version was 2.16 and for Version {VERSION} it is 3.8.6.
+In the {PRODUCT_SHORT} version {VERSION_90x} the Quarkus version was 2.16 and for version {VERSION} it is 3.8.6.
 To make this upgrade, open the `pom.xml` file and do the following change:
 +
 [source,xml]
@@ -317,7 +317,7 @@ To make this upgrade, open the `pom.xml` file and do the following change:
 [start=2]
 . Upgrade the BOM and Kogito versions.
 +
-Previously, the {PRODUCT_SHORT} Version {VERSION_90x} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_90x}.
+Previously, the {PRODUCT_SHORT} version {VERSION_90x} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_90x}.
 Now, both versions are {BOM_VERSION_91x}.
 Update the following lines in your `pom.xml`:
 +
@@ -333,7 +333,7 @@ Update the following lines in your `pom.xml`:
 [start=3]
 . Update the dependencies GAV.
 +
-In the {PRODUCT_SHORT} Version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
 +
 One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +
@@ -353,7 +353,7 @@ This ends the `pom.xml` changes, next, files that need changes
 [start=4]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} Version {VERSION} does not fully support the Quarkus Dev Services, due to that, it's required to disable this feature and to do that, add the following line to the `src/main/resources/application.properties` file:
+{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services, due to that, it's required to disable this feature and to do that, add the following line to the `src/main/resources/application.properties` file:
 +
 [source]
 ----
