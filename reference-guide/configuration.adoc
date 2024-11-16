@@ -5,7 +5,292 @@ include::../partials/attributes.adoc[]
 
 == {PRODUCT} Configuration Properties
 
+Configuration for an {PRODUCT} project is done within the `META-INF/application.properties` file.
+This file will also contain other configuration properties for the application.
+There are a number of different properties available in a {PRODUCT} application, below is a listing of those properties, a short description, the corresponding Java type and a default, if one exists.
+
+=== Global Properties
+
+Global properties do not belong to a particular engine, or feature of {PRODUCT}.
+These properties will affect the entire application regardless of what features are being used.
+
 [cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.service.url
+a|The service URL needed to connect to the runtime endpoint from outside the service.
+|string
+|
+
+a|kogito.generate.rest
+a|Toggle enabling the global rest endpoint generation.
+|boolean
+a|true
+
+a|kogito.generate.di
+a|Toggle enabling dependency injection
+|boolean
+a|true
+
+a|kogito.codegen.ignoreHiddenFiles
+a|Toggle to ignore hidden files when collecting files for code generation.
+|boolean
+|true
+
+a|kogito.codegen.process.failOnError
+a|Toggle to fail when there are parsing/validation errors of process assets.
+|boolean
+|true
+
+a|kogito.rest.resource.type
+a|Specifier of the type of REST resource to generate.
+Valid values: "reactive", or "".
+|string
+a|
+|===
+
+=== Engine Specific Properties
+
+{PRODUCT} is composed of six different engines.
+
+. Decisions
+. Persistence
+. Predictions
+. Processes
+. Rules
+. Workflow
+
+Each engine has its own properties.
+
+==== Decision Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.decisions
+a|Toggle enabling code generation for the decisions engine
+|boolean
+a|true
+
+a|kogito.generate.rest.decisions
+a|Toggle for REST decisions endpoint generation.
+|boolean
+a|true
+
+a|kogito.decisions.stronglytyped
+a|Toggle to enable generated Java classes to support strongly typed input.
+|boolean
+a|false
+
+a|kogito.decisions.validation
+a|Validation activation for decision models.
+Possible values: ENABLED, DISABLED, IGNORE
+|string
+a|ENABLED
+
+a|kogito.addon.tracing.decision.kafka.bootstrapAddress
+a|Bootstrap Kafka server address
+|string
+a|
+
+a|kogito.addon.tracing.decision.asyncEnabled
+a|Toggle enabling asynchronous collection of decision events
+|boolean
+a|true
+|===
+
+==== Persistence Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.persistence
+a|Toggle enabling code generation for the persistence engine
+|boolean
+a|true
+
+a|kogito.generate.rest.persistence
+a|Toggle for REST persistence endpoint generation.
+|boolean
+a|true
+
+a|kogito.persistence.data-index.proto.generation
+a|Toggle to enable generation of Protobuf marshallers
+|boolean
+a|true
+
+a|kogito.persistence.proto.marshaller
+a|Toggle to enable generation of Protobuf marshallers
+|boolean
+a|true
+
+a|kogito.persistence.type
+a|Database persistence type.
+|enum of JDBC, MONGODB, FILESYSTEM, KAFKA, INFINISPAN, or POSTGRESQL
+a|
+
+a|kogito.persistence.auto.ddl
+a|Toogle to automatically apply database schema changes.
+|boolean
+a|true
+
+a|kogito.persistence.optimistic.lock
+a|Toggle to use optimistic locking in the database.
+|boolean
+a|false
+
+a|kogito.persistence.query.timeout.millis
+a|Query execution timeout in milliseconds.
+|long
+a|10000
+|===
+
+==== Predictions Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.predictions
+a|Toggle enabling code generation for the predictions engine
+|boolean
+a|true
+
+a|kogito.generate.rest.predictions
+a|Toggle for REST predictions endpoint generation.
+|boolean
+a|true
+
+|===
+
+==== Process Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.process
+a|Toggle enabling code generation for the process engine
+|boolean
+a|true
+
+a|kogito.generate.rest.process
+a|Toggle for REST process endpoint generation.
+|boolean
+a|true
+
+a|kogito.process.instances.limit
+a|Maximum number of process instance to be returned by GET api.
+|short
+|`1000`
+
+|===
+
+==== Rules Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.rules
+a|Toggle enabling code generation for the rules engine
+|boolean
+a|true
+
+a|kogito.generate.rest.rules
+a|Toggle for REST rules endpoint generation.
+|boolean
+a|true
+
+a|kogito.rules.`rule_unit_name`.event-processing-type
+a|Type of event processing for a given rule-unit.
+Possible values: CLOUD, STREAM
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.clock-type
+a|Event clock type for a given rule-unit.
+Possible values: PSEUDO, REALTIME
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.sessions-pool
+a|The size fore the sessions pool
+|int
+a|
+|===
+
+==== Workflow Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.workflow
+a|Toggle enabling code generation for the workflow engine
+|boolean
+a|true
+
+a|kogito.generate.rest.workflow
+a|Toogle for REST workflow endpoint generation
+|boolean
+a|true
+
+a|kogito.workflow.version-strategy
+a|Strategy used to resolve a Process version.
+|string
+a|workflow
+
+a|kogito.workflow.proto.marshaller
+a|Toggle to generate Protobuf marshallers for runtime.
+|boolean
+a|true
+
+a|kogito.workflow.data-index.proto.generation
+a|Toggle to generate Protobuf marshallers for Data Index.
+|boolean
+a|true
+
+a|kogito.logger.always-include
+a|Always include the Workflow debug logger.
+By default, this will only be included in dev and test.
+Setting this to true will also include the Workflow debug logger in Prod
+|boolean
+|`false`
+
+|===
+
+==== Additional Configuration Properties
+
+There are other additional configuration properties within {PRODUCT}.
+These include properties from addons or integrations.
+
+===== Flyway
+[cols="7,4,^,^"]
 |===
 ^h|Property Name
 ^h|Description
@@ -21,6 +306,15 @@ a| kie.flyway.modules.`<module name>`.enabled
 a| Enables the execution of the Flyway initializer for a specific Kie module.
 |boolean
 |`true`
+|===
+
+===== Knative
+[cols="7,4,^,^2"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|org.kie.kogito.addons.knative.eventing.broker
 a|Name of the default Knative Broker deployed in the target Knative namespace.
@@ -67,6 +361,17 @@ This sink is used to configure the "sink" property in the generated Knative Sink
 |string
 |`Broker`
 
+|===
+
+===== Job related
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
 a|kogito.job.recipient.sink.timeout-in-millis
 a|Default timeout to execute HTTP requests for the SinkRecipient when the Job's timeout is not configured.
 |long
@@ -88,6 +393,16 @@ a|Max accepted timeout to execute HTTP requests for the HttpRecipient when the J
 Attempts to surpass this value will result in a validation error at Job creation time.
 |long
 a|300000
+|===
+
+===== GRPC
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|kogito.grpc.enum.includeDefault
 a|Indicates if default value of enumerations should be included in grpc response.
@@ -98,7 +413,16 @@ a|kogito.grpc.stream.timeout
 a|Time to wait for response from server when using streams.
 |int
 |`20`
+|===
 
+===== Events
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 a|kogito.quarkus.events.threads.poolSize
 a|Maximum number of threads to handle incoming events by channel.
 |int
@@ -138,6 +462,16 @@ a|kogito.events.usertasks.errors.propagate
 a|Toggle to propagate errors for user tasks.
 |boolean
 |`false`
+|===
+
+===== DevServices
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|kogito.devservices.port
 a|Optional port the dev service will listen to.
@@ -175,10 +509,41 @@ Otherwise, it starts a new container with the `kogito-dev-service-data-index` la
 |string
 |`kogito-data-index`
 
+a|kogito.devservices.enabled
+a|Toggle to enable Kogito Dev Services.
+Dev Services are generally enabled by default, unless there is an existing configuration present.
+|boolean
+|
+
+a|jbpm.devui.users.`<user name>`.groups
+a|Groups to which the provided user (specified in the name of the config) belongs.
+|List of strings
+a|None
+|===
+
+===== Messaging
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
 a|kogito.messaging.as-cloudevents
 a|Toggle used to enable Cloud Events.
 |boolean
 |`true`
+
+a|kogito.addon.cloudevents.kafka.kogito_incoming_stream
+a|Kafka topic to listen to use for incoming CloudEvents.
+|string
+|
+
+a|kogito.addon.cloudevents.kafka.kogito_outgoing_stream
+a|Kafka topic to post to use for outgoing CloudEvents.
+|string
+|
 
 a|kogito.jackson.fail-on-empty-bean
 a|Toggle if Jackson will fail on an empty bean.
@@ -194,21 +559,16 @@ a|kogito.addon.messaging.outgoing.defaultName
 a|Outgoing channel default name.
 |string
 |`kogito_outgoing_stream`
+|===
 
-a|kogito.codegen.ignoreHiddenFiles
-a|Toggle to ignore hidden files when collecting files for code generation.
-|boolean
-|`true`
+===== Security
 
-a|kogito.codegen.process.failOnError
-a|Toggle to fail when there are parsing/validation errors of process assets.
-|boolean
-|`true`
-
-a|kogito.service.url
-a|The service URL needed to connect to the runtime endpoint from outside the service.
-|string
-|
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|kogito.security.auth.enabled
 a|Toggle Enabling the application security context when resolving current User Identity.
@@ -219,64 +579,16 @@ a|kogito.security.auth.impersonation.allowed-for-roles
 a|Comma-separated list of roles that allow identity impersonation when resolving the actual User Identity.
 |string
 a|
+|===
 
-a|kogito.process.instances.limit
-a|Maximum number of process instance to be returned by GET api.
-|short
-|`1000`
+===== Data Index
 
-a|kogito.devservices.enabled
-a|Toggle to enable Kogito Dev Services.
-Dev Services are generally enabled by default, unless there is an existing configuration present.
-|boolean
-|
-
-a|kogito.workflow.version-strategy
-a|Strategy used to resolve a Process version.
-|string
-a|workflow
-
-a|kogito.workflow.proto.marshaller
-a|Toggle to generate Protobuf marshallers for runtime.
-|boolean
-a|true
-
-a|kogito.workflow.data-index.proto.generation
-a|Toggle to generate Protobuf marshallers for Data Index.
-|boolean
-a|true
-
-a|kogito.persistence.type
-a|Database persistence type.
-|enum of JDBC, MONGODB, FILESYSTEM, KAFKA, INFINISPAN, or POSTGRESQL
-a|
-
-a|kogito.persistence.auto.ddl
-a|Toogle to automatically apply database schema changes.
-|boolean
-a|true
-
-a|kogito.persistence.optimistic.lock
-a|Toggle to use optimistic locking in the database.
-|boolean
-a|false
-
-a|kogito.persistence.query.timeout.millis
-a|Query execution timeout in milliseconds.
-|long
-a|10000
-
-a|kogito.logger.always-include
-a|Always include the Workflow debug logger.
-By default, this will only be included in dev and test.
-Setting this to true will also include the Workflow debug logger in Prod
-|boolean
-|`false`
-
-a|jbpm.devui.users.<user name>.groups
-a|Groups to which the provided user (specified in the name of the config) belongs.
-|List of strings
-a|None
+[cols="4,4,^,2"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|kogito.dataindex.http.url
 a|HTTP port the data index will use to accept incoming requests.
@@ -298,6 +610,16 @@ a|kogito.data-index.url
 a|URL the data index will use.
 |string
 a|
+|===
+
+===== Jobs Service
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
 
 a|kogito.jobs-service.schedulerChunkInMinutes
 a|The current chunk size in minutes the scheduler handles.
