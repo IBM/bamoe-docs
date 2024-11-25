@@ -284,12 +284,17 @@ Setting this to true will also include the Workflow debug logger in Prod
 
 |===
 
-==== Additional Configuration Properties
+=== Additional Configuration Properties
 
 There are other additional configuration properties within {PRODUCT}.
 These include properties from addons or integrations.
 
-===== Flyway
+==== Flyway
+
+The Flyway integration has the concept of a "module."
+A Flyway module is any Apache Maven artifact, typically a jar file, that contains a `kie-flyway.properties` file.
+An individual module can be skipped during the initial migration by setting the module enabled to `false` using the property within the table.
+
 [cols="7,4,^,^"]
 |===
 ^h|Property Name
@@ -308,7 +313,7 @@ a| Enables the execution of the Flyway initializer for a specific Kie module.
 |`true`
 |===
 
-===== Knative
+==== Knative
 [cols="7,4,^,^2"]
 |===
 ^h|Property Name
@@ -363,7 +368,7 @@ This sink is used to configure the "sink" property in the generated Knative Sink
 
 |===
 
-===== Job related
+==== Job related
 
 [cols="7,4,^,^"]
 |===
@@ -395,7 +400,7 @@ Attempts to surpass this value will result in a validation error at Job creation
 a|300000
 |===
 
-===== GRPC
+==== GRPC
 
 [cols="7,4,^,^"]
 |===
@@ -415,7 +420,7 @@ a|Time to wait for response from server when using streams.
 |`20`
 |===
 
-===== Events
+==== Events
 
 [cols="7,4,^,^"]
 |===
@@ -464,7 +469,7 @@ a|Toggle to propagate errors for user tasks.
 |`false`
 |===
 
-===== DevServices
+==== DevServices
 
 [cols="7,4,^,^"]
 |===
@@ -521,7 +526,7 @@ a|Groups to which the provided user (specified in the name of the config) belong
 a|None
 |===
 
-===== Messaging
+==== Messaging
 
 [cols="7,4,^,^"]
 |===
@@ -561,7 +566,7 @@ a|Outgoing channel default name.
 |`kogito_outgoing_stream`
 |===
 
-===== Security
+==== Security
 
 [cols="7,4,^,^"]
 |===
@@ -581,7 +586,7 @@ a|Comma-separated list of roles that allow identity impersonation when resolving
 a|
 |===
 
-===== Data Index
+==== Data Index
 
 [cols="4,4,^,2"]
 |===
@@ -612,7 +617,7 @@ a|URL the data index will use.
 a|
 |===
 
-===== Jobs Service
+==== Jobs Service
 
 [cols="7,4,^,^"]
 |===
