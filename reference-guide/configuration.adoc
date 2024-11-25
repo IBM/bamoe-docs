@@ -436,11 +436,13 @@ h|Type
 h|Default
 a|kogito.quarkus.events.threads.poolSize
 a|Maximum number of threads to handle incoming events by channel.
+// Available for both Quarkus and SpringBoot
 |int
 |`10`
 
 a|kogito.quarkus.events.threads.queueSize
 a|Maximum size of queue to hold incoming events to be processed by threads in the pool.
+// Available for both Quarkus and SpringBoot
 |int
 |`1`
 
@@ -488,7 +490,7 @@ When using {PRODUCT}, it is recommended to use the data-index addon instead of D
 h|Type
 h|Default
 
-a|kogito.devservices.port
+a|quarkus.kogito.devservices.port
 a|Optional port the dev service will listen to.
 If not defined, 8180 will be used.
 |int
@@ -499,7 +501,7 @@ a|Toggle to enable DevServices for Kogito.
 |boolean
 |true
 
-a|kogito.devservices.image-name
+a|quarkus.kogito.devservices.image-name
 a|The Data Index image to use.
 |string
 |
@@ -515,7 +517,7 @@ Container sharing is only used in dev mode.
 |boolean
 |`true`
 
-a|kogito.devservices.service-name
+a|quarkus.kogito.devservices.service-name
 a|The value of the `kogito-dev-service-data-index` label attached to the started container.
 This property is used when `shared` is set to `true`.
 In this case, before starting a container, Dev Services looks for a container with the `kogito-dev-service-data-index` label set to the configured value.
@@ -524,13 +526,13 @@ Otherwise, it starts a new container with the `kogito-dev-service-data-index` la
 |string
 |`kogito-data-index`
 
-a|kogito.devservices.enabled
+a|quarkus.kogito.devservices.enabled
 a|Toggle to enable Kogito Dev Services.
 Dev Services are generally enabled by default, unless there is an existing configuration present.
 |boolean
 |
 
-a|jbpm.devui.users.`<user name>`.groups
+a|quarkus.jbpm.devui.users.`<user name>`.groups
 a|Groups to which the provided user (specified in the name of the config) belongs.
 
 This is only used when testing/developing services through DevUi.
@@ -606,6 +608,8 @@ a|false
 
 a|kogito.security.auth.impersonation.allowed-for-roles
 a|Comma-separated list of roles that allow identity impersonation when resolving the actual User Identity.
+
+These roles should be configured in the Identity Provider the runtime is configured to use.
 |string
 a|
 |===
@@ -621,6 +625,7 @@ h|Default
 
 a|kogito.dataindex.http.url
 a|HTTP port the data index will use to accept incoming requests.
+Used to connect the runtime, with svg addon, to the data-index
 |string
 a|http://localhost:$\{quarkus.http.port}
 
@@ -637,6 +642,7 @@ a|false
 
 a|kogito.data-index.url
 a|URL the data index will use.
+The same as `kogito.dataindex.http.url`, kept for backwards compatibility.
 |string
 a|
 |===
