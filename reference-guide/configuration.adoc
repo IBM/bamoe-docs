@@ -500,8 +500,8 @@ a|The Data Index image to use.
 |string
 |
 
-a|kogito.devservices.shared
-a|Toggle to enable sharing of Quarkus Dev Services.
+a|quarkus.kogito.devservices.shared
+a|(Quarkus Only) Toggle to enable sharing of Quarkus Dev Services.
 When shared, Quarkus looks for running containers using label-based service discovery.
 If a matching container is found, it is used, so a second one is not started.
 Otherwise, Dev Services for a new Data Index instance is started.
@@ -573,6 +573,17 @@ a|Outgoing channel default name.
 |===
 
 ==== Security
+
+Security for a User Task executed through a REST endpoint uses the user/group query parameters to generate the user identity (username and roles) that is used during task operation.
+However, there are times when a superuser needs to "impersonate" a different user.
+For example, an admin completing a blocked task on behalf of another user.
+These two configuration properties enable this "impersonating" to happen.
+
+Firstly, the `kogito.security.auth.enabled` proper must be set to true.
+Next, {PRODUCT} will check the roles, configured by the `kogito.security.auth.impersonation.allowed-for-roles`, that are allowed to be impersonated.
+This overrides the previously described user identity with the security context.
+
+These roles vary on the application, and no default is given.
 
 [cols="7,4,^,^"]
 |===
