@@ -38,7 +38,7 @@ export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/extended-services:{IMAGE_VERSION_910} --name=$APP_NAME_EXTENDED_SERVICES
+oc new-app quay.io/bamoe/extended-services:{IMAGE_VERSION} --name=$APP_NAME_EXTENDED_SERVICES
 oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
 oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
@@ -49,7 +49,7 @@ oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/cors-proxy:{IMAGE_VERSION_910} --name=$APP_NAME_CORS_PROXY
+oc new-app quay.io/bamoe/cors-proxy:{IMAGE_VERSION} --name=$APP_NAME_CORS_PROXY
 oc create route edge --service=$APP_NAME_CORS_PROXY
 oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
@@ -60,7 +60,7 @@ oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app quay.io/bamoe/canvas:{IMAGE_VERSION_910} --name=$APP_NAME_BAMOE_CANVAS \
+oc new-app quay.io/bamoe/canvas:{IMAGE_VERSION} --name=$APP_NAME_BAMOE_CANVAS \
   -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
   -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
 oc create route edge --service=$APP_NAME_BAMOE_CANVAS
