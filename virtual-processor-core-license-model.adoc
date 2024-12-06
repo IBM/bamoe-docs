@@ -1,0 +1,69 @@
+= Virtual Processor Core license model
+:DM:
+:PAM:
+:imagesdir: _images
+include::_artifacts/document-attributes.adoc[]
+
+
+---
+
+copyright:
+  years: 2022
+lastupdated: "2022-10-27"
+
+---
+
+{:new_window: target="_blank"}
+{:shortdesc: .shortdesc}
+{:screen: .screen}
+{:codeblock: .codeblock}
+{:pre: .pre}
+{:child: .link .ulchildlink}
+{:childlinks: .ullinks}
+
+
+
+IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) subcapacity license terms. License Metric Tool can calculate VPC consumption only when software identification tags exist and are activated by the customer. The optman global option licenseType must be set to perServer (default value) to activate Virtual Processor Core consumption tracking. You can also set the optman global option licenseType to byWorkstation to specify that the licensing type (either perServer or perJob) is specified at creation time for each workstation.
+
+License Metric Tool automatically detects the following {PRODUCT} 8.0 release chargeable components that are part of the product:
+
+| Chargeable Software Components |
+| ----------|
+| Process Automation Manager Open Edition |
+| Decision Manager Open Edition |
+
+To detect and count remote nodes that are managed by IBM Business Automation Manager Open Editions chargeable components, you must manually deploy software tags because no product code is present on those nodes. License Metric Tool generates and assigns dedicated software tags during the creation of the Readiness Package for the latest release of {PRODUCT}.
+
+The following {PRODUCT} chargeable components require manual deployment of software tags:
+
+| Chargeable Software Components | Assigned Software tags |
+| ----------| -------------- |
+| Process Automation Manager Open Edition | `ibm.com_IBM_Process_Automation_Manager_Open_Edition-8.0.0.swidtag` `ibm.com_IBM_Process_Automation_Manager_Open_Edition-8.0.1.swidtag`|
+| Decision Manager Open Edition | `ibm.com_IBM_Decision_Manager_Open_Edition-8.0.0.swidtag` `ibm.com_IBM_Decision_Manager_Open_Edition-8.0.1.swidtag`|
+
+[Note]
+====
+The {PRODUCT} 8.0 license can be used for all the IBM Business Automation Manager access methods and application plug-ins available on the Automation Hub and its 8.0.x fix releases.
+====
+
+Complete the following procedure to manually deploy dedicated software tags on each managed node and calculate VPC consumption:
+. Identify the remote nodes that are managed by each of your chargeable components. For example, the remote nodes that are managed by the application server that you are connecting to, with IBM Business Automation Manager plug-in for IBM InfoSphere DataStage.
+. Extract assigned software tags from the [`ILMT_for_IBAMOE_0.zip`](https://www.ibm.com/support/pages/system/files/inline-files/ILMT_for_IBAMOE_0.zip) file for the 8.0.0 release or [`ILMT_for_IBAMOE_8.0.1.zip`](https://www.ibm.com/support/pages/system/files/inline-files/ILMT_for_IBAMOE_8.0.1.zip)
+file for the 8.0.1 fix release.
+. Place the assigned software tag anywhere on the managed node.
+. Wait for the next software scan in License Metric Tool to have the chargeable software components reported.
+. It is recommended that you check whether License Metric Tool reporting matches with currently managed nodes before signing each License Metric Tool report.
+
+The master domain manager centrally maintains the history of the plug-in jobs that you run in your environment. The history can be used:
+* During audits to verify which systems are managed by IBM Business Automation Manager.
+* To check periodically the result of your License Metric Tool reporting.
+* To verify your Virtual Processor Core license entitlement.
+
+//include::_artifacts/snip-conscious-language.adoc[]
+
+// Assembly includes
+
+
+// Contact information
+//include::_artifacts/author-group.adoc[]
+
