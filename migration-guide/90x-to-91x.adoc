@@ -11,12 +11,11 @@ include::../partials/91x-prerequisites.adoc[]
 
 == Procedure
 
-The project migration from {PRODUCT_SHORT} version {VERSION_90X} to {PRODUCT_SHORT} version {VERSION} requires a few steps.
-Before proceeding, ensure that all prerequisite tools are installed or updated, then you need to properly set up Maven.
+This section describes the process to migrate your projects from version {VERSION_90X} to {VERSION}. Before you start, ensure that you have installed or updated all prerequisite tools.
 
 This migration guide will show two ways of migrating your project. One way of migrating is by creating a new project from scratch and then moving the assets to it.
-In the other way, you will be updating an existing BAMOE version {VERSION_90X} project.
-Either way, the first step is to set up the Maven configuration.
+The other way is by updating an existing BAMOE version {VERSION_90X} project.
+The next step is to set up the Maven configuration.
 
 === Update Maven configuration
 
@@ -156,10 +155,10 @@ You must also report to IBM that a dependency is missing so that the problem can
 
 
 
-See xref:../introduction/release-notes/version-mapping-9-1-1.adoc[version mapping for {PRODUCT} version 9.1.1]
+See xref:../introduction/release-notes/version-mapping.adoc[version mapping for {PRODUCT_SHORT} version {VERSION_91X}].
 
 [start=5]
-. Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required to report on subscription entitlement usage within the system)_:
+. Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required  to report on subscription entitlement usage within the system)_:
 +
 [source,xml]
 ----
@@ -181,7 +180,7 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 +
 For this example, you will be creating a project with only DMN files.
 So you must add the the Drools Kogito Quarkus dependency.
-In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, see section, 'Maven libraries mapping guide' in xref:../installation/upgrading.adoc[Upgrading] and update accordingly.
 +
 [source,xml]
 ----
@@ -322,7 +321,7 @@ Previously, the {PRODUCT_SHORT} version {VERSION_90x} used the BOM version {BOM_
 Now, both versions are {BOM_VERSION_911}.
 Update the following lines in your `pom.xml`:
 +
-[source,xml]
+[source,xml,subs="attributes+"]
 ----
        <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
  ---   <kogito.bom.version>{BOM_VERSION_901}</kogito.bom.version>
@@ -334,7 +333,7 @@ Update the following lines in your `pom.xml`:
 [start=3]
 . Update the dependencies GAV.
 +
-In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, refer to the xref:../partials/gav-mapping-all.adoc[GAV mapping table] and update accordingly.
+In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, see section, 'Maven libraries mapping guide' in xref:../installation/upgrading.adoc[Upgrading] and update accordingly.
 +
 One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +

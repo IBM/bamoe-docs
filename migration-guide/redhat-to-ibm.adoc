@@ -8,7 +8,7 @@ The offerings formally known as {RH_PAM} / {RH_DM} were transitioned to IBM in 2
 {PRODUCT} version {VERSION_80} provides a seemless upgrade path for customers and workloads formally leveraging the Red Hat offerings.
 By remaining a functionally equivalent product to the Red Hat offering, customers can easily migrate from the former Red Hat offering once they have purchased an IBM subscription for {PRODUCT}.
 This section provides guidance on how to migrate from the former Red Hat offerings of {RH_PAM} / {RH_DM} to {PRODUCT} version {VERSION_80}.
-It is recommended that you follow this migration path before attempting to migrate to the next generation of the product known as {PRODUCT} version {VERSION_910}.
+It is recommended that you follow this migration path before attempting to migrate to the next generation of the product known as {PRODUCT} version {VERSION_91X}.
 
 If you have designed your jBPM application based on the deployment of the KIE Server using Spring Boot and want to upgrade from the latest community version to the enterprise-supported {PRODUCT_LONG} version 8.0.x, you can find more information on the procedure in the following link. See, https://community.ibm.com/community/user/automation/blogs/tim-wuthenow/2023/06/16/community-to-enterprise-bamoe. As both projects are based on Maven architectures, the process is considerably simplified, by design.
 
@@ -91,7 +91,7 @@ The following archives are typically used in migrating to {PRODUCT_SHORT}:
 In the displayed table, you must replace **VERSION** with the version of {PRODUCT_SHORT} you are migrating to, such as {VERSION_8_LATEST}.
 ====
 
-_Now that you have the files, you can start to migrate our environment._
+Now that you have the files, you can start the migration process.
 
 === Step 2: Update Maven Configuration
 
@@ -176,7 +176,8 @@ During the course of your Maven dependency update, if you encounter any dependen
 
 {PRODUCT_LONG} version {VERSION_80} is based on the former Red Hat 7.13.x offering:
 
-include::../partials/version-mapping-now.adoc[]
+include::../partials/version-mapping-v8.adoc[]
+
 
 == Step 3: Update tooling & runtime
 
@@ -431,20 +432,20 @@ They are all mapped by the version progression, so it will be fairly quick.
 So, for instance, if you are running a PostgreSQL database, you must do the following:
 
 . Connect to your database instance using your method of preference.
-. Apply the SQL scripts appropriate for the version you are migrating from up to RHPAM 7.13.
+. Apply the SQL scripts appropriate for the version you are migrating from up to RHPAM 7.13.x
 
 [source,shell,subs="attributes+"]
 ----
 ...
+$ psql -h $dbhost -U $user < rhpam-7.11-to-7.12.sql
+$ psql -h $dbhost -U $user < rhpam-7.12-to-7.13.sql
 $ psql -h $dbhost -U $user < rhpam-7.13-to-7.13.1.sql
-$ psql -h $dbhost -U $user < rhpam-7.13.1-to-7.13.2.sql
-$ psql -h $dbhost -U $user < rhpam-7.13.2-to-7.13.3.sql
 ...
 ----
 
 [NOTE]
 ====
-{PRODUCT_SHORT} version {VERSION_80}'s database is compatible with {RH_PAM} 7.13, so all you need to do is to update the database to that level, and you will be set to migrate the rest of your application.
+{PRODUCT_SHORT} version {VERSION_80}'s database is compatible with {RH_PAM} 7.13.x, so all you need to do is to update the database to that level, and you will be set to migrate the rest of your application.
 ====
 
 Once you have executed these SQL statements, your datasource is now up to date.
