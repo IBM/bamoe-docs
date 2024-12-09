@@ -12,28 +12,28 @@ If you configure the `AUTH_ROLE_MAPPER_ROLES_PROPERTIES` parameter with a file n
 
 . Create the role mapping properties file, for example, `my-role-map`. The file must contain entries in the following format:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 ldap_role=product_role1, product_role2...
 ----
 +
 For example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 admins=kie-server,rest-all,admin
 ----
 +
 . Create an OpenShift configuration map from the file by entering the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create configmap ldap-role-mapping --from-file=<new_name>=<existing_name>
 ----
 +
 Replace `<new_name>` with the name that the file is to have on the pods (it must be the same as the name specified in the `AUTH_ROLE_MAPPER_ROLES_PROPERTIES` file) and `<existing_name>` with the name of the file that you created. Example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create configmap ldap-role-mapping --from-file=rolemapping.properties=my-role-map
 ----
@@ -68,7 +68,7 @@ endif::[]
 
 For every deployment configuration, run the command:
 
-[subs="attributes,verbatim,macros"]
+[source]
 ----
  oc set volume dc/<deployment_config_name> --add --type configmap --configmap-name ldap-role-mapping --mount-path=<mapping_dir> --name=ldap-role-mapping
 ----

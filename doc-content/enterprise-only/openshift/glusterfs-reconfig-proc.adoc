@@ -7,14 +7,14 @@ If you are deploying an authoring environment, you must check whether your OpenS
 
 . To check whether your environment uses GlusterFS, enter the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc get storageclass
 ----
 +
 In the results, check whether the `(default)` marker is on the storage class that lists `glusterfs`. For example, in the following output the default storage class is `gluster-container`, which does list `glusterfs`:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 NAME              PROVISIONER                       AGE
 gluster-block     gluster.org/glusterblock          8d
@@ -25,14 +25,14 @@ If the result has a default storage class that does not list `glusterfs` or if t
 
 . To save the configuration of the default storage class into a YAML file, enter the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc get storageclass <class-name> -o yaml >storage_config.yaml
 ----
 +
 Replace `<class-name>` with the name of the default storage class. Example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc get storageclass gluster-container -o yaml >storage_config.yaml
 ----
@@ -45,7 +45,7 @@ oc get storageclass gluster-container -o yaml >storage_config.yaml
 ** `uid`
 .. If you are planning to use {CENTRAL} only as a single pod, without high-availability configuration, on the line with the `volumeoptions` key, add the following options:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 features.cache-invalidation on
 performance.nl-cache on
@@ -57,7 +57,7 @@ For example:
 +
 .. If you are planning to use {CENTRAL} in a high-availability configuration, on the line with the `volumeoptions` key, add the following options:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 features.cache-invalidation on
 nfs.trusted-write on
@@ -80,21 +80,21 @@ For example:
 +
 . To remove the existing default storage class, enter the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc delete storageclass <class-name>
 ----
 +
 Replace `<class-name>` with the name of the default storage class. Example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc delete storageclass gluster-container
 ----
 +
 . To re-create the storage class using the new configuration, enter the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create -f storage_config.yaml
 ----

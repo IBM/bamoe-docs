@@ -18,14 +18,14 @@ endif::[]
 . If {OPENSHIFT} is configured with the user name and password for Red Hat registry access, enter the following commands:
 +
 ifdef::DM[]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 $ oc get imagestreamtag -n openshift | grep -F {PRODUCT_INIT}{ENTERPRISE_VERSION_SHORT}-{CENTRAL_ONEWORD}-openshift
 $ oc get imagestreamtag -n openshift | grep -F {PRODUCT_INIT}{ENTERPRISE_VERSION_SHORT}-kieserver-openshift
 ----
 endif::DM[]
 ifdef::PAM[]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 $ oc get imagestreamtag -n openshift | grep -F {PRODUCT_INIT}-{CENTRAL_ONEWORD} | grep -F {ENTERPRISE_VERSION}
 $ oc get imagestreamtag -n openshift | grep -F {PRODUCT_INIT}-kieserver | grep -F {ENTERPRISE_VERSION}
@@ -48,7 +48,7 @@ endif::[]
 .. Enter the following commands:
 +
 ifeval::["{context}"!="openshift-ansible-playbook"]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create -f <file_name>.yaml
 oc secrets link default <secret_name> --for=pull
@@ -56,7 +56,7 @@ oc secrets link builder <secret_name> --for=pull
 ----
 endif::[]
 ifeval::["{context}"=="openshift-ansible-playbook"]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create -f <file_name>.yaml -n openshift
 oc secrets link default <secret_name> --for=pull -n openshift
@@ -69,13 +69,13 @@ Replace `<file_name>` with the name of the downloaded file and `<secret_name>` w
 ..  Enter the following command:
 +
 ifeval::["{context}"!="openshift-ansible-playbook"]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 $ oc apply -f {PRODUCT_INIT}{ENTERPRISE_VERSION_SHORT}-image-streams.yaml
 ----
 endif::[]
 ifeval::["{context}"=="openshift-ansible-playbook"]
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 $ oc apply -f {PRODUCT_INIT}{ENTERPRISE_VERSION_SHORT}-image-streams.yaml -n openshift
 ----

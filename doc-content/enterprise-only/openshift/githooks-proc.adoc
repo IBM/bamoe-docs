@@ -17,14 +17,14 @@ The typical use of Git hooks is interaction with an upstream repository. To enab
 .. Prepare the `known_hosts` file with the correct name, address, and public key for the repository.
 .. Create a secret with the two files using the `oc` command, for example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create secret git-hooks-secret --from-file=id_rsa=id_rsa --from-file=known_hosts=known_hosts
 ----
 +
 .. Mount the secret in the SSH key path of the {CENTRAL} deployment, for example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc set volume dc/<myapp>-{PRODUCT_INIT}centr --add --type secret --secret-name git-hooks-secret --mount-path=/home/jboss/.ssh --name=ssh-key
 ----
@@ -35,7 +35,7 @@ Replace `<myapp>` with the application name that you set when configuring the te
 +
 For example, a simple Git hooks directory can provide a post-commit hook that pushes the changes upstream. If the project was imported into {CENTRAL} from a repository, this repository remains configured as the upstream repository. Create a file named `post-commit` with permission values `755` and the following content:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 git push
 ----
@@ -50,21 +50,21 @@ A `pre-commit` script is not supported in {CENTRAL}. Use a `post-commit` script.
 ... Change into the Git hooks directory that you have created.
 ... Create an OpenShift configuration map from the files in the directory. Run the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create configmap git-hooks --from-file=<file_1>=<file_1> --from-file=<file_2>=<file_2> ...
 ----
 +
 Replace `file_1`, `file_2`, and so on with Git hook script file names. Example:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc create configmap git-hooks --from-file=post-commit=post-commit
 ----
 +
 ... Mount the configuration map on the {CENTRAL} deployment in the path that you have configured:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc set volume dc/<myapp>-{PRODUCT_INIT}centr --add --type configmap --configmap-name git-hooks  --mount-path=<git_hooks_dir> --name=git-hooks
 ----
@@ -75,14 +75,14 @@ Replace `<myapp>` with the application name that was set when configuring the te
 +
 . Wait a few minutes, then review the list and status of pods in your project. Because {CENTRAL} does not start until you provide the Git hooks directory, {KIE_SERVER} might not start at all. To see if {KIE_SERVER} has started, check the output of the following command:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc get pods
 ----
 +
 If a working {KIE_SERVER} pod is not present, start it:
 +
-[subs="attributes,verbatim,macros"]
+[source]
 ----
 oc rollout latest dc/<myapp>-kieserver
 ----
