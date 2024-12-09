@@ -36,7 +36,7 @@ oc create configmap postconfigure \
 ifeval::["{context}"!="openshift-operator"]
 . Add mounting of the ConfigMap to the deployment configurations for {CENTRAL} and {KIE_SERVER} by using the following commands:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 oc set volumes dc/_myapp_-kieserver --add  \
     --configmap-name=postconfigure \
@@ -55,7 +55,7 @@ endif::[]
 ifeval::["{context}"=="openshift-operator"]
 . Enter the following command to edit the `kieconfigs-{ENTERPRISE_VERSION_LONG}` config map:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 oc edit cm kieconfigs-{ENTERPRISE_VERSION_LONG}
 ----
@@ -66,7 +66,7 @@ In each deployment configuration, make the following changes:
 +
 ** Under `deploymentConfigs.metadata.spec.template.spec.containers.volumeMounts`, add the following lines:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 - name: postconfigure-mount
   mountPath: /opt/eap/extensions
@@ -74,7 +74,7 @@ In each deployment configuration, make the following changes:
 +
 ** Under `deploymentConfigs.metadata.spec.template.spec.containers.volumeMounts`, add the following lines:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 - name: "postconfigure-mount"
   configMap:

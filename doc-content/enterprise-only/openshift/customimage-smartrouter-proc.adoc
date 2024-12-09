@@ -19,7 +19,7 @@ In some cases, custom routing functionality is required. You can create a custom
 . Modify the sample source of the router extension as necessary. The existing code implements simple routing based on the version of the container.
 . Build the source code with Maven:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 mvn clean package
 ----
@@ -28,7 +28,7 @@ The build process generates the following JAR file: `target/router-ext-0.0.1-SNA
 +
 . Create a working directory for creating the custom image, copy the generated JAR file into the directory, and then change to the directory, for example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 mkdir /tmp/smartrouter
 cp target/router-ext-0.0.1-SNAPSHOT.jar /tmp/smartrouter
@@ -38,7 +38,7 @@ cd /tmp/smartrouter
 include::customimage-download-step.adoc[]
 . Extract the `openshift-launch.sh` file from the official Smart Router image:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman run --rm registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:{ENTERPRISE_VERSION_LONG} \
    cat /opt/rhpam-smartrouter/openshift-launch.sh > openshift-launch.sh
@@ -46,14 +46,14 @@ podman run --rm registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:{ENTERPRISE_V
 +
 . Edit the `openshift-launch.sh` file. In the last line of the file, find the `exec` instruction that looks like the following text:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 exec ${JAVA_HOME}/bin/java ${SHOW_JVM_SETTINGS} ${JAVA_OPTS} ${JAVA_OPTS_APPEND} ${JAVA_PROXY_OPTIONS} "${D_ARR[@]}" -jar /opt/${JBOSS_PRODUCT}/${KIE_ROUTER_DISTRIBUTION_JAR}
 ----
 +
 Change the instruction to the following text:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 exec ${JAVA_HOME}/bin/java ${SHOW_JVM_SETTINGS} "${D_ARR[@]}" \
     -cp /opt/${JBOSS_PRODUCT}/router-ext-0.0.1-SNAPSHOT.jar:/opt/${JBOSS_PRODUCT}/${KIE_ROUTER_DISTRIBUTION_JAR} \
@@ -64,7 +64,7 @@ This change adds the extension JAR file to the Java Class Path.
 +
 . Create a `Dockerfile` file that defines a custom image based on the base image. The following example shows the content of the `Dockerfile` file:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 FROM registry.redhat.io/ibm-bamoe/bamoe-smartrouter-rhel8:{ENTERPRISE_VERSION_LONG}
 RUN rm -rfv /opt/rhpam-smartrouter/openshift-launch.sh
@@ -88,49 +88,49 @@ This file includes the following actions:
 . Log in to the {OPENSHIFT} cluster registry with the `podman login` command.
 . Build the custom image using the `Dockerfile`. Tag the image for your {OPENSHIFT} cluster registry and your project namespace. Use a custom name for the image and the same version tag as the version of the base image. To build the image, enter the following command:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman build . --tag _registry-route_/project-name_/_image-name_:{ENTERPRISE_VERSION_LONG}
 ----
 +
 For example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman build . --tag route-openshift-image-registry.openshift.example.com/{PRODUCT_INIT}-project/{PRODUCT_INIT}-{componentimage}-rhel8-custom:{ENTERPRISE_VERSION_LONG}
 ----
 +
 . After the build completes, run the image and verify that the customization was successful. Enter the following command:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman run _registry-route_/_project-name_/_image-name_:{ENTERPRISE_VERSION_LONG}
 ----
 +
 For example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman run route-openshift-image-registry.openshift.example.com/{PRODUCT_INIT}-project/{PRODUCT_INIT}-{componentimage}-rhel8-custom:{ENTERPRISE_VERSION_LONG}
 ----
 +
 Ensure that the output mentions the custom service, as in the following example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 INFO: Using 'LatestVersionContainerResolver' container resolver and restriction policy 'ByPassUserNotAllowedRestrictionPolicy'
 ----
 +
 . Push the custom image into the registry:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman push _registry-route_/_project-name_/_image-name_:{ENTERPRISE_VERSION_LONG}
 ----
 +
 For example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 podman push route-openshift-image-registry.openshift.example.com/{PRODUCT_INIT}-project/{PRODUCT_INIT}-{componentimage}-rhel8-custom:{ENTERPRISE_VERSION_LONG}
 ----

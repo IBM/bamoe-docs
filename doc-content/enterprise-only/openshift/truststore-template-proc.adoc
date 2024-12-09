@@ -23,7 +23,7 @@ Skip this procedure if you do not need {PRODUCT} components to communicate with 
 
 . Prepare a truststore with the certificates. Use the following command to create a truststore or to add a certificate to an existing truststore. Add all the necessary certificates to one truststore.
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 keytool -importcert -file _certificate-file_ -alias _alias_ -keyalg _algorithm_ -keysize _size_ -trustcacerts -noprompt -storetype JKS -keypass _truststore-password_ -storepass _truststore-password_ -keystore _keystore-file_
 ----
@@ -39,28 +39,28 @@ Replace the following values:
 +
 The following example command adds a certificate from the `/var/certs/nexus.cer` file to a truststore in the `/var/keystores/custom-trustore.jks` file. The truststore password is `mykeystorepass`.
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 keytool -importcert -file /var/certs/nexus.cer -alias nexus-cert -keyalg RSA -keysize 2048 -trustcacerts -noprompt -storetype JKS -keypass mykeystorepass -storepass mykeystorepass -keystore /var/keystores/custom-trustore.jks
 ----
 +
 . Create a secret with the truststore file using the `oc` command, for example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 oc create secret generic truststore-secret --from-file=/var/keystores/custom-trustore.jks
 ----
 +
 . In the deployment for the necessary components of your infrastructure, mount the secret and then set the `JAVA_OPTS_APPEND` option to enable the Java application infrastructure to use the trast store, for example:
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 oc set volume dc/_myapp_-{PRODUCT_INIT}centr --add --overwrite --name=custom-trustore-volume --mount-path /etc/custom-secret-volume --secret-name=custom-secret 
 
 oc set env dc/_myapp_-{PRODUCT_INIT}centr JAVA_OPTS_APPEND='-Djavax.net.ssl.trustStore=/etc/custom-secret-volume/custom-trustore.jks -Djavax.net.ssl.trustStoreType=jks -Djavax.net.ssl.trustStorePassword=mykeystorepass'
 ----
 +
-[subs="attributes,verbatim,macros,quotes"]
+[source]
 ----
 oc set volume dc/_myapp_-kieserver --add --overwrite --name=custom-trustore-volume --mount-path /etc/custom-secret-volume --secret-name=custom-secret 
 
