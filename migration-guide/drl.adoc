@@ -1,4 +1,4 @@
-= Migrating to the Latest Version of Drools Rule Language (DRL)
+= Migrating to the latest version of DRL
 include::../partials/attributes.adoc[]
 
 When migrating to {PRODUCT_LONG} v {PRODUCT_VERSION} you may be faced with the task of migrating your technical rules, which are currently represented by **Drools Rule Language** (DRL) files.
@@ -6,22 +6,22 @@ When migrating to {PRODUCT_LONG} v {PRODUCT_VERSION} you may be faced with the t
 == Overview
 
 This section describes how to migrate your technical rules to make use of the new features of Drools Rule Language (DRL) Version 8.0.
-Note that the {PRODUCT_SHORT} v {PRODUCT_VERSION} is partly based on Drools Rule Language version 8.0 and supports the previous version of the `DRL` language API's and syntax. 
-Hence it might not be necessary to migrate your rules except for a new language feature that you want to use.
+Note that while {PRODUCT_SHORT} v {PRODUCT_VERSION} is partly based on Drools Rule Language version 8.0, it still supports the previous version's language APIs and syntax. 
+Hence, it might not be necessary to migrate your rules, except in the case of a new language feature that you want to use.
 
 == Prerequisites
 
 The following tools are required to migrate to {PRODUCT_SHORT} v {VERSION}:
 
-include::../partials/prerequisites.adoc[]
+include::../partials/91x-prerequisites.adoc[]
 
-== Maven Dependencies
+== Maven dependencies
 
 Drools Version 6 or early Drools Version 7 projects have `pom.xml` dependencies like the following:
 
 [source,xml]
 ----
-</dependencies>
+<dependencies>
     <dependency>
         <groupId>org.drools</groupId>
         <artifactId>drools-core</artifactId>
@@ -33,11 +33,11 @@ Drools Version 6 or early Drools Version 7 projects have `pom.xml` dependencies 
         <artifactId>drools-compiler</artifactId>
         <version>${version.org.drools}</version>
     </dependency>
-  </dependencies>
+</dependencies>
 ----
 
-As the Drools Version 7.45.0, `drools-engine` and `drools-engine-classic` are introduced as aggregator dependencies.
-The dependencies `drools-engine-classic`, `drools-mvel` are **deprecated** starting with Drools Version 8.0, hence use `drools-engine` as in the following example:
+Drools Version 7.45.0 introduced `drools-engine` and `drools-engine-classic` as aggregator dependencies.
+As of Drools Version 8.0, the dependencies `drools-engine-classic` and `drools-mvel` are **deprecated**. Hence, use `drools-engine` as in the following example:
 
 [source,xml]
 ----
@@ -57,11 +57,11 @@ The aggregator dependency definitely helps.
 
 As introduced earlier, using `Rule Units` are _**a recommended style**_ for implementing rules in Drools Version 8.0.
 It requires modifications to your codebase.
-If you are developing cloud-native applications, Rule Units are _**recommended**_, as it also supports Kogito.
-Rule units represent a declarative approach to partition a rules set into smaller units by binding different data sources to those units and orchestrate the execution of the individual unit. 
+If you are developing cloud-native applications, Rule Units are _**recommended**_, as they are supported by Kogito.
+Rule units represent a declarative approach to partitioning a rules set into smaller units by binding different data sources to those units and orchestrating the execution of an individual unit. 
 A rule unit is an aggregate of data sources, global variables, and rules.
 
-To utilize Rule Units, add the following dependency, which is required for using Rule Unit API's:
+To utilize Rule Units, add the following dependency, which is required for using Rule Unit APIs:
 
 [source,xml]
 ----
@@ -74,8 +74,9 @@ To utilize Rule Units, add the following dependency, which is required for using
   </dependencies>
 ----
 
-For the related Java API usage in Drools Version 7, you can create a `KieSession` from rule assets, and insert facts and finre rules as in the following example:
+For the related Java API usage in Drools Version 7, you can create a `KieSession` from rule assets, and insert facts and fire rules as in the following example:
 
+// TODO replace by link to new adoc?
 .Traditional DRL API
 [source,java]
 ----
@@ -92,7 +93,7 @@ try {
 }
 ----
 
-However, by using the Rule Unit API's, the resulting Java snippet is displayed as follows:
+However, by using the Rule Unit APIs, the resulting Java snippet is displayed as follows:
 
 .Rule Unit API
 [source,java]
@@ -154,8 +155,6 @@ then
 end
 ----
 
-to Rule Unit DRL, as in the following example:
-
 .Rule Unit DRL
 [source,drl]
 ----
@@ -169,7 +168,7 @@ then
 end
 ----
 
-Initially, declare an `unit` and do not set it as `global`, because `controlSet` is a field of `MeasurementUnit`.
+Initially, declare a `unit` and do not set it as `global` because `controlSet` is a field of `MeasurementUnit`.
 Traditional global usage becomes the Unit's field.
 In addition, the main difference is that the `OOPath notation` is in the left hand side (LHS) of the rule.
 It is described in detail at Rule conditions in DRL.
@@ -190,8 +189,6 @@ then
 end
 ----
 
-to Rule Unit DRL, as in the following example:
-
 .Rule Unit DRL
 [source,drl]
 ----
@@ -207,8 +204,8 @@ end
 
 [NOTE]
 ====
-You need not re-write update, modify and delete because they work for a fact in its DataSource as expected.
-These changes are not negligible but not difficult to implement either.
+You need not rewrite, update, modify and delete because they work for a fact in its DataSource as expected.
+These changes are not negligible, but not difficult to implement either.
 ====
 
 == Migration from non-executable model to executable model
@@ -237,9 +234,9 @@ then
 end
 ----
 
-This rule can be built with non-executable model even if `$p.age` is int which is not acceptable in Java syntax.
+This rule can be built with the non-executable model even if `$p.age` is an int which is not acceptable in Java syntax.
 
-With executable model, the rule fails with a build error, `Cannot cast from int to String`. 
+With the executable model, the rule fails with a build error, `Cannot cast from int to String`. 
 You can fix the rule by using valid Java syntax.
 For example:
 
@@ -269,7 +266,7 @@ end
 ----
 
 By using the non-executable model you can add a String object to `bdList` even if `Fact.bdList` is `List<BigDecimal>` which is not acceptable in Java syntax.
-With executable model, the rule fails with a build error, `The method add(BigDecimal) in the type List<BigDecimal> is not applicable for the arguments (String)`.
+With the executable model, the rule fails with a build error, `The method add(BigDecimal) in the type List<BigDecimal> is not applicable for the arguments (String)`.
 You can fix the rule by using valid Java syntax.
 For example:
 
@@ -364,7 +361,7 @@ rule Rule1
 end
 ----
 
-The non-executable model can dynamically resolve the motor is DieselEngine and hence the rule works.
+The non-executable model can dynamically resolve that motor is `DieselEngine` and hence the rule works.
 However, the executable model resolves motor to TEngine, so a build error is thrown as, `Unknown field adBlueRequired on TEngine`.
 You can fix the rule by specifying the subtype with the # operator.
 For example:

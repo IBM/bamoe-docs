@@ -1,0 +1,390 @@
+= Configuring Maven with BAMOE binaries
+
+include::../partials/attributes.adoc[]
+
+With {PRODUCT_LONG} version 9.1 aligning with {PRODUCT_SHORT} version 8.0 in the downstream build model, the artifacts are no longer available in Maven Central.
+Instead the artifacts are shipped as a Container Image and Maven Repository inside compressed files in a consumable format.
+
+If you have a Maven Repository Manager tool such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
+For companies without such infrastructure, it is highly recommended to use the container image and make it available interally for all developers and the continuous integration (CI) system.
+For companies that already use a Maven Repository Manager tool, developers and the CI system are usually configured to connect with it.
+If you are using the container image, ensure that it is made available and provide the URL that developers and the CI system need to specify in their `settings.xml` file.
+
+NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
+
+There are two ways to do this:
+
+* Set up a maven repository with a container image
+* Configure your local maven repository
+
+== Configuring Maven with the container image
+
+Before changing your Maven settings you must first deploy/run the container image somewhere.
+There are a few options and your choice will depend on your work environment and the tools that are available to you.
+
+=== Deploying to OpenShift
+
+Choose the container image from one of the following sources: 
+
+bamoe-{VERSION}-maven-repository-image.tar.gz:: included in the distribution
+quay.io/bamoe/maven-repository:{IMAGE_VERSION}::  the image hosted on Quay.io
+
+[CAUTION]
+====
+The container images provided are created for Linux distribution, running on a different architecture beside Linux x86_64 architecture may display a warning similar to: "WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (...) and no specific platform was requested" which can be ignored.
+====
+
+*Using bamoe-{VERSION}-maven-repository-image.tar.gz*
+
+Enable the OpenShift registry and log into it using Docker:
+
+[source,shell,subs="attributes+"]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+export REGISTRY=`oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'`
+docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
+----
+
+Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift registry:
+
+[source,shell,subs="attributes+"]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
+docker push ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
+# Replace <PROJECT_NAME> with your OpenShift Project (namespace)
+----
+
+Set an environment variable with the image name
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION}
+----
+
+*Using quay.io/bamoe/maven-repository:{IMAGE_VERSION}*
+
+This case is simpler as you only need to set an environment variable with the image URL
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Create the Deployment and Route
+
+[source,shell,subs="attributes+"]
+----
+oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
+oc create route edge --service=bamoe-maven-repo
+----
+
+Get the Maven repository URL to be used in the next steps:
+
+[source,shell,subs="attributes+"]
+----
+oc get route bamoe-maven-repo --output jsonpath={.spec.host}
+----
+
+=== Configuring Maven on OpenShift without elevated privileges
+
+If you cannot run the container with elevated privileges, follow these instructions to build a version that does not require the elevated privileges.
+
+. Download the **bamoe-9.1.x-maven-repository.zip** file.
+. Unzip the file into a directory and `cd` into it.
+. Create a Dockerfile with the following contents:
++
+[source,docker,subs="attributes+"]
+----
+# Use the latest Red Hat UBI minimal image as a parent image
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3
+
+# Arguments for configuring the port
+ARG MAVEN_REPO_PORT=8080
+ARG MAVEN_REPO_FOLDER
+
+# Install required packages: httpd and unzip, clean up after installation
+RUN microdnf --disableplugin=subscription-manager -y install httpd \
+  && microdnf --disableplugin=subscription-manager clean all
+
+# Apache configuration adjustments
+RUN echo "Mutex posixsem" >> /etc/httpd/conf/httpd.conf \
+  && sed -i "s/Listen 80/Listen $MAVEN_REPO_PORT/g" /etc/httpd/conf/httpd.conf \
+  && sed -i "s/#ServerName www.example.com:80/ServerName 127.0.0.1:$MAVEN_REPO_PORT/g" /etc/httpd/conf/httpd.conf \
+  && sed -i "/ServerName 127.0.0.1:$MAVEN_REPO_PORT/a Header set Content-Security-Policy \"frame-ancestors 'self';\"" /etc/httpd/conf/httpd.conf \
+  && sed -i "s/Options Indexes FollowSymLinks/Options +Indexes +FollowSymLinks/" /etc/httpd/conf/httpd.conf \
+  && sed -i "$ a ServerTokens Prod" /etc/httpd/conf/httpd.conf \
+  && sed -i "$ a ServerSignature Off" /etc/httpd/conf/httpd.conf \
+  && sed -i "\$ a <Directory \"/var/www/html\">\n    Options +Indexes +FollowSymLinks\n    AllowOverride None\n    Require all granted\n    IndexOptions FancyIndexing SuppressDescription SuppressHTMLPreamble SuppressLastModified SuppressSize NameWidth=* SuppressColumnSorting SuppressIcon SuppressRules\n    HeaderName /header.html\n    ReadmeName /readme.html\n</Directory>" /etc/httpd/conf/httpd.conf \
+  && chgrp -R 0 /var/log/httpd /var/run/httpd /var/www/html \
+  && chmod -R g=u /var/log/httpd /var/run/httpd /var/www/html
+
+COPY --chown=1000:1000 $MAVEN_REPO_FOLDER /var/www/html/
+
+# Remove the default welcome page to avoid conflicts
+RUN rm -rf /etc/httpd/conf.d/welcome.conf
+
+# Expose the configured port
+EXPOSE $MAVEN_REPO_PORT
+
+# Change to a non root user
+USER 1000
+
+# Start httpd when the container launches
+CMD ["httpd", "-D", "FOREGROUND"]
+----
+
+. Create an ImageStream
++
+[source,shell,subs="attributes+"]
+----
+oc apply -f - <<EOF
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: bamoe-maven-repository-image
+spec:
+  lookupPolicy:
+    local: true
+EOF
+----
+
+. Create an Image Build on OpenShift
++
+[source,shell,subs="attributes+"]
+----
+oc apply -f - <<EOF
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: bamoe-maven-repository-image
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: bamoe-maven-repository-image:{IMAGE_VERSION}
+  strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+      buildArgs:
+       - name: MAVEN_REPO_FOLDER
+         value: ./bamoe-maven-repository-zip-{IMAGE_VERSION}
+  source:
+    type: Binary
+    binary: {}
+  resources:
+    limits:
+      memory: 4Gi
+EOF
+----
+
+. Start the build
++
+[source,shell,subs="attributes+"]
+----
+oc start-build --from-dir=. bamoe-maven-repository-image --follow
+----
+
+. Create the Deployment, Service, and Route for the built image
++
+[source,shell,subs="attributes+"]
+----
+oc new-app --image-stream bamoe-maven-repository-image:{IMAGE_VERSION} --name bamoe-maven-repo
+oc create route edge --service=bamoe-maven-repo
+----
+
+. Get the Maven repository URL to be used in the settings.xml configuration:
++
+[source,shell,subs="attributes+"]
+----
+oc get route bamoe-maven-repo --output jsonpath={.spec.host}
+----
+
+
+=== Deploying to a Kubernetes cluster
+
+Choose the container image from one of the following sources: 
+
+bamoe-{VERSION}-maven-repository-image.tar.gz:: included in the distribution
+quay.io/bamoe/maven-repository:{IMAGE_VERSION}::  the image hosted on Quay.io
+
+==== Using the `tar.gz` included in the distribution
+
+This step varies depending on your cluster configuration, but it may involve setting up an image registry (or using one that is already set up), loading and re-tagging the docker image, and pushing it to the registry with the new tag.
+
+[source,shell,subs="attributes+"]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION}
+docker push <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION}
+----
+
+NOTE: If you're using a local Kubernetes cluster with Minikube or Kind you can skip the re-tagging and pushing and follow these commands: for Minikube, run `minikube image load quay.io/bamoe/maven-repository:{IMAGE_VERSION}`; for Kind, run `kind load docker-image quay.io/bamoe/maven-repository:{IMAGE_VERSION}`.
+
+Set an env var with the image name
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION}
+# For Kind and Minikube use the original quay.io URL for this variable
+----
+
+==== Using Quay.io hosted version
+
+In this case, not much needs to be done, just set an env var with the image URL
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Create the Deployment and Ingress
+
+[source,shell,subs="attributes+"]
+----
+kubectl create deployment bamoe-maven-repo --image=${BAMOE_MAVEN_REPOSITORY_IMAGE}
+kubectl expose deployment bamoe-maven-repo --port=80 --target-port=8080
+kubectl create ingress bamoe-maven-repo --rule="<EXTERNAL_BAMOE_MAVEN_REPO_URL>/*=bamoe-maven-repo:80"
+----
+
+Replace `<EXTERNAL_BAMOE_MAVEN_REPO_URL>` with the URL that is mapped to your cluster. For Kind or Minikube you could use something like `bamoe-maven-repo.localhost`, and then map this hostname to the cluster IP on your `/etc/hosts` file.
+
+=== Running on Docker locally
+
+Start by loading the `tar.gz` file or pulling the image from Quay.io:
+
+* **bamoe-{VERSION}-maven-repository-image.tar.gz**
++
+[source,shell,subs="attributes+"]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+----
+
+* **quay.io/bamoe/maven-repository:{IMAGE_VERSION}**
++
+--
+[source,shell,subs="attributes+"]
+----
+docker pull quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Run the image mapping its port:
+
+[source,shell,subs="attributes+"]
+----
+docker run -d -p <PORT>:8080 quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+Replace <PORT> with the port that you want the container to be mapped to on your host.
+--
+
+You can verify the repository is running by accessing the repository in your browser at `+http://localhost:<PORT>/com/ibm/bamoe+`.
+
+=== Configure Maven with the container image URL
+To configure Maven with a container image follow these steps:
+
+. Download the dedicated M2 repository image container (`bamoe-{VERSION}-maven-repository-image.tar.gz`).
+. Open the Maven `~/.m2/settings.xml` file in a text editor or IDE.
++
+NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `settings.xml` file from the `$MAVEN_HOME/.m2/conf/` directory into the `~/.m2/` directory.
+
+. Add the following lines to the `<profiles>` element of the `settings.xml` file:
++
+[source]
+----
+<profile>
+  <id>ibm-bamoe-enterprise-maven-repository</id>
+  <repositories>
+    <repository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url>https://container-URL-here</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url>https://container-URL-here/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</profile>
+----
+
+. Add the following lines to the `<activeProfiles>` element of the `settings.xml` file and save the file:
+
+[source]
+----
+<activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
+----
+
+
+== Configuring a local Maven repository for {PRODUCT_SHORT}
+
+If you prefer not to use containers, you can download and configure the {PRODUCT_SHORT} Maven repository from the compressed file.
+The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers need to build {PRODUCT_SHORT} applications.
+
+To configure the {PRODUCT_SHORT} Maven repository locally follow these steps:
+
+. Download the Maven Repository`bamoe-{VERSION}-maven-repository.zip`.
+. Extract the downloaded archive.
+. Go to the `~/.m2/` directory and open the Maven `settings.xml` file in a text editor or IDE.
+. Add the following lines to the `<profiles>` element of the Maven settings.xml file, where `<MAVEN_REPOSITORY>` is the path of the Maven repository that you downloaded.
+  The format of `<MAVEN_REPOSITORY>` must be `+file://$PATH+`. For example, `+file:///home/userX/bamoe-{VERSION}-maven-repository/+`:
++
+[source]
+----
+<profile>
+  <id>ibm-bamoe-enterprise-maven-repository</id>
+  <repositories>
+    <repository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url><MAVEN_REPOSITORY></url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url><MAVEN_REPOSITORY></url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</profile>
+----
+
+. Add the following lines to the `<activeProfiles>` element of the Maven `settings.xml` file and save the file:
+
+[source]
+----
+<activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
+----
+
+If your Maven repository contains outdated artifacts, you might encounter Maven error messages when you build or deploy the project, such as:
+
+* `Missing artifact <PROJECT_NAME>`
+* `[ERROR] Failed to execute goal on project <ARTIFACT_NAME>; Could not resolve dependencies for <PROJECT_NAME>`
+
+To resolve these issues, delete the cached version of your local repository that is located in the  `~/.m2/repository` directory to force a download of the latest Maven artifacts.
+
+Your Maven repository is now properly configured and ready to build {PRODUCT_SHORT} projects using a standard Maven workflow.
+

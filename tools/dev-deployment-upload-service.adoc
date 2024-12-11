@@ -1,0 +1,47 @@
+= Dev Deployment Upload Service
+include::../partials/attributes.adoc[]
+
+The Dev Deployment Upload Service runs an HTTP server that accepts ZIP file uploads to the `/upload` endpoint. 
+Verify that the service is ready to accept uploads via the `/upload-status` endpoint.
+
+When an upload is complete, the application unzips the file at the configured location and exits with a 0 code. 
+If anything goes wrong during execution, it exits with code 1, and a helpful message is printed to stderr.
+
+To install it, download the zip file, extract it, and copy the correct executable somewhere in the `PATH` (usually `/usr/local/bin`).
+
+USAGE: `dev-deployment-upload-service`.
+
+Arguments are passed using env vars:
+
+[cols="2,1,3,2", options="header"]
+|===
+|Environment variable
+|Required
+|Description
+|Default value
+
+|`DEV_DEPLOYMENT__UPLOAD_SERVICE_EXTRACT_TO_DIR`
+|*Yes*
+|Where the uploaded zip file will be extracted. If it doesn't exist, it will be created.
+|_empty_
+
+|`DEV_DEPLOYMENT__UPLOAD_SERVICE_PORT`
+|*Yes*
+|Port where the HTTP Server will run.
+|_empty_
+
+_(`8080` on the Canvas Dev Deployment Base image)_
+
+|`DEV_DEPLOYMENT__UPLOAD_SERVICE_API_KEY`
+|*Yes*
+|API Key used as a queryParam for the `/upload` endpoint.
+|_empty_
+
+|`DEV_DEPLOYMENT__UPLOAD_SERVICE_ROOT_PATH`
+|*No*
+|Subpath where the API endpoints will be based.
+|`/`
+
+|===
+
+NOTE: The Dev Deployment Upload Service requires the system to have both the `tar` and `gzip` libraries installed.

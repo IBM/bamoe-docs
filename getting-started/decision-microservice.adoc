@@ -1,4 +1,4 @@
-= Decision Microservice in 15 minutes 
+= Decision microservice in 15 minutes
 include::../partials/attributes.adoc[]
 
 This lab introduces you to the deployment of an existing Decision Model and Notation (DMN) and the validation of its decisions.
@@ -9,20 +9,20 @@ This lab introduces you to the deployment of an existing Decision Model and Nota
 - Test the deployed DMN
 
 == Prerequisites
-* Apache Maven installed
-* {CANVAS} installed
+* xref:../installation/configure-maven.adoc[Apache Maven installed]
+* xref:../installation/canvas.adoc/[{CANVAS} installed]
 
 Instructions for both can be found within this documentation, links on the left.
 
 == Examine the Existing DMN Diagram
 
-The following example describes an *insurance* price calculator based on an applicant's age and accident history. You can check the DMN model at https://github.com/timwuthenow/dmn-workshop-labs/blob/master/policy-price/insurance-pricing.dmn[GitHub].
+The following example describes an *insurance* price calculator based on an applicant's age and accident history. You can check the DMN model at https://github.com/bamoe/bamoe-docs-source-code-examples/tree/9.1.x/dmn/insurance-pricing.dmn[GitHub].
 
-This example brings a simple DMN model, which is represented by the following diagram:
+This example consists of a simple DMN model, which is represented by the following diagram:
 
 image::insurance-price-drd.png[Insurance Pricing Requirements Diagram, 600]
 
-In this decision diagram the applicant's age and accident history are the required inputs for the decision node "Insurance Total Price". This node has a simple decision table that can be checked below:
+In this decision diagram, the applicant's age and accident history are the required inputs for the decision node "Insurance Total Price". This node has a simple decision table that can be checked below:
 
 .DMN Decision Table
 image::insurance-price-dt.png[Completed Decision Table,600]
@@ -37,8 +37,9 @@ In this section, you will import the GitHub repository to {CANVAS} directly.
 
 . Under **Import </> From URL** copy and paste the following link and click **Import**:
 +
+[source,console]
 ----
-https://raw.githubusercontent.com/timwuthenow/dmn-workshop-labs/master/policy-price/insurance-pricing.dmn
+https://raw.githubusercontent.com/bamoe/bamoe-docs-source-code-examples/9.1.x/dmn/insurance-pricing.dmn
 ----
 
 +
@@ -48,16 +49,16 @@ image::github-import.png[Import DMN]
 +
 image::insurance-pricing-dmn.png[Sandbox Model]
 
-. You can then click the **Run** button to get this DMN running within the browser session itself. 
+. You can then click the **Run** button to get this DMN running within the browser session itself.
 +
 [NOTE]
 ====
-If you're not connected to Extended Services, a modal will open showing how to setup it in your local enviroment.
+If you're not connected to Extended Services, a modal will open showing how to setup it in your local environment.
 ====
 +
 image::insurance-pricing-run.png[Run DMN]
 
-. This will have a section of the browser turn into a form and you can run the model right there. Modifying the checkbox based on the boolean of `had previous incidents` and set an `Age` based on the data type being a number.
+. This will have a section of the browser turn into a form, and you can run the model right there by modifying the checkbox based on the boolean of `had previous incidents` and setting an `Age` based on the data type being a number.
 +
 image::insurance-pricing-dmn-runner.png[Form inputs]
 
@@ -67,36 +68,36 @@ In this section, you will use BAMOE Canvas to deploy your DMN model to a Kuberne
 
 === Setup your credentials
 
-. The first step is to connect to your Kubernetes cluster. To do it, click in 1 to open the "Connected accounts" modal, and click in "Connect to an account" (2) to setup a new account.
+. The first step is to connect to your Kubernetes cluster. To do it, click on (*1*) to open the "Connected accounts" modal, and click on "Connect to an account" (*2*) to setup a new account.
 +
 image::bamoe-canvas-connected-accounts.png[Connect to an accounts]
 
-. To deploy a DMN model, BAMOE Canvas gives you the option to connect to a Kubernetes cluster or to OpenShift, which is a hybrid cloud platform offered by Red Hat. For this example, we'll use a local Kubernetes cluster, but in production, you may want to use your own internal Kubernetes. To continue, click on "Kubernetes" (1).
+. To deploy a DMN model, BAMOE Canvas gives you the option to connect to a Kubernetes cluster or to OpenShift, which is a hybrid cloud platform offered by Red Hat. For this example, we'll use a local Kubernetes cluster, but in production, you may want to use your own internal Kubernetes. To continue, click on "Kubernetes" (*1*).
 +
 image::bamoe-canvas-kubernetes-login.png[Kubernetes Login]
 +
 [NOTE]
 ====
-If you're not connected to Extended Services, an additional modal will open showing how to setup it in your local environment. Click on "Setup" (1) and follow the instructions to continue with the Kubernetes login.
+If you're not connected to Extended Services, an additional modal will open showing how to setup it in your local environment. Click on "Setup" (*1*) and follow the instructions to continue with the Kubernetes login.
 
 image::bamoe-canvas-extended-services-setup.png[Extended Services]
 ====
 
-. In the "Connect to Kubernetes" modal, add your Kubernetes cluster information. If you want to create a local cluster, you can click on "Configure a new local Kubernetes cluster through the guided wizard" (1) and follow the instructions. To continue, click on "Connect" (2).
+. In the "Connect to Kubernetes" modal, add your Kubernetes cluster information. If you want to create a local cluster, you can click on "Configure a new local Kubernetes cluster through the guided wizard" (*1*) and follow the instructions. To continue, click on "Connect" (*2*).
 +
 image::bamoe-canvas-kubernetes-infos.png[Kubernetes Informations]
 
 
 === Deploy your DMN model
 
-. After you've setup your credentials click on "Deploy" (1) and click on the DMN model name (2).
+. After you've setup your credentials click on "Deploy" (*1*) and click on the DMN model name (*2*).
 +
 image::bamoe-canvas-deploy.png[Deploy]
 
-. Your new deplyment will appear in the "Dev deployments" (1) dropdown. It will take about 30 seconds to be ready, and a green check will appear. Click on your deployment (2).
+. Your new deployment will appear in the "Dev Deployments" (*1*) dropdown. It will take about 30 seconds to be ready, and a green check will appear. Click on your deployment (*2*).
 +
 image::bamoe-canvas-deployments.png[Deployments]
 
-. A new window will appear with the equivalent form of your DMN. You can share the deployed URL with everyone that has access to your cluster.
+. A new window will appear with the equivalent form of your DMN. You can share the deployed URL with everyone who has access to your cluster.
 +
 image::bamoe-canvas-deployed.png[Deployed]
