@@ -13,13 +13,13 @@ include::../partials/91x-prerequisites.adoc[]
 
 This section describes the process to migrate your projects from version {VERSION_90X} to {VERSION}. Before you start, ensure that you have installed or updated all prerequisite tools.
 
-This migration guide will show two ways of migrating your project. One way of migrating is by creating a new project from scratch and then moving the assets to it.
-The other way is by updating an existing BAMOE version {VERSION_90X} project.
-The next step is to set up the Maven configuration.
+This migration guide will show two ways of migrating your project. The first, by creating a new project from scratch and moving your existing assets to it.
+The second, by updating an existing BAMOE version {VERSION_90X} project.
+You will start by setting up the Maven configuration.
 
 === Update Maven configuration
 
-{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
+{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
 {PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
 For a quick start, see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
 
@@ -34,14 +34,13 @@ Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.
 
 === Creating a new project from scracth
 
-Now that you have the Maven properly configured, you can move onto the first approach, which is to create a new project from scratch.
-The first step is to generate a new Maven project so that there is a place to migrate your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION}.
-There are several ways to create Maven projects; however, this approach uses a published Maven plugin.
+Now that you have Maven properly configured, you can create a new Maven project to migrate your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION}.
+There are several ways to create Maven projects; this approach uses a published Maven plugin.
 
 [start=1]
 . In a terminal window, create a new local folder for the new Maven project, for example, `/Users/developer`, and navigate to that folder.
 
-. Create the project by using Quarkus and the following Maven commands. 
+. Create the project using Quarkus and the following Maven commands. 
 This creates a Quarkus project called `my-sample-decision-service`, which is versioned `1.0.0-SNAPSHOT`, and includes the extensions `resteasy-reactive-jackson, quarkus-smallrye-openapi, quarkus-smallrye-health`.
 +
 [source,console,subs="+attributes"]
@@ -61,7 +60,7 @@ As you can see from the Maven command, there are a number of possible `extension
 You can find more information on available extensions at the following locations:  https://quarkus.io/extensions/[Quarkus Extensions], and https://quarkus.io/extensions/?search-regex=kogito[Kogito Extensions].
 ====
 +
-When you create this project, you might get a bunch of Maven artifacts start to stream in your console that are being pulled, and ultimately, you are left with a console message like the following:
+When you create this project, you will notice the Maven artifacts being streamed in your console as they are pulled. When the process is complete, you will see a console message like the following:
 +
 [source,console]
 ----
@@ -81,7 +80,7 @@ When you create this project, you might get a bunch of Maven artifacts start to 
 ----
 
 [start=3]
-.  Add the following `properties` to the `pom.xml` file by using the row numbers as a guide.
+.  Add the following `properties` to the `pom.xml` file, using the row numbers as a guide.
 This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Materials (BOM), which manages all of the associated dependency versions for a specific {PRODUCT_SHORT} release:
 +
 [source,xml,subs="attributes+"]
@@ -89,7 +88,7 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 17   <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
 18   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
 19   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20   <kogito.bom.version>{BOM_VERSION_910}</kogito.bom.version>
+20   <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
 21 </properties>
 ----
 
@@ -115,15 +114,15 @@ BOMs are ordinary `pom.xml` files that contain no source code, and their only pu
 ====
 It is recommended to use a bill of materials (BOM) to manage project dependencies, as it simplifies dependency management by organizing a group of dependencies under a single version. 
 
-It must be noted that the use of a Maven bill-of-materials (BOM) does not add any dependencies to the project.
-Rather, it functions as a reference for managing the versions of your project's dependencies (and transient dependencies).
+The use of a Maven bill-of-materials (BOM) does not add any dependencies to the project.
+Rather, it functions as a reference for managing the versions of your project dependencies (and transient dependencies).
 ====    
 
 A bill of materials (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
 
 include::../partials/maven-bom-now.adoc[]
 
-When a bill of materials (BOM) is used, it is not necessary to specify the dependency's version, as that appears from the BOM, so your dependencies end up like the following:
+When a bill of materials (BOM) is used, it is not necessary to specify the version of the dependency, as that appears from the BOM, so your dependencies will resemble the following:
 
 [source,xml]
 ----
@@ -137,20 +136,7 @@ When a bill of materials (BOM) is used, it is not necessary to specify the depen
 
 [NOTE]
 ====
-During the course of your Maven dependency update, if you encounter any dependencies that are not included in the bill of materials (BOM), then use the Maven Library version noted in the following table:
-
-[source,xml,subs="attributes+"]
-----
-<dependencies>
-    <dependency>
-        <groupId>org.drools</groupId>
-        <artifactId>drools-compiler</artifactId>
-        <version>{BOM_VERSION_OLD}</version>
-    </dependency>
-</dependencies>
-----
-
-You must also report to IBM that a dependency is missing so that the problem can be resolved in the next release.
+During the course of your Maven dependency update, if you encounter any dependencies that are not included in the bill of materials (BOM) please report it to IBM to be resolved.
 ====
 
 
@@ -192,7 +178,7 @@ In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name cha
 +
 [NOTE]
 ====
-Depending on the project files it will be required to add other dependencies.
+Depending on the project files you may be required to add other dependencies.
 ====
 
 [start=7]
