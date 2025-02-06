@@ -12,3 +12,13 @@ Process instance administration API exposes the following operations for the {PR
 * *update timer relative to current time - by process instance id and timer id*: Updates the timer expiration of an active timer based on the current time. For example, if a timer was initially created with delay of one hour and after thirty minutes you set it to update in two hours, it expires in two hours from the time it was updated.
 * *list timer instances - by process instance id*: Returns all active timers for a specified process instance.
 * *trigger node - by process instance id and node id*: Triggers any node in a process instance at any time.
+
+[NOTE]
+====
+Do not use trigger operation for failed asynchronous task. Instead, you must first fix the issue that blocks the task execution and then requeue the failing Job at *Business Central: select Menu* -> *Jobs* -> *[Filter by Status=Error and Process Instance ID=pid]* -> *Actions* -> *Requeue* -> *Requeue Job*. 
+The requeue option is also available as REST Endpoint. Use the following command:
+[source]
+----
+curl -X PUT "http://localhost:8080/kie-server/services/rest/server/jobs/JOB_ID" -H "accept: application/json"
+----
+====
