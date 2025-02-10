@@ -44,18 +44,20 @@ The following table shows the mandatory components in the subsystem of the compa
 === System
 Runtime:: This is the infrastructure providing basic services required for running a complex application: transactions, rest infraestructure (JAX-RS), jdbc pool, thread pools, escalability, security, DI (dependency injection). The runtime relies on Quarkus.
 
-Workflow Engine:: The kogito API + jBPM workflow engine provides the workflow execution environment using kogito APIs and implementations.
+Workflow engine:: The kogito API + jBPM workflow engine provides the workflow execution environment using kogito APIs and implementations.
 
-Process Container:: This is the BPMN file compiled and wired in to the workflow engine.
+Process container:: This is the BPMN file compiled and wired in to the workflow engine.
 
 === Addons
 Jobs:: allows the execution of timed events. In the case of BPMN and workflows it is required for timers, deadlines, and notifications. 
 
-Data Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
+Data audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
 
-Data Index:: allows the last snapshot of the process state to be queried. The workflow engine sends diff events and data index computes the last state by merging current data with the diff event data.
+Data index:: allows the last snapshot of the process state to be queried. The workflow engine sends diff events and data index computes the last state by merging current data with the diff event data.
 
-Human Task:: is a subsystem that allows human tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+Human task:: is a subsystem that allows human tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+
+Process mangement:: is a subsystem ...
 
 === Required deployments
 Storage:: This is another deployment. In our case would be PostgreSQL database where we are going to store the process state, jobs, data index, data audit and human task data. There can only be one storage that is shared among components and cannot be divided.
