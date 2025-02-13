@@ -29,7 +29,7 @@ This is the most "hands-off" Dev Deployment option, but it has a few requirement
  - Your project should only have Decisions and Workflows; all other files will be ignored;
  - The deployment will fail if an error is found in any file.
 
-It's a pre-defined Quarkus project template that already includes all the dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service (xref:dev-deployment-upload-service.html[read more about it here]).
+It is a pre-defined Quarkus project template that already includes all the dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service (xref:dev-deployment-upload-service.html[read more about it here]).
 
 A parameter is shown, giving the user the option to `Include DMN Form Webapp`. This is a sidecar container containing a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing the user to fill the inputs simulate differente scenarios.
 
@@ -56,13 +56,13 @@ This combination of parameters makes it a highly flexible option, but should be 
 
 - The deployed image must have an instance of the Dev Deployment Upload Service running on startup, and the service binary should be available in the `PATH` _(The `Command` parameter is executed after the Dev Deployment Upload Service finishes, in other words, the final command executed by the container will be something like: `dev-deployment-upload-service && <CUSTOM_COMMAND>`)_.
 - The Dev Deployment Upload Service must run on the same port defined by the `Container Port` parameter.
-- After {CANVAS} uploads the current project to the container it expects an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to make sure the deployment was successful _(Your deployment will be made even without this endpoint, but {CANVAS} won't be able to know if it was successful or not)_.
+- After {CANVAS} uploads the current project to the container it expects an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to make sure the deployment was successful _(Your deployment will be made even without this endpoint, but {CANVAS} will not be able to know if it was successful or not)_.
 
 Images used in this deployment:
 
 - https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
 
-NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it's recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`, xref:create-custom-dev-deployment-image.html[more information here])
+NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`, xref:create-custom-dev-deployment-image.html[more information here])
 
 === Deployment tokens
 
@@ -129,7 +129,7 @@ metadata:
 - The labels (`createdBy` and `partOf`) are required so that {CANVAS} can filter and map all resources related to a single deployment. **Important:** `createdBy` should always have the value `kie-tools`.
 - The annotations (`workspaceId` and `workspaceName`) help match a deployment to a workspace.
 
-NOTE: It's important to note that our Dev Deployment service inside {CANVAS} already applies these required labels and annotations by patching the resource YAMLs.
+NOTE: It is important to note that our Dev Deployment service inside {CANVAS} already applies these required labels and annotations by patching the resource YAMLs.
 
 === Post Deployment
 
@@ -150,7 +150,7 @@ The "magic" that drives Dev Deployments depends on various parts working togethe
 
 Before any Dev Deployment can be made, a new Kubernetes or OpenShift cluster connection to {CANVAS} must be created. While doing so, it will automatically fetch all possible API endpoints and map them to their corresponding Kubernetes resource names; this way, it _knows_ how to apply and manage different resources (such as Deployments, Ingresses, Routes, Services, etc.).
 
-When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Deployment happens. Here's a basic step-by-step:
+When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Deployment happens. Here is a basic step-by-step:
 
 1. {CANVAS} will zip all the files in the workspace being deployed (ignoring .git directories);
 2. Then it will load the chosen deployment option (Custom Image or Kogito Quarkus Blank app) YAML files and modify them dynamically:
@@ -159,9 +159,9 @@ When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Dep
  - Interpolate all tokens with their corresponding values, including parameters;
  - Split the YAML files into multiple YAMLs, making one per resource kind.
 3. Using the Kubernetes resource name and the list of API endpoints saved, requests are made to the cluster to apply each resource YAML, saving the returned resource ID locally to be referenced later.
-4. The cluster will initiate Pods, Services, and other resources. At the same time {CANVAS} will keep polling the cluster to find out whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check if it's ready to receive the upload.
+4. The cluster will initiate Pods, Services, and other resources. At the same time {CANVAS} will keep polling the cluster to find out whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check if it is ready to receive the upload.
  - If the Deployment resource is not healthy, {CANVAS} will keep polling its status whenever it tries to list Kubernetes resources and will show an error icon if the Deployment errors out or a loading icon if the Deployment is pending;
- - If the Deployment is healthy, {CANVAS} will start polling the Dev Deployment Upload Service running inside the deployed containers to check if it's ready to receive an upload;
+ - If the Deployment is healthy, {CANVAS} will start polling the Dev Deployment Upload Service running inside the deployed containers to check if it is ready to receive an upload;
  - If the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and is updated with an error icon.
 5. After reaching the "READY" status on the Dev Deployment Upload Service, {CANVAS} uploads the .zip file generated in Step 1 to the upload service;
 6. The Dev Deployment Upload Service receives the .zip file and extracts it to the defined path (this path is set using the configured environment variables on the container). After the extraction is over, the service ends with a status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever is defined in the Custom Image option parameter);
@@ -169,7 +169,7 @@ When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Dep
 8. When quarkus finishes loading, and the polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
  - The Quarkus Swagger UI, if deployed via Custom Image or Kogito Quarkus Blank App options, without the DMN Form Webapp parameter;
  - The DMN Form Webapp if the checkbox for it was checked when creating the deployment;
-9. Users can interact with the Dev Deployment and test/validate their decisions and processes; after that's finished, it's possible to delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
+9. Users can interact with the Dev Deployment and test/validate their decisions and processes; after that is finished, it is possible to delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
 
 == Limitations
 
