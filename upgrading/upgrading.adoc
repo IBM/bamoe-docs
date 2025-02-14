@@ -6,6 +6,12 @@ include::../partials/attributes.adoc[]
 You can upgrade your existing business automation applications and platforms to the most recent version of {PRODUCT_LONG}. The supported upgrade process is from the previous version to the current version. If you are upgrading from an older version, you must follow the steps to upgrade to each intermediate version, as documented. Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 To know about upgrading to version {VERSION_90X}, see [Link to 90x upgrading topic]
 
+You can upgrade your project in the following two ways by:
+
+* Creating a new project from scratch and moving your existing assets to it.
+* Updating an existing BAMOE version {VERSION_90X} project.
+You will start by setting up the Maven configuration.
+
 == Prerequisites
 
 The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION}:
@@ -28,17 +34,7 @@ After upgrade, the New DMN Editor will be opened automatically when you first ac
 Existing DMN files (any version) can be opened directly in the editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring decisions]
 
 
-== Procedure
-
-This section describes the process to upgrade your projects from version {VERSION_90X} to {VERSION}. Before you start, ensure that you have installed or updated all prerequisite tools.
-
-You can upgrade your project in the following two ways by:
-
-* Creating a new project from scratch and moving your existing assets to it.
-* Updating an existing BAMOE version {VERSION_90X} project.
-You will start by setting up the Maven configuration.
-
-=== Step 1: Download Product Archives
+== Step 1: Download Product Archives
 
 The first step in upgrading is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
 Download the files _(replace with the most current version)_ based on your requirement.
@@ -98,7 +94,7 @@ In the displayed table, you must replace **VERSION** with the version of {PRODUC
 
 Now that you have the files, you can start the upgrading process.
 
-=== Step 2: Update Maven configuration and settings
+== Step 2: Update Maven configuration and settings
 
 {MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
 {PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
@@ -112,7 +108,7 @@ Now the dependencies are distributed with a container image or a zip file.
 Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.adoc[Maven configuration].
 
 
-=== Step 3: Creating a new project from scratch
+== Step 3a: Creating a new project from scratch
 
 Now that you have Maven properly configured, you can create a new Maven project to upgrade your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION}.
 There are several ways to create Maven projects; this approach uses a published Maven plugin.
@@ -357,13 +353,19 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
-=== Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project
+==== Add Business Automation Assets
+
+If your project is upgraded from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the files.
+If you need to create a new file, use `File : New File` option from VS Code, making sure to specify the file extension to associate the new file with the appropriate editor.
+
+
+== Step 3b: Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project
 
 Upgrading a {PRODUCT_SHORT} version {VERSION_90x} project to version {VERSION} is straightforward.
 The project structure is not changed, updates only need to be made to the project versions, some dependency names, and files.
 
 [start=1]
-. Upgrade the Quarkus version.
+. Upgrade the Quarkus version in the project POM file
 +
 In the {PRODUCT_SHORT} version {VERSION_90x} the Quarkus version was 2.16 and for version {VERSION} it is 3.8.6.
 To make this upgrade, open the `pom.xml` file and do the following change:
@@ -464,12 +466,7 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now, you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
-=== Step 4: Add Business Automation Assets
-
-If your project is upgraded from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the files.
-If you need to create a new file, use `File : New File` option from VS Code, making sure to specify the file extension to associate the new file with the appropriate editor.
-
-=== Step 5: Update tooling & runtime
+=== Step 4: Update tooling & runtime
 
 Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
 Other {PRODUCT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
@@ -490,7 +487,7 @@ Updates to {EAP} must be applied using {EAP} patch distributions.
 For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
 ====
 
-=== Step 6: Compile, Build, Test, Deploy
+=== Step 5: Compile, Build, Test, Deploy
 
 You can follow the standard guidance on how to maintain your decision service project, including how to build using Maven and how to deploy to your target Kubernetes-based environment.
 This includes not only creating and publishing the new project to an enterprise GIT repository but also configuring your CI/CD pipeline to pull from GIT and performing a Maven build/test/deploy, etc.
