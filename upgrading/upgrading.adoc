@@ -8,7 +8,7 @@ To know about upgrading to version {VERSION_80}, see [Link to 80 upgrading topic
 
 == Overview
 
-This section describes migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}. In {PRODUCT_SHORT} v{VERSION_90X}, the approach to deployment and runtime works in a very different way compared to {PRODUCT_SHORT} v{VERSION_80}. It uses a cloud native, serverless, micro-service architecture to deploy business automation projects that include a runtime via Maven plug-ins, directly to your cloud platform. Whereas in version {VERSION_80}, you packaged your BAMOE projects as KJars to be deployed on Kie Server. Hence, tools like Smart router which was designed to aggregate multiple independent KIE Server instances as though they were a single server are no longer necessary in the {PRODUCT_SHORT} v{VERSION_90X} architecture.
+This section describes migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}. In {PRODUCT_SHORT} v{VERSION_90X}, the approach to deployment and runtime works in a very different way compared to {PRODUCT_SHORT} v{VERSION_80}. It uses a cloud native, serverless, micro-service architecture to deploy business automation projects that include a runtime via Maven plug-ins, directly to your cloud platform. Whereas in version {VERSION_80}, you packaged your BAMOE projects as KJars to be deployed on Kie Server. Hence, tools like Smart router which was designed to aggregate multiple independent KIE Server instances as though they were a single server are no longer necessary in the {PRODUCT_SHORT} v {VERSION_90X} architecture.
 
 == Prerequisites
 
@@ -40,48 +40,36 @@ The following archives are typically used in upgrading to {PRODUCT_SHORT}:
 |===
 | Product Archive | Description
 
-| ILMT_for_IBAMOE_**{VERSION**}.zip   
-| This archive is used by IBM ILMT to measure the usage deployed in an environment of the product.
+| bamoe-9.0.0-extended-services-image.tar.gz   
+| This image provides features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
 
-| bamoe-installer-**{VERSION**}.jar 
-| This archive is an executable file that installs {PRODUCT_SHORT} version  {VERSION_80} in a preinstalled Red Hat JBoss EAP on all supported Linux and Windows environments.
+| bamoe-9.0.0-git-cors-proxy-image.tar.gz 
+| This image provides a proxy to allow BAMOE Canvas web app to communicate with Git providers, like github.com and bitbucket.org.
 
-| bamoe-**{VERSION**}-add-ons.zip   
-| This archive contains things like the Database Migration Scripts (found at path /bamoe-**VERSION**-add-ons/process-migration/upgrade-scripts/**Database**)
+| bamoe-9.0.0-canvas-image.tar.gz   
+| BAMOE Canvas is a web application that provides authoring tools for Decisions and Workflows, directly in the browser.
 
-| bamoe-**{VERSION**}-business-central-eap7-deployable.zip   
-| This archive is required if you are running Business Central on your JBoss Enterprise Application Platform (EAP)
+| bamoe-9.0.0-containers-sources.zip   
+| No additional information.
 
-| bamoe-**{VERSION**}-kie-server-ee7.zip   
-| This archive is required if you are running running KIE Server EE7 on JBoss EAP
+| bamoe-9.0.0-canvas-compose.zip   
+| This package contains the `docker-compose` file to run Business Automation Manager Open Edition 9.0.0 Canvas and all related services.
 
-| bamoe-**{VERSION**}-kie-server-ee8.zip   
-| This archive is required if you are running KIE Server EE8 on JBoss EAP
+| bamoe-9.0.0-kogito-examples.zip   
+| The Business Automation Manager Open Editions (BAMOE) Kogito Examples include example applications which contain various types of services on Red Hat build of Quarkus to help you develop your own applications. The services use one or more Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, Predictive Model Markup Language (PMML) models, or Java classes to define the service logic.
 
-| bamoe-**{VERSION**}-maven-repository.zip   
-| This archive is required if you need to have a local copy of the product artifacts
+For information about each example application and instructions for using them, see the README file in the relevant application folder.
 
-| bamoe-**{VERSION**}-offliner.zip   
-| This archive is required to help you to build the Maven mirror repository in an offline fashion, in situations where you need to have a disconnected loading of the Maven repository in your environment.
+| bamoe-9.0.0-licenses.zip   
+| No additional information.
 
-| bamoe-**{VERSION**}-update.zip 
-| This archive includes all of the updates that get applied with the overall product set. 
+| bamoe-9.0.0-maven-repository.zip   
+| The maven repository contains many of the artifacts that Java developers typically use to build their applications.
 
-| bamoe-**{VERSION**}-kogito-offliner.zip   
-| This archive facilitates preparing a Maven mirror repository for offline use.
-
-| bamoe-**{VERSION**}-kogito-maven-repository.zip   
-| This archive is the Kogito Maven repository, which contains many of the requirements that Java developers typically use to build Kogito-based applications.
-
-| bamoe-**{VERSION**}-openshift-templates.zip
-| This archive facilitates building a custom KIE Server extension image for an external database.
+| bamoe-9.0.0-sources.zip 
+| No additional information. 
 
 |===
-[NOTE]
-====
-
-In the displayed table, you must replace **VERSION** with the version of {PRODUCT_SHORT} you are upgrading to, such as {VERSION_8_LATEST}.
-====
 
 Now that you have the files, you can start the upgrading process.
 
