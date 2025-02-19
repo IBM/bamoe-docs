@@ -8,13 +8,21 @@ To know about upgrading to version {VERSION_80}, see [Link to 80 upgrading topic
 
 == Overview
 
-This section describes migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}. In {PRODUCT_SHORT} v{VERSION_90X}, the approach to deployment and runtime works in a very different way compared to {PRODUCT_SHORT} v{VERSION_80}. It uses a cloud native, serverless, micro-service architecture to deploy business automation projects that include a runtime via Maven plug-ins, directly to your cloud platform. Whereas in version {VERSION_80}, you packaged your BAMOE projects as KJars to be deployed on Kie Server. Hence, tools like Smart router which was designed to aggregate multiple independent KIE Server instances as though they were a single server are no longer necessary in the {PRODUCT_SHORT} v {VERSION_90X} architecture.
+This section describes migration of existing applications to version {VERSION_901} of {PRODUCT_LONG}. In {PRODUCT_SHORT} v {VERSION_90X}, the approach to deployment and runtime works in a very different way compared to {PRODUCT_SHORT} v {VERSION_80}. It uses a cloud native, serverless, micro-service architecture to deploy business automation projects that include a runtime via Maven plug-ins, directly to your cloud platform. Whereas in version {VERSION_80}, you packaged your BAMOE projects as KJars to be deployed on Kie Server. Hence, tools like Smart router which was designed to aggregate multiple independent KIE Server instances as though they were a single server are no longer necessary in the {PRODUCT_SHORT} v {VERSION_90X} architecture.
 
 == Prerequisites
 
 The following tools are required to migrate to {PRODUCT_SHORT} version {VERSION_901}:
 
-include::../partials/prerequisites.adoc[]
+- JDK 11 or later is installed.
+
+- Apache Maven 3.8.6 or later is installed.
+
+- Visual Studio Code IDE latest version
+
+- IBM BAMOE Developer Tools latest version of VS Code IDE extensions
+
+// include::../partials/prerequisites.adoc[]
 
 == Procedure
 
@@ -108,7 +116,7 @@ With the knowledge from {PRODUCT} Version 8 or Red Hat's Version 7, you might be
 However, this is not required anymore as the product dependencies are hosted by https://central.sonatype.com/search?q=bamoe[Maven Central].
 There is no need to include an additional repository in `pom.xml` or `settings.xml`.
 
-=== Step 3: Generate a New Maven Project using Apache Maven
+== Step 3: Generate a New Maven Project using Apache Maven
 
 Now that you have Maven properly configured, you can move onto the next step, which is to generate a new Maven project:
 
@@ -308,12 +316,12 @@ Examples of supported business automation assets are:
 The proper folder for unit test files is `src/test/resources`, as this is a testing resource.
 ====
 
-=== Step 4: Add Business Automation Assets
+== Step 4: Add Business Automation Assets
 
 If your project is migrated from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the file(s).
 If you need to create a new file, use VS Code's `File : New File` option, making sure to specify the file extension to associate the new file with the appropriate editor.
 
-== Business Automation Assets in Businss Central
+=== Business Automation Assets in Businss Central
 
 The following table focuses on business automation assets no longer supported in the new tools but available in Business Central.
 The table indicates how to manage assets in the absence of Business Central.
@@ -351,7 +359,7 @@ At this time `Test Scenarios` are not directly supported in {CANVAS}, as it has 
 There will be comptability between test scenarios included in a future release of {PRODUCT}.
 ====
 
-== Migration of Deprecated Assets
+=== Migration of Deprecated Assets
 
 Though all the guided editors are deprecated in {PRODUCT} version {VERSION_90x}, you do not loose all your effort into building those assets.
 
@@ -366,7 +374,7 @@ The following table indicates the mapping from guided to non-guided form:
 | Guided Rule (.rdrl) | Technical Rule (.drl) | **Copy** source from BC to new Technical Rule (.drl) file
 |===
 
-== How to **Copy** the Asset Source from Business Central
+=== How to **Copy** the Asset Source from Business Central
 
 It is important to keep in mind that all guided assets are Drools Rule Language (.drl) files under the covers.
 In most situations a guided asset can be refactored into a non-guided asset by copying the source from the source tab in Business Central into a file with the file extension of `.drl`.
@@ -398,7 +406,7 @@ Examples of these types of attriutes are `salience`, `dialect`, `no-loop`, & `lo
 
 At this point you are free to modify the new `technical rule` to your liking, such as updating to use `rule units`, using `OOPATH syntax` vs `mvel`, and so on. 
 
-== How to **Export** the asset from Business Central
+=== How to **Export** the asset from Business Central
 
 Guided Decision Tables are a wizard-led alternative to uploaded decision table spreadsheets for defining business rules in a tabular format.
 With guided decision tables, you are led by a UI-based wizard in Business Central that helps you define rule attributes, metadata, conditions, and actions based on specified data objects in your project.
@@ -449,7 +457,7 @@ Rules make use of `salience` in order to orchestrate the execution of each `row`
 It is possible replace a decision table directly with technical rules vs exporting to Excel format, provided you follow the pattern that the rules were generated to.
 ====
 
-=== Step 5: Update tooling & runtime
+== Step 5: Update tooling & runtime
 
 Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
 Other {PRODUCT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
@@ -471,7 +479,7 @@ For more information about Red Hat JBoss EAP patching, see the https://access.re
 ====
 
 
-=== Step 6: Compile, Build, Test, Deploy
+== Step 6: Compile, Build, Test, Deploy
 
 You can follow the standard guidance on how to maintain your decision service project including how to build using Maven and deploy to your target Kubernetes-based environment.
 This includes not only creating and publishing the new project to an enterprise GIT repository and configuring your CI/CD pipeline to pull from GIT, perform a Maven build/test/deploy, and so on.
