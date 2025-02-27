@@ -4,7 +4,7 @@ include::../partials/attributes.adoc[]
 
 
 You can upgrade your existing business automation applications and platforms to the most recent version of {PRODUCT_LONG}. The supported upgrade process is from the previous version to the current version. If you are upgrading from an older version, you must follow the steps to upgrade to each intermediate version, as documented. Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
-To know about upgrading to version {VERSION_80}, see [Link to 80 upgrading topic]
+To know about upgrading to version {VERSION_80}, see https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/8.0.x?topic=upgrading[Upgrading]
 
 == Overview
 
@@ -81,12 +81,12 @@ For information about each example application and instructions for using them, 
 
 Now that you have the files, you can start the upgrading process.
 
-== Step 2: Update Maven Configuration
+== Step 2: Update Maven Configuration and settings
 
 https://maven.apache.org/[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
 {PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications. For a quick start, see the https://maven.apache.org/guides/getting-started/[Maven Quick Start Guide].
 
-Since {PRODUCT_SHORT} v{VERSION_901} is based on Quarkus 2, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
+Since {PRODUCT_SHORT} version {VERSION_901} is based on Quarkus 2, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
 You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
 
 The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from `pom.xml` by its non-association with particular projects.
@@ -107,7 +107,7 @@ Both are combined with users taking precedence.
 
 [TIP] 
 ====
-If you need to create user-specific settings from scratch, it's easiest to copy the global settings from your Maven installation to your *_${user.home}/.m2_* directory.
+If you need to create user-specific settings from scratch, it is easiest to copy the global settings from your Maven installation to your *_${user.home}/.m2_* directory.
 Maven's default *_settings.xml_* is a template with comments and examples so you can quickly tweak it to match your needs.
 _If you are looking to learn more about how to manage your various Maven settings, see https://maven.apache.org/settings.html[Maven Settings Reference]._
 ====
@@ -116,7 +116,30 @@ With the knowledge from {PRODUCT} Version 8 or Red Hat's Version 7, you might be
 However, this is not required anymore as the product dependencies are hosted by https://central.sonatype.com/search?q=bamoe[Maven Central].
 There is no need to include an additional repository in `pom.xml` or `settings.xml`.
 
-== Step 3: Generate a New Maven Project using Apache Maven
+
+== Step 3: Update tooling
+
+Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
+Other {PRODUCT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
+
+[NOTE]
+====
+You can deploy the latest version of {PRODUCT} as either a new installation or as a patch update from one of the previous patch releases.
+====
+
+You can use the same automated update tool to apply both patch updates and minor release upgrades.
+Patch updates of {PRODUCT} include the latest security updates and bug fixes.
+Minor release upgrades will include enhancements, security updates, and bug fixes.
+
+[NOTE]
+====
+Only updates are included in the {PRODUCT} update tools.
+Updates to {EAP} must be applied using {EAP} patch distributions.
+For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
+====
+
+
+== Step 4: Generate a New Maven Project using Apache Maven
 
 Now that you have Maven properly configured, you can move onto the next step, which is to generate a new Maven project:
 
@@ -244,8 +267,10 @@ You must also report to IBM that a dependency is missing so that the problem can
 
 The following table is useful in determining which community release is bound to the section details of the mapping of https://www.kie.org/[KIE Community] releases to the current {PRODUCT_LONG} enterprise release.
 
-[id=mapping-next]
-include::../partials/version-mapping-next.adoc[]
+//[id=mapping-next]
+//include::../partials/version-mapping-next.adoc[]
+
+See xref:../introduction/release-notes/version-mapping.adoc[version mapping for {PRODUCT_SHORT} version {VERSION_91X}].
 
 [start=5]
 . Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required to report on subscription entitlement usage within the system)_:
@@ -316,7 +341,7 @@ Examples of supported business automation assets are:
 The proper folder for unit test files is `src/test/resources`, as this is a testing resource.
 ====
 
-== Step 4: Add Business Automation Assets
+== Step 5: Add Business Automation Assets
 
 If your project is migrated from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the file(s).
 If you need to create a new file, use VS Code's `File : New File` option, making sure to specify the file extension to associate the new file with the appropriate editor.
@@ -457,29 +482,12 @@ Rules make use of `salience` in order to orchestrate the execution of each `row`
 It is possible replace a decision table directly with technical rules vs exporting to Excel format, provided you follow the pattern that the rules were generated to.
 ====
 
-== Step 5: Update tooling & runtime
 
-Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
-Other {PRODUCT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
-
-[NOTE]
-====
-You can deploy the latest version of {PRODUCT} as either a new installation or as a patch update from one of the previous patch releases.
-====
-
-You can use the same automated update tool to apply both patch updates and minor release upgrades.
-Patch updates of {PRODUCT} include the latest security updates and bug fixes.
-Minor release upgrades will include enhancements, security updates, and bug fixes.
-
-[NOTE]
-====
-Only updates are included in the {PRODUCT} update tools.
-Updates to {EAP} must be applied using {EAP} patch distributions.
-For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
-====
+== Step 6: Update runtime
 
 
-== Step 6: Compile, Build, Test, Deploy
+
+== Step 7: Compile, Build, Test, Deploy
 
 You can follow the standard guidance on how to maintain your decision service project including how to build using Maven and deploy to your target Kubernetes-based environment.
 This includes not only creating and publishing the new project to an enterprise GIT repository and configuring your CI/CD pipeline to pull from GIT, perform a Maven build/test/deploy, and so on.
