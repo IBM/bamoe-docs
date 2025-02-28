@@ -21,6 +21,62 @@ The following new versions are supported for the technology stack:
 
 You can find the supported configurations in the following link: xref:supported-environments.adoc[Supported Environments]
 
+
+== Stateful process functionality available for production
+{PRODUCT_SHORT} {VERSION} now supports complex business process development, namely:
+
+* Human-driven processes
+* Usage of timer events
+* Data persistence
+* Business KPIs
+* Data audit
+* Saga pattern implementation using error and compensation events
+* Long-running processes
+
+=== Database schema definition scripts
+This version includes new Data Definition Language (DDL) scripts that can be used create from scratch a Database including all required tables to be used by the persistence layer of the following process components (subsystems):
+•	Data index
+•	Data audit
+•	Job Service
+•	Runtime Engine
+•	User tasks subsystem
+
+The scripts are available in the bamoe-9.1.2-db-utils.zip file and support PostgreSQL database only (MS SQL datbase ?). 
+
+=== Human-Driven Workflows
+Design and consume workflows with:
+
+* SLA tracking
+* Customizable user groups
+* Decoupled user task data 
+* Task assignment strategies
+* Business Calendar for precise time management
+* New product-oriented endpoints (e.g. /usertasks)
+
+=== New User Tasks API
+in {VERSION_91X} it was possible to manage User Tasks through the Process API in the same way as any other work item. This version introduces a new subsystem in the runtime engine that is designed to work efficiently with user tasks. The new endpoints will not require global process data to be defined via parameters such as the process ID, process instance ID and task name, and the JSON objects returned contain richer information. 
+
+Note if you used the Stateful process technology preview in {VERSION}, you will need to follow the instructions in the Upgrade xxxx section.  
+
+=== User task JPA persistence
+The User task sub-system can be configured to persists its data in the supported databases(PostgreSQL and MS SQL Server)
+
+=== Transactional Operations
+For enhanced data consistency
+
+=== Performant Data querying
+For enhanced data consistency
+
+=== Seamless integration with Kafka 
+Enabling you to focus on your business processes, as integration code gets automatically generated for you.
+
+=== Event-driven Processes 
+Use bpmn events to design event-driven processes
+
+=== Process data auditing 
+Asynchronous auditing can automatically emit events and enable tracking processes and tasks execution.
+
+
 == Management Console
 Task management has been integrated from the Task Inbox web application into the Management Console.
 
@@ -33,28 +89,6 @@ There is new support for multiple runtimes both with or without security enabled
 You can connect to many runtimes simultaneously, allowing users to manage multiple runtimes on the same web application.
 
 It is now possible to impersonate another user. This is useful when a User Task is assigned to an unavailable user, blocking the status of that task until the assigned user returns. In BAMOE it is possible to define a group of users that may impersonate any other user, giving them the rights to manage User Tasks assigned to unavailable people. 
-
-
-== Stateful process functionality available for production
-=== New User Tasks API
-in {VERSION_91X} it was possible to manage User Tasks through the Process API in the same way as any other work item. This version introduces a new subsystem in the runtime engine that is designed to work efficiently with user tasks. The new endpoints will not require global process data to be defined via parameters such as the process ID, process instance ID and task name, and the JSON objects returned contain richer information. 
-
-Note if you used the Stateful process technology preview in {VERSION}, you will need to follow the instructions in the Upgrade xxxx section.  
-
-== User task JPA persistence
-The User task sub-system can be configured to persists its data in the supported databases(PostgreSQL and MS SQL Server)
-
-== Database schema definition scripts
-This version includes new Data Definition Language (DDL) scripts that can be used create from scratch a Database including all required tables to be used by the persistence layer of the following process components (subsystems):
-•	Data index
-•	Data audit
-•	Job Service
-•	Runtime Engine
-•	User tasks subsystem
-
-
-The scripts are available in the bamoe-9.1.2-db-utils.zip file and support PostgreSQL database only (MS SQL datbase ?). 
-
 
 == Download documents 
 
