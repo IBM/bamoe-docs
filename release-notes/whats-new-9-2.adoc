@@ -1,0 +1,61 @@
+= What's new in version 9.2.0
+include::../partials/attributes.adoc[]
+
+
+This section describes the main new functionality and changes in the {PRODUCT_SHORT} {VERSION}
+
+=== Modernized Technology Stack
+
+New support for the Spring Boot framework for DRL across the UI
+
+The following new versions are supported for the technology stack:
+
+* SpringBoot 3
+* Quarkus - 3.15
+* Red Hat Enterprise Linux (RHEL) - 9.5  
+* OpenShift Container Platform - 4.16
+* Kubernetes - 1.30 
+* Google Chrome - Latest release
+* PostgreSQL - 16.4
+* MS SQL Server 
+
+You can find the supported configurations in the following link: xref:supported-environments.adoc[Supported Environments]
+
+== Management Console
+Task management has been integrated from the Task Inbox web application into the Management Console.
+
+New support for authenticated runtimes that use external Identity Providers. The Management Console has a specific configuration that can be set via an environment variable when initializing the Container image: 
+-	RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID.
+The environment variable receives the “client_id", which the Management Console will use to communicate with the Identity Providers registered with each runtime.
+
+There is new support for multiple runtimes both with or without security enabled. As a result of this the Management Console is not connected to a runtime when you open it, and you are required to select a runtime to connect to. 
+
+You can connect to many runtimes simultaneously, allowing users to manage multiple runtimes on the same web application.
+
+It is now possible to impersonate another user. This is useful when a User Task is assigned to an unavailable user, blocking the status of that task until the assigned user returns. In BAMOE it is possible to define a group of users that may impersonate any other user, giving them the rights to manage User Tasks assigned to unavailable people. 
+
+
+== Stateful process functionality available for production
+=== New User Tasks API
+in {VERSION_91X} it was possible to manage User Tasks through the Process API in the same way as any other work item. This version introduces a new subsystem in the runtime engine that is designed to work efficiently with user tasks. The new endpoints will not require global process data to be defined via parameters such as the process ID, process instance ID and task name, and the JSON objects returned contain richer information. 
+
+Note if you used the Stateful process technology preview in {VERSION}, you will need to follow the instructions in the Upgrade xxxx section.  
+
+== User task JPA persistence
+The User task sub-system can be configured to persists its data in the supported databases(PostgreSQL and MS SQL Server)
+
+== Database schema definition scripts
+This version includes new Data Definition Language (DDL) scripts that can be used create from scratch a Database including all required tables to be used by the persistence layer of the following process components (subsystems):
+•	Data index
+•	Data audit
+•	Job Service
+•	Runtime Engine
+•	User tasks subsystem
+
+
+The scripts are available in the bamoe-9.1.2-db-utils.zip file and support PostgreSQL database only (MS SQL datbase ?). 
+
+
+== Download documents 
+
+For more information on {PRODUCT_LONG} version {VERSION} download document, see https://www.ibm.com/support/pages/node/7151078[BAMOE 9.1 Download Document].
