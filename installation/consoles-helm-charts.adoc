@@ -1,60 +1,74 @@
-= Installing BAMOE Task and Management Console
+= Installing BAMOE Management Console
 include::../partials/attributes.adoc[]
 
-== Using Helm charts
-BAMOE Consoles is a Helm chart based on the open-source KIE Runtime Tools Consoles Helm Chart that can be used to deploy BAMOE Task and Management Console images on a Kubernetes cluster using the Helm package manager.
+You can install the Management console via Helm or via Docker.
 
-==  Additional requirements
+== Using Helm charts
+Helm, https://helm.sh/[the package manager for Kubernetes] enables you to manage Kubernetes applications and Helm Charts help you to define, install and upgrade even the most complex Kubernetes applications. 
+
+BAMOE Consoles is a Helm chart based on the open-source KIE Runtime Tools Consoles Helm Chart that can be used to deploy the BAMOE Management Console image on a Kubernetes cluster using the Helm package manager.
+
+
+===  Additional requirements
 
 * Podman (for Linux)
 * Docker (for macOS)
 * Minikube
 
-==  Components
+===  Components
 
-* Management Console
+* Management Console 
 * Task Console
 
-==  Installing the Chart
+===  Installing the Chart
 
-
-===  Default install
+Use the following command to do a default installation:
 
     $ helm install bamoe-consoles oci://quay.io/bamoe/consoles-helm-chart --version={VERSION}
 
-===  Minikube install
+==== Minikube install
+
+Use the following commands to do a Minikube install if you wish to run a single-node Kubernetes cluster in a virtual machine on your machine:
 
     $ helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
     $ helm install bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-minikube-nginx.yaml --set global.dataIndexUrl="<KOGITO_DATA_INDEX_SERVICE_URL>"
 
-===  Kubernetes install
+==== Kubernetes install
 
-First, you may need to get the default Kubernetes cluster domain for your ingress with this command:
+If you want to install the Management console directly on a Kubernetes cluster, you may need to get the default Kubernetes cluster domain for your Ingress using this command:
+
     $ kubectl get --all-namespaces ingress -o json 2> /dev/null| jq -r '.items[] | .spec.rules[] | .host as $host | .http.paths[] | ( $host )' | sort | grep -v ^/
+
+You can then run the following helm commands:
 
     $ helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
     $ helm install bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-kubernetes.yaml --set global.dataIndexUrl="<DATA_INDEX_SERVICE_URL>" --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 
-===  OpenShift install
+====  OpenShift install
 
 First, you may need to get the default OpenShift domain for your routes with this command:
+
     $ oc get ingresses.config cluster --output jsonpath={.spec.domain}
-If you don't have access rights to this config, try creating a dummy Route resource and checking its domain.
+
+If you do not have access rights to this config, try creating a dummy Route resource and checking its domain.
+
     $ helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
     $ helm install bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-openshift.yaml --set global.dataIndexUrl="<DATA_INDEX_SERVICE_URL>" --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 
-==  Uninstalling the Chart
+===  Uninstalling the Chart
 
 To uninstall the bamoe-consoles deployment:
+
     $ helm uninstall bamoe-consoles
 
 
-==  Passing Environmental variables
+===  Passing Environmental variables
 
-This chart uses default environmental variables from values.yaml file. You can override the variables by passing them through the command line.
+This chart uses default environmental variables from the `values.yaml`file. You can override the variables by passing them through the command line.
+
     $ helm install my-bamoe-consoles ./src --set runtime-tools-consoles-helm-chart.task-console.image.registry=quay.io --set runtime-tools-consoles-helm-chart.management-console.image.account=bamoe
 
-==  Configuration
+===  Configuration
 
 The following table lists the configurable parameters of the Runtime Tools Consoles helm chart and their default values.
 
