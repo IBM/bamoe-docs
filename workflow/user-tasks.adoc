@@ -1,23 +1,20 @@
-=== The User Tasks API
+= The User Tasks API
+include::../partials/attributes.adoc[]
 
 A User Task is a typical “workflow” Task where a human performer
-performs the Task with the assistance of a software application and is
-scheduled through a task list manager of some sort”._
+performs the Task with the assistance of a software application and is scheduled through a task list manager.
 
 In the previous BAMOE versions (9.1.x, 9.0.x) it was possible to manage
 User Tasks relying on Process level API (Process API) offered to operate
 on any work item.
 
-This BAMOE 9.1.2-LA version introduces a new subsystem in the Runtime
+In this version there is a new subsystem in the Runtime
 Engine, that is designed to work more effectively with User Tasks.
-Consequently, a new API (User Tasks API) layer specifically designed to
-operate with User Tasks entities is now available to the BAMOE users.
+Consequently, a new API (User Tasks API) layer specifically designed to operate with User Tasks entities is now available to the BAMOE users.
 
-The resulting User Tasks Api is lighter and more narrowed to work with
-the User Tasks: the new endpoints don’t require any longer global
-process data like the process ID, process Instance ID, task Name as
-endpoints’ parameters, and the returned JSON objects contain richer
-information.
+The resulting User Tasks Api is lighter and focused on working with
+ User tasks: the new endpoints no longer require global
+process data like the `process ID`, `process Instance ID`, `task Name` as endpoint parameters, and the returned JSON objects contain richer information.
 
 NOTE: Migrating to the new API for User Task related operations is
 required. The General Process API endpoints are still being provided to
@@ -36,7 +33,7 @@ recommended and it should be avoided. You should perform ALL the User
 Tasks operations using the new User Tasks API. 
 
 With the new endpoints, it’s possible to operate with the following
-Entities:*
+Entities:
 
 * User Tasks (GET)
 ** Transitions (GET, POST)
@@ -58,33 +55,33 @@ The following sections describe the User Task API in detail.
 * user: String (QueryParameter)
 * group: List++<++String++>++ (QueryParameter)
 
-|*Output* | A JSON List of _UserTaskView_ elements that describes all the User Tasks assigned to a given user / group.
+|*Output* a| A JSON List of _UserTaskView_ elements that describes all the User Tasks assigned to a given user / group.
 
 UserTaskView:
 
-* *id: String*
-* *userTaskid: String*
-* *status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *taskName: String*
-* *taskDescription: String*
-* *taskPriority: String*
-* *potentialUsers: Set++<++String++>++*
-* *potentialGroups: Set++<++String++>++*
-* *adminUsers: Set++<++String++>++*
-* *adminGroups: Set++<++String++>++*
-* *excludedUsers: Set++<++String++>++*
-* *externalReferenceId: String*
-* *actualOwner: String*
-* *inputs: Map++<++String, Object++>++*
-* *outputs: Map++<++String, Object++>++*
-* *metadata: Map++<++String, Object++>++*
+* id: String
+* userTaskid: String
+* status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* taskName: String
+* taskDescription: String
+* taskPriority: String
+* potentialUsers: Set++<++String++>++
+* potentialGroups: Set++<++String++>++
+* adminUsers: Set++<++String++>++
+* adminGroups: Set++<++String++>++
+* excludedUsers: Set++<++String++>++
+* externalReferenceId: String
+* actualOwner: String
+* inputs: Map++<++String, Object++>++
+* outputs: Map++<++String, Object++>++
+* metadata: Map++<++String, Object++>++
 
 |*Example* |curl -X GET \
 'http://localhost:8080/usertasks/instance?group=managers&user=manager'
 |===
 
-===  /usertasks/instance/`{taskId}` 
+===  /usertasks/instance/{taskId} 
 
 [cols="1,1"]
 |===
@@ -97,83 +94,68 @@ _ERROR)_*
 * *user: String (QueryParameter)*
 * *group: List++<++String++>++ (QueryParameter)*
 
-|*Output* |A JSON _UserTaskView_ Element that describes the requested User Task
+|*Output* a|A JSON _UserTaskView_ Element that describes the requested User Task
 assigned to a given user / group.
 
-*UserTaskView:*
+UserTaskView:
 
-* *id: String*
-* *userTaskid: String*
-* *status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *taskName: String*
-* *taskDescription: String*
-* *taskPriority: String*
-* *potentialUsers: Set++<++String++>++*
-* *potentialGroups: Set++<++String++>++*
-* *adminUsers: Set++<++String++>++*
-* *adminGroups: Set++<++String++>++*
-* *excludedUsers: Set++<++String++>++*
-* *externalReferenceId: String*
-* *actualOwner: String*
-* *inputs: Map++<++String, Object++>++*
-* *outputs: Map++<++String, Object++>++*
-* *metadata: Map++<++String, Object++>++*
+* id: String
+* userTaskid: String
+* status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* taskName: String
+* taskDescription: String
+* taskPriority: String
+* potentialUsers: Set++<++String++>++
+* potentialGroups: Set++<++String++>++
+* adminUsers: Set++<++String++>++
+* adminGroups: Set++<++String++>++
+* excludedUsers: Set++<++String++>++
+* externalReferenceId: String
+* actualOwner: String
+* inputs: Map++<++String, Object++>++
+* outputs: Map++<++String, Object++>++
+* metadata: Map++<++String, Object++>++
 
 An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* |
 curl -X GET ++\++
-
 'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'
 |===
 
-===  /usertasks/instance/`{taskId}`/transition
+===  /usertasks/instance/{taskId}/transition
 [cols="1,1"]
 |===
 |*Type* |GET
-|*Type* |GET
-
-| |
 
 |*Description* |It returns the allowed transitions for a specific User
 Task given its task ID and assigned to a given user and a given group
 
-| |
+|*Inputs*
+a|* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Inputs* |
-
-| |
-
-a|
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-
-*Output*
-
-|A JSON Collection of _UserTaskTransitionView_ elements, that represents
+|*Output*
+a|A JSON Collection of _UserTaskTransitionView_ elements, that represents
 the list of allowed transition for a specific User Task. A
 _UserTaskTransitionView_ element contains:
 
-| |
+* transitionId: String ("activate", "claim", "release", "complete",
+"skip", “fail”)
+* source: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* target: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
 
-a|
-* *transitionId: String ("activate", "claim", "release", "complete",
-"skip", “fail”)*
-* *source: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *target: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-
-*Example*
-
+|*Example*
 |curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/transition?user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/transition
+===  /usertasks/instance/{taskId}/transition
 [cols="1,1"]
 |===
 |*Type* |POST
@@ -181,109 +163,100 @@ _ERROR)_*
 |*Description* |It applies a transition for a specific User Task given
 its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *transitionInfo: a JSON object that contains:*
-** *transitionId: String ("activate", "claim", "release", "complete",
-"skip", “fail”)*
-** *data: Map++<++String, Object++>++*
+|*Inputs* 
+a|* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* transitionInfo: a JSON object that contains:
+** transitionId: String ("activate", "claim", "release", "complete",
+"skip", “fail”)
+** data: Map++<++String, Object++>++
 
-|*Output* |
-A JSON _UserTaskView_ Element which represents the User Task to which
-the given transition was applied.
+|*Output* a|A JSON _UserTaskView_ Element which represents the User Task to which the given transition was applied.
 
-|*UserTaskView:* |
-* *id: String*
-* *userTaskid: String*
-* *status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *taskName: String*
-* *taskDescription: String*
-* *taskPriority: String*
-* *potentialUsers: Set++<++String++>++*
-* *potentialGroups: Set++<++String++>++*
-* *adminUsers: Set++<++String++>++*
-* *adminGroups: Set++<++String++>++*
-* *excludedUsers: Set++<++String++>++*
-* *externalReferenceId: String*
-* *actualOwner: String*
-* *inputs: Map++<++String, Object++>++*
-* *outputs: Map++<++String, Object++>++*
-* *metadata: Map++<++String, Object++>++*
+*UserTaskView:*
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+* id: String
+* userTaskid: String
+* status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* taskName: String
+* taskDescription: String
+* taskPriority: String
+* potentialUsers: Set++<++String++>++
+* potentialGroups: Set++<++String++>++
+* adminUsers: Set++<++String++>++
+* adminGroups: Set++<++String++>++
+* excludedUsers: Set++<++String++>++
+* externalReferenceId: String
+* actualOwner: String
+* inputs: Map++<++String, Object++>++
+* outputs: Map++<++String, Object++>++
+* metadata: Map++<++String, Object++>++
+
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |
-curl -H "Content-Type: application/json" -H "Accept: application/json"
+|*Example* 
+a|curl -H "Content-Type: application/json" -H "Accept: application/json"
 
-*-X POST
+-X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}?user=++{++user}&group=++{++groups}'
--d '++{++transitionId: String, data: Map++<++String, Object++>++}'*
+-d '++{++transitionId: String, data: Map++<++String, Object++>++}'
 |===
 
-===  /usertasks/instance/`{taskId}`/inputs
+===  /usertasks/instance/{taskId}/inputs
 [cols="1,1"]
 |===
 |*Type* |PUT
-
 |*Description* |It associates input properties with a specific User Task
 given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* data: Map++<++String, Object++>++ The input properties
 
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *data: Map++<++String, Object++>++ The input properties*
-
-|*Output* |
+|*Output* a|
 A JSON _UserTaskView_ Element which represents the User Task to which
 the given input parameters were added.
 
-|*UserTaskView:* |
-* *id: String*
-* *userTaskid: String*
-* *status: String(_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *taskName: String*
-* *taskDescription: String*
-* *taskPriority: String*
-* *potentialUsers: Set++<++String++>++*
-* *potentialGroups: Set++<++String++>++*
-* *adminUsers: Set++<++String++>++*
-* *adminGroups: Set++<++String++>++*
-* *excludedUsers: Set++<++String++>++*
-* *externalReferenceId: String*
-* *actualOwner: String*
-* *inputs: Map++<++String, Object++>++*
-* *outputs: Map++<++String, Object++>++*
-* *metadata: Map++<++String, Object++>++*
+*UserTaskView:* 
 
- +
+* id: String
+* userTaskid: String
+* status: String(_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* taskName: String
+* taskDescription: String
+* taskPriority: String
+* potentialUsers: Set++<++String++>++
+* potentialGroups: Set++<++String++>++
+* adminUsers: Set++<++String++>++
+* adminGroups: Set++<++String++>++
+* excludedUsers: Set++<++String++>++
+* externalReferenceId: String
+* actualOwner: String
+* inputs: Map++<++String, Object++>++
+* outputs: Map++<++String, Object++>++
+* metadata: Map++<++String, Object++>++
+
+
 An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|Example a|
-curl -X PUT ++\++
+|*Example* a| curl -X PUT ++\++
 
 'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'
 ++\++
-
 -H 'accept: application/json' ++\++
-
 -H 'Content-Type: application/json' ++\++
-
--d '++{++
-
-"variable": "value"
-
+-d '++{++ "variable": "value"
 }'
 |===
 
-===  /usertasks/instance/`{taskId}`/outputs
+===  /usertasks/instance/{taskId}/outputs
 [cols="1,1"]
 |===
 |*Type* |PUT
@@ -291,56 +264,50 @@ curl -X PUT ++\++
 |*Description* |It associates output properties with a specific User
 Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *data: Map++<++String, Object++>++ The output properties*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* data: Map++<++String, Object++>++ The output properties
 
-|*Output* |A JSON _UserTaskView_ Element which represents the User Task to which
+|*Output* a|A JSON _UserTaskView_ Element which represents the User Task to which
 the given output parameters were added.
 
-|*UserTaskView:* |
-* *id: String*
-* *userTaskid: String*
-* *status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_*
-* *taskName: String*
-* *taskDescription: String*
-* *taskPriority: String*
-* *potentialUsers: Set++<++String++>++*
-* *potentialGroups: Set++<++String++>++*
-* *adminUsers: Set++<++String++>++*
-* *adminGroups: Set++<++String++>++*
-* *excludedUsers: Set++<++String++>++*
-* *externalReferenceId: String*
-* *actualOwner: String*
-* *inputs: Map++<++String, Object++>++*
-* *outputs: Map++<++String, Object++>++*
-* *metadata: Map++<++String, Object++>++*
- +
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+*UserTaskView:* 
+
+* id: String
+* userTaskid: String
+* status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
+_ERROR)_
+* taskName: String
+* taskDescription: String
+* taskPriority: String
+* potentialUsers: Set++<++String++>++
+* potentialGroups: Set++<++String++>++
+* adminUsers: Set++<++String++>++
+* adminGroups: Set++<++String++>++
+* excludedUsers: Set++<++String++>++
+* externalReferenceId: String
+* actualOwner: String
+* inputs: Map++<++String, Object++>++
+* outputs: Map++<++String, Object++>++
+* metadata: Map++<++String, Object++>++
+
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|Example a|
-curl -X PUT ++\++
+|Example a| curl -X PUT ++\++
 
 'http://localhost:8080/usertasks/instance/++{++taskId}/output?group=managers&user=manager'
 ++\++
-
 -H 'accept: application/json' ++\++
-
 -H 'Content-Type: application/json' ++\++
-
 -d '++{++
-
 "variable": "value"
-
 }'
-
 |===
 
-===  /usertasks/instance/`{taskId}`/comments
+===  /usertasks/instance/{taskId}/comments
 [cols="1,1"]
 |===
 |*Type* |GET
@@ -348,84 +315,81 @@ curl -X PUT ++\++
 |*Description* |It returns the all the comments associated with a
 specific User Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |A JSON Collection of Comment elements. This is composed by:
-* *Id: String*
-* *content: String*
-* *updatedAt: Date*
-* *updatedBy: String*
+|*Output* a|A JSON Collection of Comment elements. This is composed by:
+* Id: String
+* content: String
+* updatedAt: Date
+* updatedBy: String
 
 |*Example* |
 |curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/comments
+===  /usertasks/instance/{taskId}/comments
 [cols="1,1"]
 |===
 |*Type* |POST
 
 |*Description* |It adds a comment for a specific User Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *commentInfo: a JSON object that contains:*
-** *comment: String*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* commentInfo: a JSON object that contains:
+** comment: String
 
-|*Output* |
-A JSON _Comment_ element, representing the added _Comment_ which matches the given parameters. This is composed by:
+|*Output* a|A JSON _Comment_ element, representing the added _Comment_ which matches the given parameters. This is composed by:
 
-* *Id: String*
-* *content: String*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* content: String
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |
-curl -H "Content-Type: application/json" -H "Accept: application/json"
+|*Example* a|curl -H "Content-Type: application/json" -H "Accept: application/json"
 
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?user=++{++user}&group=++{++groups}'
--d '++{++comment: String}'*
+-d '++{++comment: String}'
 |===
 
-===  /usertasks/instance/`{taskId}`/comments/`{commentId}`
+===  /usertasks/instance/{taskId}/comments/{commentId}
 [cols="1,1"]
 |===
 |*Type* |GET
 
 |*Description* |It retrieves a specific comment for a specific User Task given its comment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |
-A JSON _Comment_ element, representing the _Comment_ which matches the given parameters. This is composed by:
+|*Output* a|A JSON _Comment_ element, representing the _Comment_ which matches the given parameters. This is composed by:
 
-* *Id: String*
-* *content: String*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* content: String
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |curl -X GET
+|*Example* a|curl -X GET
 'http://localhost:8080/usertask/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/comments/`{commentId}`
+===  /usertasks/instance/{taskId}/comments/{commentId}
 
 [cols="1,1"]
 |===
@@ -433,27 +397,27 @@ matches with the given parameters doesn’t exist.
 
 |*Description* |It updates a specific comment for a specific User Task given its comment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *commentInfo: a JSON object that contains:*
-** *comment: String*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* commentInfo: a JSON object that contains:
+** comment: String
 
-|*Output* |
+|*Output* a|
 A JSON _Comment_ element, representing the updated _Comment_ which
 matches the given parameters. This is composed by:
 
-* *Id: String*
-* *content: String*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* content: String
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |
+|*Example* a|
 curl -H "Content-Type: application/json" -H "Accept: application/json"
 
 -X POST
@@ -461,7 +425,7 @@ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -d '++{++comment: String}'
 |===
 
-===  /usertasks/instance/`{taskId}`/comments/`{commentId}`
+===  /usertasks/instance/{taskId}/comments/{commentId}
 
 [cols="1,1"]
 |===
@@ -469,55 +433,56 @@ curl -H "Content-Type: application/json" -H "Accept: application/json"
 
 |*Description* |It deletes a specific comment for a specific User Task given its comment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |
+|*Output* a|
 A JSON _Comment_ element, representing the deleted _Comment_ which
 matches the given parameters. This is composed by:
 
-* *Id: String*
-* *content: String*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* content: String
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |curl -X DELETE
+|*Example* a|curl -X DELETE
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/attachments
+===  /usertasks/instance/{taskId}/attachments
 
 [cols="1,1"]
 |===
 |*Type* |GET
 
-|*Description* |It returns the all the Attachments associated with a specific User Task given its task ID and assigned to a given user and a given group
+|*Description* a|It returns the all the Attachments associated with a specific User Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |A JSON Collection of _Attachments_ elements. This is composed by:
-* *Id: String*
-* *name: String*
-* *content: Uri*
-* *updatedAt: Date*
-* *updatedBy: String*
+|*Output* a|A JSON Collection of _Attachments_ elements. This is composed by:
 
-|*Example* |
+* Id: String
+* name: String
+* content: Uri
+* updatedAt: Date
+* updatedBy: String
+
+|*Example* a|
 curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?
 user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/attachments
+===  /usertasks/instance/{taskId}/attachments
 
 [cols="1,1"]
 |===
@@ -525,25 +490,25 @@ user=++{++user}&group=++{++groups}'
 
 |*Description* |It adds an Attachment for a specific User Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *attachmentInfo: a JSON object that contains:*
-** *name: String*
-** *uri: Uri*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* attachmentInfo: a JSON object that contains:
+** name: String
+** uri: Uri
 
-|*Output* |
+|*Output* a|
 A JSON _Attachments_ element, representing the __Attachment __which
 matches the given parameters. This is composed by:
 
-* *Id: String*
-* *name: String*
-* *content: Uri*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* name: String
+* content: Uri
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
@@ -554,38 +519,36 @@ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -d '++{++name: String, uri: URI}'*
 |===
 
-===  /usertasks/instance/`{taskId}`/attachments/`{attachmentId}`
+===  /usertasks/instance/{taskId}/attachments/{attachmentId}
 
 [cols="1,1"]
 |===
 |*Type* |GET
 
-|*Description* |It retrieves a specific Attachment for a specific User Task given its attachment ID, task ID and assigned to a given user and a given group
+|*Description* a|It retrieves a specific Attachment for a specific User Task given its attachment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |
-A JSON _Attachment_ element, representing the _Attachment_ which matches
+|*Output* a|A JSON _Attachment_ element, representing the _Attachment_ which matches
 the given parameters. This is composed by:
 
-* *Id: String*
-* *name: String*
-* *content: Uri*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* name: String
+* content: Uri
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* |curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
 |===
 
-===  /usertasks/instance/`{taskId}`/attachments/`{attachmentId}`
+===  /usertasks/instance/{taskId}/attachments/{attachmentId}
 
 [cols="1,1"]
 |===
@@ -593,36 +556,36 @@ matches with the given parameters doesn’t exist.
 
 |*Description* |It updates a specific Attachment for a specific User Task given its attachment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
-* *attachmentInfo: a JSON object that contains:*
-** *name: String*
-** *uri: Uri*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
+* attachmentInfo: a JSON object that contains:
+** name: String
+** uri: Uri
 
-|*Output* |
+|*Output* a|
 A JSON _Attachment_ element, representing the updated _Attachment_ which matches the given parameters. This is composed by:
 
-* *Id: String*
-* *name: String*
-* *content: Uri*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* name: String
+* content: Uri
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
 curl -H "Content-Type: application/json" -H "Accept: application/json"
 
-*-X POST
+-X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}
--d '++{++name: String, uri: URI}'*
+-d '++{++name: String, uri: URI}'
 |===
 
-===  /usertasks/instance/`{taskId}`/attachments/`{attachmentId}`
+===  /usertasks/instance/{taskId}/attachments/{attachmentId}
 
 [cols="1,1"]
 |===
@@ -630,27 +593,27 @@ curl -H "Content-Type: application/json" -H "Accept: application/json"
 
 |*Description* |It deletes a specific comment for a specific User Task given its attachment ID, task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *commentId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* commentId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
-|*Output* |
+|*Output* a|
 A JSON _Attachment_ element, representing the deleted _Attachment_ which
 matches the given parameters. This is composed by:
 
-* *Id: String*
-* *name: String*
-* *content: Uri*
-* *updatedAt: Date*
-* *updatedBy: String*
+* Id: String
+* name: String
+* content: Uri
+* updatedAt: Date
+* updatedBy: String
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |curl -X DELETE
+|*Example* a|curl -X DELETE
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
 |===
 
-To know more how the passed QueryParameters representing the user and the groups associated to a given User Task are integreted with the native BAMOE authentication system, please refer to the Security chapter of this guide.
+To know more how the passed QueryParameters representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.
