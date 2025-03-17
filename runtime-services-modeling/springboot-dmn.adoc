@@ -31,9 +31,9 @@ This is needed to embed SCESIM testing functionality
 ----
 org.springframework.boot:spring-boot-devtools
 ----
-This is needed to enable hot-reload during development.
+This is needed to enable hot-reload during development
 
-Lastly, the following plugins are required to correctly build and package the application:
+Finally, the following plugins are required to correctly build and package the application:
 
 [source]
 ----
@@ -43,8 +43,8 @@ org.springframework.boot:spring-boot-maven-plugin
 
 == Setup
 
-The core of the BAMOE-application configuration is inside the root pom.
-AFirst of all, the BAMOE target version must be identified.
+The core of the BAMOE-application configuration is inside the root POM.
+First of all, the BAMOE target version must be identified.
 Then, there is a Bill of Materials (BOM) that is used to simplify dependency management, to be declared in the dependencyManagement section, enabling you to control dependencies and their versions via the BOM without changing the POM file. 
 
 [source]
@@ -53,7 +53,7 @@ org.kie.kogito:kogito-spring-boot-bom
 org.springframework.boot:spring-boot-devtools
 ----
 
-Here is an example of a pom with SCESIM and devtools support:
+Here is an example of a POM with SCESIM and devtools support:
 
 [source]
 ----
@@ -171,7 +171,7 @@ Lastly, a 'logback.xml' file should be provided to customize logging output.
 == Structure
 
 A Decision application has the usual Maven structure
-(module)
+(module).
 
 [source]
 ----
@@ -184,9 +184,9 @@ A Decision application has the usual Maven structure
       /resources
 ----
 
-Model(s), 'application.properties' and 'logback.xml' files have to be written under the 'main/resource directory' (to change the behavior during test execution, 'application.properties' and 'logback.xml' could also be written under 'test/resources').
+Model(s), 'application.properties' and 'logback.xml' files have to be written under the 'main/resource directory' (to change the behavior during test execution, 'application.properties' and 'logback.xml' could also be written in 'test/resources').
 
-Generated code will be generated under 'target/generated-sources/kogito'.
+Generated code will be generated in 'target/generated-sources/kogito'.
 
 == Code
 
@@ -206,9 +206,11 @@ public class KogitoSpringbootApplication {
 
 == Testing
 
-For full integration tests, testing classes should be annotated as @SpringBootTest, eventually injecting required managed properties or beans.
+For full integration tests, testing classes should be annotated as '@SpringBootTest', eventually injecting required managed properties or beans.
 Here is an example that verifies the response received when posting an HTTP request on a given (automatically generated) entry point:
 
+[source]
+----
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KogitoSpringbootApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TrafficViolationTest {
@@ -240,9 +242,11 @@ public class TrafficViolationTest {
     }
 }
 
+----
+
 == SCESIM
 
-Scenario Simulation (SCESIM) is a testing tool used to verify the response of the decision engine following a series of invocations. It uses a *.scesim file that describes all the tested scenarios. The file may be created or edited using the Decision editor, and should be saved in the 'test/resources' folder. In addition, a runner class is required in the src/test/java/testscenario package; here is an example:
+Scenario Simulation (SCESIM) is a testing tool used to verify the response of the decision engine following a series of invocations. It uses a '*.scesim' file that describes all the tested scenarios. The file may be created or edited using the Decision editor, and should be saved in the 'test/resources' folder. In addition, a runner class is required in the 'src/test/java/testscenario' package; here is an example:
 
 [source]
 ----
@@ -252,7 +256,7 @@ public class KogitoScenarioJunitActivatorTest { }
 
 == Compilation
 
-During Maven’s compilation phase, the kogito-maven-plugin scans the main/resources directory to find any *.dmn files. For each discovered file, the decision engine creates REST classes, with endpoints specifically to:
+During Maven’s compilation phase, the 'kogito-maven-plugin' scans the 'main/resources' directory to find any '*.dmn' files. For each discovered file, the decision engine creates REST classes, with endpoints specifically to:
 
 .	Retrieve the original model
 .	Execute the model
@@ -287,8 +291,8 @@ mvn clean verify
 
 For medium to large sized applications, recompiling and restarting the application upon code changes could be cumbersome and time-consuming. To simplify that, the Spring Boot framework offers https://docs.spring.io/spring-boot/docs/3.2.6/reference/html/using.html#using.devtools[devtools]
 
-The caveat is that the classpath has to be "manually" rebuilt to trigger the reload. 
-Since the BAMOE-application also relies on automatic code-generation driven by models and executed by the kogito-maven-plugin, the approach is to:
+The condition is that the classpath has to be "manually" rebuilt to trigger the reload. 
+Since the BAMOE-application also relies on automatic code-generation driven by models and executed by the 'kogito-maven-plugin', the approach is to:
 
 .	Create a mvn clean compile command/button (details vary by IDE) to be fired on-demand
 .	Start the application with mvn clean compile spring-boot:run
@@ -297,14 +301,15 @@ Since the BAMOE-application also relies on automatic code-generation driven by m
 == Debugging
 
 The way to debug the application without using specific IDE tools or plug-ins, relies on the standard Java remote debug setup:
-.	Create a remote debug configuration on port 8000 (details vary by IDE)
-.	Start application in debug mode
+
+-	Create a remote debug configuration on port 8000 (details vary by IDE)
+-	Start application in debug mode
 [source]
 ----
 mvn clean compile spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 ----
-.	Put a breakpoint in some of the code-generated sources
-.	Connect the remote debugger
+-	Put a breakpoint in some of the code-generated sources
+- Connect the remote debugger
 
 == Package and run
 
@@ -314,12 +319,7 @@ Standard Maven/Java commands are required to package and start the generated app
 .	java -jar ./target/(name_of_the_application).jar
 
 
-//After you create your project, you can create or import Decision Model and Notation (DMN) decision models and Drools Rule Language (DRL) business rules in the `src/main/resources` folder of your project. You can also include Java classes in the `src/main/java` folder of your project that act as Java services or provide implementations that can be called from decisions.
 
-//The example for this procedure is a basic Kogito microservice that provides a REST endpoint `/persons`. This endpoint is automatically generated based on an example `PersonDecisions.dmn` DMN model to make decisions based on the data being processed.
-
-//The business decision contains the decision logic of the {PRODUCT} service. You can define business rules and decisions in different ways, such as with DMN models or DRL rules. The example for this procedure uses a DMN model.
-//
 . In the Maven project that was created in the xref:../getting-started/project-setup.adoc[Initial Project Setup and Walkthrough] section, navigate to the `src/main/java/com/ibm` folder and add the following `Person.java` file:
 +
 --
