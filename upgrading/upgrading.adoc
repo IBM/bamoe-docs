@@ -563,18 +563,17 @@ and
 
 You must upgrade all entry points in your application to use the User Task API layers when operating with User Tasks. 
 
-The Returned JSON object contains more detailed data. That means, you need to adapt how consuming the entrypoint data according to the returned data.
+The Returned JSON object contains more detailed data. You will therefore need to adapt how the entrypoint data is consumed by your application.
 
-Therefore, in most of the case, migrating to the new API requires:
-
-Here, you can find a description on how migrating to the new API based
+The following sections show how the API calls changed based
 on the most important use cases:
 
 [cols=",",]
 |===
-2+| *Example 1 – Show Tasks assigned to a user / groups*
+2+| *Example 1 - Show Tasks assigned to a user / groups*
 
 |*Process API* |curl -X GET ++\++
+
 'http://localhost:8080/++{++processId}/++{++uuid}/tasks?user=manager&group=managers'
 
 |*User Task API* a|
@@ -582,7 +581,7 @@ curl -X GET ++\++
 
 'http://localhost:8080/usertasks/instance?group=managers&user=manager'
 
-2+|*Example 2 – Show a precise Task assigned to a user / groups*
+2+|*Example 2 - Show a precise Task assigned to a user / groups*
 
 |*Process API* a|
 curl -X GET ++\++
@@ -592,14 +591,16 @@ curl -X GET ++\++
 |*New API* a|
 curl -X GET ++\++
 
-'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'*
+'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'
 |===
 
-The JSON returned by the User Task API to represents a Task is significantly different from the JSON returned by the Process API.
+The JSON returned by the User Task API to represent a Task is significantly different from the JSON returned by the Process API.
 
-Here, an example of the two returned objects for both endpoints. The new User Tasks API returns:
+Here, an example of the two returned objects for both endpoints.
 
-[source,docker,subs="attributes+"]
+The new User Tasks API returns the following information:
+
+[source,json,subs="attributes+"]
 ----
 {
     "id": "e447c247-abc2-4ed4-a7ab-ef4ee2fe4a71",
@@ -651,11 +652,9 @@ Here, an example of the two returned objects for both endpoints. The new User Ta
 
 ----
 
-Task Information provided by the New User Tasks API
+While the Process API returns the following task information:
 
-While the Current Process API returns: 
-
-[source,docker,subs="attributes+"]
+[source,json,subs="attributes+"]
 ----
 [
   {
@@ -685,265 +684,207 @@ While the Current Process API returns:
 ]
 ----
 
-Task Information provided by the Current Process API
+The main differences are:
 
-Those differences consist in:
-
-As underlined previously, User Tasks IDs are not the same.
-
-The assigned ID in the for the Task in the new User Tasks API
+* The User Tasks IDs will not be the same.
++
+The assigned ID for the Task in the new User Tasks API
 (e447c247-abc2-4ed4-a7ab-ef4ee2fe4a71) is scoped inside the User Tasks
-subsystem. That means that id can be used in that subsystem only, and it’s the ID to use as taskID parameter in all the
+subsystem, and can only be used in that subsystem. It is the ID to be used as taskID parameter in all the
 entrypoints defined in the new User Tasks API. The rest of the engine is
-out-of-scope, so using that ID in the current Process API entrypoint
+out of scope. Using this task ID in a Process API entrypoint
 will lead to an error.
 
-* *The externalReferenceId element represents the Work Item ID, that is
-how the Process API identifies this User Task at global level. That is,
-in fact, the returned ID for the User Task using the current Process
-API. *
-* *Several new data related to the assigned permissions of the Tasks
-have been added, like the actual owner, potential users and groups and
-excluded users*
-* *The parameters object present in the old API is now renamed to input.
-This represents a Map of String, Objects entries that the user can set
-as the User Task input. It’s possible to modify this list adding more
-entries with a specific entrypoint*
-* *The parameters object present in the old API is now renamed to
-output. This represents a Map of String, Objects entries that the user
-can set as the User Task output. It’s possible to modify this list
-adding more entries with a specific entrypoint*
-* *The new API Task object now contains a Metadata object. This contains
-relevant properties that describes the BPMN asset *
+* The `externalReferenceId` element represents the Work Item ID, which is how the Process API identifies a User Task at the global level. The value is the same as the Task ID if you use Process API. 
 
-*Having a dedicated API for User Tasks, it is now possible to directly
-put new Input and Output data for a given User Task, using the following
-entrypoints: (with the previous Process API that was not possible).*
+* New data related to the assigned permissions for the Tasks
+has been added, such as the actual owner, potential users and groups and excluded users
+
+* The `parameters` object present in the old API has become `inputs` and `outputs`. These represents a Map of String, Objects entries that you can set
+as the User Task input or output. You can modify this list adding more entries with a specific entrypoint.
+
+* The new API Task object now contains a Metadata object. This contains relevant properties that describes the BPMN asset 
+
+With the dedicated API for User Tasks, it is now possible to directly put new Input and Output data for a given User Task, using the following entrypoints:
 
 [cols=",",]
 |===
-| |*Example 3 – Add Inputs data*
+2+|*Example 3 – Add Inputs data*
 
-| |
-
-|*Process API* |Not possibile to modify inputs in the previous API
+|*Process API* |Not possible to modify inputs in the previous API
 version.
 
-| |
+|*New API* a|
+curl -X PUT ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"variable": "value"
+
+}'
+
+2+| *Example 4 - Add Output data*
+
+|*Process API* |Not possible to pass Output data to a User Task when sending a termination (eg. completion) phase update call.
 
 |*New API* a|
 curl -X PUT ++\++
 
-*'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'
-++\++*
+'http://localhost:8080/usertasks/instance/++{++taskId}/outputs?group=managers&user=manager'
+++\++
 
-* -H 'accept: application/json' ++\++*
+-H 'accept: application/json' ++\++
 
-* -H 'Content-Type: application/json' ++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -d '++{++*
+-d '++{++
 
-* "variable": "value"*
+"variable": "value"
 
-*}'*
-
-| |
-
-| |*Example 4 – Add Output data*
-
-| |
-
-|*Process API* |It was not possibile to pass Output data to a User Task
-when sending a termination (eg. completion) phase update call.
-
-| |
-
-|*New API* a|
-curl -X PUT ++\++
-
-*'http://localhost:8080/usertasks/instance/++{++taskId}/outputs?group=managers&user=manager'
-++\++*
-
-* -H 'accept: application/json' ++\++*
-
-* -H 'Content-Type: application/json' ++\++*
-
-* -d '++{++*
-
-* "variable": "value"*
-
-*}'*
-
-| |
+}'
 |===
 
-*Now, some examples on how to manage Comments and Attachments*
+Here are some examples on how to manage Comments and Attachments
 
 [cols=",",]
 |===
-| |*Example 5 – Add Comments*
-
-| |
+2+|*Example 5  Add Comments*
 
 |*Process API* |Not possibile to add comments
 
-| |
-
 |*New API* a|
 curl -X POST ++\++
 
-* 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?
-group=managers&user=manager' ++\++*
+'http://localhost:8080/usertasks/instance/++{++taskId}/comments?
+group=managers&user=manager' ++\++
 
-* -H 'accept: application/json' ++\++*
+-H 'accept: application/json' ++\++
 
-* -H 'Content-Type: application/json' ++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -d '++{++*
+-d '++{++
 
-* "comment": "test"*
+"comment": "test"
 
-*}'*
+}'
 
-| |
-
-| |*Example 6 – Add Attachments*
-
-| |
+2+| *Example 6 - Add Attachments*
 
 |*Process API* |Not possibile to add attachments
 
-| |
-
 |*New API* a|
 curl -X POST ++\++
 
-*
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?group=managers&user=manager'
-++\++*
+++\++
 
-* -H 'accept: application/json' ++\++*
+-H 'accept: application/json' ++\++
 
-* -H 'Content-Type: application/json' ++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -d '++{++*
+-d '++{++
 
-* "uri": "http://www.bamoe.com",*
+"uri": "http://www.bamoe.com",
+"name": "bamoe"
 
-* "name": "bamoe"*
-
-*}'*
-
-| |
+}'
 |===
 
-*Similar operations (GET, DELETE) can be performed against Comments and
-Attachments. Please refer to the previous paragraph for the precise
-endpoint definitions.*
+Similar operations (GET, DELETE) can be performed against Comments and
+Attachments. The precise endpoint definitions are shown above.
 
-*As the last use case, here is shown how to apply a transition to a
-given User Task.* +
-*The transition scope is to advance a User Task status, moving it from
-one status to another (transitionID), which can be ("activate", "claim",
-"release", "complete", "skip", or “fail”). The following example shows
-how to complete a User Task.*
+The following examples show how to apply a transition to a
+given User Task.
+The transition scope is to advance a User Task status, moving it from
+one status to another (transitionID), where the status can be: "activate", "claim", "release", "complete", "skip", or “fail”. The following example shows
+how to complete a User Task.
 
 [cols=",",]
 |===
-| |*Example 7 – Approve User Task*
-
-| |
+2+|*Example 7 - Approve User Task*
 
 |*Process API* a|
 curl -X POST ++\++
+'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}?user=admin&group=managers'
+++\++
 
-*'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}?user=admin&group=managers'
-++\++*
+-H 'accept: application/json' ++\++
 
-* -H 'accept: application/json' ++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -H 'Content-Type: application/json' ++\++*
+-d '++{++
 
-* -d '++{++*
+"approved": "true"
 
-* "approved": "true"*
+}'
 
-*}'*
+OR
 
-*OR*
+curl -X POST ++\++
+'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}/phases/++{++phaseId}?user=admin&group=managers'
+++\++
 
-*curl -X POST ++\++*
+-H 'accept: application/json' ++\++
 
-*'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}/phases/++{++phaseId}?user=admin&group=managers'
-++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -H 'accept: application/json' ++\++*
+-d '++{++
 
-* -H 'Content-Type: application/json' ++\++*
+"approved": "true"
 
-* -d '++{++*
-
-* "approved": "true"*
-
-*}'*
-
-| |
+}'
 
 |*New API* a|
 curl -X POST ++\++
 
-*
 'http://localhost:8080/usertasks/instance/++{++taskId}/transition?group=managers&user=manager'
-++\++*
+++\++
 
-* -H 'accept: application/json' ++\++*
+-H 'accept: application/json' ++\++
 
-* -H 'Content-Type: application/json' ++\++*
+-H 'Content-Type: application/json' ++\++
 
-* -d '++{++*
+-d '++{++
 
-* "transitionId": "complete"*
+"transitionId": "complete"
 
-*}' *
-
-| |
+}' 
 |===
 
-*As you may notice, with Process API there are two ways to change the
+With the Process API there are two ways to change the
 User Task status. With the first entrypoint, the User Tasks change its
 status to complete, without specifying the phaseId. The second
 entrypoint gives the ability to pass a specific phaseId different than
-“complete”. It’s possible to pass output values in the same call (E.g.,
-“approved” = true)*
+“complete”. It is possible to pass output values in the same call (E.g.,
+“approved” = true)
 
-*The new User Task API requires that the transitionID is defined in the
-JSON payload, as in the example below. It’s not possible anymore to pass
-output values like in Process API, so if you need to put some output
-data, you need to call the Add Output entypoint described some examples
-below.*
+The new User Task API requires that the transitionID is defined in the
+JSON payload, as in the example below. It is no longer possible to pass
+output values as was done in the Process API, so if you need to put some output
+data, you need to call the Add Output entypoint described later.
 
-*A new feature that the new User Tasks API introduced is to provide an
+A new feature that the new User Tasks API introduced is to provide an
 endpoint that returns all reachable statuses that a given User Task can
-reach from the current status.*
+reach from the current status.
 
 [cols=",",]
 |===
-| |*Example 8 – Retrieve reachable status for a given User Task*
-
-| |
+2+|*Example 8 – Retrieve reachable status for a given User Task*
 
 |*Process API* |Not present
-
-| |
 
 |*New API* a|
 curl -X GET ++\++
 
-* 'http://localhost:8080/usertasks/instance/++{++taskId}/transition?
-group=managers&user=manager' ++\++*
-
-| |
+'http://localhost:8080/usertasks/instance/++{++taskId}/transition?
+group=managers&user=manager' ++\++
 |===
 
 === Migrating your PostgreSQL database
-<TBD>
+The database script package contain scripts that enable you to migrate a database that you set up with the technology preview for stateful workflow.
