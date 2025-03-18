@@ -181,7 +181,155 @@ This command should compile and package the process service into a Quarkus execu
 
 The first execution downloads any artifacts not yet available on the development environment
 
-==  Configuring the process runtime database
+== Enabling JDBC Persistence for {BAMOE} stateful processes
+
+{BAMOE} process service and all the {BAMOE} subsystems (Data Index, Data Audit, Job Service and User Tasks) use JDBC to persist
+ in relational databases. The supported databases are PostgreSQL and Microsoft SQL Server for production environments
+and H2 for development.
+
+All {BAMOE} components will rely on the default DataSource to establish the connection with the connection with
+the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
+guidelines.
+
+Configuring persistence for {BAMOE} requires a minimal  set of dependencies and configurations in your application. The
+minimal set of dependencies are:
+
+* Quarkus Agroal (_io.quarkus:quarkus-agroal_): Quarkus DataSource Connection Pool with Security and Transaction support
+* Database Specific Quarkus JDBC Driver (_io.quarkus:quarkus-jdbc-<db-type>_)
+* KIE Add-On Persistence JDBC (_org.kie:kie-addons-quarkus-persistence-jdbc_): Enables JDBC persistence for the process engine.
+
+NOTE: For full information about how to configure DataSources in Quarkus, please check the
+https://quarkus.io/version/3.15/guides/datasource#jdbc-configuration[Configure data sources in Quarkus] guide.
+
+=== Configuring JDBC Persistence for PostgreSQL
+
+To configure PostgreSQL persistence for your {BAMOE} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - PostgreSQL
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/bamoe-db}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+=== Configuring JDBC Persistence for Microsoft SQL Server
+
+To configure Microsoft SQL Server persistence for your {BAMOE} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-mssql</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Microsoft SQL Server
+quarkus.datasource.db-kind=mssql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0.0:1433;DatabaseName=bamoe-db;encrypt=true;trustServerCertificate=true;}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+==== {BAMOE} Microsoft SQL Server Mappings
+
+Additionally, if the {BAMOE} application includes the Data Index or Job Service, it's also required to add the `bamoe-mssql-mappings` dependency
+to ensure the correct behaviour of those components. This module includes the necessary Hibernate ORM mappings to help remapping
+some of the JPA entities used in both components. The mappings contained are:
+
+* META-INF/bamoe-data-index-orm.xml: This file remaps some entities from the data-index component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+    <groupId>com.ibm.bamoe</groupId>
+    <artifactId>bamoe-mssql-mappings</artifactId>
+    <version>${version.com.ibm.bamoe}</version>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+=== Configuring JDBC Persistence for H2 (Only for development)
+
+In Development environments, you can use H2 persistence for your {BAMOE} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-h2</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - H2
+quarkus.datasource.db-kind=h2
+datasource.devservices.properties.NON_KEYWORDS=VALUE,KEY
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+=== Configuring the process runtime database
 
 When deploying process service, you will need to configure the database so that the process runtime can persist data such as User Tasks, Audit logs, etc. To do that, {PRODUCT_SHORT} comes with a Flyway-based mechanism that automatically creates the database schema during startup. This is convenient in a development environment and is not adapted to production database instances.
 
@@ -193,40 +341,23 @@ A set of DDL (Data Definition Language) scripts for both supported databases (Po
 * Runtime Engine
 * User Tasks
 
-The script creates all the tables required by the features listed above to work. 
-
-The scripts are provided for the PostgreSQL database only.
-// what about MS SQL server?
-
-You can use standard PostgreSQL functionality to apply the scripts, such as:
-
-* pgAdmin Query Tool
-* A psql command (e.g., psql -h host -U username -d myDataBase -a -f myInsertFile)
+The script creates all the tables required by the features listed above to work.
 
 The scripts can be executed in any order, and the required tables will be created in the database that will be used by the {BAMOE} process service. 
 
-As well as manually executing the scripts you can use Flyway to automate the process of creating and maintaining database tables across patch releases. To avoid manual managament of the above scripts and their future update. To enable this feature, the following properties should be added in your project `application.property` file, which is found in `[your-project]/src/main/resources/application.properties`:
+In Development environments, you can use Kie Flyway to automate the process of creating and maintaining database tables across patch releases.
+To avoid manual management of the above scripts and their future update. To enable this feature, the following property
+should be added in your project `application.property` file, which is found in `application.properties`:
 
 * kie.flyway.enabled=true 
 
 The default is false.
 
-In a Quarkus-based application, the following properties are required to point to the database. 
-
-[source,properties]
-----
-quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=kogito-user
-quarkus.datasource.password=kogito-pass
-quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/kogito}
-quarkus.datasource.reactive.url=${QUARKUS_DATASOURCE_REACTIVE_URL:postgresql://0.0.0.0:5432/kogito}
-----
-
 If everything is correctly set, at the first project execution all the tables will be automatically added.
 
 The following sections contain a description of all tables that are created by the DDL script. 
 
-=== Runtime-persistence table
+=== Process Persistence tables
 
 [%autowidth]
 |===
@@ -242,7 +373,7 @@ The following sections contain a description of all tables that are created by t
 |process state from alive processes
 |===
 
-=== Data-index table
+=== Data-index tables
 
 [%autowidth]
 |===
@@ -315,7 +446,7 @@ The following sections contain a description of all tables that are created by t
 |user task instance potential users
 |===
 
-=== Jobs-service table
+=== Job Service tables
 
 [%autowidth]
 |===
@@ -328,7 +459,7 @@ The following sections contain a description of all tables that are created by t
 |use for clustering and to check which instance is the lead
 |===
 
-=== Data audit table
+=== Data Audit tables
 
 [%autowidth]
 |===
@@ -380,7 +511,7 @@ The following sections contain a description of all tables that are created by t
 |historical record of user task instance input/output variables change
 |===
 
-=== User task table
+=== User tasks tables
 [%autowidth]
 |===
 |Table |Description
