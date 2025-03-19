@@ -1,12 +1,11 @@
 = The User Tasks API
 include::../partials/attributes.adoc[]
 
-A User Task is a typical “workflow” Task where a human performer
+A User Task is a typical process or workflow task where a human
 performs the Task with the assistance of a software application and is scheduled through a task list manager.
 
-In the previous BAMOE versions (9.1.x, 9.0.x) it was possible to manage
-User Tasks relying on Process level API (Process API) offered to operate
-on any work item.
+In the previous version it was possible to manage
+User Tasks through the Process level API (Process API) offered to operate on any work item.
 
 In this version there is a new subsystem in the Runtime
 Engine, that is designed to work more effectively with User Tasks.
@@ -43,7 +42,7 @@ Entities:
 
 The following sections describe the User Task API in detail. 
 
-===  /usertasks/instance| 
+===  /usertasks/instance
 
 [cols="1,1"]
 |===
@@ -89,10 +88,10 @@ _ERROR)_
 
 |*Description* |It returns the User Task given its task ID and assigned to a given user and a given group
 
-|*Inputs* |
-* *taskId: String (PathParameter)*
-* *user: String (QueryParameter)*
-* *group: List++<++String++>++ (QueryParameter)*
+|*Inputs* a|
+* taskId: String (PathParameter)
+* user: String (QueryParameter)
+* group: List++<++String++>++ (QueryParameter)
 
 |*Output* a|A JSON _UserTaskView_ Element that describes the requested User Task
 assigned to a given user / group.
@@ -117,8 +116,8 @@ _ERROR)_
 * outputs: Map++<++String, Object++>++
 * metadata: Map++<++String, Object++>++
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
-matches with the given parameters doesn’t exist.
+A _UserTaskInstanceNotFoundException_ is thrown if there is no User Task that
+matches with the given parameters.
 
 |*Example* |
 curl -X GET ++\++
@@ -243,7 +242,7 @@ _ERROR)_
 * metadata: Map++<++String, Object++>++
 
 
-An _UserTaskInstanceNotFoundException_ is thrown if a User Task that
+A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a| curl -X PUT ++\++
@@ -273,7 +272,7 @@ Task given its task ID and assigned to a given user and a given group
 |*Output* a|A JSON _UserTaskView_ Element which represents the User Task to which
 the given output parameters were added.
 
-*UserTaskView:* 
+UserTaskView:
 
 * id: String
 * userTaskid: String
@@ -321,6 +320,7 @@ specific User Task given its task ID and assigned to a given user and a given gr
 * group: List++<++String++>++ (QueryParameter)
 
 |*Output* a|A JSON Collection of Comment elements. This is composed by:
+
 * Id: String
 * content: String
 * updatedAt: Date
@@ -514,9 +514,9 @@ matches with the given parameters doesn’t exist.
 |*Example* a|
 curl -H "Content-Type: application/json" -H "Accept: application/json"
 
-*-X POST
+-X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?user=++{++user}&group=++{++groups}'
--d '++{++name: String, uri: URI}'*
+-d '++{++name: String, uri: URI}'
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -616,4 +616,4 @@ matches with the given parameters doesn’t exist.
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
 |===
 
-To know more how the passed QueryParameters representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.
+To find out more how the passed `QueryParameters`` representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.
