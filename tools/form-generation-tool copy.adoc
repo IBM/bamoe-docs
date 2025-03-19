@@ -1,73 +1,39 @@
-= Form Generation
+= Form Generation tool
 
 include::../partials/attributes.adoc[]
 
-This is a functionality of the {VS_CODE_BUNDLE}. 
+The *{FORM_GENERATION_TOOL}* generates the web forms needed for the execution of processes (workflows).
 
-*Generation Prerequisities*
+== Tool Installation
+// TODO: what url to use?
+Download *{FORM_GENERATION_TOOL}* zip file available at https://www.ibm.com/support/pages/node/7151078[https://www.ibm.com/support/pages/node/7151078].
+The zip file contains three binary files of the same tool for multiple operating systems.
+Please choose the binary file according your operating system and extract it into desired destination.
+Then please make sure the binary file is executable.
 
-- Make sure your https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] project has been compiled, otherwise the CLI will not be able to find all the form schemas.
+.Make sure the binary file is executable - linux example
+[source,bash]
+----
+chmod a+x form-generation-cli-linux
+----
 
-You can generate forms by using the  existing https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] *process-compact-architecture-example* project available at https://www.ibm.com/support/pages/node/7151078[https://www.ibm.com/support/pages/node/7151078].
-You will find more example projects in this zip file, however *process-compact-architecture-example* requires the minimal effort to see forms in the action or you can use your own project.
+== Form Generation
+
+You can generate forms using the *{FORM_GENERATION_TOOL}* for any Workflow that requires input data.
+However, for this documentation, we will use existing https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] *jbpm-compact-architecture-example* project available at https://www.ibm.com/support/pages/node/7151078[https://www.ibm.com/support/pages/node/7151078].
+You will find more example projects in this zip file, however *jbpm-compact-architecture-example* requires the minimal effort to see forms in the action.
+Or you can use your own project.
+
 
 Browsing the linked examples, you may notice the projects use Maven.
 So when Maven builds an https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] project, Kie generates JSON schemas to represent the data models for both Workflows and User Tasks.
 The *{FORM_GENERATION_TOOL}* then locates those JSON Schemas in the project and, taking advantage of the Uniforms APIs, processes them and generates static forms as a resource in the project `src/main/resources/forms` folder.
 
+*Generation Prerequisities*
 
-The `Custom Forms Dev` functionality is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension). To run a command in VS Code, open the command palette using the keyboard shortcut `CTRL + SHIFT + P` for Windows and Linux or `CMD + SHIFT + P for macOS`.
+- Make sure your https://incubator.apache.org/projects/kie.html[Apache Kie,window=_blank] project has been compiled, otherwise the CLI won't be able to find all the form schemas.
 
-The `Custom Forms Dev` functionality is available in the `BAMOE Developer Tools: Generate form code for User Tasks` command. The command palette dynamically re-organizes based on user activity and input. For example, if you type 'BAMOE', it displays the available BAMOE Developer Tools commands.
-
-image::developer-tools/form-gen-generate-form-code.png[generate form code for user tasks]
-
-When you select `BAMOE Developer Tools: Generate form code for User Tasks`, you must enter the absolute path of the BAMOE project. By default, this field is auto-filled with the currently opened workspace.
-
-image::developer-tools/form-gen-project-folder.png[select folder]
-
-[NOTE]: 
-----
-As mentioned in 'Generation Prerequisites', the project must be compiled first; otherwise, the command will fail.
-----
-
-After entering the absolute path of BAMOE project, you must choose between `Bootstrap 4` and `PatternFly`, the two supported UI libraries. `Bootstrap 4` generates HTML code, while `PatternFly` generates React code.
-
-image::developer-tools/form-gen-libraries.png[libraries]
-
-Next, you must choose whether to generate form code for all User Tasks or specific User Tasks.
-
-image::developer-tools/form-gen-user-tasks.png[user tasks]
-
-If `Generate form code for specific User Tasks` is selected, an additional step appears, displaying a checkbox with a list of the project's User Tasks. The command  generates form code only for the selected tasks.
-
-image::developer-tools/form-gen-list-project-user-tasks.png[list of projects user tasks]
-
-If the VS Code does not show any errors, the form code is generated in the project’s `src/main/resources/custom-forms-dev folder`.
-
-image::developer-tools/form-gen-code-project-folder.png[form code in folder]
-
-If the selected forms already exist in the `custom-forms-dev` folder, an additional step prompts you to confirm whether to override the existing form files.
-
-image::developer-tools/form-gen-confirmation.png[confirmation]
-
-The override process will erase the current form and config files, even if the type does not match.
-
-For example:
-
-If the user already has a `PatternFly` form for the 'hiring' User Task (a .tsx file) but chooses to generate a `Bootstrap 4` form (an .html file), overriding will erase `hiring.tsx` and `hiring.config`, replacing them with `\hiring.html` and a new `hiring.config` file.
-
-[NOTE]: 
-----
-The form code generation process can be stopped at any time by pressing ESC.
-----
-
-
-
-
-
-
-//Once the *{FORM_GENERATION_TOOL}* binary file is extracted and executable you can start the *{FORM_GENERATION_TOOL}* from your command line.
+Once the *{FORM_GENERATION_TOOL}* binary file is extracted and executable you can start the *{FORM_GENERATION_TOOL}* from your command line.
 
 .Start the binary file - linux example
 [source,bash]
