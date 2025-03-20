@@ -2,15 +2,32 @@
 
 include::../partials/attributes.adoc[]
 
-This is a functionality of the {VS_CODE_BUNDLE} and is used to generate web forms for {PRODUCT_SHORT} and Apache Kie projects needed for the execution of processes. 
+This is a functionality of the {VS_CODE_BUNDLE} and is used to generate web forms for {PRODUCT_SHORT} and Apache Kie projects needed for the execution of processes. Form Generation is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension).
 
-Form Generation is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension).
+=== Form Type
+Form Generation function supports two form types:
+
+* *patternfly*: This type generates *.tsx* files using the *patternfly* library for styling the forms.
+* *bootstrap4*: This type generates *.html* files using the *bootstrap4* library for styling the forms.
+
+Furthermore, according to the file name extension, we can say that *.tsx* files are **React** forms and *.html* files are *plain html* forms.
+
+=== Form Config
+Each generated form, both *patternfly* and *bootstrap4*, has a corresponding *.config* file.
+Such config files contain schema information about the object that the form is generated for.
+Furthermore, the goal of this *.config* file is to load additional scripts and styles.
+
+For the *patternfly* forms, by default, no additional scripts or styles are loaded.
+
+For the *bootstrap4* forms, by default, we load `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts.
+
 
 == Generation Prerequisities
 
 - Make sure that your project is compiled, otherwise the command will not be able to find all the form schemas.
 
-You can generate forms by using the existing {PRODUCT_SHORT} project, *process-compact-architecture-example* available at https://www.ibm.com/support/pages/node/7151078[https://www.ibm.com/support/pages/node/7151078]. You will find more example projects in this zip file, however *process-compact-architecture-example* requires minimal effort to see forms in the action or you can use your own project.
+You can generate forms by using an existing {PRODUCT_SHORT} project, *process-compact-architecture-example* available at xref:../getting-started/examples.adoc[Example applications].
+
 
 == Form Generation
 
@@ -60,23 +77,6 @@ If the user already has a `PatternFly` form for the 'hiring' User Task (a .tsx f
 The form code generation process can be stopped at any time by pressing ESC.
 ====
 
-=== Form Type
-Form Generation function supports two form types:
-
-* *patternfly*: This type generates *.tsx* files using the *patternfly* library for styling the forms.
-* *bootstrap4*: This type generates *.html* files using the *bootstrap4* library for styling the forms.
-
-Furthermore, according to the file name extension, we can say that *.tsx* files are **React** forms and *.html* files are *plain html* forms.
-
-=== Form Config
-Each generated form, both *patternfly* and *bootstrap4*, has a corresponding *.config* file.
-Such config files contain schema information about the object that the form is generated for.
-Furthermore, the goal of this *.config* file is to load additional scripts and styles.
-
-For the *patternfly* forms, by default, no additional scripts or styles are loaded.
-
-For the *bootstrap4* forms, by default, we load `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts.
-
 == Form DevUI
 For Quarkus-based {PRODUCT_SHORT} projects, you can use and test them by using the *jBPM Quarkus DevUI* extension.
 
@@ -109,14 +109,6 @@ Then, in your browser, navigate to:
 ----
 http://localhost:8080/q/dev-ui/extensions
 ----
-
-[NOTE]
-====
-//TOD Add Link for the issue
-Currently *jbpm-compact-architecture-example* contains one wrong dependency that needs to be removed.
-Please remove `org.jbpm:jbpm-quarkus-devui-bom` from the project `pom.xml`.
-For more information, see xref:../introduction/release-notes/known-limitations.adoc[Known limitations].
-====
 
 On the displayed page, find this card and click *Forms*.
 
