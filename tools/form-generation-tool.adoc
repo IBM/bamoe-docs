@@ -6,7 +6,7 @@ This is a functionality of the {VS_CODE_BUNDLE} and is used to generate web form
 
 Form Generation is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension).
 
-*Generation Prerequisities*
+== Generation Prerequisities
 
 - Make sure that your project is compiled, otherwise the command will not be able to find all the form schemas.
 
@@ -60,86 +60,6 @@ If the user already has a `PatternFly` form for the 'hiring' User Task (a .tsx f
 The form code generation process can be stopped at any time by pressing ESC.
 ====
 
-
-
-
-
--
--
--
--
-//Once the *{FORM_GENERATION_TOOL}* binary file is extracted and executable you can start the *{FORM_GENERATION_TOOL}* from your command line.
-
-//.Start the binary file - linux example
-[source,bash]
-----
-./form-generation-cli-linux
-----
-
-This will start a wizard to help you generate the forms:
-
-First, set the path to your https://incubator.apache.org/projects/kie.html[Apache KIE,window=_blank] project.
-This example will use *jbpm-compact-architecture-example*.
-
-[source,bash]
-----
-Kogito Form Generation CLI
-===========================
- 
-This tool will help you generate forms for the Processes and User Tasks in your Kogito Projects.
-The tool will search for the User Tasks JSON schemas generated in your project, so make sure the project is build.
-The generated forms will be stored as resources in your project (in src/main/resources/forms folder).
- 
-? Type your Kogito Project path:---> /path/to/my/projects/jbpm-compact-architecture-example <---
-----
-
-Select one of the available Form types (Patternfly or Bootstrap 4).
-Select Bootstrap 4.
-Use the arrow keys to change the selection.
-
-[source,bash]
-----
-? Select the Form type:
-  patternfly
-❯ bootstrap
-----
-
-Confirm Selection, type *Y*, to start the Form Generation process.
-
-[source,bash]
-----
-Current selection:
-Project path: /path/to/my/projects/jbpm-compact-architecture-example
-Form type: bootstrap
- 
-? Do you want to continue? (Y/n) Y
-----
-
-
-[NOTE]
-====
-Currently there is an issue for the `Array` type.
-You will probably spot similar warning between log messages.
-This is a known and reported https://github.com/apache/incubator-kie-issues/issues/1313[issue].
-
-`Unsupported field type: Array`
-====
-
-
-Once the generation is done, browse to `/path/to/my/projects/jbpm-compact-architecture-example/src/main/resources/forms` folder.
-
-[source,bash]
-----
-ls /path/to/my/projects/jbpm-compact-architecture-example/src/main/resources/forms/
- 
-hiring.config
-hiring.html
-hiring_HRInterview.config
-hiring_HRInterview.html
-hiring_ITInterview.config
-hiring_ITInterview.html
-----
-//
 === Form Type
 Form Generation function supports two form types:
 
@@ -158,7 +78,7 @@ For the *patternfly* forms, by default, no additional scripts or styles are load
 For the *bootstrap4* forms, by default, we load `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts.
 
 == Form DevUI
-For Quarkus-based https://incubator.apache.org/projects/kie.html[Apache Kie, window=_blank] projects, you can use and test them by using the *jBPM Quarkus DevUI* extension.
+For Quarkus-based BAMOE projects, you can use and test them by using the *jBPM Quarkus DevUI* extension.
 
 To do so, just add the following dependency in your project `pom.xml`:
 
@@ -167,11 +87,11 @@ To do so, just add the following dependency in your project `pom.xml`:
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-quarkus-devui</artifactId>
-    <version>9.1.x-ibm-0001</version>
+    <version>9.2.x-ibm-0003</version>
 </dependency>
 ----
 Where 'x' is the product version.
-NOTE: This is already done for *jbpm-compact-architecture-example*.
+NOTE: This is already done for *process-compact-architecture-example*.
 
 And start the project in Dev mode with the command:
 
@@ -203,7 +123,7 @@ image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Quarkus Dev UI Card]
 Now you should see a list of all available forms that we listed via the command line earlier in this documentation.
 
 .Forms list
-image::tools/forms.png[Forms list]
+image::tools/form-gen-forms.png[Forms list]
 
 Choosing a form will present the option to adjust it.
 Continue with the *hiring* form.
@@ -215,36 +135,42 @@ Now you see two tabs: *Source* and *Connections*.
 The *Source* tab displays the form source code on the left side, while on the right side there is the form UI.
 
 .Hiring form
-image::tools/hiring.png[Hiring form]
+image::tools/form-gen-hiring.png[Hiring form]
 
-Let's remove this piece of the source code
+Tweak specific parts of the source code, for example:
+
 [source,html]
 ----
-<div class="alert alert-warning" role="alert">
-  <h4 class="alert-heading">Unsupported field type: Array</h4>
-  <p>Cannot find form control for property <code>candidateData.skills</code> with type <code>Array</code>.</p>
-  <hr />
-  <p class="mb-0">
-    Some complex property types, such as <code>Array</code> aren't yet supported, however, you can still write your own component into
-    the form and manually bind it.
-  </p>
-</div>
+<label for="candidateData.email">Email</label>
+----
+to,
+
+[source,html]
+----
+<label for="candidateData.email">Candidate Email</label>
+
 ----
 
-and click the *Execute form* button.
-You will immediately see the result.
+and click *Save*.
+The form reloads the applied changes.
 
 .Updated hiring form
-image::tools/hiring-updated.png[Updated hiring form]
+image::tools/form-gen-hiring-updated.png[Updated hiring form]
 
 The same functionality is available for the `React` forms.
+
+You can apply new changes to the HR Interview form as well.
+
+image::tools/form-gen-approve.png[Updated hiring form]
+
+Open the form and change `Approve' to `I approve this candidate!`.
 
 === Connections
 The *Connections* tab displays loaded scripts and styles.
 
 IMPORTANT: This tab is for loading external resources only.
 
-You can to load newer `bootstrap@5.1.3` version.
+You can load newer `bootstrap@5.1.3` version.
 
 To do it, update the `hiring.config` from:
 
