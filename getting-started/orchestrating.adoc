@@ -1,43 +1,43 @@
-= Orchestrating decisions and rules in 15 minutes 
+= Orchestrating Decisions and Rules in 15 minutes 
 include::../partials/attributes.adoc[]
 
-The following example is a workflow scenario in {PRODUCT} that demonstrates how you can use process definitions to orchestrate your {PRODUCT} decision services. The example of a traffic violations project describes how to use decisions within the processes and how to integrate decisions in an embedded way using the business rule tasks, which must be deployed with a process in the same application.
+The following example is a Workflow scenario in {PRODUCT} that demonstrates how you can use Workflows to orchestrate your {PRODUCT} Business Decision Services. The example of a traffic violation project describes how to use Decisions within Workflows and how to integrate Decisions in an embedded way using Business Rule Tasks, which must be deployed with a Workflow in the same application.
 
-NOTE: {PRODUCT} fully supports Straight-Through-Processing (STP) where processes are integrating decisions without any safe points and without persistence. For more {PRODUCT} examples that use process capabilities, see the references below. Stateful processing is provided as a technology preview (xref:../workflow/overview.adoc[Stateful processs overview]) in the {VERSION_910} and {VERSION_911}. 
+NOTE: {PRODUCT} fully supports Straight-Through Processing (STP), where Workflows integrate with Decisions without any human intervention, without persistence, and without waiting for timers to execute. For more {PRODUCT} examples that use Workflow capabilities, see the references below. Stateful Workflows is provided as a technology preview (xref:../workflow/overview.adoc[Overview of Stateful Workflows]) in the {VERSION_910} and {VERSION_911}, and is fully supported on {VERSION_920}.
 
-The following diagram illustrates how decisions are integrated with processes:
+The following diagram illustrates how Decisions are integrated with Workflows:
 
-.Embedded method to integrate a process with decisions in {PRODUCT}
-image::process-decisions-embedded-integration.png[Image of embedded method to integrate a process with decisions in {PRODUCT}]
+.Embedded method to integrate a Workflow with Decisions
+image::process-decisions-embedded-integration.png[Image of embedded method to integrate a Workflow with Decisions in {PRODUCT}]
 
 To view the complete project, see the xref:../getting-started/examples.adoc[`process-decisions-quarkus`] example application for Quarkus.
 
-The example of a traffic violations project describes how to use decisions within processes.
-Those decisions are then integrated using an embedded form using the business rule tasks.
-The tasks must be deployed with a process in the same application.
+The example of a traffic violations project describes how to use Decisions within Workflows.
+Those Decisions are then integrated using an embedded form using the Business Rule Tasks.
+The tasks must be deployed with a Workflow in the same application.
 
-In Kogito, the decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets, including BPMN, DMN, and DRL must be placed in the resources folder.
+In BAMOE, the Decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets, including BPMN, DMN, and DRL must be placed in the resources folder.
 
-When the example application is running, there also must be different running processes, such as a process using a business rule task, containing the URL as `+http://localhost:8080/traffic+`.
+When the example application is running, there also must be different running Workflows, such as a process using a Business Rule Task, containing the URL as `+http://localhost:8080/traffic+`.
 
 == Traffic violations example for embedded method
 
-The traffic violations project is based on the evaluation process of traffic violations. In the traffic violations example, first, the information of the driver is fetched, and based on the fetched information, it is determined whether the driver has a valid driving license using a RuleUnit in a DRL. After the validation of the driving license, the violation evaluation is executed, which is defined as a DMN decision, and the output provides information on whether the driver is suspended or not.
+The traffic violations project is based on the evaluation process of traffic violations. In the traffic violations example, first, the information of the driver is fetched, and based on the fetched information, it is determined whether the driver has a valid driving license using a RuleUnit in a DRL. After the validation of the driving license, the violation evaluation is executed, which is defined as a DMN Decision, and the output provides information on whether the driver is suspended or not.
 
 .Traffic violations example
 image::traffic-rules-dmn.png[Image of traffic violations example]
 
-=== Processes in traffic violation example
+=== Workflows in traffic violation example
 
-In the traffic violations project, the interactions with the defined decisions are executed using the decision engine. Also, the information that is required to execute the decision evaluation must be defined in the *Data Assignments* property of the business rule task.
+In the traffic violations project, the interactions with the defined Decisions are executed using the Decision engine. Also, the information that is required to execute the Decision evaluation must be defined in the *Data Assignments* property of the Business Rule Task.
 
 NOTE: The ID property of a process is used in the REST endpoint generation, which refers to the path that is used to interact with the process.
 
-Also, the classes in the process are used to define the Plain Old Java Objects (POJOs) that enable the interaction between the process and decisions. The process classes include `Violation`, `Driver`, `Fine`.
+Also, the classes in the process are used to define the Plain Old Java Objects (POJOs) that enable the interaction between the Workflow and Decisions. The process classes include `Violation`, `Driver`, `Fine`.
 
-=== Decisions in traffic violation example
+=== Rules in traffic violation example
 
-The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify whether the license is expired or not. The result of the license validation is added to the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
+The traffic violations process contains license validation as a Rule that is created using DRL. The license validation consists of rules that are evaluated to verify whether the license is expired or not. The result of the license validation is added to the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
 Example `LicenseValidationService.drl` file:
 [source]
@@ -91,16 +91,16 @@ public class LicenseValidationService implements RuleUnitData {
 }
 ----
 
-After the license validation task, the traffic violations process contains traffic violation as a decision that is created using DMN. The traffic violation decision verifies whether the driver is suspended or not based on the points in the driver's license.
+After the license validation task, the traffic violations Workflow contains traffic violation as a Decision that is created using DMN. The traffic violation Decision verifies whether the driver is suspended or not based on the points in the driver's license.
 
-The traffic violation decision is declared in the `TrafficViolation.dmn` file.
+The traffic violation Decision is declared in the `TrafficViolation.dmn` file.
 
 .Example `TrafficViolation.dmn` file
 image::traffic-violation-dmn.png[Image of traffic TrafficViolation.dmn file]
 
-=== Data mapping between a process and decisions
+=== Data mapping between Workflows and Decisions
 
-To map the data between a process and decisions, you can align all the attribute names in a Java class, which are used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
+To map the data between Workflows and Decisions, you can align all the attribute names in a Java class, which are used as process variables. If the names of the attributes contain spaces or the names of the attributes are not following Java conventions, then you can use https://github.com/FasterXML/jackson[Jackson] annotations. The Jackson annotations align the process variables with the data types of the DMN model. For example, in the traffic violations project, the `Violation` class is mapped with the `speedLimit` attribute using the `@JsonProperty` annotation. Therefore, the `speedLimit` attribute can be integrated with the `Violation` data type defined in the DMN model.
 
 Violation class defined in the Traffic Violations example:
 [source,java]
@@ -186,7 +186,7 @@ Then you can check the application Swagger UI at `+http://localhost:8080/q/swagg
 
 === Other examples
 
-For more {PRODUCT} examples that use decisions orchestrated by processes, see the following example applications which are included in the xref:../getting-started/examples.adoc[examples package]:
+For more {PRODUCT} examples that use Decisions orchestrated by Workflows, see the following example applications which are included in the xref:../getting-started/examples.adoc[examples package]:
 
 * `process-business-rules-quarkus`: An example project that shows the use of business rules and processes
 * `process-decisions-rest-quarkus`: An example project that shows the usage of decisions within processes. The project focuses on how to integrate decisions in a remote way using REST APIs where they can be deployed and decoupled from the process service.

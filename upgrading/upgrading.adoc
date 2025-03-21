@@ -1,11 +1,11 @@
-= Upgrading from BAMOE version 9.1.x
+= Upgrading from 9.1.x
 include::../partials/attributes.adoc[]
 
 You can upgrade your existing business automation applications and platforms to the most recent version of {PRODUCT_LONG}. If you are upgrading from an older version, you must follow the steps to upgrade to each intermediate version, as documented. Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 
 If you want to know more on how to upgrade from version {VERSION_90x} to version {VERSION_91X}, see https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/9.1.x?topic=upgrading[Upgrading]
 
-//The above link to Upgrade has to be changed to external site during release 
+// The above link to Upgrade has to be changed to external site during release 
 
 You can upgrade your project in the following two ways by:
 
@@ -20,15 +20,13 @@ The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION_
 - https://openjdk.org[JDK 17] or later is installed.
 - https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version
-- https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[IBM {DEV_TOOLS}] latest version of VS Code IDE extensions
-- Quarkus version {QUARKUS_VERSION} or later is installed
+- https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[{DEV_TOOLS}] latest version of VS Code IDE extensions
 
-// include::../partials/91x-prerequisites.adoc[]
 
 
 == Step 1: Download Product Archives
 
-The first step in upgrading is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
+The first step in upgrading is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
 Download the files based on your requirement.
 The following table shows the most common files but you can select other files according to your environment.
 
@@ -112,9 +110,9 @@ Now that you have the files, you can start the upgrading process.
 
 == Step 2: Update Maven configuration and settings
 
-{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
+{MAVEN_SITE_LINK}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
 {PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
-For a quick start, see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
+For a quick start, see the {MAVEN_SITE_GETTING_STARTED_LINK}[Maven Quick Start Guide].  
 
 Since {PRODUCT_SHORT} version {VERSION} is based on Quarkus 3.15, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
 You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
@@ -125,10 +123,9 @@ Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.
 
 == Step 3: Updating your development environment
 
-When you update your development environment, you must update {CANVAS}, {VS_CODE_BUNDLE} and the 
-{FORM_GENERATION_TOOL}.
+When you update your development environment, you must update {CANVAS} and {DEV_TOOLS}. 
 
-=== Updating {CANVAS}
+=== Upgrading {CANVAS}
 
 Before you update {CANVAS}:
 
@@ -141,11 +138,11 @@ If you want to know how to install {CANVAS}, see xref:../installation/installati
 
 To know more on projects, see Step 4a.
 
-=== Updating {VS_CODE_BUNDLE}
+=== Upgrading {DEV_TOOLS}
 
-The {VS_CODE_BUNDLE} will automatically update as long as you have set this option in VS Code.
+The {DEV_TOOLS} will automatically update as long as you have set this option in VS Code.
 
-To set this option, go to Visual Studio Code, click Extensions and then select the {VS_CODE_BUNDLE}. You will see a checkbox 'Auto Update' on the page. Click it to set. This will take care of your updates automatically. To know more about {VS_CODE_BUNDLE}, see xref:../tools/developer-tools-for-vscode.adoc[Developer Tools for VS Code].
+To set this option, go to Visual Studio Code, click Extensions and then select the {DEV_TOOLS}. You will see a checkbox 'Auto Update' on the page. Click it to set. This will take care of your updates automatically. To know more about {DEV_TOOLS}, see xref:../tools/developer-tools-for-vscode.adoc[Developer Tools for VS Code].
 
 [NOTE]
 ====
@@ -207,11 +204,12 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml,subs="attributes+"]
 ----
-17   <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
-18   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
-19   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20   <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
-21 </properties>
+<properties>
+  <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+  <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
+  <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
+  <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
+</properties>
 ----
 
 [start=4]
@@ -219,13 +217,13 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml]
 ----
-31  <dependency>
-32    <groupId>${kogito.bom.group-id}</groupId>
-33    <artifactId>${kogito.bom.artifact-id}</artifactId>
-34    <version>${kogito.bom.version}</version>
-35    <type>pom</type>
-36    <scope>import</scope>
-37  </dependency>
+ <dependency>
+   <groupId>${kogito.bom.group-id}</groupId>
+   <artifactId>${kogito.bom.artifact-id}</artifactId>
+   <version>${kogito.bom.version}</version>
+   <type>pom</type>
+   <scope>import</scope>
+ </dependency>
 ----
 +
 A bill of materials (BOM) is a list of parts or components that are required to build a product.
@@ -249,10 +247,10 @@ When a bill of materials (BOM) is used, it is not necessary to specify the versi
 [source,xml]
 ----
 <dependencies>
-    <dependency>
-        <groupId>org.drools</groupId>
-        <artifactId>drools-compiler</artifactId>
-    </dependency>
+  <dependency>
+    <groupId>org.drools</groupId>
+    <artifactId>drools-compiler</artifactId>
+  </dependency>
 </dependencies>
 ----
 
@@ -268,11 +266,12 @@ See xref:../introduction/release-notes/version-mapping.adoc[version mapping for 
 +
 [source,xml]
 ----
-40  <dependencies>
-41    <dependency>
-42      <groupId>com.ibm.bamoe</groupId>
-43      <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
-44    </dependency>
+<dependencies>
+  <dependency>
+    <groupId>com.ibm.bamoe</groupId>
+    <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
+  </dependency>
+</dependencies>
 ----
 
 [NOTE]
@@ -285,7 +284,7 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 . Add the dependencies.
 +
 For this example, you will be creating a project with only DMN files.
-So you must add the the Drools Kogito Quarkus dependency.
+So you must add the `drools-quarkus-decisions` dependency.
 In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, see section, 'Maven libraries mapping guide' and update accordingly.
 +
 [source,xml]
@@ -342,18 +341,18 @@ The choice of extensions determines the imported behavior of the project includi
 After the project is generated, you will see a project structure in VS Code, similar to the following diagram:
 +
 .Example Maven Project in VS Code
-image::maven-project.png[Example Maven Project in VS Code]
+image::maven-project.png[Example Maven project in VS Code]
 +
 As you can see from the figure, a Maven compliant project is generated, including all of the standard folders typically found in a Maven project.
 The most significant folder is the `resources` folder, which is where new or upgraded business automation asset files must be stored.
 Examples of supported business automation assets are:
 +
-- Decision Model & Notation (DMN) Models (.dmn)
-- Drools Rule Language (DRL) Files (.drl)
-- Business Process Modeling & Notation (BPMN) Models (.bpmn)
-- Excel Decision Tables Excel Files (.xlsx)
-- Standard Property Files (.properties)
-- Test Scenario Files (.scesim)
+- Decision Model & Notation (DMN) decisions (.dmn)
+- Drools Rule Language (DRL) rules (.drl)
+- Business Process Modeling & Notation (BPMN) workflows (.bpmn)
+- Excel Decision Tables Excel files (.xlsx)
+- Standard Properties files (.properties)
+- Test Scenario files (.scesim)
 +
 [NOTE]
 ====
