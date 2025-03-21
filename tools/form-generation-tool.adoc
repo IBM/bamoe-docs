@@ -2,24 +2,27 @@
 
 include::../partials/attributes.adoc[]
 
-This is a functionality of the {VS_CODE_BUNDLE} and is used to generate web forms for {PRODUCT_SHORT} and Apache Kie projects needed for the execution of processes. Form Generation is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension).
+This is a functionality of the {VS_CODE_BUNDLE} and is used to generate web forms for {PRODUCT_SHORT} and Apache KIE projects. Form Generation is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension).
 
 === Form Type
 Form Generation function supports two form types:
 
-* *patternfly*: This type generates *.tsx* files using the *patternfly* library for styling the forms.
-* *bootstrap4*: This type generates *.html* files using the *bootstrap4* library for styling the forms.
+* *Patternfly*: This type generates *.tsx* files using the *Patternfly* library for styling the forms.
+* *Bootstrap4*: This type generates *.html* files using the *Bootstrap4* library for styling the forms.
 
-Furthermore, according to the file name extension, we can say that *.tsx* files are **React** forms and *.html* files are *plain html* forms.
+`Bootstrap 4` generates HTML code, while `PatternFly` generates React code.
+
+Furthermore, according to the file name extension, *.tsx* files are **React** forms and *.html* files are *plain html* forms.
+
 
 === Form Config
-Each generated form, both *patternfly* and *bootstrap4*, has a corresponding *.config* file.
+Each generated form, both *Patternfly* and *Bootstrap4*, has a corresponding *.config* file.
 Such config files contain schema information about the object that the form is generated for.
 Furthermore, the goal of this *.config* file is to load additional scripts and styles.
 
-For the *patternfly* forms, by default, no additional scripts or styles are loaded.
+For the *Patternfly* forms, by default, no additional scripts or styles are loaded.
 
-For the *bootstrap4* forms, by default, we load `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts.
+For the *Bootstrap4* forms, by default, we load `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts.
 
 
 == Generation Prerequisities
@@ -31,9 +34,9 @@ You can generate forms by using an existing {PRODUCT_SHORT} project, *process-co
 
 == Form Generation
 
-The `Custom Forms Dev` functionality is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension). To run a command in VS Code, open the command palette using the keyboard shortcut `CTRL + SHIFT + P` for Windows and Linux or `CMD + SHIFT + P` for macOS.
+This functionality is included as a command in the BAMOE Developer Tools extension for VS Code (BAMOE VS Code extension). To run a command in VS Code, open the command palette using the keyboard shortcut `CTRL + SHIFT + P` for Windows and Linux or `CMD + SHIFT + P` for macOS.
 
-The `Custom Forms Dev` is available in the `BAMOE Developer Tools: Generate form code for User Tasks` command. The command palette dynamically re-organizes based on user activity and input. For example, if you type 'BAMOE', it displays the available BAMOE Developer Tools commands.
+This function is available in the `BAMOE Developer Tools: Generate form code for User Tasks` command. The command palette dynamically re-organizes based on user activity and input. For example, if you type "BAMOE", it displays the available BAMOE Developer Tools commands.
 
 image::tools/form-gen-generate-form-code.png[generate form code for user tasks]
 
@@ -43,10 +46,10 @@ image::tools/form-gen-project-folder.png[select folder]
 
 [NOTE]
 ====
-As mentioned in 'Generation Prerequisites', the project must be compiled first; otherwise, the command will fail.
+As mentioned in "Generation Prerequisites", the project must be compiled first; otherwise, the command will fail.
 ====
 
-After entering the absolute path of {PRODUCT_SHORT} project, you must choose between `Bootstrap 4` and `PatternFly`, the two supported UI libraries. `Bootstrap 4` generates HTML code, while `PatternFly` generates React code.
+After entering the absolute path of {PRODUCT_SHORT} project, you must choose between `Bootstrap 4` and `PatternFly`, the two supported UI libraries.
 
 image::tools/form-gen-libraries.png[libraries]
 
@@ -58,7 +61,7 @@ If `Generate form code for specific User Tasks` is selected, an additional step 
 
 image::tools/form-gen-list-project-user-tasks.png[list of projects user tasks]
 
-If the VS Code does not show any errors, the form code is generated in the project’s `src/main/resources/custom-forms-dev` folder.
+If the VS Code does not show any errors, the form code is generated in the project folder, `src/main/resources/custom-forms-dev`.
 
 image::tools/form-gen-code-project-folder.png[form code in folder]
 
@@ -70,7 +73,7 @@ The override process will erase the current form and config files, even if the t
 
 For example:
 
-If the user already has a `PatternFly` form for the 'hiring' User Task (a .tsx file) but chooses to generate a `Bootstrap 4` form (an .html file), overriding will erase `hiring.tsx` and `hiring.config`, replacing them with `hiring.html` and a new `hiring.config` file.
+If the user already has a `PatternFly` form for the "hiring" User Task (a .tsx file) but chooses to generate a `Bootstrap 4` form (an .html file), overriding will erase `hiring.tsx` and `hiring.config`, replacing them with `hiring.html` and a new `hiring.config` file.
 
 [NOTE]
 ====
@@ -87,10 +90,9 @@ To do so, just add the following dependency in your project `pom.xml`:
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-quarkus-devui</artifactId>
-    <version>9.2.x-ibm-0003</version>
+    <version>9.2.0-ibm-0003</version>
 </dependency>
 ----
-Where 'x' is the product version.
 
 [NOTE]
 ====
@@ -233,5 +235,5 @@ After updating `hiring.config` to use `bootstrap@5.3.3` instead of `bootstrap@4.
 
 [NOTE]
 ====
-If the form contains Lists, all `badge` classes must be removed, and 'loat-right' should be replaced with 'float-end'.
+If the form contains Lists, all `badge` classes must be removed, and 'float-right' should be replaced with 'float-end'.
 ====
