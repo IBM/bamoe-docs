@@ -56,16 +56,14 @@ Design and consume workflows with:
 * Business Calendar for precise time management
 * New product-oriented endpoints (e.g. /usertasks)
 
+=== New Business calendar for process time management
+The Business Calendar feature provides precise time management within a business process by considering specific working hours, workdays, and holidays. This ensures that time-based events and deadlines are aligned with actual business schedules rather than simple chronological time. xref:../workflow/designing-workflow.adoc#using-business-calendars[Learn more...]
+
 === New User Tasks API
 In {VERSION_91X} it was possible to manage User Tasks through the Process API in the same way as any other work item. This version introduces a new subsystem in the runtime engine that is designed to work efficiently with user tasks. The new endpoints will not require global process data to be defined via parameters such as the process ID, process instance ID and task name, and the JSON objects returned contain richer information. 
 
-[Note]
-----
- If you have used the Stateful process technology preview in {VERSION}, you will need to follow the instructions in the Upgrade xxxx section.  
-----
+If you have used the Stateful process technology preview in {VERSION}, you will need to follow the instructions in the xref:upgrading/upgrading.adoc#migrate-tech-preview[Upgrading from technology preview] section.  
 
-=== New Business calendar for process time management
-The Business Calendar feature provides precise time management within a business process by considering specific working hours, workdays, and holidays. This ensures that time-based events and deadlines are aligned with actual business schedules rather than simple chronological time. xref:../workflow/designing-workflow.adoc#using-business-calendars[Learn more...]
 
 === User task JPA persistence
 The User task sub-system can be configured to persists its data in the supported databases(PostgreSQL and MS SQL Server)
@@ -88,6 +86,8 @@ Asynchronous auditing can automatically emit events and enable tracking processe
 == Management Console
 Task management has been integrated from the Task Inbox web application into the Management Console.
 
+The Management console is now provided as a Helm chart to facilitate installation xref:../installation/consoles-helm-charts.adoc[Learn more...].
+
 New support for authenticated runtimes that use external Identity Providers. The Management Console has a specific configuration that can be set via an environment variable when initializing the Container image: 
 
 * RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID
@@ -100,10 +100,12 @@ You can connect to many runtimes simultaneously, allowing users to manage multip
 
 It is now possible to impersonate another user. This is useful when a User Task is assigned to an unavailable user, blocking the status of that task until the assigned user returns. In BAMOE it is possible to define a group of users that may impersonate any other user, giving them the rights to manage User Tasks assigned to unavailable people. 
 
-== Security authentification and authorization
-{PRODUCT_SHORT} is designed to be a Quarkus or SpringBoot application. Both these frameworks natively offer a reliable authentication and authorization layer. Once this layer is configured (simply by defining property values in your project) it can be consumed by your applications to protect service endpoints or the management console. 
+xref:../workflow/consoles.adoc[Learn more...]
 
-You can then rely on an external IdP like Keycloak or Microsoft Entra ID as your project Identity and Access Management Solution. A key role of this architecture is the BAMOE Management Console, which enables users to access an integrated environment to log in to your application and interact with its entities like process instances, submit task forms, and view jobs, in a secured and authenticated way. 
+== Security authentification and authorization
+{PRODUCT_SHORT} is designed to be a Quarkus or SpringBoot application. Both these frameworks natively offer a reliable authentication and authorization layer. Once this layer is configured it can be consumed by your applications to protect service endpoints or the management console. 
+
+You can then rely on an external IdP like Keycloak or Microsoft Entra ID as your project Identity and Access Management Solution. A key role of this architecture is the BAMOE Management Console, which enables users to access an integrated environment to log in to your application and interact with its entities like process instances, submit task forms, and view jobs, in a secured and authenticated way. xref:security.adoc[Learn more...].
 
 === Authentification and authorization with OpenID Connect
 Protect services, tools, consoles and APIs with robust authentication and authorization, backed by your IDP of choice.
