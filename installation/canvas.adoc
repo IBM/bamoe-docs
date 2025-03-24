@@ -1,4 +1,4 @@
-= BAMOE Canvas
+= Installing BAMOE Canvas
 include::../partials/attributes.adoc[]
 
 //tag::canvas-description[]
@@ -7,15 +7,15 @@ include::../partials/attributes.adoc[]
 
 It depends on two backend applications to provide full functionality:
 
-* Extended Services: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
-* CORS Proxy: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
+* BAMOE Extended Services: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
+* BAMOE CORS Proxy: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
 
 {CANVAS} and its two backend applications are available as container images.
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
-* Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION}
-* CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION}
+* BAMOE Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
+* BAMOE Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION}
+* BAMOE CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION}
 
 NOTE: All three image versions must be the same for deployment to work.
 
@@ -34,7 +34,7 @@ export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
 export APP_NAME_CORS_PROXY=bamoe-cors-proxy
 export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 ----
-. Deploy Extended Services and label its resources
+. Deploy BAMOE Extended Services and label its resources
 +
 [source,shell,subs="attributes+"]
 ----
@@ -45,7 +45,7 @@ oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
 ----
-. Deploy CORS Proxy and label its resources
+. Deploy BAMOE CORS Proxy and label its resources
 +
 [source,shell,subs="attributes+"]
 ----
@@ -56,7 +56,7 @@ oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 ----
-. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the Extended Services and CORS Proxy backends.
+. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the BAMOE Extended Services and BAMOE CORS Proxy backends.
 +
 [source,shell,subs="attributes+"]
 ----
@@ -79,11 +79,11 @@ Your {CANVAS} instance should be up and accessible via the route created in this
 oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
-NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the Extended Services and CORS Proxy backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the BAMOE Extended Services and BAMOE CORS Proxy backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 == Installing and configuring {CANVAS} images manually via Docker
 
-=== Configuring Extended Services
+=== Configuring BAMOE Extended Services
 
 [source,shell,subs="attributes+"]
 ----
