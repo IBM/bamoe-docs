@@ -1,4 +1,113 @@
 = Data-Index GraphQL API
 include::../partials/attributes.adoc[]
 
+When your project implements the Compact Architecture it natively integrates the Kogito Data Index Addon. One of the useful frameworks offered by this Service is GraphQL, which provides endpoints that can be consumed by client applications to run Process Instances, User Task Instances, Jobs and Process Definitions and also get other information about running process instances. GraphQL offers a very rich set of conditions to create a query according to your business needs.
+
+The GraphQL functionalities can be consumed in two ways:
+
+. Using the GraphQL UI tool in Quarkus dev mode: 
++
+This tool is useful to experiment and create your own queries to run against your application. You can use it in the development phase by setting `quarkus.kogito.data-index.graphql.ui.always-include=true`, and opening the GraphQL UI via `+https://HOST:PORT/q/graphql-ui+`
++
+
+. Using the endpoints: 
++
+The compact architecture natively exposes an endpoint to make requests to GraphQL:
++
+
+
+The following table provides some information on the /graphql entry point. 
+
+===  /graphql
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It runs a provided GraphQL query against your application 
+
+|*Inputs* |
+A GraphQL query
+
+|*Output* a| A JSON that holds the result of your GraphQL query
+|*Example* |curl -X POST `+http://HOST:PORT/graphql+` -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "query": "/* YOUR GRAPHQL QUERY */" }'
+|===
+
+== GraphQL query capabilities
+
+The following sections describe the queries that can be done on the different workflow types
+
+=== Process Instances
+
+A `ProcessInstance` represents an instance of a running Workflow in the runtime environment. The state of a `ProcessInstance` can be tracked (e.g., active, completed, suspended, or aborted). A process instance may execute various tasks, handle events, interact with external services, and more, depending on the process definition. The following table shows the fields that can be queried for a ProcessInstance:
+
+[cols="1,1,1"]
+|===
+|Field |Description |Mandatory/Optional
+
+|id 
+|A unique Id of type String for tracking the ProcessInstance.
+|mandatory
+
+|processId
+|A unique Id of type String for tracking the Process
+|Tmandatory
+
+|version
+|String value for tracking the version of the ProcessInstance now being refered.
+|
+
+|processName
+|The name of the Process as a String can be tracked in this field
+|
+
+|parentProcessInstanceId
+|Parent process Id of current process can be tracked using this field
+|
+
+|rootProcessInstanceId
+|Root process instance Id of current process can be tracked in this field
+|
+
+|rootProcessId
+|The root process Id of current process can be tracked using this field
+|
+
+|roles
+|The list of roles defined and used in the process
+|mandatory 
+
+|state
+|The current state of the process is tracked here.This can be any one of the following [PENDING, ACTIVE, COMPLETED, ABORTED, SUSPENDED , ERROR]
+|
+
+|endpoint
+|The endpoint of the process can be tracked using this endpoint field.
+|mandatory
+
+|serviceUrl
+|The service url of the process can be tracked using this field
+|
+
+|nodes
+|The node Instance details of the process can be tracked in this field 
+|
+|===
+
+=== User Task Instances
+
+=== Jobs
+
+=== Process Definitions
+
+
+
+
+
+
+
+
+
+
+
 https://ibm.ent.box.com/notes/1795143299782
