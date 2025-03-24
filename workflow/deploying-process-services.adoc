@@ -4,7 +4,7 @@ include::../partials/attributes.adoc[]
 This section provides more detail on the deployment architecture to simplify event management and ensure stable and robust stateful applications.
 The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
 
-Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Jobs, Data audit, Data index) in the runtime.
+Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Jobs, Data audit, Data-Index) in the runtime.
 This architecture simplifies the application configuration and minimizes the communication between components.
 
 == The Jobs subsystem
@@ -74,7 +74,7 @@ NOTE: Use managed dependencies or specify the version of the dependencies.
 
 == The Data audit subsystem
 
-The Data audit subsystem enables the storage of events issued by the following process elements and persists them in the Data index subsystem:
+The Data audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
 
 * workflow engine
 * user task
@@ -196,24 +196,24 @@ Each implementation might require additional dependencies. In this case a driver
 
 No additional configuration is required besides the default datasource use by the application already.
 
-== The Data index subsystem
-The Data Index subsystem is used to store a snapshot of the latest state of the process instance. 
+== The Data-Index subsystem
+The Data-Index subsystem is used to store a snapshot of the latest state of the process instance. 
 
-.Graphical view of the Data Index subsystem
+.Graphical view of the Data-Index subsystem
 image::../images/data-index.png[]
 
 The concepts to understand the above picture are:
 
-Transport:: the medium used to transfer events between the runtime and the data index service. The transport is in-vm.
+Transport:: the medium used to transfer events between the runtime and the Data-Index service. The transport is in-vm.
 
-Storage:: the persistence tier of the data index component.
+Storage:: the persistence tier of the Data-Index component.
 
-Data index:: the main component responsible for creating/updating the data index, and for providing query capabilities.
+Data-Index:: the main component responsible for creating/updating the Data-Index, and for providing query capabilities.
 
 
 === Querying
 
-Data index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
+Data-Index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
 
 [source,]
 ----
@@ -222,9 +222,9 @@ http://localhost:8080/<root path>/graphql-ui/
 
 to start working with the queries defined by the schema aforementioned.
 
-=== Using the Data index add-on
+=== Using the Data-Index add-on
 
-Use the Data Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data index and the transport tier simultaneously.
+Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data-Index and the transport tier simultaneously.
 
 [source,xml]
 ----

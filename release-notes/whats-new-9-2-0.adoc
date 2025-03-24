@@ -7,49 +7,44 @@ This section describes the main new functionalities and changes in {PRODUCT_SHOR
 See the list below for a complete list of changes introduced in {PRODUCT_SHORT} {VERSION}.
 
 == Modernized technology stack
-
 This version upgrades foundational technologies and brings support for new ones:
 
 * Quarkus - 3.15 _(from 3.8)_
 * Red Hat Enterprise Linux (RHEL) - 9.5 _(from 9.4)_
 * OpenShift Container Platform - 4.16 _(from 4.14)_
 * Kubernetes - 1.30 _(from 1.29)_
-* (New!) Spring Boot 3.4 (for Decisions and Rules)
+* (New!) Spring Boot 3.4 _(for Decisions and Rules)_
 * (New!) PostgreSQL - 16.8
 * (New!) Microsoft SQL Server - 2019
 
 More information in xref:supported-environments.adoc[Supported Environments]
 
 == Stateful Workflows (BPMN)
-/// TODO
-
-=== REST and GraphQL APIs for system-to-system integration
-/// TODO
-
-=== User Tasks subsystem for Human-driven Workflows
-In {VERSION_91X} it was possible to manage User Tasks through the Process API in the same way as any other work item. This version introduces a new User Tasks subsystem in the runtime engine, with new endpoints that do not require global process data to be defined via parameters such as the process ID, process instance ID and task name. The returned JSON objects also contain richer information now.
+In {VERSION_91X}, {PRODUCT_SHORT} introduced Stateful Workfows as technology preview. {VERSION_92X} now brings those capabilities to general availability. The following list highlights the most relevant aspects of Stateful Workflows, as well as important differences compared to technology preview in {VERSION_91X}.
 
 If you have used the Stateful Workflows technology preview in {VERSION_91X}, you will need to follow the instructions in xref:upgrading/upgrading.adoc#migrate-tech-preview[Upgrading from technology preview].  
 
-* SLA tracking
-* Customizable user groups 
-* Automatic User Task assignment strategies
+=== REST and GraphQL APIs for system-to-system integration
+{PRODUCT_SHORT} will generate REST API endpoints for your Business Service applications based on the Workflows, Decisions, and Rules it contains (Domain API). In addition to those, fixed endpoints will also be present for easily managing Process Instances, User Tasks, and Jobs (Technical API). For flexibility, a GraphQL endpoint will be available for you to query information from the Data-Index. xref:../workflow/rest-and-graphql-apis[Learn more...]
+
+=== Kafka integration for Event-driven Workflows
+Complementary to REST and GraphQL APIs, {PRODUCT_SHORT} allows Workflows to connect to Kafka topics that will trigger or consume tasks inside business processes. xref:../workflow/event-driven[Learn more...]
+
+=== User Tasks subsystem for Human-driven Workflows
+This version introduces a new User Tasks subsystem in the runtime engine, with new endpoints that do not require global process data to be defined via parameters such as the process ID, process instance ID and task name. The returned JSON objects also contain richer information now.
+
+Some highlights of the new User Tasks subsystem include SLA tracking, Customizable user groups, and customizable automatic User Task assignment. xref:../workflow/user-tasks[Learn more...]
 
 === Secured Workflows with OpenID Connect
-Protect Service APIs with authentication and authorization, backed by your Identity Provider (IdP) of choice.
-
-{PRODUCT_SHORT} is designed to be a Quarkus or Spring Boot application. Both these frameworks natively offer a reliable authentication and authorization layer. Once this layer is configured it can be consumed by your applications to protect service endpoints or the management console. 
-
-You can then rely on an external IdP like Keycloak or Microsoft Entra ID as your project Identity and Access Management Solution. A key role of this architecture is the BAMOE Management Console, which enables users to access an integrated environment to log in to your application and interact with its entities like process instances, submit task forms, and view jobs, in a secured and authenticated way. xref:security.adoc[Learn more...].
+Quarkus natively offers reliable authentication and authorization capabilities, allowing you to integrate with externals Identity Providers (IdPs) like Keycloak or Microsoft Entra ID. By binding into the built-in security layer of Quarkus, {PRODUCT_SHORT} allows you to be completely in control over authentication and authorization in your Business Service applications. {MANAGEMENT_CONSOLE} will also make use of this to let you interact with Process Instances, User Tasks, and Jobs, in an authenticated way. xref:../workflow/security.adoc[Learn more...].
 
 === Custom Business Calendar definitions
 The Business Calendar feature provides precise time management within a business process by considering specific working hours, workdays, and holidays. This ensures that time-based events and deadlines are aligned with actual business schedules rather than simple chronological time. xref:../workflow/designing-workflow.adoc#using-business-calendars[Learn more...]
 
-=== Kafka integration for Event-driven Workflows
-/// TODO
-
 === Persistence layer
-Data Definition Language (DDL) scripts are available to create from scratch a database that includes all required tables to be used by the persistence layer of the following Workflow subsystems:
+{PRODUCT_SHORT} let's you configure databases to store operational data and audit records so that you can back-up periodically and rely on information not being lost. To make deployments more convienient and not dictate when database creation happens, {PRODUCT_SHORT} offers separate Installation DDL scripts for your convenience.
+
+Installation Data Definition Language (DDL) scripts are available to create from scratch a database that includes all required tables to be used by the persistence layer of the following Workflow subsystems:
 
 •	Data-Index
 •	Data Audit
@@ -57,35 +52,25 @@ Data Definition Language (DDL) scripts are available to create from scratch a da
 •	User Tasks
 •	Runtime Engine
 
-The scripts can be found in the product deliverables and support both the PostgreSQL and Microsoft SQL databases. [Learn more...]
+The scripts can be found in the product deliverables and support both the PostgreSQL and Microsoft SQL databases. xref:../workflow/persistence[Learn more...]
 
 === Data consistency enforced by transactional operations
-/// TODO
+In addition to supporting the Saga pattern for compensating failures in distributed operations, {PRODUCT_SHORT} handles actions across multiple subsystems in a transacional way. This means if something fails during execution for unforeseen reasons, your Process Instances, User Tasks, and/or Jobs won't be left in invalid intermediate states. xref:../workflow/persistence#transactional-operations[Learn more...]
 
 === Workflow monitoring 
-/// TODO
+/// TODO - Description of monitoring capabilities
 
 === Workflow auditing 
-Asynchronous auditing can automatically emit events and enable tracking processes and tasks execution.
-
-/// TODO
+/// TODO - Description of monitoring capabilities - Asynchronous auditing can automatically emit events and enable tracking business processes and User Tasks execution.
 
 == {MANAGEMENT_CONSOLE}
-Task management has been integrated from the Task Inbox web application into the Management Console.
+There are many changes in {MANAGEMENT_CONSOLE} compared to {VERSION_91X} technology preview, being the most important:
 
-The {MANAGEMENT_CONSOLE} installation is now facilitated via a Helm chart xref:../installation/consoles-helm-charts.adoc[Learn more...].
-
-New support for authenticated runtimes that use external Identity Providers. The Management Console has a specific configuration that can be set via an environment variable when initializing the Container image: 
-
-* RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID
-
-The environment variable receives the “client_id", which the Management Console will use to communicate with the Identity Providers registered with each runtime.
-
-There is new support for multiple runtimes both with or without security enabled. As a result of this the Management Console is not connected to a runtime when you open it, and you are required to select a runtime to connect to. 
-
-You can connect to many runtimes simultaneously, allowing users to manage multiple runtimes on the same web application.
-
-It is now possible to impersonate another user. This is useful when a User Task is assigned to an unavailable user, blocking the status of that task until the assigned user returns. In BAMOE it is possible to define a group of users that may impersonate any other user, giving them the rights to manage User Tasks assigned to unavailable people. 
+* Task Console has now been merged into {MANAGEMENT_CONSOLE}, in the "Tasks" screen.
+* Connecting with multiple Business Service applications in a single {MANAGEMENT_CONSOLE} installation is now supported.
+* IdP configuration is now transparent, allowing {MANAMGENT_CONSOLE} to know what IdP to authenticate with based only on the Business Service application URL.
+* Authorized users can now impersonate other users when managing User Tasks.
+* A Helm Chart is made available for easier installation on K8s/OCP clusters. xref:../installation/consoles-helm-charts.adoc[Learn more...].
 
 xref:../workflow/consoles.adoc[Learn more...]
 
@@ -94,16 +79,16 @@ xref:../workflow/consoles.adoc[Learn more...]
 Instead of a standalone CLI tool, Form generation capabilities for User Tasks are now available as custom commands provided by {DEV_TOOLS}. xref:../tools/form-generation.adoc[Learn more...]
 
 == New Test Scenario Editor compatible with DMN 1.5
-/// TODO
+Continuing our modernization efforts that began with the new DMN Editor on {VERSION_91X}, {PRODUCT_SHORT} now provides a new Test Scenario Editor (`.scesim` files) compatible with DMN 1.5. This removes the limitation of only being able to unit-test DMN 1.2 files. The new Test Scenario Editor is available on {DEV_TOOLS} as the new default editor for `.scesim` files. xref:../tools/new-test-scenario-editor.adoc[Learn more...]
 
 == Spring Boot 3 support for Decision and Rules services
-/// TODO
+For the first time, Spring Boot 3 can be used as a foundational framework for Decisions- and Rules-based Business Service applications. xref:../runtime-services-modeling/springboot-dmn.adoc[Learn more...]
 
 == DMN Editor UX improvements
-/// TODO
+When renaming Decisions, Business Knowledge Models (BKMs), Decision Services, or any other identifier in a DMN file, the DMN Editor will now prompt you to automatically update all occurrences of that identifier if you'd like it to. Another improvement for the DMN Editor is that it is now capable of highlighting Decision Table rules and Conditional Boxed Expression branches based on the DMN Runner results. xref:../editing/dmn.adoc[Learn more...]
 
 == Bug fixes and enhancements
-/// TODO
+/// TODO - List of most important bugs we fixed or link to it.
 
 == Download documents 
 For more information on {PRODUCT_LONG} version {VERSION} download document, see https://www.ibm.com/support/pages/node/7151078[BAMOE 9.2 Download Document].

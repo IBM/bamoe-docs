@@ -23,7 +23,7 @@ You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, 
 
 In order to be visible in the Management console your {PRODUCT_SHORT} services must use the following {PRODUCT_SHORT} components:
 
-* *{PRODUCT_SHORT} Data index service*: Enables the Management console to access stored events related to processes and domain data from your {PRODUCT_SHORT} services. The data index service requires PostgreSQL persistence.
+* *{PRODUCT_SHORT} Data-Index service*: Enables the Management console to access stored events related to processes and domain data from your {PRODUCT_SHORT} services. The Data-Index service requires PostgreSQL persistence.
 * *{PRODUCT_SHORT} Process management add-on*: Enables the Management console to interact with the process data from your {PRODUCT_SHORT} services through the add-on REST endpoint `/management/processes`.
 If you do not enable this add-on for your {PRODUCT_SHORT} service, the Management console provides read-only access to your service data without the ability to modify instances, such as aborting process instances.
 //For more information about the process management add-on, see xref:../workflow/deploying-process-services.html[].
@@ -42,10 +42,10 @@ You can use the Management Console to view and manage process instance details f
 You can run the Management Console for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on OpenShift.
 
 .Prerequisites
-* A {PRODUCT_SHORT} Data Index Service instance is configured and running for your {PRODUCT_SHORT} service.
-The Data Index Service enables the Management Console to access stored process data.
-The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
-//For information about the Data Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
+* A {PRODUCT_SHORT} Data-Index Service instance is configured and running for your {PRODUCT_SHORT} service.
+The Data-Index Service enables the Management Console to access stored process data.
+The Data-Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
+//For information about the Data-Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
 * The `pom.xml` file of your {PRODUCT_SHORT} project contains the following dependency for the process management add-on.
 This add-on enables the Management Console to interact with the process data through the add-on REST endpoint `/management/processes`.
 //For more information about the process management add-on, see xref:con-bpmn-process-management-addon_kogito-developing-process-services[].
@@ -82,8 +82,8 @@ $ docker run -p 8280:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
 ====
 The default port for the Management Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
-Also, the Management Console uses the default Data Index Service port 8180.
-If you modified this port in your Data Index Service instance, you can set the new Data Index URL using the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
+Also, the Management Console uses the default Data-Index Service port 8180.
+If you modified this port in your Data-Index Service instance, you can set the new Data-Index URL using the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
 [source,subs="attributes"]
 ----
 $ docker run -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT=http:/_HOST_:_PORT_/graphql -p 8280:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
@@ -294,8 +294,8 @@ image::runtime-services-modeling/kogito-task-console.png[Image of Kogito Task Co
 
 You can use the Task Console to view your list of assigned tasks, view the task details for each task, and move the task to the next phase of the task lifecycle.
 
-The Task Console requires your {PRODUCT_SHORT} services to use the {PRODUCT_SHORT} Data Index Service.
-The Data Index Service enables the Task Console to access stored events related to tasks and domain data from your {PRODUCT_SHORT} services.
+The Task Console requires your {PRODUCT_SHORT} services to use the {PRODUCT_SHORT} Data-Index Service.
+The Data-Index Service enables the Task Console to access stored events related to tasks and domain data from your {PRODUCT_SHORT} services.
 
 ==== Configuration
 
@@ -310,7 +310,7 @@ The following table lists the configuration envs of the Task Console Image:
 | "DEV"
 
 | RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT
-| Sets the Data Index Service GraphQL URL
+| Sets the Data-Index Service GraphQL URL
 | string
 | "http://localhost:8180"
 
@@ -361,9 +361,9 @@ You can use the Task Console to view and interact with user tasks in {PRODUCT_SH
 You can run the Task Console for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on OpenShift.
 
 .Prerequisites
-* A {PRODUCT_SHORT} Data Index Service instance is configured and running for your {PRODUCT_SHORT} service.
-The Data Index Service enables the Task Console to access stored tasks and process data.
-The Data Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
+* A {PRODUCT_SHORT} Data-Index Service instance is configured and running for your {PRODUCT_SHORT} service.
+The Data-Index Service enables the Task Console to access stored tasks and process data.
+The Data-Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
 * The `application.properties` file of your {PRODUCT_SHORT} project contains the following system properties for the location where the {PRODUCT_SHORT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support.
 +
 .Application properties for REST URLs
@@ -386,8 +386,8 @@ $ docker run -p 8280:8080 quay.io/bamoe/task-console:{IMAGE_VERSION}
 ====
 The default port for the Task Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
-Also, the Task Console uses the default Data Index Service port 8180.
-If you modified this port in your Data Index Service instance, you can set the new Data Index URL using the `RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
+Also, the Task Console uses the default Data-Index Service port 8180.
+If you modified this port in your Data-Index Service instance, you can set the new Data-Index URL using the `RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
 [source,subs="attributes"]
 ----
 $ docker run -e RUNTIME_TOOLS_TASK_CONSOLE_DATA_INDEX_ENDPOINT=http:/_HOST_:_PORT_/graphql -p 8280:8080 quay.io/bamoe/task-console:{IMAGE_VERSION}
