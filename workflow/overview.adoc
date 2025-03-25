@@ -31,7 +31,7 @@ The following table shows the mandatory components in the subsystem of the Compa
 
 |Workflow Engine | System | Mandatory | Mandatory 
 |Data-Index | Add-on | Optional | N/A
-|Data Audit | Add-on | Optional | N/A
+|Data-Audit | Add-on | Optional | N/A
 |Jobs Service | Add-on | Mandatory | N/A
 |User Tasks | Add-on | Mandatory | N/A
 |Runtime | Add-on | Mandatory | N/A
@@ -50,14 +50,14 @@ Process container:: This is the BPMN file compiled and wired in to the Workflow 
 === Add-ons
 Data-Index:: allows the last snapshot of the process state to be queried. The Workflow engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
-Data Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
+Data-Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
 
 Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines, and notifications. 
 
 User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
 
 === Required deployments
-Storage:: This is another deployment. In our case would be PostgreSQL database where we are going to store the process state, Data-Index, Data Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
+Storage:: This is another deployment. In our case would be PostgreSQL database where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
 
 
 

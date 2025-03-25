@@ -28,14 +28,14 @@ Install a released version available on quay.io registry:
 
 === Default install
 
-[source, shell]
+[source,shell]
 ----
 $ helm install my-bamoe-canvas oci://quay.io/bamoe/canvas-helm-chart --version={VERSION}.
 ----
 
 === Minikube install
 
-[source, shell]
+[source,shell]
 ----
 $ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
 $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
@@ -43,7 +43,7 @@ $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/
 
 === Kubernetes install
 
-[source, shell]
+[source,shell]
 ----
 $ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
 $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
@@ -53,14 +53,14 @@ $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/
 
 First, you may need to get the default OpenShift domain for your routes with the following command:
 
-[source, shell]
+[source,shell]
 ----
 $ oc get ingresses.config cluster --output jsonpath={.spec.domain}
 ----
 
 If you do not have access rights to this configuration, try creating a dummy Route resource and checking its domain.
 
-[source, shell]
+[source,shell]
 ----
 $ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
 $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
@@ -70,7 +70,7 @@ $ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/
 
 Follow the command to uninstall the `my-bamoe-canvas` deployment:
 
-[source, shell]
+[source,shell]
 ----
 $ helm uninstall my-bamoe-canvas
 ----
@@ -79,7 +79,7 @@ $ helm uninstall my-bamoe-canvas
 
 This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line.
 
-[source, shell]
+[source,shell]
 ----
 $ helm install my-bamoe-canvas ./src --set image.repository=quay.io
 ----
