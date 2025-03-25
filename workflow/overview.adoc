@@ -1,26 +1,15 @@
-= Architecture overview of stateful Workflows
+= Overview of stateful Workflow architecture
 
 include::../partials/attributes.adoc[]
 
-As a developer of business processes, you can use BAMOE to develop process services using Business Process Model and Notation (BPMN) 2.0 models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
+You can use BAMOE to develop stateful workflow services using Business Process Model and Notation (BPMN) 2.0 models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
 
-Stateful Workflows capabilities enables you to go further with BPMN workflows that you implement by allowing you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks). 
+Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
-This section also introduces the key concepts of the new Compact Architecture where certain services can be colocated directly in the your Business Automation application. This architecture simplifies the application configuration and minimizes the communication between components which ensures that {PRODUCT_SHORT} applications are stable and robust in a Business Process environment. 
+The Compact Architecture is the reference architecture for stateful workflow. In this architecture certain services can be colocated directly in your {PRODUCT_SHORT} application. This simplifies the application configuration and minimizes the communication between components which ensures that {PRODUCT_SHORT} applications are stable and robust in a Business Process environment. 
 
-== Compact Architecture 
-Compact Architecture is a way to enable a process to run everything in an integrated way within the same deployment. In this architecture the communication with required and/or optional subsystems is done via internal VM communication. Here are some basic definitions:
-
-Deployment:: is considered to be a consistent functional program that provides a set of defined functionalities that enable workflow execution.
-
-Stateful Workflow:: is a process that is able to persist its instance state into a database or other type of storage. It may include user tasks, timers, be long-running, have data tracking and auditing.
-
-Stateless Workflow or Straight-Through Process (STP):: is a Workflow whose instance state is not stored in database. A stateless Workflow is executed in one transaction, does not have data persistence, timers or User Tasks. Stateless Workflows are a subset of stateful Workflows.
-
-.The different components of Compact Architecture
-image::../images/wf-compact-arch.png[]
-
-The following table shows the mandatory components in the subsystem of the Compact Architecture to implement a stateful Workflow.
+== Components of Compact Architecture
+The following table details the different components in Compact Architecture, indicating whether they are mandatory or not.
 
 [%header,cols="4"]
 |===
@@ -38,10 +27,13 @@ The following table shows the mandatory components in the subsystem of the Compa
 |Storage | System | Mandatory | N/A
 |===
 
-== Component description
+The following figure shows how they relate to each other in a deployment architecture. 
+
+.The different components of Compact Architecture
+image::../images/wf-compact-arch.png[]
 
 === System
-Runtime:: This is the foundational framework providing basic services required for running a complex application: transactions, rest infraestructure (JAX-RS), JDBC connection pool, thread pools, escalability, security, DI (dependency injection) etc.
+Runtime:: This is the foundational framework providing basic services required for running a complex application: transactions, rest infrastructure (JAX-RS), JDBC connection pool, thread pools, escalability, security, DI (dependency injection) etc.
 
 Workflow engine:: The kogito API + jBPM workflow engine provides the workflow execution environment using kogito APIs and implementations.
 
@@ -57,17 +49,8 @@ Jobs Service:: allows the execution of timed events. In the case of Workflows wi
 User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
 
 === Required deployments
-Storage:: This is another deployment. In our case would be PostgreSQL database where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
-
-
-
-
-This section provides more detail on the different components of a stateful worfklow that uses the Compact Architecture.
-The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
-
-Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Data-Index, Data Audit, Jobs Service, and User Tasks) in the runtime.
-
-This architecture simplifies the application configuration and minimizes the communication between components.
+Storage:: This is another deployment where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
+.
 
 == The Jobs Service subsystem
 Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
