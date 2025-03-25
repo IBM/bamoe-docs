@@ -4,40 +4,41 @@ include::../partials/attributes.adoc[]
 This section provides more detail on the different components of a stateful worfklow that uses the Compact Architecture.
 The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
 
-Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Jobs, Data audit, Data-Index) in the runtime.
+Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Data-Index, Data Audit, Jobs Service, and User Tasks) in the runtime.
+
 This architecture simplifies the application configuration and minimizes the communication between components.
 
-== The Jobs subsystem
-The Jobs service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
-It is also used for human tasks notifications.
+== The Jobs Service subsystem
+Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
+It is also used for User Tasks notifications.
 
-By collocating the Job Scheduler within the {PRODUCT_SHORT} Runtime, the Job service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
+By collocating the Jobs Service within the {PRODUCT_SHORT} Runtime, the Jobs Service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
 It uses the Data Source as the app.
 
-The Jobs subsystem only supports Quarkus runtimes and storage can be PostgreSQL or Microsoft SQL Server.
+The Jobs Service subsystem only supports Quarkus runtimes and storage can be PostgreSQL or Microsoft SQL Server.
 
 === How it works
 
-.Graphical view of the Job service flow
+.Graphical view of the Jobs Service flow
 image::../images/job_service.png[]
 
-When a client invokes the job service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
-Once the request reaches the job service it creates the job internally, and stores the data on job status in the storage.
+When a client invokes the Jobs Service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
+Once the request reaches the Jobs Service it creates the job internally, and stores the data on job status in the storage.
 When the job times out, the component calls the sink (either in-vm or via http request) to signal to the client.
 
 ==== Definitions
-transport:: the medium used to transfer a message between client component and job service. The transport can be http, kafka or in-vm.
+transport:: the medium used to transfer a message between client component and Jobs Service. The transport can be http, kafka or in-vm.
 sink:: is the client endpoint callback.
 storage:: is the persistence tier of the jobs being current scheduled.
-Job service:: it the main component containing the logic of scheduling a job and storing data.
+Jobs Service:: it the main component containing the logic of scheduling a job and storing data.
 
-=== Using the Job Service add-on
+=== Using the Jobs Service add-on
 
-To use the Job service add-on in your project you must include the dependency related to the transport tier (in-vm):
+To use the Jobs Service add-on in your project you must include the dependency related to the transport tier (in-vm):
 
 [source,xml]
 ----
-  <!-- Required for the Job service add-on transport tier definition -->
+  <!-- Required for the Jobs Service add-on transport tier definition -->
   <dependency>
     <groupId>org.kie</groupId>
     <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
@@ -52,7 +53,7 @@ Following that you must include the storage to be used, PostgreSQL:
 
 [source,xml]
 ----
-<!-- Required for the Job service add-on storage definition -->
+<!-- Required for the Jobs Service add-on storage definition -->
   <dependency>
       <groupId>org.kie</groupId>
       <artifactId>jobs-service-storage-jpa</artifactId>
@@ -72,13 +73,13 @@ quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://loca
 
 NOTE: Use managed dependencies or specify the version of the dependencies. 
 
-== The Data audit subsystem
+== The Data Audit subsystem
 
-The Data audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
+The Data Audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
 
-* workflow engine
-* user task
-* job service
+* Workflow engine
+* User Tasks
+* Jobs Service
 
 The system contains several modules and common modules to redistribute responsibilities. The main features of this system are:
 
@@ -101,7 +102,7 @@ Data Audit JPA «Quarkus»:: Provides the wiring between the specific implementa
 
 === Querying
 
-The way to retrieve information from the data audit is using GraphQL. This way we can abstract how the information is retrieved and allow different needs depending on the user.
+The way to retrieve information from the Data Audit is using GraphQL. This way we can abstract how the information is retrieved and allow different needs depending on the user.
 
 The Path is `$\{HOST}/data-audit/q` for sending GraphQL queries.
 
@@ -163,7 +164,7 @@ The following extension points do not depend on the runtime:
 `org.kie.kogito.app.audit.spi.GraphQLSchemaQueryProvider`:: enables the subsystem to identify additional queries provided by the end user.
 
 
-=== Using the Data audit add-on
+=== Using the Data Audit add-on
 
 You need to add two different dependencies to your project  for a collocated service.
 
