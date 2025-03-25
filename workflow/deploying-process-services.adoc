@@ -1,236 +1,219 @@
-= Components of a process service
+= Deploying a stateful workflow service
 include::../partials/attributes.adoc[]
 
-This section provides more detail on the deployment architecture to simplify event management and ensure stable and robust stateful applications.
-The standard Event-Driven {PRODUCT} setup is better adapted to Serverless execution.
+This section provides more detail deploying an application built using the 
+Compact Architecture that uses the {PRODUCT} add-ons, that collocate add-on services (Data-Index, Data-Audit, Jobs Service, and User Tasks) in the runtime.
 
-Compact Architecture consists of applications built using a new set of {PRODUCT} add-ons, that collocate add-on services (Jobs, Data audit, Data index) in the runtime.
 This architecture simplifies the application configuration and minimizes the communication between components.
 
-== The Jobs subsystem
-The Jobs service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
-It is also used for human tasks notifications.
+== Enabling JDBC Persistence for stateful Workflows
 
-By collocating the Job Scheduler within the {PRODUCT_SHORT} Runtime, the Job service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
-It uses the Data Source as the app.
+{PRODUCT_SHORT} process service and all the {PRODUCT_SHORT} subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist
+ in relational databases.
 
-The Jobs subsystem only supports Quarkus runtimes and PostgreSQL storage.
+All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the connection with
+the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
+guidelines.
 
-=== How it works
+Configuring persistence for {PRODUCT_SHORT} requires a minimal  set of dependencies and configurations in your application. The
+minimal set of dependencies are:
 
-.Graphical view of the Job service flow
-image::../images/job_service.png[]
+* Quarkus Agroal (_io.quarkus:quarkus-agroal_): Quarkus DataSource Connection Pool with Security and Transaction support
+* Database Specific Quarkus JDBC Driver (_io.quarkus:quarkus-jdbc-<db-type>_)
+* KIE Add-on Persistence JDBC (_org.kie:kie-addons-quarkus-persistence-jdbc_): Enables JDBC persistence for the process engine.
 
-When a client invokes the job service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
-Once the request reaches the job service it creates the job internally, and stores the data on job status in the storage.
-When the job times out, the component calls the sink (either in-vm or via http request) to signal to the client.
+NOTE: For full information about how to configure DataSources in Quarkus, please check the
+https://quarkus.io/version/3.15/guides/datasource[Configure data sources in Quarkus] guide.
 
-==== Definitions
-transport:: the medium used to transfer a message between client component and job service. The transport can be http, kafka or in-vm.
-sink:: is the client endpoint callback.
-storage:: is the persistence tier of the jobs being current scheduled.
-Job service:: it the main component containing the logic of scheduling a job and storing data.
+=== Configuring JDBC Persistence for PostgreSQL
 
-=== Using the Job Service add-on
-
-To use the Job service add-on in your project you must include the dependency related to the transport tier (in-vm):
-
+To configure PostgreSQL persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
 [source,xml]
 ----
-  <!-- Required for the Job service add-on transport tier definition -->
-  <dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kogito-addons-quarkus-jobs</artifactId>
-  </dependency>
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
 ----
 
-Following that you must include the storage to be used, PostgreSQL:
-
-[source,xml]
-----
-<!-- Required for the Job service add-on storage definition -->
-  <dependency>
-      <groupId>org.kie</groupId>
-      <artifactId>jobs-service-storage-jpa</artifactId>
-  </dependency>
-----
-
-In this case for postgresql in-vm, your main available data source is automatically used. Here is an example of this configuration:
-	
+Configuration required in your `application.properties`:
 [source,properties]
 ----
-kogito.persistence.type=jdbc
+# Application default Datasource - PostgreSQL
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=kogito-user
-quarkus.datasource.password=kogito-pass
-quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://localhost:5432/kogito}
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/bamoe-db}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
 ----
 
-NOTE: Use managed dependencies or specify the version of the dependencies. 
+=== Configuring JDBC Persistence for Microsoft SQL Server
 
-== The Data audit subsystem
-
-The Data audit subsystem enables the storage of events issued by the following process elements and persists them in the Data index subsystem:
-
-* workflow engine
-* user task
-* job service
-
-The system contains several modules and common modules to redistribute responsibilities. The main features of this system are:
-
-* runs as colocated services with Quarkus 
-* contains a module that enables you to implement your own subsystem
-* contains graphql modules to query data
-* provides extension points to develop new storage easily
-* provides extension points to develop new queries extending graphql definitions
-
-.Graphical view of the Data Audit subsystem
-image::../images/data-audit-design.png[]
-
-Data Audit Common:: Provides the common framework to create implementations.
-
-Data Audit «Quarkus»:: Provides the wiring to use Data Audit with Quarkus as colocated service in a deployment.
-
-Data Audit JPA Common:: Provides the common extension that doesn't depend on the runtime.
-
-Data Audit JPA «Quarkus»:: Provides the wiring between the specific implementation and Quarkus System.
-
-=== Querying
-
-The way to retrieve information from the data audit is using GraphQL. This way we can abstract how the information is retrieved and allow different needs depending on the user.
-
-The Path is `$\{HOST}/data-audit/q` for sending GraphQL queries.
-
-==== Example 1
-
-Execute a registered query, e.g. `GetAllProcessInstancesState` with a definition of data fields that should be returned:
-
-[source,console]
+To configure Microsoft SQL Server persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
+[source,xml]
 ----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://${HOST}/data-audit/q/ -d '
-{
-    "query": "{GetAllProcessInstancesState {eventId, processInstanceId, eventType, eventDate}}"
-}'|jq
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-mssql</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
 ----
 
-To retrieve the GraphQL schema definition including a list of all registered queries, run a GET command to the `$\{HOST}/data-audit/r` endpoint. This endpoint can also be used to register new queries.
-
-==== Example 2
-
-Register a new query with a complex data type:
-
-[source,]
+Configuration required in your `application.properties`:
+[source,properties]
 ----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://${HOST}/data-audit/r/ -d '
-{
-    "identifier" : "tests",
-    "graphQLDefinition" : "type EventTest { jobId : String, processInstanceId: String} type Query { tests (pagination: Pagination) : [ EventTest ] } ",
-    "query" : "SELECT o.job_id, o.process_instance_id FROM job_execution_log o"
-}'
+# Application default Datasource - Microsoft SQL Server
+quarkus.datasource.db-kind=mssql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0.0:1433;DatabaseName=bamoe-db;encrypt=true;trustServerCertificate=true;}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
 ----
 
-Once registered, the new query can be executed similar to the pre-registered ones using the `$\{HOST}/data-audit/q` endpoint:
+NOTE: If your {PRODUCT_SHORT} application uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services,
+please make sure you read the https://quarkus.io/version/3.15/guides/databases-dev-services[Dev Services for Databases] guide and
+apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.15/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
 
-[source,]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://${HOST}/data-audit/q/ -d '
-{
-    "query": "{tests {jobId, processInstanceId}}"
-}'|jq
-----
+==== {PRODUCT_SHORT} Microsoft SQL Server Mappings
 
-=== Java Persistence API (JPA) implementation
+Additionally, if the {PRODUCT_SHORT} application includes the Data-Index or Jobs Service, it's also required to add the `bamoe-mssql-mappings` dependency
+to ensure the correct behaviour of those components. This module includes the necessary Hibernate ORM mappings to help remapping
+some of the JPA entities used in both components. The mappings contained are:
 
-The JPA implementation allows you to store the events to be persisted in a database.
-To use this you will need to set up the datasource.
+* META-INF/bamoe-data-index-orm.xml: This file remaps some entities from the data-index component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
 
-=== Extension Points
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
 
-Some extensions depend on the runtime and others do not.
-
-`org.kogito.kie.app.audit.spi.DataAuditContextFactory`:: depends on the runtime and enables the creation of the context needed by a particular implementation.
-
-The following extension points do not depend on the runtime:
-
-`org.kie.kogito.app.audit.spi.DataAuditStore`:: stores the data in particular way.
-
-`org.kie.kogito.app.audit.spi.GraphQLSchemaQuery<T>`:: enables execution of a GraphQL query.
-
-`org.kie.kogito.app.audit.spi.GraphQLSchemaQueryProvider`:: enables the subsystem to identify additional queries provided by the end user.
-
-
-=== Using the Data audit add-on
-
-You need to add two different dependencies to your project  for a collocated service.
-
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
 [source,xml]
 ----
 <dependency>
-	  <groupId>org.kie</groupId>
-	  <artifactId>kie-addons-quarkus-data-audit</artifactId>
-	  <version>${version}</version>
-</dependency>
-<dependency>
-	  <groupId>org.kie</groupId>
-	  <artifactId>kie-addons-quarkus-data-audit-jpa</artifactId>
-	  <version>${version}</version>
+    <groupId>com.ibm.bamoe</groupId>
+    <artifactId>bamoe-mssql-mappings</artifactId>
+    <version>${version.com.ibm.bamoe}</version>
 </dependency>
 ----
 
-The first dependency is related how to you want to deploy it. In this case it is deployed as a collocated/embedded service.
-The second dependency specifies the implementation you want to use.
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
 
-Each implementation might require additional dependencies. In this case a driver may be required to use a Java Persistence API (JPA) implementation.
+=== Configuring JDBC Persistence for H2 (Only for development)
 
+In Development environments, you can use H2 persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
 [source,xml]
 ----
-<dependency>
-	  <groupId>io.quarkus</groupId>
-	  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-jdbc-h2</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+    </dependency>
+</dependencies>
 ----
 
-No additional configuration is required besides the default datasource use by the application already.
-
-== The Data index subsystem
-The Data Index subsystem is used to store a snapshot of the latest state of the process instance. 
-
-.Graphical view of the Data Index subsystem
-image::../images/data-index.png[]
-
-The concepts to understand the above picture are:
-
-Transport:: the medium used to transfer events between the runtime and the data index service. The transport is in-vm.
-
-Storage:: the persistence tier of the data index component.
-
-Data index:: the main component responsible for creating/updating the data index, and for providing query capabilities.
-
-
-=== Querying
-
-Data index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
-
-[source,]
+Configuration required in your `application.properties`:
+[source,properties]
 ----
-http://localhost:8080/<root path>/graphql-ui/
+# Application default Datasource - H2
+quarkus.datasource.db-kind=h2
+datasource.devservices.properties.NON_KEYWORDS=VALUE,KEY
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
 ----
 
-to start working with the queries defined by the schema aforementioned.
+=== Setting up the database for stateful Workflows
 
-=== Using the Data index add-on
+To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a Database Admin.
+The provided DDLs allow creating from scratch the Database for the different {PRODUCT_SHORT} subsystems (see xref:deploying-process-services.adoc[The components of a process service])
+for both PostgreSQL and Microsoft SQL Server.
 
-Use the Data Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data index and the transport tier simultaneously.
+The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} process service.
 
-[source,xml]
+.Contents of bamoe-9.2.0-db-utils.zip
+image::wf-tutorial/gs-bamoe-9.2.0-db-utils.png[Contents of bamoe-9.2.0-db-utils.zip]
+
+Additionally {PRODUCT_SHORT} comes with `KIE Flyway`, a Flyway-based mechanism that automatically creates the database schema
+during startup. *This is convenient in a development environments and is not adapted to production database instances.*
+
+To enable this feature, the `kie.flyway.enabled` property should be added in your project `application.properties` file,
+which is found in `src/main/resources` as follows:
+
+[source,properties]
 ----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
-</dependency>
+kie.flyway.enabled=true
 ----
+
+If everything is correctly set, at the first project execution all the tables will be automatically added.
+
+== Authentication in User Task API endpoints
+The xref:../user-tasks.adoc[User Task API] layer integrates an  Authentication layer.  All the endpoints in the User Task API layer require, as QueryParameters, the groups and the user associated with a User Task under management.
+To enable the Authentication in the User Task API endpoints, the following properties should be set in the `application.properties` file of your project:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
+
+|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
+Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
+
+|===
+
+
+To have a fully enabled authentication mechanism working for the User Tasks with the above features, you will need to have the entire Authentication/Authorization layer configured, as described in the xref:../runtime-services-modeling/security.adoc[Security section]
+
+
+
+== Transactional operations on Compact Architecture
+All the operations performed by the Process API layer on the Compact Architecture are transactional. In detail, all the endpoints are now compliant with the ACID properties, namely that in case of failure during a transaction, the action is undone, and any applied change is rolled back to  restore the consistent state that existed before the transactional operation started. This makes all the operations performed on the Compact Architecture reliable and safe. 
+Transactions are enabled as default choice on Compact Architecture projects.
+It is possible to disable the default behavior and make the operation no longer transactional by configuring your project `application.properties` with one of the properties shown in the following table:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.transactionEnabled` |It globally sets the transactions enabled for the entire application |Boolean |true
+
+|`kogito.processes.transactionEnabled` |It sets the transactions enabled for the general Process API layer |Boolean |true
+
+|`kogito.usertasks.transactionEnabled`|It sets the Transactions enabled for the new User Tasks API layer |Boolean |true
+|===
 

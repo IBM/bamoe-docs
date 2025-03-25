@@ -1,15 +1,15 @@
-= Configuration Reference
+= application.properties Configuration reference
 :icons: image
 :iconsdir: ../images/icons
 include::../partials/attributes.adoc[]
 
-== {PRODUCT} Configuration Properties
+Configuration for an {PRODUCT} project is done within the `META-INF/application.properties` file in both Quarkus and Spring Boot.
 
-Configuration for an {PRODUCT} project is done within the `META-INF/application.properties` file.
 This file will also contain other configuration properties for the application.
+
 There are a number of different properties available in a {PRODUCT} application, below is a listing of those properties, a short description, the corresponding Java type and a default, if one exists.
 
-=== Global Properties
+== Global Properties
 
 Global properties do not belong to a particular engine, or feature of {PRODUCT}.
 These properties will affect the entire application regardless of what features are being used.
@@ -53,7 +53,7 @@ Valid values: "reactive", or "".
 a|
 |===
 
-=== Engine Specific Properties
+== Engine Specific Properties
 
 {PRODUCT} is composed of five different engines.
 
@@ -249,7 +249,7 @@ a|Toggle to generate Protobuf marshallers for runtime.
 a|true
 
 a|kogito.workflow.data-index.proto.generation
-a|Toggle to generate Protobuf marshallers for Data Index.
+a|Toggle to generate Protobuf marshallers for Data-Index.
 |boolean
 a|true
 
@@ -262,10 +262,10 @@ Setting this to true will also include the Workflow debug logger in Prod
 
 |===
 
-=== Additional Configuration Properties
+== Additional Configuration Properties
 
 There are other additional configuration properties within {PRODUCT}.
-These include properties from addons or integrations.
+These include properties from add-ons or integrations.
 
 ==== Flyway
 
@@ -317,7 +317,7 @@ If not defined, this auto generated Broker will work as the Sink.
 
 a|org.kie.kogito.addons.knative.eventing.generate-kogito-source
 a|Toggle to generate the Knative https://github.com/knative-sandbox/eventing-kogito[`KogitoSource`] instead of a Knative SinkBinding.
-`KogitoSource` is a custom `SinkBinding` created specifically to bind with entities within the Kogito ecosystem such as Data Index, Jobs Service, etc.
+`KogitoSource` is a custom `SinkBinding` created specifically to bind with entities within the Kogito ecosystem such as Data-Index, Jobs Service, etc.
 For minimal configuration and setup, leave this property set to the default of `false`.
 |boolean
 |`false`
@@ -349,7 +349,7 @@ This sink is used to configure the "sink" property in the generated Knative Sink
 |===
 ////
 
-==== Job related
+==== Job-related
 
 [cols="7,4,^,^"]
 |===
@@ -416,13 +416,13 @@ h|Type
 h|Default
 a|kogito.quarkus.events.threads.poolSize
 a|Maximum number of threads to handle incoming events by channel.
-// Available for both Quarkus and SpringBoot
+// Available for both Quarkus and Spring Boot
 |int
 |`10`
 
 a|kogito.quarkus.events.threads.queueSize
 a|Maximum size of queue to hold incoming events to be processed by threads in the pool.
-// Available for both Quarkus and SpringBoot
+// Available for both Quarkus and Spring Boot
 |int
 |`1`
 
@@ -447,12 +447,12 @@ a|Toggle to propagate errors for process definition emitter.
 |`false`
 
 a|kogito.events.usertasks.enabled
-a|Toggle to enable publishing user task instances events.
+a|Toggle to enable publishing User Tasks events.
 |boolean
 |`true`
 
 a|kogito.events.usertasks.errors.propagate
-a|Toggle to propagate errors for user tasks.
+a|Toggle to propagate errors for User Tasks.
 |boolean
 |`false`
 |===
@@ -460,8 +460,8 @@ a|Toggle to propagate errors for user tasks.
 ==== DevServices
 
 Kogito DevServices function only when a Kogito Quarkus application is in dev mode.
-Enabling DevServices starts an in-memory Data Index container.
-When using {PRODUCT}, it is recommended to use the data-index addon instead of the in-memory Data Index container when using DevServices.
+Enabling DevServices starts an in-memory Data-Index container.
+When using {PRODUCT}, it is recommended to use the data-index addon instead of the in-memory Data-Index container when using DevServices.
 
 [cols="7,4,^,^"]
 |===
@@ -482,7 +482,7 @@ a|Toggle to enable DevServices for Kogito.
 |true
 
 a|quarkus.kogito.devservices.image-name
-a|The Data Index image to use.
+a|The Data-Index image to use.
 |string
 |
 
@@ -490,7 +490,7 @@ a|quarkus.kogito.devservices.shared
 a|(Quarkus Only) Toggle to enable sharing of Quarkus Dev Services.
 When shared, Quarkus looks for running containers using label-based service discovery.
 If a matching container is found, it is used, so a second one is not started.
-Otherwise, Dev Services for a new Data Index instance is started.
+Otherwise, Dev Services for a new Data-Index instance is started.
 The discovery uses the `kogito-dev-service-data-index` label.
 The value is configured using the `service-name` property.
 Container sharing is only used in dev mode.
@@ -594,7 +594,7 @@ These roles should be configured in the Identity Provider the runtime is configu
 a|
 |===
 
-==== Data Index
+==== Data-Index
 
 [cols="4,4,^,2"]
 |===
@@ -604,13 +604,13 @@ h|Type
 h|Default
 
 a|kogito.dataindex.http.url
-a|HTTP port the data index will use to accept incoming requests.
+a|HTTP port the Data-Index will use to accept incoming requests.
 Used to connect the runtime, with svg addon, to the data-index
 |string
 a|http://localhost:$\{quarkus.http.port}
 
 a|kogito.dataindex.ws.url
-a|HTTP port the data index websocket will use to accept incoming requests.
+a|HTTP port the Data-Index websocket will use to accept incoming requests.
 |string
 a|ws://localhost:$\{quarkus.http.port}
 
@@ -621,7 +621,7 @@ By default, this is only included if the application is running in dev mode.
 a|false
 
 a|kogito.data-index.url
-a|URL the data index will use.
+a|URL the Data-Index will use.
 The same as `kogito.dataindex.http.url`, kept for backwards compatibility.
 |string
 a|

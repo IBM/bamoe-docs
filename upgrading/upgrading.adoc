@@ -1,11 +1,11 @@
-= Upgrading from BAMOE version 9.1.x
+= Upgrading from 9.1.x
 include::../partials/attributes.adoc[]
 
 You can upgrade your existing business automation applications and platforms to the most recent version of {PRODUCT_LONG}. If you are upgrading from an older version, you must follow the steps to upgrade to each intermediate version, as documented. Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 
-If you want to know more on how to upgrade from version {VERSION_90x} to version {VERSION_91X}, see https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/9.1.x?topic=upgrading[Upgrading]
+If you want to know more on how to upgrade from version {VERSION_90X} to version {VERSION_91X}, see https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/9.1.x?topic=upgrading[Upgrading]
 
-//The above link to Upgrade has to be changed to external site during release 
+// The above link to Upgrade has to be changed to external site during release 
 
 You can upgrade your project in the following two ways by:
 
@@ -20,15 +20,11 @@ The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION_
 - https://openjdk.org[JDK 17] or later is installed.
 - https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version
-- https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[IBM {DEV_TOOLS}] latest version of VS Code IDE extensions
-- Quarkus version {QUARKUS_VERSION} or later is installed
-
-// include::../partials/91x-prerequisites.adoc[]
 
 
 == Step 1: Download Product Archives
 
-The first step in upgrading is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
+The first step in upgrading is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
 Download the files based on your requirement.
 The following table shows the most common files but you can select other files according to your environment.
 
@@ -42,19 +38,19 @@ The following archives are typically used in upgrading to {PRODUCT_SHORT}:
 | Product Archive | Description
 
 | bamoe-**{VERSION**}-maven-repository-image.tar.gz   
-| Maven repository image contains many of the artifacts that Java developers typically use to build their applications.
+| BAMOE Maven repository image contains many of the artifacts that Java developers typically use to build their applications.
 
 | bamoe-**{VERSION**}-management-console-image.tar.gz 
-| The Management Console Image provides a user interface for managing process instances.
+| The {MANAGEMENT_CONSOLE} Image provides a user interface for managing process instances.
 
 | bamoe-**{VERSION**}-developer-tools.zip   
-| IBM BAMOE Developer Tools for VS Code to create, edit and visualize business processes (BPMN), decisions (DMN), test scenarios (SceSim), and generate web forms used during workflow execution.
+| {DEV_TOOLS} to create, edit and visualize business processes (BPMN), decisions (DMN), test scenarios (SceSim), and generate web forms used during workflow execution.
 
 | bamoe-**{VERSION**}-standalone-bpmn-and-dmn-editors-classic.tgz   
-| Classic Standalone Editors are now available enabling you to embed the BPMN and DMN editors in your application, and packages.
+| BPMN and DMN Editors (classic) are available enabling you to embed the BPMN and DMN Editors in your applications.
 
 | bamoe-**{VERSION**}-standalone-dmn-editor.tgz   
-| The new Standalone DMN Editor is now available enabling you to embed the DMN editors in your application, and packages.
+| The new Standalone DMN Editor is available enabling you to embed the DMN editors in your applications.
 
 | bamoe-**{VERSION**}-sources.zip   
 | Source code of the product artifacts.
@@ -63,42 +59,42 @@ The following archives are typically used in upgrading to {PRODUCT_SHORT}:
 | Source code of the product container images.
 
 | bamoe-**{VERSION**}-maven-repository.zip   
-| The maven repository contains many of the artifacts that Java developers typically use to build their applications.
+| The Maven repository contains many of the artifacts that Java developers use to build their applications.
 
 | bamoe-**{VERSION**}-licenses.zip   
 | No additional information.
 
 | bamoe-**{VERSION**}-examples.zip
-| The Business Automation Manager Open Editions (BAMOE) Kogito Examples include example applications which contain various types of services on Red Hat build of Quarkus to help you develop your own applications. The services use one or more Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, Predictive Model Markup Language (PMML) models, or Java classes to define the service logic.
+| The Business Automation Manager Open Editions (BAMOE) examples include example applications which contain various types of services to help you develop your own applications. The services use one or more Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, Predictive Model Markup Language (PMML) models, or Java classes to define the service logic.
 
 For information about each example application and instructions for using them, see the README file in the relevant application folder.
 
 | bamoe-**{VERSION**}-canvas-helm-chart.tgz
-| BAMOE Canvas helm chart is a Helm chart that allows to install multi-container services with a single command: Helm, the package manager for Kubernetes.
+| A Helm Chart that allows to install {CANVAS} and its related services with a single command: Helm, the package manager for Kubernetes.
 
 | bamoe-**{VERSION**}-canvas-docker-compose.zip
-| This package contains the 'docker-compose' file to run Business Automation Manager Open Edition {VERSION} Canvas and all related services.
+| This package contains the 'docker-compose' file to run {CANVAS} and all related services.
 
 | bamoe-**{VERSION**}-cors-proxy-image.tar.gz
-| This image provides a proxy to allow BAMOE Canvas web app to communicate with Git providers, like github.com and GitHub Enterprise.
+| This image provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and GitHub Enterprise.
 
 | bamoe-**{VERSION**}-canvas-image.tar.gz
-| BAMOE Canvas is a web application that provides authoring tools for Decisions and Workflows, directly in the browser.
+| {CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser.
 
 | bamoe-**{VERSION**}-extended-services-image.tar.gz
 | This image provides features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
 
 | bamoe-**{VERSION**}-canvas-dev-deployment-upload-service.zip
-| The Canvas Dev Deployment Upload Service runs an HTTP server that accepts ZIP file uploads to the `/upload` endpoint, with the correct `?apiKey=<key>` query param. When an upload is done, the application will unzip the file at the configured location and exit with a 0 code, or 1 otherwise.
+| The {CANVAS} Dev Deployment Upload Service runs an HTTP server that accepts ZIP file uploads to the `/upload` endpoint, with the correct `?apiKey=<key>` query param. When an upload is done, the application will unzip the file at the configured location and exit with a 0 code, or 1 otherwise.
 
 | bamoe-**{VERSION**}-canvas-dev-deployment-base-image.tar.gz
 | Docker image with Java and Maven, as well as the `canvas-dev-deployment-upload-service` binary pre-installed and ready to be used. This image doesn't run any services, and is only used to provide a basis for other Dev Deployment images that want a starting point, taking advantaged of the included `canvas-dev-deployment-upload-service`.
 
 | bamoe-**{VERSION**}-canvas-dev-deployment-quarkus-blank-app-image.tar.gz
-| This image is ready to be used for Dev deployments on BAMOE Canvas. It starts the `dev-deployment-upload-service` and then places the uploaded files inside a blank Quarkus app. These files can be Decisions (`.dmn`) or Processes (`.bpmn`), all of them will be used as resources for the app.
+| This image is ready to be used for Dev deployments on {CANVAS}. It starts the `dev-deployment-upload-service` and then places the uploaded files inside a blank Quarkus app. These files can be Decisions (`.dmn`) or Processes (`.bpmn`), all of them will be used as resources for the app.
 
 | bamoe-**{VERSION**}-canvas-dev-deployment-dmn-form-webapp-image.tar.gz
-| This image is ready to be used for Dev deployments that contain Decisions (`.dmn`) on BAMOE Canvas. It expects a Quarkus application to be running at the same host, which it will use to fetch information to render a form that let users interact with a Decision.
+| This image is ready to be used for Dev deployments that contain Decisions (`.dmn`) on {CANVAS}. It expects a Quarkus application to be running at the same host, which it will use to fetch information to render a form that let users interact with a Decision.
 
 |===
 
@@ -112,9 +108,9 @@ Now that you have the files, you can start the upgrading process.
 
 == Step 2: Update Maven configuration and settings
 
-{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
+{MAVEN_SITE_LINK}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
 {PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
-For a quick start, see the {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
+For a quick start, see the {MAVEN_SITE_GETTING_STARTED_LINK}[Maven Quick Start Guide].  
 
 Since {PRODUCT_SHORT} version {VERSION} is based on Quarkus 3.15, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
 You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
@@ -125,10 +121,9 @@ Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.
 
 == Step 3: Updating your development environment
 
-When you update your development environment, you must update {CANVAS}, {VS_CODE_BUNDLE} and the 
-{FORM_GENERATION_TOOL}.
+When you update your development environment, you must update {CANVAS} and {DEV_TOOLS}. 
 
-=== Updating {CANVAS}
+=== Upgrading {CANVAS}
 
 Before you update {CANVAS}:
 
@@ -137,26 +132,22 @@ Before you update {CANVAS}:
 
 If you want to know how to install {CANVAS}, see xref:../installation/installation.adoc[Installing]
 
-- If you have installed a parallel version, use Canvas Import functionality to import your saved projects. See xref:../tools/importing-existing-projects.adoc[Importing existing projects]
+- If you have installed a parallel version, use {CANVAS} Import functionality to import your saved projects. See xref:../tools/importing-existing-projects.adoc[Importing existing projects]
 
 To know more on projects, see Step 4a.
 
-=== Updating {VS_CODE_BUNDLE}
+=== Upgrading {DEV_TOOLS}
 
-The {VS_CODE_BUNDLE} will automatically update as long as you have set this option in VS Code.
+The {DEV_TOOLS} will automatically update as long as you have set this option in VS Code.
 
-To set this option, go to Visual Studio Code, click Extensions and then select the {VS_CODE_BUNDLE}. You will see a checkbox 'Auto Update' on the page. Click it to set. This will take care of your updates automatically. To know more about {VS_CODE_BUNDLE}, see xref:../tools/developer-tools-for-vscode.adoc[Developer Tools for VS Code].
+To set this option, go to Visual Studio Code, click Extensions and then select the {DEV_TOOLS}. You will see a checkbox 'Auto Update' on the page. Click it to set. This will take care of your updates automatically. See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}] to know more.
 
 [NOTE]
 ====
-After upgrading, the New DMN Editor will be opened automatically when you first access it in Canvas or Developer tools for VS Code.
+After upgrading, the new DMN Editor will be opened automatically when you first access it in {CANVAS} or {DEV_TOOLS}.
 Existing DMN files (any version) can be opened directly in the editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring decisions].
 
 ====
-
-=== Updating {FORM_GENERATION_TOOL}
-
-This tool is required for workflow execution. If the {FORM_GENERATION_TOOL} is already present, uninstall and re-install using steps available in  xref:../tools/form-generation-tool.adoc[Form generation tool].
 
 == Step 4a: Creating a new project from scratch
 
@@ -211,11 +202,12 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml,subs="attributes+"]
 ----
-17   <surefire-plugin.version>{SUREFIRE_MAVEN_PLUGIN}</surefire-plugin.version>
-18   <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
-19   <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
-20   <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
-21 </properties>
+<properties>
+  <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+  <kogito.bom.group-id>com.ibm.bamoe</kogito.bom.group-id>
+  <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
+  <kogito.bom.version>{BOM_VERSION}</kogito.bom.version>
+</properties>
 ----
 
 [start=4]
@@ -223,13 +215,13 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml]
 ----
-31  <dependency>
-32    <groupId>${kogito.bom.group-id}</groupId>
-33    <artifactId>${kogito.bom.artifact-id}</artifactId>
-34    <version>${kogito.bom.version}</version>
-35    <type>pom</type>
-36    <scope>import</scope>
-37  </dependency>
+ <dependency>
+   <groupId>${kogito.bom.group-id}</groupId>
+   <artifactId>${kogito.bom.artifact-id}</artifactId>
+   <version>${kogito.bom.version}</version>
+   <type>pom</type>
+   <scope>import</scope>
+ </dependency>
 ----
 +
 A bill of materials (BOM) is a list of parts or components that are required to build a product.
@@ -253,10 +245,10 @@ When a bill of materials (BOM) is used, it is not necessary to specify the versi
 [source,xml]
 ----
 <dependencies>
-    <dependency>
-        <groupId>org.drools</groupId>
-        <artifactId>drools-compiler</artifactId>
-    </dependency>
+  <dependency>
+    <groupId>org.drools</groupId>
+    <artifactId>drools-compiler</artifactId>
+  </dependency>
 </dependencies>
 ----
 
@@ -272,11 +264,12 @@ See xref:../introduction/release-notes/version-mapping.adoc[version mapping for 
 +
 [source,xml]
 ----
-40  <dependencies>
-41    <dependency>
-42      <groupId>com.ibm.bamoe</groupId>
-43      <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
-44    </dependency>
+<dependencies>
+  <dependency>
+    <groupId>com.ibm.bamoe</groupId>
+    <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
+  </dependency>
+</dependencies>
 ----
 
 [NOTE]
@@ -289,7 +282,7 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 . Add the dependencies.
 +
 For this example, you will be creating a project with only DMN files.
-So you must add the the Drools Kogito Quarkus dependency.
+So you must add the `drools-quarkus-decisions` dependency.
 In the {PRODUCT_SHORT} version {VERSION} some dependencies had a slight name change, see section, 'Maven libraries mapping guide' and update accordingly.
 +
 [source,xml]
@@ -318,14 +311,14 @@ quarkus.devservices.enabled=false
 [start=8]
 . Build the project in the root folder:
 + 
-[source,console]
+[source,shell]
 ----
 mvn clean package
 ----
 +
 You might get Maven streaming text once again, and at the end of it you will see:
 +
-[source,console]
+[source,shell]
 ----
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
@@ -346,18 +339,18 @@ The choice of extensions determines the imported behavior of the project includi
 After the project is generated, you will see a project structure in VS Code, similar to the following diagram:
 +
 .Example Maven Project in VS Code
-image::maven-project.png[Example Maven Project in VS Code]
+image::maven-project.png[Example Maven project in VS Code]
 +
 As you can see from the figure, a Maven compliant project is generated, including all of the standard folders typically found in a Maven project.
 The most significant folder is the `resources` folder, which is where new or upgraded business automation asset files must be stored.
 Examples of supported business automation assets are:
 +
-- Decision Model & Notation (DMN) Models (.dmn)
-- Drools Rule Language (DRL) Files (.drl)
-- Business Process Modeling & Notation (BPMN) Models (.bpmn)
-- Excel Decision Tables Excel Files (.xlsx)
-- Standard Property Files (.properties)
-- Test Scenario Files (.scesim)
+- Decision Model & Notation (DMN) decisions (.dmn)
+- Drools Rule Language (DRL) rules (.drl)
+- Business Process Modeling & Notation (BPMN) workflows (.bpmn)
+- Excel Decision Tables Excel files (.xlsx)
+- Standard Properties files (.properties)
+- Test Scenario files (.scesim)
 +
 [NOTE]
 ====
@@ -402,12 +395,12 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
-==== Add Business Automation Assets
+=== Add Business Automation Assets
 
 If your project is upgraded from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the files.
 If you need to create a new file, use `File : New File` option from VS Code, making sure to specify the file extension to associate the new file with the appropriate editor.
 
-== Step 4b: Upgrading a version {VERSION_90x} project
+== Step 4b: Upgrading a version {VERSION_90X} project
 
 Upgrading a {PRODUCT_SHORT} version {VERSION_91x} project to version {VERSION} is straightforward.
 The project structure is not changed, updates only need to be made to the project versions, some dependency names, and files.
@@ -415,7 +408,7 @@ The project structure is not changed, updates only need to be made to the projec
 [start=1]
 . Upgrade the Quarkus version in the project POM file
 +
-In the {PRODUCT_SHORT} version {VERSION_90x} the Quarkus version was 2.16 and for version {VERSION} it is 3.8.6.
+In the {PRODUCT_SHORT} version {VERSION_90X} the Quarkus version was 2.16 and for version {VERSION} it is 3.8.6.
 To make this upgrade, open the `pom.xml` file and do the following change:
 +
 [source,xml]
@@ -431,7 +424,7 @@ To make this upgrade, open the `pom.xml` file and do the following change:
 [start=2]
 . Upgrade the BOM and Kogito versions.
 +
-Previously, the {PRODUCT_SHORT} version {VERSION_90x} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_901}.
+Previously, the {PRODUCT_SHORT} version {VERSION_90X} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_901}.
 Now, both versions are {BOM_VERSION_911}.
 Update the following lines in your `pom.xml`:
 +
@@ -469,7 +462,7 @@ Depending on your project setup you may also need to make changes to a parent `p
 {PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
 
 +
-[source]
+[source,diff]
 ----
  +++ quarkus.devservices.enabled=false
 ----
@@ -481,7 +474,7 @@ A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that package im
 +
 This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
 +
-[source]
+[source,diff]
 ----
  --- import javax.inject.Named;
  +++ import jakarta.inject.Named;
@@ -531,7 +524,7 @@ This includes not only creating and publishing the new project to an enterprise 
 To update your management console installation, see xref:../workflow/consoles.adoc[consoles].
 
 
-== Migrating from the {VERSION_911} Technology Preview
+== [#migrate-tech-preview]Migrating from the {VERSION_911} Technology Preview
 
 In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of the
 a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:

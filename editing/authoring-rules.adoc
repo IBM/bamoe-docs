@@ -20,7 +20,7 @@ a|
 * Support Friendly Enough Expression Language (FEEL) to define decision logic in DMN decision tables and other DMN boxed expressions
 * Can be integrated efficiently with Business Process Model and Notation (BPMN) process models
 * Are optimal for creating comprehensive, illustrative, and stable decision flows
-|{CANVAS} or other DMN-compliant editor
+|{CANVAS}, {DEV_TOOLS}, or other DMN-compliant Editor
 
 |Spreadsheet decision tables
 a|
@@ -89,7 +89,7 @@ rule "rule2 name"
 The following example DRL rule determines the age limit in a loan application decision service:
 
 .Example rule for loan application age limit
-[source]
+[source,drl]
 ----
 rule "Underage"
   salience 15
@@ -109,7 +109,7 @@ Each rule must have a unique name within the rule package. If you use the same r
 
 All data objects related to a DRL rule must be in the same project package as the DRL file in {CANVAS}. Assets in the same package are imported by default. Existing assets in other packages can be imported with the DRL rule.
 
-== Using spreadsheet decision tables in {PRODUCT} services
+== Spreadsheet decision tables
 
 [role="_abstract"]
 As a developer of business decisions, you can define business rules in a tabular format in spreadsheet decision tables and then include the spreadsheet file in your {PRODUCT} project. These rules are compiled into Drools Rule Language (DRL) for the decision service in your project.
@@ -248,13 +248,13 @@ NOTE: As an alternative to populating both the object type and constraint cells,
 +
 If you need to add more rule tables to this decision table spreadsheet, skip a row after the last rule in the previous table, label another `RuleTable` cell in the same column as the previous `RuleTable` and  `RuleSet` cells, and create the new table following the same steps in this section (rows 19-29 in example).
 . Save your XLS or XLSX spreadsheet to finish.
-. In your VSCode IDE, import the XLS or XLSX spreadsheet file in the relevant folder of your {PRODUCT} project, typically in `src/main/resources`.
+. In your VS Code IDE, import the XLS or XLSX spreadsheet file in the relevant folder of your {PRODUCT} project, typically in `src/main/resources`.
 
 NOTE: Only the first worksheet in a spreadsheet workbook is processed as a decision table when you include the spreadsheet in your {PRODUCT} project. Each `RuleSet` name combined with the `RuleTable` name must be unique across all decision table files in the same package.
 
 After you include the decision table in your {PRODUCT} project, the rules are interpreted as DRL rules like the following example, from the sample spreadsheet:
 
-[source, drl]
+[source,drl]
 ----
 //row 12
 rule "Basic_12"
@@ -280,7 +280,8 @@ drools.trimCellsInDTable=false
 You can also set this property as a start-up option when you build your {PRODUCT} project:
 
 .On Quarkus
-[source]
+
+[source,shell]
 ----
 mvn compile quarkus:dev -Ddrools.trimCellsInDTable=false
 ----
