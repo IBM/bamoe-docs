@@ -9,32 +9,25 @@ It very similar to xref:drl-rules-embedded-java-mode.adoc[Executing Rules in emb
 A `KieContainer` is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Apache Maven dependencies for the KJAR.
 You typically embed knowledge assets directly into a project if there is a tight relationship between the version of the code and the version of the DMN definition.
 
+---
+
+---
+
 == pom.xml
 In your client application, add the following dependencies to the relevant classpath of your Java project:
 
 [source,xml]
 ----
-<!-- Required for the DMN runtime API -->
+<!-- Required for running DMN models in embedded Java mode -->
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kie-dmn-core</artifactId>
 </dependency>
 ----
 
-Instead of specifying a Drools `<version>` for individual dependencies, consider adding the Drools bill of materials (BOM) dependency to dependencyManagement section of your project `pom.xml` file.
-When you add the BOM files, the correct versions of transitive dependencies from the provided Apache Maven repositories are included in the project.
+---
 
-.Example BOM dependency
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-dmn-bom</artifactId>
-  <version>{BOM_VERSION}</version>
-  <scope>import</scope>
-  <type>pom</type>
-</dependency>
-----
+---
 
 == KieContainer
 It is a common entry point for an execution of all KIE assets.
@@ -61,6 +54,10 @@ ReleaseId releaseId = kieServices.newReleaseId("org.acme", "my-kjar", "1.0.0");
 KieContainer kieContainer = kieServices.newKieContainer(releaseId);
 ----
 
+---
+
+---
+
 == DMNModel
 To execute a DMN Decision we need to know the DMN model namespace and model name.
 Both can be found in the properties panel of the DMN Editor.
@@ -77,6 +74,10 @@ String modelName = "loan-application-age-limit";
 DMNModel dmnModel = dmnRuntime.getModel(namespace, modelName);
 ----
 
+---
+
+---
+
 == DMNContext
 `DMNContext` is a holder for the input values.
 It should contain a value for each corresponding `InputData` node of or DMN model.
@@ -89,6 +90,10 @@ DMNContext dmnContext = dmnRuntime.newContext();
 dmnContext.set("Applicant", new Applicant("#0001", 20));  
 dmnContext.set("Application", new LoanApplication("#0001"));  
 ----
+
+---
+
+---
 
 == DMNResult
 In the example below we execute the DMN model and consequently we iterate its results.

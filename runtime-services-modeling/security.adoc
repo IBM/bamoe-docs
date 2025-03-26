@@ -9,6 +9,10 @@ image::../images/runtime-services-modeling/security.png[Security authentication 
 
 After configuring your {PRODUCT_SHORT} runtimes  correctly to integrate its framework security layer, it is possible to rely on an external Identity Providers (IdPs) like Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution. A key role of this architecture is the Management Console, which provides your {PRODUCT_SHORT} application’s user an integrated environment to log in to your application and interact with its entities like process instances, submit task forms, and view jobs, in a secured and authenticated way. For more information on Management Console, see xref:../installation/consoles-helm-charts.adoc[Installing → {MANAGEMENT_CONSOLE}].
 
+---
+
+---
+
 == Quarkus (Authentication)
 
 Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/guides/security-oidc-bearer-token-authentication[tutorial] that explains how to do the set up correctly.
@@ -62,6 +66,10 @@ property should be set as
  | string  | service
 
 |===
+
+---
+
+---
 
 == Quarkus (Authorization)
 
@@ -125,11 +133,15 @@ defined, and extensions
  | String | -
 |===
 
-== How to proxy the Identity Provider URL through 'quarkus-oidc-proxy' on a Processes Runtime instance
+---
 
-For the BAMOE Management Console to authenticate and connect to a Process Runtime instance that is secured through an Identity Provider, the instance must make the Identity Provider URL available.
+---
 
-To solve this, you need to use the `quarkus-oidc-proxy` extension, as it creates new endpoints in the Process Runtime instance where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
+== Allowing {MANAGEMENT_CONSOLE} to connect to live Process services
+
+For {MANAGEMENT_CONSOLE} to authenticate and connect to a Process service that is secured through an Identity Provider, the instance must make the Identity Provider URL available.
+
+To solve this, you need to use the `quarkus-oidc-proxy` extension, as it creates new endpoints in the Process service where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
 
 To add the `quarkus-oidc-proxy` extension, you need to add the following code to the list of dependencies in the `pom.xml` file:
 
@@ -137,8 +149,10 @@ To add the `quarkus-oidc-proxy` extension, you need to add the following code to
 ----
 <!-- OIDC Proxy -->
 <dependency>
-	<groupId>io.quarkiverse.oidc-proxy</groupId>
-	<artifactId>quarkus-oidc-proxy</artifactId>
-	<version>0.1.3</version>
+  <groupId>io.quarkiverse.oidc-proxy</groupId>
+  <artifactId>quarkus-oidc-proxy</artifactId>
+  <version>0.1.3</version>
 </dependency>
 ----
+
+NOTE: Version 0.1.3 of `quarkus-oidc-proxy` is compatible with Quarkus 3.15. Do not use versions 0.2.x.
