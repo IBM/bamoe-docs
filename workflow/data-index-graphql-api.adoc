@@ -32,72 +32,19 @@ A GraphQL query
 
 GraphQL queries  can be done on the different workflow types
 
-=== Process Instances
+*Process Instances*
 
-A `ProcessInstance` represents an instance of a running Workflow in the runtime environment. The state of a `ProcessInstance` can be tracked (e.g., active, completed, suspended, or aborted). A process instance may execute various tasks, handle events, interact with external services, and more, depending on the process definition. The following table shows the fields that can be queried for a ProcessInstance:
+A `ProcessInstance` represents an instance of a running Workflow in the runtime environment. The state of a `ProcessInstance` can be tracked (e.g., active, completed, suspended, or aborted). A process instance may execute various tasks, handle events, interact with external services, and more, depending on the process definition. T
 
-[cols="1,1,1"]
-|===
-|Field |Description |Mandatory/Optional
+*User Tasks*
+`UserTaskInstances` are used to track the tasks that  are part of a broader workflow, and the Kogito framework provides mechanisms to manage and interact with these tasks through different lifecycle stages . Using APIs, you can easily manage UserTaskInstances in business processes, including assigning tasks, tracking task states, and interacting with process variables.
 
-|id 
-|A unique Id of type String for tracking the ProcessInstance.
-|Mandatory
-
-|processId
-|A unique Id of type String for tracking the Process
-|Mandatory
-
-|version
-|String value for tracking the version of the ProcessInstance now being refered.
-|
-
-|processName
-|The name of the Process as a String can be tracked in this field
-|
-
-|parentProcessInstanceId
-|Parent process Id of current process can be tracked using this field
-|
-
-|rootProcessInstanceId
-|Root process instance Id of current process can be tracked in this field
-|
-
-|rootProcessId
-|The root process Id of current process can be tracked using this field
-|
-
-|roles
-|The list of roles defined and used in the process
-|Mandatory 
-
-|state
-|The current state of the process is tracked here.This can be any one of the following [PENDING, ACTIVE, COMPLETED, ABORTED, SUSPENDED , ERROR]
-|
-
-|endpoint
-|The endpoint of the process can be tracked using this endpoint field.
-|Mandatory
-
-|serviceUrl
-|The service url of the process can be tracked using this field
-|
-
-|nodes
-|The node Instance details of the process can be tracked in this field 
-|
-|===
-
-=== User Tasks
-
-=== Jobs
+*Jobs*
 
 `Jobs` are used to represent asynchronous or scheduled tasks that run in the background. They are primarily used for executing long-running processes, timers, and other scheduled tasks within a business process or workflow. `Jobs` are typically used to handle tasks like sending reminders, triggering specific actions after a delay, or performing periodic checks within a process.
 
 Example query:
 // examples to come from Pere
-
 
 === Process Definitions
 
@@ -116,7 +63,7 @@ You can see the response below:
 
 // examples to come from Pere
 
-In GraphQL, filters are often handled through arguments passed to queries, and the conditions like logical operators (AND, OR, NOT) , between, contains, conatainsAll, containsAny,equalTo, greaterThan, greaterThanEqual, lessThan, lessThanEqual, isNull can be used to handle the complex query conditions.
+In GraphQL, filters are often handled through arguments passed to queries, and the conditions like logical operators (`AND`, `OR`, `NOT`) , `between`, `contains`, `containsAll`, `containsAny`, `equalTo`, `greaterThan`, `greaterThanEqual`, `lessThan`, `lessThanEqual`, `isNull` can be used to handle the complex query conditions.
 
 Depending on the attribute type, the following operators are also available:
 
@@ -210,11 +157,9 @@ to: Date time
 
 == Sorting
 
-In GraphQL, sorting is often implemented by using arguments in the query. The specific sorting mechanism and the way it's used depend on how the GraphQL schema is designed, but many GraphQL APIs allow sorting by providing arguments that specify the field(s) to sort by and the sort order (ascending or descending).To sort the value  based on a particular field in either ascending or descending order, you can use the ORDER BY clause in your Graphql query.
+In GraphQL, sorting is often implemented by arguments in the query. The specific sorting mechanism and the way it is used depends on how the GraphQL schema is designed, but many GraphQL APIs allow sorting by providing arguments that specify the field(s) to sort by and the sort order (ascending - ASC or descending - DESC). To sort the value  based on a particular field in either ascending or descending order, you can use the `ORDER BY` clause in your Graphql query.
 
-Can select a particular field and mention whether to sort the value in ascending (ASC) or descending (DESC) order of the parameter.
-
-The following shows an example of how you can structure the query to return User Tasks sorted in the descending order of the field “state“
+The following shows an example of how you can structure the query to return User Tasks sorted in the descending order of the field `state`
 
 `{ UserTaskInstances (orderBy: {state: DESC}){ state id description name priority processId    processInstanceId actualOwner potentialUsers comments { id } attachments { id name } } }`
 
