@@ -12,8 +12,8 @@ This chart can be used to deploy the {CANVAS} image on a https://kubernetes.io[K
 
 == Additional requirements
 
-* Podman (for Linux)
-* Docker (for macOS)
+* Docker or Podman
+* Helm
 * Minikube
 
 == Components
@@ -30,23 +30,23 @@ Install a released version available on quay.io registry:
 
 [source,shell]
 ----
-$ helm install my-bamoe-canvas oci://quay.io/bamoe/canvas-helm-chart --version={VERSION}.
+helm install my-bamoe-canvas oci://quay.io/bamoe/canvas-helm-chart --version={VERSION}.
 ----
 
 === Minikube install
 
 [source,shell]
 ----
-$ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
-$ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
 ----
 
 === Kubernetes install
 
 [source,shell]
 ----
-$ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
-$ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
 
 === OpenShift install
@@ -55,15 +55,15 @@ First, you may need to get the default OpenShift domain for your routes with the
 
 [source,shell]
 ----
-$ oc get ingresses.config cluster --output jsonpath={.spec.domain}
+oc get ingresses.config cluster --output jsonpath={.spec.domain}
 ----
 
 If you do not have access rights to this configuration, try creating a dummy Route resource and checking its domain.
 
 [source,shell]
 ----
-$ helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
-$ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
 == Uninstalling the Chart
@@ -72,7 +72,7 @@ Follow the command to uninstall the `my-bamoe-canvas` deployment:
 
 [source,shell]
 ----
-$ helm uninstall my-bamoe-canvas
+helm uninstall my-bamoe-canvas
 ----
 
 == Passing Environmental variables
@@ -81,7 +81,7 @@ This chart uses default environmental variables from `values.yaml` file. You can
 
 [source,shell]
 ----
-$ helm install my-bamoe-canvas ./src --set image.repository=quay.io
+helm install my-bamoe-canvas ./src --set image.repository=quay.io
 ----
 
 == Configuration
