@@ -168,7 +168,7 @@ NOTE:  Ensure it implements the `BusinessCalendar`` interface. The implementatio
 An example is provided below. However, you are free to define your own logic.
 
 +
-[source.java]
+[source,java]
 ----
 package org.kie.kogito.calendar.custom;
 
@@ -232,13 +232,15 @@ public class BusinessCalendarProducer {
 }
 ----
 
+==  
+
 == Configuring User Task assignment strategies
 
 User Tasks can be assigned to a single User based on a defined logic, which is active by default. The algorithm will automatically assign ANY User Tasks in `ACTIVATE` status for the resulting person that is part of the “Potential Users” group associated to that User Task and the same person is NOT part of the “Excluded Users” group associated to the same User Taks. In other words, the algorithm performs a Set Difference between the Potential Users and the Excluded User of a given User Taks. If that difference results in a single user, the User Task is automatically assigned to that user and moved to “CLAIM” status. In all other cases, the User Tasks is not assigned and no changes are applied on it.
 
 This default logic covers the basic use case. To implement your specific business logic to automatically assign User Tasks create a new Java Class that extends the `BasicUserTaskAssignmentStrategy` class. This class represents the Java class that holds the default logic previously described. The logic should be wrapped into the inherited computeAssigment method. The effect of this action is to replace the the default logic with your own custom logic. An example of a custom UserTaskAssignmentStrategy is shown below:
 
-[source, java]
+[source,java]
 ----
 @Specializes
 @ApplicationScoped
