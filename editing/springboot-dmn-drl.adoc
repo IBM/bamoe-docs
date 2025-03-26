@@ -225,12 +225,15 @@ Here is an example that verifies the response received when posting an HTTP requ
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KogitoSpringbootApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TrafficViolationTest {
+
     @LocalServerPort
     private int port;
+
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
     }
+
     @Test
     public void testEvaluateTrafficViolation() {
         given()
@@ -557,16 +560,13 @@ Here is an example that verifies the response received when posting an HTTP requ
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RestQueryTest {
 
-
     @LocalServerPort
     private int port;
-
 
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
     }
-
 
     private static final String JSON_PAYLOAD =
             "{\n" +
