@@ -1,8 +1,8 @@
-= Overview of stateful Workflow architecture
+= Overview of stateful Workflows with Compact Architecture
 
 include::../partials/attributes.adoc[]
 
-You can use BAMOE to develop stateful workflow services using Business Process Model and Notation (BPMN) 2.0 models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
+You can use BAMOE to develop stateful workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
@@ -117,6 +117,7 @@ quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://loca
 
 NOTE: Use managed dependencies or specify the version of the dependencies. 
 
+[#data-audit]
 == The Data-Audit subsystem
 
 The Data-Audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
@@ -215,14 +216,12 @@ You need to add two different dependencies to your project  for a collocated ser
 [source,xml]
 ----
 <dependency>
-	  <groupId>org.kie</groupId>
-	  <artifactId>kie-addons-quarkus-data-audit</artifactId>
-	  <version>${version}</version>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-data-audit</artifactId>
 </dependency>
 <dependency>
-	  <groupId>org.kie</groupId>
-	  <artifactId>kie-addons-quarkus-data-audit-jpa</artifactId>
-	  <version>${version}</version>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-data-audit-jpa</artifactId>
 </dependency>
 ----
 
@@ -234,8 +233,8 @@ Each implementation might require additional dependencies. In this case a driver
 [source,xml]
 ----
 <dependency>
-	  <groupId>io.quarkus</groupId>
-	  <artifactId>quarkus-jdbc-h2</artifactId>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
 </dependency>
 ----
 
@@ -279,6 +278,7 @@ Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The sam
 </dependency>
 ----
 
+[#user-tasks]
 == The User Tasks Subsystem
 A User Task is a typical process or workflow task where a human performs the Task with the assistance of a software application and is scheduled through a task list manager.
 
