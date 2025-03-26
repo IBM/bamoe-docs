@@ -1,11 +1,10 @@
-= Interacting with Workflows, User Tasks, and Jobs
+= Managing live Workflows using BAMOE Management Console
 include::../partials/attributes.adoc[]
 
-== Management console
 
-The Management console is a web application for viewing the state of all available {PRODUCT_SHORT} services and manage and interact with process instances:
+{MANAGEMENT_CONSOLE} is a web application for viewing the state of all available {PRODUCT_SHORT} services and manage and interact with process instances:
 
-.Management Console
+.{MANAGEMENT_CONSOLE}
 image::runtime-services-modeling/kogito-management-console.png[Image of {MANAGEMENT_CONSOLE}]
 
 You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, manage User Tasks and Jobs. These are the different elements you can view:
@@ -21,33 +20,33 @@ You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, 
 * domain-specific process data
 
 
-In order to be visible in the Management console your {PRODUCT_SHORT} services must use the following {PRODUCT_SHORT} components:
+In order to be visible in {MANAGEMENT_CONSOLE} your {PRODUCT_SHORT} services must use the following {PRODUCT_SHORT} components:
 
-* *{PRODUCT_SHORT} Data-Index service*: Enables the Management console to access stored events related to processes and domain data from your {PRODUCT_SHORT} services. The Data-Index service requires PostgreSQL persistence.
-* *{PRODUCT_SHORT} Process management add-on*: Enables the Management console to interact with the process data from your {PRODUCT_SHORT} services through the add-on REST endpoint `/management/processes`.
-If you do not enable this add-on for your {PRODUCT_SHORT} service, the Management console provides read-only access to your service data without the ability to modify instances, such as aborting process instances.
+* *{PRODUCT_SHORT} Data-Index service*: Enables the {MANAGEMENT_CONSOLE} to access stored events related to processes and domain data from your {PRODUCT_SHORT} services. The Data-Index service requires PostgreSQL persistence.
+* *{PRODUCT_SHORT} Process management add-on*: Enables the {MANAGEMENT_CONSOLE} to interact with the process data from your {PRODUCT_SHORT} services through the add-on REST endpoint `/management/processes`.
+If you do not enable this add-on for your {PRODUCT_SHORT} service, the {MANAGEMENT_CONSOLE} provides read-only access to your service data without the ability to modify instances, such as aborting process instances.
 //For more information about the process management add-on, see xref:../workflow/deploying-process-services.html[].
 
-To visualize the process instance execution path at the management console, add the following add-on:
+To visualize the process instance execution path at the {MANAGEMENT_CONSOLE}, add the following add-on:
 
 * *{PRODUCT_SHORT} process SVG add-on*: Enables the process SVG diagram to visualize the process instance execution path.
-If this add-on is not enabled for your {PRODUCT_SHORT} service, the management console does not display the diagram panel.
+If this add-on is not enabled for your {PRODUCT_SHORT} service, the {MANAGEMENT_CONSOLE} does not display the diagram panel.
 //For more information about the process SVG add-on, see xref:con-bpmn-process-svg-addon_kogito-developing-process-services[].
 
 
 
-=== Using the Management Console to manage process instances
+=== Using the {MANAGEMENT_CONSOLE} to manage process instances
 
-You can use the Management Console to view and manage process instance details from your {PRODUCT_SHORT} services.
-You can run the Management Console for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on OpenShift.
+You can use the {MANAGEMENT_CONSOLE} to view and manage process instance details from your {PRODUCT_SHORT} services.
+You can run the {MANAGEMENT_CONSOLE} for local {PRODUCT_SHORT} services or add it to your {PRODUCT_SHORT} infrastructure on OpenShift.
 
 .Prerequisites
 * A {PRODUCT_SHORT} Data-Index Service instance is configured and running for your {PRODUCT_SHORT} service.
-The Data-Index Service enables the Management Console to access stored process data.
+The Data-Index Service enables the {MANAGEMENT_CONSOLE} to access stored process data.
 The Data-Index Service requires Infinispan or MongoDB persistence and Apache Kafka messaging for your {PRODUCT_SHORT} service.
 //For information about the Data-Index Service, see {URL_CONFIGURING_KOGITO}#con-data-index-service_kogito-configuring[_{CONFIGURING_KOGITO}_].
 * The `pom.xml` file of your {PRODUCT_SHORT} project contains the following dependency for the process management add-on.
-This add-on enables the Management Console to interact with the process data through the add-on REST endpoint `/management/processes`.
+This add-on enables the {MANAGEMENT_CONSOLE} to interact with the process data through the add-on REST endpoint `/management/processes`.
 //For more information about the process management add-on, see xref:con-bpmn-process-management-addon_kogito-developing-process-services[].
 +
 .Project dependency to enable process management REST operations
@@ -60,7 +59,7 @@ This add-on enables the Management Console to interact with the process data thr
 ----
 
 * The `application.properties` file of your {PRODUCT_SHORT} project contains the following system properties for the location where the {PRODUCT_SHORT} service is deployed, such as `\http://localhost:8080`, and for Quarkus Cross-Origin Resource Sharing (CORS) support.
-These properties enable the Management Console to generate the URLs to execute the REST operations from the process management add-on.
+These properties enable the {MANAGEMENT_CONSOLE} to generate the URLs to execute the REST operations from the process management add-on.
 +
 .Application properties for REST URLs
 [source,subs="+quotes"]
@@ -70,9 +69,9 @@ quarkus.http.cors=true
 ----
 
 * Procedure
-. In a command terminal, enter the following command to run the Management Console:
+. In a command terminal, enter the following command to run the {MANAGEMENT_CONSOLE}:
 +
-.Running the Management Console
+.Running the {MANAGEMENT_CONSOLE}
 [source,subs="attributes"]
 ----
 $ docker run -p 8280:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
@@ -80,9 +79,9 @@ $ docker run -p 8280:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
 +
 [NOTE]
 ====
-The default port for the Management Console is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
+The default port for the {MANAGEMENT_CONSOLE} is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
 
-Also, the Management Console uses the default Data-Index Service port 8180.
+Also, the {MANAGEMENT_CONSOLE} uses the default Data-Index Service port 8180.
 If you modified this port in your Data-Index Service instance, you can set the new Data-Index URL using the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT` environment variable like:
 [source,subs="attributes"]
 ----
@@ -90,7 +89,7 @@ $ docker run -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_DATA_INDEX_ENDPOINT=http:/_HOST
 ----
 ====
 
-=== Management Console application
+=== {MANAGEMENT_CONSOLE} application
 
 Management Console consists of the following tabs that allow you to interact with your process instances and data:
 
@@ -100,7 +99,7 @@ Management Console consists of the following tabs that allow you to interact wit
 .Management Console
 image::runtime-services-modeling/kogito-management-console.png[Image of {MANAGEMENT_CONSOLE}]
 
-In this example, the Management Console displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
+In this example, the {MANAGEMENT_CONSOLE} displays data for the `kogito-travel-agency` extended example application in the xref:../getting-started/examples.html[list of example applications].
 
 ==== Process Instances
 
@@ -110,11 +109,11 @@ The *Process Instances* tab displays the list of process instances and enables y
 image::runtime-services-modeling/kogito-management-console-process-instance-section.png[Image of process instance list section]
 
 When you select a process instance on the *Process Instances* page, it redirects you to the *Process Details* page, providing the process instance details including interactions with the process instance.
-You can access the *Process Details* page from a different Management Console tab, displaying the instance related data and enables you to perform the available actions.
+You can access the *Process Details* page from a different {MANAGEMENT_CONSOLE} tab, displaying the instance related data and enables you to perform the available actions.
 You can also sort the results based on the column headers.
 
 .Process Details page
-image::runtime-services-modeling/kogito-management-console-process-diagram.png[Image of Process Instance details in Management Console]
+image::runtime-services-modeling/kogito-management-console-process-diagram.png[Image of Process Instance details in {MANAGEMENT_CONSOLE}]
 
 The *Process Details* page consists of the following panels:
 
@@ -130,7 +129,7 @@ Process Diagram panel::
 +
 --
 This panel enables you to explore the process diagram and execution path of the related process instance.
-The execution path is displayed when the Management Console finds the `.svg` resources using the {PRODUCT_SHORT} process SVG add-on configuration included in the Management Console.
+The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` resources using the {PRODUCT_SHORT} process SVG add-on configuration included in the {MANAGEMENT_CONSOLE}.
 
 .Process Diagram panel
 image::runtime-services-modeling/kogito-management-console-process-diagram-panel.png[Image of process instance diagram panel]
@@ -156,7 +155,7 @@ The Details panel consists of the following fields:
 * *Endpoint*: The endpoint of the process instance. You can click the displayed endpoint to view the process or application UI that triggered the process instance.
 +
 .Process instance details endpoint
-image::runtime-services-modeling/kogito-management-console-process-details-endpoint.png[Image of process instance details endpoint in Management Console]
+image::runtime-services-modeling/kogito-management-console-process-details-endpoint.png[Image of process instance details endpoint in {MANAGEMENT_CONSOLE}]
 
 * *Start*: Time reference indicating when the process instance is started.
 * *Last Updated*: Time reference indicating when the process instance is updated.
@@ -172,10 +171,10 @@ The *Process Variables* panel displays the process instance domain data in a tre
 When you hover the mouse on different elements, the available actions are displayed.
 
 .Process Variables panel
-image::runtime-services-modeling/kogito-management-console-process-variable-panel.png[Image of process variables panel  in Management Console]
+image::runtime-services-modeling/kogito-management-console-process-variable-panel.png[Image of process variables panel  in {MANAGEMENT_CONSOLE}]
 
 .Actions in Process Variables panel
-image::runtime-services-modeling/kogito-management-console-process-variable-actions.png[Image of process variables panel available actions in Management Console]
+image::runtime-services-modeling/kogito-management-console-process-variable-actions.png[Image of process variables panel available actions in {MANAGEMENT_CONSOLE}]
 
 The process variables in the *Process Variables* panel consists of the following actions:
 
@@ -183,7 +182,7 @@ The process variables in the *Process Variables* panel consists of the following
 * Add item: Enables you to add a new key. When you add a new key, it contains null values, which you can edit if required.
 +
 .Add new key
-image::runtime-services-modeling/kogito-management-console-process-variable-add.png[Steps to add a new variable to a process instance in Management Console]
+image::runtime-services-modeling/kogito-management-console-process-variable-add.png[Steps to add a new variable to a process instance in {MANAGEMENT_CONSOLE}]
 
 * Copy: Enables you to copy the selected value in clipboard.
 * Edit: Enables you to edit the selected element value.
@@ -218,7 +217,7 @@ When you select a node, the related information is displayed, such as *Node name
 Click the *Trigger* button, to trigger the selected node.
 
 .Node Trigger panel
-image::runtime-services-modeling/kogito-management-console-node-trigger-panel.png[Image of node trigger panel in Management Console]
+image::runtime-services-modeling/kogito-management-console-node-trigger-panel.png[Image of node trigger panel in {MANAGEMENT_CONSOLE}]
 --
 
 Milestones panel::
@@ -227,7 +226,7 @@ Milestones panel::
 The *Milestones* panel displays a list of the milestones for the process instance, if applicable.
 
 .Milestones panel
-image::runtime-services-modeling/kogito-management-console-milestones-panel.png[Image of milestones panel in Management Console]
+image::runtime-services-modeling/kogito-management-console-milestones-panel.png[Image of milestones panel in {MANAGEMENT_CONSOLE}]
 --
 
 Jobs panel::
@@ -236,10 +235,10 @@ Jobs panel::
 The *Jobs* panel displays the list of available jobs that are related to the process instance.
 
 .Jobs panel
-image::runtime-services-modeling/kogito-management-console-jobs-panel.png[Image of jobs panel in Management Console]
+image::runtime-services-modeling/kogito-management-console-jobs-panel.png[Image of jobs panel in {MANAGEMENT_CONSOLE}]
 
 .Job details
-image::runtime-services-modeling/kogito-management-console-jobs-panel-details.png[Image of jobs panel details in Management Console]
+image::runtime-services-modeling/kogito-management-console-jobs-panel-details.png[Image of jobs panel details in {MANAGEMENT_CONSOLE}]
 
 You can reschedule or cancel a job that is in scheduled or error state.
 You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
@@ -251,17 +250,17 @@ You can also modify the expiration time for one-time jobs and repeat interval, r
 The *Jobs Management* tab displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, rescheduling a job, or canceling a job.
 
 .Jobs Management page
-image::runtime-services-modeling/kogito-management-console-jobs-management.png[Image of Jobs Management page in Management Console]
+image::runtime-services-modeling/kogito-management-console-jobs-management.png[Image of Jobs Management page in {MANAGEMENT_CONSOLE}]
 
 You can also cancel the multiple jobs at the same time.
 To cancel multiple jobs, select the jobs to be canceled and click the *Cancel Selected* button.
 
-=== Enabling Management Console security
+=== Enabling {MANAGEMENT_CONSOLE} security
 
-For security, the Management Console relies on https://www.keycloak.org/[Keycloak] solution for authentication.
-Once a user is authenticated, Management Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
+For security, the {MANAGEMENT_CONSOLE} relies on https://www.keycloak.org/[Keycloak] solution for authentication.
+Once a user is authenticated, {MANAGEMENT_CONSOLE} uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
 
-IMPORTANT: By default, To enable security it is required to run Management Console in "PROD" mode.
+IMPORTANT: By default, To enable security it is required to run {MANAGEMENT_CONSOLE} in "PROD" mode.
 
 .Prerequisites
 * You have a https://www.keycloak.org/[Keycloak] server running.
@@ -273,9 +272,9 @@ You can also add the origin URLs as a parameter to the *Web Origins*, which can 
 image::runtime-services-modeling/kogito-consoles-keycloak-config.png[Image of client config in keycloak server]
 
 .Procedure
-In a command terminal, enter the following command to run the Management Console:
+In a command terminal, enter the following command to run the {MANAGEMENT_CONSOLE}:
 
-.Run the Management Console with security enabled
+.Run the {MANAGEMENT_CONSOLE} with security enabled
 [source,subs="attributes"]
 ----
 $ docker run -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_KOGITO_ENV_MODE=PROD
@@ -305,7 +304,7 @@ The following table lists the configuration envs of the Task Console Image:
 | Name | Description | Type | Default
 
 | RUNTIME_TOOLS_TASK_CONSOLE_KOGITO_ENV_MODE
-| Starts the Management Console in "PROD" or "DEV" Mode. "PROD" mode enables authentication.
+| Starts the {MANAGEMENT_CONSOLE} in "PROD" or "DEV" Mode. "PROD" mode enables authentication.
 | string
 | "DEV"
 
@@ -444,7 +443,7 @@ image::runtime-services-modeling/kogito-task-console-details-expanded.png[Image 
 For security, Task Console relies on https://www.keycloak.org/[Keycloak] solution for authentication.
 Once a user is authenticated, Task Console uses bearer tokens to communicate with other {PRODUCT_SHORT} services.
 
-IMPORTANT: By default, To enable security it is required to run Management Console in "PROD" mode.
+IMPORTANT: By default, To enable security it is required to run {MANAGEMENT_CONSOLE} in "PROD" mode.
 
 .Prerequisites
 * You have a https://www.keycloak.org/[Keycloak] server running.
