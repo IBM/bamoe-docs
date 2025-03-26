@@ -75,25 +75,24 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.bamoe.bom>{9.2.0-ibm-0004} 
-    </version.bamoe.bom>
-    <version.org.springframework.boot>3.4.2</version.org.springframework.boot>
+    <version.bamoe.bom>9.2.0-ibm-0004</version.bamoe.bom>
+    <version.org.springframework.boot>3.4.3</version.org.springframework.boot>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-    <dependency>
-      <groupId>org.kie.kogito</groupId>
-      <artifactId>kogito-spring-boot-bom</artifactId>
-      <version>${version.bamoe.bom}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <version>${version.org.springframework.boot}</version>
-      <optional>true</optional>
+      <dependency>
+        <groupId>org.kie.kogito</groupId>
+        <artifactId>kogito-spring-boot-bom</artifactId>
+        <version>${version.bamoe.bom}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <version>${version.org.springframework.boot}</version>
+        <optional>true</optional>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -131,6 +130,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
   <build>
     <finalName>${project.artifactId}</finalName>
+    
     <pluginManagement>
       <plugins>
         <plugin>
@@ -225,12 +225,15 @@ Here is an example that verifies the response received when posting an HTTP requ
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KogitoSpringbootApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TrafficViolationTest {
+
     @LocalServerPort
     private int port;
+
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
     }
+
     @Test
     public void testEvaluateTrafficViolation() {
         given()
@@ -409,7 +412,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.bamoe.bom>9.2.0-ibm-0004</version.bamoe.bom>
-    <version.org.springframework.boot>3.4.2</version.org.springframework.boot>
+    <version.org.springframework.boot>3.4.3</version.org.springframework.boot>
   </properties>
 
   <dependencyManagement>
@@ -458,6 +461,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
   <build>
     <finalName>${project.artifactId}</finalName>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -556,16 +560,13 @@ Here is an example that verifies the response received when posting an HTTP requ
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RestQueryTest {
 
-
     @LocalServerPort
     private int port;
-
 
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
     }
-
 
     private static final String JSON_PAYLOAD =
             "{\n" +
