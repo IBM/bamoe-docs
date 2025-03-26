@@ -1,0 +1,520 @@
+= The Process Management API
+include::../partials/attributes.adoc[]
+
+Process management in Kogito applications refers to the orchestration and execution of business processes and workflows, enabling the automation of complex tasks and decision-making in a cloud-native environment.
+
+In Kogito, Process Management APIs are crucial for interacting with business processes, including starting, querying, and managing the lifecycle of processes. Kogito provides RESTful APIs to manage processes and tasks in workflows, leveraging its integration with jBPM for business process management (BPM) and Drools for business rule management.
+
+== Process Management APIs
+The kie-addons-quarkus-process-management is an extension for Kogito that integrates Quarkus with Kie (Drools and jBPM), enabling process management features for business workflows in a Quarkus-based microservice architecture. It provides the necessary infrastructure for running and managing business processes (from jBPM) and rules (from Drools) within a Kogito service on Quarkus.
+
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-addons-quarkus-process-management</artifactId>
+    </dependency>
+
+With the Process Management endpoints, it’s possible to operate with the following Entities:
+
+* Processes (GET, POST, DELETE)
+** ProcessInstance (GET)
+** Node (GET, POST, DELETE)
+** ProcessError (GET)
+** WorkItem (GET)
+
+The following sections describe the Process Instance Management API in detail.
+
+===  /management/processes
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* | It returns the list of process names that are currently executing.
+
+|*Inputs* |
+
+|*Output* a| A JSON List of _Process names_ that are currently executing.
+
+* processName: String
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It returns the complete process information of the specified processId.
+
+|*Inputs* |
+* processId: String (PathParameter)
+
+|*Output* a| Process instance information including the following information
+* id : String
+* name : String
+* type : String
+* version : String
+* description : String
+* annotations : List
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |DELETE
+
+|*Description* |It cancels the specific processInstanceId for the given processId
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Response will be returned with the _variables_ details defined for the canceled process instance.
+
+* _ProcessInstanceExecutionException_ is returned if a process instance cancel operation returns any error.
+* _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |curl -X 'DELETE' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/error
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It returns the error details corresponding to the failed processInstanceId for the given processId
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Response with the following process details will be returned.
+
+** processInstanceId: String
+** failedNodeId: String
+** errorMessage: String
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+* A _BAD REQUEST_ error with message "Process instance with id {processInstanceId} is not in error state"  will be returned if no error details are found.
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/error' \
+-H 'accept: */*'
+|===
+
+
+===  /management/processes/{processId}/instances/{processInstanceId}/migrate
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It migrates the process from given processId and processInstanceId to the target processId and processInstanceId.
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* targetProcessId": String (Query Parameter)
+* targetProcessVersion": String (Query Parameter)
+
+|*Output* a| * Response with the following process details will be returned.
+** processInstanceId: String
+** message: String
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+* A _BAD REQUEST_ error with error message if any issue occurs while doing the migration.
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/migrate' \
+-H 'accept: */*' \
+-H 'Content-Type: application/json' \
+-d '{
+"targetProcessId": "string",
+"targetProcessVersion": "string"
+}'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It returns the list of workItems in the specified process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * A list of _WorkItem_ present in the specified processId and the processInstanceId will be returned.It includes following details
+
+*WorkItem:*
+
+    * id : String
+    * nodeInstanceId : String
+    * nodeId: WorkflowElementIdentifier
+    * name : String
+    * state : int
+    * phase : String
+    * phaseStatus : String
+    * parameters : Map++<++String, Object++>++
+    * results :  Map++<++String, Object++>++
+    * workItemHandlerName : String
+    * externalReferenceId : String
+
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodeInstances' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It will re trigger the nodeInstance mentioned in the NodeInstanceId for the specified processId & processInstanceId
+
+|*Inputs* |
+* nodeInstanceId : String (PathParameter)
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Returns the response with variables details in the process instance
+
+* A _ProcessInstanceExecutionException_ is returned if a process instance retrigger returns any error.
+* A _NodeInstanceNotFoundException_ is returned if the mentioned node instance id is not found.
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processInstance}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}' \
+-H 'accept: */*' \
+-d ''
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |DELETE
+
+|*Description* |It will cancel the nodeInstance mentioned in the nodeInstanceId of the specified processId & processInstanceId
+
+|*Inputs* |
+* nodeInstanceId : String (PathParameter)
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Returns the response with variables details in the process instance
+
+* A _ProcessInstanceExecutionException_ is returned if a Process Instance returns any error.
+* A _NodeInstanceNotFoundException_ is returned if the mentioned node instance id is not found.
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processInstance}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}' \
+-H 'accept: */*' \
+-d ''
+|===
+
+
+===  /management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It will trigger the node for the specified nodeId corresponding to the mentioned processId and processInstanceId.
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* nodeId : String (PathParameter)
+
+|*Output* a| * Returns the response with variables details of the process instance
+
+* A _ProcessInstanceExecutionException_ is returned if a Process Instance returns any error.
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}' \
+-H 'accept: */*' \
+-d ''
+|===
+
+
+
+===  /management/processes/{processId}/instances/{processInstanceId}/retrigger
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It will retrigger instance in error status for the specified processId & processInstanceId
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Returns the response with variables details in the process instance
+
+* A _ProcessInstanceExecutionException_ is returned if a Process Instance returns any error.
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _BAD REQUEST_ error is returned if processInstanceId is not in error state.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/retrigger' \
+-H 'accept: */*' \
+-d ''
+|===
+
+
+===  /management/processes/{processId}/instances/{processInstanceId}/skip
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It will skip instance in error status corresponding to the mentioned processId and processInstanceId
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * Returns the response with variables details in the process instance
+
+* A _ProcessInstanceExecutionException_ is returned if a Process Instance returns any error.
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _BAD REQUEST_ error is returned if processInstanceId is not in error state.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/skip' \
+-H 'accept: */*' \
+-d ''
+|===
+
+===  /management/processes/{processId}/migrate
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It will migrate all instances corresponding to the mentioned processId to the target processId
+
+|*Inputs* |
+* processId: String (PathParameter)
+* targetProcessId: String (Query Parameter)
+* targetProcessVersion: String (Query Parameter)
+
+|*Output* a| * Returns the response with details of the migrated instances .
+Includes below details
+  * id : String
+  * numberOfProcessInstanceMigrated : String
+
+* A _BAD REQUEST_ error is returned if any error occurred during migration.
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/processes/{processId}/migrate' \
+-H 'accept: */*' \
+-H 'Content-Type: application/json' \
+-d '{
+"targetProcessId": "string",
+"targetProcessVersion": "string"
+}'
+|===
+
+
+===  /management/processes/{processId}/nodes
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It will get the process nodes corresponding to the mentioned processId
+
+|*Inputs* |
+* processId: String (PathParameter)
+
+|*Output* a| * Returns the list of node details corresponding to the processId.
+Below details will be included.
+** id : String
+** uniqueID : String
+** nodeDefinitionId : String
+** metadata : String
+** type : String
+** name : String
+
+* A _BAD REQUEST_ error is returned if any error occurs.
+* A _BAD REQUEST_ error is returned if processId  is missing in the request.
+* A _NOT FOUND_ error is returned if processId is not found.
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/nodes' \
+-H 'accept: */*'
+|===
+
+== Source File Management APIs
+Source file management in Kogito, a cloud-native business automation platform, typically involves managing files related to business process management (BPM), decision management (DMN), and other related artifacts.
+The kie-addons-quarkus-source-files extension is part of Kogito's integration with Quarkus and is primarily used for loading source files (such as BPMN, DMN, and DRL files) in a Quarkus-based Kogito project. This extension allows Kogito applications to dynamically load these source files, which are essential for executing business processes, decision tables, and rules within a Quarkus runtime.
+
+ <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-addons-quarkus-source-files</artifactId>
+</dependency>
+
+With the Source File Management endpoints, it’s possible to operate with the following Entities:
+* SourceFile (GET)
+
+===  /management/processes/sources
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It will get source files corresponding to the uri mentioned as the query parameter.
+
+|*Inputs* |
+* uri: String (QueryParameter)
+
+|*Output* a| * Returns the source file corresponding to the uri mentioned.
+
+* A _NOT FOUND_ error is returned if uri is not found.
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/sources?uri={uri}}' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}/source
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It will get source file corresponding to the processId.
+
+|*Inputs* |
+* processId : String (PathParameter)
+
+|*Output* a| * Returns the list of _SourceFiles_ corresponding to the processId.
+Below details will be returned.
+** uri : String
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/source' \
+-H 'accept: */*'
+|===
+
+===  /management/processes/{processId}/sources
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |It will get SourceFiles corresponding to the mentioned processId
+
+|*Inputs* |
+* processId : String (PathParameter)
+
+|*Output* a| * Returns the list of _SourceFiles_ corresponding to the processId.
+Below details will be returned.
+** uri : String
+
+|*Example* |curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/source' \
+-H 'accept: */*'
+|===
+
+== Callback Jobs Service Management APIs
+
+In Kogito, Callback Jobs Service Management APIs are used to manage callback jobs, which are jobs or tasks that are triggered at a specific point in a process or workflow. These callbacks allow external systems to be notified about events occurring within the Kogito process engine or business workflows. Kogito allows users to schedule and handle jobs, including callback jobs that can invoke external systems or APIs.
+
+===  /management/jobs/{processId}/instances/{processInstanceId}/timers/{timerId}
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It triggers the job for the given processId and processInstanceId at the specified timer Id
+
+|*Inputs* |
+* processId : String (PathParameter)
+* processInstanceId : String (PathParameter)
+* timerId : String (PathParameter)
+* limit : int (QueryParameter) - (Default limit value will be 0)
+* payload : String passed in as the request body it includes the correlation id and job id
+
+
+|*Output* a| * Returns the OK response if the job triggered successfully.
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+*A _BAD REQUEST_ error is returned if payload  is missing in the request.
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/jobs/{processId}/instances/{processInstanceId}/timers/1?limit=0' \
+-H 'accept: */*' \
+-H 'Content-Type: application/json' \
+-d '"string"'
+
+|===
+
+== Job Service Management APIs
+
+The Job Service Management APIs are part of the Kogito Job Service component, which works with the Kogito Jobs Service (which is typically built on top of Quartz Scheduler or other job scheduling mechanisms) to handle and manage jobs in processes.
+
+In the Kogito ecosystem, kogito-addons-quarkus-jobs-management is an extension that integrates job management capabilities with the Kogito runtime. Specifically, it leverages the Quarkus framework and provides features for handling and managing long-running jobs and timers within Kogito-based applications.
+
+ <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
+</dependency>
+
+
+===  /management/shutdown
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It completes any ongoing processing or tasks
+
+|*Inputs* |
+
+|*Output* a| * Returns the success response if the job shuts down successfully.
+
+|*Example* |curl -X 'POST' \
+'http://localhost:8080/management/shutdown' \
+-H 'accept: application/json' \
+-d ''
+
+|===
