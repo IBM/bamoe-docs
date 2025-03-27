@@ -19,8 +19,8 @@ This chart can be used to deploy the {CANVAS} image on a https://kubernetes.io[K
 == Components
 
 * {CANVAS}: Main application
-* Extended Services: Powers the DMN Runner and validator
-* CORS Proxy: Intended to solve CORS issues
+* {EXT_SERVICES}: Powers the DMN Runner and validator
+* {CORS_PROXY}: Intended to solve CORS issues
 
 == Installing a released version from the OCI registry:
 
@@ -175,7 +175,7 @@ The following table lists the configurable parameters of the {CANVAS}
 | extended_services.autoscaling 
 | object  
 | {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
-| Extended Services HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+| {EXT_SERVICES} HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 
 | extended_services.fullnameOverride 
 | string  
@@ -185,22 +185,22 @@ The following table lists the configurable parameters of the {CANVAS}
 | extended_services.image 
 | object  
 | {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{VERSION}"}  
-| Image source configuration for the Extended Services image
+| Image source configuration for the {EXT_SERVICES} image
 
 | extended_services.imagePullSecrets 
 | list  
 | []  
-| Pull secrets used when pulling Extended Services image
+| Pull secrets used when pulling {EXT_SERVICES} image
 
 | extended_services.ingress 
 | object  
 | {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"extended-services.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
-| Extended Services Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
+| {EXT_SERVICES} Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
 | extended_services.name  
 | string  
 | "extended-services"  
-| The Extended Services application name
+| The {EXT_SERVICES} application name
 
 | extended_services.nameOverride 
 | string  
@@ -210,17 +210,17 @@ The following table lists the configurable parameters of the {CANVAS}
 | extended_services.openshiftRoute 
 | object  
 | {"annotations":{},"enabled":false,"host":"extended-services.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}  
-| Extended Services OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+| {EXT_SERVICES} OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
 
 | extended_services.service 
 | object  
 | {"nodePort":"","port":21345,"type":"ClusterIP"}  
-| Extended Services Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+| {EXT_SERVICES} Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
 
 | extended_services.serviceAccount 
 | object  
 | {"annotations":{},"create":true,"name":""}  
-| Extended Services ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+| {EXT_SERVICES} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
 
 | kie_sandbox.autoscaling 
 | object  

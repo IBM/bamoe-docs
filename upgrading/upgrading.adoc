@@ -1,145 +1,81 @@
 = Upgrading from 9.1.x
 include::../partials/attributes.adoc[]
 
-The usual upgrade path recommended for users is to upgrade to the next version before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to migrate projets and services developed with {PRODUCT_SHORT} {VERSION_910} and {VERSION_911}. 
+The usual upgrade path recommended for users is to upgrade to the next version before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911}. 
 
-NOTE: Due to the significant architecture change between {PRODUCT_SHORT} {VERSION_80X} and 9.x, if you haven't already upgraded to {VERSION_90X} or {VERSION_91X}, we do not recommend that you upgrade to {VERSION_920}. When the required features are availabl in a 9.2.x release the detailed migration procedures will be provided. 
+NOTE: Due to the significant architecture change between {PRODUCT_SHORT} {VERSION_80X} and 9.x, if you haven't already upgraded to versions {VERSION_90X} or {VERSION_91X}, we do not recommend that you upgrade to {VERSION_920}. When the required features are available in a 9.2.x release the detailed migration procedures will be provided. 
 
 Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 
-{PRODUCT_SHORT} projects can be upgraded in two ways, by:
+---
 
-* Creating a new project from scratch and moving your existing assets to it.
-* Updating an existing project with its artifacts by changing the Maven configuration. 
+This guide will walk you through upgrading your {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}; your _Busienss Services_ projects; and your {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_. At the end, if you're using {VERSION_91X} technology preview for stateful Workflows, you'll find upgrade instructions as well.
 
-The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION_920}:
+== Step 1: Download product archives
 
-- https://openjdk.org[JDK 17] or later is installed.
-- https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
-- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version
+Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT}, {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program].
 
+== Step 2: Upgrade your {PRODUCT_SHORT} development environment installation
 
-== Step 1: Download Product Archives
+When you upgrade your {PRODUCT_SHORT} development environment, you must upgrade {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}. 
 
-Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT} or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program].
+=== Upgrade {MVN_REPO}
 
-The following table shows the most common files but you can select other files according to your environment.
+It is recommended using the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION}.
 
-.{PRODUCT_SHORT} Product Archives
+If you are using the {MVN_REPO} `.zip` instead of {MVN_REPO} container images, simply extract the contents of {MVN_REPO} `.zip` version {VERSION} to your local Maven repository.
 
-The following archives are typically used in upgrading to {PRODUCT_SHORT}:
+In case you have installed {MVN_REPO} in a Maven Repository Manager such as Artifactory or Nexus, follow the steps in xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}] to install the new {MVN_REPO} version {VERSION}.
 
-.Common Product Archives
-|===
-| Product Archive | Description
+=== Upgrade {CANVAS}
 
-| bamoe-**{VERSION**}-maven-repository-image.tar.gz   
-| BAMOE Maven repository image contains many of the artifacts that Java developers typically use to build their applications.
+The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_90x} and {VERSION_91x} versions (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
-| bamoe-**{VERSION**}-management-console-image.tar.gz 
-| The {MANAGEMENT_CONSOLE} Image provides a user interface for managing process instances.
-
-| bamoe-**{VERSION**}-developer-tools.zip   
-| {DEV_TOOLS} to create, edit and visualize business processes (BPMN), decisions (DMN), test scenarios (SceSim), and generate web forms used during workflow execution.
-
-| bamoe-**{VERSION**}-standalone-bpmn-and-dmn-editors-classic.tgz   
-| BPMN and DMN Editors (classic) are available enabling you to embed the BPMN and DMN Editors in your applications.
-
-| bamoe-**{VERSION**}-standalone-dmn-editor.tgz   
-| The Standalone DMN Editor is available enabling you to embed the DMN editors in your applications.
-
-| bamoe-**{VERSION**}-sources.zip   
-| Source code of the product artifacts.
-
-| bamoe-**{VERSION**}-container-sources.zip 
-| Source code of the product container images.
-
-| bamoe-**{VERSION**}-maven-repository.zip   
-| The Maven repository contains many of the artifacts that Java developers use to build their applications.
-
-| bamoe-**{VERSION**}-licenses.zip   
-| No additional information.
-
-| bamoe-**{VERSION**}-examples.zip
-| The Business Automation Manager Open Editions (BAMOE) examples include example applications which contain various types of services to help you develop your own applications. The services use one or more Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) rule units, Predictive Model Markup Language (PMML) models, or Java classes to define the service logic.
-
-For information about each example application and instructions for using them, see the README file in the relevant application folder.
-
-| bamoe-**{VERSION**}-canvas-helm-chart.tgz
-| A Helm Chart that allows to install {CANVAS} and its related services with a single command: Helm, the package manager for Kubernetes.
-
-| bamoe-**{VERSION**}-canvas-docker-compose.zip
-| This package contains the docker-compose file to run {CANVAS} and all related services.
-
-| bamoe-**{VERSION**}-cors-proxy-image.tar.gz
-| This image provides a proxy to allow {CANVAS} web app to communicate with Git providers, such as github.com and GitHub Enterprise.
-
-| bamoe-**{VERSION**}-canvas-image.tar.gz
-| {CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser.
-
-| bamoe-**{VERSION**}-extended-services-image.tar.gz
-| This image provides features like DMN Runner, static validation of DMN, BPMN models, and also provides a proxy to communicate with OpenShift and Kubernetes clusters.
-
-| bamoe-**{VERSION**}-canvas-dev-deployment-upload-service.zip
-| The {CANVAS} Dev Deployment Upload Service runs an HTTP server that accepts ZIP file uploads to the `/upload` endpoint, with the correct `?apiKey=<key>` query param. When an upload is done, the application will unzip the file at the configured location and exit with a 0 code, or 1 otherwise.
-
-| bamoe-**{VERSION**}-canvas-dev-deployment-base-image.tar.gz
-| Docker image with Java and Maven, as well as the `canvas-dev-deployment-upload-service` binary pre-installed and ready to be used. This image doesn't run any services, and is only used to provide a basis for other Dev Deployment images that want a starting point, taking advantaged of the included `canvas-dev-deployment-upload-service`.
-
-| bamoe-**{VERSION**}-canvas-dev-deployment-quarkus-blank-app-image.tar.gz
-| This image is ready to be used for Dev deployments on {CANVAS}. It starts the `dev-deployment-upload-service` and then places the uploaded files inside a blank Quarkus app. These files can be Decisions (`.dmn`) or Processes (`.bpmn`), all of them will be used as resources for the app.
-
-| bamoe-**{VERSION**}-canvas-dev-deployment-dmn-form-webapp-image.tar.gz
-| This image is ready to be used for Dev deployments that contain Decisions (`.dmn`) on {CANVAS}. It expects a Quarkus application to be running at the same host, which it will use to fetch information to render a form that let users interact with a Decision.
-
-|===
+If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) if the DNS domains between installations are different, or have your imported projects automatically show up in the new installation when you open it in your browser if the DNS domains between installations are the same.
 
 [NOTE]
 ====
-In this table, replace VERSION with the version of {PRODUCT_SHORT} you are upgrading to, such as 9.2.0.
-
+If you have customized your previous {CANVAS} installation, remember to apply the same Environment Variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
 ====
-Once you have the files, you can start the upgrading process.
 
+=== Upgrade {DEV_TOOLS}
 
-== Step 2: Update Maven configuration and settings
-
-{MAVEN_SITE_LINK}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage the build, reporting and documentation of a project from a central piece of information.
-{PRODUCT_LONG} depends on Maven to build various types of deployable artifacts, such as decision service applications.
-For a quick start, see the {MAVEN_SITE_GETTING_STARTED_LINK}[Maven Quick Start Guide].  
-
-Since {PRODUCT_SHORT} version {VERSION} is based on Quarkus 3.15, the easiest route is to use the Quarkus Maven Plugin and adjust some of the details in the generated project to align it with {PRODUCT_SHORT} dependencies and plugins.
-You can read all about **Quarkus and Maven** https://quarkus.io/guides/maven-tooling[here].
-
-The dependencies are distributed with a container image or a zip file.
-Refer to {PRODUCT_SHORT} version {VERSION} xref:../installation/configure-maven.adoc[Maven configuration].
-
-
-== Step 3: Updating your development environment
-
-When you update your development environment, you must update {CANVAS} and {DEV_TOOLS}. 
-
-=== Upgrading {CANVAS}
-
-The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_90x} and {VERSION_91x} versions (see xref:../installation/installation.adoc[Installing]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
-
-If you prefer to install a parallel version using blue-green deployment strategies (https://docs.openshift.com/container-platform/4.14/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue/green deployment strategies]) you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects])
-
-=== Upgrading {DEV_TOOLS}
-
-The {DEV_TOOLS} are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN and DMN editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded simultaneously. 
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded simultaneously.
 
 See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
 
 [NOTE]
 ====
-After upgrading from {VERSION_90x}, the new DMN Editor will be opened automatically when you first access it in {CANVAS} or {DEV_TOOLS}.
-Existing DMN files (any version) can be opened directly in the editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring decisions].
+After upgrading from {VERSION_90x}, the new DMN Editor will be opened automatically when you first open DMN models in {CANVAS} or {DEV_TOOLS}.
+Existing DMN files (any version) can be opened directly in the new DMN Editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring Decisions with DMN].
+
+After upgrading from {VERSION_90x} or {VERSION_91X}, the new Test Scenario Editor (now compatible with DMN 1.5) will also open automatilly when you first open SCESIM files in {DEV_TOOLS}, even when the linked Decision is on an older version (E.g., DMN 1.2).
 ====
 
-== Step 4a: Creating a new project from scratch
+== Step 3: Upgrade your _Business Service_ projects
 
-Once Maven is configured and your development environment is installed, you can create a new Maven project to upgrade your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION}.
+_Business Service_ projects can be upgraded in two ways, by:
+
+* Creating a _Business Service_ project from scratch and moving your existing assets to it.
+* Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
+
+The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION_920}:
+
+- https://openjdk.org[JDK 17] or later is installed.
+- https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
+- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
+- Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
+
+
+== Step 3a: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
+
+Once your {PRODUCT_SHORT} development environment installation is upgraded, you can create a new _Business Service_ project to contan your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new {PRODUCT_SHORT} version {VERSION}.
+
+[WARNING]
+====
+This is only recommended if you're facing impediments when trying to upgrade your existing _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}. Go to xref:../upgrading/upgrading.adoc#step-3b[Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}] for instructions if you haven't tried that yet.
+====
+
 There are several ways to create Maven projects; this approach uses a published Maven plugin.
 
 [start=1]
@@ -150,7 +86,7 @@ This creates a Quarkus project called `my-sample-decision-service`, which is ver
 +
 [source,console,subs="+attributes"]
 ----
-mvn io.quarkus.platform:quarkus-maven-plugin:3.8.6:create \
+mvn io.quarkus.platform:quarkus-maven-plugin:3.15.3:create \
     -DprojectGroupId=com.ibm.bamoe.samples \
     -DprojectArtifactId=my-sample-decision-service \
     -DprojectVersion=1.0.0-SNAPSHOT \
@@ -203,13 +139,13 @@ This specifies the Maven coordinates for the {PRODUCT_SHORT} Maven Bill-of-Mater
 +
 [source,xml]
 ----
- <dependency>
-   <groupId>${kogito.bom.group-id}</groupId>
-   <artifactId>${kogito.bom.artifact-id}</artifactId>
-   <version>${kogito.bom.version}</version>
-   <type>pom</type>
-   <scope>import</scope>
- </dependency>
+<dependency>
+  <groupId>${kogito.bom.group-id}</groupId>
+  <artifactId>${kogito.bom.artifact-id}</artifactId>
+  <version>${kogito.bom.version}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
 ----
 +
 A bill of materials (BOM) is a list of parts or components that are required to build a product.
@@ -232,12 +168,10 @@ When a bill of materials (BOM) is used, it is not necessary to specify the versi
 
 [source,xml]
 ----
-<dependencies>
-  <dependency>
-    <groupId>org.drools</groupId>
-    <artifactId>drools-compiler</artifactId>
-  </dependency>
-</dependencies>
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-compiler</artifactId>
+</dependency>
 ----
 
 [NOTE]
@@ -252,12 +186,10 @@ See xref:../introduction/release-notes/version-mapping.adoc[version mapping].
 +
 [source,xml]
 ----
-<dependencies>
-  <dependency>
-    <groupId>com.ibm.bamoe</groupId>
-    <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
-  </dependency>
-</dependencies>
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-ilmt-compliance-quarkus-dmoe</artifactId>
+</dependency>
 ----
 
 [NOTE]
@@ -275,10 +207,10 @@ In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name
 +
 [source,xml]
 ----
-45 <dependency>
-46   <groupId>org.drools</groupId>
-47   <artifactId>drools-quarkus-decisions</artifactId>
-48 </dependency>
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-quarkus-decisions</artifactId>
+</dependency>
 ----
 +
 
@@ -332,7 +264,7 @@ Examples of supported business automation assets are:
 - Decision Model & Notation (DMN) decisions (.dmn)
 - Drools Rule Language (DRL) rules (.drl)
 - Business Process Modeling & Notation (BPMN) workflows (.bpmn)
-- Excel Decision Tables Excel files (.xlsx)
+- Spreadsheet Decision Table files (.xls or .xlsx)
 - Standard Properties files (.properties)
 - Test Scenario files (.scesim)
 +
@@ -383,51 +315,56 @@ Now you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
 If your project is upgraded from a previous version of the product, you can add the business automation files from the previous project to the `src/main/resources` folder of the new project by copying the files between projects.
 
-== Step 4b: Upgrading a version {VERSION_90X} project
+[NOTE]
+====
+After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
 
-Upgrading a {PRODUCT_SHORT} version {VERSION_91x} or {VERSION_90x}project to version {VERSION} is straightforward.
-The project structure is not changed, updates only need to be made to the project versions, some dependency names, and files.
+Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
+====
+
+[#step-3b]
+== Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}
+
+Upgrading a _Business Service_ project on {PRODUCT_SHORT} version {VERSION_90x} or {VERSION_91x} to {PRODUCT_SHORT} version {VERSION} is straightforward.
+
+The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
 [start=1]
-. Upgrade the Quarkus version in the project POM file to the currently supported version 3.15:
-+
-[source,xml]
-----
- ---   <quarkus-plugin.version>2.16.10.Final</quarkus-plugin.version>
- +++   <quarkus-plugin.version>3.15</quarkus-plugin.version>
-       <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-       <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
- ---   <quarkus.platform.version>2.16.12.Final</quarkus.platform.version>
- +++   <quarkus.platform.version>3.15</quarkus.platform.version>
-----
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.15 (LTS)`:
+
 
 [start=2]
-. Upgrade the BOM and Kogito versions in your POM file. Both versions are now {BOM_VERSION_920}:
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+  <type>
+</dependency>
+----
 +
-[source,xml,subs="attributes+"]
-----
-       <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
- ---   <kogito.bom.version>{BOM_VERSION_901}</kogito.bom.version>
- ---   <version.org.kie.kogito>{KOGITO_VERSION_901}</version.org.kie.kogito>
- +++   <kogito.bom.version>{BOM_VERSION_911}</kogito.bom.version>
- +++   <version.org.kie.kogito>{KOGITO_VERSION_920}</version.org.kie.kogito>
-----
 
 [start=3]
-. If you are upgrading from {VERSION_910} Update the dependencies GAV.
+. If you are upgrading from {VERSION_90X}, you'll need to update some dependencies GAVs.
 +
-In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section, https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide] and update accordingly.
+In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide @ 9.1.x] first and update accordingly.
 +
 One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
 +
 [source,xml]
 ----
-       <dependency>
+ ---   <dependency>
  ---     <groupId>org.kie.kogito</groupId>
  ---     <artifactId>kogito-quarkus</artifactId>
+ ---   </dependency>
+ +++   <dependency>
  +++     <groupId>org.jbpm</groupId>
  +++     <artifactId>jbpm-with-drools-quarkus</artifactId>
-       </dependency>
+ +++   </dependency>
 ----
 +
 Depending on your project setup you may also need to make changes to a parent `pom.xml`if it exists. This is not covered here.
@@ -444,7 +381,7 @@ Depending on your project setup you may also need to make changes to a parent `p
 ----
 
 [start=5]
-. Upgrading the code to Quarkus 3 if you are upgrading from {VERSION_910}
+. Upgrade the code to Quarkus 3 if you are upgrading from {VERSION_90X}
 +
 A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that package imports also need to update from `javax` to `jakarta`.
 +
@@ -484,49 +421,47 @@ You might get Maven streaming text once again, and at the end you will see:
 
 [NOTE]
 ====
-After completing the upgrade of the project, you might want to consider upgrading your technical rules to use new language features, such as `rule units` and `OOPATH syntax`.
-Refer to xref:drl.html[Drools Rule Language Migration] for information on upgrading to the latest version of Drools Rule Language (DRL).
+After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
+
+Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
 ====
 
 Now, you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
-== Step 5: Update your runtime environment
+== Step 4: Upgrade your {PRODUCT_SHORT} production environment installation
 
-You need to update your business services and {MANAGEMENT_CONSOLE}. 
+After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
 
-You can follow the standard guidance on how to maintain your business service project, including how to build using Maven and how to deploy to your target Kubernetes-based environment.
-This includes not only creating and publishing the new project to an enterprise GIT repository but also configuring your CI/CD pipeline to pull from GIT and performing a Maven build/test/deploy, etc.
+It is recommended using the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
 
-To update your {MANAGEMENT_CONSOLE} installation, see xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}]. If you already installed the Task Console from {VERSION_910} we recommend removing the previous version
+If your getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
 
-//is Management console a drop in replacement and Task console to be removed now that they are a single UI?
+Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_. See xref:../runtime-services-modeling/services-deployment.adoc[Building Business Services] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services] for recommendations on how to do it.
 
 [#migrate-tech-preview]
-== Migrating from the {VERSION_911} Technology Preview
+== Upgrading from {PRODUCT_SHORT} version {VERSION_911} technology preview for stateful Workflows
 
 In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
 
-* The new API does not require global parameters related to the whole process (such as `processID`, `process Instance ID` and `task name`. The `task ID`` is the key and most of the time it is the only actor to operate with the new API. 
+* The new API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID`` is the key and most of the time it is the only actor to operate with the new API. 
 +
 In version {VERSION_911}, the General Process API entrypoints are based on the following pattern:
 +
-`http://<host:port>/<process id>/<process
-instance>/<task name>/<task instance id>`
+`http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +
 In version {VERSION} the User Task API entrypoints are based on the following pattern:
 +
-`http://<host:port>/<usertasks>/<instance>/<task instance id>`
+`http://<host:port>/<usertasks>/<instance>/<task-instance-id>`
 
-* The Task ID used in the User Tasks is not the same ID required in the Process API. The reason for this behavior is that the new API relies on a new subsystem. The subsystem base has its own IDs, that are not recognized by the Process API. This is an important point to understand before you start migrating to the new API. 
+* The Task ID used in the User Tasks is not the same ID required in the Process API. The reason for this behavior is that the new API relies on a new subsystem. The subsystem base has its own IDs, that are not recognized by the Process API. This is an important point to understand before you start upgrading to the new API. 
 +
 For example the `<task instance id>` referenced in the General Process API call:
 +
-`http://<host:port>/<process id>/<process
-instance>/<task name>/<task instance id>`
+`http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +
 and
 +
-`http://<host:port>/usertasks/instance/<task instance id>`
+`http://<host:port>/usertasks/instance/<task-instance-id>`
 +
 You must upgrade all entry points in your application to use the User Task API layers when operating with User Tasks. 
 
@@ -775,11 +710,8 @@ curl -X POST ++\++
 Similar operations (GET, DELETE) can be performed against Comments and
 Attachments. The precise endpoint definitions are shown above.
 
-The following examples show how to apply a transition to a
-given User Task.
-The transition scope is to advance a User Task status, moving it from
-one status to another (transitionID), where the status can be: "activate", "claim", "release", "complete", "skip", or “fail”. The following example shows
-how to complete a User Task.
+The following examples show how to apply a transition to a given User Task.
+The transition scope is to advance a User Task status, moving it from one status to another (transitionID), where the status can be: "activate", "claim", "release", "complete", "skip", or “fail”. The following example shows how to complete a User Task.
 
 [cols=",",]
 |===
@@ -861,6 +793,3 @@ curl -X GET ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}/transition?
 group=managers&user=manager' ++\++
 |===
-
-=== Migrating your PostgreSQL database
-The database script package contain scripts that enable you to migrate a database that you set up with the technology preview for stateful workflow.

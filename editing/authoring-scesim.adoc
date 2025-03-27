@@ -3,7 +3,7 @@ include::../partials/attributes.adoc[]
 
 As a developer of business decisions, you can use test scenarios in {PRODUCT} to test the decision logic in your {PRODUCT} decision services. Test scenarios enable you to ensure that your {PRODUCT} decision services are functioning properly and as expected as you develop your Business Service application.
 
-Currently, Test Scenario models can be created and modified with {DEV_TOOLS}.
+Currently, Test Scenario models can be created and modified with {QUARKUS_DEV_UI}.
 
 Static file validation, DMN Runner, and Dev Deployments are not available for {DEV_TOOLS} yet, but you can achieve a similar experience of DMN Runner with BAMOE's Test Scenario Editor.
 See how below.
@@ -12,23 +12,23 @@ See how below.
 
 Test scenarios in {PRODUCT} enable you to validate the functionality of business decisions and business decision data during project development. With a test scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
 
-You define test scenarios in `.scesim` (scenario simulation) files that you can model in Visual Studio Code (VS Code) using using {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*]. You can use one or multiple `.scesim` files in your {PRODUCT} project, and each `.scesim` file can contain one or multiple test scenarios based on the defined decision data.
+You define test scenarios in `.scesim` (scenario simulation) files that you can model in Visual Studio Code (VS Code) using using {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*]. You can use one or multiple `.scesim` files in your _Business Service_ project, and each `.scesim` file can contain one or multiple test scenarios based on the defined decision data.
 
 .Example test scenarios for `PersonDecisions` DMN decision logic
 image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDecisionsTest test scenario]
 
-When you run the test scenarios in your {PRODUCT} project, all test scenarios in all `.scesim` files are run as part of the same command. However, individual test scenarios are independent, so one scenario cannot affect or modify another. You can run test scenarios at any time during project development. You do not need to compile or deploy your decision service to run test scenarios, but your {PRODUCT} project needs to be compilable and free from build errors.
+When you run the test scenarios in your _Business Service_ project, all test scenarios in all `.scesim` files are run as part of the same command. However, individual test scenarios are independent, so one scenario cannot affect or modify another. You can run test scenarios at any time during project development. You do not need to compile or deploy your decision service to run test scenarios, but your _Business Service_ project needs to be compilable and free from build errors.
 
 
 This documentation provides a step-by-step guide on how to use the Test Scenario Editor in VS Code to test DMN assets created with {PRODUCT_SHORT}. For that scope, this guide will refer to an existing project that lives in the https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/dmn-pmml-quarkus-example[kie-kogito-examples] GitHub repo. However, this guide will provide the steps to enable Test Scenario in your own project
 
-NOTE: At the current time, {PRODUCT_SHORT} supports DMN-based Test Scenario only. Rule-based Test Scenario are not supported yet. It's still possible to **run** a Rule-based Test Scenario generated with {PRODUCT_SHORT} {VERSION_80X} in Business Central using the old APIs. You can find an example xref:../getting-started/examples.adoc[here]
+NOTE: At the current time, {PRODUCT_SHORT} supports DMN-based Test Scenario only. Rule-based Test Scenario are not supported yet. It's still possible to **run** a Rule-based Test Scenario generated with {PRODUCT_SHORT} version {VERSION_80X} in Business Central using the old APIs. You can find an example xref:../getting-started/examples.adoc[here].
 
 NOTE: All the DMN-based scesim assets created prior to version {VERSION} will require a user action to update the related DMN file location. This is requested because the DMN file path is now managed in a relative format.
 
 === Project Setup
 
-To run this scenario, you must have set up {PRODUCT_SHORT} and Developer Tools for VS Code. See xref:../installation/installation.adoc[Installing]. Optionally, you can use Language Support for Java(TM).
+To run this scenario, you must have set up {MVN_REPO} and {DEV_TOOLS}. See xref:../installation/installation.adoc[Installing]. Optionally, you can use Language Support for Java(TM).
 
 ==== Cloning the Example Project
 If you are a new {PRODUCT_SHORT} user and you do not have any project to set up yet, or you prefer having an out-of-the-box project to deal with, you can use the previously mentioned example in the `incubator-kie-kogito-examples` repository.
@@ -46,9 +46,9 @@ Add the following dependency to your project's `pom.xml` to enable the Test Scen
 [source,xml]
 ----
 <dependency>
-   <groupId>org.kie.kogito</groupId>
-   <artifactId>kogito-scenario-simulation</artifactId>
-   <scope>test</scope>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-scenario-simulation</artifactId>
+  <scope>test</scope>
 </dependency>
 ----
 +
@@ -76,7 +76,7 @@ This will be the first model that will tested using a `.scesim` file.
 Then, in the `src/test/resources` directory, create a new file with the `.scesim` extension.
 
 image::developer-tools/scesim-file-creation.png[]
-For this example, the test scenario file corresponds to a `PersonDecisions.dmn` model in the {PRODUCT} project:
+For this example, the test scenario file corresponds to a `PersonDecisions.dmn` model in the _Business Service_ project:
 
 The test scenario modeler automatically generates a scenario template based on the available DMN data types and fields that you defined in the DMN model.
 
@@ -90,7 +90,7 @@ Modify the generated test scenario header cells and specified data objects as ne
 
 Use the following resources in the right toolbar of the test scenario modeler to help you design your test scenario header cells:
 
-* *Settings*: Use this panel to change the target *DMN model* selection if needed or to select the option to *Skip this simulation during the test*. This skip option excludes this test scenario file from being run when you run all test scenario files in the {PRODUCT} project. If you update these settings, you must save, close, and reopen the test scenario file for the changes to take effect.
+* *Settings*: Use this panel to change the target *DMN model* selection if needed or to select the option to *Skip this simulation during the test*. This skip option excludes this test scenario file from being run when you run all test scenario files in the _Business Service_ project. If you update these settings, you must save, close, and reopen the test scenario file for the changes to take effect.
 * *Test Tools*: Use this panel to select and insert the data objects for a selected header cell. These data objects come from the target DMN model specified in the *Settings* toolbar option.
 * *Scenario Cheatsheet*: Use this panel to review supported test scenario table actions, syntax, and other options.
 
@@ -131,18 +131,18 @@ This example scenario tests whether the person Jenny Quark with 15 years of age 
 . Continue adding test scenarios as needed to complete the test scenario file.
 +
 --
-The following test scenario file is the completed `PersonDecisionsTest.scesim` test scenario example:
+The following test scenario file is the completed `PersonDecisionsTest.scesim` Test Scenario example:
 
 .Example test scenarios for `PersonDecisions` DMN decision logic
-image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDecisionsTest test scenario]
+image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDecisionsTest Test Scenario]
 
-This example test scenario file tests the decision logic for the following `PersonDecisions.dmn` model in the {PRODUCT} project. This DMN model determines whether a specified person is an adult or is underage.
+This example test scenario file tests the decision logic for the following `PersonDecisions.dmn` model in the _Business Service_ project. This DMN model determines whether a specified person is an adult or is underage.
 
 .Example `PersonDecisions` DMN decision requirements diagram (DRD)
-image::test-scenarios/kogito-dmn-example-person.png[Image of PersonDecisions decision diagram]
+image::test-scenarios/kogito-dmn-example-person.png[Image of PersonDecisions DRD]
 
 .Example DMN boxed expression for `isAdult` decision
-image::test-scenarios/kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
+image::test-scenarios/kogito-dmn-example-person-logic.png[Image of PersonDecisions Decision Table]
 
 If you plan to use the same value for a *GIVEN* input condition in all test scenario rows in the file, you can use the *Background* tab to define the global header cell and value definitions and exclude the column from the test scenario table template. The *GIVEN* input conditions in the *Background* page are treated as background data for the table and are applied to all test scenarios listed.
 
@@ -162,13 +162,13 @@ The following test scenario file is a more advanced `TrafficViolationTest.scesim
 .Example test scenarios for `Traffic Violation` DMN decision logic
 image::test-scenarios/kogito-test-scenario-example-traffic-violation.png[Image of TrafficViolationTest test scenario]
 
-This example test scenario file tests the decision logic for the following `Traffic Violation.dmn` model in the {PRODUCT} project. This DMN model determines fine amounts and driver suspension for traffic violations.
+This example test scenario file tests the decision logic for the following `Traffic Violation.dmn` model in the _Business Service_ project. This DMN model determines fine amounts and driver suspension for traffic violations.
 
 .Example `Traffic Violation` DMN decision requirements diagram (DRD)
 image::test-scenarios/kogito-dmn-example-traffic-violation.png[Image of Traffic Violation decision diagram]
 
 .Example DMN boxed expression for `Fine` decision
-image::test-scenarios/kogito-dmn-example-traffic-violation-fine.png[Image of Fine decision table]
+image::test-scenarios/kogito-dmn-example-traffic-violation-fine.png[Image of Fine Decision Table]
 
 .Example DMN boxed expression for `Should the driver be suspended?` decision
 image::test-scenarios/kogito-dmn-example-traffic-violation-suspension.png[Image of Should the driver be suspended? context expression]
