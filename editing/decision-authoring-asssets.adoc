@@ -29,7 +29,7 @@ a|
 * Are decision models based on a notation standard defined by the Object Management Group (OMG)
 * Use graphical decision requirements diagrams (DRDs) that represent part or all of the overall decision requirements graph (DRG) to trace business decision flows
 * Use an XML schema that allows the DMN models to be shared between DMN-compliant platforms
-* Support Friendly Enough Expression Language (FEEL) to define decision logic in DMN decision tables and other DMN boxed expressions
+* Support Friendly Enough Expression Language (FEEL) to define decision logic in DMN Decision Tables and other DMN boxed expressions
 * Can be integrated efficiently with Business Process Model and Notation (BPMN) process models
 * Are optimal for creating comprehensive, illustrative, and stable decision flows
 |{CANVAS}, {DEV_TOOLS}, or other DMN-compliant Editor
@@ -42,7 +42,7 @@ a|
 * Have strict syntax requirements for rules to be compiled properly
 |Any integrated development environment (IDE)
 
-|Spreadsheet decision tables
+|Spreadsheet Decision Tables
 a|
 * Are tabular sets of rules that you define in `.xls` or `.xlsx` spreadsheet files
 * Support template keys and values for creating rule templates
@@ -88,22 +88,22 @@ All Friendly Enough Expression Language (FEEL) expressions that you use in your 
 
 
 [id="con-dmn-decision-tables"]
-==== DMN decision tables
+==== DMN Decision Tables
 
 [role="_abstract"]
-A decision table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input, light blue in the picture below) and outcome (output, dark blue in the picture below) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
+A Decision Table in DMN is a visual representation of one or more business rules in a tabular format. You use decision tables to define rules for a decision node that applies those rules at a given point in the decision model. Each rule consists of a single row in the table, and includes columns that define the conditions (input, light blue in the picture below) and outcome (output, dark blue in the picture below) for that particular row. The definition of each row is precise enough to derive the outcome using the values of the conditions. Input and output values can be FEEL expressions or defined data type values.
 
-For example, the following decision table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
+For example, the following Decision Table determines applicant qualification for a loan as the concluding decision node in a loan prequalification decision model:
 
 .Decision table for loan prequalification
 image::dmn-decision-table-example3.png[]
 
 Decision tables are a popular way of modeling rules and decision logic, and are used in many methodologies (such as DMN) and implementation frameworks (such as Drools).
 
-IMPORTANT: {PRODUCT} supports both DMN decision tables and Drools-native decision tables, but they are different types of assets with different syntax requirements and are not interchangeable.
+IMPORTANT: {PRODUCT} supports both DMN Decision Tables and Drools-native Decision Tables, but they are different types of assets with different syntax requirements and are not interchangeable.
 
 [id="con-dmn-decision-tables-hit-policies"]
-===== Hit policies in DMN decision tables
+===== Hit policies in DMN Decision Tables
 
 [role="_abstract"]
 Hit policies determine how to reach an outcome when multiple rules in a decision table match the provided input values. For example, if one rule in a decision table applies a sales discount to military personnel and another rule applies a discount to students, then when a customer is both a student and in the military, the decision table hit policy must indicate whether to apply one discount or the other (*Unique*, *First*) or both discounts (*Collect Sum*). You specify the single character of the hit policy (*U*, *F*, *C+*) in the upper-left corner of the decision table.
@@ -359,20 +359,20 @@ You can find the DMN source file for this decision model on https://raw.githubus
 === Configurable DMN validation in {PRODUCT}
 
 [role="_abstract"]
-By default, the {PRODUCT} CodeGen component uses the `kogito.decisions.validation=ENABLED` configuration to perform pre-compilation validation of DMN model assets and to perform DMN decision table static analysis.
+By default, the {PRODUCT} CodeGen component uses the `kogito.decisions.validation=ENABLED` configuration to perform pre-compilation validation of DMN model assets and to perform DMN Decision Table static analysis.
 
 When this configuration is enabled, {PRODUCT} performs the following DMN validations:
 
 * DMN model files are verified against the DMN specification XSD schema to ensure that the files are valid XML and compliant with the specification.
 * The pre-compilation analysis is performed for the DMN model to ensure that the basic semantic is aligned with the DMN specification.
-* DMN decision tables are statically analyzed for gaps or overlaps and to ensure that the semantic of the decision table follows best practices.
+* DMN Decision Tables are statically analyzed for gaps or overlaps and to ensure that the semantic of the decision table follows best practices.
 
 Any DMN validation error causes the {PRODUCT} CodeGen build to fail and errors are reported accordingly, as shown in the following example:
 
 .DMN validation errors
 image::kogito-dmn-validation-con-error.png[Image of DMN validation errors]
 
-You can modify the default DMN validation and DMN decision table analysis behavior to ignore errors during the project build, or you can disable this default behavior completely, as shown in the following examples:
+You can modify the default DMN validation and DMN Decision Table analysis behavior to ignore errors during the project build, or you can disable this default behavior completely, as shown in the following examples:
 
 .Default configuration for DMN validation and decision table analysis
 [source]
@@ -380,7 +380,7 @@ You can modify the default DMN validation and DMN decision table analysis behavi
 kogito.decisions.validation=ENABLED
 ----
 
-.Configuration to validate DMN models and DMN decision tables but ignore errors
+.Configuration to validate DMN models and DMN Decision Tables but ignore errors
 [source]
 ----
 kogito.decisions.validation=IGNORE
@@ -627,7 +627,7 @@ image::dmn-bkm-define.png[]
 --
 . For this example, use a decision node and select *Decision Table* as the boxed expression type.
 +
-A decision table in DMN is a visual representation of one or more rules in a tabular format. Each rule consists of a single row in the table, and includes columns that define the conditions (input) and outcome (output) for that particular row.
+A Decision Table in DMN is a visual representation of one or more rules in a tabular format. Each rule consists of a single row in the table, and includes columns that define the conditions (input) and outcome (output) for that particular row.
 . Click the input column header to define the name and data type for the input condition. For example, name the input column *Credit Score.FICO* with a `number` data type. This column specifies numeric credit score values or ranges of loan applicants.
 . Click the output column header to define the name and data type for the output values. For example, name the output column *Credit Score Rating* and next to the *Data Type* option, click *Manage* to go to the *Data Types* page where you can create a custom data type with score ratings as constraints.
 +
@@ -714,8 +714,8 @@ Custom data types that you create for a boxed expression can be simple or struct
 --
 include::../partials/vs-code-bundle-precondition.adoc[]
 --
-. In the DMN Editor diagram, select a decision node or business knowledge model for which you want to define the data types and click the *Edit* icon to open the DMN boxed expression editor.
-. If the boxed expression is for a decision node that is not yet defined, click the undefined table to select the type of boxed expression you want to use, such as a boxed literal expression, boxed context expression, decision table, or other DMN boxed expression.
+. In the DMN Editor diagram, select a decision node or business knowledge model for which you want to define the data types and click the *Edit* icon to open the DMN Boxed Expression Editor.
+. If the Boxed Expression is for a decision node that is not yet defined, click the undefined table to select the type of boxed expression you want to use, such as a Boxed Literal expression, Boxed Context expression, decision table, or other DMN boxed expression.
 +
 .Selecting the logic type for a decision node
 image::dmn-decision-boxed-expression-options.png[]
@@ -733,7 +733,7 @@ image::dmn-manage-data-types1a.png[]
 
 The data type that you define for a specified cell in a boxed expression determines the structure of the data that you use within that associated table, column, or field in the boxed expression.
 
-In this example, an output column *Credit Score Rating* for a DMN decision table defines a set of custom credit score ratings based on an applicant's credit score.
+In this example, an output column *Credit Score Rating* for a DMN Decision Table defines a set of custom credit score ratings based on an applicant's credit score.
 --
 . On the *Data Types* page, click *New Data Type* to add a new data type.
 +

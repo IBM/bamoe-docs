@@ -413,7 +413,7 @@ The monitoring add-on provides monitoring capabilities in the {PRODUCT} project.
 
 To use the monitoring add-on, add the following code to the `pom.xml` file of your project:
 
-.Quarkus dependency for elastic search
+.Quarkus dependency for Elasticsearch
 [source,xml,subs="attributes+"]
 ----
 <dependency>
@@ -857,13 +857,13 @@ $ curl -X 'GET' \
 == Designing the application logic for a {PRODUCT} service using BPMN and DMN
 
 [role="_abstract"]
-After you create your {PRODUCT} project, you can create or import Business Process Model and Notation (BPMN) business processes, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) business rules, XLS or XLSX decision tables, and other assets in the `src/main/resources` folder of your project. You can also include Java classes in the `src/main/java` folder of your project that act as Java services or provide implementations that you call from your business processes or decisions.
+After you create your {PRODUCT} project, you can create or import Business Process Model and Notation (BPMN) business processes, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) business rules, spreadsheet Decision Tables, and other assets in the `src/main/resources` folder of your project. You can also include Java classes in the `src/main/java` folder of your project that act as Java services or provide implementations that you call from your business processes or decisions.
 
 The example for this procedure is a basic {PRODUCT} service that provides a REST endpoint `/persons`. This endpoint is automatically generated based on an example `PersonProcess.bpmn2` business process that employs an example `PersonDecisions.dmn` DMN model to make decisions based on the data being processed.
 
 The business process contains the business logic of the {PRODUCT} service. The process provides the complete set of steps to achieve the business goal. The process is also the entry point to the service that can be consumed by other services.
 
-The business decision contains the decision logic of the {PRODUCT} service. In this example, the decision logic is invoked as part of the business process. You can define business rules and decisions in several ways, such as with DMN models, DRL rules, or XLS or XLSX decision tables. The example for this procedure uses a DMN model.
+The business decision contains the decision logic of the {PRODUCT} service. In this example, the decision logic is invoked as part of the business process. You can define business rules and decisions in several ways, such as with DMN models, DRL rules, or spreadsheet Decision Tables. The example for this procedure uses a DMN model.
 
 .Procedure
 . In the Maven project that you generated for your {PRODUCT} service, navigate to the `src/main/java/org/acme` folder and add the following `Person.java` file:
@@ -922,12 +922,12 @@ This example Java object sets and retrieves a person's name, age, and adult stat
 image::kogito-dmn-example-person.png[Image of PersonDecisions decision diagram]
 
 .Example DMN boxed expression for `isAdult` decision
-image::kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
+image::kogito-dmn-example-person-logic.png[Image of PersonDecisions Decision Table]
 
 .Example DMN data types
 image::kogito-dmn-example-person-data-types.png[Image of PersonDecisions data types]
 
-This example DMN model consists of a basic DMN input node and a decision node defined by a DMN decision table with a custom structured data type.
+This example DMN model consists of a basic DMN input node and a decision node defined by a DMN Decision Table with a custom structured data type.
 
 In VS Code, you can add the {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*] to design the decision requirements diagram (DRD), boxed expression, and data types with the {PRODUCT} DMN Editor.
 
@@ -1030,19 +1030,19 @@ To create this example DMN model in VS Code using the {PRODUCT} DMN Editor, foll
 .. In the left palette, select *DMN Decision*, drag the node to the diagram, double-click the node to name it `isAdult`, and link to it from the input node.
 .. Select the decision node to display the node options and click the *Edit* icon to open the DMN boxed expression editor to define the decision logic for the node.
 .. Click the undefined expression field and select *Decision Table*.
-.. Click the upper-left corner of the decision table to set the hit policy to *Unique*.
+.. Click the upper-left corner of the Decision Table to set the hit policy to *Unique*.
 .. Set the input and output columns so that the input source `Person.Age` with type `number` determines the age limit and the output target `isAdult` with type `boolean` determines adult status:
 +
-.Example DMN decision table for `isAdult` decision
-image::kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
+.Example DMN Decision Table for `isAdult` Decision
+image::kogito-dmn-example-person-logic.png[Image of PersonDecisions Decision Table]
 .. In the upper tab options, select the *Data Types* tab and add the following `tPerson` structured data type and nested data types:
 +
 .Example DMN data types
 image::kogito-dmn-example-person-data-types.png[Image of PersonDecisions data types]
 .. After you define the data types, select the *Editor* tab to return to the DMN Editor diagram.
 .. Select the *Person* input node, click the *Properties* icon, and under *Information item*, set the *Data type* to `tPerson`.
-.. Select the *isAdult* decision node, click the *Properties* icon, and under *Information item*, confirm that the *Data type* is still set to `boolean`. You previously set this data type when you created the decision table.
-.. Save the DMN decision file.
+.. Select the *isAdult* decision node, click the *Properties* icon, and under *Information item*, confirm that the *Data type* is still set to `boolean`. You previously set this data type when you created the Decision Table.
+.. Save the DMN Decision file.
 --
 . In the `src/main/resources` folder, add the following `PersonProcess.bpmn2` BPMN process model:
 +
@@ -1501,7 +1501,7 @@ This example test scenario file tests the decision logic for the following `Pers
 image::kogito-dmn-example-person.png[Image of PersonDecisions decision diagram]
 
 .Example DMN boxed expression for `isAdult` decision
-image::kogito-dmn-example-person-logic.png[Image of PersonDecisions decision table]
+image::kogito-dmn-example-person-logic.png[Image of PersonDecisions Decision Table]
 
 In VS Code, you can add the {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*] to design the test scenarios with the test scenario modeler.
 
