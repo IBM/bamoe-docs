@@ -280,15 +280,54 @@ Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The sam
 ----
 
 == The User Tasks Subsystem
-A User Task is a typical process or workflow task where a human performs the Task with the assistance of a software application and is scheduled through a task list manager.
+
+In {PRODUCT_SHORT} `User Task` is a special type of activity that cannot be automatically executed by the workflow engine, requiring the
+manual intervention of a user. When a process instance reaches a `User Task` node, a new user task is created and the process
+instance is stopped waiting for the completion of the user task. Once the user task completes, the process can continue its execution normally.
+
+The User Task subsystem is in charge of the execution the User Tasks initiated by the workflow engine, allowing the user
+drive its tasks through the different phases of their User Task Lifecycle until they reach a `Completion` state.
+
+The User Task Subsystem provides the following features:
+
+* Runs as a collocated service in the process engine with no extra configuration in the.
+* Generic set of REST Apis to interact with it, allowing users transitioning tasks between the different lifecycle phases,
+modify task data (inputs and outputs), add comments and attachments on tasks.
+* Customizable *Task Assignment Strategy* to automatically assign tasks to users during the task `Activate` phase (also known as `UserGroupCallback` in previous {PRODUCT_SHORT} versions)
+* Customizable User Task Lifecycle
+
+=== The User Task LifeCycle
+
+The User Task Subsystem defines a Default Lifecycle that allows user transition the task pass different phases that will change
+the task state until it reaches a `Completion` state that will allow the associated process instance continuing its execution.
+
+.Default User Task Lifecycle
+image::../images/wf-usertaks-lifecycle.png[]
+
+With the Default Lifecycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment,
+ it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users
+that are allowed to work with it.
+The task will then remain in *Ready* state until a user claims it, which will make the task pass through the `Claim` phase
+making the move into a *Reserved* state and the user will become the owner of the task.
+
+With the task *Reserved*, the owner will be able to complete the task (`Complete` phase) that will finally move te task in to a *Completed* that will
+successfully finalize the task allowing the process instance to continue.
+
+Tasks in *Ready* or *Reserved* state, are can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
+
+Also, Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, that will make the task terminate in a *Failed* state indicating an abnormal completion or through `Skip` phase that will
+finalize the task in a *Obsolete* state denoting that the task hasn't been executed.
+
+NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
 
 === User Task JPA persistence
-The User Task sub-system can now be configured to persist its data in a database. To enable this functionality, the following dependency needs to be added to the application `pom.xml`` file:
 
+The User Task subsystem by default uses an in-memory storage, but it can be configured to persist its data in database
+using the default application Data Source using the `jbpm-addons-quarkus-usertask-storage-jpa` add-on.
+To enable this functionality, the following dependency needs to be added to the application `pom.xml` file:
 
-[source,java]
+[source,xml]
 ----
-<!-- User Task persistence --> 
 <dependency> 
   <groupId>org.jbpm</groupId> 
   <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
