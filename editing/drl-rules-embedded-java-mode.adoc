@@ -9,9 +9,9 @@ While standard Apache Maven can build and package these resources, it will not p
 There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
 The plugin also generates many classes, making the runtime loading faster too.
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == kmodule.xml
 Since meaningful defaults have been provided for all configuration aspects, the simplest `kmodule.xml` file can contain just an empty kmodule tag like the following:
@@ -51,9 +51,9 @@ KieSession kieSession1 = kieContainer.newKieSession("KSession2_1");
 StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2_2");
 ----
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == pom.xml
 To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
@@ -120,9 +120,9 @@ Please update your `pom.xml` in the following way.
   </build>
 ----
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == KieBase
 The `KieBase` is a repository of all the application's knowledge definitions.
@@ -135,9 +135,9 @@ The `KieBase` can be obtained from the `KieContainer` containing the `KieModule`
 KieBase kieBase = kieContainer.getKieBase();
 ----
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == KieSession
 The `KieSession` stores and executes on the runtime data.
@@ -165,9 +165,9 @@ You can think of stateless as treating an engine like a function call with optio
 StatelessKieSession kieSession = kieBase.newStatelessKieSession();
 ----
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == KieRuntime
 The `KieRuntime` provides methods that are applicable to both rules and processes, such as setting globals and registering channels.
@@ -197,9 +197,9 @@ kieSession.setGlobal("list", list);
 Make sure to set any global before it is used in the evaluation of a rule.
 Otherwise a `NullPointerException` will be thrown.
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == Event Model
 The event package provides means to be notified of Drools rule engine events, including rules firing, objects being asserted, etc.
@@ -236,9 +236,9 @@ All emitted events implement the `KieRuntimeEvent` interface which can be used t
 NOTE: To see available events browse `org.kie.api.event.rule` https://github.com/apache/incubator-kie-drools/tree/main/kie-api/src/main/java/org/kie/api/event/rule[package].
 
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == KieRuntimeLogger
 The `KieRuntimeLogger` uses the comprehensive event system in Drools to create an audit log that can be used to log the execution of an application for later inspection.
@@ -251,9 +251,9 @@ KieRuntimeLogger logger =
 logger.close();
 ----
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == Commands and the CommandExecutor
 Both the stateful and stateless session interfaces extend the `CommandExecutor` interface.
@@ -286,9 +286,9 @@ The `FireAllRules` command is allowed, and using it will disable the automatic e
 Any command, in the batch, that has an out identifier set will add its results to the returned `ExecutionResults` instance.
 Please notice `"applicant"` and `"application"` identifiers in our example.
 
-=== &nbsp;
+---
 
-=== &nbsp;
+---
 
 == Complete example
 Most of the mentioned concepts can be seen as https://github.com/bamoe/bamoe-docs-source-code-examples/tree/{VERSION_X}/rules-embedded-mode-example[rules-embedded-mode-example].
