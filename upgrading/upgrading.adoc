@@ -1,15 +1,21 @@
 = Upgrading from 9.1.x
 include::../partials/attributes.adoc[]
 
-The usual upgrade path recommended for users is to upgrade to the next version before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911}. 
+The usual upgrade path recommended for users is to upgrade to the next version (n) before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911}. 
 
 NOTE: Due to the significant architecture change between {PRODUCT_SHORT} {VERSION_80X} and 9.x, if you haven't already upgraded to versions {VERSION_90X} or {VERSION_91X}, we do not recommend that you upgrade to {VERSION_920}. When the required features are available in a 9.2.x release the detailed migration procedures will be provided. 
 
 Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 
----
+This guide will walk you through upgrading your:
 
-This guide will walk you through upgrading your {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}; your _Busienss Services_ projects; and your {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_. At the end, if you're using {VERSION_91X} technology preview for stateful Workflows, you'll find upgrade instructions as well.
+* {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+
+* _Business Services_ projects
+
+* {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
+
+If you are using {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[tthis section].
 
 == Step 1: Download product archives
 
@@ -31,7 +37,7 @@ In case you have installed {MVN_REPO} in a Maven Repository Manager such as Arti
 
 The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_90x} and {VERSION_91x} versions (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
-If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) if the DNS domains between installations are different, or have your imported projects automatically show up in the new installation when you open it in your browser if the DNS domains between installations are the same.
+If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
 
 [NOTE]
 ====
@@ -40,24 +46,23 @@ If you have customized your previous {CANVAS} installation, remember to apply th
 
 === Upgrade {DEV_TOOLS}
 
-{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded simultaneously.
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded.
 
 See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
 
 [NOTE]
 ====
-After upgrading from {VERSION_90x}, the new DMN Editor will be opened automatically when you first open DMN models in {CANVAS} or {DEV_TOOLS}.
-Existing DMN files (any version) can be opened directly in the new DMN Editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring Decisions with DMN].
-
-After upgrading from {VERSION_90x} or {VERSION_91X}, the new Test Scenario Editor (now compatible with DMN 1.5) will also open automatilly when you first open SCESIM files in {DEV_TOOLS}, even when the linked Decision is on an older version (E.g., DMN 1.2).
+After upgrading the new Test Scenario Editor (now compatible with DMN 1.5) will also open automatically when you first open SCESIM files in {DEV_TOOLS}, even when the linked Decision is on an older version (e.g., DMN 1.2).
 ====
 
 == Step 3: Upgrade your _Business Service_ projects
 
 _Business Service_ projects can be upgraded in two ways, by:
 
-* Creating a _Business Service_ project from scratch and moving your existing assets to it.
+
 * Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
+
+* Creating a _Business Service_ project from scratch and moving your existing assets to it.
 
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION_920}:
 
@@ -66,15 +71,121 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
 
+[#step-3a]
+== Step 3a: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}
 
-== Step 3a: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
+Once your {PRODUCT_SHORT} development environment installation is upgraded, it is straightforward to upgrade your _Business Service_ project on {PRODUCT_SHORT} {VERSION_91x} to {PRODUCT_SHORT} version {VERSION}.
 
-Once your {PRODUCT_SHORT} development environment installation is upgraded, you can create a new _Business Service_ project to contan your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new {PRODUCT_SHORT} version {VERSION}.
+The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
 [WARNING]
 ====
-This is only recommended if you're facing impediments when trying to upgrade your existing _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}. Go to xref:../upgrading/upgrading.adoc#step-3b[Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}] for instructions if you haven't tried that yet.
+If you come across some difficulties when trying to upgrade your existing _Business Service_ projects we recommend creating a new project to xref:../upgrading/upgrading.adoc#step-3b[Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}].
 ====
+
+[start=1]
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.15 (LTS)`:
+
+
+[start=2]
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+  <type>
+</dependency>
+----
++
+
+[start=3]
+. If you are upgrading from {VERSION_90X}, you'll need to update some dependencies GAVs.
++
+In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide @ 9.1.x] first and update accordingly.
++
+One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
++
+[source,xml]
+----
+ ---   <dependency>
+ ---     <groupId>org.kie.kogito</groupId>
+ ---     <artifactId>kogito-quarkus</artifactId>
+ ---   </dependency>
+ +++   <dependency>
+ +++     <groupId>org.jbpm</groupId>
+ +++     <artifactId>jbpm-with-drools-quarkus</artifactId>
+ +++   </dependency>
+----
++
+Depending on your project setup you may also need to make changes to a parent `pom.xml`if it exists. This is not covered here.
+
+[start=4]
+. Update the `application.properties` file.
++
+{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+
++
+[source,diff]
+----
+ +++ quarkus.devservices.enabled=false
+----
+
+[start=5]
+. Upgrade the code to Quarkus 3 if you are upgrading from {VERSION_90X}
++
+A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that package imports also need to update from `javax` to `jakarta`.
++
+This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
++
+[source,diff]
+----
+ --- import javax.inject.Named;
+ +++ import jakarta.inject.Named;
+----
++
+[NOTE]
+====
+Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+====
+
+[start=6]
+. Build the project in the root folder:
++
+[source,console]
+----
+mvn clean package
+----
++
+You might get Maven streaming text once again, and at the end you will see:
++
+[source,console]
+----
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.023 s
+[INFO] Finished at: 2024-06-11T17:09:00-03:00
+[INFO] ------------------------------------------------------------------------
+----
++
+
+[NOTE]
+====
+After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
+
+Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
+====
+
+Now, you can start using your {PRODUCT_SHORT} version {VERSION} project.
+
+[#step-3b]
+== Step 3b: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
+
+If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
 
 There are several ways to create Maven projects; this approach uses a published Maven plugin.
 
@@ -179,7 +290,7 @@ When a bill of materials (BOM) is used, it is not necessary to specify the versi
 During the course of your Maven dependency update, if you encounter any dependencies that are not included in the bill of materials (BOM) please report it to IBM to be resolved.
 ====
 
-See xref:../introduction/release-notes/version-mapping.adoc[version mapping].
+See xref:../release-notes/version-mapping.adoc[version mapping].
 
 [start=5]
 . Add the `IBM ILMT Compliance Library` to the `pom.xml`  _(this is required  to report on subscription entitlement usage within the system)_:
@@ -203,7 +314,6 @@ This is due to importing the `bamoe-bom` into the project, where the various dep
 +
 For this example, you will be creating a project with only DMN files.
 So you must add the `drools-quarkus-decisions` dependency.
-In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section, https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide] and update accordingly.
 +
 [source,xml]
 ----
@@ -275,20 +385,8 @@ The proper folder for unit test files is `src/test/resources`, as this is a test
 ====
 +
 Now, copy all your assets from the {PRODUCT_SHORT} version {VERSION_901} project to the respective folders on the new project.
-As the new project uses Quarkus 3, you must make a few more updates.
-One of the biggest changes is that Quarkus 3 uses Jarkarta EE 10. You need to update all `javax` to `jakarta`.
-This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
-+
-[source,diff]
-----
- --- import javax.inject.Named;
- +++ import jakarta.inject.Named;
-----
-+
-[NOTE]
-====
+
 Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
-====
 
 [start=10]
 . Build the project one more time.
@@ -323,121 +421,17 @@ After completing the upgrade of your _Business Service_ project, you might want 
 Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
 ====
 
-[#step-3b]
-== Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}
 
-Upgrading a _Business Service_ project on {PRODUCT_SHORT} version {VERSION_90x} or {VERSION_91x} to {PRODUCT_SHORT} version {VERSION} is straightforward.
-
-The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
-
-[start=1]
-. Upgrade the Quarkus version in the project POM file to the currently supported version `3.15 (LTS)`:
-
-
-[start=2]
-. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
-+
-[source,xml]
-----
-<dependency>
-  <groupId>com.ibm.bamoe</groupId>
-  <artifactId>bamoe-bom</artifactId>
-  <version>{BOM_VERSION}</version>
-  <type>pom</type>
-  <scope>import</scope>
-  <type>
-</dependency>
-----
-+
-[start=3]
-. If you are upgrading from {VERSION_90X}, you'll need to update some dependencies GAVs.
-+
-In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide @ 9.1.x] first and update accordingly.
-+
-One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
-+
-[source,xml]
-----
- ---   <dependency>
- ---     <groupId>org.kie.kogito</groupId>
- ---     <artifactId>kogito-quarkus</artifactId>
- ---   </dependency>
- +++   <dependency>
- +++     <groupId>org.jbpm</groupId>
- +++     <artifactId>jbpm-with-drools-quarkus</artifactId>
- +++   </dependency>
-----
-+
-Depending on your project setup you may also need to make changes to a parent `pom.xml`if it exists. This is not covered here.
-
-[start=4]
-. Update the `application.properties` file.
-+
-{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
-
-+
-[source,diff]
-----
- +++ quarkus.devservices.enabled=false
-----
-
-[start=5]
-. Upgrade the code to Quarkus 3 if you are upgrading from {VERSION_90X}
-+
-A major Quarkus 3 change, is the usage of Jakarta EE 10, meaning that package imports also need to update from `javax` to `jakarta`.
-+
-This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
-+
-[source,diff]
-----
- --- import javax.inject.Named;
- +++ import jakarta.inject.Named;
-----
-+
-[NOTE]
-====
-Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
-====
-
-[start=6]
-. Build the project in the root folder:
-+
-[source,console]
-----
-mvn clean package
-----
-+
-You might get Maven streaming text once again, and at the end you will see:
-+
-[source,console]
-----
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  8.023 s
-[INFO] Finished at: 2024-06-11T17:09:00-03:00
-[INFO] ------------------------------------------------------------------------
-----
-+
-
-[NOTE]
-====
-After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
-
-Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
-====
-
-Now, you can start using your {PRODUCT_SHORT} version {VERSION} project.
 
 == Step 4: Upgrade your {PRODUCT_SHORT} production environment installation
 
 After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
 
-It is recommended using the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
 
-If your getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
+If you are getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
 
-Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_. See xref:../runtime-services-modeling/services-deployment.adoc[Building Business Services] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services] for recommendations on how to do it.
+Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-deployment.adoc[Building Business Services] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
 
 [#migrate-tech-preview]
 == Upgrading from {PRODUCT_SHORT} version {VERSION_911} technology preview for stateful Workflows

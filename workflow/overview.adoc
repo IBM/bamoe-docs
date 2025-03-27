@@ -9,7 +9,7 @@ Stateful Workflow capabilities enable you to use elements such as process variab
 The Compact Architecture is the reference architecture for stateful workflow. In this architecture certain services can be colocated directly in your {PRODUCT_SHORT} application. This simplifies the application configuration and minimizes the communication between components which ensures that {PRODUCT_SHORT} applications are stable and robust in a Business Process environment. 
 
 == Components of Compact Architecture
-The following table details the different components in Compact Architecture, indicating whether they are mandatory or not.
+The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful workflows.
 
 [%header,cols="4"]
 |===
@@ -17,13 +17,12 @@ The following table details the different components in Compact Architecture, in
 ^|Type 
 ^|Stateful (Compact Architecture) 
 ^|Stateless (STP) 
-
-|Workflow Engine | System | Mandatory | Mandatory 
 |Data-Index | Add-on | Optional | N/A
 |Data-Audit | Add-on | Optional | N/A
 |Jobs Service | Add-on | Mandatory | N/A
 |User Tasks | Add-on | Mandatory | N/A
-|Runtime | Add-on | Mandatory | N/A
+|Workflow Engine | System | Mandatory | Mandatory 
+|Runtime | System | Mandatory | N/A
 |Storage | System | Mandatory | N/A
 |===
 
@@ -40,13 +39,13 @@ Workflow engine:: The kogito API + jBPM workflow engine provides the workflow ex
 Process container:: This is the BPMN file compiled and wired in to the Workflow engine.
 
 === Add-ons
+User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+
 Data-Index:: allows the last snapshot of the process state to be queried. The Workflow engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
 Data-Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
 
-Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines, and notifications. 
-
-User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
 
 === Required deployments
 Storage:: This is another deployment where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
