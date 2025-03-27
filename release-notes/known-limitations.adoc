@@ -32,9 +32,9 @@ See https://www.ibm.com/mysupport/aCIKe000000XfJo[issue,window=_blank]
 For reference, see xref:../getting-started/examples.adoc[Example applications]
 
 |The event subsystem in the {PRODUCT_SHORT} workflow engine does not have transactional support.
-|After starting a process instance, you might get some transaction errors with a message, 'enlisted connection used without active transaction' in BAMOE application, compact setup with runtime persistence.
+|Using transactions that emit events through an emitter like Kafka or CloudEvents in BAMOE application in Compact Setup with at least runtime persistence may throw a transaction error with message 'enlisted connection used without active transaction' after starting a process instance.
 
 |In {PRODUCT_SHORT} application, workflow subsystem event related messages are sent even if the process execution fails due to a DB error.
-|A process which contains a node is used for sending messages when executed, for example 'Intermediate Message Throw Event'. If the execution encounters an error and the transaction is rolled back, the message is still sent.
+|In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
 
 |===
