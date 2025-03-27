@@ -68,9 +68,6 @@ The following table list all the supported add-ons in {PRODUCT}:
 |Mail
 |jbpm-addons-quarkus-mail
 
-|Elastic Monitoring
-|kie-addons-quarkus-monitoring-elastic
-
 |Prometheus Monitoring
 |kie-addons-quarkus-monitoring-prometheus
 
@@ -159,39 +156,8 @@ To use the DMN event-driven add-on, add the following code to the `pom.xml` file
 </dependency>
 ----
 
-////
-=== explainability add-on
 
-The Explainability add-on in {PRODUCT} provides integration with Explainability and Trusty Services. You can also use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/trusty-demonstration[`trusty-demonstration`] example application.
 
-To use the explainability add-on, add the following code to the `pom.xml` file of your project:
-
-.Quarkus
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-addons-quarkus-explainability</artifactId>
-</dependency>
-----
-////
-
-////
-=== jobs management add-on
-
-The Jobs Management add-on provides integration and configuration for a project using the supporting services related to Jobs. 
-
-To use the Jobs Management add-on, add the following code to the `pom.xml` file of your project:
-
-.Quarkus
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-</dependency>
-----
-////
 
 === Knative eventing add-on
 
@@ -410,15 +376,6 @@ The monitoring add-on provides monitoring capabilities in the _Business Service_
 
 To use the monitoring add-on, add the following code to the `pom.xml` file of your project:
 
-.Quarkus dependency for Elastic
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-monitoring-elastic</artifactId>
-</dependency>
-----
-
 .Quarkus dependency for Prometheus
 [source,xml,subs="attributes+"]
 ----
@@ -427,190 +384,6 @@ To use the monitoring add-on, add the following code to the `pom.xml` file of yo
   <artifactId>kie-addons-quarkus-monitoring-prometheus</artifactId>
 </dependency>
 ----
-
-////
-=== persistence add-on
-
-The persistence add-on provides persistence capability in your _Business Service_ project.
-
-To use the Persistence add-on, add the following code to the `pom.xml` file of your project:
-
-.Quarkus dependency for persistence filesystem
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-filesystem</artifactId>
-</dependency>
-----
-
-.Quarkus dependency for persistence Infinispan
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-infinispan</artifactId>
-</dependency>
-----
-
-.Quarkus dependency for persistence JDBC
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
-</dependency>
-----
-
-.Quarkus dependency for persistence MongoDB
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-mongodb</artifactId>
-</dependency>
-----
-
-.Quarkus dependency for persistence PostgreSQL
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-postgresql</artifactId>
-</dependency>
-----
-
-.Quarkus dependency for persistence Kafka
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-persistence-kafka</artifactId>
-</dependency>
-----
-
-=== process management add-on
-
-[role="_abstract"]
-{PRODUCT} provides a `kie-addons-quarkus-process-management` add-on that enables basic REST operations that you can use to manage process instances. These REST operations are supplemental to any other specific REST operations that you have configured in your application.
-
-To configure process management REST capabilities for your _Business Services_, you can add the process management add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
-
-.Project dependency to enable process management REST operations
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kie-addons-quarkus-process-management</artifactId>
-</dependency>
-----
-
-The {PRODUCT} process management add-on provides REST support for the following basic operations:
-
-* *Process instances*: Abort an active process instance
-* *Node instances*:  Cancel or re-trigger a node instance, or trigger a new node instance
-* *Error handling*: Retrieve error details for a process instance, or skip or re-trigger a failed node instance
-
-In addition to exposed REST operations, the process management add-on also provides the following REST exception mappers to generate more meaningful error messages for typical exception types:
-
-* `ProcessInstanceNotFound`
-* `NodeInstanceNotFound`
-* `NodeNotFound`
-* `ProcessInstanceExecutionError`
-* `NotAuthorized`
-* `InvalidTransition` (for work items)
-* `InvalidLifeCyclePhase` (for work items)
-
-These exception mappers produce a valid HTTP error code with JSON payload with the context that caused the exception.
-
-For example, the following is a `ProcessInstanceNotFoundException` error generated at runtime:
-
-.Example error with JSON payload at runtime
-[source,json]
-----
-HTTP code : 404
-
-{
-  "processInstanceId" : "c6862071-0f2e-4f21-9bc8-586245a76c3aa",
-  "message" : "Process instance with id c6862071-0f2e-4f21-9bc8-586245a76c3aa not found"
-}
-----
-////
-
-////
-=== process SVG add-on
-
-[role="_abstract"]
-{PRODUCT} provides an add-on named `process-svg-addon`, enabling the basic REST operations that you can use to visualize the process diagram and execution path of the related process instances. The REST operations are supplemental to any other specific REST operation that is configured in your application.
-
-The add-on requires the access of process SVG files. The process SVG files can be placed in a file system, which is accessible to the service or available in `META-INF/processSVG/` folder in the class path. For example, when the SVG files are generated, rename the files to `\{processId\}.svg`. The `\{processId\}.svg` file is used by the add-on and placed in a file system folder (accessible by the service) or in `META-INF/processSVG` folder in the class path. The configuration property `kogito.svg.folder.path` of the add-on points to the file system folder, otherwise the files are searched in the class path.
-
-The VS Code extension enables you to export the process to SVG format:
-
-.Export process diagram at VS Code
-image::kogito/bpmn/kogito-svg-addon-manually-export.png[Manually export to SVG at VS Code]
-
-[NOTE]
-====
-When you export a process to SVG format, the generated SVG is named to \{processFileName\}-svg.svg.
-====
-
-The process code generation searches this export and, if this file exists, copies and renames it to `META-INF/processSVG/\{processId\}.svg allowing the process SVG addon to consume it directly.
-
-To configure process SVG REST capabilities for your _Business Services_, you can add the process SVG add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
-
-.Project dependency to enable process SVG REST operations in Quarkus projects
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-process-svg</artifactId>
-</dependency>
-----
-
-The process SVG add-on provides the following set of configuration properties:
-
-.Process SVG add-on configuration properties in {PRODUCT}
-[cols="30%,70%"]
-|===
-|Property
-|Description
-
-|`kogito.svg.folder.path`
-|Determines the folder in which the add-on searches the initial process diagrams. If this property is not enabled, then the add-on searches `META-INF/processSVG/` folder in the class path.
-
-Default value: `empty`
-
-Example: `kogito.svg.folder.path=/home/user/diagrams`
-
-a|`kogito.svg.color.completed`
-|Changes the color to fill the completed nodes when showing the execution path.
-
-Default value: `#C0C0C0`
-
-Example: `kogito.svg.color.completed=#C2C0C1`
-
-a|`kogito.svg.color.completed.border`
-|Changes the color of the border of the completed node when showing the execution path.
-
-Default value: `#030303`
-
-Example: `kogito.svg.color.completed.border=#C2C0C1`
-
-a|`kogito.svg.color.active.border`
-|Changes the color of the border of the active node when showing the execution path.
-
-Default value: `#FF0000`
-
-Example: `kogito.svg.color.active.border=#C2C0C1`
-
-|===
-
-The {PRODUCT} process SVG add-on provides REST support for the following basic operations:
-
-* *Process Diagram*: Return the process SVG diagram
-* *Process instance diagram*: Return the process SVG diagram displaying the executed path of a specific process instance
-////
 
 === Process event add-on
 
