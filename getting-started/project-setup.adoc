@@ -17,19 +17,23 @@ Spring Boot is supported for Decisions, Rules, and spreadsheet Decision Tables s
 
 To use Accelerators, have three options:
 
-1. Create Decisions and Workflows on {CANVAS} then apply an Accelerator.
-2. Clone one of the Accelerators locally and start from there with {DEV_TOOLS}. 
-3. (Advanced) Manually create a Java project and add dependencies to the _Business Service_ project's configuration file.
+a. Create Decisions and Workflows on {CANVAS} then apply an Accelerator.
+b. Clone one of the Accelerators locally and start from there with {DEV_TOOLS}. 
+c. (Advanced) Manually create a Java project and add dependencies to the _Business Service_ project's configuration file.
 
-== 1. Starting on {CANVAS}
+== a. Starting on {CANVAS}
+
+Before starting, make sure your organization already provided you with a {CANVAS} installation or follow xref:../installation/canvas.adoc[Installing → {CANVAS}] to install it.
 
 For starting a new _Business Service_ project on {CANVAS}, please refer to xref:../tools/applying-accelerators.adoc[{CANVAS} → Using Accelerators].
 
-If you want to continue developing on {DEV_TOOLS} after starting on {CANVAS}, you can create a new Git repository in your Git provider of choice then clone it locally. Alternatively you can download your newly created _Business Sevice_ project from {CANVAS} as a .zip file and unpack it in your computer.
+If you want to continue developing on {DEV_TOOLS} after starting on {CANVAS}, you can create a new Git repository in your Git provider of choice directly in {CANVAS} then clone it locally. Alternatively you can download your newly created _Business Sevice_ project from {CANVAS} as a .zip file and unpack it in your computer.
 
-== 2. Starting on {DEV_TOOLS}
+== b. Starting on {DEV_TOOLS}
 
-Currenly, {DEV_TOOLS} doesn't contain any commands to create a new _Business Service_ project automatically, but using Git in a Terminal window is easy enough, since {PRODUCT_SHORT} Accelerators are publicly hosted on IBM's GitHub at https://github.com/IBM/bamoe-canvas-quarkus-accelerator.
+Installing {DEV_TOOLS} is straighforward, an can be done directly in VS Code, simply follow xref:../installation/developer-tools-for-vscode.adoc[Installing → {DEV_TOOLS}].
+
+Unlike {CANVAS}, {DEV_TOOLS} doesn't currently provide any commands to create a new _Business Service_ project automatically, but using Git in a Terminal window is easy enough, since {PRODUCT_SHORT} Accelerators are publicly hosted on IBM's GitHub at the https://github.com/IBM/bamoe-canvas-quarkus-accelerator template repository, following the steps below will get your started:
 
 - Create a new folder in your preferred location and open it on VS Code.
 - Open a new Terminal window (`Terminal` → `New Terminal`)
@@ -49,11 +53,23 @@ git clone {ACCELERATOR_REPO_LINK} -b {BOM_VERSION}-quarkus-full my-business-serv
 
 - Your _Business Service_ project on {PRODUCT_SHORT}, based on your Accelerator of choice will be ready for you in the `my-business-service-project` folder.
 
-- In the `src/main/resources` folder, create or move Workflows (`.bpmn`), Decisions (`.dmn`), Rules (`.drl`), spreadsheet Decision Tables (`.xls` or `.xlsx`), or Test Scenario (`.scesim`) files.
+- To unlink your newly created _Business Serivce_ project with the original Accelerator template repository, run
+[source,shell,subs="attributes"]
+----
+cd my-business-service-project && rm -rf .git && git init
+----
+
+- Your _Business Service_ project is now a fresh Git repository. You can create your first commit by running
+[source,shell,subs="attributes"]
+----
+git add . && git commit -m "First commit on my Business Service project"
+----
+
+- In the `src/main/resources` folder, your can create or move Workflows (`.bpmn`), Decisions (`.dmn`), Rules (`.drl`), spreadsheet Decision Tables (`.xls` or `.xlsx`), or Test Scenario (`.scesim`) files.
 
 - You _Business Service_ project is now ready to be developed.
 
-== 3. (Advanced) Manually creating a Java project
+== c. (Advanced) Manually creating a Java project
 
 If you're an experienced Java developer, you might have your own preferences when creating new projects. That's completely okay too, and you should be able to decide with {PRODUCT_SHORT} dependencies you need based on xref:../reference-guide/maven-repository-libraries.adoc[Reference → {MVN_REPO} libraries].
 
