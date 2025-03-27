@@ -5,7 +5,7 @@ include::../partials/attributes.adoc[]
 == Creating a Maven project for a {PRODUCT} service using {CANVAS}
 
 [role="_abstract"]
-Before you can begin developing {PRODUCT} services, you need to create a Maven project where you can build your {PRODUCT} assets and any other related resources for your application.
+Before you can begin developing _Business Services_, you need to create a Maven project where you can build your Business Automation assets and any other related resources for your application.
 
 .Procedure
 . Run {CANVAS} - see the xref:../installation/canvas.adoc[installation] chapter for more details on how to install and run it.
@@ -41,13 +41,13 @@ $ mvn clean package
 $ mvn clean package -Dnative
 ----
 
-== {PRODUCT} add-ons
+== Add-ons
 
-You can extend {PRODUCT} core capabilities by using add-ons modules. The add-on modules extend monitoring, messaging, and other features of {PRODUCT} services.
+You can extend {PRODUCT} core capabilities by using add-ons. The add-on modules extend monitoring, messaging, and other features for _Business Services_.
 
-The following tables list all the supported add-ons in {PRODUCT}:
+The following table list all the supported add-ons in {PRODUCT}:
 
-.{PRODUCT} add-ons for Quarkus
+.Add-ons for Quarkus
 [cols=2]
 |===
 |Name
@@ -74,16 +74,13 @@ The following tables list all the supported add-ons in {PRODUCT}:
 |Prometheus Monitoring
 |kie-addons-quarkus-monitoring-prometheus
 
-|Tracing Decision
-|kogito-addons-quarkus-tracing-decision
-
 |Source Files
 |kie-addons-quarkus-source-files
 |===
 
-=== {PRODUCT} messaging add-on
+=== Messaging add-on
 
-{PRODUCT} provides a messaging add-on, enabling a process to register an event listener. The messaging add-on uses events in the {PRODUCT} projects. 
+{PRODUCT} provides a messaging add-on, enabling a process to register an event listener. The messaging add-on uses events in the _Business Service_ projects. 
 
 To configure messaging capabilities for your Business Services, you must add the messaging add-on as a dependency in the `pom.xml` file of your project:
 
@@ -98,7 +95,7 @@ To configure messaging capabilities for your Business Services, you must add the
 
 For Quarkus, the {PRODUCT} process event add-on implementation is based on https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/2/connectors/connectors.html[Smallrye Messaging] library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. Therefore, the {PRODUCT} process event add-on is not specifically combined with any event broker, but also requires additional configuration to use a suitable Smallrye connector.
 
-For example, to use Kafka as an event broker in Quarkus, you must add the following dependency in the `pom.xml` file of your {PRODUCT} project:
+For example, to use Kafka as an event broker in Quarkus, you must add the following dependency in the `pom.xml` file of your _Business Service_ project:
 
 .Project dependency to enable event broker in Quarkus
 [source,xml,subs="attributes+"]
@@ -150,7 +147,7 @@ For an example, see https://github.com/apache/incubator-kie-kogito-examples/blob
 By default, {PRODUCT} uses Cloud event JSON format for messaging. However, you can change the default format by providing your own https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/EventMarshaller.java[event marshaler] implementation. 
 For an example, see https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/marshallers/avro/src/main/java/org/kie/kogito/event/avro/AvroEventMarshaller.java[AvroEventMarshaller.java example].
 
-=== {PRODUCT} Decision Model and Notation (DMN) event-driven add-on
+=== DMN Event-driven add-on
 
 .Quarkus
 To use the DMN event-driven add-on, add the following code to the `pom.xml` file of your project:
@@ -163,7 +160,7 @@ To use the DMN event-driven add-on, add the following code to the `pom.xml` file
 ----
 
 ////
-=== {PRODUCT} explainability add-on
+=== explainability add-on
 
 The Explainability add-on in {PRODUCT} provides integration with Explainability and Trusty Services. You can also use https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/trusty-demonstration[`trusty-demonstration`] example application.
 
@@ -180,7 +177,7 @@ To use the explainability add-on, add the following code to the `pom.xml` file o
 ////
 
 ////
-=== {PRODUCT} jobs management add-on
+=== jobs management add-on
 
 The Jobs Management add-on provides integration and configuration for a project using the supporting services related to Jobs. 
 
@@ -196,9 +193,9 @@ To use the Jobs Management add-on, add the following code to the `pom.xml` file 
 ----
 ////
 
-=== {PRODUCT} Knative Eventing add-on
+=== Knative eventing add-on
 
-The Knative Eventing add-on is used in the {PRODUCT} project for messaging. The https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/knative/eventing[{PRODUCT} Knative Eventing] add-on enables your project to connect to a https://knative.dev/docs/developer/eventing/sinks/[sink] or make it a https://github.com/knative-sandbox/eventing-kogito#kogito-source[KogitoSource].
+The Knative Eventing add-on is used in the _Business Service_ project for messaging. The https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/knative/eventing[{PRODUCT} Knative Eventing] add-on enables your project to connect to a https://knative.dev/docs/developer/eventing/sinks/[sink] or make it a https://github.com/knative-sandbox/eventing-kogito#kogito-source[KogitoSource].
 
 The add-on processes the https://knative.dev/development/developer/eventing/sources/sinkbinding/[`K_SINK`] and https://knative.dev/development/developer/eventing/sources/sinkbinding/reference/#cloudevent-overrides[`K_CE_OVERRIDES`] environment variables injected by Knative Eventing controllers (`SinkBinding` or `KogitoSource`).
 
@@ -314,7 +311,7 @@ The target deployment defined in the Quarkus Kubernetes plugin work as the subje
 
 The following table lists all the available properties for the Knative Eventing add-on:
 
-.{PRODUCT} Knative Eventing Add-on  properties
+.Knative Eventing Add-on  properties
 [cols="50%,20%,20%", options="header"]
 |===
 |Property
@@ -355,7 +352,7 @@ For more information about the Knative Eventing add-on, see the following exampl
 * https://github.com/apache/incubator-kie-kogito-examples/tree/main/serverless-workflow-examples/serverless-workflow-order-processing[Serverless Workflow Order Processing]
 * https://github.com/apache/incubator-kie-kogito-examples/tree/main/kogito-quarkus-examples/process-knative-quickstart-quarkus[Process Knative Eventing]
 
-=== {PRODUCT} mail add-on
+=== Mail add-on
 
 The mail add-on is used to send emails in a process project. To use the mail add-on, add the following code to the `pom.xml` file of your project:
 
@@ -368,9 +365,9 @@ The mail add-on is used to send emails in a process project. To use the mail add
 </dependency>
 ----
 
-=== {PRODUCT} events add-on
+=== Events add-on
 
-The events add-on provides a default implementation in supported target platforms for EventEmitter and EventReceiver interfaces. You can use EventEmitter and EventReceiver interfaces to enable messaging by process, serverless workflow events, and event decision handling. 
+The Events add-on provides a default implementation in supported target platforms for EventEmitter and EventReceiver interfaces. You can use EventEmitter and EventReceiver interfaces to enable messaging by process, serverless workflow events, and event decision handling. 
 
 ==== Implementing message payload decorator
 Any dependant add-on can implement the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecorator.java[MessagePayloadDecorator].
@@ -407,13 +404,13 @@ To use the events add-on, add the following code to the `pom.xml` file of your p
 </dependency>
 ----
 
-=== {PRODUCT} monitoring add-on
+=== Monitoring add-on
 
-The monitoring add-on provides monitoring capabilities in the {PRODUCT} project. 
+The monitoring add-on provides monitoring capabilities in the _Business Service_ project. 
 
 To use the monitoring add-on, add the following code to the `pom.xml` file of your project:
 
-.Quarkus dependency for Elasticsearch
+.Quarkus dependency for Elastic
 [source,xml,subs="attributes+"]
 ----
 <dependency>
@@ -432,9 +429,9 @@ To use the monitoring add-on, add the following code to the `pom.xml` file of yo
 ----
 
 ////
-=== {PRODUCT} persistence add-on
+=== persistence add-on
 
-The persistence add-on provides persistence capability in your {PRODUCT} project.
+The persistence add-on provides persistence capability in your _Business Service_ project.
 
 To use the Persistence add-on, add the following code to the `pom.xml` file of your project:
 
@@ -492,12 +489,12 @@ To use the Persistence add-on, add the following code to the `pom.xml` file of y
 </dependency>
 ----
 
-=== {PRODUCT} process management add-on
+=== process management add-on
 
 [role="_abstract"]
 {PRODUCT} provides a `kie-addons-quarkus-process-management` add-on that enables basic REST operations that you can use to manage process instances. These REST operations are supplemental to any other specific REST operations that you have configured in your application.
 
-To configure process management REST capabilities for your {PRODUCT} services, you can add the process management add-on as a dependency in the `pom.xml` file of your {PRODUCT} project:
+To configure process management REST capabilities for your _Business Services_, you can add the process management add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
 
 .Project dependency to enable process management REST operations
 [source,xml]
@@ -541,7 +538,7 @@ HTTP code : 404
 ////
 
 ////
-=== {PRODUCT} process SVG add-on
+=== process SVG add-on
 
 [role="_abstract"]
 {PRODUCT} provides an add-on named `process-svg-addon`, enabling the basic REST operations that you can use to visualize the process diagram and execution path of the related process instances. The REST operations are supplemental to any other specific REST operation that is configured in your application.
@@ -560,7 +557,7 @@ When you export a process to SVG format, the generated SVG is named to \{process
 
 The process code generation searches this export and, if this file exists, copies and renames it to `META-INF/processSVG/\{processId\}.svg allowing the process SVG addon to consume it directly.
 
-To configure process SVG REST capabilities for your {PRODUCT} services, you can add the process SVG add-on as a dependency in the `pom.xml` file of your {PRODUCT} project:
+To configure process SVG REST capabilities for your _Business Services_, you can add the process SVG add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
 
 .Project dependency to enable process SVG REST operations in Quarkus projects
 [source,xml]
@@ -615,7 +612,7 @@ The {PRODUCT} process SVG add-on provides REST support for the following basic o
 * *Process instance diagram*: Return the process SVG diagram displaying the executed path of a specific process instance
 ////
 
-=== {PRODUCT} process event add-on
+=== Process event add-on
 
 {PRODUCT} provides a process event add-on, which you can use to send processes, tasks, and variable events to an external event listener. In this case, the processes, tasks, and variable events are generated as a result of the execution of an operation, which modifies a process state; such events are known as runtime events.
 
@@ -630,7 +627,7 @@ The data field contains a JSON of one of the following types:
 // * https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/usertask/UserTaskInstanceEventMetadata.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
 * https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceVariableEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
 
-To configure process event capabilities for your {PRODUCT} services, you can add the process event add-on as a dependency in the `pom.xml` file of your {PRODUCT} project:
+To configure process event capabilities for your _Business Services_, you can add the process event add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
 
 .Project dependency to enable process event operations in Quarkus projects
 [source,xml,subs="attributes+"]
@@ -643,7 +640,7 @@ To configure process event capabilities for your {PRODUCT} services, you can add
 
 For Quarkus, the {PRODUCT} process event add-on implementation is based on https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/2/connectors/connectors.html[Smallrye Messaging] library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. Therefore, the {PRODUCT} process event add-on is not specifically combined with any event broker in Quarkus, but requires additional configuration to use a suitable Smallrye connector.
 
-For example, to use Kafka as an event broker in Quarkus, you can add the following dependency in the `pom.xml` file of your {PRODUCT} project:
+For example, to use Kafka as an event broker in Quarkus, you can add the following dependency in the `pom.xml` file of your _Business Service_ project:
 
 .Project dependency to enable Kafka event broker in Quarkus
 [source,xml,subs="attributes+"]
@@ -695,26 +692,10 @@ kogito.events.usertasks.enabled=false
 kogito.events.variables.enabled=false
 ----
 
-
-=== {PRODUCT} tracing add-on
-
-The Tracing add-on provides Decision model and notation (DMN) services tracing capability.
-
-To use the Tracing add-on, add the following code to the `pom.xml` file of your project:
-
-.Quarkus
-[source,xml,subs="attributes+"]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-addons-quarkus-tracing-decision</artifactId>
-</dependency>
-----
-
 [#source-files-add-on]
-=== {PRODUCT} source files add-on
+=== Source files add-on
 
-The {PRODUCT} Source Files Add-on adds the capability of listing and downloading source files to {PRODUCT} projects.
+The {PRODUCT} Source Files Add-on adds the capability of listing and downloading source files to _Business Service_ projects.
 
 > **⚠️**
 This add-on isn't supposed to be used by end-users, if not needed for internal integrations, since it can be a potential security breach for some users' use cases.
@@ -854,10 +835,10 @@ $ curl -X 'GET' \
 ----
 
 [id="proc-kogito-designing-app"]
-== Designing the application logic for a {PRODUCT} service using BPMN and DMN
+== Designing the application logic for a _Business Service_ using BPMN and DMN
 
 [role="_abstract"]
-After you create your {PRODUCT} project, you can create or import Business Process Model and Notation (BPMN) business processes, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) business rules, spreadsheet Decision Tables, and other assets in the `src/main/resources` folder of your project. You can also include Java classes in the `src/main/java` folder of your project that act as Java services or provide implementations that you call from your business processes or decisions.
+After you create your _Business Service_ project, you can create or import Business Process Model and Notation (BPMN) business processes, Decision Model and Notation (DMN) decision models, Drools Rule Language (DRL) business rules, spreadsheet Decision Tables, and other assets in the `src/main/resources` folder of your project. You can also include Java classes in the `src/main/java` folder of your project that act as Java services or provide implementations that you call from your business processes or decisions.
 
 The example for this procedure is a basic {PRODUCT} service that provides a REST endpoint `/persons`. This endpoint is automatically generated based on an example `PersonProcess.bpmn2` business process that employs an example `PersonDecisions.dmn` DMN model to make decisions based on the data being processed.
 
@@ -1379,7 +1360,7 @@ As an alternative to using Decision Model and Notation (DMN) to define this exam
 A DRL rule unit is a module for rules and a unit of execution. A rule unit collects a set of rules with the declaration of the type of facts that the rules act on. A rule unit also serves as a unique namespace for each group of rules. A single rule base can contain multiple rule units. You typically store all the rules for a unit in the same file as the unit declaration so that the unit is self-contained.
 
 .Procedure
-. In the `src/main/resources` folder of your example {PRODUCT} project, instead of using a DMN file, add the following `PersonRules.drl` file:
+. In the `src/main/resources` folder of your example _Business Service_ project, instead of using a DMN file, add the following `PersonRules.drl` file:
 +
 --
 .Example `PersonRules` DRL file
@@ -1438,12 +1419,12 @@ This rule unit syntax in the *Rule Flow Group* field specifies that you are usin
 . Save the process file to update the model.
 
 [id="proc-kogito-testing-decision-logic"]
-== Testing the decision logic for a {PRODUCT} service using test scenarios
+== Testing the decision logic for a _Business Service_ using Test Scenarios
 
 [role="_abstract"]
-As you develop business decisions in your {PRODUCT} services, you can use test scenarios to validate the functionality of your decisions before you begin running and using your {PRODUCT} services. With a test scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
+As you develop business decisions in your _Business Services_, you can use test scenarios to validate the functionality of your decisions before you begin running and using your _Business Services_. With a test scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
 
-You define test scenarios in `.scesim` (scenario simulation) files that you can model in Visual Studio Code (VS Code) using {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*]. You can use one or multiple `.scesim` files in your {PRODUCT} project, and each `.scesim` file can contain one or multiple test scenarios based on the defined decision data.
+You define test scenarios in `.scesim` (scenario simulation) files that you can model in Visual Studio Code (VS Code) using {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*]. You can use one or multiple `.scesim` files in your _Business Service_ project, and each `.scesim` file can contain one or multiple test scenarios based on the defined decision data.
 
 The example for this procedure uses a basic `PersonDecisionsTest.scesim` test scenario file that validates the decision logic in the example `PersonDecisions.dmn` Decision Model and Notation (DMN) model that you created previously.
 
@@ -1485,7 +1466,7 @@ package testscenario;
 public class KogitoScenarioJunitActivatorTest { }
 ----
 
-This activator class is a custom https://junit.org/junit5/[JUnit 5] runner that enables the execution of test scenario files in your {PRODUCT} project. When you run test scenarios, this class loads all `.scesim` files available in the project and executes them. For each row (scenario) in a test scenario file, the activator class generates a JUnit test result.
+This activator class is a custom https://junit.org/junit5/[JUnit 5] runner that enables the execution of test scenario files in your _Business Service_ project. When you run test scenarios, this class loads all `.scesim` files available in the project and executes them. For each row (scenario) in a test scenario file, the activator class generates a JUnit test result.
 --
 . Navigate to the `test/resources` folder and add the following `PersonDecisionsTest.scesim` test scenario file:
 +
@@ -1838,7 +1819,7 @@ This example scenario tests whether the person Jenny Quark with 15 years of age 
 mvn clean test
 ----
 
-A summary of the test scenario execution appears in the command terminal, and detailed reports are generated in the `target/surefire-reports` folder of your {PRODUCT} project.
+A summary of the test scenario execution appears in the command terminal, and detailed reports are generated in the `target/surefire-reports` folder of your _Business Service_ project.
 
 In the following example output, the test scenarios were executed successfully and encountered no errors:
 
@@ -1915,7 +1896,7 @@ The expected results defined in the `Is underage` test scenario did not match th
 --
 
 [id="proc-kogito-running-app"]
-== Running a {PRODUCT} service
+== Running a _Business Service_
 
 [role="_abstract"]
 After you design the business decisions and processes for your {PRODUCT} service, you can run your Quarkus application in one of the following modes:
@@ -1987,7 +1968,7 @@ $ mvn clean package -Dnative -Dquarkus.native.container-build -Dquarkus.native.b
 For further information about building a native image, see https://quarkus.io/guides/building-native-image#container-runtime[Quarkus - Building a Native Executable].
 
 [id="proc-kogito-interacting-app"]
-== Interacting with a running {PRODUCT} service
+== Interacting with a running _Business Service_
 
 [role="_abstract"]
 After your {PRODUCT} service is running, you can send REST API requests to interact with your application and execute your services according to how you set up the application.

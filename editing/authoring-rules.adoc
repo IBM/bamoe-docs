@@ -3,7 +3,7 @@ include::../partials/attributes.adoc[]
 
 {PRODUCT} supports several assets that you can use to define business decisions for your decision service. Each decision-authoring asset has different advantages, and you might prefer to use one or a combination of multiple assets depending on your goals and needs.
 
-The following table highlights the main decision-authoring assets supported in {PRODUCT} projects to help you decide or confirm the best method for defining decisions in your decision service.
+The following table highlights the main decision-authoring assets supported in _Business Service_ projects to help you decide or confirm the best method for defining decisions in your decision service.
 
 .Decision-authoring assets supported in {PRODUCT}
 [cols="20%,40%,20%", options="header"]
@@ -46,7 +46,7 @@ a|
 * Are predictive data-analytic models based on a notation standard defined by the Data Mining Group (DMG)
 * Use an XML schema that allows the PMML models to be shared between PMML-compliant platforms
 * Support Regression, Scorecard, Tree, Mining, and other model types
-* Can be included with a standalone {PRODUCT} project or imported into a project in {CANVAS}
+* Can be included with a standalone _Business Service_ project or imported into a project in {CANVAS}
 * Are optimal for incorporating predictive data into decision services in {PRODUCT}
 |PMML or XML editor
 ////
@@ -112,12 +112,12 @@ All data objects related to a DRL rule must be in the same project package as th
 == Spreadsheet Decision Tables
 
 [role="_abstract"]
-As a developer of business decisions, you can define business rules in a tabular format in spreadsheet Decision Tables and then include the spreadsheet file in your {PRODUCT} project. These rules are compiled into Drools Rule Language (DRL) for the decision service in your project.
+As a developer of business decisions, you can define business rules in a tabular format in spreadsheet Decision Tables and then include the spreadsheet file in your _Business Service_ project. These rules are compiled into Drools Rule Language (DRL) for the decision service in your project.
 
 === Spreadsheet Decision Tables
 
 [role="_abstract"]
-Spreadsheet Decision Tables are spreadsheet files (XLS OR XLSX) that contain business rules defined in a tabular format. You can include spreadsheet Decision Tables as part of your {PRODUCT} project. Each row in a spreadsheet Decision Table is a rule, and each column is a condition, an action, or another rule attribute. After you create and include your spreadsheet Decision Tables in your project, the rules you defined are compiled into Drools Rule Language (DRL) rules for the Decision service.
+Spreadsheet Decision Tables are spreadsheet files (XLS or XLSX) that contain business rules defined in a tabular format. You can include spreadsheet Decision Tables as part of your _Business Service_ project. Each row in a spreadsheet Decision Table is a rule, and each column is a condition, an action, or another rule attribute. After you create and include your spreadsheet Decision Tables in your project, the rules you defined are compiled into Drools Rule Language (DRL) rules for the Decision service.
 
 === Decision table use case
 
@@ -215,19 +215,19 @@ These conditions and rates are shown in the following example spreadsheet Decisi
 .Decision table for shipping charges
 image::decision-table-example-02.png[Decision table example]
 
-In order for a Decision Table to be compiled in your {PRODUCT} project, the table must comply with certain structure and syntax requirements within an spreadsheet, as shown in this example.
+In order for a Decision Table to be compiled in your _Business Service_ project, the table must comply with certain structure and syntax requirements within an spreadsheet, as shown in this example.
 
-=== Creating spreadsheet Decision Tables for your {PRODUCT} project
+=== Creating spreadsheet Decision Tables for your _Business Service_ project
 
 [role="_abstract"]
 Spreadsheet Decision Tables (XLS or XLSX) require two key areas that define rule data: a `RuleSet` area and a `RuleTable` area. The `RuleSet` area of the spreadsheet defines elements that you want to apply globally to all rules in the same package (not only the spreadsheet), such as a rule set name or universal rule attributes. The `RuleTable` area defines the actual rules (rows) and the conditions, actions, and other rule attributes (columns) that constitute that rule table within the specified rule set. A spreadsheet of decision tables can contain multiple `RuleTable` areas, but only one `RuleSet` area.
 
-IMPORTANT: For each {PRODUCT} project, try to include only one spreadsheet of decision tables, containing all necessary `RuleTable` definitions. Although you can include separate decision table spreadsheets, including multiple spreadsheets in the same project package can cause compilation errors from conflicting `RuleSet` or `RuleTable` attributes and is therefore not recommended.
+IMPORTANT: For each _Business Service_ project, try to include only one spreadsheet of decision tables, containing all necessary `RuleTable` definitions. Although you can include separate decision table spreadsheets, including multiple spreadsheets in the same project package can cause compilation errors from conflicting `RuleSet` or `RuleTable` attributes and is therefore not recommended.
 
 Using the example in the previous section, <<spreadsheet_decision_table_example>>, create a decision table from the spreadsheet.
 
 .Prerequisites
-* You have `org.kie.kogito:drools-decisiontables` added to the `pom.xml` file of your {PRODUCT} project to enable decision tables for decision services:
+* You have `org.kie.kogito:drools-decisiontables` added to the `pom.xml` file of your _Business Service_ project to enable decision tables for decision services:
 
 .Procedure
 . In a new spreadsheet, go to the second or third column and label a cell `RuleSet` (row 1 in example). Reserve the column or columns to the left for descriptive metadata (optional).
@@ -248,11 +248,11 @@ NOTE: As an alternative to populating both the object type and constraint cells,
 +
 If you need to add more rule tables to this decision table spreadsheet, skip a row after the last rule in the previous table, label another `RuleTable` cell in the same column as the previous `RuleTable` and  `RuleSet` cells, and create the new table following the same steps in this section (rows 19-29 in example).
 . Save your spreadsheet to finish.
-. In your VS Code IDE, import the spreadsheet file in the relevant folder of your {PRODUCT} project, typically in `src/main/resources`.
+. In your VS Code IDE, import the spreadsheet file in the relevant folder of your _Business Service_ project, typically in `src/main/resources`.
 
-NOTE: Only the first worksheet in a spreadsheet workbook is processed as a decision table when you include the spreadsheet in your {PRODUCT} project. Each `RuleSet` name combined with the `RuleTable` name must be unique across all decision table files in the same package.
+NOTE: Only the first worksheet in a spreadsheet workbook is processed as a decision table when you include the spreadsheet in your _Business Service_ project. Each `RuleSet` name combined with the `RuleTable` name must be unique across all decision table files in the same package.
 
-After you include the decision table in your {PRODUCT} project, the rules are interpreted as DRL rules like the following example, from the sample spreadsheet:
+After you include the decision table in your _Business Service_ project, the rules are interpreted as DRL rules like the following example, from the sample spreadsheet:
 
 [source,subs="attributes+"]
 ----
@@ -269,7 +269,7 @@ end
 [NOTE]
 .Enabling white space used in cell values
 ====
-By default, any white space before or after values in decision table cells is removed before the decision table is processed by the decision engine. To retain white space that you use intentionally before or after values in cells, set the `drools.trimCellsInDTable` system property to `false` in the `application.properties` file of your {PRODUCT} project:
+By default, any white space before or after values in decision table cells is removed before the decision table is processed by the decision engine. To retain white space that you use intentionally before or after values in cells, set the `drools.trimCellsInDTable` system property to `false` in the `application.properties` file of your _Business Service_ project:
 
 .Enable white space in `application.properties`
 [source]
@@ -277,7 +277,7 @@ By default, any white space before or after values in decision table cells is re
 drools.trimCellsInDTable=false
 ----
 
-You can also set this property as a start-up option when you build your {PRODUCT} project:
+You can also set this property as a start-up option when you build your _Business Service_ project:
 
 .On Quarkus
 

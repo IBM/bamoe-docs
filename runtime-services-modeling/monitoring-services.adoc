@@ -4,7 +4,7 @@ include::../partials/attributes.adoc[]
 == {PRODUCT} interaction with Prometheus and Grafana
 
 [role="_abstract"]
-{PRODUCT} provides a `monitoring-prometheus-addon` add-on that enables Prometheus metrics for monitoring your {PRODUCT} services and to generate Grafana dashboards that consume the default metrics exported by the Prometheus add-on. 
+{PRODUCT} provides a `monitoring-prometheus-addon` add-on that enables Prometheus metrics for monitoring your _Business Services_ and to generate Grafana dashboards that consume the default metrics exported by the Prometheus add-on. 
 
 When you deploy a Business Service that uses the `monitoring-prometheus-addon` add-on and you have the https://github.com/coreos/prometheus-operator[Prometheus Operator] installed in the same namespace as your Business Service, you can create a `ServiceMonitor` custom resource to expose the metrics for Prometheus, as shown in the following example:
 
@@ -99,7 +99,7 @@ spec:
 <Start here>
 ////
 
-=== Replacing {PRODUCT} services TrustStores
+=== Replacing _Business Services_ TrustStores
 
 [role="_abstract"]
 You can replace the default Java TrustStore that comes in {PRODUCT} images. Replacement of Java TrustStore is required when a given {PRODUCT} service makes HTTPS calls to services that require encrypted connections using a private https://dzone.com/articles/understanding-the-role-of-certificate-authorities[Certificate Authority (CA)].
@@ -150,7 +150,7 @@ https://prometheus.io/[Prometheus] is an open source systems monitoring toolkit 
 * Prometheus is installed. For information about downloading and using Prometheus, see the https://prometheus.io/docs/introduction/overview/[Prometheus documentation page].
 
 .Procedure
-. In your {PRODUCT} project, depending on the framework you are using, add one of the following dependencies to the `pom.xml` file to enable the Prometheus add-on:
+. In your _Business Service_ project, depending on the framework you are using, add one of the following dependencies to the `pom.xml` file to enable the Prometheus add-on:
 +
 --
 .Add dependency for Prometheus Quarkus add-on
@@ -162,7 +162,7 @@ https://prometheus.io/[Prometheus] is an open source systems monitoring toolkit 
 </dependency>
 ----
 
-By default, all stored metrics are exported to the configured monitoring module. If you want to disable certain metrics from being exported, you can set any of the following properties in the `application.properties` file of your {PRODUCT} project:
+By default, all stored metrics are exported to the configured monitoring module. If you want to disable certain metrics from being exported, you can set any of the following properties in the `application.properties` file of your _Business Service_ project:
 
 .Enable or disable specific metrics from being exported
 [source]
@@ -188,7 +188,7 @@ static_configs:
 
 Replace the values according to your {PRODUCT} service settings.
 --
-. In a command terminal, navigate to your {PRODUCT} project and run the project using your preferred run mode, such as development mode:
+. In a command terminal, navigate to your _Business Service_ project and run the project using your preferred run mode, such as development mode:
 +
 --
 .On Quarkus
@@ -261,7 +261,7 @@ image::prometheus-grafana-data.png[Image of application metrics in Grafana]
 ==== Grafana dashboards for default metrics in {PRODUCT}
 
 [role="_abstract"]
-If any of the Prometheus monitoring modules are imported as dependencies in the `pom.xml` file of your {PRODUCT} project, some Grafana dashboards that use the default metrics are generated under the folder `target/classes/META-INF/resources/monitoring/dashboards/` every time you compile your {PRODUCT} service.
+If any of the Prometheus monitoring modules are imported as dependencies in the `pom.xml` file of your _Business Service_ project, some Grafana dashboards that use the default metrics are generated under the folder `target/classes/META-INF/resources/monitoring/dashboards/` every time you compile your {PRODUCT} service.
 
 Two types of dashboards are exported depending on the decision model used on the endpoints:
 
@@ -288,7 +288,7 @@ NOTE: Generated dashboards for BPMN resources are currently not supported.
 [role="_abstract"]
 You can add custom dashboards that are defined as `json` files in your project. For format specification and more information, see https://grafana.com/docs/grafana/latest/dashboards/json-model/[Official documentation] page.
 
-To add custom dashboards in your {PRODUCT} project, you must follow the following conventions:
+To add custom dashboards in your _Business Service_ project, you must follow the following conventions:
 
 * Dashboard files must be stored in `/src/main/resources/META-INF/dashboards` directory
 * dashboard file names must start with `domain-dashoboard` (for domain specific dashboards) or `operational-dashboard` (for operational dashboards)

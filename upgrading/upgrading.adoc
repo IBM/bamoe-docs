@@ -67,13 +67,13 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
 
 
-== Step 3a: Creating a {PRODUCT_SHORT} version {VERSION} _Business Service_ project from scratch
+== Step 3a: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
 
 Once your {PRODUCT_SHORT} development environment installation is upgraded, you can create a new _Business Service_ project to contan your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new {PRODUCT_SHORT} version {VERSION}.
 
 [WARNING]
 ====
-This is only recommended if you're facing impediments when trying to upgrade your existing _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}. Go to xref:../upgrading/upgrading.adoc#step-3b[Step 3b: Upgrade {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X} _Business Service_ projects] for instructions if you haven't tried that yet.
+This is only recommended if you're facing impediments when trying to upgrade your existing _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}. Go to xref:../upgrading/upgrading.adoc#step-3b[Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}] for instructions if you haven't tried that yet.
 ====
 
 There are several ways to create Maven projects; this approach uses a published Maven plugin.
@@ -264,7 +264,7 @@ Examples of supported business automation assets are:
 - Decision Model & Notation (DMN) decisions (.dmn)
 - Drools Rule Language (DRL) rules (.drl)
 - Business Process Modeling & Notation (BPMN) workflows (.bpmn)
-- Excel Decision Tables Excel files (.xlsx)
+- Spreadsheet Decision Table files (.xls or .xlsx)
 - Standard Properties files (.properties)
 - Test Scenario files (.scesim)
 +
@@ -323,18 +323,30 @@ Refer to xref:reference-guide/drl.html[Reference → Drools Rule Language (DRL)]
 ====
 
 [#step-3b]
-== Step 3b: Upgrade {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X} _Business Service_ projects
+== Step 3b: Upgrade _Business Service_ projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}
 
-Upgrading a {PRODUCT_SHORT} version {VERSION_90x} or {VERSION_91x} _Business Service_ project to version {VERSION} is straightforward.
+Upgrading a _Business Service_ project on {PRODUCT_SHORT} version {VERSION_90x} or {VERSION_91x} to {PRODUCT_SHORT} version {VERSION} is straightforward.
 
 The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
 [start=1]
-. Upgrade the Quarkus version in the project POM file to the currently supported version 3.15:
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.15 (LTS)`:
 
 
 [start=2]
-. Upgrade the BAMOE BOM to in the project POM file to {BOM_VERSION_920}:
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+  <type>
+</dependency>
+----
++
 
 [start=3]
 . If you are upgrading from {VERSION_90X}, you'll need to update some dependencies GAVs.

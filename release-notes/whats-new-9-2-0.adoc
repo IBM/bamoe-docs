@@ -25,7 +25,7 @@ In {VERSION_91X}, {PRODUCT_SHORT} introduced Stateful Workfows as technology pre
 If you have used the Stateful Workflows technology preview in {VERSION_91X}, you will need to follow the instructions in xref:../upgrading/upgrading.adoc#migrate-tech-preview[Upgrading from technology preview].  
 
 === REST and GraphQL APIs for system-to-system integration
-{PRODUCT_SHORT} will generate REST API endpoints for your Business Service applications based on the Workflows, Decisions, and Rules it contains (Domain API). In addition to those, fixed endpoints will also be present for easily managing Process Instances, User Tasks, and Jobs (Technical API). For flexibility, a GraphQL endpoint will be available for you to query information from the Data-Index. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
+{PRODUCT_SHORT} will generate REST API endpoints for your _Business Services_ based on the Workflows, Decisions, and Rules it contains (Domain API). In addition to those, fixed endpoints will also be present for easily managing Process Instances, User Tasks, and Jobs (Management API). For flexibility, a GraphQL endpoint will be available for you to query information from the Data-Index and Data-Audit subsystems. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
 === Kafka integration for Event-driven Workflows
 Complementary to REST and GraphQL APIs, {PRODUCT_SHORT} allows Workflows to connect to Kafka topics that will trigger or consume tasks inside business processes. xref:../workflow/event-driven[Learn more...]
@@ -36,7 +36,7 @@ This version introduces a new User Tasks subsystem in the runtime engine, with n
 Some highlights of the new User Tasks subsystem include SLA tracking, Customizable user groups, and customizable automatic User Task assignment. xref:../workflow/authoring-workflows.adoc#user-tasks[Learn more...]
 
 === Secured Workflows with OpenID Connect
-Quarkus natively offers reliable authentication and authorization capabilities, allowing you to integrate with externals Identity Providers (IdPs) like Keycloak or Microsoft Entra ID. By binding into the built-in security layer of Quarkus, {PRODUCT_SHORT} allows you to be in complete control over authentication and authorization in your Business Service applications. {MANAGEMENT_CONSOLE} will also make use of this to let you interact with Process Instances, User Tasks, and Jobs, in an authenticated way. xref:../runtime-services-modeling/security.adoc[Learn more...].
+Quarkus natively offers reliable authentication and authorization capabilities, allowing you to integrate with externals Identity Providers (IdPs) like Keycloak or Microsoft Entra ID. By binding into the built-in security layer of Quarkus, {PRODUCT_SHORT} allows you to be in complete control over authentication and authorization in your _Business Services_. {MANAGEMENT_CONSOLE} will also make use of this to let you interact with Process Instances, User Tasks, and Jobs, in an authenticated way. xref:../runtime-services-modeling/security.adoc[Learn more...].
 
 === Custom Business Calendar definitions
 The Business Calendar feature provides precise time management within a business process by considering specific working hours, workdays, and holidays. This ensures that time-based events and deadlines are aligned with actual business schedules rather than simple chronological time. xref:../workflow/authoring-workflows.adoc#business-calendars[Learn more...]
@@ -58,7 +58,7 @@ The scripts can be found in the product deliverables and support both the Postgr
 In addition to supporting the Saga pattern for compensating failures in distributed operations, {PRODUCT_SHORT} handles actions across multiple subsystems in a transacional way. This means if something fails during execution for unforeseen reasons, your Process Instances, User Tasks, and/or Jobs won't be left in invalid intermediate states. xref:../workflow/deploying-process-services.adoc#transactions[Learn more...]
 
 === Workflow monitoring 
-Track and analyze the activity within your Business Service applications using {PRODUCT_SHORT}'s monitoring capabilities. With built-in support for Prometheus, you can collect metrics and visualize them using tools like Grafana. xref:../workflows/monitoring.adoc[Learn more...].
+Track and analyze the activity within your _Business Services_ using {PRODUCT_SHORT}'s monitoring capabilities. With built-in support for Prometheus, you can collect metrics and visualize them using tools like Grafana. xref:../workflows/monitoring.adoc[Learn more...].
 
 === Workflow auditing 
 When enabled, the Data-Audit subsystem will watch for relevant operations and log them to database tables. Creating your own audit logs is also possible by subscribing to internal events emitted by the Workflow engine. xref:../workflow/overview.adoc#data-audit[Learn more...]
@@ -67,7 +67,7 @@ When enabled, the Data-Audit subsystem will watch for relevant operations and lo
 There are many changes in {MANAGEMENT_CONSOLE} compared to {VERSION_91X} technology preview, being the most important:
 
 * BAMOE Task Console (available in {VERSION_91X} technology preview) has now been merged into {MANAGEMENT_CONSOLE}, in the "Tasks" screen.
-* Connecting with multiple Business Service applications in a single {MANAGEMENT_CONSOLE} installation is now supported.
+* Connecting with multiple _Business Services_ in a single {MANAGEMENT_CONSOLE} installation is now supported.
 * IdP configuration is now transparent, allowing {MANAGEMENT_CONSOLE} to know what IdP to authenticate with based only on the Business Service application URL.
 * Authorized users can now impersonate other users when managing User Tasks.
 * A Helm Chart is made available for easier installation on K8s/OCP clusters. xref:../installation/management-console.adoc[Learn more...].
@@ -81,7 +81,7 @@ Instead of a standalone CLI tool, Form code generation capabilities for User Tas
 Continuing the modernization efforts that began with the new DMN Editor on {VERSION_91X}, {PRODUCT_SHORT} now provides a new Test Scenario Editor (`.scesim` files) compatible with DMN 1.5. This removes the limitation of only being able to unit-test DMN 1.2 files. The new Test Scenario Editor is available on {DEV_TOOLS} as the new default editor for `.scesim` files. xref:../tools/new-test-scenario-editor.adoc[Learn more...]
 
 == Spring Boot 3 support for Decision and Rules services
-For the first time, Spring Boot 3 can be used as a foundational framework for Decisions- and Rules-based Business Service applications. xref:../editing/springboot-dmn-drl.adoc[Learn more...]
+For the first time, Spring Boot 3 can be used as a foundational framework for Decisions- and Rules-based _Business Services_. xref:../editing/springboot-dmn-drl.adoc[Learn more...]
 
 == DMN Editor UX improvements
 When renaming Decisions, Business Knowledge Models (BKMs), Decision Services, or any other identifier in a DMN model, the DMN Editor will now prompt you to automatically update all occurrences of that identifier in FEEL expressions if you'd like it to. Another improvement is that the DMN Editor is now capable of highlighting Decision Table rules and Conditional Boxed Expression branches based on the DMN Runner evaluation results. xref:../editing/running-decisions.adoc[Learn more...]
