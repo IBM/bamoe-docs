@@ -1,5 +1,10 @@
-= Authoring rules with DRL and spreadsheet Decision Tables
+= Authoring Rules with DRL and spreadsheet Decision Tables
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+== Drools Rule Language (DRL) rules
+
+DRL (Drools Rule Language) rules are business rules that you define directly in `.drl` text files. A DRL file can contain one or more rules that define at a minimum the rule conditions (`when`) and actions (`then`).
 
 {PRODUCT} supports several assets that you can use to define business decisions for your decision service. Each decision-authoring asset has different advantages, and you might prefer to use one or a combination of multiple assets depending on your goals and needs.
 
@@ -30,7 +35,7 @@ a|
 * Have strict syntax requirements for rules to be compiled properly when uploaded
 |Spreadsheet editor
 
-|DRL rules
+|DRL Rules
 a|
 * Are individual rules that you define directly in `.drl` text files
 * Provide the most flexibility for defining rules and other technicalities of rule behavior
@@ -40,22 +45,8 @@ a|
 |Integrated development environment (IDE)
 
 |===
-////
-|Predictive Model Markup Language (PMML) models
-a|
-* Are predictive data-analytic models based on a notation standard defined by the Data Mining Group (DMG)
-* Use an XML schema that allows the PMML models to be shared between PMML-compliant platforms
-* Support Regression, Scorecard, Tree, Mining, and other model types
-* Can be included with a standalone _Business Service_ project or imported into a project in {CANVAS}
-* Are optimal for incorporating predictive data into decision services in {PRODUCT}
-|PMML or XML editor
-////
 
-== DRL (Drools Rule Language) rules
-
-DRL (Drools Rule Language) rules are business rules that you define directly in `.drl` text files. These DRL files are the source in which all other rule assets in {CANVAS} are ultimately rendered. You can create and manage DRL files within the {CANVAS} interface, or create them externally as part of a Maven or Java project using Red Hat CodeReady Studio or another integrated development environment (IDE). A DRL file can contain one or more rules that define at a minimum the rule conditions (`when`) and actions (`then`).
-
-DRL files consist of the following components:
+== Components of DRL Rules 
 
 .Components in a DRL file
 [source,subs="attributes+"]
@@ -119,7 +110,7 @@ As a developer of business decisions, you can define business rules in a tabular
 [role="_abstract"]
 Spreadsheet Decision Tables are spreadsheet files (XLS or XLSX) that contain business rules defined in a tabular format. You can include spreadsheet Decision Tables as part of your _Business Service_ project. Each row in a spreadsheet Decision Table is a rule, and each column is a condition, an action, or another rule attribute. After you create and include your spreadsheet Decision Tables in your project, the rules you defined are compiled into Drools Rule Language (DRL) rules for the Decision service.
 
-=== Decision table use case
+=== Decision Table use case
 
 [role="_abstract"]
 An online shopping site lists the shipping charges for ordered items. The site provides free shipping under the following conditions:
@@ -227,7 +218,17 @@ IMPORTANT: For each _Business Service_ project, try to include only one spreadsh
 Using the example in the previous section, <<spreadsheet_decision_table_example>>, create a decision table from the spreadsheet.
 
 .Prerequisites
-* You have `org.kie.kogito:drools-decisiontables` added to the `pom.xml` file of your _Business Service_ project to enable decision tables for decision services:
+* You have the following dependency added to the `pom.xml` file of your _Business Service_ project to enable decision tables for decision services:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-decisiontables</artifactId>
+</dependency>
+----
+
+
 
 .Procedure
 . In a new spreadsheet, go to the second or third column and label a cell `RuleSet` (row 1 in example). Reserve the column or columns to the left for descriptive metadata (optional).

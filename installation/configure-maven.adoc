@@ -1,6 +1,8 @@
 include::../partials/attributes.adoc[]
 = Installing {MVN_REPO}
 
+include::../styles/images.adoc[]
+
 With {PRODUCT_LONG} version {VERSION} aligning with {PRODUCT_SHORT} version 8.0 in the downstream build model, the artifacts are no longer available in Maven Central.
 
 Instead the Maven libraries are shipped in the Maven repository format as a `.zip` file or via HTTP through a Container image you can deploy to your infrastructure.
@@ -41,7 +43,7 @@ The container images provided are created for Linux distribution, running on a d
 
 Enable the OpenShift registry and log into it using Docker:
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 export REGISTRY=`oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'`
@@ -50,7 +52,7 @@ docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
 
 Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift registry:
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
 docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
@@ -76,7 +78,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSIO
 
 Create the Deployment and Route
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
 oc create route edge --service=bamoe-maven-repo
@@ -128,7 +130,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSIO
 
 Create the Deployment and Ingress
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 kubectl create deployment bamoe-maven-repo --image=${BAMOE_MAVEN_REPOSITORY_IMAGE}
 kubectl expose deployment bamoe-maven-repo --port=80 --target-port=8080
@@ -274,5 +276,5 @@ If your Maven repository contains outdated artifacts, you might encounter Maven 
 
 To resolve these issues, delete the cached version of your local repository that is located in the  `~/.m2/repository` directory to force a download of the latest Maven artifacts.
 
-Your Maven repository is now properly configured and ready to build {PRODUCT_SHORT} projects using a standard Maven workflow.
+Your Maven repository is now properly configured and ready to build _Business Service_ projects using a standard Maven workflow.
 
