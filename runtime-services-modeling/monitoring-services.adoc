@@ -2,12 +2,10 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-== {PRODUCT} interaction with Prometheus and Grafana
-
 [role="_abstract"]
-{PRODUCT} provides a `monitoring-prometheus-addon` add-on that enables Prometheus metrics for monitoring your _Business Services_ and to generate Grafana dashboards that consume the default metrics exported by the Prometheus add-on. 
+{PRODUCT} provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your _Business Services_ and to generate Grafana dashboards that consume the default metrics exported by the Prometheus add-on. 
 
-When you deploy a _Business Service_ that uses the `monitoring-prometheus-addon` add-on and you have the https://github.com/coreos/prometheus-operator[Prometheus Operator] installed in the same namespace as your Business Service, you can create a `ServiceMonitor` custom resource to expose the metrics for Prometheus, as shown in the following example:
+When you deploy a _Business Service_ that uses the monitoring add-on and you have the https://github.com/coreos/prometheus-operator[Prometheus Operator] installed in the same namespace as your _Business Service_ in your cloud infrastructure, you can create a `ServiceMonitor` custom resource to expose the metrics for Prometheus, as shown in the following example:
 
 .Example `ServiceMonitor` resource for Prometheus
 [source,yaml]
@@ -16,9 +14,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: onboarding-service
-  name: onboarding-service
-  namespace: kogito
+    app: my-business-service
+  name: my-business-service
+  namespace: my-namespace
 spec:
   endpoints:
   - path: /metrics
@@ -26,10 +24,10 @@ spec:
     scheme: http
   namespaceSelector:
     matchNames:
-    - kogito
+    - my-namespace
   selector:
     matchLabels:
-      app: onboarding-service
+      app: my-business-service
 ----
 
 You must manually configure your `Prometheus` custom resource that is managed by the Prometheus Operator to select the `ServiceMonitor` resource:
@@ -45,7 +43,7 @@ spec:
   serviceAccountName: prometheus
   serviceMonitorSelector:
     matchLabels:
-      app: onboarding-service
+      app: my-business-service
 ----
 
 After you configure your Prometheus resource with the `ServiceMonitor` resource,you can see the endpoint being scraped by Prometheus in the *Targets* page in the Prometheus web console:
@@ -86,63 +84,15 @@ spec:
         - key: app
           operator: In
           values:
-            - my-kogito-application
+            - my-business-service
 ----
 
 [role="_additional-resources"]
 .Additional resources
-// * {URL_CONFIGURING_KOGITO}#proc-prometheus-metrics-monitoring_kogito-configuring[Enabling Prometheus metrics monitoring in {PRODUCT}]
 * https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/getting-started.md[Prometheus Operator]
 * https://operatorhub.io/operator/grafana-operator[Grafana Operator]
 
-////
-=== Prometheus and Grafana integration troubleshooting
-<Start here>
-////
-
-=== Replacing _Business Services_ TrustStores
-
-[role="_abstract"]
-You can replace the default Java TrustStore that comes in {PRODUCT} images. Replacement of Java TrustStore is required when a given _Business Service_ makes HTTPS calls to services that require encrypted connections using a private https://dzone.com/articles/understanding-the-role-of-certificate-authorities[Certificate Authority (CA)].
-
-.Prerequisites
-* The Java TrustStore replaces the default one. You must add the trusted certificates to the default JKS. As an alternative, you can create a new TrustStore that consists of the required _Business Service_ certificates.
-
-NOTE: Any _Business Service_ that is deployed in a given namespace can access the Java TrustStore if required.
-
-To manipulate the Java TrustStore, you can use https://keystore-explorer.org/[KeyExplorer] or https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html[keytool] that consists of JDK.
-
-.Procedure
-. Create a https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-config-file/[Kubernetes Secret] based on the customized Java TrustStore:
-+
---
-.Example Kuberbetes Secret
-[source]
-----
-$ oc create secret generic kogito-truststore --from-file=cacerts=<path to your JKS> --from-literal=keyStorePassword=<TrustStore Password>
-----
---
-+
-You must define the secret keys as shown in the previous command. `cacerts` is used for the TrustStore file and `keyStorePassword` is used for the TrustStore password.
-
-. Deploy the _Business Service_ that uses the TrustStore. For example:
-+
---
-.Example _Business Service_ deployment
-[source,yaml]
-----
-piVersion: app.kiegroup.org/v1beta1
-kind: KogitoRuntime
-metadata:
-  name: my-service
-spec:
-  replicas: 1
-  image: quay.io/my-namespace/my-service:latest
-  trustStoreSecret: kogito-truststore
-----
---
-
-=== Enabling Prometheus metrics monitoring in {PRODUCT}
+== Enabling Prometheus metrics monitoring in {PRODUCT}
 
 [role="_abstract"]
 https://prometheus.io/[Prometheus] is an open source systems monitoring toolkit that you can use with {PRODUCT} to collect and store metrics related to the execution of Business Process Model and Notation (BPMN) process models, business rules, and Decision Model and Notation (DMN) decision models. You can access the stored metrics through a REST API call to a configured application endpoint, through the Prometheus expression browser, or using a data-graphing tool such as https://grafana.com/[Grafana].
@@ -154,12 +104,19 @@ https://prometheus.io/[Prometheus] is an open source systems monitoring toolkit 
 . In your _Business Service_ project, depending on the framework you are using, add one of the following dependencies to the `pom.xml` file to enable the Prometheus add-on:
 +
 --
-.Add dependency for Prometheus Quarkus add-on
+.Add dependency for Prometheus add-on
 [source,xml,subs="+quotes"]
 ----
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kie-addons-quarkus-monitoring-prometheus</artifactId>
+</dependency>
+
+<!-- or -->
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-monitoring-prometheus</artifactId>
 </dependency>
 ----
 
@@ -181,7 +138,7 @@ kogito.monitoring.interceptor.useDefault=false
 [source,yaml,subs="+quotes"]
 ----
 scrape_configs:
-  job_name: 'kogito-metrics'
+  job_name: 'my-business-service-metrics'
 metrics_path: /metrics
 static_configs:
   - targets: ["localhost:8080"]
@@ -259,7 +216,7 @@ image::prometheus-grafana-data.png[Image of application metrics in Grafana]
 * https://prometheus.io/docs/visualization/grafana/[Grafana Support for Prometheus]
 * https://grafana.com/docs/grafana/latest/features/datasources/prometheus/[Using Prometheus in Grafana]
 
-==== Grafana dashboards for default metrics in {PRODUCT}
+== Grafana dashboards for default metrics in {PRODUCT}
 
 [role="_abstract"]
 If any of the Prometheus monitoring modules are imported as dependencies in the `pom.xml` file of your _Business Service_ project, some Grafana dashboards that use the default metrics are generated under the folder `target/classes/META-INF/resources/monitoring/dashboards/` every time you compile your _Business Service_.
@@ -284,7 +241,7 @@ image::grafana-domain-dashboard.png[Generated domain specific dashboard]
 
 NOTE: Generated dashboards for BPMN resources are currently not supported.
 
-==== Custom Grafana dashboards in {PRODUCT}
+== Custom Grafana dashboards in {PRODUCT}
 
 [role="_abstract"]
 You can add custom dashboards that are defined as `json` files in your project. For format specification and more information, see https://grafana.com/docs/grafana/latest/dashboards/json-model/[Official documentation] page.
@@ -299,7 +256,7 @@ To add custom dashboards in your _Business Service_ project, you must follow the
 
 Custom dashboards are available in the Grafana panel along with the auto-generated dashboards.
 
-==== Disabling Grafana dashboards generation in {PRODUCT}
+== Disabling Grafana dashboards generation in {PRODUCT}
 
 [role="_abstract"]
 You can disable the generation of default dashboards in Prometheus metrics monitoring using the following properties:
