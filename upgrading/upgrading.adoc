@@ -16,11 +16,11 @@ This guide will walk you through upgrading your:
 
 * {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
 
-If you are using {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
+If you are using the {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
 
 == Step 1: Download product archives
 
-Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT}, {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program].
+Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT}, {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. For more information see https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document]. 
 
 == Step 2: Upgrade your {PRODUCT_SHORT} development environment installation
 
@@ -36,7 +36,7 @@ In case you have installed {MVN_REPO} in a Maven Repository Manager such as Arti
 
 === Upgrade {CANVAS}
 
-The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_90x} and {VERSION_91x} versions (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_91x} version (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
 If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
 
@@ -109,27 +109,6 @@ If you come across some difficulties when trying to upgrade your existing _Busin
 ----
 
 [start=3]
-. If you are upgrading from {VERSION_90X}, you'll need to update some dependencies GAVs.
-+
-In the {PRODUCT_SHORT} version {VERSION_91x} some dependencies had a slight name change, see section https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=installing-upgrading[Maven libraries mapping guide @ 9.1.x] first and update accordingly.
-+
-One of the renamed dependencies is the `groupdId=org.kie.kogito` and `artifactId=kogito-quarkus`, which was renamed to `groupdId=org.jbpm` and `jbpm-with-drools-quarkus`.
-+
-[source,xml]
-----
- ---   <dependency>
- ---     <groupId>org.kie.kogito</groupId>
- ---     <artifactId>kogito-quarkus</artifactId>
- ---   </dependency>
- +++   <dependency>
- +++     <groupId>org.jbpm</groupId>
- +++     <artifactId>jbpm-with-drools-quarkus</artifactId>
- +++   </dependency>
-----
-+
-Depending on your project setup you may also need to make changes to a parent `pom.xml` if it exists. This is not covered here.
-
-[start=4]
 . Update the `application.properties` file.
 +
 {PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
@@ -176,7 +155,7 @@ Examples of supported business automation assets are:
 - Standard Properties files (`.properties`)
 - Test Scenario files (`.scesim`)
 
-Copy all your assets from your _Business Service_ project on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X} to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+Copy all your assets from your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91X} to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
 
 [NOTE]
 ====
@@ -221,7 +200,7 @@ Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you
 
 In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
 
-* The new API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID` is the key and most of the time it is the only actor to operate with the new API. 
+* The new User Tasks API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID` is the key and most of the time it is the only actor to operate with the new API. 
 +
 In version {VERSION_911}, the General Process API entrypoints are based on the following pattern:
 +

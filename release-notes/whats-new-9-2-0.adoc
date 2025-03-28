@@ -16,7 +16,7 @@ This version upgrades foundational technologies and brings support for new ones:
 * Kubernetes - 1.30 _(from 1.29)_
 * (New!) Spring Boot 3.4 _(for Decisions and Rules)_
 * (New!) PostgreSQL - 16.8
-* (New!) Microsoft SQL Server - 2019
+* (New!) Microsoft SQL Server - 2022
 
 More information in xref:supported-environments.adoc[Supported Environments].
 
@@ -26,7 +26,9 @@ In {VERSION_91X}, {PRODUCT_SHORT} introduced Stateful Workfows as technology pre
 If you have used the Stateful Workflows technology preview in {VERSION_91X}, you will need to follow the instructions in xref:../upgrading/upgrading.adoc#migrate-tech-preview[Upgrading from technology preview].  
 
 === REST and GraphQL APIs for system-to-system integration
-{PRODUCT_SHORT} will generate REST API endpoints for your _Business Services_ based on the Workflows, Decisions, and Rules it contains (Domain API). In addition to those, fixed endpoints will also be present for easily managing Process Instances, User Tasks, and scheduled Jobs (Management API). For flexibility, a GraphQL endpoint will be available for you to query information from the Data-Index and Data-Audit subsystems. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
+{PRODUCT_SHORT} will generate REST API endpoints for your _Business Services_ based on the Workflows, Decisions, and Rules it contains (Domain API). In addition to those, fixed endpoints will also be present for easily managing Process Instances, User Tasks, and scheduled Jobs (Management API). xref:../workflow/process-management.adoc[Learn more...]
+
+For flexibility, a GraphQL endpoint will be available for you to query information from the Data-Index and Data-Audit subsystems. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
 === Kafka integration for Event-driven Workflows
 Complementary to REST and GraphQL APIs, {PRODUCT_SHORT} allows Workflows to connect to Kafka topics that will trigger or consume tasks inside business processes. An example of this integration is delivered in the product (process-event-driven). xref:../getting-started/examples.adoc[Learn more...]
@@ -34,7 +36,7 @@ Complementary to REST and GraphQL APIs, {PRODUCT_SHORT} allows Workflows to conn
 === User Tasks subsystem for Human-driven Workflows
 This version introduces a new User Tasks subsystem in the runtime engine, with new endpoints that do not require global process data to be defined via parameters such as the process ID, process instance ID and task name. The returned JSON objects also contain richer information now.
 
-Some highlights of the new User Tasks subsystem include SLA tracking, Customizable user groups, and customizable automatic User Task assignment. xref:../workflow/authoring-workflows.adoc#user-tasks[Learn more...]
+Some highlights of the new User Tasks subsystem include SLA tracking, Customizable user groups, and customizable automatic User Task assignment. xref:../workflow/overview.adoc#user-tasks[Learn more...]
 
 === Secured Workflows with OpenID Connect
 Quarkus natively offers reliable authentication and authorization capabilities, allowing you to integrate with externals Identity Providers (IdPs) like Keycloak or Microsoft Entra ID. By binding into the built-in security layer of Quarkus, {PRODUCT_SHORT} allows you to be in complete control over authentication and authorization in your _Business Services_. {MANAGEMENT_CONSOLE} will also make use of this to let you interact with Process Instances, User Tasks, and scheduled Jobs, in an authenticated way. xref:../runtime-services-modeling/security.adoc[Learn more...].
@@ -53,10 +55,10 @@ Installation Data Definition Language (DDL) scripts are available to create from
 •	User Tasks
 •	Runtime Engine
 
-The scripts can be found in the product deliverables and support both the PostgreSQL and Microsoft SQL databases. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#jdbc-persistence[Learn more...]
+The scripts can be found in the product deliverables and support both the PostgreSQL and Microsoft SQL databases. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Learn more...]
 
 === Data consistency enforced by transactional operations
-In addition to supporting the Saga pattern for compensating failures in distributed operations, {PRODUCT_SHORT} handles actions across multiple subsystems in a transacional way. This means if something fails during execution for unforeseen reasons, your Process Instances, User Tasks, and/or Jobs won't be left in invalid intermediate states. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#transactions[Learn more...]
+In addition to supporting the Saga pattern for compensating failures in distributed operations, {PRODUCT_SHORT} handles actions across multiple subsystems in a transactional way. This means if something fails during execution for unforeseen reasons, your Process Instances, User Tasks, and/or Jobs will not be left in invalid intermediate states. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#transactions[Learn more...]
 
 === Workflow monitoring 
 Track and analyze the activity within your _Business Services_ using {PRODUCT_SHORT}'s monitoring capabilities. With built-in support for Prometheus, you can collect metrics and visualize them using tools like Grafana. xref:../runtime-services-modeling/monitoring-services.adoc[Learn more...].
@@ -92,6 +94,4 @@ See the complete list in xref:fix-list.adoc[Fix List].
 
 
 == Download documents 
-For more information on {PRODUCT_LONG} version {VERSION} download document, see https://www.ibm.com/support/pages/node/7151078[BAMOE 9.2 Download Document].
-
-// TODO: Update link to BAMOE 9.2.
+For more information on {PRODUCT_LONG} version {VERSION} download document, see https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document].
