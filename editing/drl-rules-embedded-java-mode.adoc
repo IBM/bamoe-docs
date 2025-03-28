@@ -3,13 +3,16 @@ include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 Building a DRL based project makes use of Apache Maven and aligns with standard Apache Maven practices.
+
 These projects or modules are simply an Apache Maven Java project or module; with an additional metadata: file `META-INF/kmodule.xml`.
+
 The `kmodule.xml` file is the descriptor that selects resources to knowledge bases and configures those bases and sessions.
 
 While standard Apache Maven can build and package these resources, it will not provide validation at build time.
-There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
-The plugin also generates many classes, making the runtime loading faster too.
 
+There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
+
+The plugin also generates many classes, making the runtime loading faster too.
 
 == kmodule.xml
 Since meaningful defaults have been provided for all configuration aspects, the simplest `kmodule.xml` file can contain just an empty kmodule tag like the following:
@@ -225,8 +228,7 @@ The `KieRuntimeLogger` uses the comprehensive event system in Drools to create a
 
 [source,java]
 ----
-KieRuntimeLogger logger =
-  KieServices.Factory.get().getLoggers().newFileLogger(kieSession, "logdir/mylogfile");
+KieRuntimeLogger logger = KieServices.Factory.get().getLoggers().newFileLogger(kieSession, "logdir/mylogfile");
 // ... kieSession in action ...
 logger.close();
 ----
