@@ -1,5 +1,6 @@
 = The User Tasks API
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 A User Task is a typical process or workflow task where a human
 performs the Task with the assistance of a software application and is scheduled through a task list manager.
@@ -12,7 +13,7 @@ Engine, that is designed to work more effectively with User Tasks.
 Consequently, a new API (User Tasks API) layer specifically designed to operate with User Tasks entities is now available to the BAMOE users.
 
 The resulting User Tasks Api is lighter and focused on working with
- User tasks: the new endpoints no longer require global
+ User Tasks: the new endpoints no longer require global
 process data like the `process ID`, `process Instance ID`, `task Name` as endpoint parameters, and the returned JSON objects contain richer information.
 
 NOTE: Migrating to the new API for User Task related operations is
@@ -76,8 +77,13 @@ _ERROR)_
 * outputs: Map++<++String, Object++>++
 * metadata: Map++<++String, Object++>++
 
-|*Example* |curl -X GET \
+|*Example* a|
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertasks/instance?group=managers&user=manager'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId} 
@@ -119,9 +125,14 @@ _ERROR)_
 A _UserTaskInstanceNotFoundException_ is thrown if there is no User Task that
 matches with the given parameters.
 
-|*Example* |
-curl -X GET ++\++
+|*Example* a|
+
++curl example+
+
+ curl -X GET ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/transition
@@ -149,9 +160,13 @@ _ERROR)_
 * target: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
 _ERROR)_
 
-|*Example*
-|curl -X GET
+|*Example* a|
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/transition?user=++{++user}&group=++{++groups}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/transition
@@ -196,12 +211,16 @@ _ERROR)_
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* 
-a|curl -H "Content-Type: application/json" -H "Accept: application/json"
+|*Example* a|
++curl example+
 
+ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}?user=++{++user}&group=++{++groups}'
 -d '++{++transitionId: String, data: Map++<++String, Object++>++}'
+
++curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/inputs
@@ -245,14 +264,19 @@ _ERROR)_
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* a| curl -X PUT ++\++
+|*Example* a|
 
++curl example+
+
+ curl -X PUT ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'
 ++\++
 -H 'accept: application/json' ++\++
 -H 'Content-Type: application/json' ++\++
 -d '++{++ "variable": "value"
 }'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/outputs
@@ -295,8 +319,11 @@ _ERROR)_
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|Example a| curl -X PUT ++\++
+|*Example* a|
 
++curl example+
+
+ curl -X PUT ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}/output?group=managers&user=manager'
 ++\++
 -H 'accept: application/json' ++\++
@@ -304,6 +331,8 @@ matches with the given parameters doesn’t exist.
 -d '++{++
 "variable": "value"
 }'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/comments
@@ -326,9 +355,14 @@ specific User Task given its task ID and assigned to a given user and a given gr
 * updatedAt: Date
 * updatedBy: String
 
-|*Example* |
-|curl -X GET
+|*Example* a|
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?user=++{++user}&group=++{++groups}'
+
++curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/comments
@@ -355,11 +389,15 @@ specific User Task given its task ID and assigned to a given user and a given gr
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* a|curl -H "Content-Type: application/json" -H "Accept: application/json"
+|*Example* a|
++curl example+
 
+ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?user=++{++user}&group=++{++groups}'
 -d '++{++comment: String}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/comments/{commentId}
@@ -385,8 +423,14 @@ matches with the given parameters doesn’t exist.
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* a|curl -X GET
+|*Example* a|
+
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertask/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/comments/{commentId}
@@ -418,11 +462,15 @@ A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
-curl -H "Content-Type: application/json" -H "Accept: application/json"
 
++curl example+
+
+ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
 -d '++{++comment: String}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/comments/{commentId}
@@ -451,8 +499,14 @@ matches the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* a|curl -X DELETE
+|*Example* a|
++curl example+
+
+ curl -X DELETE
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
+
++curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments
@@ -477,9 +531,13 @@ matches with the given parameters doesn’t exist.
 * updatedBy: String
 
 |*Example* a|
-curl -X GET
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?
 user=++{++user}&group=++{++groups}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments
@@ -512,11 +570,14 @@ A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
-curl -H "Content-Type: application/json" -H "Accept: application/json"
++curl example+
 
+ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?user=++{++user}&group=++{++groups}'
 -d '++{++name: String, uri: URI}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -544,8 +605,14 @@ the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* |curl -X GET
+|*Example* a|
+
++curl example+
+
+ curl -X GET
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
+
++curl example+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -578,11 +645,16 @@ A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
-curl -H "Content-Type: application/json" -H "Accept: application/json"
 
++curl example+
+
+ curl -H "Content-Type: application/json" -H "Accept: application/json"
 -X POST
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}
 -d '++{++name: String, uri: URI}'
+
++curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -612,8 +684,15 @@ matches the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
-|*Example* a|curl -X DELETE
+|*Example* a|
+
++curl example+
+
+ curl -X DELETE
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
+
++curl example+
+
 |===
 
 To find out more how the passed `QueryParameters`` representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.
