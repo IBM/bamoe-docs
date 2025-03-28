@@ -1,0 +1,124 @@
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+== Running Workflows locally with {QUARKUS_DEV_UI}
+
+The {QUARKUS_DEV_UI} extension is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes.
+
+image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
+
+After reading xref:../workflow/workflows-with-quarkus.html[Workflows services with Quarkus] and getting your project ready, it's time to add the {QUARKUS_DEV_UI} extension to your project.
+
+Start by adding the {QUARKUS_DEV_UI} dependency to your `pom.xml` file:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-quarkus-devui</artifactId>
+</dependency>
+----
+
+Then setup the `application.properties` file to add users and user groups in the format:
+
+`jbpm.devui.users.<username>.groups=<comma separated list of groups>`
+
+For example:
+
+[source,properties]
+----
+jbpm.devui.users.jdoe.groups=admin,HR,IT
+jbpm.devui.users.alice.groups=HR,IT
+jbpm.devui.users.admin.groups=admin
+----
+
+To include the Swagger UI with the Open API specifications for you Workflow, add the followin properties:
+
+[source,properties]
+----
+quarkus.swagger-ui.always-include=true
+quarkus.smallrye-openapi.path=docs/openapi.json
+----
+
+To execute the project in the local development environment, open a new terminal and execute:
+
+[source,bash]
+----
+mvn clean quarkus:dev
+----
+
+This command should install the dependencies and run your Quarkus application in Dev mode locally (usually at `http://localhost:8080`).
+
+
+== Using the {QUARKUS_DEV_UI} interface to manage processes
+
+To access the {QUARKUS_DEV_UI}, open a browser and navigate to `http://localhost:8080/q/dev-ui/`. This is the Quarkus Dev UI, where the {QUARKUS_DEV_UI} extension is listed.
+
+image::workflow/dev-ui-extension.gif[Accessing the {QUARKUS_DEV_UI} from the Quarkus Dev UI]
+
+Scroll down until to the `jBPM Quarkus Dev UI` box and click on any item in the list (Process Instances, Tasks, Jobs, or Forms) to open the {QUARKUS_DEV_UI} web app.
+
+=== Process Instances
+
+image::workflow/dev-ui-process-instances.png[Process Instances page]
+
+The Process Instances page will display all the running processes and their execution status. Clicking on any process instance will open the Process Instance details page.
+
+image::workflow/dev-ui-process-details.png[Process Details page]
+
+==== Starting a new process instance
+
+To start a new process instance, go to the **Process Definitions** tab. There, all the process definitions are listed, one for each Workflow in your resources directory.
+
+image::workflow/dev-ui-process-definitions.png[Process Definitions page]
+
+Click on any process definition to open its respective initialization form.
+
+image::workflow/dev-ui-process-form.png[Process Definition form page]
+
+Fill the form with relevant data for you Workflow and click on Start.
+
+[NOTE]
+The Process Defitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
+
+=== Jobs
+
+image::workflow/dev-ui-jobs.png[Jobs page]
+
+The Jobs page will display all the scheduled jobs and their execution status. Clicking on the actions menu on any job will show available options, including *Details*, which will open the job details modal.
+
+image::workflow/dev-ui-job-details.png[Jobs page]
+
+=== Tasks
+
+image::workflow/dev-ui-tasks.png[Tasks page]
+
+The Tasks page will display all the User Tasks and their priorities and status. Clicking on the task name will open the User Task Form that can be filled and submitted to progress it to the next phase.
+
+image::workflow/dev-ui-task-form.png[Task Form page]
+
+Clicking on **View Details** will open a side panel with more details regarding the current task, including the parent process, possible assigned users/groups, id, name, and state.
+
+image::workflow/dev-ui-task-form-details.png[Task details panel]
+
+[NOTE]
+The Task forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
+
+=== Forms
+
+image::workflow/dev-ui-forms.png[Forms page]
+
+The Forms page will display all the available forms in the project. It initially will be empty, since all forms (for User Tasks and Process Definitions) are auto generated.
+
+To add custom forms (for the `hiring` Process Definition or `HR Interview` User Task for example), follow the steps in xref:../tools/form-generation.adoc[Form code generation functionality] and then place the generated forms in the `src/main/resources/custom-forms-dev` folder.
+
+== Using the Swagger UI
+
+Not directly related to the {QUARKUS_DEV_UI}, but also a useful tool to explore the API of your Workflow.
+
+image::workflow/dev-ui-swagger-ui.png[Swagger UI page]
+
+The Swagger UI lists all endpoints generated for your Workflow as well as the extra endpoints for management, such as `/management/processes`.
+
+To use the API, select any endpoint and click on *Try it out* to test it.
+
+image::workflow/dev-ui-swagger-ui-try-out.gif[Swagger UI try it out page]
