@@ -187,29 +187,24 @@ kogito.persistence.type=jdbc
 ----
 
 
-=== Setting up the database for stateful Workflows
+=== Setting up the database for stateful Workflows in development
 
-To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a Database Admin.
+All stateful Workflows subsystems brought by {PRODUCT_SHORT} into your _Business Service_ project come with `KIE Flyway` migrations, a sandboxed Flyway-based mechanism that automatically creates the database schema for you during startup. *This is convenient in development environments and is not suitable for production database instances*
 
-The provided DDLs allow creating from scratch the Database for the different {PRODUCT_SHORT} subsystems for both PostgreSQL and Microsoft SQL Server.
-
-The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
-
-.Contents of bamoe-9.2.0-db-utils.zip
-image::wf-tutorial/gs-bamoe-9.2.0-db-utils.png[Contents of bamoe-9.2.0-db-utils.zip]
-
-Additionally {PRODUCT_SHORT} comes with `KIE Flyway`, a Flyway-based mechanism that automatically creates the database schema
-during startup. *This is convenient in a development environments and is not adapted to production database instances.*
-
-To enable this feature, the `kie.flyway.enabled` property should be added in your project `application.properties` file,
-which is found in `src/main/resources` as follows:
+To enable this feature, the `kie.flyway.enabled` property should be added in your project `application.properties` file, which is found in `src/main/resources` as follows:
 
 [source,properties]
 ----
-kie.flyway.enabled=true
+kie.flyway.enabled=false # for production
+%dev.kie.flyway.enabled=true
 ----
 
-If everything is correctly set, at the first project execution all the tables will be automatically added.
+Your development database schema will be automatically created for you.
+
+[NOTE]
+====
+For production environemnts, please see xref:../runtime-services-modeling/services-deployment.adoc##production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
+====
 
 
 == Authentication in User Task API endpoints
