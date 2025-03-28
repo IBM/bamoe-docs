@@ -7,7 +7,7 @@ You can use BAMOE to develop stateful workflow services using Business Process M
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
-The Compact Architecture is the reference architecture for stateful workflow. In this architecture certain services can be colocated directly in your {PRODUCT_SHORT} application. This simplifies the application configuration and minimizes the communication between components which ensures that {PRODUCT_SHORT} applications are stable and robust in a Business Process environment. 
+The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows. In this architecture certain services (subsystems) can be colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
 == Components of Compact Architecture
 The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful workflows.
@@ -221,10 +221,11 @@ No additional configuration is required besides the default datasource use by th
 Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
 It is also used for User Tasks notifications.
 
-By collocating the Jobs Service within the {PRODUCT_SHORT} Runtime, the Jobs Service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
+By collocating the Jobs Service with the other stateful Workflows subsystems in a _Business Service_, the Jobs Service add-on enables direct communication.
+
 It uses the Data Source as the app.
 
-The Jobs Service subsystem only supports Quarkus runtimes and storage can be PostgreSQL or Microsoft SQL Server.
+The Jobs Service subsystem only supports Quarkus at the moment and persistence can be configured for PostgreSQL or Microsoft SQL Server databases.
 
 === How it works
 
