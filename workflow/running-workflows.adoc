@@ -1,0 +1,68 @@
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+== Running Workflows locally with {QUARKUS_DEV_UI}
+
+Following the download of your process service to your local development environment, you can unzip the project into a new folder using the following command:
+
+`$ unzip process-service-sample.zip -d process-service-sample`
+
+Open the project `process-service-sample` using VS Code.
+
+When using the {DEV_TOOLS} extension, developers can interact with BPMN models directly.
+
+.Project in VS Code
+image::wf-tutorial/3-project-in-vscode.png[Project in VS Code]
+
+Note that the project includes the process definition and the `application.properties` file with generic sample configurations:
+
+[source,properties]
+----
+# Set up for the swagger-ui (Process-defintions)
+quarkus.http.cors=true
+quarkus.smallrye-openapi.path=/docs/openapi.json
+quarkus.swagger-ui.always-include=true
+kogito.generate.rest.decisions=true
+kogito.generate.rest.processes=true
+
+# list of users for task console
+quarkus.kogito-runtime-tools.users=jdoe,admin,user
+quarkus.kogito-runtime-tools.users.admin.groups=admin
+quarkus.kogito-runtime-tools.users.user.groups=user
+quarkus.kogito-runtime-tools.users.jdoe.groups=user,admin,IT,HR
+kogito.service.url=http://localhost:8080
+kogito.dataindex.http.url=http://localhost:8180
+kogito.dataindex.ws.url=ws://localhost:8180
+
+# Maximum Java heap to be used during the native image generation
+quarkus.native.native-image-xmx=6g
+kafka.bootstrap.servers=localhost:9092
+
+## main transport
+
+## metadata
+
+#mp.messaging.outgoing.kogito-processinstances-events.bootstrap.servers=localhost:9092
+mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
+mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+#mp.messaging.outgoing.kogito-usertaskinstances-events.bootstrap.servers=localhost:9092
+mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
+mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+#mp.messaging.outgoing.kogito-variables-events.bootstrap.servers=localhost:9092
+mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
+mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+
+To execute the project in the local development environment, open a new terminal in VS Code and execute:
+
+[source,bash]
+----
+mvn clean quarkus:dev
+----
+
+This command should compile and package the process service into a Quarkus executable Jar file. The resulting package is the service that can later be containerized and executed on cloud platforms. The process service generated using the Accelerator brings a pre-configured set of add-ons via the `pom.xml` file. You can adapt this file to meet the requirements of your service.
+
+The first execution downloads any artifacts not yet available on the development environment

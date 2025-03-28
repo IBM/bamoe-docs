@@ -1,5 +1,6 @@
-= Service execution
+= Using _Business Services_
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 [role="_abstract"]
 
@@ -7,9 +8,9 @@ include::../partials/attributes.adoc[]
 [id="con-kogito-service-execution"]
 
 [role="_abstract"]
-After you design your {PRODUCT} service, you can build and run your application, sending REST API requests to the application to execute your services. The exact REST API requests that you can use depend on how you set up the application.
+After you design your _Business Service_, you can build and run your application, sending REST API requests to the application to execute your services. The exact REST API requests that you can use depend on how you set up the application.
 
-For example, consider a {PRODUCT} service that is set up to generate a `/persons` REST API endpoint and that determines whether a specified customer is an adult or is underage. In this example, you can send the following `POST` request using a REST client or curl utility to add an adult and execute the service:
+For example, consider a _Business Service_ that is set up to generate a `/persons` REST API endpoint and that determines whether a specified customer is an adult or is underage. In this example, you can send the following `POST` request using a REST client or curl utility to add an adult and execute the service:
 
 .Example POST request body to add an adult (JSON)
 [source,json]
@@ -42,7 +43,7 @@ curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -
 }
 ----
 
-Note that for JSON marshaling, {PRODUCT_SHORT} is relying on the default mappers of https://quarkus.io/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
+Note that for JSON marshaling, {PRODUCT_SHORT} is relying on the default mappers of https://quarkus.io/version/3.15/guides/rest-json#jackson[Quarkus], which can be configured according to the specific requirements.
 // end::con-kogito-service-execution[]
 
 [id="ref-rest-dmn-endpoints"]
@@ -365,7 +366,7 @@ curl -X POST http://localhost:8080/Traffic Violation/TrafficViolationDecisionSer
 == Running the {PRODUCT} decision example applications
 
 [role="_abstract"]
-To get started with {PRODUCT}, you can run any of the example applications in the bamoe-{VERSION}-kogito-examples.zip archive and experiment with the {PRODUCT} services.
+To get started with {PRODUCT}, you can run any of the example applications in the bamoe-{VERSION}-kogito-examples.zip archive and experiment with the _Business Services_.
 
 For this procedure, use the `process-decisions-quarkus` application. You can follow similar steps with the other {PRODUCT} examples on Quarkus.
 
@@ -378,7 +379,7 @@ image::traffic-rules-dmn.png[Image of `traffic-rules-dmn.bpmn` example process]
 The traffic violations process contains license validation as a decision that is created using DRL. The license validation consists of rules that are evaluated to verify that the license is expired or not. The result of the license validation is added for the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
 Example `LicenseValidationService.drl` file:
-[source]
+[source,subs="attributes+"]
 ----
 unit LicenseValidationService
 
@@ -477,7 +478,7 @@ $ ./target/process-decisions-quarkus-runner
 ----
 
 [start=3]
-. After the {PRODUCT} service is running, use a REST client, curl utility, or the Swagger UI configured for the application - http://localhost:8080/q/swagger-ui - to send API requests with the following components:
+. After the _Business Service_ is running, use a REST client, curl utility, or the Swagger UI configured for the application - http://localhost:8080/q/swagger-ui - to send API requests with the following components:
 
 * *URL*: `\http://localhost:8080/`
 * *HTTP headers*: For `POST` and `PUT` requests only:
@@ -547,4 +548,148 @@ quarkus.swagger-ui.always-include=true
 This is a build time property, it cannot be changed at runtime after your application is built.
 ====
 
+
+
+
+---
+
+[id="proc-kogito-interacting-app"]
+== Interacting with a running _Business Service_
+
+[role="_abstract"]
+After your _Business Service_ is running, you can send REST API requests to interact with your application and execute your services according to how you set up the application.
+
+This example tests the `/persons` REST API endpoint that is automatically generated based on the `PersonProcess.bpmn2` business process, according to the decisions in the `PersonDecisions.dmn` file (or the rules in the `PersonRules.drl` file if you used a DRL rule unit).
+
+For this example, use a REST client, curl utility, or the Swagger UI configured for the application (such as \http://localhost:8080/q/swagger-ui or \http://localhost:8080/swagger-ui.html) to send API requests with the following components:
+
+* *URL*: `\http://localhost:8080/persons`
+* *HTTP headers*: For `POST` requests only:
+** `accept`: `application/json`
+** `content-type`: `application/json`
+* *HTTP methods*: `GET`, `POST`, or `DELETE`
+
+.Example POST request body to add an adult (JSON)
+[source,json]
+----
+{
+  "person": {
+    "name": "John Quark",
+    "age": 20
+  }
+}
+----
+
+.Example curl command to add an adult
+[source]
+----
+curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -H 'accept: application/json' -d '{"person": {"name":"John Quark", "age": 20}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "id": "3af806dd-8819-4734-a934-728f4c819682",
+  "person": {
+    "name": "John Quark",
+    "age": 20,
+    "adult": false
+  },
+  "isAdult": true
+}
+----
+
+.Swagger UI to interact with all application endpoints (such as \http://localhost:8080/q/swagger-ui or \http://localhost:8080/swagger-ui.html)
+image::kogito-swagger-example.png[Image of Swagger UI for example application]
+
+This example procedure uses curl commands for convenience.
+
+.Procedure
+In a command terminal window that is separate from your running application, navigate to the project that contains your _Business Service_ and use any of the following curl commands with JSON requests to interact with your running service:
+
+* Add an adult person:
++
+--
+.Example request
+[source]
+----
+curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -H 'accept: application/json' -d '{"person": {"name":"John Quark", "age": 20}}'
+----
+
+.Example response
+[source]
+----
+{"id":"3af806dd-8819-4734-a934-728f4c819682","person":{"name":"John Quark","age":20,"adult":false},"isAdult":true}
+----
+--
+* Add an underage person:
++
+--
+.Example request
+[source]
+----
+curl -X POST http://localhost:8080/persons -H 'content-type: application/json' -H 'accept: application/json' -d '{"person": {"name":"Jenny Quark", "age": 15}}'
+----
+
+.Example response
+[source]
+----
+{"id":"8eef502b-012b-4628-acb7-73418a089c08","person":{"name":"Jenny Quark","age":15,"adult":false},"isAdult":false}
+----
+--
+* View active process instances:
++
+--
+.Example request
+[source]
+----
+curl -X GET http://localhost:8080/persons -H 'content-type: application/json' -H 'accept: application/json'
+----
+
+.Example response
+[source]
+----
+[{"id":"8eef502b-012b-4628-acb7-73418a089c08","person":{"name":"Jenny Quark","age":15,"adult":false},"isAdult":false}]
+----
+--
+* View process instance details using the returned process UUID:
++
+--
+.Example request
+[source]
+----
+curl -X GET http://localhost:8080/persons/8eef502b-012b-4628-acb7-73418a089c08/tasks -H 'content-type: application/json' -H 'accept: application/json'
+----
+
+.Example response (JSON)
+[source]
+----
+{"cdec4241-d676-47de-8c55-4ee4f9598bac":"ChildrenHandling"}
+----
+--
+* View task instance details using the returned process and task UUIDs:
++
+--
+.Example request
+[source]
+----
+curl -X GET http://localhost:8080/persons/8eef502b-012b-4628-acb7-73418a089c08/ChildrenHandling/cdec4241-d676-47de-8c55-4ee4f9598bac -H 'content-type: application/json' -H 'accept: application/json'
+----
+
+.Example response
+[source]
+----
+{"person":{"name":"Jenny Quark","age":15,"adult":false},"name":"ChildrenHandling","id":"cdec4241-d676-47de-8c55-4ee4f9598bac"}
+----
+--
+* Complete the evaluation using the returned UUIDs:
++
+--
+.Example request
+[source]
+----
+curl -X POST http://localhost:8080/persons/8eef502b-012b-4628-acb7-73418a089c08/ChildrenHandling/cdec4241-d676-47de-8c55-4ee4f9598bac -H 'content-type: application/json' -H 'accept: application/json' -d '{}'
+----
+--
 

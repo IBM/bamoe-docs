@@ -1,0 +1,149 @@
+= Configuring _Business Service_ security
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+
+{PRODUCT_SHORT} is one of the applications that is designed for Quakus or Spring Boot application. Both frameworks natively offer a reliable authentication and authorization layer, to be used by user-designed applications if properly
+configured. You will know how to configure your _Business Service_ project to use the Quarkus or Spring Boot authentication and authorization layer by defining some property values.
+
+image::runtime-services-modeling/security.png[Security authentication and authorization]
+
+After configuring your {PRODUCT_SHORT} runtimes  correctly to integrate its framework security layer, it is possible to rely on an external Identity Providers (IdPs) like Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution. A key role of this architecture is the Management Console, which provides your {PRODUCT_SHORT} application’s user an integrated environment to log in to your application and interact with its entities like process instances, submit task forms, and view jobs, in a secured and authenticated way. For more information on Management Console, see xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}].
+
+
+== Quarkus (Authentication)
+
+Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.15/guides/security-oidc-bearer-token-authentication[tutorial] that explains how to do the set up correctly.
+
+The first step is to configure the Quarkus OpenID Connect (OIDC) extension by setting the properties in the `src/main/resources/application.properties` file. 
+
+The list of properties required to setup your project may change based on your security needs, Identity and Access Management Solution. 
+
+Following is an example of the configuration.
+
+[source]
+----
+quarkus.oidc.enabled=true
+quarkus.oidc.tenant-enabled=true
+quarkus.oidc.auth-server-url=http://localhost:8280/auth/realms/kogito
+quarkus.oidc.client-id=kogito-service
+quarkus.oidc.credentials.secret=secret
+quarkus.oidc.application-type=hybrid
+----
+
+The following table describes in detail the properties suggested in the example, but it is only a subset of all properties available https://quarkus.io/version/3.15/guides/security-oidc-configuration-properties-reference[here].
+
+
+[%header,cols=4]
+[%autowidth]
+
+|===
+
+|Property | Description | Type | Default value
+|quarkus.oidc.enabled | It determines OIDC extension is enabled
+ | Boolean | true
+|quarkus.oidc.tenant-enabled | Specifies whether the tenant configuration is
+enabled
+ | Boolean | true
+|quarkus.oidc.auth-server-url  | The base URL of the OpenID
+Connect (OIDC) server
+ | URI | -
+|quarkus.oidc.client.id  | The client id of the application
+ | string  | -
+|quarkus.oidc.credentials.secret  | The client secret used by the
+client_secret_basic
+authentication method
+ | string  | -
+|quarkus.oidc.application-type  | The application type, which can
+be one of the following values:
+web-app, service, hybrid.
+To enable the compatibility
+with Managment Console, this
+property should be set as
+“hybrid”
+ | string  | service
+
+|===
+
+
+== Quarkus (Authorization)
+
+Quarkus incorporates a pluggable web security layer. When security is active, the system performs a
+permission check on all HTTP requests to determine if they should proceed. For more information, see 
+https://quarkus.io/version/3.15/guides/security-authorize-web-endpoints-reference[Authorization].
+
+Following is an example of the configuration:
+
+[source]
+----
+quarkus.http.auth.permission.authenticated.paths=/*
+quarkus.http.auth.permission.authenticated.policy=authenticated
+quarkus.http.auth.permission.public.paths=/q/*,/docs/*,/oidc/info
+quarkus.http.auth.permission.public.policy=permit
+----
+
+Properties are pluggable based on how many permission rules you want to define for your application.
+
+In the following example, two permissions are defined:
+
+• authenticated: Used for REST entrypoints that requires an Authorization to be done.
+• public: Used for publicly accessible REST entrypoints.
+
+You can find a detailed explanation and  https://quarkus.io/version/3.8/guides/security-authorize-web-endpoints-reference[guide] to define your permissions and the effect on the required properties to add in your `application.property` file.
+
+The available properties can be configured for all the used-defined permission rules.
+For example, the `quarkus.http.auth.permission."permissions".policy` property with the specified permissions can have two properties detailed  in the following table:
+  
+
+[%header,cols=4]
+[%autowidth]
+|===
+
+|Property | Description | Type | Default value
+|quarkus.http.auth.permission."permissions".paths
+(quarkus.http.auth.permission.authenticated.paths
+-
+quarkus.http.auth.permission.public.paths)
+ | The paths that this
+permission check applies
+to. If the path ends in /*
+then this is treated as a
+path prefix, otherwise it is
+treated as an exact
+match.
+ | List of
+URI
+ | -
+ |quarkus.http.auth.permission."permissions".policy
+(quarkus.http.auth.permission.authenticated.policy
+-
+quarkus.http.auth.permission.public.policy)
+ | The HTTP policy that this
+permission set is linked
+to. There are three built-
+in policies: permit, deny
+and authenticated. Role
+based policies can be
+defined, and extensions
+ | String | -
+|===
+
+
+== Allowing {MANAGEMENT_CONSOLE} to connect to live Process services
+
+For {MANAGEMENT_CONSOLE} to authenticate and connect to a Process service that is secured through an Identity Provider, the instance must make the Identity Provider URL available.
+
+To solve this, you need to use the `quarkus-oidc-proxy` extension, as it creates new endpoints in the Process service where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
+
+To add the `quarkus-oidc-proxy` extension, you need to add the following code to the list of dependencies in the `pom.xml` file:
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkiverse.oidc-proxy</groupId>
+  <artifactId>quarkus-oidc-proxy</artifactId>
+  <version>0.1.3</version>
+</dependency>
+----
+
+NOTE: Version 0.1.3 of `quarkus-oidc-proxy` is compatible with Quarkus 3.15 (LTS). Do not use versions 0.2.x.

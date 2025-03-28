@@ -1,5 +1,6 @@
-= Decision microservice in 15 minutes
+= Decision service in 15 minutes
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 This lab introduces you to the deployment of an existing Decision Model and Notation (DMN) and the validation of its decisions.
 
@@ -9,37 +10,35 @@ This lab introduces you to the deployment of an existing Decision Model and Nota
 - Test the deployed DMN
 
 == Prerequisites
-* xref:../installation/configure-maven.adoc[Apache Maven installed]
-* xref:../installation/canvas.adoc/[{CANVAS} installed]
+* xref:../installation/configure-maven.adoc[BAMOE Maven repository installed]
+* xref:../installation/canvas.adoc[{CANVAS} installed]
 
-Instructions for both can be found within this documentation, links on the left.
+== Examine the existing DMN Diagram
 
-== Examine the Existing DMN Diagram
-
-The following example describes an *insurance* price calculator based on an applicant's age and accident history. You can check the DMN model at https://github.com/bamoe/bamoe-docs-source-code-examples/tree/9.1.x/dmn/insurance-pricing.dmn[GitHub].
+The following example describes an *insurance* price calculator based on an applicant's age and accident history. You can check the DMN model at {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/dmn/insurance-pricing.dmn[GitHub].
 
 This example consists of a simple DMN model, which is represented by the following diagram:
 
 image::insurance-price-drd.png[Insurance Pricing Requirements Diagram, 600]
 
-In this decision diagram, the applicant's age and accident history are the required inputs for the decision node "Insurance Total Price". This node has a simple decision table that can be checked below:
+In this decision diagram, the applicant's age and accident history are the required inputs for the decision node "Insurance Total Price". This node has a simple Decision Table that can be checked below:
 
 .DMN Decision Table
 image::insurance-price-dt.png[Completed Decision Table,600]
 
-The DMN decision table includes a `hit policy`, `inputs` columns, and `outputs` columns. In this example, the `hit policy` is `U`, which means `Unique`, therefore only one input rule should be matched per time. The `inputs` are `Age` and `had previous incidents` and the combination of both creates a rule. The result of this rule is the `outputs` column, which in this case is the "Insurance Total Price".
+The DMN Decision Table includes a `hit policy`, `inputs` columns, and `outputs` columns. In this example, the `hit policy` is `U`, which means `Unique`, therefore only one input rule should be matched per time. The `inputs` are `Age` and `had previous incidents` and the combination of both creates a rule. The result of this rule is the `outputs` column, which in this case is the "Insurance Total Price".
 
 The conditions for the `Age` input are defined using the Friendly Enough Expression Language (FEEL).
 
-== Import the DMN File into {CANVAS}
+== Import the DMN file into {CANVAS}
 
 In this section, you will import the GitHub repository to {CANVAS} directly.
 
 . Under **Import </> From URL** copy and paste the following link and click **Import**:
 +
-[source,console]
+[source,console,subs="+attributes"]
 ----
-https://raw.githubusercontent.com/bamoe/bamoe-docs-source-code-examples/9.1.x/dmn/insurance-pricing.dmn
+{BAMOE_DOCS_EXAMPLES_DOCS_RAW_LINK}/dmn/insurance-pricing.dmn
 ----
 
 +
@@ -53,7 +52,7 @@ image::insurance-pricing-dmn.png[Sandbox Model]
 +
 [NOTE]
 ====
-If you're not connected to Extended Services, a modal will open showing how to setup it in your local environment.
+If you're not connected to {EXT_SERVICES}, a modal will open showing how to setup it in your local environment.
 ====
 +
 image::insurance-pricing-run.png[Run DMN]
@@ -64,7 +63,7 @@ image::insurance-pricing-dmn-runner.png[Form inputs]
 
 == Deploy
 
-In this section, you will use BAMOE Canvas to deploy your DMN model to a Kubernetes cluster.
+In this section, you will use {CANVAS} to deploy your DMN model to a Kubernetes cluster.
 
 === Setup your credentials
 
@@ -72,15 +71,15 @@ In this section, you will use BAMOE Canvas to deploy your DMN model to a Kuberne
 +
 image::bamoe-canvas-connected-accounts.png[Connect to an accounts]
 
-. To deploy a DMN model, BAMOE Canvas gives you the option to connect to a Kubernetes cluster or to OpenShift, which is a hybrid cloud platform offered by Red Hat. For this example, we'll use a local Kubernetes cluster, but in production, you may want to use your own internal Kubernetes. To continue, click on "Kubernetes" (*1*).
+. To deploy a DMN model, {CANVAS} gives you the option to connect to a Kubernetes cluster or to OpenShift, which is a hybrid cloud platform offered by Red Hat. For this example, we'll use a local Kubernetes cluster, but in production, you may want to use your own internal Kubernetes. To continue, click on "Kubernetes" (*1*).
 +
 image::bamoe-canvas-kubernetes-login.png[Kubernetes Login]
 +
 [NOTE]
 ====
-If you're not connected to Extended Services, an additional modal will open showing how to setup it in your local environment. Click on "Setup" (*1*) and follow the instructions to continue with the Kubernetes login.
+If you're not connected to {EXT_SERVICES}, an additional modal will open showing how to setup it in your local environment. Click on "Setup" (*1*) and follow the instructions to continue with the Kubernetes login.
 
-image::bamoe-canvas-extended-services-setup.png[Extended Services]
+image::bamoe-canvas-extended-services-setup.png[{EXT_SERVICES}]
 ====
 
 . In the "Connect to Kubernetes" modal, add your Kubernetes cluster information. If you want to create a local cluster, you can click on "Configure a new local Kubernetes cluster through the guided wizard" (*1*) and follow the instructions. To continue, click on "Connect" (*2*).

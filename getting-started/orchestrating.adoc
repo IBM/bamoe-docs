@@ -1,9 +1,10 @@
 = Orchestrating Decisions and Rules in 15 minutes 
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 The following example is a Workflow scenario in {PRODUCT} that demonstrates how you can use Workflows to orchestrate your {PRODUCT} Business Decision Services. The example of a traffic violation project describes how to use Decisions within Workflows and how to integrate Decisions in an embedded way using Business Rule Tasks, which must be deployed with a Workflow in the same application.
 
-NOTE: {PRODUCT} fully supports Straight-Through Processing (STP), where Workflows integrate with Decisions without any human intervention, without persistence, and without waiting for timers to execute. For more {PRODUCT} examples that use Workflow capabilities, see the references below. Stateful Workflows is provided as a technology preview (xref:../workflow/overview.adoc[Overview of Stateful Workflows]) in the {VERSION_910} and {VERSION_911}, and is fully supported on {VERSION_920}.
+NOTE: {PRODUCT} fully supports Straight-Through Processing (STP), where Workflows integrate with Decisions without any human intervention, without persistence, and without having to wait for timers to execute. For more {PRODUCT} examples that use Workflow capabilities, see the references below. Stateful Workflows is provided as a technology preview (xref:../workflow/overview.adoc[Overview of Stateful Workflows with Compact Architecture]) in versions {VERSION_910} and {VERSION_911}, and is fully supported on version {VERSION_920}.
 
 The following diagram illustrates how Decisions are integrated with Workflows:
 
@@ -13,7 +14,9 @@ image::process-decisions-embedded-integration.png[Image of embedded method to in
 To view the complete project, see the xref:../getting-started/examples.adoc[`process-decisions-quarkus`] example application for Quarkus.
 
 The example of a traffic violations project describes how to use Decisions within Workflows.
+
 Those Decisions are then integrated using an embedded form using the Business Rule Tasks.
+
 The tasks must be deployed with a Workflow in the same application.
 
 In BAMOE, the Decisions can be expressed in different domains or assets, such as DMN and DRL. All the assets, including BPMN, DMN, and DRL must be placed in the resources folder.
@@ -40,7 +43,7 @@ Also, the classes in the process are used to define the Plain Old Java Objects (
 The traffic violations process contains license validation as a Rule that is created using DRL. The license validation consists of rules that are evaluated to verify whether the license is expired or not. The result of the license validation is added to the driver variable. The rule units are declared in the `LicenseValidationService.drl` file and the rule unit data is added to the `LicenseValidationService` class.
 
 Example `LicenseValidationService.drl` file:
-[source]
+[source,subs="attributes+"]
 ----
 unit LicenseValidationService
 
@@ -138,13 +141,13 @@ image::license-validation-drl-businessrule.png[Image of license validation task 
 
 The properties that are required to be set for the DRL service task include `Rule Language`, which must be set as `DRL` and the `Rule Flow Group`. You can set the value of `Rule Flow Group` using the following format:
 
-[source]
+[source,drl]
 ----
 unit: + [the FQCN of the Rule Unit Data class] 
 ----
 
 For example: 
-[source]
+[source,drl]
 ----
 unit:org.kie.kogito.traffic.LicenseValidationService
 ----
@@ -186,9 +189,9 @@ Then you can check the application Swagger UI at `+http://localhost:8080/q/swagg
 
 === Other examples
 
-For more {PRODUCT} examples that use Decisions orchestrated by Workflows, see the following example applications which are included in the xref:../getting-started/examples.adoc[examples package]:
+For more _Business Service_ examples that use Decisions orchestrated by Workflows, see the following example applications which are included in the xref:../getting-started/examples.adoc[Example Business Services]:
 
 * `process-business-rules-quarkus`: An example project that shows the use of business rules and processes
 * `process-decisions-rest-quarkus`: An example project that shows the usage of decisions within processes. The project focuses on how to integrate decisions in a remote way using REST APIs where they can be deployed and decoupled from the process service.
 * `process-decisions-rules-quarkus`: An example project that shows the usage of decisions within processes. The project focuses on integrating decisions in an embedded way using Business Rule Tasks where they must be deployed together with the process.
-`process-error-handling`: A usage scenario of the Error Handling Strategy
+* `process-error-handling`: A usage scenario of the Error Handling Strategy

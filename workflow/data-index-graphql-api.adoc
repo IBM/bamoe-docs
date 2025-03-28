@@ -1,4 +1,187 @@
-= Data Index GraphQL API
+= The Data-Index GraphQL API
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+When your project implements the Compact Architecture it natively integrates the Data-Index subsystem. One of the useful frameworks offered by this Service is GraphQL, which provides endpoints that can be consumed by client applications to run Process Instances, User Tasks, Jobs, and Process Definitions and also get other information about running process instances. GraphQL offers a very rich set of conditions to create a query according to your business needs.
+
+The GraphQL functionalities can be consumed in two ways:
+
+. Using the GraphQL UI tool in Quarkus dev mode: 
++
+This tool is useful to experiment and create your own queries to run against your application. You can use it in the development phase by setting `quarkus.kogito.data-index.graphql.ui.always-include=true`, and opening the GraphQL UI via `+https://HOST:PORT/q/graphql-ui+`
++
+
+. Using the `/graphql` entry point to make requests to GraphQL, which the Compact Architecture natively exposes.
+
+
+The `/graphql` entry point is described in the following table. 
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It runs a provided GraphQL query against your application 
+
+|*Inputs* |
+A GraphQL query
+
+|*Output* a| A JSON that holds the result of your GraphQL query
+|*Example* |curl -X POST `+http://HOST:PORT/graphql+` -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "query": "/* YOUR GRAPHQL QUERY */" }'
+|===
+
+== GraphQL query capabilities
+
+GraphQL queries  can be done on the different workflow types
+
+*Process Instances*
+
+A `ProcessInstance` represents an instance of a running Workflow in the runtime environment. The state of a `ProcessInstance` can be tracked (e.g., active, completed, suspended, or aborted). A process instance may execute various tasks, handle events, interact with external services, and more, depending on the process definition. T
+
+*User Tasks*
+`UserTaskInstances` are used to track the tasks that  are part of a broader workflow, and the Kogito framework provides mechanisms to manage and interact with these tasks through different lifecycle stages . Using APIs, you can easily manage UserTaskInstances in business processes, including assigning tasks, tracking task states, and interacting with process variables.
+
+*Jobs*
+
+`Jobs` are used to represent asynchronous or scheduled tasks that run in the background. They are primarily used for executing long-running processes, timers, and other scheduled tasks within a business process or workflow. `Jobs` are typically used to handle tasks like sending reminders, triggering specific actions after a delay, or performing periodic checks within a process.
+
+Example query:
+// examples to come from Pere
+
+=== Process Definitions
+
+A `ProcessDefinition` represents the definition of a business process or workflow. It encapsulates the structure, rules, and logic that define how a process behaves. The ProcessDefinition object is the model for a particular BPMN (Business Process Model and Notation) or other workflow-based process and includes all the details required to execute and manage that process within the runtime environment.
+
+Example query:
+
+== Filtering
+Filtering typically refers to the ability to query and retrieve values based on specific criteria. Filtering can be extremely useful in scenarios where you want to track, manage, or analyse processes, tasks, or jobs by applying certain conditions or constraints (e.g., filter by status, user, date range, variables, etc.).
+
+There are multiple mechanisms to filter ProcessInstances, UserTasks, Jobs, and ProcessDefinitions. To apply filtering conditions in GraphQL queries, use the `where` and mention the specific conditions. For example, to filter the `UserTaskInstances` with  id =”HRInterview” the following query can be used:
+
+ `{ UserTaskInstances (where: {id: {equal:"HRInterview"}}) { state id description   name priority processId processInstanceId actualOwner potentialUsers potentialGroups excludedUsers adminGroups adminUsers completed started referenceName lastUpdate comments { id } attachments { id name } } }`
+
+You can see the response below:
+
+// examples to come from Pere
+
+In GraphQL, filters are often handled through arguments passed to queries, and the conditions like logical operators (`AND`, `OR`, `NOT`) , `between`, `contains`, `containsAll`, `containsAny`, `equalTo`, `greaterThan`, `greaterThanEqual`, `lessThan`, `lessThanEqual`, `isNull` can be used to handle the complex query conditions.
+
+Depending on the attribute type, the following operators are also available:
+
+* String array argument:
++
+----
+contains : String
+
+containsAll: Array of strings
+
+containsAny: Array of strings
+
+isNull: Boolean (true or false)
+----
+
+* String argument:
++
+----
+in: Array of strings
+
+like: String
+
+isNull: Boolean (true or false)
+
+equal: String
+----
+
+* ID argument:
++
+----
+in: Array of strings
+
+equal: String
+
+isNull: Boolean (true or false)
+----
+
+* Boolean argument:
++
+----
+isNull: Boolean (true or false)
+
+equal: Boolean (true or false)
+----
+
+* Numeric argument:
++
+----
+in: Array of integers
+
+isNull: Boolean
+
+equal: Integer
+
+greaterThan: Integer
+
+greaterThanEqual: Integer
+
+lessThan: Integer
+
+lessThanEqual: Integer
+
+between: Numeric range
+
+from: Integer
+
+to: Integer
+----
+
+* Date argument:
++
+----
+isNull: Boolean (true or false)
+
+equal: Date time
+
+greaterThan: Date time
+
+greaterThanEqual: Date time
+
+lessThan: Date time
+
+lessThanEqual: Date time
+
+between: Date range
+
+from: Date time
+
+to: Date time
+----
+
+== Sorting
+
+In GraphQL, sorting is often implemented by arguments in the query. The specific sorting mechanism and the way it is used depends on how the GraphQL schema is designed, but many GraphQL APIs allow sorting by providing arguments that specify the field(s) to sort by and the sort order (ascending - ASC or descending - DESC). To sort the value  based on a particular field in either ascending or descending order, you can use the `ORDER BY` clause in your Graphql query.
+
+The following shows an example of how you can structure the query to return User Tasks sorted in the descending order of the field `state`
+
+`{ UserTaskInstances (orderBy: {state: DESC}){ state id description name priority processId    processInstanceId actualOwner potentialUsers comments { id } attachments { id name } } }`
+
+== Pagination
+
+Pagination in GraphQL is a technique used to break down large datasets into smaller, manageable chunks, which helps improve performance and user experience. Unlike traditional APIs where pagination might be handled with parameters like page and limit, GraphQL commonly uses offset-based pagination.
+
+To add pagination to your query, you can use the parameters LIMIT and OFFSET clauses. These are typically used to specify how many results to return (limit) and from where to start returning the results (offset)- starting point of the results.
+
+The following shows how you can structure the query to return ProcessDefinitions of count 5 starting from beginning (offset -0):
+
+`{ ProcessDefinitions(pagination: {offset: 0, limit:1}) { id name version nodes { id metadata { UniqueId state branch action } name type uniqueId } source addons roles type endpoint serviceUrl description annotations metadata } }`
+
+
+
+
+
+
+
+
+
+
 
 https://ibm.ent.box.com/notes/1795143299782

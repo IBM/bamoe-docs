@@ -1,51 +1,102 @@
-= Initial project setup and walkthrough
+= Initial _Business Service_ project setup and walkthrough
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
-//tag::maven-setup[]
-== Requirements
-Set up your Maven environment, following these instructions for doing so xref:../installation/configure-maven.adoc[Configuring Maven with BAMOE binaries].
+_Business Services_ are microservice Java applications built on top of Quarkus or Spring Boot, containing {PRODUCT_SHORT} runtime libraries and Business Automation assets such as Workflows (BPMN), Decisions (DMN), Rules (DRL), and spreadsheet Decision Tables (XLS or XLSX), following the structure and build conventions of Apache Maven.
 
-== Project Setup Options
-With the migration of the BAMOE product to Quarkus 3 you now have these options:
+Even though you can manually create everything from scratch, {PRODUCT_SHORT} provides an easier way to get started with pre-configured _Business Sevice_ projects–Accelerators.
 
-* Create a project manually
-* Create a new project using the {CANVAS} accelerator functionality. See xref:../tools/applying-accelerators.adoc[Using Accelerators].
+There are currently two available Accelerators to choose from:
 
+- **`Quarkus (DMN)`** - For _Business Services_ containing only Decisions, Rules, and spreadsheet Decision Tables
+- **`Quarkus (Full)`** - For _Business Services_ containing stateful Workflows _(and Decisions, Rules, and spreadsheet Decision Tables as well, of course!)_
 
-== Manually creating a project for {PRODUCT_SHORT}
-{PRODUCT_SHORT} uses a Maven project as a basis for the development of business automation artifacts. A Maven project can be created either using plugins or archetypes, for example using the following command:
+[NOTE]
+====
+Spring Boot is supported for Decisions, Rules, and spreadsheet Decision Tables services, but there's no Accelerator available for it yet. You can, however, get started with Spring Boot based on {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/decisions/pom.xml[this sample pom.xml for Decisions.] or {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/rules/pom.xml[this sample pom.xml for Rules].
+====
 
-[source,console,subs="+attributes"]
+To use Accelerators, have three options:
+
+* a. Create Decisions and Workflows on {CANVAS} then apply an Accelerator.
+* b. Clone one of the Accelerators locally and start from there with {DEV_TOOLS}. 
+* c. (Advanced) Manually create a Java project and add dependencies to the _Business Service_ project's configuration file.
+
+== a. Starting on {CANVAS}
+
+Before starting, make sure your organization already provided you with a {CANVAS} installation or follow xref:../installation/canvas.adoc[Installing → {CANVAS}] to install it.
+
+For starting a new _Business Service_ project on {CANVAS}, please refer to xref:../tools/applying-accelerators.adoc[{CANVAS} → Using Accelerators].
+
+If you want to continue developing on {DEV_TOOLS} after starting on {CANVAS}, you can create a new Git repository in your Git provider of choice directly in {CANVAS} then clone it locally. Alternatively you can download your newly created _Business Sevice_ project from {CANVAS} as a .zip file and unpack it in your computer.
+
+== b. Starting on {DEV_TOOLS}
+
+Installing {DEV_TOOLS} is straighforward, an can be done directly in VS Code, simply follow xref:../installation/developer-tools-for-vscode.adoc[Installing → {DEV_TOOLS}].
+
+Unlike {CANVAS}, {DEV_TOOLS} doesn't currently provide any commands to create a new _Business Service_ project automatically, but using Git in a Terminal window is easy enough, since {PRODUCT_SHORT} Accelerators are publicly hosted on IBM's GitHub at the https://github.com/IBM/bamoe-canvas-quarkus-accelerator template repository, following the steps below will get your started:
+
+- Create a new folder in your preferred location and open it on VS Code.
+- Open a new Terminal window (`Terminal` → `New Terminal`)
+- Choose which Accelerator you want to start from and clone it:
+
+[source,shell,subs="attributes"]
 ----
-mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-simple -DarchetypeVersion=1.4 -DinteractiveMode=false
+git clone {ACCELERATOR_REPO_LINK} -b {BOM_VERSION}-quarkus-dmn my-business-service-project
 ----
 
-You can then update the `pom.xml` for the project with content from one of the following templates:
+or
 
-xref:../partials/rules-sample-pom.adoc[Sample Rules/Decision Application POM Template] a sample POM that describes a typical rules/decisions project dependencies and plugins.
+[source,shell,subs="attributes"]
+----
+git clone {ACCELERATOR_REPO_LINK} -b {BOM_VERSION}-quarkus-full my-business-service-project
+----
 
-xref:../partials/process-sample-pom.adoc[Sample Workflow Application POM Template] a sample POM that describes a typical Workflow project dependencies and plugins.
+- Your _Business Service_ project on {PRODUCT_SHORT}, based on your Accelerator of choice will be ready for you in the `my-business-service-project` folder.
 
-== Editing within VS Code
+- To unlink your newly created _Business Serivce_ project with the original Accelerator template repository, run
 
-. Open the project in VS Code.
-  Within the explorer are the basic artifacts created by maven:
-.. `src/main/java`
-.. `src/main/java/com/mycompany/app/App.java`
-.. `test/java/com/mycompany/app/AppTest.java`
-.. and others.
-. Install {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*].
-This gives you access to the visual editors for DMN and BPMN files.
-It also allows you to create and edit testing scenarios for projects.
-+
-image::bamoe-vscode-marketplace.png[{DEV_TOOLS} within the marketplace]
+[source,shell,subs="attributes"]
+----
+cd my-business-service-project && rm -rf .git && git init
+----
 
-== Next Steps
+- Your _Business Service_ project is now a fresh Git repository. You can create your first commit by running
 
-Follow along with one of the examples in 15 minutes to complete setup and usage for the various use cases: xref:business-rule-microservice.html[business rules microservice], xref:orchestrating.html[orchestration], or xref:decision-microservice.html[decision microservice].
+[source,shell,subs="attributes"]
+----
+git add . && git commit -m "First commit on my _Business Service_ project"
+----
 
-== Source Control
-{CANVAS} is a standalone editor for BAMOE files, only works with git.
-Any git based tools should continue to work with BAMOE projects (i.e. vscode, git cli, GitHub Desktop, etc.).
-Add the code to git using a preferred tool, and push to a remote.
-More information about xref:../installation/canvas.html[installing] and xref:../editing/intro-editing-testing.html[using {CANVAS}] can be found later in this documentation.
+- In the `src/main/resources` folder, your can create or move Workflows (`.bpmn`), Decisions (`.dmn`), Rules (`.drl`), spreadsheet Decision Tables (`.xls` or `.xlsx`), or Test Scenario (`.scesim`) files.
+
+- You _Business Service_ project is now ready to be developed!
+
+== c. (Advanced) Manually creating a Java project
+
+If you're an experienced Java developer, you might have your own preferences when creating new projects. That's completely okay too, and you should be able to decide with {PRODUCT_SHORT} dependencies you need based on xref:../reference-guide/maven-repository-libraries.adoc[Reference → {MVN_REPO} libraries].
+
+If you're planning on running Decisions, Rules, and/or spreadsheet Decision Tables on embedded Java mode using programmatic {PRODUCT_SHORT} Java APIs, please refer to xref:../editing/dmn-decisions-embedded-java-mode.adoc[Executing Decisions in embedded Java mode] or xref:../editing/drl-rules-embedded-java-mode.adoc[Executing Rules in embedded Java mode].
+
+== Next steps
+
+Now that you have a fully functional _Busines Service_ project on {PRODUCT_SHORT}, there are several things you might want to do:
+
+- Update the README.md file with your _Business Service_ project's name and description.
+- Check your {MVN_REPO} installation to be able to build your _Business Service_ project locally (xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}]).
+
+then
+
+- xref:../getting-started/decision-microservice.html[Decision service in 15 minutes]
+- xref:../getting-started/business-rule-microservice.html[Rule service in 15 minutes]
+- xref:../getting-started/orchestrating.html[Orchestrating Decisions and Rules with Workflows in 15 minutes]
+- xref:../getting-started/deploying-to-openshift.html[Deploying your first Business Service to OpenShift using Quarkus]
+
+or
+
+- xref:../editing/authoring-decisions.html[Authoring Decisions with DMN]
+- xref:../editing/authoring-rules.html[Authoring Rules with DRL and spreadsheet Decision Tables]
+- xref:../editing/authoring-scesim.html[Authoring unit tests with Test Scenarios]
+- xref:../workflow/authoring-workflows.html[Authoring Workflows with BPMN]
+- xref:../runtime-services-modeling/services-build.html[Building Business Services executables]
+- xref:../runtime-services-modeling/services-deployment.html[Deploying Business Services]

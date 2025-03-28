@@ -1,0 +1,370 @@
+= Authoring Workflows with BPMN
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section describes the different aspects to take into account when you are designing stateful Workflows. 
+
+
+== Authoring Workflows with BPMN models in {CANVAS}
+
+Process authoring on {CANVAS} happens inside the Editor page for Workflow, where you can edit and validate BPMN files.
+
+Let's start by describing the elements present in the BPMN Editor.
+
+.Editor page for a Workflow on {CANVAS} with highlighted elements of the BPMN Editor
+image::tools/image5.jpg[]
+
+. *Node palette* → From here you can select node types and their variations.
+. *Side panel strip* → Lets you select which side panel you want to toggle.
+  From top to bottom, those are the available panels:
+[loweralpha]
+.. Properties → Lets you manage the properties of a Workflow element.
+.. Navigator → Displays a minimap with the diagram of your Workflow and a list of all elements present on it.
+. *Keyboard shortcuts panel toggle →* Clicking here toggles a panel with information about keyboard shortcuts available in the BPMN Editor.
+
+Toggling the Problems tab lets you see static validation errors that {CANVAS} reports while you're developing your Workflows.
+
+Developing Workflows through BPMN files is a complex subject and has many intricacies that are beyond the scope of this document.
+For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/2.0.2/PDF[Business Process Model And Notation (BPMN) specification].
+
+
+== Invoke a Decision from a Workflow
+
+A common use case for a Workflow is to invoke Decisions as part of its logic.
+It's very easy to achieve that on {CANVAS}.
+On your Workflow, create a new “Business Rule” task node.
+
+.Node palette open for Task nodes inside the BPMN Editor on {CANVAS}
+image::tools/image9.png[]
+
+Open the “Properties” panel using the first icon at the “Side panel strip” and look for Implementation/Execution.
+There, you can change the "Rule language" to "DMN". Select the file you want and the Decision inside it.
+Here's an example:
+
+.Implementation/Execution section of the Properties panel for a Business Rule Task inside a Workflow
+image::tools/image23.png[]
+
+When your Workflow executes, this Decision will be invoked with the inputs being passed to the Business Rule task.
+The result of the Decision will be the output of the Business Rule task.
+
+
+== Create Process Variables
+
+. Click anywhere in the diagram area and then click on the properties tab to access the properties panel.
++
+.{CANVAS} for workflow showing properties
+image::wf-tutorial/canvas-wf-1.png[Canvas for workflow showing properties]
+
+. Set the following properties:
+ * *Name*: Provide a label for the process.
+ * *ID*: Specify an identifier that will be used for endpoints.
+ * *Description*: Write a detailed description of the process.
+. To add input variables:
+ * Click the plus button to add a new variable.
+ * Set the variable name and data type. 
+ ** _Name_ is the ID and name of the variable which can be referenced via scripts or the input/output of activities. 
+ ** Data type refers to a Java type. If you click Select Custom, the field turns into the fully qualified name of the class. 
+
+.Process properties
+image::wf-tutorial/input-data-2.png[Setting process properties]
+
+
+=== Define Workflow Elements
+
+Use the following elements to define your workflow:
+
+* *Start Event*: Green circle indicating the starting point of the workflow.
+* *Intermediate Events*: Yellow circle for events that occur between the start and end points.
+* *End Events*: Red circle marking the end of the workflow.
+* *Activities*: Empty rectangle representing tasks or activities in the workflow.
+* *Subprocess*: Rectangle with a square for subprocesses.
+* *Gateways*: Diamond shape for decision points.
+* *Lanes*: Checklist icon to organize tasks by roles or departments.
+* *Non-executable Items*: 3D cube for items not executed within the workflow.
+* *Miscellaneous*: Engine icon for other workflow components.
+
+For the conformance level of BPMN elements, please refer to xref:../reference-guide/bpmn.adoc[Reference → Business Process Model and Notation (BPMN)]
+
+
+=== Adjust Properties and Add Process Variables
+
+. Create a start node with a script to initialize variables:
+// where does the script need to go - in UI or javascript called via UI?
++
+[source,java]
+----
+System.out.println("New Hiring has been created for candidate: " + candidateData.getFullName());
+kcontext.setVariable("hr_approval", false);
+kcontext.setVariable("it_approval", false);
+----
+. Add an exclusive gateway for decision-making.
+. Create a business rule task with specific properties and data assignments:
++
+[source,java]
+----
+System.out.println("###################################");
+System.out.println("Generated offer for candidate: " + candidateData.getFullName());
+System.out.println("Job Category: " + offer.getCategory());
+System.out.println("Base salary: " + offer.getSalary());
+System.out.println("###################################");
+----
+. Create and configure User Tasks and boundary events:
++
+[source,java]
+----
+System.out.println("###################################");
+System.out.println("HR Interview have been avoided after reasonable time");
+System.out.println("###################################");
+----
+. Add scripts for various tasks and events to log important details and actions:
++
+[source,java]
+----
+System.out.println("###################################");
+System.out.println("To: " + candidateData.getEmail());
+System.out.println("Subject: Congratulations you made it!");
+System.out.println("Dear " + candidateData.getFullName() + ", we are happy to tell you that you've successfully went through the hiring process. You'll find the final Offer details in attached.");
+System.out.println("Job Category: " + offer.getCategory());
+System.out.println("Base salary: " + offer.getSalary());
+System.out.println("###################################");
+
+System.out.println("###################################");
+System.out.println("Candidate " + candidateData.getFullName() + " doesn't meet the requirements for the position but we'll keep it on records for the future!");
+System.out.println("###################################");
+----
+
+[#business-calendars]
+== Using Business Calendars
+
+The Business Calendar feature provides precise time management within a business process by considering specific working hours, workdays, and holidays. This ensures that time-based events and deadlines are aligned with actual business schedules rather than simple chronological time.
+
+This feature is particularly useful in scenarios where precise timing is critical, such as:
+
+Meeting SLAs: Ensuring that deadlines are honored based on actual working time.
+
+Task Scheduling: Tasks are initiated and completed only during working hours, optimizing resource usage and efficiency.
+
+Deadline Management: Managing deadlines accurately by excluding holidays and out of office hours, avoiding unexpected timing issues.
+
+The key features of the Business Calendar are:
+
+Working Hours and Days:: The Business Calendar ensures that tasks are scheduled and executed only during predefined business hours and working days. Any time calculations respect the operational schedule of your organization, preventing tasks from being scheduled during out of work hours.
+
+Holiday Management:: This feature allows businesses to incorporate holidays into the calendar, automatically excluding these non-working days from time calculations. As a result, task timings and deadlines are adjusted appropriately to account for these holidays.
+
+Accurate Time Intervals:: The Business Calendar calculates accurate time intervals between tasks by excluding non-working hours and holidays. This ensures that process deadlines and task delays reflect the actual business operations, which is critical for meeting service-level agreements (SLAs) and managing deadlines.
+
+
+=== Enabling Business Calendar Functionality
+
+To enable the Business Calendar functionality in your application, follow these steps:
+
+. Create a `calendar.properties` file in the `src/main/resources` directory of your file. This file activates the Business Calendar feature and the required configuration. The default calendar is:
++
+[source.properties]
+----
+Working Days: Monday - Friday
+Working Hours: 9 AM - 5 PM
+Holidays: None 
+Weekend Days: Saturday and Sunday
+----
++
+. Add the properties to the file to change the default settings for those properties you wish to change, for example:
+
+[source,properties]
+----
+business.end.hour=16
+business.start.hour=8
+business.holiday.date.format=yyyy-MM-dd
+business.holidays=2024-11-07
+business.weekend.days=1,7
+business.cal.timezone= America/Los_Angeles
+----
+
+The following table provides more details on each property. Adhering to these guidelines will help ensure that tasks are executed as expected. Incorrect configurations may result in unintended behavior. 
+
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Default* |*Type*  
+
+|`business.start.hour`
+|The hour of the day when business starts. Valid range 0-23
+|9
+|Integer
+
+|`business.end.hour`
+|The hour of the day when business ends. The end hour must be greater than start hour. Valid range 0-23, 
+|17 
+|Integer
+
+|`business.hours.per.day`
+|The number of hours worked per day is calculated by subtracting the `business.start.hour` from the `business.end.hour`.  
+|8 (calculated)
+|Integer that is never specified directly
+
+|`business.weekend.days`
+|Days considered as weekends represented by one or more integers: range is `1`(Sunday), `2`(Monday),... `7`(Saturday). If you want to consider all days as working days, input `0` as value and the resulting calculation of `business.days.per.week` is `7`.
+|7,1 (Saturday and Sunday) 
+|Integer
+
+|`business.days.per.week`
+|The number of days worked per week cannot be directly specified. It is calculated by subtracting the number of busines.weekend.days from 7.
+|5 (calculated)
+|Integer that is never specified directly
+
+|`business.holiday.date.format`
+|The date format to indicate holiday time. Input must match defined format
+|yyyy-MM-dd
+|String
+
+|`business.holidays`
+|Dates of holiday time to be taken into account in the process. Holiday days can be specified as individual dates (e.g., 2024-12-25,2024-12-31) or as a range of dates (e.g., 2024-11-12:2024-11-14). Dates must be specified in the format defined by business.holiday.date.format.
+|empty (no defined vacation time)
+|String
+
+|`business.cal.timezone`
+|The timezone to be taken into account for process scheduling can be changed from the timezone of the system. The time-zone must be a valid timezone according to https://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html.
+|the default timezone of the system
+|String
+|===
+
+
+=== Customizing your Business Calendar
+The custom Business Calendar feature allows you to define your own scheduling rules, overriding the `BusinessCalendarImpl` provided out of the box. This feature can be useful when you have unique time-based constraints that differ from the default setup. For example, if you need to:
+
+•	modify scheduling rules to match specific business needs
+
+•	override or extend default time calculations
+
+•	customize task scheduling and deadline management based on unique work schedules
+
+•	ensure process deadlines respect specific business operations
+
+
+To create and integrate a Custom Business Calendar, follow these steps: 
+
+. Navigate to the root directory within the `process-business-calendar` xref:../getting-started/examples.adoc[example application] - `/src/main/java/org/kie/kogito/calendar/custom`
+
+. Create the `org/kie/kogito/calendar/custom directory` if it does not exist
+
+. Create custom calendar class (e.g., CustomCalendar.java)
++
+NOTE:  Ensure it implements the `BusinessCalendar` interface. The implementation should be a concrete class, not an interface or abstract class. 
++
+An example is provided below. However, you are free to define your own logic.
+
++
+[source,java]
+----
+package org.kie.kogito.calendar.custom;
+
+import java.util.*;
+import org.kie.kogito.calendar.BusinessCalendar;
++
+/**
+ * Custom Business Calendar Example.
+ * Modify this class to implement your own scheduling logic.
+ */
+public class CustomCalendar implements BusinessCalendar {
+
+    @Override
+    public long calculateBusinessTimeAsDuration(String timeExpression) {
+        // Implement custom logic to calculate business time duration
+      // Note:The returned long value is in milliseconds. Duration can be set at least 1000 ms or longer to prevent immediate execution.
+        return 1000;
+    }
+
+    @Override
+    public Date calculateBusinessTimeAsDate(String timeExpression) {
+        // Implement custom logic to return the scheduled date
+        return new Date();
+    }
+}
+----
+
+. Configure `src/main/resources/application.properties` to register Custom Business Calendar to the fully qualified class name of custom Business Calendar.
++
+[source,properties]
+----
+kogito.processes.businessCalendar= org.kie.kogito.calendar.custom.CustomCalendar
+----
+. If a `calendar.properties` file is present, delete it to remove the default Business Calendar Configuration. The custom implementation will replace the default functionality using the `BusinessCalendarImpl` provided out of the box.
+
+
+=== Testing the custom Business Calendar
+
+After implementing a custom Business Calendar, verify that it works correctly by following these steps:
+
+. Compile and Run the Application, executing the following Maven command to build and start the application: `mvn clean compile quarkus:dev`
+
+. Verify the generated source: `target/generated-sources/kogito/org/kie/kogito/app/BusinessCalendarProducer.java` to ensure that it contains the expected changes. If successful, `CustomCalendar` class should reflect in the `BusinessCalendarProducer.java`. For example:
+
+[source,java]
+----
+public class BusinessCalendarProducer {
+
+    private static final Logger logger = LoggerFactory.getLogger(BusinessCalendarProducer.class);
+
+    private BusinessCalendar businessCalendar;
+
+    public BusinessCalendarProducer() {
+        // we can see the CustomCalendar being reflected here
+        this.businessCalendar = new org.kie.kogito.calendar.custom.CustomCalendar();
+    }
+
+    @Produces
+    public BusinessCalendar createBusinessCalendar() {
+        return this.businessCalendar;
+    }
+}
+----
+
+
+== Configuring User Task assignment strategies
+
+User Tasks can be assigned to a single User based on a defined logic, which is active by default. The algorithm will automatically assign ANY User Tasks in `ACTIVATE` status for the resulting person that is part of the “Potential Users” group associated to that User Task and the same person is NOT part of the “Excluded Users” group associated to the same User Taks. In other words, the algorithm performs a Set Difference between the Potential Users and the Excluded User of a given User Taks. If that difference results in a single user, the User Task is automatically assigned to that user and moved to “CLAIM” status. In all other cases, the User Tasks is not assigned and no changes are applied on it.
+
+This default logic covers the basic use case. To implement your specific business logic to automatically assign User Tasks create a new Java Class that extends the `BasicUserTaskAssignmentStrategy` class. This class represents the Java class that holds the default logic previously described. The logic should be wrapped into the inherited computeAssigment method. The effect of this action is to replace the the default logic with your own custom logic. An example of a custom UserTaskAssignmentStrategy is shown below:
+
+[source,java]
+----
+@Specializes
+@ApplicationScoped
+public class CustomUserTaskAssignmentStrategy extends BasicUserTaskAssignmentStrategy {
+
+    @Override
+    public Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider) {
+        /*
+         YOUR CUSTOM LOGIC TO AUTOMATICALLY ASSIGN THE THE USER TASK
+         */
+    }
+}
+----
+
+
+== Evolving Workflow models (BPMN)
+
+When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or particularly to the BPMN files and re-deploy, there are a few things to be considered.
+
+As a general guideline, it is safe to deploy a new version of your application if there are no changes to BPMN files or if your BPMN files are Straight-through processes (STPs). However, whenever the Diagram (sequence flow) of a BPMN file of a stateful process changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) and deploy a new version your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created from a new version.
+The following shows the safest scenario as a deployment timeline.
+
+*First deploy (v1)*:
+
+	+ MyProcess.bpmn (added)
+
+*Second deploy (v2)*:
+
+	MyProcess.bpmn (kept but deprecated. Do not allow creation of new instances)
+	+ MyProcessV2.bpmn (added)
+
+*Third deploy (v3)*:
+
+	- MyProcess.bpmn (deleted once there are no active Process Instances)
+	MyProcessV2.bpmn (kept)
+
+There is no limit for how many different versions of a process that you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Business Process models by following this strategy.
+
+There are some instances where it is not possible to wait for all Process Instances to be completed before deleting a BPMN file, as they can remain active for a long time. Future versions of BAMOE will allow you to migrate Process Instances to newer versions, via API calls we refer to as Process Instance Migration (PIM). Even when using this tool we recommend that you create a new version on the same deployment, because as you are migrating an active Process Instances to the new version, you may see problems if someone tries to modify one of these Process Instances before or mid-migration.
+

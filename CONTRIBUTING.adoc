@@ -28,7 +28,7 @@ You can read more about those at https://www.atlassian.com/git/tutorials/compari
 
 Essentially, this means all work should be done on its own feature branch.
 The quick and dirty way of doing this is to simply create a new git branch from the `main` (or other version branch i.e. 9.x, 10.x, etc.).
-On the command line, this can be accomplished by running `git checkout <base branch name>` followed by `git checkout -b <name of new branch>`.
+On the command line, this can be accomplished by running `git checkout <base-branch-name>` followed by `git checkout -b <name-of-new-branch>`.
 Other tools have different ways of create a branch.
 Later in this guide, the way of doing this using VS Code will be explained and demonstrated.
 
@@ -44,7 +44,7 @@ Once you have your own fork of a repository, you will need to clone that reposit
 .Cloning a repository locally via CLI
 [source,bash]
 ----
-git clone <git repository URL>
+git clone <git-repository-URL>
 ----
 
 Using VS Code, selecting the Source Control section on the left will present two buttons "Open Folder" and "Clone Repository".
@@ -71,7 +71,7 @@ This should be the `ibm/bamoe-docs` repository.
 .Adding a remote via CLI
 [source,bash]
 ----
-git remote add upstream <repository url>
+git remote add upstream <repository-url>
 ----
 
 Adding a remote in VS Code is done by:
@@ -112,9 +112,9 @@ Publishing, or pushing, a branch is the process of making it available on a diff
 Typically, that would GitHub, however, it could be any other remote.
 The process is very simply from the command line:
 
-[source, bash]
+[source,bash]
 --
-git push <remote name> <branch name>
+git push <remote-name> <branch-name>
 --
 
 If you wish to set the upstream for the branch to the remote branch, use the `--set-upstream` option.
@@ -167,13 +167,45 @@ If the "Pull from..." menu is selected, you will be presented with the familiar 
 
 On the command line, this action is done using:
 
-[source, bash]
+[source,bash]
 ----
-git pull <remote name> <branch name>
+git pull <remote-name> <branch-name>
 ----
 
 == Conventions
 
 === Screenshots
 Documentation may often refer to screenshots, or, to be more precise, parts of screenshots.
+
 To ensure consistency across our documentation, we should use the color HEX: #008CB4 or rgb: rgba(0,140,180,255) when highlighting parts of a screenshot.
+
+Additionally, regular screenshots don't have any dropshadow, which makes them too flat on the asciidoc theme that these docs are rendered to. In order to fix this, place your raw screenshot (without shadows) in the `images-without-shadow/` directory, then use ImageMagick via Docker container to output the same image with the shadow. You don't need to install anything locally other than Docker.
+
+[source,shell]
+----
+INPUT="./images-without-shadow/path-to-your/image.png"
+OUTPUT="./images/path-to-your/image.png"
+docker run --rm -v ./:/imgs dpokidov/imagemagick "${INPUT}" \( +clone -background black -shadow 50x50+30+30 \) +swap -background white -layers merge +repage "${OUTPUT}"
+----
+
+References to images should be done via the `images/` directory, not via the `images-without-shadow/` directory.
+
+== Building the list of BAMOE Maven repository libraries based on BAMOE Maven repository
+
+== Parent modules (shouldn't be used except for BAMOE BOMs):
+```
+cd bamoe-maven-repository-zip-{version} && find . | grep '\.pom$' | xargs grep '<packaging>pom<'
+```
+
+=== Libraries (all):
+```
+cd bamoe-maven-repository-zip-{version} && find . | grep '\.pom$' | xargs grep -riL '<packaging>pom<'
+```
+
+- Replace ocurrences of `/{version}/` with ` ::: `
+- Replace occurrences of `-{version}.pom` with the empty string
+- Replace occurrences of `./` with the empty string
+- Replace occurrences of `/` with `.`
+- Sort lines (ascending) using a VS Code extension like https://marketplace.visualstudio.com/items?itemName=dakara.transformer
+- The final format will be a list of lines in `{groupId} ::: {artifactId}` pattern
+- Use this as a baseline for comparing with previous versions and for assembling the table on Reference -> BAMOE Maven repository libraries

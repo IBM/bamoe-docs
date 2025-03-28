@@ -1,0 +1,687 @@
+= application.properties Configuration reference
+:icons: image
+:iconsdir: ../images/icons
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Configuration for an _Business Service_ project is done within the `META-INF/application.properties` file in both Quarkus and Spring Boot.
+
+This file will also contain other configuration properties for the application.
+
+There are a number of different properties available in a {PRODUCT} application, below is a listing of those properties, a short description, the corresponding Java type and a default, if one exists.
+
+== Global Properties
+
+Global properties do not belong to a particular engine, or feature of {PRODUCT}.
+These properties will affect the entire application regardless of what features are being used.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.service.url
+a|The service URL needed to connect to the runtime endpoint from outside the service.
+|string
+|
+
+a|kogito.generate.rest
+a|Toggle enabling the global rest endpoint generation.
+|boolean
+a|true
+
+a|kogito.generate.di
+a|Toggle enabling dependency injection
+|boolean
+a|true
+
+a|kogito.codegen.ignoreHiddenFiles
+a|Toggle to ignore hidden files when collecting files for code generation.
+|boolean
+|true
+
+a|kogito.codegen.process.failOnError
+a|Toggle to fail when there are parsing/validation errors of process assets.
+|boolean
+|true
+
+a|kogito.rest.resource.type
+a|Specifier of the type of REST resource to generate.
+Valid values: "reactive", or "".
+|string
+a|
+|===
+
+== Engine Specific Properties
+
+{PRODUCT} is composed of five different engines.
+
+. Decisions
+. Persistence
+. Processes
+. Rules
+. Workflow
+
+Each engine has its own properties.
+
+==== Decision Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.decisions
+a|Toggle enabling code generation for the decisions engine
+|boolean
+a|true
+
+a|kogito.generate.rest.decisions
+a|Toggle for REST decisions endpoint generation.
+|boolean
+a|true
+
+a|kogito.decisions.stronglytyped
+a|Toggle to enable generated Java classes to support strongly typed input.
+|boolean
+a|false
+
+a|kogito.decisions.validation
+a|Validation activation for decision models.
+Possible values: ENABLED, DISABLED, IGNORE
+|string
+a|ENABLED
+
+a|kogito.addon.tracing.decision.kafka.bootstrapAddress
+a|Bootstrap Kafka server address
+|string
+a|
+
+a|kogito.addon.tracing.decision.asyncEnabled
+a|Toggle enabling asynchronous collection of decision events
+|boolean
+a|true
+|===
+
+==== Persistence Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.persistence
+a|Toggle enabling code generation for the persistence engine
+|boolean
+a|true
+
+a|kogito.generate.rest.persistence
+a|Toggle for REST persistence endpoint generation.
+|boolean
+a|true
+
+a|kogito.persistence.data-index.proto.generation
+a|Toggle to enable generation of Protobuf marshallers
+|boolean
+a|true
+
+a|kogito.persistence.proto.marshaller
+a|Toggle to enable generation of Protobuf marshallers
+|boolean
+a|true
+
+a|kogito.persistence.type
+a|Database persistence type.
+|enum of JDBC, MONGODB, FILESYSTEM, KAFKA, INFINISPAN, or POSTGRESQL
+a|
+
+a|kogito.persistence.auto.ddl
+a|Toogle to automatically apply database schema changes.
+|boolean
+a|true
+
+a|kogito.persistence.optimistic.lock
+a|Toggle to use optimistic locking in the database.
+|boolean
+a|false
+
+a|kogito.persistence.query.timeout.millis
+a|Query execution timeout in milliseconds.
+|long
+a|10000
+|===
+
+==== Process Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.process
+a|Toggle enabling code generation for the process engine
+|boolean
+a|true
+
+a|kogito.generate.rest.process
+a|Toggle for REST process endpoint generation.
+|boolean
+a|true
+
+a|kogito.process.instances.limit
+a|Maximum number of process instance to be returned by GET api.
+|short
+|`1000`
+
+|===
+
+==== Rules Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.rules
+a|Toggle enabling code generation for the rules engine
+|boolean
+a|true
+
+a|kogito.generate.rest.rules
+a|Toggle for REST rules endpoint generation.
+|boolean
+a|true
+
+a|kogito.rules.`rule_unit_name`.event-processing-type
+a|Type of event processing for a given rule-unit.
+Possible values: CLOUD, STREAM
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.clock-type
+a|Event clock type for a given rule-unit.
+Possible values: PSEUDO, REALTIME
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.sessions-pool
+a|The size fore the sessions pool
+|int
+a|
+|===
+
+==== Workflow Engine Properties
+
+[cols="6,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.workflow
+a|Toggle enabling code generation for the workflow engine
+|boolean
+a|true
+
+a|kogito.generate.rest.workflow
+a|Toogle for REST workflow endpoint generation
+|boolean
+a|true
+
+a|kogito.workflow.version-strategy
+a|Strategy used to resolve a Process version.
+|string
+a|workflow
+
+a|kogito.workflow.proto.marshaller
+a|Toggle to generate Protobuf marshallers for runtime.
+|boolean
+a|true
+
+a|kogito.workflow.data-index.proto.generation
+a|Toggle to generate Protobuf marshallers for Data-Index.
+|boolean
+a|true
+
+a|kogito.logger.always-include
+a|Always include the Workflow debug logger.
+By default, this will only be included in dev and test.
+Setting this to true will also include the Workflow debug logger in Prod
+|boolean
+|`false`
+
+|===
+
+== Additional Configuration Properties
+
+There are other additional configuration properties within {PRODUCT}.
+These include properties from add-ons or integrations.
+
+==== Flyway
+
+The Flyway integration has the concept of a "module."
+A Flyway module is any Apache Maven artifact, typically a jar file, that contains a `kie-flyway.properties` file.
+An individual module can be skipped during the initial migration by setting the module enabled to `false` using the property within the table.
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kie.flyway.enabled
+a|Toggles the execution of the Flyway initializer during application startup.
+|boolean
+|`true`
+
+a| kie.flyway.modules.`<module-name>`.enabled
+a| Enables the execution of the Flyway initializer for a specific Kie module.
+|boolean
+|`true`
+|===
+
+////
+// Knative is not currently (December 2024) supported in BAMOE, but leaving for later
+==== Knative
+[cols="7,4,^,^2"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|org.kie.kogito.addons.knative.eventing.broker
+a|Name of the default Knative Broker deployed in the target Knative namespace.
+This broker is used as the reference to create the Knative Triggers responsible to delegate the events that this Kogito service will consume.
+|string
+|`default`
+
+a|org.kie.kogito.addons.knative.eventing.auto-generate-broker
+a|Toggle to determine if the extension should generate a default Knative Broker in memory to sink and dispatch the messages.
+Turn this property to `false` if a broker has already been installed in the used namespace.
+Note that `org.kie.kogito.addons.knative.eventing.sink.++*++` can be used to configure a custom Sink.
+If not defined, this auto generated Broker will work as the Sink.
+|boolean
+|`true`
+
+a|org.kie.kogito.addons.knative.eventing.generate-kogito-source
+a|Toggle to generate the Knative https://github.com/knative-sandbox/eventing-kogito[`KogitoSource`] instead of a Knative SinkBinding.
+`KogitoSource` is a custom `SinkBinding` created specifically to bind with entities within the Kogito ecosystem such as Data-Index, Jobs Service, etc.
+For minimal configuration and setup, leave this property set to the default of `false`.
+|boolean
+|`false`
+
+a|org.kie.kogito.addons.knative.eventing.sink.namespace
+a|Namespace where the given Knative Sink is deployed.
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+|string
+|
+
+a|org.kie.kogito.addons.knative.eventing.sink.api-version
+a|Kubernetes API Version of the given Knative Sink.
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+|string
+|`eventing.knative.dev/v1`
+
+a|org.kie.kogito.addons.knative.eventing.sink.name
+a|Name of the given Knative Sink.
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+|string
+|`default`
+
+a|org.kie.kogito.addons.knative.eventing.sink.kind
+a|Kubernetes Kind of the given Knative Sink.
+This sink is used to configure the "sink" property in the generated Knative SinkBinding for this Kogito service.
+|string
+|`Broker`
+
+|===
+////
+
+==== Job-related
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.job.recipient.sink.timeout-in-millis
+a|Default timeout to execute HTTP requests for the SinkRecipient when the Job's timeout is not configured.
+|long
+a|5000
+
+a|kogito.job.recipient.sink.max-timeout-in-millis
+a|Max accepted timeout to execute HTTP requests for the SinkRecipient when the Job's timeout is configured.
+Attempts to surpass this value will result in a validation error at Job creation time.
+|long
+a|6000
+
+a|kogito.job.recipient.http.timeout-in-millis
+a|Default timeout to execute HTTP requests for the HttpRecipient when the Job's timeout is not configured.
+|long
+a|180000
+
+a|kogito.job.recipient.http.max-timeout-in-millis
+a|Max accepted timeout to execute HTTP requests for the HttpRecipient when the Job's timeout is configured.
+Attempts to surpass this value will result in a validation error at Job creation time.
+|long
+a|300000
+|===
+
+////
+// GRPC Is currently not supported (December 2024) in BAMOE
+==== GRPC
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.grpc.enum.includeDefault
+a|Indicates if default value of enumerations should be included in grpc response.
+|boolean
+|`false`
+
+a|kogito.grpc.stream.timeout
+a|Time to wait for response from server when using streams.
+|int
+|`20`
+|===
+////
+
+==== Events
+
+It should be noted, that the `kogito.quarkus.events.*` properties, despite having the word `quarkus` in them, are not specific to the Quarkus environment.
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+a|kogito.quarkus.events.threads.poolSize
+a|Maximum number of threads to handle incoming events by channel.
+// Available for both Quarkus and Spring Boot
+|int
+|`10`
+
+a|kogito.quarkus.events.threads.queueSize
+a|Maximum size of queue to hold incoming events to be processed by threads in the pool.
+// Available for both Quarkus and Spring Boot
+|int
+|`1`
+
+a|kogito.events.processinstances.enabled
+a|Toggle enabling publishing of processes instances events.
+|boolean
+|`true`
+
+a|kogito.events.processinstances.errors.propagate
+a|Toggle to propagate errors for process instance emitter.
+|boolean
+|`false`
+
+a|kogito.events.processdefinitions.enabled
+a|Toggle to enable publishing processes definition events.
+|boolean
+|`true`
+
+a|kogito.events.processdefinitions.errors.propagate
+a|Toggle to propagate errors for process definition emitter.
+|boolean
+|`false`
+
+a|kogito.events.usertasks.enabled
+a|Toggle to enable publishing User Tasks events.
+|boolean
+|`true`
+
+a|kogito.events.usertasks.errors.propagate
+a|Toggle to propagate errors for User Tasks.
+|boolean
+|`false`
+|===
+
+==== DevServices
+
+Kogito DevServices function only when a Kogito Quarkus application is in dev mode.
+Enabling DevServices starts an in-memory Data-Index container.
+When using {PRODUCT}, it is recommended to use the data-index addon instead of the in-memory Data-Index container when using DevServices.
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.kogito.devservices.port
+a|Optional port the dev service will listen to.
+If not defined, 8180 will be used.
+|int
+|`8180`
+
+a|quarkus.kogito.devservices.enabled
+a|Toggle to enable DevServices for Kogito.
+|boolean
+|true
+
+a|quarkus.kogito.devservices.image-name
+a|The Data-Index image to use.
+|string
+|
+
+a|quarkus.kogito.devservices.shared
+a|(Quarkus Only) Toggle to enable sharing of Quarkus Dev Services.
+When shared, Quarkus looks for running containers using label-based service discovery.
+If a matching container is found, it is used, so a second one is not started.
+Otherwise, Dev Services for a new Data-Index instance is started.
+The discovery uses the `kogito-dev-service-data-index` label.
+The value is configured using the `service-name` property.
+Container sharing is only used in dev mode.
+|boolean
+|`true`
+
+a|quarkus.kogito.devservices.service-name
+a|The value of the `kogito-dev-service-data-index` label attached to the started container.
+This property is used when `shared` is set to `true`.
+In this case, before starting a container, Dev Services looks for a container with the `kogito-dev-service-data-index` label set to the configured value.
+If found, it will use this container instead of starting a new one.
+Otherwise, it starts a new container with the `kogito-dev-service-data-index` label set to the specified value.
+|string
+|`kogito-data-index`
+
+a|quarkus.kogito.devservices.enabled
+a|Toggle to enable Kogito Dev Services.
+Dev Services are generally enabled by default, unless there is an existing configuration present.
+|boolean
+|
+
+a|quarkus.jbpm.devui.users.`<user-name>`.groups
+a|Groups to which the provided user (specified in the name of the config) belongs.
+
+This is only used when testing/developing services through DevUi.
+The configured user (specified by the `user name`) and their groups (specified in this configuration) will be listed in a Task Inbox dropdown so the developer can switch between users during development and testing.
+|List of strings
+a|None
+|===
+
+==== Messaging
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.messaging.as-cloudevents
+a|Toggle used to enable Cloud Events.
+|boolean
+|`true`
+
+a|kogito.addon.cloudevents.kafka.kogito_incoming_stream
+a|Kafka topic to listen to use for incoming CloudEvents.
+|string
+|
+
+a|kogito.addon.cloudevents.kafka.kogito_outgoing_stream
+a|Kafka topic to post to use for outgoing CloudEvents.
+|string
+|
+
+a|kogito.jackson.fail-on-empty-bean
+a|Toggle if Jackson will fail on an empty bean.
+|boolean
+|`false`
+
+a|kogito.addon.messaging.incoming.defaultName
+a|Incoming channel default name.
+|string
+|`kogito_incoming_stream`
+
+a|kogito.addon.messaging.outgoing.defaultName
+a|Outgoing channel default name.
+|string
+|`kogito_outgoing_stream`
+|===
+
+==== Security
+
+Security for a User Task executed through a REST endpoint uses the user/group query parameters to generate the user identity (username and roles) that is used during task operation.
+However, there are times when a superuser needs to "impersonate" a different user.
+For example, an admin completing a blocked task on behalf of another user.
+These two configuration properties enable this "impersonating" to happen.
+
+Firstly, the `kogito.security.auth.enabled` proper must be set to true.
+Next, {PRODUCT} will check the roles, configured by the `kogito.security.auth.impersonation.allowed-for-roles`, that are allowed to be impersonated.
+This overrides the previously described user identity with the security context.
+
+Roles are defined within the identity provider used by the current application.
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.security.auth.enabled
+a|Toggle Enabling the application security context when resolving current User Identity.
+|boolean
+a|false
+
+a|kogito.security.auth.impersonation.allowed-for-roles
+a|Comma-separated list of roles that allow identity impersonation when resolving the actual User Identity.
+
+These roles should be configured in the Identity Provider the runtime is configured to use.
+|string
+a|
+|===
+
+==== Data-Index
+
+[cols="4,4,^,2"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.dataindex.http.url
+a|HTTP port the Data-Index will use to accept incoming requests.
+Used to connect the runtime, with svg addon, to the data-index
+|string
+a|http://localhost:$\{quarkus.http.port}
+
+a|kogito.dataindex.ws.url
+a|HTTP port the Data-Index websocket will use to accept incoming requests.
+|string
+a|ws://localhost:$\{quarkus.http.port}
+
+a|kogito.data-index.graphql.ui.always-include
+a|Toogle to determine if the GraphQL UI should be enabled.
+By default, this is only included if the application is running in dev mode.
+|boolean
+a|false
+
+a|kogito.data-index.url
+a|URL the Data-Index will use.
+The same as `kogito.dataindex.http.url`, kept for backwards compatibility.
+|string
+a|
+|===
+
+==== Jobs Service
+
+[cols="7,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.jobs-service.schedulerChunkInMinutes
+a|The current chunk size in minutes the scheduler handles.
+Used to keep a limited number of jobs scheduled in the in-memory scheduler.
+|long
+a|10
+
+a|kogito.jobs-service.loadJobIntervalInMinutes
+a|The interval the jobs loading method runs to fetch the persisted jobs from the repository.
+|long
+a|10
+
+a|kogito.jobs-service.loadJobFromCurrentTimeIntervalInMinutes
+a|The interval used to determine when the next run to fetch jobs.
+|long
+a|60
+
+a|kogito.jobs-service.maxIntervalLimitToRetryMillis
+a|Maximum amount of time (in milliseconds) the jobs service will be retrying a job.
+|long
+a|6000
+
+a|kogito.jobs-service.backoffRetryMillis
+a|Delay, in milliseconds, between retries when a job execution fails and must be retried.
+|long
+a|1000
+
+a|kogito.jobs-service.forceExecuteExpiredJobs
+a|Toggle used to allow and force a job with expirationTime in the past to be executed immediately.
+|boolean
+a|true
+
+a|kogito.jobs-service.forceExecuteExpiredJobsOnServiceStart
+a|Toggle used to allow jobs that where timed-out when the jobs service was down to be fired immediately at the jobs service next startup.
+|boolean
+a|true
+
+a|kogito.jobs-service.loadJobRetries
+a|Number of retries configured for the periodic jobs loading procedure.
+Every time the procedure is started this value is considered.
+|int
+a|3
+
+a|kogito.jobs-service.loadJobErrorStrategy
+a|Error strategy to apply when the periodic jobs loading procedure has exceeded the jobLoadReties.
+|string
+a|NONE
+
+|===

@@ -1,7 +1,7 @@
 = IBM Business Automation Manager Open Editions :: Documentation
 
 Documentation for the IBM Business Automation Manager Open Editions product lives here.
-It is a combination of Asciidoc files and possibly links to other repositories within the KIE Community.
+It is a combination of Asciidoc files and possibly links to other repositories within the Apache KIE community.
 
 == Installing asciidoctor
 
@@ -13,7 +13,7 @@ Using either the native asciidoctor, asciidoctor.js, or asciidoctor in Docker, e
 
 [source,shell]
 ----
-asciidoctor -vw -R . -D output \**/*.adoc
+rm -rf output && mkdir output && cp -r images output/images && asciidoctor -vw -R . -D output **/*.adoc
 ----
 
 This will build all the files as HTML, show you any warnings, and output into the `output` directory, which is ignored by git.
@@ -39,3 +39,13 @@ Each secondary section of the navigation has its own file.
 Images are kept at the root level.
 
 All attributes are in the `partials/attributes.adoc` file and included at the top of every file.
+
+== Adding shadow to screenshots
+
+Regular screenshots don't have any dropshadow, which makes them too flat on the asciidoc theme that these docs are rendered to. In order to fix this we can add some css. Make sure to include the `styles/images.adoc` in the top of your file:
+
+[source,asciidoc]
+----
+\include::../styles/images.adoc[]
+----
+

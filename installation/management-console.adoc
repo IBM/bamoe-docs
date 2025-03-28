@@ -1,0 +1,210 @@
+include::../partials/attributes.adoc[]
+= Installing {MANAGEMENT_CONSOLE}
+
+include::../styles/images.adoc[]
+
+You can install/deploy {MANAGEMENT_CONSOLE} via Helm Chart or via Docker.
+
+== Using Docker
+
+Start the container with:
+
+[source,shell,subs="attributes+"]
+----
+docker run -d -p 8080:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
+----
+
+The {MANAGEMENT_CONSOLE} will be up at http://localhost:8080
+
+=== Setting environment varialbes
+
+You can set the environment variables for the {MANAGEMENT_CONSOLE} image via Docker's environment variables.
+
+[source,shell,subs="attributes+"]
+----
+docker run -d -p 8080:8080 -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID="<OIDC_CLIENT_ID>" quay.io/bamoe/management-console:{IMAGE_VERSION}
+----
+
+=== Available environment variables
+ 
+[cols="3*", options="header"]
+|===
+| Name | Description | Default 
+| RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME | Management Console app name. | "{MANAGEMENT_CONSOLE}"
+| RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID | OpenID Connect client ID for connecting to Identity Providers. | "bamoe-management-console"
+|===
+
+== Using the Helm Chart
+Helm, https://helm.sh/[the package manager for Kubernetes] enables you to manage Kubernetes applications and Helm Charts help you to define, install and upgrade even the most complex Kubernetes applications. 
+
+BAMOE Consoles is a Helm Chart based on the open-source Apache KIE Runtime Tools Consoles Helm Chart that can be used to deploy the {MANAGEMENT_CONSOLE} image on a Kubernetes cluster using the Helm package manager.
+
+
+===  Additional requirements
+
+* Docker or Podman
+* Helm
+* Minikube
+
+===  Components
+
+* {MANAGEMENT_CONSOLE} 
+
+===  Installing the Chart
+
+Use the following command to do a default installation:
+
+[source,shell]
+----
+helm install my-bamoe-consoles oci://quay.io/bamoe/consoles-helm-chart --version={VERSION}
+----
+
+==== Minikube install
+
+Use the following commands to do a Minikube install if you wish to run a single-node Kubernetes cluster in a virtual machine on your machine:
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
+helm install my-bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-minikube-nginx.yaml
+----
+
+==== Kubernetes install
+
+If you want to install the Management console directly on a Kubernetes cluster, you may need to get the default Kubernetes cluster domain for your Ingress.
+
+You can then run the following helm commands:
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
+helm install my-bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+----
+
+====  OpenShift install
+
+First, you may need to get the default OpenShift domain for your routes with this command:
+
+[source,shell]
+----
+oc get ingresses.config cluster --output jsonpath={.spec.domain}
+----
+
+If you do not have access rights to this config, try creating a dummy Route resource and checking its domain.
+
+Then, install the Helm Chart with the following command:
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/consoles-helm-chart --version={VERSION} --untar
+helm install my-bamoe-consoles ./consoles-helm-chart --values ./consoles-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+----
+
+===  Uninstalling the Chart
+
+To uninstall the my-bamoe-consoles deployment:
+
+[source,shell]
+----
+helm uninstall my-bamoe-consoles
+----
+
+
+===  Passing Environmental variables
+
+This chart uses default environmental variables from the `values.yaml` file. You can override the variables by passing them through the command line during install.
+
+[source,shell]
+----
+helm install my-bamoe-consoles ./src --set runtime-tools-consoles-helm-chart.management-console.image.registry=quay.io --set runtime-tools-consoles-helm-chart.management-console.image.account=bamoe
+----
+
+===  Configuration
+
+The following table lists the configurable parameters of the Runtime Tools Consoles Helm Chart and their default values.
+
+[cols="4*", options="header"]
+|===
+|Key |Type |Default |Description
+|global.ingressSource
+|string
+|`""`
+|Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only
+|global.kubernetesClusterDomain
+|string
+|`""`
+|If using Minikube or Kubernetes, set the cluster domain
+|global.kubernetesIngressClass
+|string
+|`""`
+|If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+|global.openshiftRouteDomain
+|string
+|`""`
+|If using OpenShift Routes, set the Route domain
+|runtime-tools-consoles-helm-chart.fullnameOverride
+|string
+|`""`
+|Overrides charts full name
+|runtime-tools-consoles-helm-chart.nameOverride
+|string
+|`""`
+|Overrides charts name
+|runtime-tools-consoles-helm-chart.management-console.appNameOverride
+|string
+|`""`
+|Overrides the deployed application name
+|runtime-tools-consoles-helm-chart.management-console.autoscaling
+|object
+|`{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}`
+|Management Console HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+|runtime-tools-consoles-helm-chart.management-console.enabled
+|bool
+|`true`
+|Enable or disable Management Console installation
+|runtime-tools-consoles-helm-chart.management-console.fullnameOverride
+|string
+|`""`
+|Overrides charts full name
+|runtime-tools-consoles-helm-chart.management-console.image
+|object
+|`{"account":"bamoe","name":"management-console","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{IMAGE_VERSION}"}`
+|Image source configuration for the Management Console image
+|runtime-tools-consoles-helm-chart.management-console.imagePullSecrets
+|list
+|`[]`
+|Pull secrets used when pulling Management Console image
+|runtime-tools-consoles-helm-chart.management-console.ingress
+|object
+|`{"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"management-console.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}`
+|Management Console Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
+|runtime-tools-consoles-helm-chart.management-console.name
+|string
+|`"management-console"`
+|Component name
+|runtime-tools-consoles-helm-chart.management-console.nameOverride
+|string
+|`""`
+|Overrides charts name
+|runtime-tools-consoles-helm-chart.management-console.nodeSelector
+|object
+|`{}`
+|
+|runtime-tools-consoles-helm-chart.management-console.oidcClientIdOverride
+|string
+|`""`
+|Overrides the OIDC Client ID used by the Management Console
+|runtime-tools-consoles-helm-chart.management-console.openshiftRoute
+|object
+|`{"annotations":{},"enabled":false,"host":"management-console.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}`
+|Management Console OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+|runtime-tools-consoles-helm-chart.management-console.service
+|object
+|`{"nodePort":"","port":8081,"targetPort":8080,"type":"ClusterIP"}`
+|Management Console Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+|runtime-tools-consoles-helm-chart.management-console.serviceAccount
+|object
+|`{"annotations":{},"create":true,"name":""}`
+|Management Console ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+|===
+

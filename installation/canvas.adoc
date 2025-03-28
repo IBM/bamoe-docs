@@ -1,5 +1,6 @@
-= BAMOE Canvas
+= Installing {CANVAS}
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 //tag::canvas-description[]
 {CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and tool integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your files.
@@ -7,15 +8,15 @@ include::../partials/attributes.adoc[]
 
 It depends on two backend applications to provide full functionality:
 
-* Extended Services: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
-* CORS Proxy: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
+* {EXT_SERVICES}: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
+* {CORS_PROXY}: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
 
 {CANVAS} and its two backend applications are available as container images.
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* Canvas → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
-* Extended Services → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION}
-* CORS Proxy → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION}
+* {CANVAS} → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
+* {EXT_SERVICES} → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION}
+* {CORS_PROXY} → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION}
 
 NOTE: All three image versions must be the same for deployment to work.
 
@@ -34,7 +35,7 @@ export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
 export APP_NAME_CORS_PROXY=bamoe-cors-proxy
 export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 ----
-. Deploy Extended Services and label its resources
+. Deploy {EXT_SERVICES} and label its resources
 +
 [source,shell,subs="attributes+"]
 ----
@@ -45,7 +46,7 @@ oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
 ----
-. Deploy CORS Proxy and label its resources
+. Deploy {CORS_PROXY} and label its resources
 +
 [source,shell,subs="attributes+"]
 ----
@@ -56,7 +57,7 @@ oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 ----
-. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the Extended Services and CORS Proxy backends.
+. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the {EXT_SERVICES} and {CORS_PROXY} backends.
 +
 [source,shell,subs="attributes+"]
 ----
@@ -79,11 +80,11 @@ Your {CANVAS} instance should be up and accessible via the route created in this
 oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
-NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the Extended Services and CORS Proxy backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the {EXT_SERVICES} and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 == Installing and configuring {CANVAS} images manually via Docker
 
-=== Configuring Extended Services
+=== Configuring {EXT_SERVICES}
 
 [source,shell,subs="attributes+"]
 ----
@@ -93,7 +94,7 @@ docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{IMAGE_VERSION}
 Access the API through port 21345, no additional configuration is necessary.
 
 
-=== Configuring CORS Proxy
+=== Configuring {CORS_PROXY}
 
 [source,shell,subs="attributes+"]
 ----
@@ -102,7 +103,7 @@ docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
 ----
 The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
 
-=== Configuring Canvas
+=== Configuring {CANVAS}
 
 This image must be run with two environment variables that will allow it to communicate with the two backend services:
 
@@ -150,7 +151,7 @@ For other customization options of {CANVAS}, please refer to the https://quay.io
 
 == Other installation methods
 
-{CANVAS} can also be deployed via xref:docker-compose.adoc[Docker Compose] or using xref:kie-helm-charts.adoc[Helm Charts].
+{CANVAS} can also be deployed via xref:docker-compose.adoc[Docker Compose] or using xref:canvas-helm-charts.adoc[Helm Charts].
 
 == Securing your Installation
 

@@ -1,0 +1,201 @@
+= Stateful Workflows subsystems' database tables
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+The following sections contain a description of all tables that are created by the Installation DDL scripts from `bamoe-{VERSION}-db-utils.zip` for stateful Workflows. These tables are also automatically created when your Business Automation application runs for the first time if the Apache KIE Flyway mechanism is enabled.
+
+== Runtime tables
+
+[%autowidth]
+|===
+|Table |Description
+
+|business_key_mapping 
+|Stores the mapping between Process Instances with their business keys
+
+|correlation_instances 
+|Composite business keys to locate a process without the Process Instance id
+
+|process_instances
+|Process state from alive processes
+|===
+
+== Data-Index tables
+
+[%autowidth]
+|===
+|Table |Description
+
+|attachments  
+|User Task instance attachments belongs
+
+|comments  
+|User Task instance comments belongs
+
+|definitions 
+|Process definitions that have been deployed
+
+|definitions_addons  
+|Add-ons the process definitions were deployed with
+
+|definitions_annotations 
+|Annotations the process definitions were deployed with
+
+|definitions_metadata 
+|Metadata the process definitions were deployed with
+
+|definitions_nodes
+|Last definitions of node executed by a Process Instance 
+
+|definitions_nodes_metadata
+|Metadata the last definitions of node executed by a Process Instance was deployed with
+
+|definitions_roles
+|Roles the process definitions were deployed with
+
+|jobs
+|Timers created by runtime
+
+|kogito_data_cache
+|The data cache used by Kogito
+
+|milestones
+|Special type of node that is completed through a condition (comes from cmmn)
+
+|nodes 
+|Nodes executed by the Process Instance
+
+|processes 
+|Last state of the Process Instance
+
+|processes_addons 
+|Add-ons this Process Instance is being executed with
+
+|processes_roles 
+|Roles this Process Instance is required
+
+|tasks 
+|User Task instance last state
+
+|tasks_admin_groups 
+|User Task instance admin groups assinged
+
+|tasks_admin_users 
+|User Task instance admin user assingned
+
+|tasks_excluded_users
+|User Task instance excluded users
+
+|tasks_potential_groups
+|User Task instance potential groups
+
+|tasks_potential_users
+|User Task instance potential users
+|===
+
+
+== Data-Audit tables
+
+[%autowidth]
+|===
+|Table |Description
+
+|audit_query 
+|Store custom queries against Data-Audit tables
+
+|job_execution_log 
+|Historical records of events of Job execution
+
+|process_instance_error_log 
+|Historical record of Process Instance errors
+
+|process_instance_node_log 
+|Historical record of node instance executions
+
+|process_instance_state_log 
+|Historical record of node state changed during executions
+
+|process_instance_state_roles_log 
+|Historical record of Process Instance state changed during execution
+
+|process_instance_variable_log 
+|Historical record of varaible changes during Process Instance execution
+
+|task_instance_assignment_log 
+|Historical record of assignments in User Task instance
+
+|task_instance_assignment_users_log 
+|Historical record of assignments in User Task instance
+
+|task_instance_attachment_log 
+|Historical record of User Task instance attachments
+
+|task_instance_comment_log 
+|Historical record of User Task instance comments
+
+|task_instance_deadline_log 
+|Historical record of User Task instance deadlines change
+
+|task_instance_deadline_notification_log 
+|Historical record of use task instance deadlines notifications
+
+|task_instance_state_log 
+|Historical record of User Task instance state change
+
+|task_instance_variable_log
+|Historical record of User Task instance input/output variables change
+|===
+
+
+== Jobs Service tables
+
+[%autowidth]
+|===
+|Table |Description
+
+|job_details  
+|Job instance being created
+
+|job_service_management 
+|For clustering and to check which instance is the lead
+|===
+
+
+== User Tasks tables
+[%autowidth]
+|===
+|Table |Description
+
+|jbpm_user_tasks  
+|The entity that represents a User Task
+
+|jbpm_user_tasks_potential_users 
+|The potential users assignable to a given User Task
+
+|jbpm_user_tasks_potential_groups
+|The potential groups assignable to a given User Task
+
+|jbpm_user_tasks_admin_users
+|User Admins assigned to a given User Task
+
+|jbpm_user_tasks_admin_group
+|Group Admins assigned to a given User Task
+
+|jbpm_user_tasks_excluded_users
+|Users which can’t be assigned to a given User Task
+
+|jbpm_user_tasks_attachments
+|An attachment is a reference to an external URI containing information relevant to a related User Task
+
+|jbpm_user_tasks_comments
+|A comment consists of a human readable text that will help to achieve a successful resolution of a User Task
+
+|jbpm_user_tasks_inputs
+|Input parameters of a User Task which are passed as a pair (name, value) format, to be consumed by a Human
+
+|jbpm_user_tasks_ouputs
+|Output parameters of a User Task which results in a set of properties in a pair (name, value) format
+
+|jbpm_user_tasks_metadata
+|Global properties related to the User Task
+|===

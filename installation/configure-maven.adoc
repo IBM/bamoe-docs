@@ -1,21 +1,26 @@
-= Configuring Maven with BAMOE binaries
-
 include::../partials/attributes.adoc[]
+= Installing {MVN_REPO}
+
+include::../styles/images.adoc[]
 
 With {PRODUCT_LONG} version {VERSION} aligning with {PRODUCT_SHORT} version 8.0 in the downstream build model, the artifacts are no longer available in Maven Central.
-Instead the artifacts are shipped as a Container Image and Maven Repository inside compressed files in a consumable format.
 
-If you have a Maven Repository Manager tool such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
-For companies without such infrastructure, it is highly recommended to use the container image and make it available interally for all developers and the continuous integration (CI) system.
-For companies that already use a Maven Repository Manager tool, developers and the CI system are usually configured to connect with it.
-If you are using the container image, ensure that it is made available and provide the URL that developers and the CI system need to specify in their `settings.xml` file.
+Instead the Maven libraries are shipped in the Maven repository format as a `.zip` file or via HTTP through a Container image you can deploy to your infrastructure.
+
+If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
+
+For organizations without such infrastructure, it is highly recommended to use the Container image and make it available internally for developers and continuous integration (CI) systems.
+
+For organizations that already use a Maven Repository Manager, developers and the CI systems are usually configured to connect to it.
+
+If you are using the Container image, ensure that it is made available and provide the URL that developers and CI systems need to specify in their `settings.xml` file.
 
 NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
 
 There are two ways to do this:
 
-* Set up a maven repository with a container image
-* Configure your local maven repository
+* Set up a Maven repository with a Container image
+* Configure your local Maven repository
 
 == Configuring Maven with the container image
 
@@ -38,7 +43,7 @@ The container images provided are created for Linux distribution, running on a d
 
 Enable the OpenShift registry and log into it using Docker:
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 export REGISTRY=`oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'`
@@ -47,7 +52,7 @@ docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
 
 Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift registry:
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
 docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
@@ -73,7 +78,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSIO
 
 Create the Deployment and Route
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
 oc create route edge --service=bamoe-maven-repo
@@ -125,7 +130,7 @@ export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSIO
 
 Create the Deployment and Ingress
 
-[source,shell,subs="attributes+"]
+[source,shell]
 ----
 kubectl create deployment bamoe-maven-repo --image=${BAMOE_MAVEN_REPOSITORY_IMAGE}
 kubectl expose deployment bamoe-maven-repo --port=80 --target-port=8080
@@ -174,7 +179,7 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 
 . Add the following lines to the `<profiles>` element of the `settings.xml` file:
 +
-[source]
+[source,xml]
 ----
 <profile>
   <id>ibm-bamoe-enterprise-maven-repository</id>
@@ -207,7 +212,7 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 
 . Add the following lines to the `<activeProfiles>` element of the `settings.xml` file and save the file:
 
-[source]
+[source,xml]
 ----
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
@@ -220,13 +225,13 @@ The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers
 
 To configure the {PRODUCT_SHORT} Maven repository locally follow these steps:
 
-. Download the Maven Repository`bamoe-{VERSION}-maven-repository.zip`.
+. Download the Maven Repository `bamoe-{VERSION}-maven-repository.zip`.
 . Extract the downloaded archive.
 . Go to the `~/.m2/` directory and open the Maven `settings.xml` file in a text editor or IDE.
 . Add the following lines to the `<profiles>` element of the Maven settings.xml file, where `<MAVEN_REPOSITORY>` is the path of the Maven repository that you downloaded.
   The format of `<MAVEN_REPOSITORY>` must be `+file://$PATH+`. For example, `+file:///home/userX/bamoe-{VERSION}-maven-repository/+`:
 +
-[source]
+[source,xml]
 ----
 <profile>
   <id>ibm-bamoe-enterprise-maven-repository</id>
@@ -259,7 +264,7 @@ To configure the {PRODUCT_SHORT} Maven repository locally follow these steps:
 
 . Add the following lines to the `<activeProfiles>` element of the Maven `settings.xml` file and save the file:
 
-[source]
+[source,xml]
 ----
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
@@ -271,5 +276,5 @@ If your Maven repository contains outdated artifacts, you might encounter Maven 
 
 To resolve these issues, delete the cached version of your local repository that is located in the  `~/.m2/repository` directory to force a download of the latest Maven artifacts.
 
-Your Maven repository is now properly configured and ready to build {PRODUCT_SHORT} projects using a standard Maven workflow.
+Your Maven repository is now properly configured and ready to build _Business Service_ projects using a standard Maven workflow.
 

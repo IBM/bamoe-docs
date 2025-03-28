@@ -1,8 +1,10 @@
-= Running decisions
 include::../partials/attributes.adoc[]
+= Running Decisions in {CANVAS} with DMN Runner
+
+include::../styles/images.adoc[]
  
 Developing a Decision can be very complex, depending on the number of rules you have on Decision Tables and the possibilities you have available with the many values that compose its inputs.
-{CANVAS} allows you to run your Decisions while developing them, making it easy for you to test scenarios and reproduce them after you make changes.
+{CANVAS} allows you to run your Decisions while developing them, making it easy for you to Test Scenarios and reproduce them after you make changes.
 It's also very useful for quickly evaluating a set of inputs.
 We call this capability of running Decisions while developing them "DMN Runner".
 
@@ -48,9 +50,74 @@ We encourage you to keep your Data Types organized for better maintainability of
 
 Loading an input file with unmatching input names and/or Data Types will ignore the unmatching inputs.
 
+== Evaluation highlights
+It can sometimes be difficult to understand how/why an expression produced a specific result.
+This is particularly true for certain types of expressions, such as Decision Tables, which can contain numerous rules, making it challenging to identify which rule or rules were applied to produce the outcome.
+Similarly, for Conditional Expressions, it may be unclear which condition was triggered.
+The evaluation highlights feature helps to visualize the evaluation of Decision Tables and Boxed Conditional Expressions.
+
+
+=== Enabling evaluation highlights
+The user can enable or disable the evaluation highlights feature is the overlays panel using the 'Enable evaluation highlights' toggle button.
+Once the feature is enabled, there will be indicator in the top right corner.
+
+.Evaluation highlights enabled
+image::tools/runningDecisions/evaluation-highlights-indicator-enabled.png[]
+
+.Evaluation highlights disabled
+image::tools/runningDecisions/evaluation-highlights-indicator-disabled.png[]
+
+
+=== Node evaluation results
+Once the feature is enabled, all decision nodes will have an evalaution result badge in its top left corner.
+The evaluation result badge has an icon representing the evaluation result of the node.
+The node evaluation result can be one of:
+
+* succeeded
+* failure
+* skipped
+
+.Succeeded
+image::tools/runningDecisions/evaluation-highlights-node-succeeded.png[]
+All needed inputs were provided and no error was thrown during the node evaluation.
+
+.Failure
+image::tools/runningDecisions/evaluation-highlights-node-failure.png[]
+All needed inputs were provided, however an error was thrown during the node evaluation.
+
+.Skipped
+image::tools/runningDecisions/evaluation-highlights-node-skipped.png[]
+Not all needed inputs for the node evaluation were provided.
+
+=== Expressions evaluation hits count
+For decision nodes that are defined either as Decision Table or as an Conditional Expression, the feature will show to the user expression evaluation hit count.
+
+For the DMN Runner form mode, the evaluation hits count will be usually zero or one.
+Below is an example of the DMN Loan Pre-Qualification evaluation in the DMN Runner form mode:
+
+.Loan Pre-Qualification evaluation hits count - form mode inputs
+```
+{"configs":{"version":"v1","mode":"form","inputs":{}},"inputs":[{"Credit Score":{"FICO":800},"Applicant Data":{"Age":25,"Marital Status":"S","Employment Status":"Employed","Existing Customer":true,"Monthly":{"Income":10000,"Repayments":100,"Expenses":200,"Tax":150,"Insurance":300}},"Requested Product":{"Type":"Standard Loan","Rate":1,"Term":1,"Amount":1000},"id":"_1CCE6DE1-832A-4072-AB1C-1D5E3F6139BE"}]}
+```
+
+.Loan Pre-Qualification evaluation hits count - form mode outcome
+image::tools/runningDecisions/evaluation-highlights-loan-pre-qualification-form-mode.png[]
+
+For the DMN Runner table mode, the evaluation hits count may be ofter greater than one.
+The same is true for evaluation model with collection as an input.
+Below is an example of the DMN Loan Pre-Qualification evaluation in the DMN Runner table mode:
+
+.Loan Pre-Qualification evaluation hits count - table mode inputs
+```
+{"configs":{"version":"v1","mode":"table","inputs":{}},"inputs":[{"Credit Score":{"FICO":800},"Applicant Data":{"Age":25,"Marital Status":"S","Employment Status":"Employed","Existing Customer":true,"Monthly":{"Income":10000,"Repayments":100,"Expenses":200,"Tax":150,"Insurance":300}},"Requested Product":{"Type":"Standard Loan","Rate":1,"Term":1,"Amount":1000},"id":"_98DE9A6F-648E-4EE8-ACAE-7B468C1956D9"},{"Credit Score":{"FICO":700},"Applicant Data":{"Age":20,"Marital Status":"D","Employment Status":"Unemployed","Existing Customer":false,"Monthly":{"Income":5000,"Repayments":100,"Expenses":200,"Tax":150,"Insurance":300}},"Requested Product":{"Type":"Standard Loan","Rate":1,"Term":1,"Amount":1000},"id":"_1CCE6DE1-832A-4072-AB1C-1D5E3F6139BE"}]}
+```
+
+.Loan Pre-Qualification evaluation hits count - table mode outcome
+image::tools/runningDecisions/evaluation-highlights-loan-pre-qualification-table-mode.png[]
+
 == Limitations
 
-* Recursive Struct Data Types are not yet supported.
+* Recursive Struct Data Types are not currently supported.
   You'll see a placeholder component where the inputs should be if you have one of those in your Decision.
 * Your input data is not versioned as part of your repository, and it is only persisted in your browser.
   They are saved to your disk, so you can safely close your tabs and restart your computer.
@@ -97,14 +164,14 @@ Now, to define logic for the new nodes.
 Set the `vacationDays` and `paymentDate` data type to `number`.
 Do not use `date` for the `paymentDate` because in this example the `paymentDate` is a day of the month.
 
-Both `vacationDays` and `paymentDate` will be implemented as a decision table very similar to the `taxRate` decision table.
+Both `vacationDays` and `paymentDate` will be implemented as a Decision Table very similar to the `taxRate` Decision Table.
 It is a good opportunity to use the copy and paste feature.
 This feature is available by clicking the top left corner of the node expression.
 
 image::tools/runningDecisions/reusing-logic-checkpoint-3.png[]
 
 Click on the node expression type.
-Copy the existing `taxRate` expression and paste it into `vacationDays` and `paymentDate` nodes, or create the decision tables from scratch.
+Copy the existing `taxRate` expression and paste it into `vacationDays` and `paymentDate` nodes, or create the Decision Tables from scratch.
 
 NOTE: If you decided to use the copy and paste feature, you will need to rename the nodes back to `vacationDays` and `paymentDate`.
 
@@ -133,6 +200,6 @@ image::tools/runningDecisions/reusing-logic-checkpoint-4.png[]
 Then, open the **DMN Runner** and input the employee's country.
 You should see the payroll computed accordingly.
 
-There is source code available for the https://raw.githubusercontent.com/bamoe/bamoe-docs-source-code-examples/9.1.x/dmn/payroll.dmn[payroll.dmn] example model.
+There is source code available for the {BAMOE_DOCS_EXAMPLES_DOCS_RAW_LINK}/dmn/payroll.dmn[payroll.dmn] example model.
 
 image::tools/runningDecisions/reusing-logic-checkpoint-5.png[]

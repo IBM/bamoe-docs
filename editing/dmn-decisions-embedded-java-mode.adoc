@@ -1,0 +1,109 @@
+= Executing Decisions in embedded Java mode
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+You can create or import DMN files in your Drools project using the xref:../editing/authoring-decisions.adoc[DMN Editor].
+
+After you implement your DMN files in your Drools project, you can execute the DMN decision service by instantiating a https://github.com/apache/incubator-kie-drools/blob/main/kie-api/src/main/java/org/kie/api/runtime/KieContainer.java[`KieContainer`].
+It very similar to xref:drl-rules-embedded-java-mode.adoc[Executing Rules in embedded Java mode].
+
+A `KieContainer` is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Apache Maven dependencies for the KJAR.
+You typically embed knowledge assets directly into a project if there is a tight relationship between the version of the code and the version of the DMN definition.
+
+
+== pom.xml
+In your client application, add the following dependencies to the relevant classpath of your Java project:
+
+[source,xml]
+----
+<!-- Required for running DMN models in embedded Java mode -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-dmn-core</artifactId>
+</dependency>
+----
+
+
+== KieContainer
+It is a common entry point for an execution of all KIE assets.
+`KieContainer` determines where to search for KIE assets that will be loaded into our application.
+
+In this example all assets from the `src/main/resources` will be loaded into our application.
+
+.Create a KieContainer from classpath
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+In this example all assets from the given dependency GAV will be loaded into our application.
+
+.Create a KieContainer from ReleaseId
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+ReleaseId releaseId = kieServices.newReleaseId("org.acme", "my-kjar", "1.0.0");
+KieContainer kieContainer = kieServices.newKieContainer(releaseId);
+----
+
+
+== DMNModel
+To execute a DMN Decision we need to know the DMN model namespace and model name.
+Both can be found in the properties panel of the DMN Editor.
+In this example we use namespace and model name from the <<_complete_example>>.
+
+.Obtain DMNRuntime from the KIE container and a reference to the DMN model to be evaluated, by using the model namespace and modelName
+[source,java]
+----
+DMNRuntime dmnRuntime = KieRuntimeFactory.of(kieContainer.getKieBase()).get(DMNRuntime.class);
+
+String namespace = "https://kie.org/dmn/_C83DFD16-A42A-46BE-A843-370444580E0F";
+String modelName = "loan-application-age-limit";
+
+DMNModel dmnModel = dmnRuntime.getModel(namespace, modelName);
+----
+
+
+== DMNContext
+`DMNContext` is a holder for the input values.
+It should contain a value for each corresponding `InputData` node of or DMN model.
+In this example, `"Applicant"` and `"Application"` are `InputData` nodes from the <<_complete_example>>.
+
+.Prepare data for the DMN Model execution
+[source,java]
+----
+DMNContext dmnContext = dmnRuntime.newContext();  
+dmnContext.set("Applicant", new Applicant("#0001", 20));  
+dmnContext.set("Application", new LoanApplication("#0001"));  
+----
+
+
+== DMNResult
+In the example below we execute the DMN model and consequently we iterate its results.
+We should be able to see results for all `Decision` nodes of the given DMN Model.
+
+.Execute the DMN Model
+[source,java]
+----
+DMNResult dmnResult = dmnRuntime.evaluateAll(dmnModel, dmnContext);  
+
+for (DMNDecisionResult dr : dmnResult.getDecisionResults()) {  
+    System.out.println(
+        "Decision: '" + dr.getDecisionName() + "', " +
+        "Result: " + dr.getResult());        
+}
+----
+
+For executing <<_complete_example>> model, we should see output like below.
+
+[source,bash]
+----
+Decision: 'Approvement', Result: {approved=false, explanation=Underage}
+----
+
+
+== Complete example
+Can be found as {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/decisions-embedded-mode-example[decisions-embedded-mode-example].

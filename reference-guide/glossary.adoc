@@ -1,0 +1,91 @@
+= Glossary of terms
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+[role="_abstract"]
+This glossary defines terms, concepts, or components that are referenced frequently in {PRODUCT} documentation or that have a unique meaning or function in {PRODUCT}.
+
+Apache KIE::
+Open-source project providing foundational technologies for Business Automation applications. Contains technologies like Drools, jBPM, and Kogito.
+
+Business Service::
+A Java application embedding Business Models, such as Workflows (BPMN), Decisions (DMN), Rules (DRL), or spreadsheet Decision Tables (XLS or XLSX). A _Business Service_ also contains BAMOE libraries that power the execution of those Business models, making REST and/or GraphQL APIs available for system-to-system integration. A _Business Service_ is a microservice built on top of Quarkus or Spring Boot.
+
+BPMN model::
+A definition of a business process workflow based on the https://www.omg.org/spec/BPMN/2.0/About-BPMN[Business Process Model and Notation (BPMN) specification]. BPMN is a standard established by the Object Management Group (OMG) for describing and modeling business processes. BPMN defines an XML schema that enables BPMN models to be shared between BPMN-compliant platforms and across organizations so that business analysts and business process developers can collaborate in designing and implementing BPMN process services. The BPMN standard is similar to and can be used together with the Decision Model and Notation (DMN) standard for designing and modeling business decisions.
+
+Business Domain API::
+An API that your business develops and implements within business applications that contain _Business Services_.
+
+Business model::
+The collection of BPMN process models, DMN decision models, DRL rules, spreadsheet Decision Tables, and any other assets that define the business logic for a _Business Service_.
+
+CloudEvents format::
+A specification for describing event data in a common way. {PRODUCT} runtime events for messages, processes, tasks, and other application activities are published in https://cloudevents.io/[CloudEvents] format so that they can be consumed efficiently by other entities.
+
+Compact Architecture:: is a way to enable a process to run everything in an integrated way within the same deployment. In this architecture the communication with required and/or optional subsystems is done via internal VM communication. 
+
+Decision Table::
+A set of business rules defined in a tabular format. Each row in a Decision Table is a rule, and each column is a condition, an action, or another rule attribute.
+
+Deployment:: is considered to be a consistent functional program that provides a set of defined functionalities that enable workflow execution.
+
+Development mode::
+A project build option that provides a fast feedback loop from code changes to a running system using hot reload. Development mode also enables debugging tools such as Swagger in _Busines Services_.
+
+DMN model::
+A definition of a business decision flow based on the https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification]. DMN is a standard established by the Object Management Group (OMG) for describing and modeling operational decisions. DMN defines an XML schema that enables DMN models to be shared between DMN-compliant platforms and across organizations so that business analysts and business rules developers can collaborate in designing and implementing DMN decision services. The DMN standard is similar to and can be used together with the Business Process Model and Notation (BPMN) standard for designing and modeling business processes.
+
+DRL rule::
+A definition of a business rule in Drools Rule Language (DRL) format. DRL is a notation established by the https://www.drools.org/[Drools] open source business automation project for defining and describing business rules.
+
+DRL rule unit::
+A module for rules and a unit of execution. A rule unit collects a set of rules with the declaration of the type of facts that the rules act on. A rule unit also serves as a unique namespace for each group of rules. A single rule base can contain multiple rule units. You typically store all the rules for a unit in the same file as the unit declaration so that the unit is self-contained.
+
+Drools::
+Open-source project part of Apache KIE that provides a rule engine, DMN engine, and complex event processing (CEP) engine for Java™ and the JVM platform.
+
+Engine::
+An engine is a computational entity responsible for parsing and executing related models.
+A decision engine is responsible for managing the DMN model. Currently, the decision engine supports DMN versions from 1.1 to 1.5.
+
+Event Listener::
+A procedure or function in a program that reacts to a specified event, such as a completed node in a process or an executed decision.
+
+Intelligent application::
+An optimized, integrated solution that uses _Business Services_ to implement business-domain knowledge.
+
+Runtime event::
+A record of a significant change of state in the application domain at a point in time. {PRODUCT} emits runtime events as a result of successfully executed requests, or _units of work_, in a process instance or task instance in a process. {PRODUCT} can use these events to notify third parties about changes to the BPMN process instance and its data.
+
+jBPM::
+Open-source project that enables executing business Workflows applications.
+
+Kogito:: 
+Open-source project part of Apache KIE that provides an underlying foundation for Java-based cloud-native Business Automation projects via Quarkus and Spring Boot frameworks.
+
+Message event::
+A specified point in a business process where a defined message is used as the input (received) or output (sent) as a result of the process execution. For example, a message event might be an email sent to a specified user after a task is complete.
+
+MicroProfile Reactive Messaging::
+A specification for sending and receiving messages within and between microservices using message brokers. {PRODUCT} supports https://github.com/eclipse/microprofile-reactive-messaging[MicroProfile Reactive Messaging] for messaging in _Business Services_, such as message events used as either input or output of business process execution.
+
+Middleware infrastructure services::
+The collection of supplemental services in {PRODUCT} that provide capabilities such as persistence, messaging, and security. Key middleware infrastructure services in {PRODUCT} include Infinispan persistence and Apache Kafka reactive messaging.
+
+Process Definition::
+A model that defines the components, workflow, and functionality for a business process, such as a BPMN model.
+
+Process Instance::
+An occurrence of a pending, running, or completed business process, based on the process definition.
+
+PROTO file (`.proto`)::
+A data library used for marshalling Java objects in protobuf (https://developers.google.com/protocol-buffers/[protocol buffers]) format. {PRODUCT} runtime persistence and communication with Infinispan or MongoDB are handled through a protobuf schema and generated marshallers.
+
+Stateful Workflow:: is a process that is able to persist its instance state into a database or other type of storage. It may include user tasks, timers, be long-running, have data tracking and auditing.
+
+Stateless Workflow or Straight-Through Process (STP):: is a Workflow whose instance state is not stored in database. A stateless Workflow is executed in one transaction, does not have data persistence, timers or User Tasks. Stateless Workflows are a subset of stateful Workflows.
+
+Unit of work::
+A component in {PRODUCT} that serves as the basis for {PRODUCT} runtime execution. Units of work capture all steps in a process and are used internally to move a process instance from one state to the next state. After all possible steps in a process are successfully executed, the final state is sent to the {PRODUCT} runtime as a runtime event. {PRODUCT} can then use these events to notify third parties about changes to the BPMN process instance and its data.
+

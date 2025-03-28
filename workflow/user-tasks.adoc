@@ -51,7 +51,7 @@ The following sections describe the User Task API in detail.
 
 |*Description* |It returns a list of User Tasks assigned to a given user and a given group
 
-|*Inputs* |
+|*Inputs* a|
 * user: String (QueryParameter)
 * group: List++<++String++>++ (QueryParameter)
 
@@ -76,6 +76,7 @@ _ERROR)_
 * inputs: Map++<++String, Object++>++
 * outputs: Map++<++String, Object++>++
 * metadata: Map++<++String, Object++>++
+
 
 |*Example* a|
 +curl example+
@@ -133,7 +134,7 @@ matches with the given parameters.
 'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'
 
 +curl example+
-|===
+
 
 ===  /usertasks/instance/{taskId}/transition
 [cols="1,1"]
@@ -224,6 +225,7 @@ matches with the given parameters doesn’t exist.
 
 +curl example+
 
+
 |===
 
 ===  /usertasks/instance/{taskId}/inputs
@@ -273,13 +275,14 @@ matches with the given parameters doesn’t exist.
 
  curl -X PUT ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'
-++\++
--H 'accept: application/json' ++\++
--H 'Content-Type: application/json' ++\++
+-H 'accept: application/json' 
+-H 'Content-Type: application/json' 
 -d '++{++ "variable": "value"
 }'
 
 +curl example+
+
+
 |===
 
 ===  /usertasks/instance/{taskId}/outputs
@@ -328,14 +331,14 @@ matches with the given parameters doesn’t exist.
 
  curl -X PUT ++\++
 'http://localhost:8080/usertasks/instance/++{++taskId}/output?group=managers&user=manager'
-++\++
--H 'accept: application/json' ++\++
--H 'Content-Type: application/json' ++\++
+-H 'accept: application/json' 
+-H 'Content-Type: application/json' 
 -d '++{++
 "variable": "value"
 }'
 
 +curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/comments
@@ -358,6 +361,7 @@ specific User Task given its task ID and assigned to a given user and a given gr
 * updatedAt: Date
 * updatedBy: String
 
+
 |*Example* a|
 
 +curl example+
@@ -366,6 +370,7 @@ specific User Task given its task ID and assigned to a given user and a given gr
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments?user=++{++user}&group=++{++groups}'
 
 +curl example+
+
 
 |===
 
@@ -392,6 +397,7 @@ specific User Task given its task ID and assigned to a given user and a given gr
 
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
+
 
 |*Example* a|
 
@@ -428,6 +434,7 @@ matches with the given parameters doesn’t exist.
 
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
+
 
 |*Example* a|
 +curl example+
@@ -468,6 +475,7 @@ A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
+
 +curl example+
 
  curl -H "Content-Type: application/json" -H "Accept: application/json"
@@ -476,6 +484,7 @@ matches with the given parameters doesn’t exist.
 -d '++{++comment: String}'
 
 +curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/comments/{commentId}
@@ -504,6 +513,7 @@ matches the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
+
 |*Example* a|
 +curl example+
 
@@ -511,6 +521,7 @@ matches with the given parameters doesn’t exist.
 'http://localhost:8080/usertasks/instance/++{++taskId}/comments/++{++commentId}?user=++{++user}&group=++{++groups}'
 
 +curl example+
+
 
 |===
 
@@ -537,6 +548,7 @@ matches with the given parameters doesn’t exist.
 
 |*Example* a|
 
+
 +curl example+
 
  curl -X GET
@@ -544,6 +556,7 @@ matches with the given parameters doesn’t exist.
 user=++{++user}&group=++{++groups}'
 
 +curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments
@@ -576,6 +589,7 @@ A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
 |*Example* a|
+
 +curl example+
 
  curl -H "Content-Type: application/json" -H "Accept: application/json"
@@ -584,6 +598,7 @@ matches with the given parameters doesn’t exist.
 -d '++{++name: String, uri: URI}'
 
 +curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -611,6 +626,7 @@ the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
+
 |*Example* a|
 
 +curl example+
@@ -619,6 +635,7 @@ matches with the given parameters doesn’t exist.
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
 
 +curl example+
+
 
 |===
 
@@ -653,6 +670,7 @@ matches with the given parameters doesn’t exist.
 
 |*Example* a|
 
+
 +curl example+
 
  curl -H "Content-Type: application/json" -H "Accept: application/json"
@@ -661,6 +679,7 @@ matches with the given parameters doesn’t exist.
 -d '++{++name: String, uri: URI}'
 
 +curl example+
+
 |===
 
 ===  /usertasks/instance/{taskId}/attachments/{attachmentId}
@@ -690,6 +709,7 @@ matches the given parameters. This is composed by:
 A _UserTaskInstanceNotFoundException_ is thrown if a User Task that
 matches with the given parameters doesn’t exist.
 
+
 |*Example* a|
 
 +curl example+
@@ -698,6 +718,7 @@ matches with the given parameters doesn’t exist.
 'http://localhost:8080/usertasks/instance/++{++taskId}/attachments/++{++attachmentId}?user=++{++user}&group=++{++groups}'
 
 +curl example+
+
 |===
 
-To find out more how the passed `QueryParameters`` representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.
+To find out more how the passed `QueryParameters` representing the user and the groups associated to a given User Task are integreted with the native {PRODUCT_SHORT} authentication system, please refer to the Security chapter of this guide.

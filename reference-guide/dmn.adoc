@@ -1,0 +1,633 @@
+= Decision Model and Notation (DMN) reference
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+[id="con-dmn-conformance-levels"]
+== DMN conformance levels
+
+[role="_abstract"]
+The DMN specification defines three incremental levels of conformance in a software implementation. A product that claims compliance at one level must also be compliant with any preceding levels. For example, a conformance level 3 implementation must also include the supported components in conformance levels 1 and 2. For the formal definitions of each conformance level, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification].
+
+The following list summarizes the three DMN conformance levels:
+
+Conformance level 1::
+A DMN conformance level 1 implementation supports decision requirement diagrams (DRDs), decision logic, and Decision Tables, but decision models are not executable. Any language can be used to define the expressions, including natural, unstructured languages.
+
+Conformance level 2::
+A DMN conformance level 2 implementation includes the requirements in conformance level 1, and supports Simplified Friendly Enough Expression Language (S-FEEL) expressions and fully executable decision models.
+
+Conformance level 3::
+A DMN conformance level 3 implementation includes the requirements in conformance levels 1 and 2, and supports Friendly Enough Expression Language (FEEL) expressions, the full set of boxed expressions, and fully executable decision models.
+
+{PRODUCT} provides runtime support for DMN 1.1, 1.2, 1.3, 1.4 and 1.5 models at conformance level 3 and design support for DMN 1.2 with DMN Editor (classic), and 1.5 with the new DMN Editor at conformance level 3.
+You can design your DMN models with {CANVAS} or import existing DMN models into your _Business Service_ projects for deployment and execution.
+Any DMN models that you import and open in the DMN editor, are converted to DMN 1.2 or 1.5 models.
+
+The following table summarizes the design and runtime support for each DMN version in {PRODUCT}:
+
+.DMN support in {PRODUCT}
+[cols="20%,20%,15%,15%,15%,15%"]
+|===
+.2+h|DMN version
+1+h|DMN engine support
+2+h|DMN Editor (classic) support
+2+h|New DMN Editor support
+
+h|Execution
+h|Open
+h|Save
+h|Open
+h|Save
+
+|DMN 1.1
+|image:grn_check.png[]
+|image:grn_check.png[]
+|image:bk_x.png[]
+|image:bk_x.png[]
+|image:bk_x.png[]
+
+|DMN 1.2
+|image:grn_check.png[]
+|image:grn_check.png[]
+|image:grn_check.png[]
+|image:grn_check.png[]
+|image:bk_x.png[]
+
+|DMN 1.3
+|image:grn_check.png[]
+|image:grn_check.png[]
+|image:bk_x.png[]
+|image:grn_check.png[]
+|image:bk_x.png[]
+
+|DMN 1.4
+|image:grn_check.png[]
+|image:bk_x.png[]
+|image:bk_x.png[]
+|image:grn_check.png[]
+|image:bk_x.png[]
+
+|DMN 1.5
+|image:grn_check.png[]
+|image:bk_x.png[]
+|image:bk_x.png[]
+|image:grn_check.png[]
+|image:grn_check.png[]
+|===
+
+In addition to all DMN conformance level 3 requirements, {PRODUCT} also includes enhancements and fixes to FEEL and DMN model components to optimize the experience of implementing DMN decision services with {PRODUCT}.
+
+[id="con-dmn-drd"]
+== DMN decision requirements diagram (DRD) components
+
+[role="_abstract"]
+A decision requirements diagram (DRD) is a visual representation of your DMN model. A DRD can represent part or all of the overall decision requirements graph (DRG) for the DMN model. DRDs trace business decisions using decision nodes, business knowledge models, sources of business knowledge, input data, and decision services.
+
+The following table summarizes the components in a DRD:
+
+.DRD components
+[cols="20%,20%,40%,20%" options="header"]
+|===
+2+|Component
+|Description
+|Notation
+
+.5+|Elements
+|Decision
+|Node where one or more input elements determine an output based on defined decision logic.
+a|
+image::dmn-decision-node.png[]
+
+|Business knowledge model
+|Reusable function with one or more decision elements. Decisions that have the same logic but depend on different sub-input data or sub-decisions use business knowledge models to determine which procedure to follow.
+a|
+image::dmn-bkm-node.png[]
+
+|Knowledge source
+|External authorities, documents, committees, or policies that regulate a decision or business knowledge model. Knowledge sources are references to real-world factors rather than executable business rules.
+a|
+image::dmn-knowledge-source-node.png[]
+
+|Input data
+|Information used in a decision node or a business knowledge model. Input data usually includes business-level concepts or objects relevant to the business, such as loan applicant data used in a lending strategy.
+a|
+image::dmn-input-data-node.png[]
+
+|Decision service
+a|Top-level decision containing a set of reusable decisions published as a service for invocation. A decision service can be invoked from an external application or a BPMN business process.
+
+a|
+image::dmn-decision-service-node.png[]
+
+.3+|Requirement connectors
+|Information requirement
+|Connection from an input data node or decision node to another decision node that requires the information.
+a|
+image::dmn-info-connector.png[]
+
+|Knowledge requirement
+|Connection from a business knowledge model to a decision node or to another business knowledge model that invokes the decision logic.
+a|
+image::dmn-knowledge-connector.png[]
+
+|Authority requirement
+|Connection from an input data node or a decision node to a dependent knowledge source or from a knowledge source to a decision node, business knowledge model, or another knowledge source.
+a|
+image::dmn-authority-connector.png[]
+
+.2+|Artifacts
+|Text annotation
+|Explanatory note associated with an input data node, decision node, business knowledge model, or knowledge source.
+a|
+image::dmn-annotation-node.png[]
+
+|Association
+|Connection from an input data node, decision node, business knowledge model, or knowledge source to a text annotation.
+a|
+image::dmn-association-connector.png[]
+|===
+
+The following table summarizes the permitted connectors between DRD elements:
+
+.DRD connector rules
+[cols="20%,20%,20%,40%" options="header"]
+|===
+|Starts from
+|Connects to
+|Connection type
+|Example
+
+|Decision
+|Decision
+|Information requirement
+a|
+image::dmn-decision-to-decision.png[]
+
+.2+|Business knowledge model
+|Decision
+.2+|Knowledge requirement
+a|
+image::dmn-bkm-to-decision.png[]
+
+|Business knowledge model
+a|
+image::dmn-bkm-to-bkm.png[]
+
+.2+a|Decision service
+
+|Decision
+.2+|Knowledge requirement
+a|
+image::dmn-decision-service-to-decision.png[]
+
+|Business knowledge model
+a|
+image::dmn-decision-service-to-bkm.png[]
+
+.2+|Input data
+|Decision
+|Information requirement
+a|
+image::dmn-input-to-decision.png[]
+
+|Knowledge source
+|Authority requirement
+a|
+image::dmn-input-to-knowledge-source.png[]
+
+.3+|Knowledge source
+|Decision
+.3+|Authority requirement
+a|
+image::dmn-knowledge-source-to-decision.png[]
+
+|Business knowledge model
+a|
+image::dmn-knowledge-source-to-bkm.png[]
+
+|Knowledge source
+a|
+image::dmn-knowledge-source-to-knowledge-source.png[]
+
+|Decision
+.4+|Text annotation
+.4+|Association
+a|
+image::dmn-decision-to-annotation.png[]
+
+|Business knowledge model
+a|
+image::dmn-bkm-to-annotation.png[]
+
+|Knowledge source
+a|
+image::dmn-knowledge-source-to-annotation.png[]
+
+|Input data
+a|
+image::dmn-input-to-annotation.png[]
+|===
+
+The following example DRD illustrates some of these DMN components in practice:
+
+.Example DRD: Loan prequalification
+image::dmn-example-drd.png[]
+
+[id="con-dmn-feel"]
+== Rule expressions in FEEL
+
+[role="_abstract"]
+Friendly Enough Expression Language (FEEL) is an expression language defined by the Object Management Group (OMG) DMN specification. FEEL expressions define the logic of a decision in a DMN model. FEEL is designed to facilitate both decision modeling and execution by assigning semantics to the decision model constructs. FEEL expressions in decision requirements diagrams (DRDs) occupy table cells in boxed expressions for decision nodes and business knowledge models.
+
+For more information about FEEL in DMN, see:
+
+* The OMG https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification].
+* {DMN_FEEL_HANDBOOK_LINK}[DMN FEEL Handbook]
+
+[id="ref-dmn-feel-data-types"]
+==== Data types in FEEL
+
+[role="_abstract"]
+Friendly Enough Expression Language (FEEL) supports the following data types:
+
+* {DMN_FEEL_HANDBOOK_LINK}#number[Numbers]
+* {DMN_FEEL_HANDBOOK_LINK}#string[Strings]
+* {DMN_FEEL_HANDBOOK_LINK}#boolean[Boolean values]
+* {DMN_FEEL_HANDBOOK_LINK}#date[Dates]
+* {DMN_FEEL_HANDBOOK_LINK}#time[Time]
+* {DMN_FEEL_HANDBOOK_LINK}#date-and-time[Date and time]
+* {DMN_FEEL_HANDBOOK_LINK}#days-and-time-duration[Days and time duration]
+* {DMN_FEEL_HANDBOOK_LINK}#years-and-month-duration[Years and months duration]
+* {DMN_FEEL_HANDBOOK_LINK}#function[Functions]
+* {DMN_FEEL_HANDBOOK_LINK}#context[Contexts]
+* {DMN_FEEL_HANDBOOK_LINK}#range-or-interval[Ranges (or intervals)]
+* {DMN_FEEL_HANDBOOK_LINK}#list[Lists]
+
+NOTE: The DMN specification currently does not provide an explicit way of declaring a variable as a `function`, `context`, `range`, or `list`, but {PRODUCT} extends the DMN built-in types to support variables of these types.
+
+The following list describes each data type:
+
+Numbers::
+Numbers in FEEL are based on the http://ieeexplore.ieee.org/document/4610935/[IEEE 754-2008] Decimal 128 format, with 34 digits of precision. Internally, numbers are represented in Java as https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html[`BigDecimals`] with `MathContext DECIMAL128`. FEEL supports only one number data type, so the same type is used to represent both integers and floating
+point numbers.
++
+--
+FEEL numbers use a dot (`.`) as a decimal separator. FEEL does not support `-INF`, `+INF`, or `NaN`. FEEL uses
+`null` to represent invalid numbers.
+
+{PRODUCT} extends the DMN specification and supports additional number notations:
+
+* *Scientific:* You can use scientific notation with the suffix `e<exp>` or `E<exp>`. For example, `1.2e3` is the same as writing the expression `1.2*10**3`, but is a literal instead of an expression.
+* *Hexadecimal:* You can use hexadecimal numbers with the prefix `0x`. For example, `0xff` is the same as the decimal number `255`. Both uppercase and lowercase letters are supported. For example, `0XFF` is the same as `0xff`.
+* *Type suffixes:* You can use the type suffixes `f`, `F`, `d`, `D`, `l`, and `L`. These suffixes are ignored.
+--
+
+Strings::
+Strings in FEEL are any sequence of characters delimited by double quotation marks.
++
+--
+.Example
+----
+"John Doe"
+----
+--
+
+Boolean values::
+FEEL uses three-valued boolean logic, so a boolean logic expression may have values `true`, `false`, or `null`.
+
+
+Dates::
+Date literals are not supported in FEEL, but you can use the built-in `date()` function to construct date values. Date strings in FEEL follow the format defined in the https://www.w3.org/TR/xmlschema-2/#date[XML Schema Part 2: Datatypes] document. The format is `"YYYY-MM-DD"` where `YYYY` is the year with four digits, `MM` is the number of the month with two digits, and `DD` is the number of the day.
++
+--
+Example:
+----
+date( "2017-06-23" )
+----
+
+Date objects have time equal to `"00:00:00"`, which is midnight. The dates are considered to be local, without a timezone.
+--
+
+Time::
+Time literals are not supported in FEEL, but you can use the built-in `time()` function to construct time values. Time strings in FEEL follow the format defined in the https://www.w3.org/TR/xmlschema-2/#time[XML Schema Part 2: Datatypes] document. The format is `"hh:mm:ss[.uuu][(+-)hh:mm]"` where `hh` is the hour of the day (from `00` to `23`), `mm` is the minutes in the hour, and `ss` is the number of seconds in the minute. Optionally, the string may define the number of milliseconds (`uuu`) within the second and contain a positive (`+`) or negative (`-`) offset from UTC time to define its timezone. Instead of using an offset, you can use the letter `z` to represent the UTC time, which is the same as an offset of `-00:00`. If no offset is defined, the time is considered to be local.
++
+--
+Examples:
+----
+time( "04:25:12" )
+time( "14:10:00+02:00" )
+time( "22:35:40.345-05:00" )
+time( "15:00:30z" )
+----
+
+Time values that define an offset or a timezone cannot be compared to local times that do not define an offset or a timezone.
+--
+
+Date and time::
+Date and time literals are not supported in FEEL, but you can use the built-in `date and time()` function to construct date and time values. Date and time strings in FEEL follow the format defined in the https://www.w3.org/TR/xmlschema-2/#dateTime[XML Schema Part 2: Datatypes] document. The format is `"<date>T<time>"`, where `<date>` and `<time>` follow the prescribed XML schema formatting, conjoined by `T`.
++
+--
+Examples:
+----
+date and time( "2017-10-22T23:59:00" )
+date and time( "2017-06-13T14:10:00+02:00" )
+date and time( "2017-02-05T22:35:40.345-05:00" )
+date and time( "2017-06-13T15:00:30z" )
+----
+
+Date and time values that define an offset or a timezone cannot be compared to local date and time values
+that do not define an offset or a timezone.
+
+IMPORTANT: If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword `dateTime` as a synonym of `date and time`.
+
+--
+
+Days and time duration::
+Days and time duration literals are not supported in FEEL, but you can use the built-in `duration()` function to construct days and time duration values. Days and time duration strings in FEEL follow the format defined in the https://www.w3.org/TR/xmlschema-2/#duration[XML Schema Part 2: Datatypes] document, but are restricted to only days, hours, minutes and seconds. Months and years are not supported.
++
+--
+Examples:
+----
+duration( "P1DT23H12M30S" )
+duration( "P23D" )
+duration( "PT12H" )
+duration( "PT35M" )
+----
+
+IMPORTANT: If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword `dayTimeDuration` as a synonym of `days and time duration`.
+
+--
+
+Years and months duration::
+Years and months duration literals are not supported in FEEL, but you can use the built-in `duration()` function to construct days and time duration values. Years and months duration strings in FEEL follow the format defined in the https://www.w3.org/TR/xmlschema-2/#duration[XML Schema Part 2: Datatypes] document, but are restricted to only years and months. Days, hours, minutes, or seconds are not supported.
++
+--
+Examples:
+----
+duration( "P3Y5M" )
+duration( "P2Y" )
+duration( "P10M" )
+duration( "P25M" )
+----
+
+IMPORTANT: If your implementation of the DMN specification does not support spaces in the XML schema, use the keyword `yearMonthDuration` as a synonym of `years and months duration`.
+
+--
+
+Functions::
+FEEL has `function` literals (or anonymous functions) that you can use to create functions. The DMN specification currently does not provide an explicit way of declaring a variable as a `function`, but {PRODUCT} extends the DMN built-in types to support variables of functions.
++
+--
+Example:
+----
+function(a, b) a + b
+----
+In this example, the FEEL expression creates a function that adds the parameters `a` and `b` and returns the result.
+--
+
+Contexts::
+FEEL has `context` literals that you can use to create contexts. A `context` in FEEL is a list of key and value pairs, similar to maps in languages like Java. The DMN specification currently does not provide an explicit way of declaring a variable as a `context`, but {PRODUCT} extends the DMN built-in types to support variables of contexts.
++
+--
+Example:
+----
+{ x : 5, y : 3 }
+----
+In this example, the expression creates a context with two entries, `x` and `y`, representing a coordinate in a chart.
+
+In DMN 1.2, another way to create contexts is to create an item definition that contains the list of keys as attributes, and then declare the variable as having that item definition type.
+
+The {PRODUCT} DMN API supports DMN `ItemDefinition` structural types in a `DMNContext` represented in two ways:
+
+* User-defined Java type: Must be a valid JavaBeans object defining properties and getters for each of the components in the DMN `ItemDefinition`. If necessary, you can also use the `@FEELProperty` annotation for those getters representing a component name which would result in an invalid Java identifier.
+* `java.util.Map` interface: The map needs to define the appropriate entries, with the keys corresponding to the component name in the DMN `ItemDefinition`.
+--
+
+Ranges (or intervals)::
+FEEL has `range` literals that you can use to create ranges or intervals. A `range` in FEEL is a value that defines a lower and an upper bound, where either can be open or closed. The DMN specification currently does not provide an explicit way of declaring a variable as a `range`, but {PRODUCT} extends the DMN built-in types to support variables of ranges.
++
+--
+The syntax of a range is defined in the following formats:
+----
+range          := interval_start endpoint '..' endpoint interval_end
+interval_start := open_start | closed_start
+open_start     := '(' | ']'
+closed_start   := '['
+interval_end   := open_end | closed_end
+open_end       := ')' | '['
+closed_end     := ']'
+endpoint       := expression
+----
+
+The expression for the endpoint must return a comparable value, and the lower bound endpoint must be lower than the upper bound endpoint.
+
+For example, the following literal expression defines an interval between `1` and `10`, including the boundaries (a closed interval on both endpoints):
+
+----
+[ 1 .. 10 ]
+----
+
+The following literal expression defines an interval between 1 hour and 12 hours, including the lower boundary (a closed interval), but excluding the upper boundary (an open interval):
+
+----
+[ duration("PT1H") .. duration("PT12H") )
+----
+
+You can use ranges in Decision Tables to test for ranges of values, or use ranges in simple literal expressions. For example, the following literal expression returns `true` if the value of a variable `x` is between `0` and `100`:
+
+----
+x in [ 1 .. 100 ]
+----
+--
+
+Lists::
+FEEL has `list` literals that you can use to create lists of items. A `list` in FEEL is represented by a comma-separated list of values enclosed in square brackets. The DMN specification currently does not provide an explicit way of declaring a variable as a `list`, but {PRODUCT} extends the DMN built-in types to support variables of lists.
++
+--
+Example:
+----
+[ 2, 3, 4, 5 ]
+----
+
+All lists in FEEL contain elements of the same type and are immutable. Elements in a list can be accessed by index, where the first element is `1`. Negative indexes can access elements starting from the end of the list so that `-1` is the last element.
+
+For example, the following expression returns the second element of a list `x`:
+
+----
+x[2]
+----
+
+The following expression returns the second-to-last element of a list `x`:
+
+----
+x[-2]
+----
+
+Elements in a list can also be counted by the function `count`, which uses the list of elements as the parameter.
+
+For example, the following expression returns `4`:
+
+----
+count([ 2, 3, 4, 5 ])
+----
+--
+
+//@comment: Keep this file as a standalone module because it is synced with the file at https://github.com/apache/incubator-kie-drools/blob/main/kie-dmn/kie-dmn-feel/ref-dmn-feel-builtin-functions.adoc
+// include::ref-dmn-feel-builtin-functions.adoc[leveloffset=+3]
+
+[id="ref-dmn-feel-variable-function-names"]
+== Variable and function names in FEEL
+
+[role="_abstract"]
+Unlike many traditional expression languages, Friendly Enough Expression Language (FEEL) supports spaces and a few special characters as part of variable and function names. A FEEL name must start with a `letter`, `?`, or `_` element. The unicode letter characters are also allowed. Variable names cannot start with a language keyword, such as `and`, `true`, or `every`. The remaining characters in a variable name can be any of the starting characters, as well as `digits`, white spaces, and special characters such as `+`, `-`, `/`, `*`, `'`, and `.`.
+
+For example, the following names are all valid FEEL names:
+
+* Age
+* Birth Date
+* Flight 234 pre-check procedure
+
+Several limitations apply to variable and function names in FEEL:
+
+Ambiguity::
+The use of spaces, keywords, and other special characters as part of names can make FEEL ambiguous. The ambiguities are resolved in the context of the expression, matching names from left to right. The parser resolves the variable name as the longest name matched in scope. You can use `( )` to disambiguate names if necessary.
+
+Spaces in names::
+The DMN specification limits the use of spaces in FEEL names. According to the DMN specification, names can contain multiple spaces but not two consecutive spaces.
++
+--
+In order to make the language easier to use and avoid common errors due to spaces, {PRODUCT} removes the limitation on the use of consecutive spaces. {PRODUCT} supports variable names with any number of consecutive spaces, but normalizes them into a single space. For example, the variable references `First Name` with one space and `First  Name` with two spaces are both acceptable in {PRODUCT}.
+
+{PRODUCT} also normalizes the use of other white spaces, like the non-breakable white space that is common in web pages, tabs, and line breaks. From a {PRODUCT} FEEL engine perspective, all of these characters are normalized into a single white space before processing.
+--
+
+The keyword `in`::
+The keyword `in` is the only keyword in the language that cannot be used as part of a variable name. Although the specifications allow the use of keywords in the middle of variable names, the use of `in` in variable names conflicts with the grammar definition of `for`, `every` and `some` expression constructs.
+
+[id="con-dmn-1.5"]
+== DMN 1.5
+
+BAMOE version {VERSION_91X} introduce support for DMN 1.5.
+
+The following are the new features.
+
+
+Add support for negation of duration::
+
+Before this version, it was not possible to use the following declaration:
+----
+-duration("PT1H")
+----
+
+Add a new "list replace" function::
+
+Implemented the following specification:
+
+[cols="25%,25%,25%,25%" options="header"]
+|===
+|Definitions
+|Parameters
+|Behaviour
+|Examples
+|list replace(_list_, _position_, _newItem_)
+
+list replace(_list_, _match_, _newItem_)
+
+|list, number or boolean function(_item_, _newItem_), any element including _null_
+
+|return new list with _newItem_ replaced at _position_ (if _position_ is a number) or return a new list where _newItem_ is replaced at all positions where the _match_ function returned _true_
+
+|list replace( [2, 4, 7, 8], 3, 6) = [2, 4, 6, 8]
+
+list replace ( [2, 4, 7, 8], function(item, newItem) item < newItem, 5) = [5, 5, 7, 8]
+|===
+
+Add support for iteration of date ranges::
+
+Implemented the following specification:
+
+__An iteration context may either be an expression that returns a list of elements, or two expressions that return  integers connected by "..". __
+
+Examples of valid iteration contexts are:
+
+----
+[…]
+
+@”2021-01-01”..@”2022-01-01”
+----
+
+Allow importing into the default namespace::
+
+Before this modification, it was not possible to import a DMN file into another DMN file, specifying an empty string in the name attribute for the import. With this feature, the following snippet become valid
+[source,xml]
+----
+<semantic:import xmlns:drools="http://www.drools.org/kie/dmn/1.1"
+                    xmlns:triso="http://www.trisotech.com/2015/triso/modeling"
+                    importType="http://www.omg.org/spec/DMN1-2Alpha/20160929/MODEL"
+                    namespace="http://www.trisotech.com/dmn/definitions/_f27bb64b-6fc7-4e1f-9848-11ba35e0df36"
+                    name="" />
+----
+
+and all the definitions from the imported model get registered as belonging to the importing model.
+
+Add implicit type conversion of date to date and time when necessary::
+
+Implemented the following specification:
+
+_In implicit type conversions, the data type is converted automatically without loss of information. There are several
+possible implicit type conversions:_
+
+* _[…]_
+* _from date to date and time: When the type of the expression is date and the target type is date and time, the expression is converted to a date time value in which the time of day is UTC midnight (00:00:00)_
+
+
+
+Option to use alternative image for InputData::
+
+Implemented the following specification:
+
+[cols="50%,50%" options="header"]
+|===
+|Definition
+|Behaviour
+|useAlternativeInputDataShape: Boolean [0..1]
+|If the DMNShape depicts an Input Data element then it is represented either using the paper sheet symbol, harmonized with BPMN and CMMN notations (true) or using the backwards compatible oval symbol (false).
+|===
+
+
+Support new attribute typeConstraint in ItemDefinition::
+
+Implemented the following specification:
+
+[cols="50%,50%" options="header"]
+|===
+|Definition
+|Behaviour
+|typeConstraint: UnaryTests [0..1]
+|This attribute is a UnaryTests that restricts the values in the base type that are allowed in this ItemDefinition. In case of a collection, it directly constrains the collection and is not projected on the collection elements.
+|===
+
+These new feature allows an interesting use case, i.e. filtering a base type based on its value, and then filtering a collection of the above element based on size (or other attribute) of the  collection itself.
+
+Example
+[source,xml]
+----
+<dmn:itemDefinition label="tInterest" name="tInterest">
+      <dmn:typeRef>string</dmn:typeRef>
+      <dmn:typeConstraint>
+        <dmn:text>"Golf","Computer","Hockey","Jogging"</dmn:text>
+     </dmn:typeConstraint>
+</dmn:itemDefinition>
+<dmn:itemDefinition isCollection="true" label="tInterests" name="tInterests">
+      <dmn:typeRef>tInterest</dmn:typeRef>
+      <dmn:typeConstraint>
+       <dmn:text> count (?) = 1 </dmn:text>
+     </dmn:typeConstraint>
+</dmn:itemDefinition>
+----
+
+Note, that the `allowedValues` tag has been deprecated in the 1.5 DMN version.
+
+'''
+
+For official DMN specifications, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification].

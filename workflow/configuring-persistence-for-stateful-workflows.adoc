@@ -1,0 +1,253 @@
+= Configuring persistence for stateful Workflows
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section provides more detail deploying an application built using the 
+Compact Architecture that uses the {PRODUCT} add-ons, that collocate add-on services (Data-Index, Data-Audit, Jobs Service, and User Tasks) in the runtime.
+
+
+[#jdbc-persistence]
+== Enabling JDBC Persistence for stateful Workflows
+
+{PRODUCT_SHORT} process service and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
+
+All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the connection with
+the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
+guidelines.
+
+Configuring persistence for {PRODUCT_SHORT} requires a minimal  set of dependencies and configurations in your application. The
+minimal set of dependencies are:
+
+* Quarkus Agroal: Quarkus DataSource Connection Pool with Security and Transaction support
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+----
+
+* Database Specific Quarkus JDBC Driver
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-{{your-database-type}}</artifactId>
+</dependency>
+----
+
+* KIE Add-on Persistence JDBC: Enables JDBC persistence for the process engine.
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+NOTE: For full information about how to configure DataSources in Quarkus, please check the
+https://quarkus.io/version/3.15/guides/datasource[Configure data sources in Quarkus] guide.
+
+
+=== Configuring JDBC Persistence for PostgreSQL
+
+To configure PostgreSQL persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-postgresql</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - PostgreSQL
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/bamoe-db}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+
+=== Configuring JDBC Persistence for Microsoft SQL Server
+
+To configure Microsoft SQL Server persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-mssql</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Microsoft SQL Server
+quarkus.datasource.db-kind=mssql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0.0:1433;DatabaseName=bamoe-db;encrypt=true;trustServerCertificate=true;}
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+NOTE: If your {PRODUCT_SHORT} application uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services,
+please make sure you read the https://quarkus.io/version/3.15/guides/databases-dev-services[Dev Services for Databases] guide and
+apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.15/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
+
+
+==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
+
+Additionally, if the {PRODUCT_SHORT} application includes the Data-Index or Jobs Service, it's also required to add the `bamoe-mssql-mappings` dependency
+to ensure the correct behaviour of those components. This module includes the necessary Hibernate ORM mappings to help remapping
+some of the JPA entities used in both components. The mappings contained are:
+
+* META-INF/bamoe-data-index-orm.xml: This file remaps some entities from the data-index component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-mssql-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+
+=== Configuring JDBC Persistence for H2 (Only for development)
+
+In Development environments, you can use H2 persistence for your {PRODUCT_SHORT} application, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - H2
+quarkus.datasource.db-kind=h2
+datasource.devservices.properties.NON_KEYWORDS=VALUE,KEY
+
+# Enabling jdbc persistence for kogito processes
+kogito.persistence.type=jdbc
+----
+
+
+=== Setting up the database for stateful Workflows
+
+To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a Database Admin.
+The provided DDLs allow creating from scratch the Database for the different {PRODUCT_SHORT} subsystems (see xref:configuring-persistence-for-stateful-workflows.adoc[Configuring persistence for Stateful Workflows])
+for both PostgreSQL and Microsoft SQL Server.
+
+The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} process service.
+
+.Contents of bamoe-9.2.0-db-utils.zip
+image::wf-tutorial/gs-bamoe-9.2.0-db-utils.png[Contents of bamoe-9.2.0-db-utils.zip]
+
+Additionally {PRODUCT_SHORT} comes with `KIE Flyway`, a Flyway-based mechanism that automatically creates the database schema
+during startup. *This is convenient in a development environments and is not adapted to production database instances.*
+
+To enable this feature, the `kie.flyway.enabled` property should be added in your project `application.properties` file,
+which is found in `src/main/resources` as follows:
+
+[source,properties]
+----
+kie.flyway.enabled=true
+----
+
+If everything is correctly set, at the first project execution all the tables will be automatically added.
+
+
+== Authentication in User Task API endpoints
+The xref:../user-tasks.adoc[User Task API] layer integrates an  Authentication layer.  All the endpoints in the User Task API layer require, as QueryParameters, the groups and the user associated with a User Task under management.
+To enable the Authentication in the User Task API endpoints, the following properties should be set in the `application.properties` file of your project:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
+
+|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
+Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
+
+|===
+
+
+To have a fully enabled authentication mechanism working for the User Tasks with the above features, you will need to have the entire Authentication/Authorization layer configured, as described in the xref:../runtime-services-modeling/security.adoc[Security section]
+
+
+[#transactions]
+== Transactional operations on Compact Architecture
+All the operations performed by the Process API layer on the Compact Architecture are transactional. In detail, all the endpoints are now compliant with the ACID properties, namely that in case of failure during a transaction, the action is undone, and any applied change is rolled back to  restore the consistent state that existed before the transactional operation started. This makes all the operations performed on the Compact Architecture reliable and safe. 
+Transactions are enabled as default choice on Compact Architecture projects.
+
+NOTE: The event subsystem in the BAMOE workflow engine does not have transactional support (see xref:../release-notes/known-limitations.adoc[the Known Limitations section])
+
+It is possible to disable the default behavior and make the operation no longer transactional by configuring your project `application.properties` with one of the properties shown in the following table:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.transactionEnabled` |Globally sets transactions as enabled for the entire application |Boolean |true
+
+|`kogito.processes.transactionEnabled` |Sets the transactions as enabled for the general Process API layer, overriding global behavior |Boolean |true
+
+|`kogito.usertasks.transactionEnabled`|Sets the transactions as enabled for the new User Tasks API layer, overriding global behavior |Boolean |true
+|===
+

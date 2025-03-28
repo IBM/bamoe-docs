@@ -1,0 +1,100 @@
+= Building _Business Services_ executables
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Building an executable application is the first step toward deploying _Business Services_ to production environment. There are several types of executables you can create, and trade-offs vary depending on your requirements. This section is divided between Quarkus and Spring Boot.
+
+== Quarkus
+
+Quarkus support the following building modes. The command that you use depends on your preferred run mode and application environment:
+
+* *a. JVM mode*: For compatibility with a Java virtual machine (JVM).
++
+.Building
+[source]
+----
+mvn clean package
+----
+.Running locally
++
+[source]
+----
+java -jar target/quarkus-app/quarkus-run.jar
+----
++
+* *b. Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
++
+.Building in native mode
++
+[source]
+----
+mvn clean package -Dnative
+----
++
+.Running native binary locally
++
+[source]
+----
+./target/sample-kogito-1.0-SNAPSHOT-runner
+----
++
+[NOTE]
+========
+
+Alternatively, you can use a container builder image for native builds. You do not need to install GraalVM because a container containing GraalVM is pulled automatically. Note that the executable targets Linux by default. For example:
+
+--
+.On Quarkus only (GraalVM native build using container)
+[source]
+----
+$ mvn clean package -Dnative -Dquarkus.native.container-build
+----
+--
+
+To use Mandrel instead of GraalVM, run the following command:
+
+--
+.On Quarkus only (Mandrel native build using container)
+[source]
+----
+$ mvn clean package -Dnative -Dquarkus.native.container-build -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel:21.1-java11
+----
+--
+
+For further information about building a native image, see https://quarkus.io/version/3.15/guides/building-native-image#container-runtime[Quarkus - Building a Native Executable].
+
+========
++
+* *c. Container image*
++
+.Building
++
+[source]
+----
+mvn clean package -Pcontainer
+----
++
+.Running locally
++
+[source]
+----
+docker run -it --rm -p 8080:8080 dev.local/{USER}/my-business-service:latest
+----
+
+
+---
+
+== Spring Boot
+
+Standard Maven or Java commands are required to package and start the generated application. Following are the commands:
+
+.Building
+[source]
+----
+mvn clean package
+----
+.Running locally
+[source]
+----
+java -jar ./target/(name_of_the_application).jar
+----

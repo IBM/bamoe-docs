@@ -1,0 +1,569 @@
+== Add-ons
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+You can extend {PRODUCT} core capabilities by using add-ons. The add-on modules extend monitoring, messaging, and other features for _Business Services_.
+
+The following table list all the supported add-ons in {PRODUCT}:
+
+.Add-ons for Quarkus
+[cols=2]
+|===
+|Name
+|Artifact Id
+
+|Messaging
+|kie-addons-quarkus-messaging
+
+|Events Decisions
+|kie-addons-quarkus-events-decisions
+
+|Events Process
+|kie-addons-quarkus-events-process
+
+|Knative Eventing
+|kie-addons-quarkus-knative-eventing
+
+|Mail
+|jbpm-addons-quarkus-mail
+
+|Prometheus Monitoring
+|kie-addons-quarkus-monitoring-prometheus
+
+|Source Files
+|kie-addons-quarkus-source-files
+|===
+
+=== Messaging add-on
+
+{PRODUCT} provides a messaging add-on, enabling a process to register an event listener. The messaging add-on uses events in the _Business Service_ projects. 
+
+To configure messaging capabilities for your _Business Services_, you must add the messaging add-on as a dependency in the `pom.xml` file of your project:
+
+.Project dependency to enable messaging operations in Quarkus projects
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-messaging</artifactId>
+</dependency>
+----
+
+For Quarkus, the {PRODUCT} process event add-on implementation is based on https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/2/connectors/connectors.html[Smallrye Messaging] library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. Therefore, the {PRODUCT} process event add-on is not specifically combined with any event broker, but also requires additional configuration to use a suitable Smallrye connector.
+
+For example, to use Kafka as an event broker in Quarkus, you must add the following dependency in the `pom.xml` file of your _Business Service_ project:
+
+.Project dependency to enable event broker in Quarkus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+</dependency>
+----
+
+Smallrye uses an abstraction named `channel`. The implementation of channels depends on the underlying event broker. For example, when using Kafka, every channel is mapped to a topic. 
+
+Channels are configured by using properties. The pattern for these properties is `mp.messaging.[incoming|outgoing].<channel name>.<property_name>`.
+
+{PRODUCT} allows different channel mapping strategies:
+
+* Define one default incoming channel to receive all the incoming messages and one default outgoing channel to store all the published messages.
+* Define a channel for each message name so that every message type has a dedicated channel.
+* Define a channel for certain message names and let the not mapped message names to use the default incoming or outgoing channel. 
+
+{PRODUCT} first searches for channel name equals to message name in the properties. If found, it uses that channel for that message name. If not, it searches for default channel definition. If also not existing, then an error will be reported. 
+
+The name for the default incoming channel is `kogito_incoming_stream` and for the default outgoing channel is `kogito_outgoing_stream`. 
+
+You can change the default incoming and outgoing topic name as follows:
+
+.Quarkus
+[source]
+----
+kogito.addon.messaging.incoming.defaultName=<default channel name>
+kogito.addon.messaging.outgoing.defaultName=<default channel name>
+----
+
+Optionally, for Kafka connector, you can define the Kafka topic to be used for that channel using the following form:
+
+`mp.messaging.[incoming|outgoing].<channel name>.topic = <topic name>`
+
+If the topic property is not found, then the topic name is considered to be the same as Kafka name.
+Note that you can map different channels to the same topic.
+
+==== Providing a key for a Kafka record
+
+To specify the key to your Kafka record, you can use a custom https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/quarkus/addons/common/reactive-messaging/src/main/java/org/kie/kogito/addon/quarkus/common/reactive/messaging/MessageDecorator.java[MessageDecorator] implementation. 
+
+For an example, see https://github.com/apache/incubator-kie-kogito-examples/blob/main/kogito-quarkus-examples/process-kafka-avro-multi-quarkus/src/main/java/org/acme/travel/StringKeyDecorator.java[StringKeyDecorator.java]
+
+==== Customizing message format
+
+By default, {PRODUCT} uses Cloud event JSON format for messaging. However, you can change the default format by providing your own https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/EventMarshaller.java[event marshaler] implementation. 
+For an example, see https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/marshallers/avro/src/main/java/org/kie/kogito/event/avro/AvroEventMarshaller.java[AvroEventMarshaller.java example].
+
+=== DMN Event-driven add-on
+
+.Quarkus
+To use the DMN event-driven add-on, add the following code to the `pom.xml` file of your project:
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-decisions</artifactId>
+</dependency>
+----
+
+
+
+
+=== Knative eventing add-on
+
+The Knative Eventing add-on is used in the _Business Service_ project for messaging. The https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/knative/eventing[{PRODUCT} Knative Eventing] add-on enables your project to connect to a https://knative.dev/docs/developer/eventing/sinks/[sink] or make it a https://github.com/knative-sandbox/eventing-kogito#kogito-source[KogitoSource].
+
+The add-on processes the https://knative.dev/development/developer/eventing/sources/sinkbinding/[`K_SINK`] and https://knative.dev/development/developer/eventing/sources/sinkbinding/reference/#cloudevent-overrides[`K_CE_OVERRIDES`] environment variables injected by Knative Eventing controllers (`SinkBinding` or `KogitoSource`).
+
+The service requires the https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/messaging[{PRODUCT} Messaging] and https://quarkus.ioversion/3.15/guides/reactive-messaging-http.html[Quarkus HTTP connector] libraries to wire the _Business Service_ with a given sink. The {PRODUCT} Messaging and Quarkus HTTP connector perform as dependencies for the Knative Eventing add-on.
+
+
+To use the Knative Eventing add-on, add the following code to the `pom.xml` file of your project:
+
+.Quarkus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-knative-eventing</artifactId>
+</dependency>
+----
+
+==== Auto-generated Knative resources
+
+The Knative Eventing add-on can generate Knative Eventing resources by inspecting your BPMN or Serverless Workflow files for event definitions. 
+
+To enable the auto-generation of Knative resources, add the following dependency to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-kubernetes</artifactId>
+</dependency>
+----
+
+After adding the previous dependency, the add-on generates Knative Eventing resources to handle the events that are produced or consumed by your BPMN or Serverless Workflow resources on Knative Eventing platform.
+
+For each consumed event, the add-on generates a https://knative.dev/docs/eventing/broker/triggers/[Knative Eventing Trigger] as shown in the following example:
+
+.Example Knative `Trigger` custom resource for a _Business Service_ with `Broker` binding
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: travellers-trigger-process-knative-quickstart-quarkus
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: travellers
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: process-knative-quickstart-quarkus
+----
+
+The `Trigger` resource requires a subscriber to receive the events that are routed by the `Broker`. In this case, the current _Business Service_ work as a subscriber, and the Knative Eventing add-on uses the _Business Service_ deployment, which is configured by Quarkus Kubernetes.
+
+If a `Broker` is not specified, the Knative Eventing add-on generates a default `InMemoryChannel` as follows:
+
+.Example `Broker` custom resource for Knative Eventing with default `InMemoryChannel`
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: default
+----
+
+If a `Broker` is configured in the target namespace, you can specify the `Broker` using the following property:
+`org.kie.kogito.addons.knative.eventing.broker=myKafkaBroker`.
+
+If the _Business Service_ contains any produced event definitions, the Knative Eventing add-on generates a https://knative.dev/development/eventing/custom-event-source/sinkbinding/[Knative Eventing `SinkBinding`], or a https://github.com/knative-sandbox/eventing-kogito#kogito-source[Knative Eventing `KogitoSource`]. By default, the `SinkBinding` is generated, but you can change this behavior by setting `org.kie.kogito.addons.knative.eventing.generate-kogito-source` property to `true`.
+
+.Example `SinkBinding` custom resource for Knative Eventing
+[source,yaml]
+----
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: sb-process-knative-quickstart-quarkus
+spec:
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: process-knative-quickstart-quarkus
+----
+
+.Example `KogitoSource` custom resource for Knative Eventing
+[source,yaml]
+----
+apiVersion: kogito.knative.dev/v1alpha1
+kind: KogitoSource
+metadata:
+  name: process-knative-quickstart-quarkus
+spec:
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+      namespace: ""
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: process-knative-quickstart-quarkus
+----
+
+The target deployment defined in the Quarkus Kubernetes plugin work as the subject for `SinkBinding` and `KogitoSource`. You can configure the `sink` using the application properties. By default, the generated `Broker` is defined as the `sink`.
+
+The following table lists all the available properties for the Knative Eventing add-on:
+
+.Knative Eventing Add-on  properties
+[cols="50%,20%,20%", options="header"]
+|===
+|Property
+|Description
+|Example value
+
+|`org.kie.kogito.addons.knative.eventing.sink.namespace`
+|Property for set sink namespace
+|`default`
+
+|`org.kie.kogito.addons.knative.eventing.sink.name`
+|Property to set sink name
+|`my-sink`
+
+|`org.kie.kogito.addons.knative.eventing.sink.api-version`
+|Property to set Kubernetes API version of the sink
+|`eventing.knative.dev/v1`
+
+|`org.kie.kogito.addons.knative.eventing.sink.kind`
+|Property to set Kubernetes resource kind of the sink
+|`Broker`
+
+|`org.kie.kogito.addons.knative.eventing.broker`
+|Property to set name of the pre-defined Broker
+|`myKafkaBroker`
+
+|`org.kie.kogito.addons.knative.eventing.generate-kogito-source`
+|Property to enable the generation of `KogitoSource` instead of `SinkBinding`
+|`false`
+
+|`org.kie.kogito.addons.knative.eventing.auto-generate-broker`
+|Property to enable the generation of default in-memory Broker
+|`true`
+|===
+
+For more information about the Knative Eventing add-on, see the following example applications:
+
+* https://github.com/apache/incubator-kie-kogito-examples/tree/main/serverless-workflow-examples/serverless-workflow-order-processing[Serverless Workflow Order Processing]
+* https://github.com/apache/incubator-kie-kogito-examples/tree/main/kogito-quarkus-examples/process-knative-quickstart-quarkus[Process Knative Eventing]
+
+=== Mail add-on
+
+The mail add-on is used to send emails in a process project. To use the mail add-on, add the following code to the `pom.xml` file of your project:
+
+.Quarkus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-quarkus-mail</artifactId>
+</dependency>
+----
+
+=== Events add-on
+
+The Events add-on provides a default implementation in supported target platforms for EventEmitter and EventReceiver interfaces. You can use EventEmitter and EventReceiver interfaces to enable messaging by process, serverless workflow events, and event decision handling. 
+
+==== Implementing message payload decorator
+Any dependant add-on can implement the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecorator.java[MessagePayloadDecorator].
+
+.Prerequisites
+
+* You have installed the Events add-on in {PRODUCT}.
+
+.Procedure
+. Create a file named `META-INF/services/org.kie.kogito.add-on.cloudevents.message.MessagePayloadDecorator` in your class path.
+. Open the file.
+. Enter the full name of your implementation class in the file.
+. Save the file.
+
+The `MessagePayloadDecoratorProvider` loads the file upon application startup and adds the file to the decoration chain. When {PRODUCT} calls the https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/addons/common/messaging/src/main/java/org/kie/kogito/addon/cloudevents/message/MessagePayloadDecoratorProvider.java[MessagePayloadDecoratorProvider#decorate], your implementation is part of the decoration algorithm.
+
+To use the events add-on, add the following code to the `pom.xml` file of your project:
+
+.Events Process add-on for Quarkus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-process</artifactId>
+</dependency>
+----
+
+.Events decisions add-on for Quarkus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-events-decisions</artifactId>
+</dependency>
+----
+
+=== Monitoring add-on
+
+The monitoring add-on provides monitoring capabilities in the _Business Service_ project. 
+
+To use the monitoring add-on, add the following code to the `pom.xml` file of your project:
+
+.Quarkus dependency for Prometheus
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-monitoring-prometheus</artifactId>
+</dependency>
+----
+
+=== Process event add-on
+
+{PRODUCT} provides a process event add-on, which you can use to send processes, tasks, and variable events to an external event listener. In this case, the processes, tasks, and variable events are generated as a result of the execution of an operation, which modifies a process state; such events are known as runtime events.
+
+In {PRODUCT}, every modifying operation is executed within an abstraction called a unit of work. Examples of such operations include creating a process instance, transitioning a task, and modifying a variable. A runtime event is published when a unit of work is completed.
+
+You can use the {PRODUCT} process event add-on to build a historical representation of all process instance executions. Also, you can use this add-on with process REST API to build a custom graphical user interface to handle the user tasks.
+
+By default, the event format follows the https://cloudevents.io/[CloudEvent] specification, sending information using the data field.
+The data field contains a JSON of one of the following types:
+
+* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceEventMetadata.java[ProcessInstanceEvent]: This event is published when a process instance is created, modified, or completed.
+// * https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/usertask/UserTaskInstanceEventMetadata.java[UserTaskInstanceEvent]: This event is published when a change occurs on a user task.
+* https://github.com/apache/incubator-kie-kogito-runtimes/blob/main/api/kogito-events-api/src/main/java/org/kie/kogito/event/process/ProcessInstanceVariableEventBody.java[VariableInstanceEvent]: This event is published when a variable is created, modified, or removed.
+
+To configure process event capabilities for your _Business Services_, you can add the process event add-on as a dependency in the `pom.xml` file of your _Business Service_ project:
+
+.Project dependency to enable process event operations in Quarkus projects
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-process</artifactId>
+</dependency>
+----
+
+For Quarkus, the {PRODUCT} process event add-on implementation is based on https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/2/connectors/connectors.html[Smallrye Messaging] library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. Therefore, the {PRODUCT} process event add-on is not specifically combined with any event broker in Quarkus, but requires additional configuration to use a suitable Smallrye connector.
+
+For example, to use Kafka as an event broker in Quarkus, you can add the following dependency in the `pom.xml` file of your _Business Service_ project:
+
+.Project dependency to enable Kafka event broker in Quarkus
+[source,xml,subs="attributes+"]
+----
+ <dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+</dependency>
+----
+
+Smallrye defines an abstraction named channel to enable multi-broker support. For every channel that you define in your {PRODUCT} application, you can specify the connector to use for that channel using the following form:
+
+`mp.messaging.[incoming|outgoing].<channel name>.connector = <connector name>`
+
+Optionally, for Kafka connector, you can define the Kafka topic to be used for that channel using the following form:
+
+`mp.messaging.[incoming|outgoing].<channel name>.topic = <topic name>`
+
+You can also set up a channel property using the following form:
+
+`mp.messaging.[incoming|outgoing].<channel name>.<property name>= <property value>`
+
+IMPORTANT: If the defined property is not found, then the topic name is considered to be the same as Kafka name.
+
+The {PRODUCT} process event add-on defines a channel for each event type, such as `kogito-processinstances-events`, `kogito-usertaskinstances-events`, and `kogito-variables-events`. Therefore, when the process event add-on is enabled, you must add the event types to your `application.properties` file using the following properties:
+
+.Properties to define event types in `application.properties` file
+[source]
+----
+mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
+mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
+mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
+mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+Additionally, you can disable the publishing on any channel by setting the related property to false as shown in the following example:
+
+.Example properties to disable publishing
+[source]
+----
+kogito.events.usertasks.enabled=false
+kogito.events.variables.enabled=false
+----
+
+[#source-files-add-on]
+=== Source files add-on
+
+The {PRODUCT} Source Files Add-on adds the capability of listing and downloading source files to _Business Service_ projects.
+
+> **⚠️**
+This add-on isn't supposed to be used by end-users, if not needed for internal integrations, since it can be a potential security breach for some users' use cases.
+
+To add the endpoints to download your services' source files, you can add the source files add-on as a dependency in your `pom.xml` file.
+
+.Project dependency to enable source files endpoints
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-source-files</artifactId>
+</dependency>
+----
+
+Access to all the endpoints is granted to the role `source-files-client`.
+To define basic authentication, you can add the following code to your `application.properties` file:
+
+.Example of credentials for the user `scott` and password `jb0ss`
+[source,properties]
+----
+quarkus.security.users.embedded.enabled=true
+quarkus.security.users.embedded.plain-text=true
+quarkus.security.users.embedded.users.scott=jb0ss
+quarkus.security.users.embedded.roles.scott=source-files-client
+----
+
+You can also disable plain-text passwords by setting the `quarkus.security.users.embedded.plain-text` property to
+`false` or just removing it from the configuration. In this case, the passwords are encrypted using MD5.
+
+.Example of credentials for the user `scott` and password `jb0ss` encrypted using MD5
+[source,properties]
+----
+quarkus.security.users.embedded.enabled=true
+quarkus.security.users.embedded.users.scott=4960d03c13b5aff4ca6886758a8be019
+quarkus.security.users.embedded.roles.scott=source-files-client
+----
+
+To define a more robust authentication mechanism, you can refer to the https://quarkus.io/version/3.15/guides/security[Quarkus documentation].
+
+The Source Files Add-on provides REST support for the following operation:
+
+==== List all the source files for the specified process
+
+* GET: `/management/processes/\{processId\}/sources`
+** parameters:
+*** processId: process identifier
+** output:
+*** JSON with related source files URIs
+
+.Example: to list the source files for the process with id `petstore_http`, you can use the following command:
+
+[source,bash]
+----
+$ curl -X 'GET' \
+  'http://localhost:8080/management/processes/petstore_http/sources' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Basic c2NvdHQ6amIwc3M='
+----
+
+.Output
+
+[source,json]
+----
+[
+  {
+    "uri": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v2.0/json/petstore-simple.json"
+  },
+  {
+    "uri": "/sources/org/kie/kogito/examples/petstore_http.sw.json"
+  }
+]
+----
+
+==== Download the specified source file
+
+* GET: `/management/processes/\{processId\}/source`
+** parameters:
+*** processId: process identifier
+** output:
+*** Source file content used by the editor
+
+.Example: to list the source file for the process with id `petstore_http`, you can use the following command:
+
+[source,bash]
+----
+$ curl -X 'GET' \
+  'http://localhost:8080/management/processes/petstore_http/source' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Basic c2NvdHQ6amIwc3M='
+----
+
+.Output
+
+[source,json]
+----
+{
+  "id": "petstore_http",
+  "version": "1.0",
+  "name": "Send CloudEvent after creating Pluto",
+  "start": "AddPluto",
+  "functions": [
+    {
+      "name": "addPet",
+      "operation": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v2.0/json/petstore-simple.json#addPet"
+    }
+  ],
+  "states": [
+    {
+      "name": "AddPluto",
+      "type": "operation",
+      "actions": [
+        {
+          "functionRef": {
+            "refName": "addPet",
+            "parameters": {
+              "body": {
+                "name": "Pluto"
+              }
+            }
+          }
+        }
+      ],
+      "end": true
+    }
+  ]
+}
+----
+.Example: to download the source file located at `org/kie/kogito/examples/petstore_http.sw.json`, you can use the following command:
+
+[source,bash]
+----
+$ curl -X 'GET' \
+  'http://localhost:8080/sources?uri=org/kie/kogito/examples/petstore_http.sw.json' \
+  -H 'accept: */*' \
+  -H 'Authorization: Basic c2NvdHQ6amIwc3M='
+----
+
+[id="proc-kogito-designing-app"]

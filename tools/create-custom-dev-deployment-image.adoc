@@ -1,5 +1,6 @@
-= Creating a custom Dev Deployment image
+= Creating a custom BAMOE Canvas Dev Deployment image
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
 For convenience, one of the deployment options in {CANVAS} allows the user to input a custom image and a custom command to start the application once the upload is complete.
 
@@ -11,7 +12,7 @@ For convenience, one of the deployment options in {CANVAS} allows the user to in
 2. The image must expose port `8080`, and all services running on the container should listen to this port. This includes the `dev-deployment-upload-service`, which can be configured by setting the `DEV_DEPLOYMENT__UPLOAD_SERVICE_PORT` environment variable to `8080`;
 3. After {CANVAS} uploads the assets to the `dev-deployment-upload-service` listening inside your image, and the service finishes unzipping and placing the files in the configured directory, it's expected that an application will start and provide an endpoint `/q/health` that responds with **`HTTP 200`** so that {CANVAS} can acknowledge that the application started successfully and is running;
 
-== Example 1: Using the Canvas Dev Deployment Base image
+== Example 1: Using the BAMOE Canvas Dev Deployment Base image
 
 The `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}` image is used as a base since it already has the `dev-deployment-upload-service` pre-configured.
 

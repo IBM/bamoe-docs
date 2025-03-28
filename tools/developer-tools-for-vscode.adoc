@@ -1,109 +1,83 @@
-= Developer Tools for VS Code
+= BAMOE Developer Tools for VS Code
 include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
 
-{PRODUCT_SHORT} provides a useful VS Code Extension that bundles graphical Editors for BPMN, DMN files, and SCESIM files.
+{PRODUCT_SHORT} provides a useful VS Code Extension that bundles graphical Editors for BPMN, DMN, and SCESIM files.
 The {DEV_TOOLS} extension can be downloaded from the https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[VS Code Marketplace].
 
-The bundled BPMN, DMN and Test Scenario Editors are made available through the KIE DMN Editor and KIE BPMN Editor extensions, and they include the same features that are available on {CANVAS}.
-Static file validation, DMN Runner, and Dev Deployments are not available for {DEV_TOOLS}, however it is possible to get a similar experience of DMN Runner with the Test Scenario Editor.
-For more information see below.
+Static file validation, DMN Runner, and Dev Deployments are not available for {DEV_TOOLS}, however it is possible to get a similar experience of DMN Runner with the Test Scenario Editor. 
+
+For more information, see the following sections.
 
 == DMN Editor
 In {DEV_TOOLS} you can consume DMN files in the following ways:
 
-* **New DMN Editor**:
-+
+**New DMN Editor**:
+
 image::developer-tools/dmn-editor-new.gif[]
-+
-Since {PRODUCT_SHORT} {VERSION_911} a new DMN Editor is available. That is implemented with a modern technologies stack and with native support of DMN 1.5 specifications. This new editor can open 1.2, 1.3, 1.4, and 1.5 DMN file versions, and it automatically saves them to DMN 1.5. If you are upgrading from a previous {PRODUCT_SHORT} version (e.g. {VERSION_90X} or {VERSION_80X}), your DMN files will be automatically converted to DMN 1.5 version without any loss of logic.
 
-* **Classic DMN Editor**:
-+
+Since {PRODUCT_SHORT} {VERSION_911}, a new DMN Editor is available. It is implemented with a modern technologies stack and native support of DMN 1.5 specifications. 
+
+The new editor can open 1.2, 1.3, 1.4, and 1.5 DMN file versions, and it automatically saves them to DMN 1.5. If you are upgrading from a previous {PRODUCT_SHORT} version, for example, {VERSION_90X} or {VERSION_80X}, your DMN files will be automatically converted to DMN 1.5 version without any loss of logic.
+
+**DMN Editor (classic)**:
+
 image::developer-tools/dmn-editor-classic.gif[]
-+
-This is the classic version of the DMN Editor inherited from {PRODUCT_SHORT} {VERSION_80X}. This editor can open 1.1, 1.2, and 1.3 DMN file versions only, and it saves them to version 1.2.
-+
-NOTE: The Classic DMN Editor should be considered a deprecated tool. That means, no new feature will land in this editor version and it will be eventually removed in a future {PRODUCT_SHORT} version.
 
-The new Editor is currently set as the default choice for DMN assets. The steps to switch to the classic Editor are:
+This is the classic version of the DMN Editor inherited from {PRODUCT_SHORT} {VERSION_80X}. This editor can open 1.1, 1.2, and 1.3 DMN file versions only, and it saves them to version 1.2.
+
+[NOTE]
+====
+The DMN Editor (classic) should be considered a deprecated tool. That means, no new feature will land in this editor version and it will be eventually removed in a future {PRODUCT_SHORT} version.
+====
+The new Editor is currently set as the default choice for DMN assets. 
 
 image::developer-tools/dmn-editor-switch-version.png[]
 
-. Right-click on the currently opened DMN file tab
+Following are the steps to switch to the DMN Editor (classic):
+
+. Right-click the currently opened DMN file tab.
 . Select `Reopen Editor with...`
-. Select `BAMOE DMN Editor (classic)`
-. In the same menu, it's possible selecting `Configure default editor for '*.dmn'...` to change the default editor in your local machine
+. Select `BAMOE DMN/Test Scenario Editors (classic)`.
+. Select `Configure default editor for '*.dmn'...` in the same menu to change the default editor in your local machine.
 
-== Importing DMN Data Types from Java classes
+=== Test Scenario Editor
+Test Scenarios in {PRODUCT_SHORT} enable you to validate the functionality of business rules (for rules-based Test Scenarios) or DMN models (for DMN-based Test Scenarios) before deploying them into a production environment.
 
-{DEV_TOOLS} allows you to create DMN Data Types directly from Java POJOs. This step-by-step guide aims to describe how effectively using it.
+With a Test Scenario, use data from your project to set given conditions and expected results based on one or more defined business rules. When you run the scenario, the expected results and actual results of the rule instance are compared.
+If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
 
-NOTE: This feature is currently available in the Classic DMN Editor only.
+[NOTE]
+====
+The current version of the Test Scenario Editor does not support the DRL-based Test Scenarios at the moment.
+====
 
-=== Prerequisites
-* {DEV_TOOLS} {VERSION_911}
-* VSCode (1.66.0+)
-* Language Support for Java(TM) by Red Hat (1.31+) VSCode extension
-* Your domain’s Java Classes;
-* The Activator, a Java class file (Activator.java) required to activate the functionality;
+In {DEV_TOOLS}, you can author `scesim` files in the following ways:
 
-=== Project Setup
-Any {PRODUCT_SHORT} project that holds DMN assets is a perfect pick can be used as a reference. This guide will refer to an existing project that lives in the xref:../getting-started/examples.html[kie-kogito-examples], which already contains DMN assets. The steps to follow are:
+**New Test Scenario Editor**:
 
-1. Clone the `incubator-kie-kogito-examples` repository.
-2. Open VSCode and navigate to `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-quarkus-example`.
-3. Add the Java Classes you need to convert to DMN Data Type in any package under the `src/main/java` directory of your {PRODUCT_SHORT} project.
-4. In the same package defined in the previous point, create the  `Activator` Java Class. The Activator class **must** be an empty Java Class exactly named "Activator.java". Any change or additional code can affect negatively the feature behavior.
-+
-image::developer-tools/dmn-import-java-classes-activator.png[]
+image::developer-tools/scesim-editor-new.png[]
 
-=== Importing your Java Classes as DMN Types
+Since {PRODUCT_SHORT} {VERSION_920}, a new Test Scenario Editor is available. If you are upgrading from a previous version, for example, {VERSION_90X} or {VERSION_80X}, your `*.scesim` files will be compatible with the new Editor.
 
-Open your target DMN file, the reference for this guide is the `TrafficViolation.dmn` file already available in the example project. Go to the `Data Types` tab. Here, you should notice a  button: `Import Java Classes`.
-Be aware that this button is enabled only if the previously described requirements are satisfied.
+**Test Scenario Editor (classic)**:
 
-image::developer-tools/dmn-import-java-classes-button.png[]
+This is the classic version of the Test Scenario Editor inherited from {PRODUCT_SHORT} {VERSION_80X}.
 
-After clicking that button, the Import Java Classes panel will appear. At this point, follow these steps:
+[NOTE]
+====
+The Test Scenario Editor (classic) should be considered as a deprecated tool, which means that no new feature will exist in this editor version and it will be removed eventually in the future {PRODUCT_SHORT} version. This editor parses DMN assets generated with the DMN Editor (classic) only (DMN version 1.2).
+====
 
-* **Select Java Classes:** In the search box, put the name of the Java Class you want to import as a DMN Type. You can use the class simple name (eg. Book) or the full qualified name (eg. dto.Book). Below the search box, a list with all Java Classes that match the provided key will appear. Select the ones you want to import. When ready, click on the `Next` button.
-+
-image::developer-tools/dmn-import-java-classes-selection.png[]
-+
-* **Select Fields and Review:** In this section, the list of all Java Classes' fields will be shown.
-+
-image::developer-tools/dmn-import-java-classes-fields.png[]
-+
-* **Import:** Press the `Import` button. This will automatically import the selected Java Class in the DMN Data Type tab.
-+
-image::developer-tools/dmn-import-java-classes-imported.png[]
+The new Editor is currently set as the default choice for `scesim` assets. 
 
-== Running unit tests with Test Scenario
+image::developer-tools/scesim-editor-switch-version.png[]
 
-Running the unit test with Test scenarios enable you to validate the functionality of business decisions and business decision data during project development. Test Scenario models can be created and modified with VS Code Extension. 
+Following are the steps to switch to the Test Scenario Editor (classic):
 
-=== Setup and creation of Test Scenarios
+. Right-click the currently opened `scesim` file tab.
+. Select `Reopen Editor with...`
+. Select `BAMOE DMN/Test Scenario Editors (classic)`.
+. Select `Configure default editor for '*.scesim'...` in the same menu to change the default editor in your local machine.
 
-Refer to xref:../editing/authoring-scesim.html[Authoring Test Scenario] for setup and scenario creation.
-
-=== Executing the Test Scenario
-1. **Save the File**:
-   Save the `.scesim` file (`CTRL+S`).
-2. **Run Tests**:
-   Open a terminal in your project's root directory (eg. the `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-pmml-quarkus-example`) and execute:
-+
-[source,console]
-----
-   $ mvn clean test
-----
-+
-
-Alternatively, if you installed the `Language Support for Java(TM) by Red Hat` extension, run the test from `KogitoScenarioJunitActivator.java` using the `Run Java` button in VSCode.
-3. **Verify Results**:
-   Check the results to ensure the scenarios pass. The test results will be visible in your Terminal after the completion of the `mvn clean test` command.
-+
-image::developer-tools/scesim-runner-results.png[]
-+
-Using the `Run Java` button provided by `Language Support for Java(TM) by Red Hat`, the test results will appear in the native VSCode `Test Results` window.
-+
-image::developer-tools/scesim-java-test-runner-results.png[]
+The `scesim` files produced by the new Test Scenario Editor can be used by the Test Scenario Editor (classic).

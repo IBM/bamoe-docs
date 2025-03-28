@@ -1,0 +1,286 @@
+= Managing live Workflows using BAMOE Management Console
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+{MANAGEMENT_CONSOLE} is a web application for viewing the state of all available _Business Services_ and managing and interacting with process instances:
+
+.{MANAGEMENT_CONSOLE}
+image::runtime-services-modeling/mgmt-console-process-instances.png[Image of {MANAGEMENT_CONSOLE}]
+
+You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, complete User Tasks and manage Jobs.
+
+In order to be compatible with {MANAGEMENT_CONSOLE} your _Business Services_ must use the following {PRODUCT_SHORT} components:
+
+* *{PRODUCT_SHORT} Data-Index service*: Enables the {MANAGEMENT_CONSOLE} to access stored events related to processes and domain data from your _Business Services_. The Data-Index service requires PostgreSQL persistence.
+* *{PRODUCT_SHORT} Process management add-on*: Enables the {MANAGEMENT_CONSOLE} to interact with the Process data from your _Business Services_ through the add-on REST endpoint `/management/processes`.
+If you do not enable this add-on for your {PRODUCT_SHORT} service, the {MANAGEMENT_CONSOLE} provides read-only access to your service data without the ability to modify instances, such as aborting Process instances.
+
+To visualize the process instance execution path at the {MANAGEMENT_CONSOLE}, add the following add-on:
+
+* *{PRODUCT_SHORT} Process SVG add-on*: Enables the Process SVG diagram to visualize the process instance execution path.
+If this add-on is not enabled for your {PRODUCT_SHORT} service, the {MANAGEMENT_CONSOLE} does not display the diagram panel.
+
+---
+
+== Running the {MANAGEMENT_CONSOLE}
+
+You can run the {MANAGEMENT_CONSOLE} container image locally or add it to your {PRODUCT_SHORT} infrastructure on OpenShift.
+
+.Local Docker container
+. In a terminal, enter the following command to run the {MANAGEMENT_CONSOLE} locally:
++
+.Running the {MANAGEMENT_CONSOLE}
+[source,shell,subs="attributes"]
+----
+docker run -p 8280:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
+----
++
+[NOTE]
+====
+The default port for the {MANAGEMENT_CONSOLE} is 8080, but this example specifies port 8280 to avoid conflicts with the example {PRODUCT_SHORT} service running at port 8080.
+====
+
+For installing to OpenShift or any other Kubernetes cluster, refer to xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}]
+
+== Using the {MANAGEMENT_CONSOLE} features
+
+{MANAGEMENT_CONSOLE} consists of the following tabs that allow you to interact with your process instances and data:
+
+* *Process Instances*: List process and subprocess instances and filter them by status or business key;
+
+* *Jobs*: List available jobs, filter them by status, and perform actions for any individual one, such as view details, reschedule, or cancel.
+
+* *Tasks*: List User Tasks from Processes, filter them by status or name, and submit forms to fulfill tasks.
+
+But before you can use these tabs, you need to connect your {PRODUCT_SHORT} service to the {MANAGEMENT_CONSOLE}.
+
+=== Connecting to a {PRODUCT_SHORT} service instance
+
+image::runtime-services-modeling/mgmt-console-home-no-connections.png[Image of {MANAGEMENT_CONSOLE} home page without connections]
+
+To do so, click on the **+ Connect to a runtime…** button and fill in the required information on the
+modal:
+
+- **Alias**: The name to give your connected {PRODUCT_SHORT} service instance (can be anything that helps you identify it).
+- **URL**: The {PRODUCT_SHORT} service root URL (E.g., http://localhost:8080).
+- **Force login prompt (for secured runtimes only)**: Check this if you are already logged in your Identity Provider but would like to log in again (maybe with a different user).
+
+More settings are available in the **Advanced OpenID Connect settings** section:
+
+- **Client ID**: Overrides the Client ID used for this connection. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID` environment variable.
+- **Scope**: Overrides the scopes requested to the Identity Provider. Useful from some Identity Providers that, for example, will only grant a Refresh Token if the `offline_access` scope is included in the token request. Defaults to `openid email profile`.
+- **Audience**: This is the `audience` parameter in the Authorization request. Used to identify the service that the token is intended for. Empty by default.
+
+image::runtime-services-modeling/mgmt-console-home-add-connection-modal-filled.png[Image of {MANAGEMENT_CONSOLE} new connection modal]
+
+If your {PRODUCT_SHORT} service uses OpenID Connect authentication, you should be redirected to the Identity Provider
+(IdP) login page or, if you’re already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your
+{PRODUCT_SHORT} service is unsecured, it should connect directly.
+
+Once logged in, the management pages will be displayed in the side menu, listing Process Instances,
+Jobs, and Tasks.
+
+image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.gif[Image of {MANAGEMENT_CONSOLE} new connection modal]
+
+[NOTE]
+For information on how to secure your {PRODUCT_SHORT} service and expose the Indentity Provider URL to the {MANAGEMENT_CONSOLE} check xref:./security.adoc[Configuring Business Service security]
+
+=== Process Instances
+
+.Process Instances tab
+image::runtime-services-modeling/mgmt-console-process-instances.png[Image of Process Instance list section]
+
+The Process Instances tab shows the list of process instances available. They are displayed in an expandable list, which shows all the child process instances of the particular process instance when expanded.
+
+Each row in the list contains the information about the process instance, including details like _name_, _status_, _endpoint_ etc. The list also provides many ways to filter out the process instances and perform management operations.
+
+.Process Details page
+image::runtime-services-modeling/mgmt-console-process-instances-details.png[Image of Process Instance details in {MANAGEMENT_CONSOLE}]
+
+The *Process Details* page consists of the following panels:
+
+* Process Diagram panel
+* Details panel
+* Process Variables panel
+* Timeline panel
+* Node Trigger panel
+* Milestones panel
+* Jobs panel
+
+
+==== Process Diagram panel:
+--
+This panel enables you to explore the Process diagram and execution path of the related process instance.
+The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` resources using the {PRODUCT_SHORT} Process SVG add-on configuration included in the {MANAGEMENT_CONSOLE}.
+
+.Process Diagram panel
+image::runtime-services-modeling/mgmt-console-process-diagram-panel.png[Image of Process instance diagram panel]
+
+This panel includes different controls to view the Process diagram, such as *Selection*, *Pan*, *Zoom in*, *Zoom out*, and *Fit to viewer*.
+--
+
+==== Details panel:
+--
+This panel displays the basic Process instance information and provides links to the related Process runtime UI.
+If the Process instance is related to other Process instances, then links to the parent and subprocess instances are also available in the *Details* panel.
+
+.Details panel
+image::runtime-services-modeling/mgmt-console-details-panel.png[Image of Process instance details panel]
+
+The Details panel consists of the following fields:
+
+* *Name*: The Process definition ID related to the Process instance.
+* *Business key*: Optional business key of the Process instance.
+* *State*: The state of the Process instance. The state of a Process instance can be pending, active, completed, aborted, suspended, or error.
+* *Id*: The unique identifier of the Process instance.
+* *Endpoint*: The endpoint of the Process instance. You can click the displayed endpoint to view the Process or application UI that triggered the Process instance.
++
+.Process instance details endpoint
+image::runtime-services-modeling/mgmt-console-process-details-endpoint.png[Image of Process instance details endpoint in {MANAGEMENT_CONSOLE}]
+
+* *Start*: Time reference indicating when the Process instance is started.
+* *Last Updated*: Time reference indicating when the Process instance is updated.
+* *End*: Time reference indicating when the Process instance is completed.
+* *Parent Process*: Parent Process instance of the instance (if linked). You can click and navigate to the parent Process instance.
+* *Sub Processes*: Subprocess of the instance (if linked). You can click and navigate to the subprocess instances.
+--
+
+==== Process Variables panel:
+--
+The *Process Variables* panel displays the Process instance domain data in a tree structure.
+When you hover the mouse on different elements, the available actions are displayed.
+
+.Process Variables panel
+image::runtime-services-modeling/mgmt-console-process-variable-panel.png[Image of Process variables panel  in {MANAGEMENT_CONSOLE}]
+
+.Actions in Process Variables panel
+image::runtime-services-modeling/mgmt-console-process-variable-actions.png[Image of Process variables panel available actions in {MANAGEMENT_CONSOLE}]
+
+The process variables in the *Process Variables* panel consists of the following actions:
+
+* Expand or collapse: Enables you to expand or collapse an element.
+* Add item: Enables you to add a new key. When you add a new key, it contains null values, which you can edit if required.
++
+.Add new key
+image::runtime-services-modeling/mgmt-console-process-variable-add.png[Steps to add a new variable to a Process instance in {MANAGEMENT_CONSOLE}]
+
+* Copy: Enables you to copy the selected value in clipboard.
+* Edit: Enables you to edit the selected element value.
+* Remove: Enables you to remove the selected element.
+
+If there are pending changes to be saved, the panel displays *Changes are not saved yet* message.
+To save the changes that you made to the process variable, click *Save*, or click *Abort* to abort the changes.
+If you want to revert the changes, click the refresh icon.
+--
+
+==== Timeline panel:
+--
+The *Timeline* panel displays the list of node instances related to the Process instance sorted by the start time.
+Each node consists of an icon, indicating the state of the node, such as active, completed, or error.
+
+.Timeline panel
+image::runtime-services-modeling/mgmt-console-process-timeline-panel.png[Image of Timeline panel showing the related node instances]
+
+The actions that are available for an active node include retriggering and canceling a node.
+Whereas the actions for an error node include retrying and skipping the node.
+The node actions in the *Timeline* panel are connected with the _Business Service_ to perform the requested action.
+
+If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*.
+--
+
+==== Node Trigger panel:
+--
+The *Node Trigger* panel displays the list of all process definition nodes in a drop-down.
+When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*.
+Click the *Trigger* button, to trigger the selected node.
+
+.Node Trigger panel
+image::runtime-services-modeling/mgmt-console-node-trigger-panel.png[Image of node trigger panel in {MANAGEMENT_CONSOLE}]
+--
+
+==== Milestones panel:
+--
+The *Milestones* panel displays a list of the milestones for the Process instance, if applicable.
+
+.Milestones panel
+image::runtime-services-modeling/mgmt-console-milestones-panel.png[Image of milestones panel in {MANAGEMENT_CONSOLE}]
+--
+
+==== Jobs panel:
+--
+The *Jobs* panel displays the list of available jobs that are related to the Process instance.
+
+.Jobs panel
+image::runtime-services-modeling/mgmt-console-jobs-panel.png[Image of jobs panel in {MANAGEMENT_CONSOLE}]
+
+.Job details
+image::runtime-services-modeling/mgmt-console-jobs-panel-details.png[Image of jobs panel details in {MANAGEMENT_CONSOLE}]
+
+You can reschedule or cancel a job that is in scheduled or error state.
+You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
+--
+
+=== Jobs
+
+The *Jobs* tab displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, rescheduling a job, or canceling a job.
+
+.Jobs page
+image::runtime-services-modeling/mgmt-console-jobs-list.png[Image of Jobs List page in {MANAGEMENT_CONSOLE}]
+
+Clicking on the actions menu for each actions shows a list of available actions: *Details*, *Reschedule*, and *Cancel*.
+
+.Job actions menu
+image::runtime-services-modeling/mgmt-console-job-menu.png[Image of Jobs List page in {MANAGEMENT_CONSOLE}]
+
+==== Jobs Details
+
+.Job details modal
+image::runtime-services-modeling/mgmt-console-job-details.png[Image of Jobs details modal]
+
+==== Jobs reschedule
+
+.Job reschedule modal
+image::runtime-services-modeling/mgmt-console-job-reschedule.png[Image of Jobs reschedule]
+
+==== Jobs cancel
+
+.Job cancel success modal
+image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel modal]
+
+You can also cancel the multiple jobs at the same time by selecting the jobs to be canceled and clicking the *Cancel Selected* button.
+
+.Jobs batch cancel
+image::runtime-services-modeling/mgmt-console-job-batch-cancel.png[Image of Jobs cancel modal]
+
+=== Tasks
+
+The tasks panel shows a list of User Tasks which are available for a process. Each column contains detailed information about the user task which are - _Name_, _Process_, _Priority_, _Status_, _Started_ and _Last update_. The columns are sortable.
+
+==== Tasks List
+
+.Tasks list
+image::runtime-services-modeling/mgmt-console-task-list.png[Image of Task List page in {MANAGEMENT_CONSOLE}]
+
+Tasks can be filtered by the status and task name, and clicking on the name of the user task will navigate to Task Details page, with the Task Form and Task Details panel.
+
+==== Tasks Details
+
+.Task details
+image::runtime-services-modeling/mgmt-console-task-form.png[Image of Task Form page in {MANAGEMENT_CONSOLE}]
+
+Clicking on the **View Details** button opens a side panel with more details regarding the current task, including the parent process, possible assigned users/groups, id, name, and state.
+
+The form is autogenerated based on the User Task defined in the parent process definition and filling and submitting it will progress the task to the next phase of the task lifecycle.
+
+==== Impersonation
+
+User Tasks can be assigned to a specific user or user group, and submitting them is limited to that assigned user. But when using a unsecured {PRODUCT_SHORT} service or authenticated as a user with impersonation powers, you can submit the task as the assigned user by impersonating them.
+
+image::runtime-services-modeling/mgmt-console-task-impersonation.png[Image of the Impersonation form]
+
+Fill the **User** and/or **Group** fields in the Impersonation form and click ** Apply** to start impersonating a specific user or user group.
+
+To stop impersonation, click the **Reset** button.
+
+[NOTE]
+When viewing User Tasks from a secured {PRODUCT_SHORT} service with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
