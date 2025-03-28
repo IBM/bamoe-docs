@@ -30,7 +30,7 @@ The following sections describe the Process Instance Management API in detail.
 |===
 |*Type* |GET
 
-|*Description* | It returns the list of process definition names that are deployed in the runtime.
+|*Description* | This endpoint returns the list of process definition names that are deployed in the runtime.
 
 |*Inputs* |
 
@@ -52,7 +52,7 @@ The following sections describe the Process Instance Management API in detail.
 |===
 |*Type* |GET
 
-|*Description* |It returns the complete process information of the specified processId.
+|*Description* |This endpoint returns the complete process information of the specified processId.
 
 |*Inputs*|
 * processId: String (PathParameter)
@@ -108,7 +108,7 @@ The following sections describe the Process Instance Management API in detail.
 |===
 |*Type* |GET
 
-|*Description* |It returns the error details corresponding to the failed process instance for the given processId
+|*Description* |This endpoint returns the error details corresponding to the failed process instance for the given processId
 
 |*Inputs* |
 * processId: String (PathParameter)
@@ -173,7 +173,7 @@ The following sections describe the Process Instance Management API in detail.
 |===
 |*Type* |POST
 
-|*Description* |It returns the list of workItems in the specified process instance
+|*Description* |This endpoint returns the list of workItems in the specified process instance
 
 |*Inputs* |
 * processId: String (PathParameter)
@@ -424,7 +424,7 @@ Below details will be included.
 |===
 
 == Source File Management APIs
-The Source File Management APIs in {PRODUCT_SHORT} provides endpoints that allow users to dynamically retrieve BPMN source files at runtime. This API is provided by the `kie-addons-quarkus-source-files extension`.
+The Source File Management APIs in {PRODUCT_SHORT} provides endpoints that allow users to dynamically retrieve BPMN source files at runtime. This API is provided by the `kie-addons-quarkus-source-files` extension.
 [source,xml]
 ----
 <dependency>
@@ -506,11 +506,10 @@ Below details will be returned.
 
 |===
 
-////
 
 == Callback Jobs Service Management APIs
 
-In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage callbacks into the runtime engine from an external job service. These callbacks allow external systems, such as the job service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the `kogito-addons-quarkus-jobs-management extension`.
+In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage callbacks into the runtime engine from an external job service. These callbacks allow external systems, such as the job service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the `kogito-addons-quarkus-jobs-management` extension.
 
 [source,xml]
 ----
@@ -519,6 +518,10 @@ In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage
       <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
 </dependency>
 ----
+
+NOTE: This API endpoint is not primarily intended for manual invocation.
+
+////
 ===  /management/jobs/{processId}/instances/{processInstanceId}/timers/{timerId}
 
 [cols="1,1a"]
@@ -550,3 +553,76 @@ In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage
 |===
 ////
 
+== Job Resource APIs
+
+In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
+
+== Job Resource V2 APIs
+
+In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
+
+
+== Job Service Management Resource APIs
+
+In {PRODUCT_SHORT}, this API is currently not used. It might be removed in future versions of the product.
+
+== Process Svg Resource APIs
+
+In {PRODUCT_SHORT}, the Process Svg Resource APIs can be used to obtain a graphical representation of a process in svg format. There are two variants of the svg file, a static one for the process definition itself, as well as a dynamic one for an active process instance which also contains information about the process execution. This API is provided by the `kie-addons-quarkus-process-svg` extension.
+
+[source,xml]
+----
+<dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-addons-quarkus-process-svg</artifactId>
+</dependency>
+----
+
+===  /svg/processes/{processId}
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the svg file for a process definition.
+
+|*Inputs* |
+* processId : String (PathParameter)
+
+|*Output* a| * Returns the svg resource for a process definition. The content type of the returned data is `image/svg+xml`.
+
+* A _NOT FOUND_ error is returned if the `processId` is not found.
+
+|*Example* a|
+
+   curl -X 'GET' \
+  'http://localhost:8080/svg/processes/{processId}' \
+  -H 'accept: */*'
+
+|===
+
+===  /svg/processes/{processId}/{processInstanceId}
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the svg file for a process instance.
+
+|*Inputs* |
+* processId : String (PathParameter)
+* processInstanceId : String (PathParameter)
+
+|*Output* a| * Returns the svg resource for a process instance, including markup information of the executed nodes. The content type of the returned data is `image/svg+xml`.
+
+* If the `processInstanceId` is not found, the svg of the process definition is returned.
+
+* A _NOT FOUND_ error is returned if the `processId` is not found.
+
+|*Example* a|
+
+   curl -X 'GET' \
+  'http://localhost:8080/svg/processes/{processId}/{processInstanceId}' \
+  -H 'accept: */*'
+
+|===
