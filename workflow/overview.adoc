@@ -46,7 +46,7 @@ Data-Audit:: allows the inspection of what happened during workflow execution. I
 
 Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
 
-User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a User Task node in the workflow. The User Task node uses this subsystem to implement User Tasks.
 
 === Required deployments
 Storage:: This is another deployment where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
@@ -284,32 +284,32 @@ quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://loca
 NOTE: Use managed dependencies or specify the version of the dependencies. 
 
 [#user-tasks]
-== The User Tasks Subsystem
+== The User Tasks subsystem
 
-In {PRODUCT_SHORT} `User Task` is a special type of activity that cannot be automatically executed by the workflow engine, requiring the
-manual intervention of a user. When a process instance reaches a `User Task` node, a new user task is created and the process
-instance is stopped waiting for the completion of the user task. Once the user task completes, the process can continue its execution normally.
+In Workflows built with BPMN, `User Task` is a special type of activity that cannot be automatically executed by the workflow engine, requiring the
+manual intervention of a user. When a process instance reaches a `User Task` node, a new User Task is created and the process
+instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
 
-The User Task subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
-tasks through the different phases of their User Task Lifecycle until they reach a `Completion state.
+The User Tasks subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
+tasks through the different phases of their User Task life cycle until they reach a `Completion state.
 
-The User Task Subsystem provides the following features:
+The User Tasks subsystem provides the following features:
 
 * Runs as a collocated service in the process engine with no extra configuration in the required in the application.
 * Generic set of REST Apis to interact with it, enabling users to transition tasks between the different lifecycle phases,
 modify task data (inputs and outputs), add comments and attachments on tasks.
 * Customizable *Task Assignment Strategy* to automatically assign tasks to users during the task `Activate` phase (also known as `UserGroupCallback` in previous {PRODUCT_SHORT} versions)
-* Customizable User Task Lifecycle
+* Customizable User Task life cycle
 
-=== The User Task LifeCycle
+=== The User Task life cycle
 
-The User Task Subsystem defines a Default Lifecycle that enables users to transition a task through different phases that will change
+The User Task subsystem defines a Default life cycle that enables users to transition a task through different phases that will change
 the task state until it reaches a `Completion` state, allowing the associated process instance to continue executing.
 
-.Default User Task Lifecycle
+.Default User Task life cycle
 image::../images/wf-usertaks-lifecycle.png[]
 
-With the Default Lifecycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment,
+With the Default life cycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment,
  it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users
 that are allowed to work with it.
 The task will then remain in *Ready* state until a user claims it, which will make the task pass through the `Claim` phase
