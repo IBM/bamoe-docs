@@ -124,7 +124,7 @@ The Knative Eventing add-on is used in the _Business Service_ project for messag
 
 The add-on processes the https://knative.dev/development/developer/eventing/sources/sinkbinding/[`K_SINK`] and https://knative.dev/development/developer/eventing/sources/sinkbinding/reference/#cloudevent-overrides[`K_CE_OVERRIDES`] environment variables injected by Knative Eventing controllers (`SinkBinding` or `KogitoSource`).
 
-The service requires the https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/messaging[{PRODUCT} Messaging] and https://quarkus.io/guides/reactive-messaging-http.html[Quarkus HTTP connector] libraries to wire the {PRODUCT} service with a given sink. The {PRODUCT} Messaging and Quarkus HTTP connector perform as dependencies for the Knative Eventing add-on.
+The service requires the https://github.com/apache/incubator-kie-kogito-runtimes/tree/main/addons/common/messaging[{PRODUCT} Messaging] and https://quarkus.ioversion/3.15/guides/reactive-messaging-http.html[Quarkus HTTP connector] libraries to wire the _Business Service_ with a given sink. The {PRODUCT} Messaging and Quarkus HTTP connector perform as dependencies for the Knative Eventing add-on.
 
 
 To use the Knative Eventing add-on, add the following code to the `pom.xml` file of your project:
@@ -156,7 +156,7 @@ After adding the previous dependency, the add-on generates Knative Eventing reso
 
 For each consumed event, the add-on generates a https://knative.dev/docs/eventing/broker/triggers/[Knative Eventing Trigger] as shown in the following example:
 
-.Example Knative `Trigger` custom resource for a {PRODUCT} service with `Broker` binding
+.Example Knative `Trigger` custom resource for a _Business Service_ with `Broker` binding
 [source,yaml]
 ----
 apiVersion: eventing.knative.dev/v1
@@ -175,7 +175,7 @@ spec:
       name: process-knative-quickstart-quarkus
 ----
 
-The `Trigger` resource requires a subscriber to receive the events that are routed by the `Broker`. In this case, the current {PRODUCT} service work as a subscriber, and the Knative Eventing add-on uses the {PRODUCT} service deployment, which is configured by Quarkus Kubernetes.
+The `Trigger` resource requires a subscriber to receive the events that are routed by the `Broker`. In this case, the current _Business Service_ work as a subscriber, and the Knative Eventing add-on uses the _Business Service_ deployment, which is configured by Quarkus Kubernetes.
 
 If a `Broker` is not specified, the Knative Eventing add-on generates a default `InMemoryChannel` as follows:
 
@@ -191,7 +191,7 @@ metadata:
 If a `Broker` is configured in the target namespace, you can specify the `Broker` using the following property:
 `org.kie.kogito.addons.knative.eventing.broker=myKafkaBroker`.
 
-If the {PRODUCT} service contains any produced event definitions, the Knative Eventing add-on generates a https://knative.dev/development/eventing/custom-event-source/sinkbinding/[Knative Eventing `SinkBinding`], or a https://github.com/knative-sandbox/eventing-kogito#kogito-source[Knative Eventing `KogitoSource`]. By default, the `SinkBinding` is generated, but you can change this behavior by setting `org.kie.kogito.addons.knative.eventing.generate-kogito-source` property to `true`.
+If the _Business Service_ contains any produced event definitions, the Knative Eventing add-on generates a https://knative.dev/development/eventing/custom-event-source/sinkbinding/[Knative Eventing `SinkBinding`], or a https://github.com/knative-sandbox/eventing-kogito#kogito-source[Knative Eventing `KogitoSource`]. By default, the `SinkBinding` is generated, but you can change this behavior by setting `org.kie.kogito.addons.knative.eventing.generate-kogito-source` property to `true`.
 
 .Example `SinkBinding` custom resource for Knative Eventing
 [source,yaml]
@@ -466,7 +466,7 @@ quarkus.security.users.embedded.users.scott=4960d03c13b5aff4ca6886758a8be019
 quarkus.security.users.embedded.roles.scott=source-files-client
 ----
 
-To define a more robust authentication mechanism, you can refer to the https://quarkus.io/guides/security[Quarkus documentation].
+To define a more robust authentication mechanism, you can refer to the https://quarkus.io/version/3.15/guides/security[Quarkus documentation].
 
 The Source Files Add-on provides REST support for the following operation:
 
