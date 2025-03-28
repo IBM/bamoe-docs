@@ -2,94 +2,46 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-[id="proc-kogito-creating-project"]
-== Creating a Maven project for a {PRODUCT} service using {CANVAS}
+Building an executable application is the first step toward deploying _Business Services_ to production environment. There are several types of executables you can create, and trade-offs vary depending on your requirements. This section is divided between Quarkus and Spring Boot.
 
-[role="_abstract"]
-Before you can begin developing _Business Services_, you need to create a Maven project where you can build your Business Automation assets and any other related resources for your application.
+== Quarkus
 
-.Procedure
-. Run {CANVAS} - see the xref:../installation/canvas.adoc[Installation] chapter for more details on how to install and run it.
-. If you do not already have a project or an asset file, create a DMN or BPMN file.
-. Use the xref:../tools/applying-accelerators.adoc[Accelerators] functionality in {CANVAS} to create a project that is buildable and deployable.
+Quarkus support the following building modes. The command that you use depends on your preferred run mode and application environment:
 
-
-== Building the project
-.Procedure
-. Download the (project).zip archive to a local directory and extract the file.
-. In a command terminal, navigate to the extracted folder, and enter one of the following commands to build the project.
-
-Quarkus support the following building modes:
-
-* *JVM mode*: For compatibility with a Java virtual machine (JVM).
-* *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-
-The command that you use depends on your preferred run mode and application environment:
-
-* For JVM mode:
+* *a. JVM mode*: For compatibility with a Java virtual machine (JVM).
 +
-.On Quarkus
+.Building
 [source]
 ----
-$ mvn clean package
+mvn clean package
 ----
+.Running locally
 +
-* For native mode (requires GraalVM or Mandrel):
-+
-.On Quarkus only
 [source]
 ----
-$ mvn clean package -Dnative
+java -jar target/quarkus-app/quarkus-run.jar
 ----
-
-[id="proc-kogito-running-app"]
-== Running a _Business Service_
-
-[role="_abstract"]
-After you design the business decisions and processes for your {PRODUCT} service, you can run your Quarkus application in one of the following modes:
-
-* *Development mode*: For local testing. On Quarkus, development mode also offers live reload of your processes and decisions in your running applications for advanced debugging.
-* *JVM mode*: For compatibility with a Java virtual machine (JVM).
-* *Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-
-.Procedure
-In a command terminal, navigate to the project that contains your {PRODUCT} service and enter one of the following commands, depending on your preferred run mode and application environment:
-
-* For development mode:
 +
---
-.On Quarkus
+* *b. Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
++
+.Building in native mode
++
 [source]
 ----
-$ mvn clean compile quarkus:dev
+mvn clean package -Dnative
 ----
---
-* For JVM mode:
 +
---
-.On Quarkus
+.Running native binary locally
++
 [source]
 ----
-$ mvn clean package
-$ java -jar target/quarkus-app/quarkus-run.jar
+./target/sample-kogito-1.0-SNAPSHOT-runner
 ----
---
-
-* For native mode (requires GraalVM):
 +
---
-.On Quarkus only
-[source]
-----
-$ mvn clean package -Dnative
-$ ./target/sample-kogito-1.0-SNAPSHOT-runner
-----
---
-
 [NOTE]
 ========
 
-Alternatively, you can use a container builder image. You do not need to install GraalVM because a container containing GraalVM is pulled automatically. Note that the executable targets a Linux kernel by default. For example:
+Alternatively, you can use a container builder image for native builds. You do not need to install GraalVM because a container containing GraalVM is pulled automatically. Note that the executable targets Linux by default. For example:
 
 --
 .On Quarkus only (GraalVM native build using container)
@@ -109,19 +61,40 @@ $ mvn clean package -Dnative -Dquarkus.native.container-build -Dquarkus.native.b
 ----
 --
 
-========
-
-
 For further information about building a native image, see https://quarkus.io/guides/building-native-image#container-runtime[Quarkus - Building a Native Executable].
+
+========
++
+* *c. Container image*
++
+.Building
++
+[source]
+----
+mvn clean package -Pcontainer
+----
++
+.Running locally
++
+[source]
+----
+docker run -it --rm -p 8080:8080 dev.local/{USER}/my-business-service:latest
+----
 
 
 ---
 
 == Spring Boot
 
-=== Package and run
-
 Standard Maven or Java commands are required to package and start the generated application. Following are the commands:
 
-.	`mvn clean package`
-.	`java -jar ./target/(name_of_the_application).jar`
+.Building
+[source]
+----
+mvn clean package
+----
+.Running locally
+[source]
+----
+java -jar ./target/(name_of_the_application).jar
+----
