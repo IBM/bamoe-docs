@@ -5,174 +5,232 @@ include::../styles/images.adoc[]
 
 Listed below you can find all libraries included in {MVN_REPO}.
 
-Format:
+== BAMOE BOMs (Bill of Materials)
+
+To facilitate upgrading your _Business Services_ projects to newer versions of BAMOE and simplify version management, BAMOE provides BOMs, adhering to Maven's best pratices.
+
+More on Maven's https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Bill_of_Materials_.28BOM.29_POMs[Bill 
+of Materials (BOM) POMs guide].
+
+---
+
 ----
-groupId ::: artifactId
+com.ibm.bamoe : bamoe-bom
 ----
 
-== BAMOE BOMs (Bill of Materials)
+Gives your _Business Service_ project access to fully supported libraries.
+
+---
+
 ----
-com.ibm.bamoe ::: bamoe-bom
+com.ibm.bamoe : bamoe-techpreview-bom
+----
+
+Gives your _Business Service_ project access to libraries in technology preview state.
+
+== Decisions, Rules, and Decision Tables (Quarkus)
+Mandatory dependencies for enabling Decisions and Rules in your _Business Services_ with Quarkus.
+
+More at xref:../editing/quarkus-dmn-drl.adoc[Decisions and Rules services wih Quarkus].
+
+----
+org.drools : drools-quarkus-decisions
 ----
 ----
-com.ibm.bamoe ::: bamoe-techpreview-bom
+org.drools : drools-quarkus-rules
+----
+
+== Decisions, Rules, and Decision Tables (Spring Boot)
+Mandatory dependencies for enabling Decisions and Rules in your _Business Services_ with Spring Boot.
+
+More at xref:../editing/springboot-dmn-drl.adoc[Decisions and Rules services wih Spring Boot].
+
+----
+org.drools : drools-decisions-spring-boot-starter
+----
+----
+org.drools : drools-rules-spring-boot-starter
+----
+----
+org.kie.kogito : kogito-maven-plugin
+----
+
+== Decisions, Rules, and Decision Tables (Dev + testing)
+
+More at xref:../editing/authoring-scesim.adoc[Authoring unit tests with Test Scenarios].
+
+----
+org.kie.kogito : kogito-scenario-simulation
+----
+
+== Add-ons
+
+----
+org.kie : kie-addons-quarkus-events-decisions
+----
+----
+org.drools : drools-addons-quarkus-events-rules
+----
+
+----
+org.kie : kie-addons-springboot-events-decisions
+----
+----
+org.drools : drools-addons-springboot-events-rules
+----
+
+== Workflows (Quarkus)
+Mandatory dependencies for enabling Workflows in your _Business Services_ with Quarkus.
+
+More at xref:../workflow/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+
+----
+org.jbpm : jbpm-quarkus
+----
+----
+org.jbpm : jbpm-with-drools-quarkus
+----
+
+== Workflows (Spring Boot)
+
+Workflow services are currently not possible to be created on Spring Boot.
+
+== Workflows (Add-ons and extra features)
+----
+org.kie : kie-addons-quarkus-process-management
+----
+----
+org.kie : kie-addons-quarkus-events-process
+----
+----
+org.kie : kie-addons-quarkus-knative-eventing
+----
+----
+org.kie : kie-addons-quarkus-messaging
+----
+----
+org.jbpm : jbpm-addons-quarkus-mail
+----
+----
+org.kie.kogito : kogito-rest-workitem
+----
+
+== Workflows (Dev + testing)
+More at xref:../workflow/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+----
+org.jbpm : jbpm-quarkus-devui
+----
+----
+org.kie : kie-addons-quarkus-process-svg
+----
+----
+org.kie : kie-addons-quarkus-source-files
+----
+
+== Workflows (Stateful) persistence
+
+More at xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Configuring persistence for stateful Workflows].
+
+----
+org.kie : kie-addons-quarkus-persistence-jdbc
+----
+
+----
+com.ibm.bamoe : bamoe-mssql-mappings
+----
+
+== Workflows (Stateful) subsystem :: Data-Index
+
+More at xref:../workflow/overview.adoc#data-index[The Data-Index subsystem].
+
+----
+org.kie : kogito-addons-quarkus-data-index-jpa
+----
+
+== Workflows (Stateful) subsystem :: Data-Audit
+
+More at xref:../workflow/overview.adoc#data-audit[The Data-Audit subsystem].
+
+----
+org.kie : kogito-addons-quarkus-data-audit
+----
+----
+org.kie : kogito-addons-quarkus-data-audit-jpa
+----
+
+== Workflows (Stateful) subsystem :: Jobs Service
+
+More at xref:../workflow/overview.adoc#jobs-service[The Jobs Service subsystem].
+
+----
+org.kie : kogito-addons-quarkus-jobs
+----
+----
+org.kie : kogito-addons-quarkus-jobs-management
+----
+----
+org.kie.kogito : jobs-service-storage-jpa
+----
+
+== Workflows (Stateful) subsystem :: User Tasks
+
+More at xref:../workflow/overview.adoc#user-tasks[The User Tasks subsystem].
+
+----
+org.jbpm : jbpm-addons-quarkus-usertask-storage-jpa
+----
+
+== Monitoring
+
+More at xref:../runtime-services-modeling/monitoring-services.adoc[Monitoring Business Services].
+
+----
+org.kie : kie-addons-quarkus-monitoring-prometheus
+----
+----
+org.kie : kie-addons-springboot-monitoring-prometheus
+----
+
+== Decisions, Rules, and Decision Tables on embedded Java mode
+More at xref:../editing/dmn-decisions-embedded-java-mode.adoc[Executing Decisions in embedded Java mode] and More at xref:../editing/drl-rules-embedded-java-mode.adoc[Executing Rules in embedded Java mode].
+----
+org.drools : drools-core
+----
+----
+org.drools : drools-compiler
+----
+----
+org.drools : drools-model-compiler
+----
+----
+org.drools : drools-mvel
+----
+----
+org.drools : drools-decisiontables
+----
+----
+org.drools : drools-xml-support
+----
+----
+org.kie : kie-dmn-core
+----
+----
+org.kie : kie-maven-plugin
 ----
 
 == BAMOE ILMT Compliance libraries
-----
-com.ibm.bamoe ::: bamoe-ilmt-compliance-quarkus-dmoe
-----
-----
-com.ibm.bamoe ::: bamoe-ilmt-compliance-quarkus-pamoe
-----
-----
-com.ibm.bamoe ::: bamoe-ilmt-compliance-spring-boot-dmoe
-----
-----
-com.ibm.bamoe ::: bamoe-ilmt-compliance-spring-boot-pamoe
-----
 
-== Libraries
+More at xref:../installation/ilmt-overview.adoc[Installing → Licenses and tracking usage]
 
-=== Decisions, Rules, and Decision Tables (Quarkus)
 ----
-org.drools ::: drools-quarkus-decisions
+com.ibm.bamoe : bamoe-ilmt-compliance-quarkus-dmoe
 ----
 ----
-org.drools ::: drools-quarkus-rules
+com.ibm.bamoe : bamoe-ilmt-compliance-spring-boot-dmoe
 ----
-
-=== Decisions, Rules, and Decision Tables (Spring Boot)
 ----
-org.drools ::: drools-decisions-spring-boot-starter
+com.ibm.bamoe : bamoe-ilmt-compliance-quarkus-pamoe
 ----
 ----
-org.drools ::: drools-rules-spring-boot-starter
-----
-
-=== Decisions, Rules, and Decision Tables (Dev + testing)
-----
-org.kie.kogito ::: kogito-scenario-simulation
-----
-
-=== Workflows (Quarkus)
-----
-org.jbpm ::: jbpm-quarkus
-----
-----
-org.jbpm ::: jbpm-with-drools-quarkus
-----
-
-=== Workflows (Add-ons and extra features)
-----
-org.kie ::: kie-addons-quarkus-process-management
-----
-----
-org.kie ::: kie-addons-quarkus-events-decisions
-----
-----
-org.kie ::: kie-addons-springboot-events-decisions
-----
-----
-org.drools ::: drools-addons-quarkus-events-rules
-----
-----
-org.drools ::: drools-addons-springboot-events-rules
-----
-----
-org.kie ::: kie-addons-quarkus-events-process
-----
-----
-org.kie ::: kie-addons-quarkus-knative-eventing
-----
-----
-org.kie ::: kie-addons-quarkus-messaging
-----
-----
-org.jbpm ::: jbpm-addons-quarkus-mail
-----
-----
-org.kie.kogito ::: kogito-rest-workitem
-----
-
-=== Workflows (Dev + testing)
-----
-org.jbpm ::: jbpm-quarkus-devui
-----
-----
-org.kie ::: kie-addons-quarkus-process-svg
-----
-----
-org.kie ::: kie-addons-quarkus-source-files
-----
-
-=== Workflows (Stateful) persistence
-----
-org.kie ::: kie-addons-quarkus-persistence-jdbc
-----
-
-=== Workflows (Stateful) persistence
-_Additional dependency only for Microsoft SQL Server_
-----
-com.ibm.bamoe ::: bamoe-mssql-mappings
-----
-
-=== Workflows (Stateful) subsystem :: Data-Index
-----
-org.kie ::: kogito-addons-quarkus-data-index-jpa
-----
-
-=== Workflows (Stateful) subsystem :: Data-Audit
-----
-org.kie ::: kogito-addons-quarkus-data-audit
-----
-----
-org.kie ::: kogito-addons-quarkus-data-audit-jpa
-----
-
-=== Workflows (Stateful) subsystem :: Jobs Service
-----
-org.kie ::: kogito-addons-quarkus-jobs
-----
-----
-org.kie ::: kogito-addons-quarkus-jobs-management
-----
-----
-org.kie.kogito ::: jobs-service-storage-jpa
-----
-
-=== Workflows (Stateful) subsystem :: User Tasks
-----
-org.jbpm ::: jbpm-addons-quarkus-usertask-storage-jpa
-----
-
-=== Monitoring
-----
-org.kie ::: kie-addons-quarkus-monitoring-prometheus
-----
-----
-org.kie ::: kie-addons-springboot-monitoring-prometheus
-----
-
-=== Decisions, Rules, and Decision Tables on embedded Java mode
-----
-org.drools ::: drools-core
-----
-----
-org.drools ::: drools-compiler
-----
-----
-org.drools ::: drools-model-compiler
-----
-----
-org.drools ::: drools-mvel
-----
-----
-org.drools ::: drools-decisiontables
-----
-----
-org.drools ::: drools-xml-support
-----
-----
-org.kie ::: kie-dmn-core
+com.ibm.bamoe : bamoe-ilmt-compliance-spring-boot-pamoe
 ----
