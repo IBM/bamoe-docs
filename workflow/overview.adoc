@@ -40,83 +40,56 @@ Workflow engine:: The kogito API + jBPM workflow engine provides the workflow ex
 Process container:: This is the BPMN file compiled and wired in to the Workflow engine.
 
 === Add-ons
-User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
-
 Data-Index:: allows the last snapshot of the process state to be queried. The Workflow engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
 Data-Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
 
 Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
 
+User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a user task node in the workflow. The user task node uses this subsystem to implement user tasks.
+
 === Required deployments
 Storage:: This is another deployment where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
 .
 
-== The Jobs Service subsystem
-Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
-It is also used for User Tasks notifications.
+[#data-index]
+== The Data-Index subsystem
+The Data-Index subsystem is used to store a snapshot of the latest state of the process instance. 
 
-By collocating the Jobs Service within the {PRODUCT_SHORT} Runtime, the Jobs Service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
-It uses the Data Source as the app.
+.Graphical view of the Data-Index subsystem
+image::data-index.png[]
 
-The Jobs Service subsystem only supports Quarkus runtimes and storage can be PostgreSQL or Microsoft SQL Server.
+The concepts to understand the above picture are:
 
-=== How it works
+Transport:: the medium used to transfer events between the runtime and the Data-Index service. The transport is in-vm.
 
-.Graphical view of the Jobs Service flow
-image::job_service.png[]
+Storage:: the persistence tier of the Data-Index component.
 
-When a client invokes the Jobs Service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
-Once the request reaches the Jobs Service it creates the job internally, and stores the data on job status in the storage.
-When the job times out, the component calls the sink (either in-vm or via http request) to signal to the client.
+Data-Index:: the main component responsible for creating/updating the Data-Index, and for providing query capabilities.
 
-==== Definitions
-transport:: the medium used to transfer a message between client component and Jobs Service. The transport can be http, kafka or in-vm.
-sink:: is the client endpoint callback.
-storage:: is the persistence tier of the jobs being current scheduled.
-Jobs Service:: it the main component containing the logic of scheduling a job and storing data.
 
-=== Using the Jobs Service add-on
+=== Querying
 
-To use the Jobs Service add-on in your project you must include the dependency related to the transport tier (in-vm):
+Data-Index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
+
+[source,]
+----
+http://localhost:8080/<root-path>/graphql-ui/
+----
+
+to start working with the queries defined by the schema aforementioned.
+
+=== Using the Data-Index add-on
+
+Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data-Index and the transport tier simultaneously.
 
 [source,xml]
 ----
-<!-- Required for the Jobs Service add-on transport tier definition -->
 <dependency>
   <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-</dependency>
-
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs</artifactId>
+  <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
 </dependency>
 ----
-
-Following that you must include the storage to be used, PostgreSQL:
-
-[source,xml]
-----
-<!-- Required for the Jobs Service add-on storage definition -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>jobs-service-storage-jpa</artifactId>
-</dependency>
-----
-
-In this case for postgresql in-vm, your main available data source is automatically used. Here is an example of this configuration:
-	
-[source,properties]
-----
-kogito.persistence.type=jdbc
-quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=kogito-user
-quarkus.datasource.password=kogito-pass
-quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://localhost:5432/kogito}
-----
-
-NOTE: Use managed dependencies or specify the version of the dependencies. 
 
 [#data-audit]
 == The Data-Audit subsystem
@@ -242,43 +215,73 @@ Each implementation might require additional dependencies. In this case a driver
 
 No additional configuration is required besides the default datasource use by the application already.
 
-== The Data-Index subsystem
-The Data-Index subsystem is used to store a snapshot of the latest state of the process instance. 
 
-.Graphical view of the Data-Index subsystem
-image::data-index.png[]
+[#jobs-service]
+== The Jobs Service subsystem
+Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
+It is also used for User Tasks notifications.
 
-The concepts to understand the above picture are:
+By collocating the Jobs Service within the {PRODUCT_SHORT} Runtime, the Jobs Service add-on enables direct communication between both services inside a {PRODUCT_SHORT} App.
+It uses the Data Source as the app.
 
-Transport:: the medium used to transfer events between the runtime and the Data-Index service. The transport is in-vm.
+The Jobs Service subsystem only supports Quarkus runtimes and storage can be PostgreSQL or Microsoft SQL Server.
 
-Storage:: the persistence tier of the Data-Index component.
+=== How it works
 
-Data-Index:: the main component responsible for creating/updating the Data-Index, and for providing query capabilities.
+.Graphical view of the Jobs Service flow
+image::job_service.png[]
 
+When a client invokes the Jobs Service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
+Once the request reaches the Jobs Service it creates the job internally, and stores the data on job status in the storage.
+When the job times out, the component calls the sink (either in-vm or via http request) to signal to the client.
 
-=== Querying
+==== Definitions
+transport:: the medium used to transfer a message between client component and Jobs Service. The transport can be http, kafka or in-vm.
+sink:: is the client endpoint callback.
+storage:: is the persistence tier of the jobs being current scheduled.
+Jobs Service:: it the main component containing the logic of scheduling a job and storing data.
 
-Data-Index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
+=== Using the Jobs Service add-on
 
-[source,]
-----
-http://localhost:8080/<root-path>/graphql-ui/
-----
-
-to start working with the queries defined by the schema aforementioned.
-
-=== Using the Data-Index add-on
-
-Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data-Index and the transport tier simultaneously.
+To use the Jobs Service add-on in your project you must include the dependency related to the transport tier (in-vm):
 
 [source,xml]
 ----
+<!-- Required for the Jobs Service add-on transport tier definition -->
 <dependency>
   <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
+  <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-jobs</artifactId>
 </dependency>
 ----
+
+Following that you must include the storage to be used, PostgreSQL:
+
+[source,xml]
+----
+<!-- Required for the Jobs Service add-on storage definition -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>jobs-service-storage-jpa</artifactId>
+</dependency>
+----
+
+In this case for postgresql in-vm, your main available data source is automatically used. Here is an example of this configuration:
+	
+[source,properties]
+----
+kogito.persistence.type=jdbc
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=kogito-user
+quarkus.datasource.password=kogito-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://localhost:5432/kogito}
+----
+
+NOTE: Use managed dependencies or specify the version of the dependencies. 
 
 [#user-tasks]
 == The User Tasks Subsystem
