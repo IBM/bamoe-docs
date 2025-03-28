@@ -1,6 +1,7 @@
-= Installing {CANVAS}
+= Installing BAMOE Canvas
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
+
 
 //tag::canvas-description[]
 {CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and tool integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your files.
@@ -127,24 +128,22 @@ Several customization options are available. For more information on the configu
 
 [NOTE]
 ====
-Those addresses need to be accessible from the users' machines, as {CANVAS} will communicate with them directly from the user's browser.
+Those addresses need to be accessible from the users' machines, as {CANVAS} will make requests to them directly from the user's browser.
 Using internal IP/DNS services will not work.
 Requests are made directly from the user's browser to both URLs configured above.
 ====
 
-Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment for Decisions.
+Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
 
-//only decisions? what about process?
-
-By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}]
+By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}].
 
 
 //what pre-configured image? Should we say, A pre-configured image is available from the community but is not part of BAMOE? Are we really saying that users should build their custom image from the base image rather than a pre-configured one? 
 
-If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
+If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
 For example, imagine a user is creating development deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
-This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DMN_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
+This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev Deployments for Decisions.
 
 For other customization options of {CANVAS}, please refer to the https://quay.io/repository/bamoe/canvas?tab=info[description of the image].
@@ -155,4 +154,66 @@ For other customization options of {CANVAS}, please refer to the https://quay.io
 
 == Securing your Installation
 
-It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation as well as all services that {CANVAS} has access to, such as remote git repositories, or container orchestration like OpenShift. To enable that, please follow your Kubernetes distribution documentation on how to enable a secure protocol, ensuring that all access tokens have a token expiration policy.
+It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation as well as all services that {CANVAS} has access to, such as remote git repositories, or container orchestration like OpenShift. To enable that, please follow your Kubernetes distribution documentation on how to enable a secure protocol.
+
+
+[id="custom-accelerators"]
+== Configuring custom Accelerators for your organization
+
+Accelerators are Git repositories that contain a skeleton of an application and will convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. But they can also be used to store configurations that are common to all new _Business Service_ projects within an organization, making them available in {CANVAS} for all users in your organization.
+
+Your custom Accelerator should be a public Git repository. After creating it, you need to write a specific JSON configuration that is used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
+
+[source,json,subs="attributes+"]
+----
+{
+    "name": "Your Accelerator name",
+    "iconUrl": "https://link.to/your/logo/image",
+    "gitRepositoryUrl": "https://github.com/...",
+    "gitRepositoryGitRef": "branchName",
+    "dmnDestinationFolder": "path/to/place/dmn/files",
+    "bpmnDestinationFolder": "path/to/place/bpmn/files",
+    "otherFilesDestinationFolder": "path/to/place/other/files"
+}
+----
+
+* **name**: This is how the Accelerator will be known inside BAMOE Canvas.
+* **iconUrl**: An optional parameter to add an image/logo alongside you Accelerator name.
+* **gitRepositoryUrl**: This is where your Accelerator is hosted. Should be an URL that can be used with git clone.
+* **gitRepositoryGitRef**: Where in your repository is this Accelerator located. Could be a branch, commit, tag, anything that can be used with git checkout.
+* **dmnDestinationFolder**: Where your DMN and PMML files will be moved to after applying the Accelerator (relative to the project root).
+* **bpmnDestinationFolder**: Where your BPMN files will be moved to after applying the Accelerator (relative to the project root).
+* **otherFilesDestinationFolder**: Where other files will be moved to after applying the Accelerator (relative to the project root).
+
+=== Configuring the `KIE_SANDBOX_ACCELERATORS` environment variable
+
+This environment variable accepts an array of Accelerators configurations in the format described above.
+
+By default, it comes pre-configured with:
+
+[source,json,subs="attributes+"]
+----
+[
+    {
+        "name": "Quarkus (Full)",
+        "iconUrl": "images/canvas_accelerator_logo_quarkus_full.png",
+        "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
+        "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-full",
+        "dmnDestinationFolder": "src/main/resources",
+        "bpmnDestinationFolder": "src/main/resources",
+        "otherFilesDestinationFolder": "src/main/resources"
+    },
+    {
+        "name": "Quarkus (DMN)",
+        "iconUrl": "images/canvas_accelerator_logo_quarkus_dmn.png",
+        "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
+        "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-dmn",
+        "dmnDestinationFolder": "src/main/resources",
+        "bpmnDestinationFolder": "src/main/resources",
+        "otherFilesDestinationFolder": "src/main/resources"
+    }
+]
+----
+
+This value can be overwritten to add your own custom Accelerators, replacing the default ones, or appending to them.
+
