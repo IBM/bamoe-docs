@@ -6,81 +6,64 @@ Building an executable application is the first step toward deploying _Business 
 
 == Quarkus
 
-Quarkus support the following building modes. The command that you use depends on your preferred run mode and application environment:
+When you build your _Business Service_ with Quarkus, there are a few different strategies you can choose to build executables. Since you're in control of your _Business Service_ project on {PRODUCT_SHORT}, you can choose which strategy better suits your envisoned architecture.
 
-* *a. JVM mode*: For compatibility with a Java virtual machine (JVM).
+Following the official Quarkus guides will help you choose which strategy is a better match for you.
+
+* *a. Container image (recommended)*: _Business Services_ on {PRODUCT_SHORT} usually get deployed to a hybrid-cloud environment, like OpenShift or Kubernetes. To build your _Business Service_ project as an executable Container image, follow the official Quarkus guide at https://quarkus.io/version/3.15/guides/container-image[Container Images].
 +
-.Building
-[source]
+For standard use-cases, run the following command:
++
+[source,shell]
+----
+mvn clean install -Dquarkus.container-image.build=true
+----
++
+A Container image will be now installed to your local Container image registry. You can see it with:
++
+[source,shell]
+----
+docker image ls
+----
++
+Container images created with Quarkus can be both JVM- or Native Executable-based.
++
+* *b. Native Executable*: Follow the official Quarkus guide at https://quarkus.io/version/3.15/guides/building-native-image[Building a Native Executable].
++
+For standard use-cases, run the following command:
++
+[source,shell]
+----
+mvn clean install -Dnative
+----
++
+The Native Executable will be on the `target/` direcotry and you can execute it with
++
+[source,shell]
+----
+./target/{your-business-service-name}-{version}-runner
+---- 
++
+[NOTE]
+====
+{PRODUCT_SHORT} version {VERSION} is tested against Quarkus 15 (LTS), JDK 17, and GraalVM 21 for JDK 17. For more details see xref:../release-notes/supported-environments.html[Supported environments].
+====
++
+* *c. Standard JAR*: _Business Services_ projects on {PRODUCT_SHORT} are Maven projects. For more information on how to create executable JARs with Maven, see the official Maven documentation at https://maven.apache.org/guides/getting-started/index.html#How_do_I_create_a_JAR_and_install_it_in_my_local_repository.3F[How to create a JAR]. Since Quarkus is included in your _Business Service_ project, an executable JAR will be produced for you. See more information about types of executable JARs in https://quarkus.io/version/3.15/guides/maven-tooling#fast-jar[Using fast-jar and Uber-jar creation].
++
+For standard use-cases, run the following command:
++
+[source,console]
 ----
 mvn clean package
 ----
-.Running locally
 +
-[source]
+Your executable JAR will be on the `target/` directory and you can execute it with
++
+[source,shell]
 ----
 java -jar target/quarkus-app/quarkus-run.jar
 ----
-+
-* *b. Native mode*: (Quarkus only, requires GraalVM or Mandrel) For direct binary execution as native code.
-+
-.Building in native mode
-+
-[source]
-----
-mvn clean package -Dnative
-----
-+
-.Running native binary locally
-+
-[source]
-----
-./target/sample-kogito-1.0-SNAPSHOT-runner
-----
-+
-[NOTE]
-========
-
-Alternatively, you can use a container builder image for native builds. You do not need to install GraalVM because a container containing GraalVM is pulled automatically. Note that the executable targets Linux by default. For example:
-
---
-.On Quarkus only (GraalVM native build using container)
-[source]
-----
-$ mvn clean package -Dnative -Dquarkus.native.container-build
-----
---
-
-To use Mandrel instead of GraalVM, run the following command:
-
---
-.On Quarkus only (Mandrel native build using container)
-[source]
-----
-$ mvn clean package -Dnative -Dquarkus.native.container-build -Dquarkus.native.builder-image=quay.io/quarkus/ubi-quarkus-mandrel:21.1-java11
-----
---
-
-For further information about building a native image, see https://quarkus.io/version/3.15/guides/building-native-image#container-runtime[Quarkus - Building a Native Executable].
-
-========
-+
-* *c. Container image*
-+
-.Building
-+
-[source]
-----
-mvn clean package -Pcontainer
-----
-+
-.Running locally
-+
-[source]
-----
-docker run -it --rm -p 8080:8080 dev.local/{USER}/my-business-service:latest
-----
-
 
 ---
 
