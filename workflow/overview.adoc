@@ -3,28 +3,29 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-You can use BAMOE to develop stateful workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
+You can use BAMOE to develop stateful Workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Automation projects for deployment and execution. 
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
-The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows. In this architecture certain services (subsystems) can be colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
+The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
 == Components of Compact Architecture
-The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful workflows.
+The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful Workflows.
 
 [%header,cols="4"]
 |===
-^|Subsystem 
+^|Component 
 ^|Type 
 ^|Stateful (Compact Architecture) 
 ^|Stateless (STP) 
-|Data-Index | Add-on | Optional | N/A
-|Data-Audit | Add-on | Optional | N/A
-|Jobs Service | Add-on | Mandatory | N/A
-|User Tasks | Add-on | Mandatory | N/A
+|Workflow models | BPMN files | Mandatory | Mandatory 
 |Workflow Engine | System | Mandatory | Mandatory 
 |Runtime | System | Mandatory | N/A
-|Storage | System | Mandatory | N/A
+|Data-Index | Subsystem (add-on) | Optional | N/A
+|Data-Audit | Subsystem (add-on) | Optional | N/A
+|Jobs Service | Subsystem (add-on) | Mandatory | N/A
+|User Tasks | Subsystem (add-on) | Mandatory | N/A
+|Storage | External system | Mandatory | N/A
 |===
 
 The following figure shows how they relate to each other in a deployment architecture. 
@@ -32,25 +33,21 @@ The following figure shows how they relate to each other in a deployment archite
 .The different components of Compact Architecture
 image::wf-compact-arch.png[]
 
-=== System
-Runtime:: This is the foundational framework providing basic services required for running a complex application: transactions, rest infrastructure (JAX-RS), JDBC connection pool, thread pools, escalability, security, DI (dependency injection) etc.
+Workflow models:: BPMN files containing a sequence flow. Workflow models are compiled and wired in to the Workflow Engine when building _Business Services_ into executables.
 
-Workflow engine:: The kogito API + jBPM workflow engine provides the workflow execution environment using kogito APIs and implementations.
+Workflow Engine:: The jBPM-powered engine for executing Workflows and which can delegate certain capabilities to other subsystems, like User Tasks or Jobs.
 
-Process container:: This is the BPMN file compiled and wired in to the Workflow engine.
+Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, escalability, authentication and authorization, DI (dependency injection) etc.
 
-=== Add-ons
-Data-Index:: allows the last snapshot of the process state to be queried. The Workflow engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
+Data-Index:: Allows the last snapshot of the process state to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
-Data-Audit:: allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
+Data-Audit:: Allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
 
 Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
 
 User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a User Task node in the workflow. The User Task node uses this subsystem to implement User Tasks.
 
-=== Required deployments
-Storage:: This is another deployment where we are going to store the process state, Data-Index, Data-Audit, Jobs Service, and User Tasks data. There can only be one storage that is shared among components and cannot be divided.
-.
+Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database like PostgreSQL.
 
 [#data-index]
 == The Data-Index subsystem
@@ -96,7 +93,7 @@ Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The sam
 
 The Data-Audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
 
-* Workflow engine
+* Workflow Engine
 * User Tasks
 * Jobs Service
 
@@ -282,8 +279,6 @@ quarkus.datasource.password=kogito-pass
 quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://localhost:5432/kogito}
 ----
 
-NOTE: Use managed dependencies or specify the version of the dependencies. 
-
 [#user-tasks]
 == The User Tasks subsystem
 
@@ -335,3 +330,9 @@ To enable this functionality, the following dependency needs to be added to the 
   <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
 </dependency>
 ----
+
+---
+
+== Getting started
+
+To start developing stateful Workflows with Compact Architecture, go to xref:../workflow/authoring-workflows.adoc[Authoring Workflows with BPMN].
