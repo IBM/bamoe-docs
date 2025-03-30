@@ -26,27 +26,13 @@ NOTE: All three image versions must be the same for deployment to work.
 
 {CANVAS} Helm Chart is a Helm chart based on the open-source Apache KIE Sandbox and it is a technology that can enable you to install multi-container services with a single command: Helm, See https://helm.sh/[https://helm.sh] for more information.
 
-=== Default install
+===  Installing the Chart
+
+Use the following command to do a default installation:
 
 [source,shell]
 ----
 helm install my-bamoe-canvas oci://quay.io/bamoe/canvas-helm-chart --version={VERSION}.
-----
-
-=== Minikube install
-
-[source,shell]
-----
-helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
-helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
-----
-
-=== Kubernetes install
-
-[source,shell]
-----
-helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
-helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
 
 === OpenShift install
@@ -64,6 +50,22 @@ If you do not have access rights to this configuration, try creating a dummy Rou
 ----
 helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
 helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+----
+
+=== Kubernetes install
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+----
+
+=== Minikube install
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
 ----
 
 === Uninstalling the Chart
