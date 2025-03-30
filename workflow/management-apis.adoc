@@ -1,4 +1,4 @@
-= Management API
+= The Management APIs
 include::../partials/attributes.adoc[]
 
 In {PRODUCT_SHORT}, Process Management APIs are provided to interact with business Process Definitions and active Process Instances. These APIs allow to obtain metadata information about Process Definitions, as well as provide management endpoints for active Process Instances.
@@ -423,6 +423,65 @@ Below details will be included.
 
 |===
 
+== Callback Jobs Service Management APIs
+
+In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage callbacks into the runtime engine from an external job service. These callbacks allow external systems, such as the job service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the `kogito-addons-quarkus-jobs-management` extension.
+
+[source,xml]
+----
+<dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
+</dependency>
+----
+
+NOTE: This API endpoint is not primarily intended for manual invocation.
+
+////
+===  /management/jobs/{processId}/instances/{processInstanceId}/timers/{timerId}
+
+[cols="1,1a"]
+|===
+|*Type* |POST
+
+|*Description* |It triggers the job for the given process and process instance at the specified timer Id
+
+|*Inputs* |
+* processId : String (PathParameter)
+* processInstanceId : String (PathParameter)
+* timerId : String (PathParameter)
+* limit : int (QueryParameter) - (Default limit value will be 0)
+* payload : String passed in as the request body it includes the correlation id and job id
+
+
+|*Output* a| * Returns the OK response if the job triggered successfully.
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+*A _BAD REQUEST_ error is returned if payload  is missing in the request.
+
+|*Example* |curl -X 'POST'
+'http://localhost:8080/management/jobs/{processId}/instances/{processInstanceId}/timers/1?limit=0'
+-H 'accept: */*'
+-H 'Content-Type: application/json'
+-d '"string"'
+
+|===
+////
+
+== Job Resource APIs
+
+In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
+
+== Job Resource V2 APIs
+
+In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
+
+
+== Job Service Management Resource APIs
+
+In {PRODUCT_SHORT}, this API is currently not used. It might be removed in future versions of the product.
+
 == Source File Management APIs
 The Source File Management APIs in {PRODUCT_SHORT} provides endpoints that allow users to dynamically retrieve BPMN source files at runtime. This API is provided by the `kie-addons-quarkus-source-files` extension.
 [source,xml]
@@ -506,65 +565,6 @@ Below details will be returned.
 
 |===
 
-
-== Callback Jobs Service Management APIs
-
-In {PRODUCT_SHORT}, the Callback Jobs Service Management APIs are used to manage callbacks into the runtime engine from an external job service. These callbacks allow external systems, such as the job service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the `kogito-addons-quarkus-jobs-management` extension.
-
-[source,xml]
-----
-<dependency>
-      <groupId>org.kie</groupId>
-      <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-</dependency>
-----
-
-NOTE: This API endpoint is not primarily intended for manual invocation.
-
-////
-===  /management/jobs/{processId}/instances/{processInstanceId}/timers/{timerId}
-
-[cols="1,1a"]
-|===
-|*Type* |POST
-
-|*Description* |It triggers the job for the given process and process instance at the specified timer Id
-
-|*Inputs* |
-* processId : String (PathParameter)
-* processInstanceId : String (PathParameter)
-* timerId : String (PathParameter)
-* limit : int (QueryParameter) - (Default limit value will be 0)
-* payload : String passed in as the request body it includes the correlation id and job id
-
-
-|*Output* a| * Returns the OK response if the job triggered successfully.
-
-* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
-* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
-*A _BAD REQUEST_ error is returned if payload  is missing in the request.
-
-|*Example* |curl -X 'POST'
-'http://localhost:8080/management/jobs/{processId}/instances/{processInstanceId}/timers/1?limit=0'
--H 'accept: */*'
--H 'Content-Type: application/json'
--d '"string"'
-
-|===
-////
-
-== Job Resource APIs
-
-In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
-
-== Job Resource V2 APIs
-
-In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
-
-
-== Job Service Management Resource APIs
-
-In {PRODUCT_SHORT}, this API is currently not used. It might be removed in future versions of the product.
 
 == Process Svg Resource APIs
 
