@@ -4,15 +4,16 @@ include::../styles/images.adoc[]
 
 
 //tag::canvas-description[]
-{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and tool integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your files.
+{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and service integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your _Business Services_ in development mode via the Dev Deployments feature.
 //end::canvas-description[]
 
-It depends on two backend applications to provide full functionality:
+{CANVAS} depends on two backend applications to provide full functionality:
 
-* {EXT_SERVICES}: provides features like DMN Runner, static validation of DMN, BPMN models, and a proxy to communicate with OpenShift and Kubernetes clusters.
-* {CORS_PROXY}: provides a proxy to allow {CANVAS} web app to communicate with Git providers, like github.com and bitbucket.org.
+* {EXT_SERVICES}: powers features like the DMN Runner and static validation of DMN, and BPMN models.
+* {CORS_PROXY}: allows {CANVAS} web app to communicate with Git and Cloud providers.
 
 {CANVAS} and its two backend applications are available as container images.
+
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
 * {CANVAS} → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
@@ -21,9 +22,71 @@ These images are published to Quay.io and can be used to run containers locally 
 
 NOTE: All three image versions must be the same for deployment to work.
 
-== Deploying {CANVAS} to OpenShift
+== Deploying to Kubernetes or OpenShift with the Helm Chart (recommended)
 
-If you have an OpenShift cluster and are logged in via the `oc` cli tool, follow these steps to deploy {CANVAS} and its dependencies.
+{CANVAS} Helm Chart is a Helm chart based on the open-source Apache KIE Sandbox and it is a technology that can enable you to install multi-container services with a single command: Helm, See https://helm.sh/[https://helm.sh] for more information.
+
+=== Default install
+
+[source,shell]
+----
+helm install my-bamoe-canvas oci://quay.io/bamoe/canvas-helm-chart --version={VERSION}.
+----
+
+=== Minikube install
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-minikube-nginx.yaml
+----
+
+=== Kubernetes install
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+----
+
+=== OpenShift install
+
+First, you may need to get the default OpenShift domain for your routes with the following command:
+
+[source,shell]
+----
+oc get ingresses.config cluster --output jsonpath={.spec.domain}
+----
+
+If you do not have access rights to this configuration, try creating a dummy Route resource and checking its domain.
+
+[source,shell]
+----
+helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
+helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+----
+
+=== Uninstalling the Chart
+
+Follow the command to uninstall the `my-bamoe-canvas` deployment:
+
+[source,shell]
+----
+helm uninstall my-bamoe-canvas
+----
+
+=== Passing environmental variables
+
+This Chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:../installation/canvas.adoc#helm-chart-config-ref[{CANVAS} Helm Chart configuration reference] for all options.
+ 
+[source,shell]
+----
+helm install my-bamoe-canvas ./src --set image.repository=quay.io
+----
+
+== Deploying {CANVAS} to OpenShift via CLI
+
+If you have an OpenShift cluster and are logged in via the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -83,7 +146,30 @@ oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 
 NOTE: All services will be available via `https`, which means that if you're deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the {EXT_SERVICES} and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
-== Installing and configuring {CANVAS} images manually via Docker
+== Running locally with Docker Compose
+
+{CANVAS} and its related services can be run locally using Docker Compose.
+
+See https://docs.docker.com/get-docker/[Docker Installation] and https://docs.docker.com/compose/install/[Compose Plugin Installation] for more information.
+
+The `bamoe-{VERSION}-docker-compose.zip` can only be downloaded from IBM Passport Advantage, and you can find information on the https://www.ibm.com/support/pages/node/7151078[Support and Download Page].
+
+=== Run
+
+To Run {CANVAS} with Docker Compose follow these steps:
+
+. Extract the downloaded `bamoe-{VERSION}-docker-compose.zip`.
+. In a terminal, navigate to the extracted folder: `bamoe-{VERSION}-canvas-docker-compose`.
+. Run the command:
++
+[source,shell]
+----
+docker compose up
+----
+
+{CANVAS} will be available at http://localhost:9090.
+
+== Running with Docker
 
 === Configuring {EXT_SERVICES}
 
@@ -123,7 +209,7 @@ docker run -p 8080:8080 -it \
 ----
 The HTTP server is accessed via port 8080.
 
-Several customization options are available. For more information on the configurations available via environment variables see https://quay.io/repository/bamoe/canvas?tab=info[https://quay.io/repository/bamoe/canvas?tab=info]
+Several customization options are available. For more information on the configurations available via environment variables see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
 
 [NOTE]
@@ -137,22 +223,15 @@ Another very important environment variable to consider when deploying {CANVAS} 
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}].
 
-
-//what pre-configured image? Should we say, A pre-configured image is available from the community but is not part of BAMOE? Are we really saying that users should build their custom image from the base image rather than a pre-configured one? 
-
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
-For example, imagine a user is creating development deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
+For example, imagine a user is creating Dev Deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
 This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev Deployments for Decisions.
 
-For other customization options of {CANVAS}, please refer to the https://quay.io/repository/bamoe/canvas?tab=info[description of the image].
+For other customization options of {CANVAS}, please refer to the https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
-== Other installation methods
-
-{CANVAS} can also be deployed via xref:docker-compose.adoc[Docker Compose] or using xref:canvas-helm-charts.adoc[Helm Charts].
-
-== Securing your Installation
+== Securing your installation
 
 It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation as well as all services that {CANVAS} has access to, such as remote git repositories, or container orchestration like OpenShift. To enable that, please follow your Kubernetes distribution documentation on how to enable a secure protocol.
 
@@ -216,4 +295,202 @@ By default, it comes pre-configured with:
 ----
 
 This value can be overwritten to add your own custom Accelerators, replacing the default ones, or appending to them.
+
+== Configuring GitHub Enterprise Server (GHES) as a Git provider
+
+To allow users to connect to your organization's GitHub Enterprise Server (GHES) instance, you need to configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable on your {CANVAS} installation. For more information refer to the https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS} image description on Quay.io].
+
+[#helm-chart-config-ref]
+== Configuration reference for {CANVAS} Helm Chart
+
+The following table lists the configurable parameters of the {CANVAS}
+ chart and their default values.
+
+|===
+| Key | Type | Default |Description
+
+| global.ingressSource 
+| string  
+| ""       
+| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only   
+
+| global.kubernetesClusterDomain 
+| string  
+| ""  
+| If using Minikube or Kubernetes, set the cluster domain
+
+| global.kubernetesIngressClass 
+| string  
+| ""  
+| If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+
+| global.openshiftRouteDomain 
+| string  
+| ""  
+| If using OpenShift Routes, set the Route domain
+
+| fullnameOverride 
+| string  
+| ""  
+| Overrides charts full name
+
+| nameOverride 
+| string  
+| ""  
+| Overrides charts name
+
+| cors_proxy.autoscaling 
+| object  
+| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
+| CORS Proxy HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+
+| cors_proxy.fullnameOverride 
+| string  
+| ""  
+| Overrides charts full name
+
+| cors_proxy.image 
+| object  
+| {"account":"kie-tools","name":"cors-proxy-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
+| Image source configuration for the CORS Proxy image
+
+| cors_proxy.imagePullSecrets 
+| list  
+| []  
+| Pull secrets used when pulling CORS Proxy image
+
+| cors_proxy.ingress 
+| object  
+| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"cors-proxy.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
+| CORS Proxy OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+
+| cors_proxy.name 
+| string  
+| "cors-proxy"  
+| The CORS Proxy application name
+
+| cors_proxy.nameOverride 
+| string  
+| ""  
+| Overrides charts name
+
+| cors_proxy.openshiftRoute 
+| object  
+| {"annotations":{},"enabled":false,"host":"cors-proxy.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}  
+| CORS Proxy OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+
+| cors_proxy.service 
+| object  
+| {"nodePort":"","port":8080,"type":"ClusterIP"}  
+| CORS Proxy Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+
+| cors_proxy.serviceAccount 
+| object  
+| {"annotations":{},"create":true,"name":""}  
+| CORS Proxy ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+
+| extended_services.autoscaling 
+| object  
+| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
+| {EXT_SERVICES} HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+
+| extended_services.fullnameOverride 
+| string  
+| ""  
+| Overrides charts full name
+
+| extended_services.image 
+| object  
+| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{VERSION}"}  
+| Image source configuration for the {EXT_SERVICES} image
+
+| extended_services.imagePullSecrets 
+| list  
+| []  
+| Pull secrets used when pulling {EXT_SERVICES} image
+
+| extended_services.ingress 
+| object  
+| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"extended-services.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
+| {EXT_SERVICES} Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
+
+| extended_services.name  
+| string  
+| "extended-services"  
+| The {EXT_SERVICES} application name
+
+| extended_services.nameOverride 
+| string  
+| ""  
+| Overrides charts name
+
+| extended_services.openshiftRoute 
+| object  
+| {"annotations":{},"enabled":false,"host":"extended-services.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}  
+| {EXT_SERVICES} OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+
+| extended_services.service 
+| object  
+| {"nodePort":"","port":21345,"type":"ClusterIP"}  
+| {EXT_SERVICES} Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+
+| extended_services.serviceAccount 
+| object  
+| {"annotations":{},"create":true,"name":""}  
+| {EXT_SERVICES} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+
+| kie_sandbox.autoscaling 
+| object  
+| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
+| {CANVAS} HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+| kie_sandbox.env 
+| list  
+|[{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}]  
+| Env variables for {CANVAS} deployment
+
+| kie_sandbox.fullnameOverride 
+| string  
+| "" 
+| Overrides charts full name
+
+| kie_sandbox.image 
+| object  
+| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{VERSION}"}  
+| Image source configuration for the {CANVAS} image
+
+| kie_sandbox.imagePullSecrets 
+| list  
+| []  
+| Pull secrets used when pulling {CANVAS} image
+
+| kie_sandbox.ingress 
+| object  
+| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"kie-sandbox.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
+| {CANVAS} Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
+
+| kie_sandbox.name 
+| string  
+| "kie_sandbox"  
+| The {CANVAS} application name
+
+| kie_sandbox.nameOverride 
+| string  
+| "" 
+| Overrides charts name
+
+| kie_sandbox.openshiftRoute 
+| object  
+| {"annotations":{},"enabled":false,"host":"kie_sandbox.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}} 
+| {CANVAS} OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
+
+| kie_sandbox.service 
+| object  
+| {"nodePort":"","port":8080,"type":"ClusterIP"} 
+| {CANVAS} Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
+
+| kie_sandbox.serviceAccount 
+| object  
+| {"annotations":{},"create":true,"name":""} 
+| {CANVAS} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
+|===
 
