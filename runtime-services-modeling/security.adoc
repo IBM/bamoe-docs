@@ -1,19 +1,18 @@
-= Configuring _Business Service_ security
+= Securing _Business Service_ API endpoints
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 
-{PRODUCT_SHORT} is one of the applications that is designed for Quakus or Spring Boot application. Both frameworks natively offer a reliable authentication and authorization layer, to be used by user-designed applications if properly
-configured. You will know how to configure your _Business Service_ project to use the Quarkus or Spring Boot authentication and authorization layer by defining some property values.
+_Business Services_ on {PRODUCT_SHORT} rely on Quakus or Spring Boot for configuring authentication and authorization, and will query their provided security-related data for information about who's the authenticated user performing a request and what permissions (roles/groups) they have, especially the stateful Workflows subsystem for User Tasks.
 
-image::runtime-services-modeling/security.png[Security authentication and authorization]
+After configuring your _Business Service_ correctly to integrate its security layer, it is possible to rely on an external Identity Providers (IdPs) like Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution.
 
-After configuring your {PRODUCT_SHORT} runtimes  correctly to integrate its framework security layer, it is possible to rely on an external Identity Providers (IdPs) like Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution. A key role of this architecture is the {MANAGEMENT_CONSOLE}, which provides an integrated environment to authenticate against your live _Business Services_ and interact with its entities like Process Instances, submit User Task forms, and view scheduled Jobs, in a secured. For more information on {MANAGEMENT_CONSOLE}, see xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}].
+{MANAGEMENT_CONSOLE} can connect to secured _Business Services_ provided they expose enough information about their configured Identity Provider. See xref:../runtime-services-modeling/security.adoc#mgmt-console-oidc-proxy[Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_] for more details.
 
 
-== Quarkus (Authentication)
+== Authentication (Quarkus)
 
-Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.15/guides/security-oidc-bearer-token-authentication[tutorial] that explains how to do the set up correctly.
+Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.15/guides/security-oidc-bearer-token-authentication[guide] that explains how to do the set up correctly.
 
 The first step is to configure the Quarkus OpenID Connect (OIDC) extension by setting the properties in the `src/main/resources/application.properties` file. 
 
@@ -31,7 +30,7 @@ quarkus.oidc.credentials.secret=secret
 quarkus.oidc.application-type=hybrid
 ----
 
-The following table describes in detail the properties suggested in the example, but it is only a subset of all properties available https://quarkus.io/version/3.15/guides/security-oidc-configuration-properties-reference[here].
+The following table describes in detail the properties suggested in the example, but it is only a subset of https://quarkus.io/version/3.15/guides/security-oidc-configuration-properties-reference[all properties available here].
 
 
 [%header,cols=4]
@@ -66,11 +65,9 @@ property should be set as
 |===
 
 
-== Quarkus (Authorization)
+== Authorization (Quarkus)
 
-Quarkus incorporates a pluggable web security layer. When security is active, the system performs a
-permission check on all HTTP requests to determine if they should proceed. For more information, see 
-https://quarkus.io/version/3.15/guides/security-authorize-web-endpoints-reference[Authorization].
+Quarkus incorporates a pluggable web security layer. When security is active, the system performs a permission check on all HTTP requests to determine if they should proceed. For more information, see the official Quarkus guide for https://quarkus.io/version/3.15/guides/security-authorize-web-endpoints-reference[Authorization of web endpoints].
 
 Following is an example of the configuration:
 
@@ -93,7 +90,7 @@ You can find a detailed explanation and  https://quarkus.io/version/3.8/guides/s
 
 The available properties can be configured for all the used-defined permission rules.
 For example, the `quarkus.http.auth.permission."permissions".policy` property with the specified permissions can have two properties detailed  in the following table:
-  
+
 
 [%header,cols=4]
 [%autowidth]
@@ -101,9 +98,12 @@ For example, the `quarkus.http.auth.permission."permissions".policy` property wi
 
 |Property | Description | Type | Default value
 |quarkus.http.auth.permission."permissions".paths
-(quarkus.http.auth.permission.authenticated.paths
--
-quarkus.http.auth.permission.public.paths)
+
+_E.g.,
+
+quarkus.http.auth.permission.authenticated.paths
+quarkus.http.auth.permission.public.paths_
+
  | The paths that this
 permission check applies
 to. If the path ends in /*
@@ -115,9 +115,12 @@ match.
 URI
  | -
  |quarkus.http.auth.permission."permissions".policy
-(quarkus.http.auth.permission.authenticated.policy
--
-quarkus.http.auth.permission.public.policy)
+
+_E.g.,
+
+quarkus.http.auth.permission.authenticated.policy
+quarkus.http.auth.permission.public.policy_
+
  | The HTTP policy that this
 permission set is linked
 to. There are three built-
@@ -129,6 +132,7 @@ defined, and extensions
 |===
 
 
+[#mgmt-console-oidc-proxy]
 == Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_
 
 For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available.
