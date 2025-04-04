@@ -9,23 +9,17 @@ If you want to know more on how to upgrade from version {VERSION_80} to version 
 
 //The above link to Upgrade has to be changed to external site during release 
 
-You can upgrade your project in the following two ways by:
+This guide will walk you through upgrading your:
 
-* Creating a new project from scratch and moving your existing assets to it.
-* Updating an existing BAMOE version {VERSION_90X} project.
-You will start by setting up the Maven configuration.
+* {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, {DEV_TOOLS}, and {FORM_GENERATION_TOOL}.
 
-== Prerequisites
+* {PRODUCT_SHORT} project(s)
 
-The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION}:
+* {PRODUCT_SHORT} production environment installation with Management and Task console, and upgraded versions of your {PRODUCT_SHORT} projects.
 
-- https://openjdk.org[JDK 17] or later is installed.
-- https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
-- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version
-- https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[IBM {DEV_TOOLS}] latest version of VS Code IDE extensions
-- Quarkus version {QUARKUS_VERSION} or later is installed
+If you are using the {VERSION_90X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
 
-// include::../partials/91x-prerequisites.adoc[]
+//Remember to change the technology preview link after creating the topic.
 
 == Step 1: Download product archives
 
@@ -77,12 +71,81 @@ See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
 ====
 After upgrading, the New DMN Editor will be opened automatically when you first access it in Canvas or Developer tools for VS Code.
 Existing DMN files (any version) can be opened directly in the editor. For more information, see xref:../editing/authoring-decisions.adoc[Authoring decisions].
-
 ====
 
 === Upgrade {FORM_GENERATION_TOOL}
 
 This tool is required for workflow execution. If the {FORM_GENERATION_TOOL} is already present, uninstall and re-install using steps available in xref:../tools/form-generation-tool.adoc[Form generation tool].
+
+== Step 3: Upgrade your {PRODUCT} project(s)
+
+{PRODUCT} project(s) can be upgraded in two ways, by:
+
+* Updating an existing BAMOE version {VERSION_90X} project with its artifacts by changing the Maven dependencies. 
+
+* Creating a new project from scratch and moving your existing assets to it.
+
+The following tools are required to upgrade your {PRODUCT_SHORT} version {VERSION}:
+
+- https://openjdk.org[JDK 17] is installed.
+- https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
+- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
+- https://marketplace.visualstudio.com/items?itemName=IBM.bamoe-developer-tools[IBM {DEV_TOOLS}] latest version of VS Code IDE extensions
+- Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION_911}.
+- Quarkus version {QUARKUS_VERSION} or later is installed.
+
+[NOTE]
+====
+After completing the upgrade of your {PRODUCT_SHORT} project, you might want to consider upgrading your business Rules.
+====
+
+== Step 3a: Upgrade {PRODUCT_SHORT} project(s) on version {VERSION_90X}
+
+Once your development environment installation is upgraded, it is straightforward to upgrade your project(s) on {PRODUCT_SHORT} {VERSION_90x} to {PRODUCT_SHORT} version {VERSION_91x}.
+
+The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
+
+[WARNING]
+====
+If you come across some difficulties when trying to upgrade your existing {PRODUCT_SHORT} projects, you are recommended to create a new project following xref:#step-3b[Step 3b: Upgrade {PRODUCT_SHORT} projects on versions {VERSION_90X}].
+====
+
+[start=1]
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.8.6`:
+
+
+[start=2]
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
++
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+----
+
+[start=3]
+. Update the `application.properties` file.
++
+{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+
++
+[source,diff]
+----
+ +++ quarkus.devservices.enabled=false
+----
+
+[NOTE]
+====
+Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+====
+
+
+
 
 == Step 3a: Creating a new project from scratch
 
