@@ -9,7 +9,7 @@ If you want to know more on how to upgrade from version {VERSION_80} to version 
 
 //The above link to Upgrade has to be changed to external site during release 
 
-This guide will walk you through upgrading your:
+This section will walk you through upgrading your:
 
 * {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, {DEV_TOOLS}, and {FORM_GENERATION_TOOL}.
 
@@ -85,7 +85,7 @@ This tool is required for workflow execution. If the {FORM_GENERATION_TOOL} is a
 
 * Creating a new project from scratch and moving your existing assets to it.
 
-The following tools are required to upgrade your {PRODUCT_SHORT} version {VERSION}:
+The following tools are required to upgrade your {PRODUCT_SHORT} projects to version {VERSION_91X}:
 
 - https://openjdk.org[JDK 17] is installed.
 - https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
@@ -97,6 +97,8 @@ The following tools are required to upgrade your {PRODUCT_SHORT} version {VERSIO
 [NOTE]
 ====
 After completing the upgrade of your {PRODUCT_SHORT} project, you might want to consider upgrading your business Rules.
+
+Refer to xref:../reference-guide/drl.adoc[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
 ====
 
 == Step 3a: Upgrade {PRODUCT_SHORT} project(s) on version {VERSION_90X}
@@ -115,7 +117,7 @@ If you come across some difficulties when trying to upgrade your existing {PRODU
 
 
 [start=2]
-. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_911}:
 +
 [source,xml,subs="+attributes"]
 ----
@@ -131,7 +133,7 @@ If you come across some difficulties when trying to upgrade your existing {PRODU
 [start=3]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+{PRODUCT_SHORT} version {VERSION_91x} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
 
 +
 [source,diff]
@@ -144,12 +146,30 @@ If you come across some difficulties when trying to upgrade your existing {PRODU
 Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
+== Step 3b: Creating a {PRODUCT_SHORT} project on version {VERSION_91x} from scratch
 
+If you have experienced some difficulties when trying to upgrade your project you can create a new {PRODUCT_SHORT} project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
 
+For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new project on {PRODUCT_SHORT} version {VERSION_91x}.
 
-== Step 3a: Creating a new project from scratch
+The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
 
-Now that you have the Maven configured, you can create a new Maven project to upgrade your existing business automation assets to the new {PRODUCT_SHORT} version {VERSION}.
+Examples of supported business automation assets are:
+
+- Decision Model & Notation (DMN) decisions (`.dmn`)
+- Drools Rule Language (DRL) rules (`.drl`)
+- Business Process Modeling & Notation (BPMN) workflows (`.bpmn`)
+- Spreadsheet Decision Table files (`.xls` or `.xlsx`)
+- Standard Properties files (`.properties`)
+- Test Scenario Files (.scesim)
+
+Copy all your assets from your project to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION_91x}. If you have custom Java code or any other type of file in your project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+
+[NOTE]
+====
+The proper folder for Test Scenario files is `src/test/resources`.
+====
+
 There are several ways to create Maven projects; this approach uses a published Maven plugin.
 
 [start=1]
@@ -353,7 +373,7 @@ Examples of supported business automation assets are:
 The proper folder for unit test files is `src/test/resources`, as this is a testing resource.
 ====
 +
-Now, copy all your assets from the {PRODUCT_SHORT} version {VERSION_901} project to the respective folders on the new project.
+Now, copy all your assets from the {PRODUCT_SHORT} version {VERSION_90X} project to the respective folders on the new project.
 As the new project uses Quarkus 3, you must make a few more updates.
 One of the biggest changes is that Quarkus 3 uses Jarkarta EE 10. You need to update all `javax` to `jakarta`.
 This is simply achieved by replacing any `javax` instance over `jarkarta`, like the following:
@@ -389,7 +409,42 @@ You might get Maven streaming text once again, and at the end of it you must hav
 [INFO] ------------------------------------------------------------------------
 ----
 +
-Now you can start using your {PRODUCT_SHORT} version {VERSION} project.
+Now you can start using your {PRODUCT_SHORT} version {VERSION_91X} project.
+
+== Step 4: Verify the upgrade of your {PRODUCT_SHORT} project
+. To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
++
+[source,console]
+----
+mvn clean package
+----
++
+You might get Maven streaming text once again, and at the end of it you must have:
++
+[source,console]
+----
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.023 s
+[INFO] Finished at: 2024-06-11T17:09:00-03:00
+[INFO] ------------------------------------------------------------------------
+----
++
+Now you can start using your project on {PRODUCT_SHORT} version {VERSION_91X}.
+
+== Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
+
+After upgrading your source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded {PRODUCT_SHORT} projects.
+
+It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live projects that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_91X} yet. Once all your projects are running, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+
+If you are getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
+
+Once you have a new installation for {MANAGEMENT_CONSOLE}, you can follow the standard guidance on how to deploy a new version of your projects (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
+
+
+----
 
 ==== Add Business Automation Assets
 
