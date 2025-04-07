@@ -1,0 +1,444 @@
+= Upgrading from Red Hat to IBM Business Automation Manager Open Editions
+:DM:
+:PAM:
+:imagesdir: _images
+include::_artifacts/document-attributes.adoc[]
+
+
+This section provides guidance on how to upgrade from the former Red Hat offerings of {RH_PAM} / {RH_DM} to {PRODUCT} version {VERSION_80}.
+It is recommended that you follow this migration path before attempting to upgrade to the next generation of the product known as {PRODUCT} version 9.1.x.
+
+If you have designed your jBPM application based on the deployment of the KIE Server using Spring Boot and want to upgrade from the latest community version to the enterprise-supported {PRODUCT_SHORT} version 8.0.x, you can find more information on the procedure in the following link. See, https://community.ibm.com/community/user/automation/blogs/tim-wuthenow/2023/06/16/community-to-enterprise-bamoe[Moving from Community to Enterprise]. As both projects are based on Maven architectures, the process is considerably simplified, by design.
+
+
+
+== Prerequisites
+
+If your current application is based on the legacy product known as {RH_BPMS}, you must first bring your installation up to the latest release of {RH_PAM} / {RH_DM} version 7 before performing any migration to {PRODUCT}.
+See the existing https://access.redhat.com/documentation/en-us/red_hat_process_automation_manager/7.0/html/migrating_from_red_hat_jboss_bpm_suite_6.4_to_red_hat_process_automation_manager_7.0/index[Red Hat Documentation] to facilitate upgrading from {RH_BPMS} to {RH_PAM}/{RH_DM} version 7.x.
+After this migration, you are free to upgrade to any release of {PRODUCT_SHORT}.
+
+The following tools are required to upgrade to {PRODUCT_SHORT} version {VERSION_80}:
+
+- https://openjdk.org[JDK 8 or 11] or later is installed.
+- https://maven.apache.org[Apache Maven 3.8.6] or later is installed.
+
+
+[IMPORTANT]
+====
+Due to https://github.com/quarkusio/quarkus/issues/31011[impossibility in creating a project with Maven 3.9.0], it is recommended to use the Apache Maven version 3.8.6, or later.
+====
+
+=== Procedure
+
+The following steps are typically involved in upgrading from {RH_PAM} / {RH_DM} to {PRODUCT_LONG}:
+
+== Step 1: Download Product Archives
+
+The first step in migration is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
+Download the files _(replace with the most current version)_ based on your requirement.
+The following table shows the most common files but you can select other files according to your environment.
+
+
+.{PRODUCT_SHORT} Product Archives
+
+The following archives are typically used in upgrading to {PRODUCT_SHORT}:
+
+.Common Product Archives
+|===
+| Product Archive | Description
+
+| ILMT_for_IBAMOE_**{VERSION**}.zip   
+| This archive is used by IBM ILMT to measure the usage deployed in an environment of the product.
+
+| bamoe-installer-**{VERSION**}.jar 
+| This archive is an executable file that installs {PRODUCT_SHORT} version  {VERSION_80} in a preinstalled Red Hat JBoss EAP on all supported Linux and Windows environments.
+
+| bamoe-**{VERSION**}-add-ons.zip   
+| This archive contains things like the Database Migration Scripts (found at path /bamoe-**VERSION**-add-ons/process-migration/upgrade-scripts/**Database**)
+
+| bamoe-**{VERSION**}-business-central-eap7-deployable.zip   
+| This archive is required if you are running Business Central on your JBoss Enterprise Application Platform (EAP)
+
+| bamoe-**{VERSION**}-kie-server-ee7.zip   
+| This archive is required if you are running running KIE Server EE7 on JBoss EAP
+
+| bamoe-**{VERSION**}-kie-server-ee8.zip   
+| This archive is required if you are running KIE Server EE8 on JBoss EAP
+
+| bamoe-**{VERSION**}-maven-repository.zip   
+| This archive is required if you need to have a local copy of the product artifacts
+
+| bamoe-**{VERSION**}-offliner.zip   
+| This archive is required to help you to build the Maven mirror repository in an offline fashion, in situations where you need to have a disconnected loading of the Maven repository in your environment.
+
+| bamoe-**{VERSION**}-update.zip 
+| This archive includes all of the updates that get applied with the overall product set. 
+
+| bamoe-**{VERSION**}-kogito-offliner.zip   
+| This archive facilitates preparing a Maven mirror repository for offline use.
+
+| bamoe-**{VERSION**}-kogito-maven-repository.zip   
+| This archive is the Kogito Maven repository, which contains many of the requirements that Java developers typically use to build Kogito-based applications.
+
+| bamoe-**{VERSION**}-openshift-templates.zip
+| This archive facilitates building a custom KIE Server extension image for an external database.
+
+|===
+[NOTE]
+====
+
+In the displayed table, you must replace **VERSION** with the version of {PRODUCT_SHORT} you are upgrading to, such as {VERSION_8_LATEST}.
+====
+
+Now that you have the files, you can start the upgrade process.
+
+== Step 2: Update Maven Configuration and settings
+
+{MAVEN_SITE_URL_BASE}[Apache Maven] is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.
+{PRODUCT_LONG} relies on Maven in order to build various types of deployable artifacts, such as decision service applications.
+For a quick start, see {MAVEN_SITE_URL_GETTING_STARTED}[Maven Quick Start Guide].  
+
+The `settings.xml` file is a repository for customizing Maven’s global operational parameters, distinguishing itself from the `pom.xml` by its non-association with particular projects.
+
+This file includes configurations such as the location of the local repository, alternative sources for remote repositories, inputting credentials, among others.
+
+There are two directories for the storage of the settings.xml file:
+
+- Maven Installation Directory: Found at `${Maven.home}/conf/settings.xml`, this location reflects the settings applied universally across all Maven projects on the system.
+- User-Specific Configuration: Located at `${user.home}/.m2/settings.xml'`, this directory allows for the storage of user-specific Maven settings.
+
+Users can tailor their Maven environment to better suit their development needs by using these configurations.
+
+[NOTE]
+====
+The first `settings.xml` is also referred to as `global settings`, and the second is referenced as user settings.
+Both are combined with users taking precedence.
+====
+
+[TIP] 
+====
+If you need to create user-specific settings from scratch, copy the global settings from your Maven installation to your `_${user.home}/.m2_` directory.
+Maven's default `_settings.xml_` is a template with comments and examples so you can quickly tweak it to match your needs.
+_If you are looking to learn more about how to manage your various Maven settings, visit  https://maven.apache.org/settings.html[Maven Settings Reference]._
+====
+
+{PRODUCT_LONG} version {VERSION_80} product dependencies are hosted by {RH_MAVEN_URL_BASE}[Red Hat's Maven repository], so you need to ensure that your `settings.xml` reflects that, as seen in the following example:
+
+include::_artifacts/settings-redhat-maven.adoc[]
+
+=== Update to use the Maven Bill of Materials (BOM)
+
+A bill of materials (BOM) is a list of the parts or components that are required to build a product.
+BOMs are ordinary `pom.xml` files — they contain no source code and their only purpose is to declare their bundled modules.
+
+.Always use the Maven Bill-of-Materials (BOM)
+[IMPORTANT]
+====
+It is highly recommended to use bill of materials (BOM) to manage project dependencies, as it simplifies dependency management by organizing a group of dependencies under a single version. 
+====
+
+A Bill of materials (BOM) can be added to an existing POM file by adding it to the **_dependencyManagement_** section as a dependency with a pom type:
+
+include::_artifacts/maven-bom-now.adoc[]
+
+When a bill of materials (BOM) is used, it is not necessary to specify the dependency's version, as that appears from the BOM, so your dependencies end up like the following:
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+    </dependency>
+</dependencies>
+----
+
+[NOTE]
+====
+During the course of your Maven dependency update, if you encounter any dependencies that are *not* included in the bill of materials (BOM), then use the Maven Library Version noted in the table below, such as:
+====
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-compiler</artifactId>
+        <version>VERSION</version>
+    </dependency>
+</dependencies>
+----
+
+
+== Step 3: Update tooling & runtime
+
+Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT_SHORT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
+Other {PRODUCT_SHORT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
+
+[NOTE]
+====
+You can deploy the latest version of {PRODUCT_SHORT} as either a new installation or as a patch update from one of the previous patch releases.
+====
+
+You can use the same automated update tool to apply both patch updates and minor release upgrades.
+Patch updates of {PRODUCT_SHORT} include the latest security updates and bug fixes.
+Minor release upgrades will include enhancements, security updates, and bug fixes.
+
+[NOTE]
+====
+Only updates are included in the {PRODUCT_SHORT} update tools.
+Updates to {EAP} must be applied using {EAP} patch distributions.
+For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
+====
+
+=== Prerequisites
+
+Your Decision/Business Central and KIE Server instances are not running.
+Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
+
+=== Procedure
+
+. Navigate to the {PRODUCT_DOWNLOAD_PAGE}[{PRODUCT_LONG} version {VERSION_80} Downloads Page] and follow the instructions to download the {PRODUCT} **Update Tool**.
+
++ 
+If you are upgrading to a new minor release, first apply the latest patch update to your current version of {PRODUCT} and then follow this procedure again to upgrade to the new minor release.
+
+. Extract the downloaded file to a temporary directory.
+
++
+This update tool automates the update of certain components such as Decision/Business Central, KIE Server, and the headless controller.
+Use this update tool first to apply updates and then install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
+
+. If you want to preserve any files from being updated by the update tool, navigate to the extracted `bamoe-$VERSION-update` folder, open the `protectedlist.txt` file, and add the relative paths to the files that you do not want to be updated.
+
++
+When a file is listed in the `protectedlist.txt` file, the update script does not replace the file with the new version.
+A new file is created containing the same information, and a `.new` suffix is added, leaving the old file in place.
+If you block files that are no longer being distributed, the update tool creates an empty marker file with a `.removed` suffix.
+You can then choose to retain, merge, or delete these new files manually.
+
++ 
+Example files to be excluded in `protectedlist.txt` file:
+
++ 
+[source,shell,subs="attributes+"]
+----
+WEB-INF/web.xml  // Custom file
+styles/base.css  // Obsolete custom file kept for record
+----
+
++
+The contents of the blocked file directories after the update:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ls WEB-INF
+web.xml web.xml.new
+
+$ ls styles
+base.css base.css.removed
+----
+
+. In your command terminal, navigate to the temporary directory where you extracted the `bamoe-$VERSION-update.zip` file and run the _apply-updates_ script in the following format:
+
++
+[IMPORTANT]
+====
+Make sure that your Decision/Business Central and KIE Server instances are not running before you apply updates.
+Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
+====
+
++
+On Linux or Unix-based systems:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./apply-updates.sh $DISTRO_PATH $DISTRO_TYPE
+----
+
++
+On Windows:
+
++
+[source,shell,subs="attributes+"]
+----
+$ .\apply-updates.bat $DISTRO_PATH $DISTRO_TYPE
+----
+
++
+The `$DISTRO_PATH` portion is the path to the relevant distribution directory and the `$DISTRO_TYPE` portion is the type of distribution that you are updating with this update.
+The following distribution types are supported in {PRODUCT} update tool:
+
++
+
+.Distribution types for {PRODUCT_SHORT} version {VERSION_80}
+|===
+| Archive | Description
+
+| bamoe-8.0-BC7   
+| Updates Business Central (`business-central.war`)
+
+| bamoe-8.0-KS8
+| Updates KIE Server (`kie-server.war`)
+
+| bamoe-kie-server-jws
+| Updates KIE Server on Red Hat JBoss Web Server (`kie-server.war`)
+
+| bamoe-controller-ee7
+| Updates the headless controller (`controller.war`)
+
+| bamoe-controller-jws
+| Updates the headless controller on Red Hat JBoss Web Server (`controller.war`)
+|===
+
++
+Example update to Decision/Business Central and KIE Server for a full {PRODUCT} distribution on {EAP}:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./apply-updates.sh ~EAP_HOME/standalone/deployments/business-central.war bamoe-8.0-BC7
+$ ./apply-updates.sh ~EAP_HOME/standalone/deployments/kie-server.war IBAMOE-8.0-KS8
+----
+
++
+Example update to headless IBM Business Automation Manager controller, if used:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./apply-updates.sh ~EAP_HOME/standalone/deployments/controller.war bamoe-controller-ee7
+----
+
++ 
+The update script creates a backup folder in the extracted `bamoe-$VERSION-update` folder with a copy of the specified distribution, and then proceeds with the update.
+
+. After the update tool completes, return to the {PRODUCT_SUPPORT_PAGE}[IBM Support] page where you have downloaded the update tool and install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
+
++
+For files that already exist in your {PRODUCT} distribution, such as .`jar` files for the decision engine or other add-ons, replace the existing version of the file with the new version from the {PRODUCT_SUPPORT_PAGE}[IBM Support] page.
+
+. If you use the standalone {PRODUCT_LONG} version {VERSION_80} - Maven Repository artifact (`bamoe-{VERSION_8_LATEST}-maven-repository.zip`), such as in air-gap environments, download {PRODUCT_LONG} version {VERSION_80} - Maven Repository and extract the downloaded `bamoe-{VERSION_8_LATEST}-maven-repository.zip` file to your existing `~/maven-repository` directory to update the relevant contents.
+
++
+Example Maven repository update:
+
++
+[source,shell,subs="attributes+"]
+----
+unzip -o bamoe-{VERSION_8_LATEST}-maven-repository.zip 'rhba-8.0.2.GA-maven-repository/maven-repository/*' -d /tmp/rhbaMavenRepoUpdate
+
+$ mv /tmp/rhbaMavenRepoUpdate/rhba-8.0.2.GA-maven-repository/maven-repository/ $REPO_PATH/
+----
+
++
+[TIP]
+====
+You can remove the `/tmp/rhbaMavenRepoUpdate` folder after you complete the update.
+====
+
+. **Optional**: If you are changing {PRODUCT} from using property-based user storage to file-based user storage, complete the following steps:
+
++
+.Navigate to the `$JBOSS_HOME` directory and run one of the following commands:
+
++
+On Linux or Unix-based systems:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./bin/standalone.sh --admin-only -c standalone-full.xml
+$ ./bin/jboss-cli.sh --connect --file=bamoe-$VERSION-update/elytron/add-kie-fs-realm.cli
+----
+
++
+On Windows:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./bin/standalone.bat --admin-only -c standalone-full.xml
+$ ./bin/jboss-cli.bat --connect --file=bamoe-$VERSION-update/elytron/add-kie-fs-realm.cli
+----
+
++
+.Run the following command:
+
++
+On Linux or Unix-based systems:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./bin/elytron-tool.sh filesystem-realm --users-file standalone/configuration/application-users.properties --roles-file standalone/configuration/application-roles.properties --output-location standalone/configuration/kie-fs-realm-users --filesystem-realm-name kie-fs-realm-users
+----
+
++
+On Windows:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./bin/elytron-tool.bat filesystem-realm --users-file standalone/configuration/application-users.properties --roles-file standalone/configuration/application-roles.properties --output-location standalone/configuration/kie-fs-realm-users --filesystem-realm-name kie-fs-realm-users
+----
+
++
+Navigate to the directory where you extracted the `bamoe-$VERSION-update.zip` file and run one of the following commands to apply the kie-fs-realm patch:
+
++
+On Linux or Unix-based systems:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./elytron/kie-fs-realm-patch.sh ~/$JBOSS_HOME/standalone/configuration/kie-fs-realm-users/
+----
+
++
+On Windows:
+
++
+[source,shell,subs="attributes+"]
+----
+$ ./elytron/kie-fs-realm-patch.bat ~/$JBOSS_HOME/standalone/configuration/kie-fs-realm-users/
+----
+
+. After you finish applying all relevant updates, start Decision/Business Central and KIE Server and login.
+. Verify that all the project data is present and accurate in Decision/Business Central, and in the top-right corner of the Decision/Business Central window, click your profile name and click About to verify the updated product version number.
+
++
+
+If you encounter errors or notice any missing data in Decision/Business Central, you can restore the contents in the backup folder within the `bamoe-$VERSION-update` folder to revert the update tool changes.
+You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}.
+After restoring your previous distribution, you can try again to run the update.
+
+== Step 4: Update Persistence
+
+For applications based on {RH_PAM}, you may be required to update the runtime database.
+For upgrading the database, the easiest way is to do it in sequence, as most of the jobs are very small (re: 2-4 lines of SQL).
+They are all mapped by the version progression, so it will be fairly quick.
+So, for instance, if you are running a PostgreSQL database, you must do the following:
+
+. Connect to your database instance using your method of preference.
+. Apply the SQL scripts appropriate for the version you are upgrading from up to RHPAM 7.13.x.
+
+[source,shell,subs="attributes+"]
+----
+...
+$ psql -h $dbhost -U $user < rhpam-7.11-to-7.12.sql
+$ psql -h $dbhost -U $user < rhpam-7.12-to-7.13.sql
+$ psql -h $dbhost -U $user < rhpam-7.13-to-7.13.1.sql
+...
+----
+
+[NOTE]
+====
+{PRODUCT_SHORT} version {VERSION_80}'s database is compatible with {RH_PAM} 7.13.x, so all you need to do is to update the database to that level, and you will be set to migrate the rest of your application.
+====
+
+Once you have executed these SQL statements, your datasource is now up to date.
+If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice; the files should largely be the same.
