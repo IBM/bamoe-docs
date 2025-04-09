@@ -13,13 +13,9 @@ This section will walk you through upgrading your:
 
 * {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, {DEV_TOOLS}, and {FORM_GENERATION_TOOL}.
 
-* {PRODUCT_SHORT} project(s)
+* _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} production environment installation with Management and Task console, and upgraded versions of your {PRODUCT_SHORT} projects.
-
-If you are using the {VERSION_90X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
-
-//Remember to change the technology preview link after creating the topic.
+* {PRODUCT_SHORT} production environment installation with Management and Task console, and upgraded versions of your _Business Services_.
 
 == Step 1: Download product archives
 
@@ -77,15 +73,15 @@ Existing DMN files (any version) can be opened directly in the editor. For more 
 
 This tool is required for workflow execution. If the {FORM_GENERATION_TOOL} is already present, uninstall and re-install using steps available in xref:../tools/form-generation-tool.adoc[Form generation tool].
 
-== Step 3: Upgrade your {PRODUCT} project(s)
+== Step 3: Upgrade your _Business Service(s)_ project(s)
 
-{PRODUCT} project(s) can be upgraded in two ways, by:
+_Business Service(s)_ project(s) can be upgraded in two ways, by:
 
-* Updating an existing BAMOE version {VERSION_90X} project with its artifacts by changing the Maven dependencies. 
+* Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
 
-* Creating a new project from scratch and moving your existing assets to it.
+* Creating a _Business Service_ project from scratch and moving your existing assets to it.
 
-The following tools are required to upgrade your {PRODUCT_SHORT} projects to version {VERSION_91X}:
+The following tools are required to upgrade your _Business Service_ projects to version {VERSION_91X}:
 
 - https://openjdk.org[JDK 17] is installed.
 - https://maven.apache.org[Apache Maven 3.9.6] or later is installed.
@@ -96,21 +92,21 @@ The following tools are required to upgrade your {PRODUCT_SHORT} projects to ver
 
 [NOTE]
 ====
-After completing the upgrade of your {PRODUCT_SHORT} project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
+After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
 
 Refer to xref:../reference-guide/drl.adoc[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
 ====
 
 
-== Step 3a: Upgrade {PRODUCT_SHORT} project(s) on version {VERSION_90X}
+== Step 3a: Upgrade _Business Service(s)_ project(s) on version {VERSION_90X}
 
-Once your development environment installation is upgraded, it is straightforward to upgrade your project(s) on {PRODUCT_SHORT} {VERSION_90x} to {PRODUCT_SHORT} version {VERSION_91x}.
+Once your development environment installation is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_90x} to {PRODUCT_SHORT} version {VERSION_91x}.
 
 The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
 [WARNING]
 ====
-If you come across some difficulties when trying to upgrade your existing {PRODUCT_SHORT} projects, you are recommended to create a new project following xref:#step-3b[Step 3b: Upgrade {PRODUCT_SHORT} projects on versions {VERSION_90X}].
+If you come across some difficulties when trying to upgrade your existing _Business Service(s)_ project(s), you are recommended to create a new project following xref:#step-3b[Step 3b: Upgrade Business Service projects on versions {VERSION_90X}].
 ====
 
 [start=1]
@@ -147,11 +143,11 @@ If you come across some difficulties when trying to upgrade your existing {PRODU
 Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
 ====
 
-== Step 3b: Creating a {PRODUCT_SHORT} project on version {VERSION_91x} from scratch
+== Step 3b: Creating a _Business Service_ project on version {VERSION_91x} from scratch
 
-If you have experienced some difficulties when trying to upgrade your project you can create a new {PRODUCT_SHORT} project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
+If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
 
-For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new project on {PRODUCT_SHORT} version {VERSION_91x}.
+For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91x}.
 
 The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
 
@@ -164,7 +160,7 @@ Examples of supported business automation assets are:
 - Standard Properties files (`.properties`)
 - Test Scenario Files (.scesim)
 
-Copy all your assets from your project to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION_91x}. If you have custom Java code or any other type of file in your project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+Copy all your assets from your _Business Service_ project to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION_91x}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
 
 [NOTE]
 ====
@@ -360,15 +356,7 @@ image::maven-project.png[Example Maven Project in VS Code]
 +
 As you can see from the figure, a Maven compliant project is generated, including all of the standard folders typically found in a Maven project.
 The most significant folder is the `resources` folder, which is where new or upgraded business automation asset files must be stored.
-Examples of supported business automation assets are:
-+
-- Decision Model & Notation (DMN) Models (.dmn)
-- Drools Rule Language (DRL) Files (.drl)
-- Business Process Modeling & Notation (BPMN) Models (.bpmn)
-- Excel Decision Tables Excel Files (.xlsx)
-- Standard Property Files (.properties)
-- Test Scenario Files (.scesim)
-+
+
 [NOTE]
 ====
 The proper folder for unit test files is `src/test/resources`, as this is a testing resource.
@@ -412,7 +400,7 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your {PRODUCT_SHORT} version {VERSION_91X} project.
 
-== Step 4: Verify the upgrade of your {PRODUCT_SHORT} project
+== Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 . To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
 +
 [source,console]
@@ -432,17 +420,17 @@ You might get Maven streaming text once again, and at the end of it you must hav
 [INFO] ------------------------------------------------------------------------
 ----
 +
-Now you can start using your project on {PRODUCT_SHORT} version {VERSION_91X}.
+Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91X}.
 
 == Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
 
-After upgrading your source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded {PRODUCT_SHORT} projects.
+After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
 
-It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live projects that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_91X} yet. Once all your projects are running, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_91X} yet. Once all your _Business Services_ are running, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
 
 If you are getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
 
-Once you have a new installation for {MANAGEMENT_CONSOLE}, you can follow the standard guidance on how to deploy a new version of your projects (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
+Once you have a new installation for {MANAGEMENT_CONSOLE}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
 
 
 
@@ -559,15 +547,6 @@ Refer to xref:../reference-guide/drl.adoc[Drools Rule Language Migration] for in
 ====
 
 Now, you can start using your {PRODUCT_SHORT} version {VERSION} project.
-
-== Update your runtime environment
-
-You need to update your business service and management and task console. 
-
-You can follow the standard guidance on how to maintain your business service project, including how to build using Maven and how to deploy to your target Kubernetes-based environment.
-This includes not only creating and publishing the new project to an enterprise GIT repository but also configuring your CI/CD pipeline to pull from GIT and performing a Maven build/test/deploy, etc.
-
-To update your management and task console installation, see xref:../workflow/consoles.adoc[consoles].
 
 === Maven libraries mapping guide
 
