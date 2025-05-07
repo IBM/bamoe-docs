@@ -1,0 +1,239 @@
+= Form code generation functionality
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Form code generation is included as a command in {DEV_TOOLS} and is used to generate custom Forms code for BPMN-based Workflows.
+
+== Form types
+Form code generation commands support two UI libraries:
+
+* *PatternFly*: This type generates *.tsx* files using the *PatternFly* library for styling the forms.
+* *Bootstrap 4*: This type generates *.html* files using the *Bootstrap 4* library for styling the forms.
+
+`Bootstrap 4` generates HTML code, while `PatternFly` generates React code.
+
+Furthermore, according to the file name extension, *.tsx* files are **React** forms and *.html* files are *plain html* forms.
+
+
+== The configuration file
+Each generated form, both for *PatternFly* and *Bootstrap 4*, has a corresponding *.config* file.
+
+Such config files contain schema information about the object that the form is generated for.
+Furthermore, the goal of this *.config* file is to load additional scripts and styles.
+
+For the *PatternFly* forms, by default, no additional scripts or styles are loaded.
+
+For the *Bootstrap 4* forms, by default, `bootstrap@4.0.0` styles and `jquery@3.2.1` scripts are loaded.
+
+
+== Form code generation pre-requisities
+
+- Make sure that your project is compiled, otherwise the command will not be able to find all the form schemas.
+
+You can generate forms by using an existing _Business Service_ project, *process-compact-architecture-example* available at xref:../getting-started/examples.adoc[Example applications].
+
+
+== Generating Forms code
+
+To run a command in VS Code, open the command palette using the keyboard shortcut `CTRL + SHIFT + P` for Windows and Linux or `CMD + SHIFT + P` for macOS.
+
+This function is available in the `BAMOE Developer Tools: Generate form code for User Tasks` command. The command palette dynamically re-organizes based on user activity and input. For example, if you type "BAMOE", it displays the available BAMOE Developer Tools commands.
+
+image::tools/form-gen-generate-form-code.png[generate form code for user tasks]
+
+When you select `BAMOE Developer Tools: Generate form code for User Tasks`, you must enter the absolute path of the _Business Service_ project. By default, this field is auto-filled with the currently opened workspace.
+
+image::tools/form-gen-project-folder.png[select folder]
+
+[NOTE]
+====
+As mentioned in "Generation Prerequisites", the project must be compiled first; otherwise, the command will fail.
+====
+
+After entering the absolute path of _Business Service_ project, you must choose between `Bootstrap 4` and `PatternFly`, the two supported UI libraries.
+
+image::tools/form-gen-libraries.png[libraries]
+
+Next, you must choose whether to generate form code for all User Tasks or specific User Tasks.
+
+image::tools/form-gen-user-tasks.png[user tasks]
+
+If `Generate form code for specific User Tasks` is selected, an additional step appears, displaying a checkbox with a list of the project's User Tasks. The command  generates form code only for the selected tasks.
+
+image::tools/form-gen-list-project-user-tasks.png[list of projects user tasks]
+
+If the VS Code does not show any errors, the form code is generated in the project folder, `src/main/resources/custom-forms-dev`.
+
+image::tools/form-gen-code-project-folder.png[form code in folder]
+
+If the selected forms already exist in the `custom-forms-dev` folder, an additional step prompts you to confirm whether to override the existing form files.
+
+image::tools/form-gen-confirmation.png[confirmation]
+
+The override process will erase the current form and config files, even if the type does not match.
+
+For example:
+
+If the user already has a `PatternFly` form for the "hiring" User Task (a .tsx file) but chooses to generate a `Bootstrap 4` form (an .html file), overriding will erase `hiring.tsx` and `hiring.config`, replacing them with `hiring.html` and a new `hiring.config` file.
+
+[NOTE]
+====
+The form code generation process can be stopped at any time by pressing ESC.
+====
+
+== Custom Forms in the Quarkus Dev UI
+For Quarkus-based projects, you can use and test them by using the *jBPM Quarkus Dev UI* extension.
+
+To do so, just add the following dependency in your project `pom.xml`:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-quarkus-devui</artifactId>
+</dependency>
+----
+
+[NOTE]
+====
+This is already done for *process-compact-architecture-example*.
+====
+
+And start the project in Dev mode with the command:
+
+[source,bash]
+----
+mvn clean -Pdevelopment quarkus:dev
+----
+
+Then, in your browser, navigate to:
+[source,bash]
+----
+http://localhost:8080/q/dev-ui/extensions
+----
+
+On the displayed page, find this card and click *Forms*.
+
+.jBPM Quarkus Dev UI Card
+image::tools/jbpm-runtime-tools-quarkus-dev-ui.png[jBPM Quarkus Dev UI Card]
+
+Now you should see a list of all available forms that are listed.
+
+.Forms list
+image::tools/form-gen-forms.png[Forms list]
+
+Choosing a form will provide the option to adjust it.
+Continue with the *hiring* form.
+Click on it to open it.
+Now you can see two tabs: *Source* and *Connections*.
+
+
+=== Source
+The *Source* tab displays the form source code on the left side, while on the right side there is the form UI.
+
+.Hiring form
+image::tools/form-gen-hiring.png[Hiring form]
+
+Tweak specific parts of the source code, for example:
+
+[source,html]
+----
+<label for="candidateData.email">Email</label>
+----
+To
+
+[source,html]
+----
+<label for="candidateData.email">Candidate Email</label>
+----
+and click *Save*.
+
+The form reloads the applied changes.
+
+.Updated hiring form
+image::tools/form-gen-hiring-updated.png[Updated hiring form]
+
+The same functionality is available for the `React` forms.
+
+You can apply new changes to the HR Interview form as well.
+
+image::tools/form-gen-approve.png[Approved hiring form]
+
+Open the form and change `Approve' to `I approve this candidate!`.
+
+[source,html]
+----
+<label class="form-check-label" for="approve">Approve</label>
+----
+To
+
+[source,html]
+----
+<label class="form-check-label"for="approve">I approve this candidate!</label>
+----
+image::tools/form-gen-process-user-task.png[Loaded forms]
+
+In the earlier version, the custom forms were loaded in `Process Definitions` page. Now, the custom forms are loaded in the `User Tasks` page as well.
+
+To verify these changes, create a new process using `Process Definitions`:
+
+image::tools/form-gen-verify.png[Verify forms]
+
+Start the new process, which will load the `hiring` form that was changed previously from `Email` to `Candidate Email`.
+
+image::tools/form-gen-new-process.png[New process]
+
+Access the newly created HR Interview task in the `Tasks` tab.
+
+image::tools/form-gen-new-interview.png[New interview]
+
+The HR Interview form now reflects the change, `I approve this candidate!`.
+
+image::tools/form-gen-new-change.png[New change]
+
+These updates apply to both HTML (Bootstrap 4) and React (PatternFly) forms.
+
+
+=== Connections
+The *Connections* tab displays loaded scripts and styles.
+
+IMPORTANT: This tab is for loading external resources only.
+
+You can load newer `bootstrap@5.3.3` version.
+
+To do it, update the `hiring.config` from, for example:
+
+[source,json]
+----
+{
+  "scripts": {
+    "jquery.js": "https://code.jquery.com/jquery-3.2.1.slim.min.js",
+    "bootstrap.bundle.min.js": "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"
+  },
+  "styles": {
+    "bootstrap.min.css": "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  }
+}
+----
+
+to:
+
+[source,json]
+----
+{
+  "scripts": {
+    "jquery.js": "https://code.jquery.com/jquery-3.2.1.slim.min.js",
+    "bootstrap.bundle.min.js": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  },
+  "styles": {
+    "bootstrap.min.css": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  }
+}
+----
+
+After updating `hiring.config` to use `bootstrap@5.3.3` instead of `bootstrap@4.0.0`, the form UI should be more compact, using smaller visual gaps between elements.
+
+[NOTE]
+====
+If the form contains Lists, all `badge` classes must be removed, and 'float-right' should be replaced with 'float-end'.
+====

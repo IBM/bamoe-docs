@@ -1,0 +1,540 @@
+= Upgrading from 9.1.x
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+The usual upgrade path recommended for users is to upgrade to the next version (n) before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911}. 
+
+NOTE: Due to the significant architecture change between {PRODUCT_SHORT} {VERSION_80X} and 9.x, if you have not already upgraded to versions {VERSION_90X} or {VERSION_91X}, we do not recommend that you upgrade to {VERSION_920}. When the required features are available in a 9.2.x release the detailed migration procedures will be provided. 
+
+Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
+
+This guide will walk you through upgrading your:
+
+* {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+
+* _Business Service(s)_ project(s)
+
+* {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
+
+If you are using the {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
+
+== Step 1: Download product archives
+
+Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT}, {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. For more information see https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document]. 
+
+== Step 2: Upgrade your {PRODUCT_SHORT} development environment installation
+
+When you upgrade your {PRODUCT_SHORT} development environment, you must upgrade {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}. 
+
+=== Upgrade {MVN_REPO}
+
+It is recommended using the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION}.
+
+If you are using the {MVN_REPO} `.zip` instead of {MVN_REPO} container images, simply extract the contents of {MVN_REPO} `.zip` version {VERSION} to your local Maven repository.
+
+In case you have installed {MVN_REPO} in a Maven Repository Manager such as Artifactory or Nexus, follow the steps in xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}] to install the new {MVN_REPO} version {VERSION}.
+
+=== Upgrade {CANVAS}
+
+The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_91x} version (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+
+If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+
+[NOTE]
+====
+If you have customized your previous {CANVAS} installation, remember to apply the same Environment Variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+====
+
+=== Upgrade {DEV_TOOLS}
+
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded.
+
+See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
+
+[NOTE]
+====
+After upgrading the new Test Scenario Editor (now compatible with DMN 1.5) will also open automatically when you first open SCESIM files in {DEV_TOOLS}, even when the linked Decision is on an older version (e.g., DMN 1.2).
+====
+
+== Step 3: Upgrade your _Business Service(s)_ project(s)
+
+_Business Service(s)_ project(s) can be upgraded in two ways, by:
+
+* Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
+
+* Creating a _Business Service_ project from scratch and moving your existing assets to it.
+
+The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION_920}:
+
+- https://openjdk.org[JDK 17] is installed.
+- https://maven.apache.org[Apache Maven 3.9.6] is installed.
+- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
+- Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
+
+[NOTE]
+====
+After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
+
+Refer to xref:../reference-guide/drl.adoc[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
+====
+
+[#step-3a]
+== Step 3a: Upgrade _Business Service(s)_ project(s) on {PRODUCT_SHORT} version {VERSION_91X}
+
+Once your {PRODUCT_SHORT} development environment installation is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_91x} to {PRODUCT_SHORT} version {VERSION}.
+
+The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
+
+[WARNING]
+====
+If you come across some difficulties when trying to upgrade your existing _Business Service_ projects we recommend creating a new project following xref:#step-3b[Step 3b: Upgrade Business Service projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}].
+====
+
+[start=1]
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.15 (LTS)`:
+
+
+[start=2]
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION_920}:
++
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+----
+
+[start=3]
+. Update the `application.properties` file.
++
+{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+
++
+[source,diff]
+----
+ +++ quarkus.devservices.enabled=false
+----
+
+
+[NOTE]
+====
+Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+====
+
+[#step-3b]
+== Step 3b: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
+
+If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
+
+For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+
+The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
+
+Examples of supported business automation assets are:
+
+- Decision Model & Notation (DMN) decisions (`.dmn`)
+- Drools Rule Language (DRL) rules (`.drl`)
+- Business Process Modeling & Notation (BPMN) workflows (`.bpmn`)
+- Spreadsheet Decision Table files (`.xls` or `.xlsx`)
+- Standard Properties files (`.properties`)
+- Test Scenario files (`.scesim`)
+
+Copy all your assets from your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91X} to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+
+[NOTE]
+====
+The proper folder for Test Scenario files is `src/test/resources`.
+====
+
+
+== Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
+. To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
++
+[source,console]
+----
+mvn clean package
+----
++
+You might get Maven streaming text once again, and at the end of it you must have:
++
+[source,console]
+----
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.023 s
+[INFO] Finished at: 2024-06-11T17:09:00-03:00
+[INFO] ------------------------------------------------------------------------
+----
++
+Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+
+== Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
+
+After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
+
+It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+
+If you are getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
+
+Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
+
+[#migrate-tech-preview]
+== Upgrading from {PRODUCT_SHORT} version {VERSION_911} technology preview for stateful Workflows
+
+In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
+
+* The new User Tasks API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID` is the key and most of the time it is the only actor to operate with the new API. 
++
+In version {VERSION_911}, the General Process API entrypoints are based on the following pattern:
++
+`http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
++
+In version {VERSION} the User Task API entrypoints are based on the following pattern:
++
+`http://<host:port>/<usertasks>/<instance>/<task-instance-id>`
+
+* The Task ID used in the User Tasks is not the same ID required in the Process API. The reason for this behavior is that the new API relies on a new subsystem. The subsystem base has its own IDs, that are not recognized by the Process API. This is an important point to understand before you start upgrading to the new API. 
++
+For example the `<task-instance-id>` referenced in the General Process API call:
++
+`http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
++
+and
++
+`http://<host:port>/usertasks/instance/<task-instance-id>`
++
+You must upgrade all entry points in your application to use the User Task API layers when operating with User Tasks. 
+
+* The Returned JSON object contains more detailed data. You will therefore need to adapt how the entrypoint data is consumed by your application.
+
+The following sections show how the API calls changed based
+on the most important use cases:
+
+[cols=",",]
+|===
+2+| *Example 1 - Show Tasks assigned to a user / groups*
+
+|*Process API* |curl -X GET ++\++
+
+'http://localhost:8080/++{++processId}/++{++uuid}/tasks?user=manager&group=managers'
+
+|*User Task API* a|
+curl -X GET ++\++
+
+'http://localhost:8080/usertasks/instance?group=managers&user=manager'
+|===
+
+[cols=",",]
+|===
+2+|*Example 2 - Show a precise Task assigned to a user / groups*
+
+|*Process API* a|
+curl -X GET ++\++
+
+'http://localhost:8080__/++{++__processId__}/++{++__processInstance__}/__++{++taskName}/++{++taskId}?user=manager'
+
+|*New API* a|
+curl -X GET ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}?group=managers&user=manager'
+|===
+
+The JSON returned by the User Task API to represent a Task is significantly different from the JSON returned by the Process API.
+
+Here, an example of the two returned objects for both endpoints.
+
+The new User Tasks API returns the following information:
+
+[source,json,subs="attributes+"]
+----
+{
+    "id": "e447c247-abc2-4ed4-a7ab-ef4ee2fe4a71",
+    "userTaskId": "_8B62D3CA-5D03-4B2B-832B-126469288BB4", // UserTask ID Node
+    "status": {
+      "terminate": null,
+      "name": "Reserved" //phase
+    },
+    "taskName": "firstLineApproval",
+    "taskDescription": null,
+    "taskPriority": null,
+    "potentialUsers": [
+      "manager"
+    ],
+    "potentialGroups": [
+      "managers"
+    ],
+    "adminUsers": [],
+    "adminGroups": [],
+    "excludedUsers": [],
+    "externalReferenceId": "c7f40ec0-0272-4e04-9f0b-91ffe78d2590", 
+    "actualOwner": "manager",
+    "inputs": {
+      "traveller": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "jon.doe@example.com",
+        "nationality": "American",
+        "address": {
+          "street": "main street",
+          "city": "Boston",
+          "zipCode": "10005",
+          "country": "US"
+        }
+      }
+    },
+    "outputs": {},
+    "metadata": {
+      "ProcessType": "BPMN",
+      "ParentProcessInstanceId": null,
+      "ProcessVersion": "1.0",
+      "RootProcessInstanceId": null,
+      "RootProcessId": null,
+      "ProcessId": "approvals",
+      "ProcessInstanceId": "e7822e65-abf3-4356-9cf9-15bde2c43641",
+      "ProcessInstanceState": 1
+    }
+  }
+
+----
+
+While the Process API returns the following task information:
+
+[source,json,subs="attributes+"]
+----
+[
+  {
+    "id": "c7f40ec0-0272-4e04-9f0b-91ffe78d2590",
+    "name": "firstLineApproval",
+    "state": 1, // termination state
+    "phase": "activate",
+    "phaseStatus": "Activated",
+    "parameters": {
+      "traveller": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "jon.doe@example.com",
+        "nationality": "American",
+        "address": {
+          "street": "main street",
+          "city": "Boston",
+          "zipCode": "10005",
+          "country": "US"
+        }
+      }
+    },
+    "results": {
+      "approved": null
+    }
+  }
+]
+----
+
+The main differences are:
+
+* The User Tasks IDs will not be the same.
++
+The assigned ID for the Task in the new User Tasks API
+(e447c247-abc2-4ed4-a7ab-ef4ee2fe4a71) is scoped inside the User Tasks
+subsystem, and can only be used in that subsystem. It is the ID to be used as taskID parameter in all the
+entrypoints defined in the new User Tasks API. The rest of the engine is
+out of scope. Using this task ID in a Process API entrypoint
+will lead to an error.
+
+* The `externalReferenceId` element represents the Work Item ID, which is how the Process API identifies a User Task at the global level. The value is the same as the Task ID if you use Process API. 
+
+* New data related to the assigned permissions for the Tasks
+has been added, such as the actual owner, potential users and groups and excluded users
+
+* The `parameters` object present in the old API has become `inputs` and `outputs`. These represents a Map of String, Objects entries that you can set
+as the User Task input or output. You can modify this list adding more entries with a specific entrypoint.
+
+* The new API Task object now contains a Metadata object. This contains relevant properties that describes the BPMN asset 
+
+With the dedicated API for User Tasks, it is now possible to directly put new Input and Output data for a given User Task, using the following entrypoints:
+
+[cols=",",]
+|===
+2+|*Example 3 – Add Inputs data*
+
+|*Process API* |Not possible to modify inputs in the previous API
+version.
+
+|*New API* a|
+curl -X PUT ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/inputs?group=managers&user=manager'++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"variable": "value"
+
+}'
+|===
+
+[cols=",",]
+|===
+2+| *Example 4 - Add Output data*
+
+|*Process API* |Not possible to pass Output data to a User Task when sending a termination (eg. completion) phase update call.
+
+|*New API* a|
+curl -X PUT ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/outputs?group=managers&user=manager'
+++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"variable": "value"
+
+}'
+|===
+
+Here are some examples on how to manage Comments and Attachments
+
+[cols=",",]
+|===
+2+|*Example 5  Add Comments*
+
+|*Process API* |Not possibile to add comments
+
+|*New API* a|
+curl -X POST ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/comments?
+group=managers&user=manager' ++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"comment": "test"
+
+}'
+|===
+
+[cols=",",]
+|===
+2+| *Example 6 - Add Attachments*
+
+|*Process API* |Not possibile to add attachments
+
+|*New API* a|
+curl -X POST ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/attachments?group=managers&user=manager'
+++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"uri": "http://www.bamoe.com",
+"name": "bamoe"
+
+}'
+|===
+
+Similar operations (GET, DELETE) can be performed against Comments and
+Attachments. The precise endpoint definitions are shown above.
+
+The following examples show how to apply a transition to a given User Task.
+The transition scope is to advance a User Task status, moving it from one status to another (transitionID), where the status can be: "activate", "claim", "release", "complete", "skip", or “fail”. The following example shows how to complete a User Task.
+
+[cols=",",]
+|===
+2+|*Example 7 - Approve User Task*
+
+|*Process API* a|
+curl -X POST ++\++
+'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}?user=admin&group=managers'
+++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"approved": "true"
+
+}'
+
+OR
+
+curl -X POST ++\++
+'http://localhost:8080/++{++processId}/++{++uuid}/++{++taskName}/++{++taskId}/phases/++{++phaseId}?user=admin&group=managers'
+++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"approved": "true"
+
+}'
+
+|*New API* a|
+curl -X POST ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/transition?group=managers&user=manager'
+++\++
+
+-H 'accept: application/json' ++\++
+
+-H 'Content-Type: application/json' ++\++
+
+-d '++{++
+
+"transitionId": "complete"
+
+}' 
+|===
+
+With the Process API there are two ways to change the
+User Task status. With the first entrypoint, the User Tasks change its
+status to complete, without specifying the phaseId. The second
+entrypoint gives the ability to pass a specific phaseId different than
+“complete”. It is possible to pass output values in the same call (E.g.,
+“approved” = true)
+
+The new User Task API requires that the transitionID is defined in the
+JSON payload, as in the example below. It is no longer possible to pass
+output values as was done in the Process API, so if you need to put some output
+data, you need to call the Add Output entypoint described later.
+
+A new feature that the new User Tasks API introduced is to provide an
+endpoint that returns all reachable statuses that a given User Task can
+reach from the current status.
+
+[cols=",",]
+|===
+2+|*Example 8 – Retrieve reachable status for a given User Task*
+
+|*Process API* |Not present
+
+|*New API* a|
+curl -X GET ++\++
+
+'http://localhost:8080/usertasks/instance/++{++taskId}/transition?
+group=managers&user=manager' ++\++
+|===

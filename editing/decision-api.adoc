@@ -1,0 +1,304 @@
+= The Decision API _(a.k.a. Domain API)_
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+A _Business Service_ on {PRODUCT_SHORT} exposes REST API endpoints for every Decision it includes.
+
+NOTE: These API endpoints are generated automaticallt generated based on the Decisions contained in the application. This means that the main context of these endpoints differ for each Decision, as it is based on the `id` of the Decision. The inputs of the Decision define the structure of the payload. In addition, the number of available endpoints is dependent of the structure of the Decision.
+
+* **`[POST] /\{modelName\}`**: A business-domain endpoint for evaluating the entire DMN model
+* **`[POST] /\{modelName\}/\{decisionServiceName\}`**: A business-domain endpoint for evaluating a specified decision service component in the DMN model
+* **`[POST] /\{modelName\}/dmnresult`**: An endpoint for evaluating the entire DMN model and returning a `DMNResult` response, including the business-domain context, helper messages, and helper decision pointers for the DMN model
+* **`[POST] /\{modelName\}/\{decisionServiceName\}/dmnresult`**: An endpoint for evaluating a specified decision service component in the DMN model and returning a `DMNResult` response, including the business-domain context, helper messages, and helper decision pointers for the decision service
+* **`[GET] /\{modelName\}`**: An endpoint for returning the DMN XML without decision logic, typically for DMN model introspection
+
+You can use these endpoints to interact with a DMN model or a specific decision service within a model. To help you decide between using business-domain and `dmnresult` variants of these REST endpoints, review the following considerations:
+
+* *REST business-domain endpoints*: Use this endpoint type if a client application only requires a positive evaluation outcome, does not need to parse `Info` or `Warn` messages, and only needs an HTTP 5xx response for any errors. This type of endpoint is also helpful for single-page application-like clients, due to singleton coercion of decision service results that resemble the DMN modeling behavior.
+* *REST `dmnresult` endpoints*: Use this endpoint type if a client needs to parse `Info`, `Warn`, or `Error` messages in all cases.
+
+For each endpoint, use a REST client, curl utility, or Swagger UI (if configured for the application) to send requests with the following components:
+
+* *Base URL*: `http://__HOST__:__PORT__/\{modelName}`
+* *Path parameters*:
+** `\{modelName\}`: The string identifier of the DMN model, such as `Traffic Violation`
+** `\{decisionServiceName\}`: The string identifier of the decision service component in the DMN DRG, such as `TrafficViolationDecisionService`
+** `dmnresult`: The string identifier that enables the endpoint to return a full `DMNResult` response with more detailed `Info`, `Warn`, and `Error` messaging
+* *HTTP headers*: For `POST` requests only:
+** `accept`: `application/json`
+** `content-type`: `application/json`
+* *HTTP methods*: `GET` or `POST`
+
+The examples in the following endpoints are based on a `Traffic Violation` DMN model that contains a `TrafficViolationDecisionService` decision service component.
+
+For all of these endpoints, if a DMN evaluation `Error` message occurs, a `DMNResult` response is returned along with an HTTP 5xx error. If a DMN `Info` or `Warn` message occurs, the relevant response is returned with the business-domain REST body, in the `X-{PRODUCT}-decision-messages` extended HTTP header, to be used for client-side business logic. When more refined client-side business logic is required, the client can use the `dmnresult` variant of the endpoints.
+
+== Return the DMN XML without decision logic
+`[GET] /\{modelName\}`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example curl request
+[source]
+----
+curl -X GET http://localhost:8080/Traffic Violation
+----
+
+The response would be the actual DMN file.
+
+== Evaluate a specified DMN model
+`[POST] /\{modelName\}`
+
+For this endpoint, the request body must contain all input data of the DMN model. The response is the resulting DMN context of the model, including the decision values, the original input values, and all other parametric DRG components in serialized form. For example, a business knowledge model is available in string-serialized form in its signature.
+
+.Example `Traffic Violation` DMN model
+image::dmn-model-traffic-violation.png[Image of Traffic Violation DMN model]
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "Violation": {
+    "Type": "speed",
+    "Speed Limit": 100,
+    "Actual Speed": 120
+  },
+  "Driver": {
+    "Points": 2
+  },
+  "Fine": {
+    "Points": 3,
+    "Amount": 500
+  },
+  "Should the driver be suspended?": "No"
+}
+----
+
+== Evaluate a specified decision service within a DMN model
+`[POST] /\{modelName\}/\{decisionServiceName\}`
+
+For this endpoint, the request body must contain all the requirements of the decision service. The response is the resulting DMN context of the decision service, including the decision values, the original input values, and all other parametric DRG components in serialized form. For example, a business knowledge model is available in string-serialized form in its signature.
+
+If the decision service is composed of a single-output decision, the response is the resulting value of that specific decision. This behavior provides an equivalent value at the API level of a specification feature when invoking the decision service in the model itself. As a result, you can, for example, interact with a DMN decision service from single-page web applications.
+
+.Example `TrafficViolationDecisionService` decision service with single-output decision
+image::dmn-model-traffic-violation-single-output.png[Image of decision service in Traffic Violation DMN model]
+
+.Example `TrafficViolationDecisionService` decision service with multiple-output decision
+image::dmn-model-traffic-violation-multi-output.png[Image of decision service in Traffic Violation DMN model]
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation/TrafficViolationDecisionService`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation/TrafficViolationDecisionService -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response for single-output decision (JSON)
+[source,json]
+----
+"No"
+----
+
+.Example response for multiple-output decision (JSON)
+[source,json]
+----
+{
+  "Violation": {
+    "Type": "speed",
+    "Speed Limit": 100,
+    "Actual Speed": 120
+  },
+  "Driver": {
+    "Points": 2
+  },
+  "Fine": {
+    "Points": 3,
+    "Amount": 500
+  },
+  "Should the driver be suspended?": "No"
+}
+----
+
+== Evaluate a specified DMN model and return a 'DMNResult' response
+`[POST] /\{modelName\}/dmnresult`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "namespace": "https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF",
+  "modelName": "Traffic Violation",
+  "dmnContext": {
+    "Violation": {
+      "Type": "speed",
+      "Speed Limit": 100,
+      "Actual Speed": 120,
+      "Code": null,
+      "Date": null
+    },
+    "Driver": {
+      "Points": 2,
+      "State": null,
+      "City": null,
+      "Age": null,
+      "Name": null
+    },
+    "Fine": {
+      "Points": 3,
+      "Amount": 500
+    },
+    "Should the driver be suspended?": "No"
+  },
+  "messages": [],
+  "decisionResults": [
+    {
+      "decisionId": "_4055D956-1C47-479C-B3F4-BAEB61F1C929",
+      "decisionName": "Fine",
+      "result": {
+        "Points": 3,
+        "Amount": 500
+      },
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    },
+    {
+      "decisionId": "_8A408366-D8E9-4626-ABF3-5F69AA01F880",
+      "decisionName": "Should the driver be suspended?",
+      "result": "No",
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    }
+  ]
+}
+----
+
+== Evaluate a specified decision service within a DMN model and return a 'DMNResult' response
+`[POST] /\{modelName\}/\{decisionServiceName\}/dmnresult`
+
+.Example REST endpoint
+`\http://localhost:8080/Traffic Violation/TrafficViolationDecisionService`
+
+.Example POST request body with input data
+[source,json]
+----
+{
+  "Driver": {
+    "Points": 2
+  },
+  "Violation": {
+    "Type": "speed",
+    "Actual Speed": 120,
+    "Speed Limit": 100
+  }
+}
+----
+
+.Example curl request
+[source]
+----
+curl -X POST http://localhost:8080/Traffic Violation/TrafficViolationDecisionService -H 'content-type: application/json' -H 'accept: application/json' -d '{"Driver": {"Points": 2}, "Violation": {"Type": "speed", "Actual Speed": 120, "Speed Limit": 100}}'
+----
+
+.Example response (JSON)
+[source,json]
+----
+{
+  "namespace": "https://github.com/kiegroup/drools/kie-dmn/_A4BCA8B8-CF08-433F-93B2-A2598F19ECFF",
+  "modelName": "Traffic Violation",
+  "dmnContext": {
+    "Violation": {
+      "Type": "speed",
+      "Speed Limit": 100,
+      "Actual Speed": 120,
+      "Code": null,
+      "Date": null
+    },
+    "Driver": {
+      "Points": 2,
+      "State": null,
+      "City": null,
+      "Age": null,
+      "Name": null
+    },
+    "Should the driver be suspended?": "No"
+  },
+  "messages": [],
+  "decisionResults": [
+    {
+      "decisionId": "_8A408366-D8E9-4626-ABF3-5F69AA01F880",
+      "decisionName": "Should the driver be suspended?",
+      "result": "No",
+      "messages": [],
+      "evaluationStatus": "SUCCEEDED"
+    }
+  ]
+}
+----
+

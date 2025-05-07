@@ -1,0 +1,15 @@
+package com.ibm.bamoe.rules.embedded; 
+
+import com.ibm.bamoe.rules.embedded.Applicant;
+import com.ibm.bamoe.rules.embedded.LoanApplication;
+
+rule "Underage"
+  salience 15
+  agenda-group "applicationGroup"
+  when
+    $application : LoanApplication( $applicantId: applicantId )
+    Applicant( id == $applicantId && age < 21 )
+  then
+    $application.setApproved( false );
+    $application.setExplanation( "Underage" );
+end

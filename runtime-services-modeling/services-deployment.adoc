@@ -1,0 +1,56 @@
+= Deploying _Business Services_
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Once you have defined what is your preferred way of building your _Business Services_ projects into your executable type of choice–Container images, Native Executable, or standard JARs–it is time to layout your deployment strategy.
+
+We encourage you to follow industry-standard software development practices of versioning your _Business Services_ projects on Version Control Systems (VCS), and to automate the deployment process of your _Business Services_ using widely adopted services and tools.
+
+While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ to your production environment, there are a few important considerations you need to take into account, especially if you are using stateful Workflows.
+
+[#production-database-creation]
+== Creating your database schema for stateful Workflows based on {DDLS}
+
+To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a Database Admin.
+
+The provided Installation DDL scripts allow creating from scratch the Database for the different {PRODUCT_SHORT} subsystems for both PostgreSQL and Microsoft SQL Server.
+
+The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
+
+.Contents of bamoe-9.2.0-db-utils.zip
+image::wf-tutorial/gs-bamoe-9.2.0-db-utils.png[Contents of bamoe-9.2.0-db-utils.zip]
+
+Make sure you have KIE Flyway disabled to guarantee your _Business Service_ containing stateful Workflows subsystems configured with persistence will not try to apply changes to your database schema in your production environment.
+
+[source,properties]
+----
+kie.flyway.enabled=false
+----
+
+If everything is correctly set, at the first project execution all the tables will be automatically added.
+
+== Evolving stateful Workflows across multiple Business Service deployments
+
+When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or particularly to the BPMN files and re-deploy, there are a few things to be considered.
+
+As a general guideline, it is safe to deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However, whenever the Diagram (Sequence Flow) of a stateful Workflow model changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) in-place and deploy a new version your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow normally, based on the old Workflow model.
+
+The pseudo-timeline below shows the safest strategy for evolving your Workflow models across many deployments.
+
+* *First deploy (v1)*:
++
+- + `MyWorkflow.bpmn` _(Added)_
++
+* *Second deploy (v2)*:
++
+- ⊙ `MyWorkflow.bpmn` _(Kept, but deprecated. Do not allow creation of new Process Instances from it.)_
+- + `MyWorkflowV2.bpmn` _(Added)_
++
+* *Third deploy (v3)*:
++
+- - `MyWorkflow.bpmn` _(Deleted once there are no more *active* Process Instances)_
+- ⊙ `MyWorkflowV2.bpmn` _(Kept)_
+
+There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy.
+
+{PRODUCT_SHORT} currently does not allow you to migrate Process Instances to newer Process Definitions versions on-the-fly, so following the recommendation above is the safest path for evolving your stateful Workflow across deployments without running into unexpected problems.

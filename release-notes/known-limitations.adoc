@@ -1,0 +1,41 @@
+= Known limitations
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Before you use {PRODUCT_LONG}, see the known limitations. When possible, workarounds will be included with the limitations.
+
+Table 1. Known limitations
+[%header,cols=2]
+[%autowidth]
+|===
+
+|Limitation | Description
+
+|{Canvas} cannot import files from GitHub using the raw URL, '/:org/:repo/refs/heads/:tree/:path*'.
+|Due to the GitHub API change, the raw URL does not work. Use the URL, '/:org/:repo/:tree/:path*' to import files from GitHub.
+
+See https://www.ibm.com/mysupport/aCIKe000000XfIg[issue,window=_blank]
+
+
+|Standalone BPMN and DMN Editors (classic): The standalone editors examples show some minor issues 
+|* Read-only not applied to process variable tags. It can be edited even if a BPMN diagram is set to read-only in the standalone BPMN Editor (classic).
+
+* Incorrect reference of state-control. Though BPMN is mentioned in the top toolbar with buttons for loading files, it refers to DMN.
+
+* Read-only not applied to boxed expressions as it can be edited even if a DMN diagram is set to read-only in the standalone DMN Editor (classic).
+
+See https://www.ibm.com/mysupport/aCIKe000000XfJo[issue,window=_blank]
+
+
+|{PRODUCT_SHORT} examples may not work on  more recent container platforms.
+|Some of the examples for user reference  are built with Docker Image format 1 (IIRC), which might not work for newer container platforms or versions.
+
+For reference, see xref:../getting-started/examples.adoc[Example applications]
+
+|The event subsystem in the {PRODUCT_SHORT} workflow engine does not have transactional support.
+|Using transactions that emit events through an emitter like Kafka or CloudEvents in _Business Services_ with Compact Architecture with at least runtime persistence may throw a transaction error with message 'enlisted connection used without active transaction' after starting a process instance.
+
+|In a _Business Service_, Workflows subsystem event related messages are sent even if the process execution fails due to a DB error.
+|In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
+
+|===

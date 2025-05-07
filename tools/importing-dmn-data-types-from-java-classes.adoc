@@ -1,0 +1,45 @@
+== Importing DMN Data Types from Java classes
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+{DEV_TOOLS} allows you to create DMN Data Types directly from Java POJOs. This step-by-step guide aims to describe how effectively using it.
+
+NOTE: This feature is currently available in the DMN Editor (classic) only.
+
+=== Prerequisites
+* {DEV_TOOLS} @ {VERSION}
+* VS Code (1.66.0+)
+* Language Support for Java(TM) by Red Hat (1.31+) VS Code extension
+* Your domain’s Java Classes;
+* The Activator, a Java class file (Activator.java) required to activate the functionality;
+
+=== Project Setup
+Any _Business Service_ project that holds DMN assets is a perfect pick can be used as a reference. This guide will refer to an existing project that lives in the xref:../getting-started/examples.html[kie-kogito-examples], which already contains DMN assets. The steps to follow are:
+
+1. Clone the `incubator-kie-kogito-examples` repository.
+2. Open VS Code and navigate to `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-quarkus-example`.
+3. Add the Java Classes you need to convert to DMN Data Type in any package under the `src/main/java` directory of your _Business Service_ project.
+4. In the same package defined in the previous point, create the  `Activator` Java Class. The Activator class **must** be an empty Java Class exactly named "Activator.java". Any change or additional code can affect negatively the feature behavior.
++
+image::developer-tools/dmn-import-java-classes-activator.png[]
+
+=== Importing your Java Classes as DMN Types
+
+Open your target DMN file, the reference for this guide is the `TrafficViolation.dmn` file already available in the example project. Go to the `Data Types` tab. Here, you should notice a  button: `Import Java Classes`.
+Be aware that this button is enabled only if the previously described requirements are satisfied.
+
+image::developer-tools/dmn-import-java-classes-button.png[]
+
+After clicking that button, the Import Java Classes panel will appear. At this point, follow these steps:
+
+* **Select Java Classes:** In the search box, put the name of the Java Class you want to import as a DMN Type. You can use the class simple name (eg. Book) or the full qualified name (eg. dto.Book). Below the search box, a list with all Java Classes that match the provided key will appear. Select the ones you want to import. When ready, click on the `Next` button.
++
+image::developer-tools/dmn-import-java-classes-selection.png[]
++
+* **Select Fields and Review:** In this section, the list of all Java Classes' fields will be shown.
++
+image::developer-tools/dmn-import-java-classes-fields.png[]
++
+* **Import:** Press the `Import` button. This will automatically import the selected Java Class in the DMN Data Type tab.
++
+image::developer-tools/dmn-import-java-classes-imported.png[]

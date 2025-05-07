@@ -1,0 +1,195 @@
+= The Process API _(a.k.a. Domain API)_
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+A _Business Service_ on {PRODUCT_SHORT} automatically exposes REST endpoints for every Process Definition it includes.
+
+For example, the following REST operations use the endpoint `/hiring` to interact with the hiring process of the application. You can use a REST client, curl utility, or the Swagger UI configured for the application at http://localhost:8080/swagger-ui/ to send API requests to interact with the running application.
+
+.Swagger UI showing the Process API for the `hiring` process
+image::swagger-ui.png[]
+
+
+The following sections describe the Process API in detail. 
+
+NOTE: This API is generated dynamically based on the Process Definitions contained in the application. This means that the main context of these endpoints differ for each process, as it is based on the `id` of the Process Definition. For some endpoints, the process variables define the structure of the payload. In addition, the number of available endpoints is dependent of the structure of the Process Definition.
+
+===  /{process_id}
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns a list of active process instances for the given process.
+
+|*Inputs* a|
+* N/A
+
+|*Output* a| A JSON List of all active process instances for the given process. The list contains the `id` of the process instance, as well as the variables tagged as `output`
+
+
+|*Example* a|
+
+  curl -X 'GET' \
+  'http://localhost:8080/{process_id}' \
+  -H 'accept: application/json'
+
+|===
+
+===  /{process_id}
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |This endpoint is provided to start a new process instance of the given process.
+
+|*Inputs* 
+a|
+* businessKey: String (QueryParameter)
+* process_variable(s): JSON (payload)
+
+|*Output* a|* The `id` of the generated process instance, as well as the variables tagged as `output`.
+
+* Error if a process instance with the provided businessKey already exists
+
+|*Example* a|
+
+  curl -X 'POST' \
+  'http://localhost:8080/{process_id}?businessKey=value' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{ "process_variable" : "json" }'
+
+|===
+
+===  /{process_id}/schema
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the schema of the given process.
+
+|*Inputs* a|
+* N/A
+
+|*Output* a| The schema representation of the given process. This includes the process variables tagged as `output`
+
+
+|*Example* a|
+
+  curl -X 'GET' \
+  'http://localhost:8080/{process_id}/scheam' \
+  -H 'accept: application/json'
+
+|===
+
+===  /{process_id}/{processInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns information about an active process instance.
+
+|*Inputs* a|
+* processInstanceId: String (PathParameter)
+
+|*Output* a|* Information about the active process instance, including the `id` of the process instance, as well as the variables tagged as `output`.
+
+* HTTP 404 is returned if the `processInstanceId` cannot be found as active process instance.
+
+|*Example* a|
+
+  curl -X 'GET' \
+  'http://localhost:8080/{process_id}/{processInstanceId}' \
+  -H 'accept: application/json'
+
+|===
+
+===  /{process_id}/{processInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |PUT
+
+|*Description* |This endpoint allows to update the process input variables.
+
+|*Inputs* a|
+* processInstanceId: String (PathParameter)
+* process_variable(s): JSON (payload)
+
+|*Output* a|* Information about the active process instance, including the `id` of the process instance, as well as the variables tagged as `output`.
+
+* HTTP 404 is returned if the `processInstanceId` cannot be found as active process instance.
+
+|*Example* a|
+
+  curl -X 'PUT' \
+  'http://localhost:8080/{process_id}/{processInstanceId}' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{ "process_variable" : "json" }'
+
+|===
+
+===  /{process_id}/{processInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |DELETE
+
+|*Description* |This endpoint allows to abort a process instance.
+
+|*Inputs* a|
+* processInstanceId: String (PathParameter)
+
+|*Output* a|* Information about the aborted process instance, including the `id` of the process instance, as well as the variables tagged as `output`.
+
+* HTTP 404 is returned if the `processInstanceId` cannot be found as active process instance.
+
+|*Example* a|
+
+  curl -X 'DELETE' \
+  'http://localhost:8080/{process_id}/{processInstanceId}' \
+  -H 'accept: application/json' 
+
+|===
+
+===  /{process_id}/{processInstanceId}
+
+[cols="1,1"]
+|===
+|*Type* |PATCH
+
+|*Description* |This endpoint allows to update the process input variables.
+
+|*Inputs* a|
+* processInstanceId: String (PathParameter)
+* process_variable(s): JSON (payload)
+
+|*Output* a|* Information about the active process instance, including the `id` of the process instance, as well as the variables tagged as `output`.
+
+* HTTP 404 is returned if the `processInstanceId` cannot be found as active process instance.
+
+|*Example* a|
+
+  curl -X 'PATCH' \
+  'http://localhost:8080/{process_id}/{processInstanceId}' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{ "process_variable" : "json" }'
+
+|===
+
+===  /{process_id}/{processInstanceId}/{nodeName}
+
+[cols="1,1"]
+|===
+|*Type* |GET|POST|DELETE
+
+|*Description* |Various endpoints for nodes acting as wait states in the process. This could include WorkItem / UserTask nodes as well as other wait states, such as a Catching Intermediate Signal event.
+
+|*Note* a|For UserTasks, it is recommended to use the dedicated xref:../workflow/user-tasks.adoc[User Task API] instead.
+
+|===

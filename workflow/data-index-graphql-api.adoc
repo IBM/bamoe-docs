@@ -1,0 +1,649 @@
+= The Data-Index GraphQL API
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+When your project implements the Compact Architecture it natively integrates the Data-Index subsystem. One of the useful frameworks offered by this Service is GraphQL, which provides endpoints that can be consumed by client applications to run Process Instances, User Tasks, Jobs, and Process Definitions and also get other information about running process instances. GraphQL offers a very rich set of conditions to create a query according to your business needs.
+
+The GraphQL functionalities can be consumed in two ways:
+
+. Using the GraphQL UI tool in Quarkus dev mode: 
++
+This tool is useful to experiment and create your own queries to run against your application. You can use it in the development phase by setting `quarkus.kogito.data-index.graphql.ui.always-include=true`, and opening the GraphQL UI via `+https://HOST:PORT/q/graphql-ui+`
++
+
+. Using the `/graphql` entry point to make requests to GraphQL, which the Compact Architecture natively exposes.
+
+
+The `/graphql` entry point is described in the following table. 
+
+[cols="1,1"]
+|===
+|*Type* |POST
+
+|*Description* |It runs a provided GraphQL query against your application 
+
+|*Inputs* |
+A GraphQL query
+
+|*Output* a| A JSON that holds the result of your GraphQL query
+|*Example* a|
+
+  curl -X POST http://HOST:PORT/graphql -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "query": "/* YOUR GRAPHQL QUERY */" }'
+  
+|===
+
+== GraphQL query capabilities
+
+GraphQL queries  can be done on the different workflow types
+
+=== Process Instances
+
+`ProcessInstances` represents an instance of a running Workflow in the runtime environment. The state of a `ProcessInstances` can be tracked (e.g., active, completed, suspended, or aborted). A process instance may execute various tasks, handle events, interact with external services, and more, depending on the Process Definition. 
+
+Here is a sample query on `ProcessInstances` showing the different fields you can query:
+
+[source,java]
+----
+{
+  ProcessInstances {
+    id
+    processId
+    version
+    processName
+    parentProcessInstanceId
+    rootProcessInstanceId
+    rootProcessId
+    roles
+    state
+    endpoint
+    serviceUrl
+    nodes {
+      id
+      name
+      type
+      enter
+      exit
+      definitionId
+      nodeId
+      slaDueDate
+    }
+    milestones {
+      id
+      name
+      status
+    }
+    variables
+    start
+    end
+    parentProcessInstance {
+      id
+    }
+    childProcessInstances {
+      id
+    } 
+    error {
+      nodeDefinitionId
+      message
+    }
+    addons
+    lastUpdate
+    businessKey
+    nodeDefinitions {
+      id
+      metadata {
+        UniqueId
+        state
+        branch
+        action
+      }
+      name
+      type
+      uniqueId
+    }
+    diagram
+    source
+    definition {
+      id
+    }
+    identity
+    createdBy
+    updatedBy
+    slaDueDate
+  }
+
+}
+----
+
+=== User Tasks
+`UserTaskInstances` are used to track the tasks that  are part of a broader workflow, and the Kogito framework provides mechanisms to manage and interact with these tasks through different lifecycle stages. Using APIs, you can easily manage `UserTaskInstances` in business processes, including assigning tasks, tracking task states, and interacting with process variables.
+
+Here is a sample query on `UserTaskInstances` showing the different fields you can query:
+
+[source,graphql]
+----
+{
+  UserTaskInstances {
+    id
+    description
+    name
+    priority
+    processInstanceId
+    processId
+    rootProcessInstanceId
+    rootProcessId
+    state
+    actualOwner
+    adminGroups
+    adminUsers
+    completed
+    started
+    excludedUsers
+    potentialGroups
+    potentialUsers
+    inputs
+    outputs
+    referenceName
+    lastUpdate
+    endpoint
+    comments {
+      id
+      content
+      updatedBy
+      updatedAt
+    }
+    attachments {
+      id
+      name
+      content
+      updatedBy
+      updatedAt
+    }
+    externalReferenceId
+    slaDueDate
+  }
+}
+----
+
+=== Jobs
+
+`Jobs` are used to represent asynchronous or scheduled tasks that run in the background. They are primarily used for executing long-running processes, timers, and other scheduled tasks within a business process or workflow. `Jobs` are typically used to handle tasks like sending reminders, triggering specific actions after a delay, or performing periodic checks within a process.
+
+Here is a sample query on `Jobs` showing the different fields you can query:
+
+[source, graphql]
+----
+{
+  Jobs {
+    id
+    processId
+    processInstanceId
+    nodeInstanceId
+    rootProcessInstanceId
+    rootProcessId
+    status
+    expirationTime
+    priority
+    callbackEndpoint
+    repeatInterval
+    repeatLimit
+    scheduledId
+    retries
+    lastUpdate
+    executionCounter
+    endpoint
+  }
+}
+----
+
+=== Process Definitions
+
+A `ProcessDefinitions` represents the definition of a business process or workflow. It encapsulates the structure, rules, and logic that define how a process behaves. The `ProcessDefinitions` object is the model for a particular BPMN (Business Process Model and Notation) or other workflow-based process and includes all the details required to execute and manage that process within the runtime environment.
+
+Here is a sample query on `ProcessDefinitions` showing the different fields you can query:
+
+[source, graphql]
+----
+{
+  ProcessDefinitions {
+    id
+    name
+    version
+    nodes {
+      id
+      metadata {
+        UniqueId
+        state
+        branch
+        action
+      }
+      name
+      type
+      uniqueId
+    }
+    source
+    addons
+    roles
+    type
+    endpoint
+    serviceUrl
+    description
+    annotations
+    metadata
+  }
+}
+----
+
+== Filtering
+Filtering typically refers to the ability to query and retrieve values based on specific criteria. Filtering can be extremely useful in scenarios where you want to track, manage, or analyse processes, tasks, or jobs by applying certain conditions or constraints (e.g., filter by status, user, date range, variables, etc.).
+
+There are multiple mechanisms to filter `ProcessInstances`, `UserTasksInstances`, `Jobs`, and `ProcessDefinitions`. 
+
+For example here is an example of a query that will show all `UserTaskInstances`:
+
+[source, graphql]
+----
+{
+  UserTaskInstances  {
+    id
+    name
+    state
+    processInstanceId
+    actualOwner
+    lastUpdate
+  }
+}
+----
+
+Which returns a list such as the following:
+
+[source, graphql]
+----
+{
+  "data": {
+    "UserTaskInstances": [
+      {
+        "id": "c2caa8f3-fe14-4779-9745-bc2c62861d01",
+        "name": "HRInterview",
+        "state": "Error",
+        "processInstanceId": "8ca68693-1c38-4f96-ab36-1f20a164dfd2",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:02:14.171Z"
+      },
+      {
+        "id": "f41664f4-ae79-4eaf-ad86-bdc1c1a06676",
+        "name": "HRInterview",
+        "state": "Error",
+        "processInstanceId": "cd9be754-96d0-4d4f-868b-d377bdab3962",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:02:14.172Z"
+      },
+      {
+        "id": "b9df90d0-2f54-4a05-aefd-8878274258e7",
+        "name": "HRInterview",
+        "state": "Completed",
+        "processInstanceId": "69e8a419-1a5e-4b1d-bbe8-5ba49718e8dd",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T11:59:37.294Z"
+      },
+      ...
+    ]
+  }
+}  
+----
+
+To apply filtering conditions in GraphQL queries, use the `where` and mention the specific conditions. For example, to filter the `UserTaskInstances` and show only those instances where state is ”Reserved” or "Ready" and name is prefixed by 'HR', the following query can be used:
+
+[source, graphql]
+----
+{
+  UserTaskInstances (where: {
+    and: [
+      {state: {in: ["Reserved", "Ready"]}},
+      {name: {like: "HR*"}}
+    ]
+  }) {
+    id
+    name
+    state
+    processInstanceId
+    actualOwner
+    lastUpdate
+  }
+}
+----
+
+And something like the following will be returned showing UserTaskInstances that match the criteria :
+
+[source, graphql]
+----
+{
+  "data": {
+    "UserTaskInstances": [
+      {
+        "id": "2fc77c0e-7afd-40da-8978-4bcac4dfa56d",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "42e919fb-b014-4927-aa3c-c19a3930efd5",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:07:47.068Z"
+      },
+      {
+        "id": "8d547a46-05a0-4999-8793-a672532106ff",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "3299d15f-1ae5-4631-8efe-d9ba955fb9b3",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:07:50.373Z"
+      },
+      {
+        "id": "4e8acdcb-0f40-4da3-bd92-e897437580fe",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "2e1113f2-9f67-4ac7-91c4-0f8495d8e410",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:12:56.138Z"
+      },
+      ...
+    ]
+  }
+} 
+----
+
+In GraphQL, filters are often handled through arguments passed to queries, and the conditions like logical operators (`AND`, `OR`, `NOT`) , `between`, `contains`, `containsAll`, `containsAny`, `equalTo`, `greaterThan`, `greaterThanEqual`, `lessThan`, `lessThanEqual`, `isNull` can be used to handle the complex query conditions.
+
+Depending on the attribute type, the following operators can be used:
+
+[cols="1,1"]
+|===
+|*Attribute type* |*Operators*
+
+|String array argument 
+a|`contains` : String
+
+`containsAll`: Array of strings
+
+`containsAny`: Array of strings
+
+`isNull`: Boolean (true or false)
+
+|String argument
+a|`in`: Array of strings
+
+`like`: String
+
+`isNull`: Boolean (true or false)
+
+`equal`: String
+
+|ID argument
+|`in`: Array of strings
+
+`equal`: String
+
+`isNull`: Boolean (true or false)
+
+|Boolean argument:
+a|`isNull`: Boolean (true or false)
+
+`equal`: Boolean (true or false)
+
+|Numeric argument:
+a|`in`: Array of integers
+
+`isNull`: Boolean
+
+`equal`: Integer
+
+`greaterThan`: Integer
+
+`greaterThanEqual`: Integer
+
+`lessThan`: Integer
+
+`lessThanEqual`: Integer
+
+`between`: Numeric range
+
+`from`: Integer
+
+`to`: Integer
+
+|Date argument:
+a|`isNull`: Boolean (true or false)
+
+`equal`: Date time
+
+`greaterThan`: Date time
+
+`greaterThanEqual`: Date time
+
+`lessThan`: Date time
+
+`lessThanEqual`: Date time
+
+`between`: Date range
+
+`from`: Date time
+
+`to`: Date time
+|===
+
+== Sorting
+
+In GraphQL, sorting is often implemented by arguments in the query. The specific sorting mechanism and the way it is used depends on how the GraphQL schema is designed, but many GraphQL API endpoints allow sorting by providing arguments that specify the field(s) to sort by and the sort order (ascending - ASC or descending - DESC). To sort the value  based on a particular field in either ascending or descending order, you can use the `ORDER BY` clause in your Graphql query.
+
+The following shows an example of a query to return UserTaskInstances filtered in the previous query, and sorted in the descending order of the `lastUpdate` string. 
+
+[source,json]
+----
+{
+  UserTaskInstances (where: {
+    and: [
+      {state: {in: ["Reserved", "Ready"]}},
+      {name: {like: "HR*"}}
+    ]},
+    orderBy: {lastUpdate: DESC}
+  ) {
+    id
+    name
+    state
+    processInstanceId
+    actualOwner
+    lastUpdate
+  }
+} 
+----
+
+And something like the following will be returned showing UserTaskInstances that match the criteria, shown in descending order or `LastUpdate`:
+
+[source, graphql]
+----
+{
+  "data": {
+    "UserTaskInstances": [
+      {
+        "id": "14d92bfa-1273-4400-b81b-a049c3fcf4a9",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "d3007173-6c89-4bbc-9438-89d75055e223",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:30.659Z"
+      },
+      {
+        "id": "cfa97303-50f2-4f37-b3f0-c79585665819",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "3368aff0-2b72-49ea-8bf5-c27a93152a9b",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:16.514Z"
+      },
+      {
+        "id": "78341329-8759-4493-aeec-e008927f828c",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "3a7b2acd-408f-427a-9b4b-b322cb668969",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:07.899Z"
+      },
+      ...
+    ]
+  }
+}
+----
+
+== Pagination
+
+GraphQL pagination is used to break down large datasets into smaller, manageable chunks to improve performance and the user experience. Unlike traditional APIs where pagination might be handled with parameters like `page` and `limit`, GraphQL commonly uses offset-based pagination.
+
+To add pagination to your query, you can use the parameters:
+
+`limit`:: to specify how many results to return 
+
+`offset`:: where to start returning the results(the starting point). 
+
+The following shows an example of a query to return the first 5 `UserTaskInstances` from the top of the list (offset 0) generated by the prevous query. 
+
+[source,json]
+----
+{
+  UserTaskInstances (where: {
+    and: [
+      {state: {in: ["Reserved", "Ready"]}},
+      {name: {like: "HR*"}}
+    ]},
+    orderBy: {lastUpdate: DESC},
+    pagination: {
+      limit: 5,
+      offset: 0
+    }
+  ) {
+    id
+    name
+    state
+    processInstanceId
+    actualOwner
+    lastUpdate
+  }
+}
+----
+
+Where the following 5 instances will be returned:
+
+[source, graphql]
+----
+{
+  "data": {
+    "UserTaskInstances": [
+      {
+        "id": "14d92bfa-1273-4400-b81b-a049c3fcf4a9",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "d3007173-6c89-4bbc-9438-89d75055e223",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:30.659Z"
+      },
+      {
+        "id": "cfa97303-50f2-4f37-b3f0-c79585665819",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "3368aff0-2b72-49ea-8bf5-c27a93152a9b",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:16.514Z"
+      },
+      {
+        "id": "78341329-8759-4493-aeec-e008927f828c",
+        "name": "HRInterview",
+        "state": "Ready",
+        "processInstanceId": "3a7b2acd-408f-427a-9b4b-b322cb668969",
+        "actualOwner": null,
+        "lastUpdate": "2025-03-28T12:13:07.899Z"
+      },
+      {
+        "id": "ed89c127-0cdf-4b25-927f-7c936ccad984",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "b31168a1-f083-43de-aad3-29b93e5112c8",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:12:58.452Z"
+      },
+      {
+        "id": "3b17a8f9-5fc8-404b-a15d-5757b98d8476",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "61465c5e-6d3c-4054-8d6f-a9183b0c5ee6",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:12:57.621Z"
+      }
+    ]
+  }
+----
+
+The following shows an example of a query to return the first 5 fUserTaskInstances from the top of the list (offset 0) generated by the prevous query. 
+
+[source,json]
+----
+{
+  UserTaskInstances (where: {
+    and: [
+      {state: {in: ["Reserved", "Ready"]}},
+      {name: {like: "HR*"}}
+    ]},
+    orderBy: {lastUpdate: DESC},
+    pagination: {
+      limit: 5,
+      offset: 5
+    }
+  ) {
+    id
+    name
+    state
+    processInstanceId
+    actualOwner
+    lastUpdate
+  }
+}
+----
+
+Where the following 4 instances will be returned starting from the 6th item in the list:
+
+[source, graphql]
+----
+{
+  "data": {
+    "UserTaskInstances": [
+      {
+        "id": "81014d64-e81a-483a-a9d4-797e0d5cb596",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "4691e5d2-04d7-4764-8ce2-9b0ae6d150ef",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:12:56.841Z"
+      },
+      {
+        "id": "4e8acdcb-0f40-4da3-bd92-e897437580fe",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "2e1113f2-9f67-4ac7-91c4-0f8495d8e410",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:12:56.138Z"
+      },
+      {
+        "id": "8d547a46-05a0-4999-8793-a672532106ff",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "3299d15f-1ae5-4631-8efe-d9ba955fb9b3",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:07:50.373Z"
+      },
+      {
+        "id": "2fc77c0e-7afd-40da-8978-4bcac4dfa56d",
+        "name": "HRInterview",
+        "state": "Reserved",
+        "processInstanceId": "42e919fb-b014-4927-aa3c-c19a3930efd5",
+        "actualOwner": "jdoe",
+        "lastUpdate": "2025-03-28T12:07:47.068Z"
+      }
+    ]
+  }
+}
+----
