@@ -79,14 +79,6 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION_911}.
 - Quarkus version {QUARKUS_VERSION} or later is installed.
 
-[NOTE]
-====
-After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
-
-Refer to xref:..\reference-guide/drl.adoc[Reference → Drools Rule Language (DRL)]
-for information on upgrading to the latest version of Drools Rule Language (DRL).
-====
-
 == Step 3a: Upgrade _Business Service(s)_ project(s) on version {VERSION_90X}
 
 Once your development environment installation is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_90x} to {PRODUCT_SHORT} version {VERSION_91x}.
@@ -102,8 +94,33 @@ If you come across some difficulties when trying to upgrade your existing _Busin
 . Upgrade the Quarkus version in the project POM file to the currently supported version `3.8.6`.
 To make this upgrade, open the POM file and do the changes.
 
++
+[source,xml]
+----
+ ---   <quarkus-plugin.version>2.16.10.Final</quarkus-plugin.version>
+ +++   <quarkus-plugin.version>3.8.6</quarkus-plugin.version>
+       <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+       <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
+ ---   <quarkus.platform.version>2.16.12.Final</quarkus.platform.version>
+ +++   <quarkus.platform.version>3.8.6</quarkus.platform.version>
+----
+
 [start=2]
 . Upgrade the BOM and Kogito versions in your POM xml.
+
++
+Previously, the {PRODUCT_SHORT} version {VERSION_90x} used the BOM version {BOM_VERSION_901} and Kogito version {KOGITO_VERSION_901}.
+Now, both versions are {BOM_VERSION_911}.
+Update the following lines in your `pom.xml`:
++
+[source,xml,subs="attributes+"]
+----
+       <kogito.bom.artifact-id>bamoe-bom</kogito.bom.artifact-id>
+ ---   <kogito.bom.version>{BOM_VERSION_901}</kogito.bom.version>
+ ---   <version.org.kie.kogito>{KOGITO_VERSION_901}</version.org.kie.kogito>
+ +++   <kogito.bom.version>{BOM_VERSION_911}</kogito.bom.version>
+ +++   <version.org.kie.kogito>{KOGITO_VERSION_911}</version.org.kie.kogito>
+----
 
 [start=3]
 . Update the Maven GAV dependencies.
@@ -457,11 +474,11 @@ Now you can start using your _Business Service_ project on {PRODUCT_SHORT} versi
 
 == Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
 
-After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade `Management and Task console` before deploying a new version of the upgraded _Business Services_.
+After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade Management and Task console before deploying a new version of the upgraded _Business Services_.
 
-It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading `Management and Task console` so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_91X} yet. Once all your _Business Services_ are running, you can safely remove your previous `Management and Task console` installation.
+It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading Management and Task console so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_91X} yet. Once all your _Business Services_ are running, you can safely remove your previous Management and Task console installation.
 
-If you are getting started with stateful Workflows, follow xref:../workflow/workflow-techpreview.adoc[Technology preview: Developing process services → Interacting with processes and tasks using Consoles] for information on installing `Management and Task console` for the first time in your production environment.
+If you are getting started with stateful Workflows, follow instructions in xref:../installation/installation.adoc[Installing] for information on initial project setup and walkthrough.
 
 Once you have a new installation, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/building-decision-services.adoc[Building decision services]).
 
