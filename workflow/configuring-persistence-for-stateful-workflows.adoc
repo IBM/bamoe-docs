@@ -150,6 +150,66 @@ quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/b
 ----
 
 
+
+=== Configuring persistence for Oracle
+
+To configure Oracle persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-oracle</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Oracle
+quarkus.datasource.db-kind=oracle
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+==== {PRODUCT_SHORT} mappings for Oracle
+
+Additionally, if the _Business Service_ includes User Task or Job Service, it is also required to add the `bamoe-oracle-mappings` dependency to ensure the correct behaviour of those components. This module includes the necessary Hibernate ORM mappings to help remapping some of the JPA entities used in both components. The mappings contained are:
+* META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-oracle-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+
 === Configuring persistence for H2 (Development only)
 
 In development environments, you can use H2 persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
