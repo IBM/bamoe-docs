@@ -8,11 +8,21 @@ DRL (Drools Rule Language) rules are business rules that you define directly in 
 
 {PRODUCT} supports several assets that you can use to define business decisions for your decision service. Each decision-authoring asset has different advantages, and you might prefer to use one or a combination of multiple assets depending on your goals and needs.
 
-=== Components of DRL Rules 
-
 DRL Rules are a flexible way of defining rules and rule behavior. They are the individual rules that you can define directly in `.drl` text files. They can be created in any standalone environments or text editor and integrated with {PRODUCT}. They Have strict syntax requirements for rules to be compiled properly.
 
-.Components in a DRL file
+=== Structure of DRL Rules 
+
+A Drools rule consists of three main parts:
+ * Rule Declaration: This is where you give your rule a name and optionally specify metadata, like salience or agenda groups.
+ * When: This section contains the conditions or constraints, specifying when the rule should be executed. It is similar to an if statement in programming language.
+ * Then: This is the action section, where you define what happens when the conditions are met.
+
+.Rule template
+
+A DRL file can contain single or multiple rules, queries, and functions, and can define resource declarations such as imports, globals, and attributes that are assigned and used by your rules and queries. The DRL package must be listed at the top of a DRL file and the rules are typically listed last. All other DRL components can follow any order.
+
+Each rule must have a unique name within the rule package. If you use the same rule name more than once in any DRL file in the package, the rules fail to compile. Always enclose rule names with double quotation marks (`rule "rule name"`) to  prevent possible compilation errors, especially if you use spaces in rule names.
+
 [source,subs="attributes+"]
 ----
 package
@@ -58,10 +68,10 @@ rule "Underage"
 end
 ----
 
-A DRL file can contain single or multiple rules, queries, and functions, and can define resource declarations such as imports, globals, and attributes that are assigned and used by your rules and queries. The DRL package must be listed at the top of a DRL file and the rules are typically listed last. All other DRL components can follow any order.
+In the example, `Underage` is the rule name. `Salience`` is a priority value for rules, where a higher value indicates higher priority and the `agenda-group` enables you to group rules together and execute them based on priority.
 
-Each rule must have a unique name within the rule package. If you use the same rule name more than once in any DRL file in the package, the rules fail to compile. Always enclose rule names with double quotation marks (`rule "rule name"`) to  prevent possible compilation errors, especially if you use spaces in rule names.
-
+In the rule, the condition checks if the `Applicant` age is less than 21. If the condition set as 'Approved' is false, the action states that the applicant is `Underage`.
+ 
 All data objects related to a DRL rule must be in the same project package as the DRL file in {CANVAS}. Assets in the same package are imported by default. Existing assets in other packages can be imported with the DRL rule.
 
 == Spreadsheet Decision Tables
@@ -170,7 +180,7 @@ image::decision-table-example-02.png[Decision table example]
 
 In order for a Decision Table to be compiled in your _Business Service_ project, the table must comply with certain structure and syntax requirements within an spreadsheet, as shown in this example.
 
-=== Creating spreadsheet Decision Tables for your _Business Service_ project
+== Creating spreadsheet Decision Tables for your _Business Service_ project
 
 [role="_abstract"]
 Spreadsheet Decision Tables (XLS or XLSX) require two key areas that define rule data: a `RuleSet` area and a `RuleTable` area. The `RuleSet` area of the spreadsheet defines elements that you want to apply globally to all rules in the same package (not only the spreadsheet), such as a rule set name or universal rule attributes. The `RuleTable` area defines the actual rules (rows) and the conditions, actions, and other rule attributes (columns) that constitute that rule table within the specified rule set. A spreadsheet of decision tables can contain multiple `RuleTable` areas, but only one `RuleSet` area.
@@ -250,7 +260,7 @@ mvn compile quarkus:dev -Ddrools.trimCellsInDTable=false
 ----
 ====
 
-=== RuleSet definitions
+== RuleSet definitions
 
 [role="_abstract"]
 Entries in the `RuleSet` area of a decision table define DRL constructs and rule attributes that you want to apply to all rules in a package (not only in the spreadsheet). Entries must be in a vertically stacked sequence of cell pairs, where the first cell contains a label and the cell to the right contains the value. A decision table spreadsheet can have only one `RuleSet` area.
@@ -301,7 +311,7 @@ The following table lists the supported labels and values for `RuleSet` definiti
 
 WARNING: In some cases, Microsoft Office, LibreOffice, and OpenOffice might encode a double quotation mark differently, causing a compilation error. For example, `"`A`"` fails, but `"A"` succeeds.
 
-=== RuleTable definitions
+== RuleTable definitions
 
 [role="_abstract"]
 Entries in the `RuleTable` area of a decision table define conditions, actions, and other rule attributes for the rules in that rule table. A spreadsheet of decision tables can contain multiple `RuleTable` areas.
@@ -382,7 +392,7 @@ For columns headed `METADATA`, the cells in consecutive lines result in a metada
 * *Third cell:* Text in the third cell below `METADATA` is a descriptive label that you define for the column, as a visual aid.
 * *Fourth cell:* From the fourth row on, non-blank entries provide data for interpolation. A blank cell results in the omission of the metadata annotation for this rule.
 
-=== Additional rule attributes for RuleSet or RuleTable definitions
+== Additional rule attributes for RuleSet or RuleTable definitions
 
 [role="_abstract"]
 The `RuleSet` and `RuleTable` areas also support labels and values for other rule attributes, such as `PRIORITY` or `NO-LOOP`. Rule attributes specified in a `RuleSet` area will affect all rule assets in the same package (not only in the spreadsheet). Rule attributes specified in a `RuleTable` area will affect only the rules in that rule table. You can use each rule attribute only once in a `RuleSet` area and once in a `RuleTable` area. If the same attribute is used in both `RuleSet` and `RuleTable` areas within the spreadsheet, then `RuleTable` takes priority and the attribute in the `RuleSet` area is overridden.
