@@ -22,6 +22,8 @@ A Drools rule consists of three main parts:
 
 A DRL file can contain single or multiple rules, queries, and functions, and can define resource declarations such as imports, globals, and attributes that are assigned and used by your rules and queries. The DRL package must be listed at the top of a DRL file and the rules are typically listed last. All other DRL components can follow any order.
 
+A package is a folder of related assets in Drools, such as data objects, DRL files, decision tables, and other asset types. It also serves as a unique namespace for each group of rules. A single rule base can contain multiple packages. You typically store all the rules for a package in the same file as the package declaration so that the package is self-contained. However, you can import objects from other packages that you want to use in the rules.
+
 Each rule must have a unique name within the rule package. If you use the same rule name more than once in any DRL file in the package, the rules fail to compile. Always enclose rule names with double quotation marks (`rule "rule name"`) to  prevent possible compilation errors, especially if you use spaces in rule names.
 
 [source,subs="attributes+"]
@@ -39,7 +41,7 @@ declare   // Optional
 global   // Optional
 
 rule "rule name"
-    // Attributes
+    // Attributes https://docs.drools.org/8.39.0.Final/drools-docs/docs-website/drools/language-reference/index.html[link]
     when
         // Conditions
     then
@@ -210,7 +212,7 @@ Using the example in the previous section, <<spreadsheet_decision_table_example>
 . Below the `RuleSet` area and in the same column as the `RuleSet` cell, skip a row and label a new cell `RuleTable` (row 7 in example) and enter a table name in the same cell. The name is used as the initial part of the name for all rules derived from this rule table, with the row number appended for distinction. You can override this automatic naming by inserting a `NAME` attribute column.
 . Use the next four rows to define the following elements as needed (rows 8-11 in example):
 +
-* *Rule attributes:* Conditions, actions, or other attributes.
+* *Rule attributes:* Conditions, actions, or other attributes. https://docs.drools.org/8.39.0.Final/drools-docs/docs-website/drools/language-reference/index.html[Click this link for more information on attributes].
 * *Object types:* The data objects to which the rule attributes apply. If the same object type applies to multiple columns, merge the object cells into one cell across multiple columns (as shown in the sample decision table), instead of repeating the object type in multiple cells. When an object type is merged, all columns below the merged range will be combined into one set of constraints within a single pattern for matching a single fact at a time. When an object is repeated in separate columns, the separate columns can create different patterns, potentially matching different or identical facts.
 * *Constraints:* Constraints on the object types.
 * *Column label:* (Optional) Any descriptive label for the column, as a visual aid. Leave blank if unused.
