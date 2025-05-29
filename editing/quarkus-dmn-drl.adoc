@@ -102,7 +102,7 @@ Decisions (DMN) and Rules (DRL) files need to go in the `src/main/resources` dir
 
 == Testing
 
-For full integration tests, testing classes should be annotated as `@SpringBootTest`, eventually injecting required managed properties or beans.
+For full integration tests, testing classes should be annotated as `@QuarkusTest`, eventually injecting required managed properties or beans.
 
 Here is an example that verifies the response received when posting an HTTP request on a given (automatically generated) entry point for a Decision:
 
@@ -187,6 +187,21 @@ public class RestQueryTest {
                 .statusCode(200)
                 .body("id", hasItem("ABC10001"));
     }
+}
+----
+
+It is also possible to execute tests on native image. Todo so:
+
+1. extend a testing class annotated as `@QuarkusTest`
+2. annotate that new class with `@QuarkusIntegrationTest`
+
+E.g.
+
+[source,java]
+----
+@QuarkusIntegrationTest
+public class NativeTrafficViolationIT extends TrafficViolationTest {
+    // Execute the same tests but in native mode.
 }
 ----
 
