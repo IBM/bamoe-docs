@@ -171,7 +171,7 @@ The following sections describe the Process Instance Management API in detail.
 
 [cols="1,1a"]
 |===
-|*Type* |POST
+|*Type* |GET
 
 |*Description* |This endpoint returns the list of workItems in the specified process instance
 
@@ -266,6 +266,38 @@ The following sections describe the Process Instance Management API in detail.
 
 |===
 
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the list of active timers associated with the given node instance of the defined process instance
+
+|*Inputs* |
+* nodeInstanceId: String (PathParameter)
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * A list of active timers associated with the given node instance of the defined process instance. It includes the following details
+
+* targetProcessId : String
+* processInstanceId : String
+* nodeInstanceId : String
+* timerId: String
+* description : String
+
+
+* A _BAD REQUEST_ error is returned if nodeInstanceId, processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if nodeInstanceId, processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers' \
+-H 'accept: */*'
+
+|===
 
 ===  /management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}
 
@@ -290,7 +322,7 @@ The following sections describe the Process Instance Management API in detail.
 |*Example* |
 
  curl -X 'POST' \
-'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeInstanceId}' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}' \
 -H 'accept: */*' \
 -d ''
 
@@ -354,6 +386,38 @@ The following sections describe the Process Instance Management API in detail.
 'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/skip' \
 -H 'accept: */*' \
 -d ''
+
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/timers
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the list of active timers associated with the given process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * A list of active timers associated with the given process instance. It includes the following details
+
+* targetProcessId : String
+* processInstanceId : String
+* nodeInstanceId : String
+* timerId: String
+* description : String
+
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/timers' \
+-H 'accept: */*'
 
 |===
 
