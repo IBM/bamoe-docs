@@ -242,3 +242,17 @@ It is possible to disable the default behavior and make the operation no longer 
 |`kogito.usertasks.transactionEnabled`|Sets the transactions as enabled for the new User Tasks API layer, overriding global behavior |Boolean |true
 |===
 
+[#multi-threading]
+== Multi-threaded access to a business service using workflow functionality
+In an environment with multi-threaded access to a business service using workflow functionality, the workflow engine needs to ensure proper state of the runtime data. If an entity, such as a process instance, is accessed concurrently by multiple threads, this can lead to race conditions. 
+{PRODUCT_SHORT} supports proper handling of concurrent access of the same database entity, such as a process instance, through optimistic locking.
+
+- With optimistic locking enabled, concurrent access to a process instance leads to an optimistic lock exception thrown by the workflow engine. This exception will then be handled by the fault-tolerance system and re-tried. This ensures data consistency at runtime. See https://quarkus.io/guides/smallrye-fault-tolerance for further information on available fault-tolerance settings.
+- With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
+
+The recommendation is to enable optimistic locking through the following property in `application.properties`:
+[source,properties]
+----
+# Enable optimistic locking
+kogito.persistence.optimistic.lock=true
+----
