@@ -266,6 +266,37 @@ The following sections describe the Process Instance Management API in detail.
 
 |===
 
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/sla
+
+[cols="1,1a"]
+|===
+|*Type* |PATCH
+
+|*Description* |This endpoint updates the SLA Due Date of the specified node in a process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* nodeInstanceId: String (PathParameter)
+* expirationTime: String (JSON payload)
+
+|*Output* a| * The result of the operation as string.
+
+
+* A _BAD REQUEST_ error is returned if processId, processInstanceId or nodeInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId, processInstanceId or nodeInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'PATCH' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/sla' \
+-H 'accept: */*'
+-H 'Content-Type: application/json'
+-d '{
+  "expirationTime": "2025-12-31T00:00:00.000Z"
+}'
+|===
+
 ===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers
 
 [cols="1,1a"]
@@ -387,6 +418,36 @@ The following sections describe the Process Instance Management API in detail.
 -H 'accept: */*' \
 -d ''
 
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/sla
+
+[cols="1,1a"]
+|===
+|*Type* |PATCH
+
+|*Description* |This endpoint updates the SLA Due Date of a process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* expirationTime: String (JSON payload)
+
+|*Output* a| * The result of the operation as string.
+
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'PATCH' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/sla' \
+-H 'accept: */*'
+-H 'Content-Type: application/json'
+-d '{
+  "expirationTime": "2025-12-31T00:00:00.000Z"
+}'
 |===
 
 ===  /management/processes/{processId}/instances/{processInstanceId}/timers
