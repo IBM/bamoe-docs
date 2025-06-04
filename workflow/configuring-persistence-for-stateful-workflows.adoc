@@ -149,6 +149,16 @@ And in the `application.properties`:
 quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
 ----
 
+==== Transaction isolation settings for Microsoft SQL Server
+
+In order to ensure {PRODUCT_SHORT} is working properly when configured with a Microsoft SQL Server database, the following settings need to be applied at the database level:
+[source,properties]
+----
+    ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
+    ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
+----
+
+These settings are required to prevent database deadlocks when resources in {PRODUCT_SHORT} are accessed concurrently.
 
 === Configuring persistence for Oracle
 
