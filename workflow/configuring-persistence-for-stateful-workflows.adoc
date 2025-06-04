@@ -243,16 +243,15 @@ It is possible to disable the default behavior and make the operation no longer 
 |===
 
 [#multi-threading]
-== Multi-threaded access to a business service using workflow functionality
-In an environment with multi-threaded access to a business service using workflow functionality, the workflow engine needs to ensure proper state of the runtime data. If an entity, such as a process instance, is accessed concurrently by multiple threads, this can lead to race conditions. 
-{PRODUCT_SHORT} supports proper handling of concurrent access of the same database entity, such as a process instance, through optimistic locking.
-
-- With optimistic locking enabled, concurrent access to a process instance leads to an optimistic lock exception thrown by the workflow engine. This exception will then be handled by the fault-tolerance system and re-tried. This ensures data consistency at runtime. See https://quarkus.io/guides/smallrye-fault-tolerance for further information on available fault-tolerance settings.
-- With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
-
-The recommendation is to enable optimistic locking through the following property in `application.properties`:
+== Multi-threaded access to a business service using workflow
+In an environment with multi-threaded access to a business service the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
+In {PRODUCT_SHORT} use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
 [source,properties]
 ----
 # Enable optimistic locking
 kogito.persistence.optimistic.lock=true
 ----
+
+- With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime. For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance.
+- With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
+
