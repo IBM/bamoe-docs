@@ -1,3 +1,83 @@
 = Upgrading from 8.0.x
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
+
+This document provides a structured approach to the migration process, covering everything from environment setup and project upgrades to operational and performance considerations.
+
+
+
+Migrating from BAMOE v8 to v9 involves more than just upgrading libraries, it is a shift in architecture, development model, and runtime behavior. This section highlights the most important differences to help you understand what has changed and how it may impact your applications and what to expect when transitioning to the new BAMOE v9.
+
+As BAMOE evolves, version 9 introduces a modern, cloud-native architecture based on the Kogito runtime, offering improved scalability, flexibility, and integration capabilities. However, this shift also brings significant changes in how processes, tasks, persistence, and user management are handled.
+
+== Architecture, Tooling, and Development Workflow
+
+    From Monolith to Cloud-Native: BAMOE v8 followed a centralized architecture with Business Central and KIE Server. BAMOE v9 adopts a cloud-native approach, built on Kogito, where business logic is packaged as independent services or embedded into applications.
+
+    * Business Central Deprecated: Business Central is no longer part of the toolchain. It is replaced by:
+        - BAMOE Developer Tools for VS Code – Targeting developer users.
+        - BAMOE Canvas – Targeting business analysts.
+        - BAMOE Maven Repository - To build and test Business Services projects.
+
+    * Authoring and Execution Split: In v9, there's a clean separation between asset authoring (offline, in source control) and runtime execution (packaged into applications or services).
+
+    * KIE Server Removed: No central KIE Server exists in v9. You can now:
+        Deploy your processes, rules, decisions as a standalone microservice.
+        Embed processes, rules and decisions directly into Java applications (Quarkus, Spring Boot).
+
+    * No More KIE Sessions: v9 eliminates the concept of KIE sessions. This impacts how rules and processes interact, especially for DRL and BPMN integration. Stateful workflows are now supported via the new User Tasks subsystem and Data Index.
+
+
+== Runtime Behavior and Persistence
+
+    * Persistence and State Management: In BAMOE v9, persistence is now optional and explicitly configured when needed. However, official support is limited to:
+        - PostgreSQL 16.8
+        - Microsoft SQL Server 2022 This ensures compatibility and support for these platforms, aligning with IBM’s tested environments. Persistence is handled through the Data Index and Data Audit subsystems, which track and expose process and task state.
+
+    * Event-Driven Architecture: BAMOE v9 supports reactive, event-driven applications through integration with Apache Kafka. This enables services to publish and consume events in real time, facilitating decoupled and scalable system design. Quarkus provides the most complete support for BPMN and reactive messaging in this context.
+
+== Production Environment
+
+    * Runtime Execution Model: v8 used KIE Server as the central runtime. In v9, each Business Service project can be packaged and deployed as an independent, containerized service.
+
+    * SmartRouter Deprecation: SmartRouter, which in v8 was used to route client requests to the appropriate KIE containers, is deprecated. Service discovery and orchestration are now handled through Kubernetes solutions.
+
+    * Monitoring and Management: Business Central's runtime dashboards are replaced by:
+        BAMOE Management Console
+        Integration with observability tools such as Prometheus and GraphQL for querying process and task data.
+
+== Asset Authoring and Compatibility
+
+    * BPMN: A completely new BPMN editor with improved UX.
+
+    * DMN: Rebuilt using React, the new editor supports DMN 1.5 and offers better integration and validation.
+
+    * Guided Assets Deprecated: Guided Rules, Guided Decision Tables, and other guided assets are no longer supported. These must be converted to DRL format. See Guided Assets chapter for more information.
+
+    * Test Scenarios: The new Test Scenario Editor supports DMN 1.5. DRL-based test scenarios have limited support. Currently, mixing DRL and DMN in the same test module is not supported. See Test Scenarios (SCESIM) chapter for more information.
+
+    * Forms: v8 Forms are not compatible in v9. New forms must be created using the BAMOE Developer Tools for VS Code. See Forms chapter for more information.
+
+== Security and Governance
+
+    * Authentication & Authorization:
+
+    BAMOE v9 integrates with external Identity Providers (IDPs) such as Keycloak, OIDC, and LDAP, using Quarkus security extensions. This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure. See Upgrading Authentication/Authorization chapter for more information.
+
+    * User and Role Management:
+
+    User and role definitions are no longer handled via Business Central. Instead, they must be configured externally using your selected IDP or through application properties in the Quarkus configuration. This allows for centralized identity and access control across services.
+
+== Testing
+
+    * Testing Approach: UI-based testing from Business Central is replaced by Maven-based unit and integration testing in your development environment.
+
+== Versioning and Collaboration
+
+    * No Embedded Git UI: Source control and collaboration are now managed using external Git platforms (e.g., GitHub, GitLab, Bitbucket), which integrates more naturally with modern CI/CD workflows. The mentioned Git providers are supported by BAMOE Canvas.
+
+== Deployment and CI/CD Integration
+
+    * Deployment Targets: v9 is designed for Kubernetes, OpenShift, and other container orchestration platforms out of the box.
+
+    CI/CD Friendly: All components (processes, rules, forms) are now text-based and version-controlled, making them easy to integrate into CI/CD pipelines.
