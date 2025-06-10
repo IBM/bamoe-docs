@@ -2,9 +2,10 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-Once you have defined what is your preferred way of building your _Business Services_ projects into your executable type of choice–Container images, Native Executable, or standard JARs–it is time to layout your deployment strategy.
+Once you have defined your preferred way of building your _Business Services_ projects into your executable type (i.e., as
+Container images, Native Executable, or standard JARs) you are ready to define your deployment strategy.
 
-We encourage you to follow industry-standard software development practices of versioning your _Business Services_ projects on Version Control Systems (VCS), and to automate the deployment process of your _Business Services_ using widely adopted services and tools.
+Follow industry-standard software development practices to version your _Business Services_ projects on Version Control Systems (VCS), and to automate the deployment process of your _Business Services_ using widely adopted services and tools.
 
 While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ to your production environment, there are a few important considerations you need to take into account, especially if you are using stateful Workflows.
 
@@ -53,4 +54,36 @@ The pseudo-timeline below shows the safest strategy for evolving your Workflow m
 
 There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy.
 
-{PRODUCT_SHORT} currently does not allow you to migrate Process Instances to newer Process Definitions versions on-the-fly, so following the recommendation above is the safest path for evolving your stateful Workflow across deployments without running into unexpected problems.
+== Migrating active process instances using the Process Instance Migration Service
+
+The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
+
+The advantage of using this utility is that it:
+
+* _Preserves State_: During migration, process or task variables remain unchanged.
+
+* _Supports Evolving Processes_: Enables seamless upgrades to new process definitions as business needs evolve.
+
+* _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
+
+* _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
+
+Process Instance Management (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
+
+Using the Management API, the following two endpoints can be used to migrate active process instances:
+
+`POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
+
+`POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
+
+=== Starting and stopping processes
+You can use the following `curl` comman to start a process:
+
+`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>-d '`
+
+You can use the following `curl` command to stop a  process:
+
+`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'`
+
+
+See xref:../workflow/management-apis.adoc[Management APIs])
