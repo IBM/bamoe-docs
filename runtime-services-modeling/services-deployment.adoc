@@ -10,11 +10,11 @@ Follow industry-standard software development practices to version your _Busines
 While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ to your production environment, there are a few important considerations you need to take into account, especially if you are using stateful Workflows.
 
 [#production-database-creation]
-== Creating your database schema for stateful Workflows based on {DDLS}
+== Creating your database schema for stateful Workflows using {DDLS}
 
-To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a Database Admin.
+To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-9.2.0-db-utils.zip` deliverable that can be manually applied by a database administrator.
 
-The provided Installation DDL scripts allow creating from scratch the Database for the different {PRODUCT_SHORT} subsystems for both PostgreSQL and Microsoft SQL Server.
+The Installation DDL scripts provided allow you to create from scratch the Database for the different {PRODUCT_SHORT} subsystems for PostgreSQL and Microsoft SQL Server.
 
 The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
 
@@ -34,7 +34,7 @@ If everything is correctly set, at the first project execution all the tables wi
 
 When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or particularly to the BPMN files and re-deploy, there are a few things to be considered.
 
-As a general guideline, it is safe to deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However, whenever the Diagram (Sequence Flow) of a stateful Workflow model changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) in-place and deploy a new version your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow normally, based on the old Workflow model.
+As a general guideline, it is safe to deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However, whenever the Diagram (Sequence Flow) of a stateful Workflow model changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) in-place and deploy a new version of your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow normally, based on the old Workflow model.
 
 The pseudo-timeline below shows the safest strategy for evolving your Workflow models across many deployments.
 
@@ -77,13 +77,20 @@ Using the Management API, the following two endpoints can be used to migrate act
 `POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
 
 === Starting and stopping processes
-You can use the following `curl` comman to start a process:
+You can use the following `curl` command to start a process:
 
-`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>-d '`
+`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d`
 
-You can use the following `curl` command to stop a  process:
+You can use the following `curl` command to stop a process:
 
 `curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'`
 
 
 See xref:../workflow/management-apis.adoc[Management APIs])
+
+=== Examples
+Migrate all active process instances of a given processId to a new target process definition : 
+
+You can migrate all active process instances of a currently active source `processID` to a target process, using the provided API endpoint: 
+
+`POST /processes/{sourceProcessId}/migrate/{targetProcessId}/{targetProcessVersion}`

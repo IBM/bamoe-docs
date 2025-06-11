@@ -325,3 +325,28 @@ kogito.persistence.optimistic.lock=true
 - With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime. For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance.
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
 
+[#multi-node]
+== Implementing multi-node Process services in a single database
+When running multiple instances of a process service on multiple nodes in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database. 
+
+(NOTE: Jobs will only execute on the instance where they were originally scheduled.)
+
+=== Configuration Steps for Multi-Node Setup
+
+Each instance of an application must have its own unique management id. This can be specified at application startup by supplying the following configuration option:
+
+`kogito.jobs-service.management.heartbeat.management-id`. This is a string value, and defaults to `kogito-jobs-service-leader`. The value of this configuration option does not need to follow any pattern or order, however, it should be unique for each pod in the deployment.
+
+The configuration option may be set in a number of ways including:
+
+Environment Variable
+
+System property
+
+META-INF/application.properties
+
+Using an environment variable, or some process that eventually becomes an environment variable such as Kubernetes ConfigMaps, is the recommended way to do so without having to make modifications to code or deployment descriptors. 
+
+Note regarding testing and recovery
+
+The above steps do not include information about testing the deployment configuration nor information about recovery. Recovery within a Kubernetes environment could be done using StatefulSets, however, that exercise is left to the reader. Also, testing various scenarios such as pod failure, load balancing, and database replication (if desired) should be performed prior to deploying in a multiple pod configuration.
