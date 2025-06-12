@@ -404,6 +404,33 @@ image::tools/authoringDecisions/new-editor-autolayout.gif[]
 
 The visualization controls give the user the option to zoom in/out from the model, to make the viewport fit the current model, or to lock any interaction.
 
+==== 8. Working with Multiple DRDs in the DMN Editor
+
+The DMN editor supports multiple DRDs within a single model, all referencing a shared DRG. This capability allows decision modelers to organize complex logic into modular, focused views without duplicating underlying logic. Multiple DRDs can coexist in a model and may depict overlapping portions of the DRG.
+
+The DMN editor supports two visual representations of Decision Services:
+
+`Collapsed Form`: 
+In the Collapsed Form, the Decision Service is displayed as a single, compact element on the DRD canvas. This form emphasizes simplicity and abstraction, allowing modelers to reference the service without displaying its internal details.
+The element’s user interface includes an expand button that, when clicked, reveals the full internal structure of the Decision Service. In its collapsed form, the internal decisions and components are hidden from view, allowing the diagram to remain clean and uncluttered. This is especially useful when the detailed logic of the service is not immediately relevant to the modeling task at hand.
+
+`Expanded Form`:
+In the Expanded Form, the internal structure of the Decision Service is fully visible, shown within a distinct boundary that visually encapsulates all internal elements. All internal logic and decision dependencies are presented in detail, providing full visibility into how the service operates.
+A collapse button is available to return the Decision Service to its Collapsed Form when clicked. In the Expanded Form, the layout and structure of internal elements must remain consistent across all DRDs where the service is expanded. If the service is being expanded for the first time in any DRD, an auto-layout algorithm is used to generate a clean and organized visual structure. This expanded view is especially useful when a deeper understanding or modification of the service logic is required within a specific modeling context.
+
+===== Expansion Rules and Conflict Management
+To ensure clarity and avoid visual conflicts, the editor enforces the following rules:
+*Exclusive Expansion: A Decision Service can only be expanded if none of its internal decisions are already expanded in another Decision Service on the same DRD.
+*Conflict Handling: If a conflict exists, the expand button is disabled (greyed out) for the affected service.
+*To resolve the conflict, collapse the currently expanded service that shares internal decisions.
+These rules align with the DMN 1.5 specification and ensure a clean, non-overlapping diagram.
+
+=====  Synchronized Layout Across DRDs
+To maintain consistency:
+*Position and size changes to decisions within a Decision Service are automatically synchronized across all DRDs.
+*This ensures that the same Decision Service appears identically wherever it is used, reinforcing visual consistency and reducing modeling errors.
+
+
 === B. Data types
 
 The Data Types tab is where all custom data types of the DMN model are placed.
