@@ -312,10 +312,11 @@ It is possible to disable the default behavior and make the operation no longer 
 |`kogito.usertasks.transactionEnabled`|Sets the transactions as enabled for the new User Tasks API layer, overriding global behavior |Boolean |true
 |===
 
-[#multi-threading]
-== Multi-threaded access to a business service using workflow
+[#multithreading]
+== Multithreaded access to a business service
 In an environment with multi-threaded access to a business service the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
 In {PRODUCT_SHORT} use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
+
 [source,properties]
 ----
 # Enable optimistic locking
@@ -326,27 +327,31 @@ kogito.persistence.optimistic.lock=true
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
 
 [#multi-node]
-== Implementing multi-node Process services in a single database
-When running multiple instances of a process service on multiple nodes in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database. 
+== Implementing multi-node process services in a single database
+When running multiple instances of a process service on multiple nodes in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database and the failure of the service. 
 
 (NOTE: Jobs will only execute on the instance where they were originally scheduled.)
 
-=== Configuration Steps for Multi-Node Setup
+=== Configuration steps for multi-node setup
 
-Each instance of an application must have its own unique management id. This can be specified at application startup by supplying the following configuration option:
+Each instance of an application must have its own unique management id. This can be specified at application startup using the following configuration option:
 
-`kogito.jobs-service.management.heartbeat.management-id`. This is a string value, and defaults to `kogito-jobs-service-leader`. The value of this configuration option does not need to follow any pattern or order, however, it should be unique for each pod in the deployment.
+[source,properties]
+----
+kogito.jobs-service.management.heartbeat.management-id=<id_string>
+----
 
-The configuration option may be set in a number of ways including:
+Where `<id-string>` does not need to follow any pattern or order and only needs to be unique for each pod in the deployment. If you do not specify a string it defaults to `kogito-jobs-service-leader`. 
 
-Environment Variable
+This configuration option can be set in a number of ways including:
 
-System property
+. Environment variable (or process such as Kubernetes ConfigMap that manages environment variables for a pod)
+. System property
+. META-INF/application.properties
 
-META-INF/application.properties
+Solution 1 is the preferred way to set the configuration option and avoid making modifications to code or deployment descriptors. 
 
-Using an environment variable, or some process that eventually becomes an environment variable such as Kubernetes ConfigMaps, is the recommended way to do so without having to make modifications to code or deployment descriptors. 
-
-Note regarding testing and recovery
-
-The above steps do not include information about testing the deployment configuration nor information about recovery. Recovery within a Kubernetes environment could be done using StatefulSets, however, that exercise is left to the reader. Also, testing various scenarios such as pod failure, load balancing, and database replication (if desired) should be performed prior to deploying in a multiple pod configuration.
+[NOTE]
+====
+ We do not document tools and best practices for testing a deployment configuration or recovery in a multi-node setup. However we recommend thorough testing of scenarios such as pod failure, load balancing, and database replication prior to deploying in a multiple pod configuration.  
+====
