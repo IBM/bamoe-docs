@@ -32,9 +32,9 @@ If everything is correctly set, at the first project execution all the tables wi
 
 == Evolving stateful Workflows across multiple Business Service deployments
 
-When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or particularly to the BPMN files and re-deploy, there are a few things to be considered.
+When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or the BPMN files and re-deploy, there are a few things to be considered.
 
-As a general guideline, it is safe to deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However, whenever the Diagram (Sequence Flow) of a stateful Workflow model changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) in-place and deploy a new version of your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow normally, based on the old Workflow model.
+As a general guideline, it is safe to deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However, when the Diagram (Sequence Flow) of a stateful Workflow model changes with new nodes, and/or new “paths” of execution, you should not just update your BPMN file(s) in-place and deploy a new version of your application. Instead, it is recommended that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow normally, based on the old Workflow model.
 
 The pseudo-timeline below shows the safest strategy for evolving your Workflow models across many deployments.
 
@@ -52,18 +52,18 @@ The pseudo-timeline below shows the safest strategy for evolving your Workflow m
 - - `MyWorkflow.bpmn` _(Deleted once there are no more *active* Process Instances)_
 - ⊙ `MyWorkflowV2.bpmn` _(Kept)_
 
-There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy.
+There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy. You can also use the 
 
 [#migration-PIM]
-== Migrating active process instances using the Process Instance Migration Service
+== Migrating active process instances using the Process Instance Migration API
 
 The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
 The advantage of using this utility is that it:
 
-* _Preserves State_: During migration, process or task variables remain unchanged.
+* _Preserves state_: During migration, process or task variables remain unchanged.
 
-* _Supports Evolving Processes_: Enables seamless upgrades to new process definitions as business needs evolve.
+* _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
 
 * _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
 
@@ -71,7 +71,7 @@ The advantage of using this utility is that it:
 
 Process Instance Management (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
 
-Using the Management API, the following two endpoints can be used to migrate active process instances:
+Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
 
 `POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
 
@@ -80,18 +80,47 @@ Using the Management API, the following two endpoints can be used to migrate act
 === Starting and stopping processes
 You can use the following `curl` command to start a process:
 
-`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d`
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
+----
 
 You can use the following `curl` command to stop a process:
 
-`curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'`
-
-
-See xref:../workflow/management-apis.adoc[Management APIs])
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
+----
 
 === Examples
-Migrate all active process instances of a given processId to a new target process definition : 
+Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
 
-You can migrate all active process instances of a currently active source `processID` to a target process, using the provided API endpoint: 
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
+{
+  "targetProcessId": <targetProcessId>
+  "targetProcessVersion": <targetProcessVersion>
+}    
+----
+Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
 
-`POST /processes/{sourceProcessId}/migrate/{targetProcessId}/{targetProcessVersion}`
+[source,shell]
+----
+{
+   "message":"All instances migrated",
+   "numberOfProcessInstanceMigrated":1
+}
+----
+
+Migrate a specific process instance of a given processId to a new target process definition following this process:
+
+. Migrate an Active Process Instance
+
+
+
+
+* Show the payload for the two API endpoints
+* Show example curl commands
+* Highlight that the PIM functionality is a two-step process, with the first one being the call to the provided migration APIs, and the second one loading/updating the process instance (eg. via a PUT command)
+* Describe the concept of a migration plan for complex migration scenarios that require node mapping

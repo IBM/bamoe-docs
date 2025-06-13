@@ -327,10 +327,10 @@ kogito.persistence.optimistic.lock=true
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
 
 [#multi-node]
-== Implementing multi-node process services in a single database
-When running multiple instances of a process service on multiple nodes in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database and the failure of the service. 
+== Implementing multi-pod process services in a single database
+When running multiple instances of a process service on multiple pods in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database and utimately the failure of the service. 
 
-(NOTE: Jobs will only execute on the instance where they were originally scheduled.)
+NOTE: Jobs will only execute on the instance where they were originally scheduled.
 
 === Configuration steps for multi-node setup
 
@@ -351,7 +351,5 @@ This configuration option can be set in a number of ways including:
 
 Solution 1 is the preferred way to set the configuration option and avoid making modifications to code or deployment descriptors. 
 
-[NOTE]
-====
- We do not document tools and best practices for testing a deployment configuration or recovery in a multi-node setup. However we recommend thorough testing of scenarios such as pod failure, load balancing, and database replication prior to deploying in a multiple pod configuration.  
+NOTE: We do not document tools and best practices for testing a deployment configuration or recovery in a multi-node setup. However we recommend thorough testing of scenarios such as pod failure, load balancing, and database replication prior to deploying in a multiple pod configuration.  
 ====
