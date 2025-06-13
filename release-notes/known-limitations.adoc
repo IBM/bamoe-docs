@@ -38,11 +38,12 @@ For reference, see xref:../getting-started/examples.adoc[Example applications]
 |In a _Business Service_, Workflows subsystem event related messages are sent even if the process execution fails due to a DB error.
 |In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
 
-|Native compilation support partially available for version 9.2.1 but not available for version 9.2.0.
-|* The version 9.2.0 provides no native image (GraalVM) support for workflows (BPMN), DMN, and DRL projects. You might encounter build-time failures if you attempt to use native compilation with these features. 
+|Native compilation support for workflow projects.
 
-* The version 9.2.1 supports the native compilation only for rules and decisions but not for workflows.
+|Using certain dependencies (for example, jobs-service-storage-jpa) might cause native builds to fail due to unsupported methods like `Object.wait0`.
 
-Using certain dependencies (for example, jobs-service-storage-jpa) might cause native builds to fail due to unsupported methods like `Object.wait0`.
+* You might encounter build-time failures if you attempt to use native compilation with DMN, and DRL projects in version 9.2.0. These problems are fixed in version 9.2.1.
+
+* Workflow (BPMN) projects do not support native compilation in version 9.2.0 and 9.2.1.
 
 |===
