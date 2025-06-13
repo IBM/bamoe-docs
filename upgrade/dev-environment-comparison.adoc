@@ -1,8 +1,6 @@
-= Upgrading from 8.0.x
+= Development environment comparison
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
-
-= Development environment comparison
 
 In {PRODUCT_SHORT} version 8.0.x, Business Central was a monolithic, web-based platform that served as the primary environment for authoring, managing, and deploying business processes (BPMN), decisions (DMN), and rules. However, Business Central had limitations, and to address these limitations and align with cloud-native principles, IBM introduced BAMOE Canvas and BAMOE Developer Tools for VS Code in V9, effectively separating the concerns of business users (who focus on modeling and collaboration) and developers (who need advanced coding and integration capabilities). BAMOE Canvas and BAMOE Developer Tools for VS Code serve distinct but complementary purposes, collectively replacing and improving upon Business Central.
 
@@ -115,13 +113,13 @@ Managed through Git provider (e.g., GitHub) — contributors must have repo perm
 |===
 Following is the detailed explanation on BAMOE Canvas and BAMOE Developer tools for VS Code.
 
-=== BAMOE Canvas
+== BAMOE Canvas
 
 BAMOE Canvas is a web-based modeling environment tailored for business users and analysts. Unlike Business Central, which bundled all functionality into a single interface, BAMOE Canvas provides a clean and focused space for authoring and reviewing business assets. It currently supports both BPMN and DMN modeling. Like Business Central, Canvas includes a built-in Git repository and integrates seamlessly with popular Git providers such as GitHub, GitLab, and Bitbucket. This allows business users to contribute directly to the same codebase as developers, without needing to understand the underlying build or deployment processes. Please refer to the official documentation for https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-canvas for set up instructions. And For creating models, please follow https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=canvas-creating-models.
 
 Differently of Business Central, creating an asset will create a new workspace with just one file. To create a project structure, use an Accelerator. On the welcome screen of Canvas it has the option to Tiles for “Create New” (BPMN/DMN), “Try Sample” (prebuilt models), and “Open/Import” (for existing files). And also in the Top-right corner there is a Settings Gear for configuring Git, CORS Proxy and Extended Services. CORS Proxy helps to communicate to Git and Cloud providers and Extended Services helps to connect to external services (database) for advanced testing, like running processes with external data. In BAMOE 8, Business Central uses an internal Git repository accessible via a local URL, such as git://localhost:9418//. This is managed by Business Central's embedded Git server and does not require external Git hosting. But in V9 you need to navigate to the BAMOE Canvas settings and configure a connection to a Git provider (e.g., GitHub, GitLab, or Bitbucket). You will need a personal access token or credentials for authentication. You can test your DMNs using the DMN Runner, you have the Problems tab that shows validation and execution errors. Like Business Central which was possible to deploy a development KIE server, you can create a dev deployment, and deploy to a Kubernetes or OpenShift cluster.
 
-=== BAMOE Developer Tools for VS Code
+== BAMOE Developer Tools for VS Code
 
 The BAMOE Developer Tools for VS Code is a single extension that provides a set of tools for authoring and editing business automation assets, including BPMN diagrams, DMN models, Test Scenario (SCESIM), and to generate User Task Forms. While the extension itself focuses on asset creation and validation, it is designed to work within standard Maven project structures. By using VS Code as the development environment, users can take full advantage of Maven for building, testing, and packaging their projects, and Git for version control and collaboration. Since all assets are stored as plain text files, they can be managed just like any other source code—making them easy to track, review, and maintain. To use the BAMOE Developer Tools for VS Code, you must first install the VS Code IDE. Refer to the  BAMOE documentation https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=features-bamoe-developer-tools-vs-code for setup instructions. The extension includes a set of graphical editors that are activated when you create files with the .bpmn, .dmn, or .scesim extensions. It also provides a couple of commands accessible via the VS Code Command Palette. To open it, press Ctrl/Cmd + Shift + P and type “BAMOE” to filter the available commands.
 

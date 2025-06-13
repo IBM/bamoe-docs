@@ -1,8 +1,149 @@
-= Upgrading from 8.0.x
+= Production environment comparison
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-= Production environment comparison
-
 {PRODUCT_SHORT} version 9.0.x introduces a modern, cloud-native architecture based on the Kogito runtime, offering improved scalability, flexibility, and integration capabilities. However, this shift also brings significant changes in how processes, tasks, persistence, and user management are handled.
 
+== Architecture Comparsion
+
+BAMOE version 8
+
+BAMOE 8 includes these key Components:
+
+    Business Central
+    KIE Server
+    Business Central Monitoring
+    Smart Router (Optional)
+
+You can deploy an BAMOE 8 project to a configured KIE Server, to an embedded Java application, or into a Red Hat OpenShift Container Platform environment for an enhanced containerized implementation. For more information on deployment options, Please see Project deployment options with IBM Business Automation Manager Open Editions.
+
+In BAMOE 8, the Business Central component provides a web-based interactive user interface for authoring services. The KIE Server runs Business services such as decision services, process applications, and other deployable assets. You can look at Architecture of an authoring environment for more information.
+
+These components of IBM Business Automation Manager Open Editions are deployed as separate OpenShift pods that can be scaled up or down. When your environment includes many services running on different KIE Servers, Smart Router provides a single endpoint to all client applications by acting as load balancer between clients and KIE Server running instances.
+
+// image
+
+BAMOE version 9
+BAMOE 9 includes these key Components:
+
+. BAMOE Canvas:
+BAMOE Canvas depends on two backend applications to provide full functionality:
+
+    * BAMOE Extended Services: Powers features like the DMN Runner and static validation of DMN, and BPMN models.
+    
+    * BAMOE CORS proxy: Allows BAMOE Canvas web app to communicate with Git and Cloud providers.
+
+. BAMOE Management Console
+. Message Broker (Optional)
+. Monitoring System (Optional)
+
+Read `Deploying to Kubernetes or OpenShift with the Helm Chart` to know more about deploying BAMOE Canvas into Openshift using Helm Charts.
+
+// image
+
+== Standard Operating Environment Differences
+
+Production Standard Operating Environment(SOP) differences between BAMOE v8 and v9 remains same as Development one's except with minor differences.
+
+[cols="1,1,1", options="header"]
+|===
+|Aspect 	
+|BAMOE 8 	
+|BAMOE 9.2
+|Supported Java Versions 	
+a|
+Java 8 (minimum requirement), Java 11
+
+a|
+
+Java 11 (minimum requirement)
+
+Java 17 (recommended for enhanced performance)
+
+GraalVM JDK 17 (For native builds)
+
+|Operating Systems (OSs)	
+a|
+Platform-independent (Windows, macOS, Linux)
+
+No specific OS restrictions for local development 	
+a|
+Platform-independent (Microsoft Windows Server 2022 / x86_64 , Red Hat Enterprise Linux 9.4 (RHEL) / x86_64 )
+
+|Container platform
+a|
+OpenShift Container Platform 4.16, Kubernetes 1.30
+a|
+OpenShift Container Platform 4.16, Kubernetes 1.30
+
+|Maven Version 	
+a|
+Maven 3.6.2+ (minimum)
+Commonly used with Maven 3.8.6 	
+a|
+Maven 3.9.6 (required for examples and builds)
+
+Backward compatible with 3.8.x
+
+|Databases 	
+a|
+PostgreSQL
+
+MySQL
+
+Oracle
+
+Microsoft SQL Server (via KIE Server) 	
+a|
+PostgreSQL (16.8)
+
+Microsoft SQL Server (2022)
+
+|Kafka 	
+a|
+3.6.1 	
+a|
+Kafka supported for event-driven processes (version 3.7.1)
+
+|Quarkus 	
+
+a|
+Red Hat build of Quarkus (2.7.x) 	
+a|
+Version 3.20
+
+|Spring Boot 	
+a|
+Version 2.5.12 	
+a|
+Version 3.4
+
+|DMN 	
+a|
+Version 1.2 	
+a|
+Version 1.5 (automatic upgrade from 1.2+)
+
+|Deployment Target 	
+a|
+WAR deployments on JBoss / WildFly; 
+
+Docker/Podman containers 	
+a|
+Microservices deployable on Kubernetes/OpenShift, container-native
+
+|Testing & Simulation 	
+a|
+Embedded UI-test tools in Business Central 	
+a|
+Unit testing via JUnit
+
+Test Scenarios supported in BAMOE Developer Tools for VS Code(New Test Scenario Editor compatible with DMN 1.5)
+
+|Access Control & Collaboration 	
+a|
+Managed through Business Central roles and app server user config (e.g., LDAP, JAAS) 	
+a|
+Managed through Git provider (e.g., GitHub) — contributors must have repo permissions to collaborate
+
+|===
