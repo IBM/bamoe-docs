@@ -133,6 +133,7 @@ System.out.println("Candidate " + candidateData.getFullName() + " doesn't meet t
 System.out.println("###################################");
 ----
 
+
 [#business-calendars]
 == Using Business Calendars
 
@@ -341,3 +342,74 @@ public class CustomUserTaskAssignmentStrategy extends BasicUserTaskAssignmentStr
     }
 }
 ----
+
+[#case-management]
+== Using Flexible processes for Case management
+
+{PRODUCT_SHORT} uses BPMN extensions to provide case management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. 
+
+An ad-hoc task can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. 
+
+A typical example of a case or flexible process is related to healthcare. A patient has a file that is accessible to the doctor and to any health professionals (or knowledge workers) who are assigned to the patient. These assigned workers take action and make different decisions and assessments until the patient is diagnosed and treated, completing the case or flexible process.
+
+In {PRODUCT_SHORT} a flexible process supports case-related usecases via the following basic components: 
+
+* Optional start event which may or may not be explicit
+* Optional node connections, which may or may not connect
+all nodes
+* Enabled `Ad-Hoc` process property set in the process definitions
+* One or more subprocesses which may or may not be ad-hoc subprocesses
+* Ad-hoc auto-start fragments, such as ad-hoc
+subprocesses or ad-hoc tasks
+* Milestones that flag or trigger events
+* End event to terminate the process
+
+The following sections contain more information on each of the components of a flexible process:
+
+=== Ad-hoc processes
+
+You can create an ad-hoc process by enabling the `Ad-Hoc` property in the process definition properties panel. This property enables the process to use ad-hoc auto-start fragments, such as ad-hoc subprocesses and ad-hoc tasks. Once your process definition is set to ad-hoc, it no longer requires strict start and end events.
+
+image::workflow/adhoc-proc-props.png[Ad-hoc process property settings]
+
+=== Ad-hoc subprocesses
+
+An ad-hoc subprocess is similar to a Stage in Case Management. It contains embedded inner activities and is itself part of another process. It is a standard BPMN component and therefore supported by {PRODUCT_SHORT}. 
+
+image::workflow/adhoc-sub-proc.png[Ad-hoc subprocess]
+
+=== Ad-hoc auto-start fragments
+
+An ad-hoc auto-start fragment is any ad-hoc process, ad-hoc subprocess, or ad-hoc task with the AdHoc Autostart property enabled. This property enables the fragment to automatically start when the process is created instead of being started by the completion of the previous node or by a signal event.However, when this flag is not set, the only way to trigger the node execution is with a signal. Processes receive signals externally through the REST API, internally by using events or programmatically.
+
+image::workflow/adhoc-auto-st.png[Ad-hoc auto-start property settings]
+
+
+=== Milestones
+
+A milestone is a standard CMMN component that is represented as a BPMN custom task. A milestone represents a single point of achievement within a process instance. You can use milestones to flag certain events to trigger other tasks or track the progress of the process.
+
+image::workflow/adhoc-milestone.png[Ad-hoc milestone]
+
+=== REST API requests as signals
+
+A REST API request can serve as a signal event to trigger milestones or to create and start ad-hoc fragments such as ad-hoc processes, ad-hoc subprocesses, or tasks. For non-flexible processes, an empty POST request for a process triggers the start node, whereas in a flexible process, the request creates the process instance. Similarly for ad-hoc tasks, an empty POST request instantiates the task node. All ad-hoc auto-start fragments with the `Ad-Hoc Autostart` property , are started automatically when the process is created.
+
+=== Implementing flexible, one-off business cases
+
+To implement flexible, non-linear workflows for unpredictable, one-off business cases, you can use the following core behaviors of flexible process execution: 
+
+* Ability to trigger/re-trigger nodes using signals
+* Re-trigger tasks using signals
+* Ad-hoc processes
+* Ad-hoc tasks
++
+Dynamic ad-hoc task creation: ability to create a new task that was not initially on the process definition. Example: During onboarding or financial crime review they want to ask something for the client, so they create an ad-hoc task that gets assigned to the client.
++
+* Milestones
+** Rest endpoints
+** Ability to trigger by throwing signal event
+** Depends on the ability of the engine to manage signal scopes, as you can set the scope to restrict a signal to only trigger milestones in the scope of that process instance.
+* BPMN
+** ad-hoc processes, tasks are on the process, and can be executed in any order
+** They use their own case id, the wrapper maps the {PRODUCT_SHORT} `caseid` to their custom id
