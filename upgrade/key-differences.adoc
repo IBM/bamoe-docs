@@ -15,16 +15,28 @@ Migrating from BAMOE v8 to v9 involves more than just upgrading libraries, it is
 
     * Authoring and Execution Split: In v9, there's a clean separation between asset authoring (offline, in source control) and runtime execution (packaged into applications or services).
 
-    * KIE Server Removed: No central KIE Server exists in v9. You can now:
-        Deploy your processes, rules, decisions as a standalone microservice.
-        Embed processes, rules and decisions directly into Java applications (Quarkus, Spring Boot).
+    * KIE Server Removed: 
+    
+    In BAMOE v8, the KIE Server acted as a centralized runtime engine, following a client-server architecture. Applications would interact with it over REST or JMS to execute processes, rules, and decisions.
 
-    * No More KIE Sessions: v9 eliminates the concept of KIE sessions. This impacts how rules and processes interact, especially for DRL and BPMN integration. Stateful workflows are now supported via the new User Tasks subsystem and Data Index.
+    In BAMOE v9, this centralized model is replaced by a decentralized, cloud-native approach:
+
+    * You now build and deploy business assets (processes, rules, decisions) as independent microservices (also known as Business Services), using Kogito with Quarkus or Spring Boot. These services expose REST endpoints automatically. Learn more in [Upgrading Client-Server Projects](../06-upgrading-projects/02-upgrading-client-server-projects/).
+
+    * Alternatively, you can embed business logic directly into Java applications. This is not the same as a Kogito-based service. It refers to plain Java applications that use the Drools or jBPM libraries directly, without relying on the Kogito runtime. Learn more in [Upgrading Standalone Projects](../06-upgrading-projects/03-upgrading-standalone-projects/).
+      
+    * No More Shared KIE Sessions: 
+    
+    In BAMOE v8, KIE sessions (stateful/stateless) were managed centrally by the KIE Server and exposed via REST or JMS. This allowed shared access to rule and process execution contexts.
+    
+    In BAMOE v9, KIE sessions still exist, but they are embedded within each application or service. They are no longer shared or exposed through a centralized runtime.
+
+    This architectural change removes the ability to access or manipulate shared rule facts across processes via a central session.
 
 
 == Runtime Behavior and Persistence
 
-    * Persistence and State Management: In BAMOE v9, persistence is now optional and explicitly configured when needed. However, official support is limited to:
+    * Persistence and State Management: In BAMOE v9, persistence is optional like BAMOE v8 and explicitly configured when needed. However, official support is limited to:
         - PostgreSQL 16.8
         - Microsoft SQL Server 2022 This ensures compatibility and support for these platforms, aligning with IBM’s tested environments. Persistence is handled through the Data Index and Data Audit subsystems, which track and expose process and task state.
 
@@ -55,15 +67,26 @@ Migrating from BAMOE v8 to v9 involves more than just upgrading libraries, it is
 == Security and Governance
 
     * Authentication & Authorization: 
-       BAMOE v9 integrates with external Identity Providers (IDPs) such as Keycloak, OIDC, and LDAP, using Quarkus security extensions. This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure. See Upgrading Authentication/Authorization chapter for more information.
+       BAMOE v9 integrates with external Identity Providers (IDPs) such as Keycloak, OIDC, and LDAP, using the security capabilities of the chosen runtime (Quarkus or Spring Boot). This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure.
 
     * User and Role Management:
-        User and role definitions are no longer handled via Business Central. Instead, they must be configured externally using your selected IDP or through application properties in the Quarkus configuration. This allows for centralized identity and access control across services.
+        User and role definitions are no longer handled via Business Central. Instead, they must be configured externally using your selected IDP or through application-level configuration, depending on the runtime. This allows for centralized identity and access control across services.
 
+        See xref:../upgrade/upgrading-authen-author.adoc[Upgrading Authentication/Authorization] for more details and examples.
+        
+        
+        
 == Testing
 
-    * Testing Approach: UI-based testing from Business Central is replaced by Maven-based unit and integration testing in your development environment.
+    * Testing Approach: 
+    
+    In BAMOE v8, Business Central provided a graphical interface for authoring and executing tests, including support for SCESIM files (scenario-based rule testing).
 
+    In BAMOE v9, testing is fully integrated into the developer workflow using Maven-based unit and integration tests.
+
+    SCESIM files (used for scenario-based rule testing) are still supported and can be executed via Maven. The SCESIM Editor is also still available for authoring and editing Test Scenarios. However, there is no graphical interface for executing tests or viewing results. Test outcomes are available in the console or build output.
+
+    
 == Versioning and Collaboration
 
     * No Embedded Git UI: Source control and collaboration are now managed using external Git platforms (e.g., GitHub, GitLab, Bitbucket), which integrates more naturally with modern CI/CD workflows. The mentioned Git providers are supported by BAMOE Canvas.
@@ -72,4 +95,4 @@ Migrating from BAMOE v8 to v9 involves more than just upgrading libraries, it is
 
     * Deployment Targets: Version9 is designed for Kubernetes, OpenShift, and other container orchestration platforms out of the box.
 
-    * CI/CD Friendly: All components (processes, rules, forms) are now text-based and version-controlled, making them easy to integrate into CI/CD pipelines.
+    * CI/CD Friendly: All components (processes, rules, decisions) are now text-based and version-controlled, making them easy to integrate into CI/CD pipelines.
