@@ -46,4 +46,15 @@ For reference, see xref:../getting-started/examples.adoc[Example applications]
 
 * Workflow (BPMN) projects do not support native compilation in version 9.2.0 and 9.2.1.
 
+|OpenAPI spec auto-generation when using the _io.quarkus:quarkus-oidc_ extension.
+
+|The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated.
+
+* This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
+
+* As a workaround, add the following to your *application.properties* file:
+`quarkus.smallrye-openapi.auto-add-bad-request-response=false`
+
+* This property will make it so that the "400 Bad Response" outputs are not added to the auto-generated OpenAPI specifications. 
+
 |===
