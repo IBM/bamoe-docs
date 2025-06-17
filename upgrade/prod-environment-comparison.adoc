@@ -518,3 +518,236 @@ BAMOE Management Console does not have the capability. BAMOE v9 provides monitor
 BAMOE 8 projects are packaged as a Knowledge JAR (KJAR) file and deployed to a KIE Server that runs the decision services, process applications, and other deployable assets from the KJAR file whereas in BAMOE 9, Each Business Service project is a cloud-native microservice application built around a given set of models.
 
 Following table compares the differences between BAMOE 8 KIE Server and BAMOE 9 cloud-native Business Services (powered by Kogito).
+
+
+[cols="1,1,1", options="header"]
+|===
+|Aspect 	
+|KIE Server	
+|Cloud-native Business Services (powered by Kogito)
+
+|Packaging 	
+a|
+Each project in BAMOE 8 is packaged as a Knowledge JAR (KJAR) file with configuration files such as a Maven pom.xml and a KIE module descriptor file (kmodule.xml), which contains the KIE base and KIE session configurations for the assets in the project.
+
+a|
+
+BAMOE 9 Business Service projects can be packaged as a Container image, WAR file, JAR file or Native Executable. They can also be packaged as kjar with pom.xml and kmodule.xml when using decision in Java embedded mode. See Executing Rules in embedded Java mode.
+
+
+|Deployment 	
+a|
+If KIE Server is integrated with business central, projects can be automatically packaged and deployed into KIE Server whereas when building projects outside Business Central users must KIE Server REST API to deploy into KIE Server.
+
+a|
+
+Each Business Service project acts as microservice and can be deployed using standard deployment strategies for deploying Quarkus and Spring boot microservices.
+
+
+|API Management 	
+a|
+KIE Server exposes KIE Server REST APIs to interacts with deployed KIE containers and business assets like processes, tasks etc.
+
+a|
+
+Use standard tools provided by the container platform of choice to manage containers and Process API, User Task API, Process Management API, Data Index API to interact with processes and tasks management features.
+
+
+|Cloud deployment 	
+a|
+All individual components like Business Central, KIE Server, Smart Router can be deployed in Openshift/Kubernetes pods.
+
+a|
+
+Use standard deployment strategies for deploying Quarkus and Spring Boot projects into Kubernetes/Openshift.
+
+|===
+
+== API differences
+
+BAMOE 8 and BAMOE 9 exposes API to interact with Business service applications. Following table compares the differences between their API implementation and usage.
+
+[cols="1,1,1", options="header"]
+|===
+|Aspect 	
+|BAMOE 8	
+|BAMOE 9
+
+| 	
+a|
+BAMOE 8 exposes KIE APIs to interact with Process Servers, KIE containers and business assets.
+
+a|
+
+BAMOE 9 allows for creating domain-specific APIs that can be exposed through REST endpoints or events. BAMOE 9 doesn’t support APIs to interact with containers and servers as business assets are no longer deployed in internal KIE Server.
+
+
+|Authentication
+a|
+API’s are authenticated by security provider configured on the platform for example, Wildfly elytron, Wildfly keycloak or LDAP.
+
+a|
+
+BAMOE 9 rely on Quarkus or Spring Boot security for authentication and authorization. see Securing Business Service API endpoints.
+
+
+|Authorization
+a|
+Users roles/groups can be configured in the security provider. Only users with “kie-server” roles are able to access KIE APIs.
+
+a|
+
+Users can use Quarkus or Spring Boot API authorization mechanisms to allow only users with specific roles to access specific endpoints. See Authorization.
+
+
+|API Documentation
+a|
+Swagger documentation for KIE APIs are available at http://SERVER:PORT/kie-server/docs.
+
+a|
+
+Swagger API documentation for Domain and Management APIs are available at http://SERVER:PORT/q/swagger-ui. See Using the Swagger UI.
+
+
+|Event-driven capabilities
+a|
+In BAMOE 8, Event driven capabilities are less emphasized.
+
+a|
+
+Users can expose domain-specific data through events or in a data index so that the data can be consumed and queried by other services in real time.
+
+|Types
+a|
+KIE Server REST API for KIE containers and business assets.
+
+a|
+
+Use Process API, User Tasks API, Data-Index API, Decisions API.
+
+
+|
+a|
+KIE Server Java client API.
+
+a|
+
+Does not support Java client API, use REST and GraphQL API endpoints instead.
+
+
+|
+a|
+Controller REST API for KIE Server templates and instances.
+
+a|
+
+Not supported as KIE server does not exist.
+
+
+|
+a|
+Controller Java client API
+
+a|
+
+Not Supported
+
+
+|
+a|
+BPMN process fluent API for Business Central processes
+
+a|
+
+Use Process API
+
+
+|
+a|
+Knowledge Store REST API for Business Central spaces and projects
+
+a|
+
+Not supported
+
+|
+a|
+Security Management REST API for Business Central groups, roles, and users
+
+a|
+
+Not supported, use Quarkus or Spring Boot supported security mechanism.
+
+|
+a|
+EJB API for KIE sessions and task services
+
+a|
+
+Not supported
+
+|===
+
+== Monitoring differences
+
+Both BAMOE 8 and v9 provides tools for monitoring Business Services and to generate Grafana dashboards from default and custom metrics. Both uses Prometheus to collect and store metrics related to your business asset activity and use Graphana as data-graphing tool. Though the overall mechanism to publish and view metrics remains the same, there are few differences that users should keep in mind when migrating to BAMOE 9.
+
+
+[cols="1,1,1", options="header"]
+|===
+|Aspect 	
+|BAMOE 8	
+|BAMOE 9
+
+|Enable/Disable metrics	
+a|
+Prometheus extension can be enabled by setting org.kie.prometheus.server.ext.disabled to false when starting process server. If using BAMOE 8 on springboot, use kieserver.prometheus.enabled=true to enable prometheus.
+
+a|
+
+BAMOE 9 provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. Users can disable specific metrics from being exported by using properties kogito.monitoring.rule.useDefault=false, kogito.monitoring.process.useDefault=false, kogito.monitoring.interceptor.useDefault=false See Enabling Prometheus metrics monitoring in IBM BAMOE.
+
+
+|REST Endpoint	
+a|
+Process server publish the metrics to REST API endpoint http://HOST:PORT/kie-server/services/rest/metrics.
+
+a|
+
+Metrics are available at REST API endpoint http://HOST:PORT/metrics. Users can also interact with your collected metrics and application targets in the Prometheus expression browser at http://HOST:PORT/graph and http://HOST:PORT/targets .
+
+
+|Graphana Integration	
+a|
+Supports default and custom Graphana dashboard.
+
+a|
+
+Supports default and custom Graphana dashboard see Custom Grafana dashboards in IBM BAMOE.
+
+
+|Red hat Openshift support	
+a|
+Users can configure Prometheus metrics monitoring for Process Server on Red Hat OpenShift Container Platform. See Managing and monitoring KIE Server.
+
+a|
+
+Follow the same steps as BAMOE 8 openshift deployment but with changes in application properties to enable/disable metrics and changes in the endpoints. See Configuring Prometheus.
+
+|===
+
+== Smart Router
+
+BAMOE 8 distribution includes Smart Router as an add-on and as Openshift container image in Red hat Openshift Image Catalog, It performs the role of an intelligent load balancer because it can route requests to individual KIE Server instances and aggregate data from different KIE Server instances.
+
+BAMOE 9 does not include a separate load balancer, since Business Processes and Decision services are no longer deployed in KIE Server, but they are created and deployed as Quarkus or Spring boot Micro-services. Due to this fact users can use any preferred load balancer that is compatible with Quarkus or Spring boot microservices. When deployed in Openshift, users can deploy a Business service as an OpenShift pod and use OpenShift's autoscaling capabilities to automatically add more pods when the load on the service increases.
+
+
+== Operators vs Helm charts
+
+BAMOE 8 allows users to download/subscribe to the BAMOE Openshift Operator that is published to Openshift Container Platform Catalog and use it to deploy their business automation applications on Openshift. BAMOE Operator can be used to set up environment that includes Business Central, Business Central Monitoring, Process Server and Smart Router.
+
+Since BAMOE 9 no longer includes these components and Business Services are created as Quarkus or Spring Boot based microservices, BAMOE 9 does not publish own Openshift Operators. Instead, BAMOE 9 publish BAMOE Canvas Helm Charts and BAMOE Consoles Helm Chart to help users with easier installation on K8s/OCP clusters. See Deploying to Kubernetes or OpenShift with the Helm Chart.
+
+
+
