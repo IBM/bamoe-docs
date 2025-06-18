@@ -1,0 +1,136 @@
+= Upgrading case management projects
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+BAMOE v8 offers workflow functionality beyond the scope defined by the Business Process Model and Notation http://www.omg.org/spec/BPMN/2.0/[(BPMN) specification]. These features are highlighted under the Case Management topic in the BAMOE v8 https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=services-designing-building-cases-case-management[documentation] and can be categorized in two distinct topics:
+
+* Case management using case data
+* Flexible processes using ad-hoc process features
+
+Instead of implementing Case Management as defined in the Case Management Model and Notation https://www.omg.org/cmmn/[(CMMN) specification], BAMOE v9 leverages BPMN extensions to provide a comparable experience. This is called flexible processes. A flexible process in BAMOE v9 is any process definition that uses ad hoc components or other features that enable the process to be executed more flexibly than traditional processes.
+
+For example, a flexible process does not require a standard start event and does not require all nodes to be connected. Some of the typical components in flexible processes include the Ad-Hoc process property that enables the process to use ad hoc auto-start fragments and to not require strict start and end events, ad hoc subprocesses that contain embedded inner activities within another process, and milestones that flag or trigger tasks and events.
+
+A typical flexible process consists of one or more of the following basic components:
+
+* Optional start event (might or might not be explicit)
+* Optional node connections (might or might not connect all nodes)
+* Enabled Ad-Hoc process property
+* One or more subprocesses, typically ad hoc subprocesses
+* Ad hoc auto-start fragments, such as ad hoc subprocesses or ad hoc tasks
+* Milestones that flag or trigger events
+* End event to terminate the process
+
+[discrete]
+=== Ad hoc Process capabilities comparison between BAMOE 8 and 9:
+
+|===
+| Capabilities | BAMOE 8 (Case Management) | BAMOE 9.2 (Flexible Process) | Concepts available in Flexible Process Management in BPMN
+
+| Ability to trigger / re-trigger nodes using signals
+| ✅ Yes
+| ✅ Yes
+| A REST API request can serve as a signal event to trigger milestones or to create and start ad hoc fragments such as ad hoc processes, ad hoc subprocesses, or tasks.
+
+| Ad-hoc processes
+| ✅ Yes
+| ✅ Yes
+|
+
+| Ad-hoc sub processes
+| ✅ Yes
+| ✅ Yes
+|
+
+| Milestones
+| ✅ Yes
+| ✅ Yes
+|
+
+| AdHoc fragments
+| ✅ Yes
+| ✅ Yes
+|
+
+| Case file instance
+| ✅ Yes
+| ✅ Yes
+| Data can be stored through the use of Data Objects and Process Variables.
+
+| Per case runtime strategy
+| ✅ Yes
+| ❌ No
+| No differentiation between different runtime strategies
+
+| Adding comments to a Case
+| ✅ Yes
+| ❌ No
+|
+
+| Different stages of a Case
+| ✅ Yes
+| ❌ No
+|
+
+| Dynamic tasks and processes
+| ✅ Yes
+| ✅ Yes
+| Allowing runtime modifications like Using Dynamic Subprocesses or call activities based on condition during process Instance execution
+
+| Case identifier (correlation key)
+| ✅ Yes
+| ✅ Yes
+| Correlation key concept is present in ProcessInstance
+
+| Case lifecycle  (close, reopen, cancel, destroy)
+| ✅ Yes
+| ❌ No
+|
+
+| Case Management operations
+| ✅ Yes
+| ❌ No
+|
+
+| Access to case(s) and its runtime data
+| ✅ Yes
+| ✅ Yes
+| Process Instance Data Access operations are available
+
+| Case Instance Migration Service
+| ✅ Yes
+| ❌ No
+|
+
+| Case Instance Migration Reports
+| ✅ Yes
+| ❌ No
+|
+
+| Defines human task specification to create new user task in ad hoc (dynamic) process instance
+| ✅ Yes
+| ❌ No
+|
+
+| Defines work item task specification to create new "service" task in ad hoc (dynamic) process instance
+| ✅ Yes
+| ❌ No
+|
+
+| Case related events Listeners and Handlers
+| ✅ Yes
+| ❌ No
+|
+
+| Asynchronous CaseInstance Audit Event Producer & Handler
+| ✅ Yes
+| ❌ No
+|
+|===
+
+[discrete]
+=== Upgrading Case Management Projects
+
+BPMN files that include ad-hoc features can be added to a BAMOE v9 workflow project, as BAMOE v9 supports the ad-hoc features listed above. Case file and data related operations are no longer available in v9 and would need to be replaced.
+
+

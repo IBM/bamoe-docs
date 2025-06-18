@@ -1,0 +1,204 @@
+= Development Environment Comparison
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+The transition from BAMOE v8 to v9 marks a significant shift in how business automation solutions are developed and maintained. While v8 relied on a centralized, monolithic architecture centered around Business Central, v9 introduces a modular, cloud-native approach that separates the responsibilities of business users and developers.
+
+This section introduces the new development experience in BAMOE v9, highlighting the tools and architectural changes that support a more flexible and scalable workflow.
+
+== Installation and Architecture Overview
+
+=== BAMOE 8
+
+image::upgrade/v8-development-environment-bamoe.png[Business Central]
+
+To use as a comparison basis, the diagram above shows an overview of BAMOE v8 development environment.
+Business Central was deployed alongside a KIE Server for developing and production execution, where the KJAR was uploaded, both running on JBoss EAP or WildFly. Business Central also hosted an internal Git repository (`.niogit`) and a Maven repository, making it the single point of control for source code, builds, and deployments.
+
+In BAMOE v8, development was tightly coupled to Business Central, which served as the central UI for authoring, testing, and deploying business assets. Building the project resulted into a KJAR (KIE JAR, a specialized JAR for KIE projects).
+
+=== BAMOE 9 - BAMOE Canvas
+
+image::upgrade/v9-development-environment-bamoe-canvas.png[BAMOE Canvas]
+
+BAMOE Canvas is a web-based modeling environment designed for business users and analysts. Unlike Business Central, which bundled all functionality into a single interface, BAMOE Canvas offers a clean and focused space for authoring and reviewing business assets. It currently supports both BPMN and DMN modeling, providing a streamlined experience for non-technical users.
+
+BAMOE Canvas includes in-browser Git and file system capabilities, removing the need for an internal storage layer and enabling seamless integration with standard Git workflows. To support communication with external Git providers such as GitHub, GitLab, and Bitbucket, BAMOE Canvas uses the BAMOE CORS Proxy. Users can also deploy development versions of their projects to Kubernetes or OpenShift environments using the BAMOE Canvas Dev Deployments feature.
+
+In addition, BAMOE Canvas includes BAMOE Extended Services, which enable the DMN Runner--a live feedback tool that allows users to execute DMN models directly within the browser.
+
+For detailed setup instructions, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-canvas[BAMOE Canvas documentation].
+
+=== BAMOE 9 - BAMOE Developer Tools for VS Code
+
+image::upgrade/v9-development-environment-bamoe-developer-tools.png[BAMOE Canvas]
+
+The BAMOE Developer Tools for VS Code is a Visual Studio Code extension designed for developers who need to author, test, and maintain business automation assets. This extension includes graphical editors for BPMN models, DMN models, and Test Scenarios files. It also supports the generation of User Task forms, providing a comprehensive toolset for building Business Service projects.
+
+Because it runs within VS Code, the extension stores files locally on the developer's file system. This allows full integration with Git for version control and with Maven for building, testing, and packaging projects. Unlike Business Central, the BAMOE Developer Tools for VS Code do not include a built-in Maven or Git repository. Instead, all required libraries are retrieved from the BAMOE Maven Repository, which can be deployed as a standalone container or installed locally in the `.m2` directory.
+
+To get started with the BAMOE Developer Tools for VS Code, follow the setup instructions in the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=features-bamoe-developer-tools-vs-code[official documentation]. For information on configuring the Maven repository, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-maven-repository[BAMOE Maven Repository documentation].
+
+=== Creating Projects
+
+Unlike Business Central, BAMOE v9 does not use the concept of Spaces. Projects are now organized using Git repositories and follow standard Maven structures. A project can be implemented using Kogito with Quarkus, Spring Boot, or plain Java with Drools or jBPM.
+
+==== BAMOE Canvas
+
+In BAMOE Canvas, creating a new file, trying a sample, or cloning a repository from the welcome screen will initialize a new workspace. A workspace is a lightweight environment where users can begin modeling assets immediately. If the workspace is not already a Maven project, users can apply a https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=canvas-using-accelerators[BAMOE Accelerator] to expand it into a full project structure.
+
+BAMOE Accelerators are project templates that include the necessary folder structure, configuration files, and dependencies. Users can choose between the Full BAMOE Accelerator, which supports both workflows and decisions, or the DMN BAMOE Accelerator, which is focused on decision services.
+
+==== BAMOE Developer Tools for VS Code
+
+For developers using the BAMOE Developer Tools for VS Code, the recommended way to start a new project is to clone a BAMOE Accelerator from a Git repository. This provides a ready-to-use project structure with all required dependencies and configurations for building and testing Business Service projects.
+
+Alternatively, developers can manually create the folder structure and configure the project using standard Maven conventions. While this approach offers more flexibility, it requires familiarity with the necessary dependencies and project layout.
+
+In both cases, the project is managed as a standard Maven project, with all assets stored as plain text files. This makes it easy to integrate with Git for version control and to use Maven for building, testing, and packaging.
+
+=== Authoring Business Automation Assets
+
+==== BAMOE Canvas
+
+BAMOE Canvas offers a streamlined, browser-based environment for modeling and reviewing business assets. It supports both BPMN and DMN modeling through intuitive graphical editors. Users can start from scratch, import existing files, or explore sample projects directly from the BAMOE Canvas welcome screen.
+
+The Problems tab offers real-time validation, and the DMN Runner enables users to test decision models directly in the browser using sample input data, making it easy to iterate and validate logic.
+
+==== BAMOE Developer Tools for VS Code
+
+The BAMOE Developer Tools for VS Code offer a full-featured environment for developers to author and manage BPMN, DMN, and SCESIM assets. The extension also supports generating user task forms and integrates with Maven for validation, testing, and packaging. This setup gives developers full control over the development lifecycle using familiar IDE workflows.
+
+=== Working with Git Repositories
+
+In BAMOE v8, Business Central managed source code through an internal Git server. Projects were stored in a hidden `.niogit` directory on the server's file system, and access was limited to the Business Central interface.
+
+In BAMOE v9, Git integration is a core part of the development workflow, but the approach differs between BAMOE Canvas and the BAMOE Developer Tools for VS Code.
+
+==== BAMOE Canvas
+
+BAMOE Canvas includes built-in Git capabilities directly in the browser. Users can initialize a Git repository from a workspace, clone existing repositories from platforms like GitHub, GitLab, or Bitbucket, and perform common Git operations such as commit, push, and pull--all without leaving the BAMOE Canvas interface.
+
+To enable communication with external Git providers, BAMOE Canvas uses the BAMOE CORS Proxy, which must be configured in the BAMOE Canvas settings. Users also need to provide Git credentials or personal access tokens to authenticate with their chosen Git provider. Once configured, business users can collaborate on shared repositories without needing to understand Git internals or use a command-line interface.
+
+This approach allows business users to contribute directly to the same codebase as developers, using a visual interface that abstracts away the complexity of Git.
+
+==== BAMOE Developer Tools for VS Code
+
+In contrast, the BAMOE Developer Tools for VS Code rely on the developer's local Git installation. Git operations are performed using the built-in Git support in VS Code or through the command line, offering full control and flexibility for experienced users.
+
+This setup is ideal for developers who are already familiar with Git workflows and want to integrate version control into their broader development process. It also allows for advanced Git features such as branching strategies, submodules, and integration with CI/CD pipelines.
+
+While BAMOE Canvas simplifies Git for business users, the BAMOE Developer Tools for VS Code provide a more powerful and customizable Git experience for developers working in a traditional IDE environment.
+
+=== Working with Maven and BAMOE Maven Repository
+
+In BAMOE v8, Maven builds were triggered internally by Business Central. When a project was built through the UI, Business Central used an embedded Maven engine to compile the assets into a KJAR (KIE JAR), which was then deployed to a KIE Server. The internal Maven repository was also managed by Business Central, and users had limited visibility or control over the build process.
+
+In BAMOE v9, projects are built using standard Maven tools, and the build process is fully externalized. The BAMOE Maven Repository provides all required dependencies and can be deployed as a standalone container or installed locally.
+
+BAMOE Canvas does not perform builds directly, but when a workspace is initialized with an accelerator, it includes Maven configuration files that reference the BAMOE Maven Repository. Projects can then be exported and built externally.
+
+For developers using the BAMOE Developer Tools for VS Code, the Maven repository is a core part of the development workflow. Projects are built and tested locally using Maven, and the repository ensures that all required libraries are available during the build process. This setup supports full automation and integration with CI/CD tools, making it suitable for enterprise-grade development.
+
+For installation and configuration instructions, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-maven-repository[BAMOE Maven Repository documentation].
+
+=== Managing Users and Authentication
+
+In BAMOE v8, user authentication was handled through a centralized login screen provided by Business Central. Authentication and user management were typically delegated to the application server, such as JBoss EAP or WildFly, using standard Java EE security mechanisms. This setup was tightly coupled to the deployment environment and often required administrative configuration on the server side.
+
+In BAMOE v9, authentication is decentralized and aligned with modern cloud-native practices. Each tool--BAMOE Canvas and the BAMOE Developer Tools for VS Code--handles authentication differently, based on its integration with Git.
+
+==== BAMOE Canvas
+
+In BAMOE Canvas, authentication is configured per Git. When connecting to a Git repository, users must authenticate using credentials or a personal access token associated with their Git provider (e.g., GitHub, GitLab, or Bitbucket). This is done through the Accounts modal in the Canvas settings, where users can manage their authentication sessions.
+
+User management is handled externally by the Git, meaning that BAMOE Canvas does not maintain its own user directory. This simplifies administration and allows organizations to leverage existing identity and access management systems.
+
+==== BAMOE Developer Tools for VS Code
+
+The BAMOE Developer Tools for VS Code rely on the developer's local Git configuration for authentication. When interacting with remote repositories, authentication is handled by the Git client, which may prompt for credentials, use SSH keys, or access stored tokens depending on the user's setup.
+
+This approach gives developers full control over how they authenticate and manage access to repositories, and it integrates seamlessly with enterprise Git workflows and credential managers.
+
+By shifting authentication to Git, BAMOE v9 eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
+
+=== Building and Deploying in Development Mode
+
+In BAMOE v8, builds were triggered through the Business Central UI and deployed to a KIE Server. The process was tightly integrated but limited in flexibility and external tooling support.
+
+BAMOE v9 adopts a more open and developer-friendly model. Projects are standard Maven applications and can be built using the Maven CLI or integrated into CI/CD pipelines. Deployment targets include Kubernetes and OpenShift.
+
+==== BAMOE Canvas
+
+While BAMOE Canvas itself does not perform builds, it supports development deployments through the Dev Deployments feature. This allows users to deploy their models to a Kubernetes or OpenShift cluster for testing purposes. The deployment process is configured through the BAMOE Canvas settings, where users can define the target cluster and credentials.
+
+This feature is especially useful for business users who want to validate their models in a live environment without needing to understand the full build and deployment pipeline. It bridges the gap between modeling and runtime testing, enabling faster feedback loops.
+
+==== BAMOE Developer Tools for VS Code
+
+For developers, the BAMOE Developer Tools for VS Code provide full control over the build and deployment process. Projects can be built using standard Maven commands, and the resulting artifacts can be deployed to any supported runtime, including Kubernetes, or OpenShift.
+
+Developers can also configure local or remote development environments, use containerization tools like Docker, and integrate with CI/CD systems. This flexibility allows teams to adopt modern cloud practices and tailor their deployment workflows to their specific needs.
+
+== Standard Operating Environment Differences
+
+|===
+| *Aspect* | *BAMOE 8* | *BAMOE 9.2*
+
+| *Supported Java Versions*
+| Java 11 (recommended for Kogito and cloud-native runtimes) - Tested with OpenJDK 11.0.11
+| Java 11 (minimum requirement) +
+Java 17 (recommended for enhanced performance)
+
+| *Operating Systems (OSs)*
+| Platform-independent (Windows, macOS, Linux) +
+No specific OS restrictions for local development
+| Platform-independent (Windows, macOS, Linux) +
+Enhanced support for Linux-based containerized environments (OpenShift, Kubernetes) - No specific OS restrictions for local development
+
+| *Maven Version*
+| Maven 3.6.2+ (minimum) +
+Commonly used with Maven 3.8.6
+| Maven 3.9.6 (required for examples and builds) +
+Backward compatible with 3.8.x
+
+| *Databases*
+| H2 (default for development) +
+PostgreSQL +
+MySQL +
+Oracle +
+Microsoft SQL Server (via KIE Server)
+| PostgreSQL (16.8) +
+Microsoft SQL Server (2022)
+
+| *Kafka*
+| Not natively integrated
+| Kafka supported for event-driven processes (version 3.6)
+
+| *Quarkus*
+| Red Hat build of Quarkus (2.7.x)
+| Version 3.20.1
+
+| *Spring Boot*
+| Version 2.5.12
+| Version 3.4.6
+
+| *DMN*
+| Version 1.2
+| Version 1.5
+
+| *Deployment Target*
+| WAR deployments on JBoss / WildFly; Docker/Podman containers
+| Microservices deployable on Kubernetes/OpenShift, container-native
+
+| *Testing & Simulation*
+| Embedded test tools in Business Central +
+Test Scenario Editor: Available and functional, but built on older technologies
+| Unit testing via JUnit +
+https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=scenarios-authoring-unit-tests-test[Test Scenarios] supported in BAMOE Developer Tools for VS Code(Modernized Test Scenario Editor which is rebuilt using TypeScript and React for better performance and maintainability)
+
+| *Access Control & Collaboration*
+| Managed through Business Central roles and app server user config (e.g., LDAP, JAAS)
+| Managed through Git provider (e.g., GitHub) -- contributors must have repo permissions to collaborate
+|===

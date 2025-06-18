@@ -1,0 +1,36 @@
+= Upgrading standalone projects
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Standalone mode allows you to run BAMOE projects as self-contained Java applications without requiring a full server environment.
+This is ideal for local development, testing, or lightweight deployments.
+BAMOE v9 provides two templates that include the minimal setup required to run a Business Service project in standalone (embedded) mode.
+Both templates include a `pom.xml` file with the minimal set of dependencies needed to run the project independently.
+
+== Decisions Template
+
+Is available https://github.com/IBM/bamoe-docs/tree/9.2.0/_code/docs/decisions-embedded-mode-example[here].
+It contains executable java class https://github.com/IBM/bamoe-docs/blob/9.2.x/_code/docs/decisions-embedded-mode-example/src/main/java/com/ibm/bamoe/decisions/embedded/DecisionsEmbeddedModeExample.java[*DecisionsEmbeddedModeExample.java*].
+You will need to update *DecisionsEmbeddedModeExample.java* code accordingly:
+
+* *namespace*: change "https://kie.org/dmn/_C83DFD16-A42A-46BE-A843-370444580E0F" to your model namespace value
+* *modelName*: change "loan-application-age-limit" to your model name value
+* *dmnContext*: change to *dmnContext.set(key, value)* according to your model Input Data nodes
+
+Once you are done with updates, please `mvn clean package`, `mvn clean verify` or `mvn clean install`.
+
+== Rules Template
+
+Is available https://github.com/IBM/bamoe-docs/tree/9.2.0/_code/docs/rules-embedded-mode-example[here].
+It contains executable java class https://github.com/IBM/bamoe-docs/blob/9.2.x/_code/docs/rules-embedded-mode-example/src/main/java/com/ibm/bamoe/rules/embedded/RulesEmbeddedModeExample.java[*RulesEmbeddedModeExample.java*].
+You will need to update *RulesEmbeddedModeExample.java* code accordingly:
+
+* *CommandFactory.newInsert(new Applicant("#0001", 20), "applicant")*: replace *Applicant* according to your domain data objects
+
+Once you are done with updates, please `mvn clean package`, `mvn clean verify` or `mvn clean install`.
+
+== Other Assets
+
+Your project may contain multiple types of assets. Each asset type may require a different migration approach. +
+Please refer to the Upgrading Individual Assets xref:06-04-upgrading-individual-assets.adoc[page] for more guidance.

@@ -1,0 +1,171 @@
+= Upgrading business calendar
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+The Business Calendar feature enables precise time management in business processes by accounting for working hours, weekends, and holidays. This ensures that timers, deadlines, and SLAs reflect actual business operations rather than simple chronological time.
+
+== Features
+
+|===
+| Feature | Description
+
+| *Working Hours & Days*
+| Tasks and timers run only during configured business hours (e.g., Mon--Fri, 8 AM--5 PM), preventing off-hours execution.
+
+| *Holiday Management*
+| Declare single dates or ranges (e.g., national holidays) to exclude from time calculations--deadlines automatically slide to the next business day.
+
+| *Accurate Intervals*
+| Business-time durations subtract non-working hours and days, ensuring SLAs and delays reflect real operating schedules.
+|===
+
+*Common Use Cases*
+
+* *Meeting SLAs*: Ensure deadlines honor _business_ not calendar time.
+* *Task Scheduling*: Launch/complete tasks strictly within working hours.
+* *Deadline Management*: Avoid unexpected slips by excluding holidays and weekends.
+
+'''
+
+=== BAMOE 8 Setup
+
+In v8, Business Calendar was enabled by placing a `jbpm.business.calendar.properties` file on application's classpath and referencing it in deployment descriptor (XML) or setting it programmatically in process code.
+
+'''
+
+=== BAMOE 9 Setup
+
+In v9, Business Calendar feature is available out of the box that is enabled automatically when a `calendar.properties` file is present in your `src/main/resources` directory. This allows to configure working hours, weekends, and holidays for the business processes.
+
+=== Differences Between BAMOE 8 and 9
+
+|===
+| Aspect | BAMOE 8 | BAMOE 9.2
+
+| *API location*
+| `org.jbpm.process.core.timer.BusinessCalendarImpl`
+| `org.kie.kogito.calendar.BusinessCalendarImpl`
+
+| *Activation*
+| Manual code + `calendar.properties`
+| `calendar.properties` in resources
+
+| *Custom Calendar*
+| Not supported out of the box
+| Supported: Ensure class implements BusinessCalendar `org.kie.kogito.calendar.BusinessCalendar` and set property in `application.properties` `kogito.processes.businessCalendar=org.acme.MyCustomBusinessCalendar`
+|===
+
+==== Properties differences
+
+|===
+| Property | BAMOE 8 | BAMOE 9.2
+
+| business.start.hour
+| ✅
+| ✅
+
+| business.end.hour
+| ✅
+| ✅
+
+| business.weekend.days
+| ✅
+| ✅
+
+| business.holidays
+| ✅
+| ✅
+
+| business.holiday.date.format
+| ✅
+| ✅
+
+| business.cal.timezone
+| ✅
+| ✅
+
+| business.days.per.week
+| ✅
+| (calculated - Not required to input)
+
+| business.hours.per.day
+| ✅
+| (calculated - Not required to input)
+|===
+
+'''
+
+== Migration Steps
+
+=== Add calendar.properties
+
+Create a `calendar.properties` file in the `src/main/resources` directory along with the BPMN file. This file activates the Business Calendar feature and essential configurations.
+
+=== Configure Business Calendar Properties `calendar.properties`
+
+If you do not input custom values in a `calendar.properties` file, the system will use the following default settings:
+
+|===
+| Property | Description | Type | Default value/format
+
+| business.start.hour
+| The hour of the day when business starts. Valid range: 0-23
+| Integer
+| 9
+
+| business.end.hour
+| The hour of the day when business ends. Valid range: 0-23
+| Integer
+| 17 (i.e., 5PM)
+
+| business.weekend.days
+| Days considered as weekends (e.g., 1 = Sunday, 7 = Saturday). To consider all days as working days, input `0`.
+| Integer
+| 7 - Saturday, 1 - Sunday
+
+| business.holiday.date.format
+| Date format for holidays (`yyyy-MM-dd`)
+| String
+| yyyy-MM-dd
+
+| business.holidays
+| Dates aligned with `business.holiday.date.format`. Add custom holidays that are non-working days. +
+Holidays can be specified as: +
+• Individual Date: `2024-12-31` +
+• List of Dates: `2024-12-25,2024-12-31` +
+• Range of Dates: `2024-11-12:2024-11-14`
+| String (single date, list, or range)
+| No predefined holidays unless specified
+
+| business.cal.timezone
+| Timezone for calculations. Valid timezone as per https://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html[Java TimeZone Documentation]
+| String
+| Default system timezone (UTC if Quarkus)
+|===
+
+=== Custom Calendar Implementation `calendar.properties`
+
+To use a custom calendar, implement the `org.kie.kogito.calendar.BusinessCalendar` interface and configure it via:
+
+[,properties]
+----
+kogito.processes.businessCalendar=org.acme.MyCustomBusinessCalendar
+----
+
+For more details, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-authoring-bpmn#_enabling_business_calendar_functionality[Business Calendar documentation].
+
+==== Example of `calendar.properties`:
+
+[,properties]
+----
+business.end.hour=17
+business.start.hour=9
+business.holiday.date.format=yyyy-MM-dd
+business.holidays=2024-11-07
+business.weekend.days=1,7
+business.cal.timezone=America/Los_Angeles
+----
+
+
+NOTE: For information in case of custom calendar implementation, refer https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-authoring-bpmn#_customizing_your_business_calendar[Business Calendar documentation].
+

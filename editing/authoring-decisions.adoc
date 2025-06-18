@@ -10,18 +10,17 @@ It is support Friendly Enough Expression Language (FEEL) to define decision logi
 
 == DMN Editor
 Decision authoring on {CANVAS} happens inside the Editor page for Decisions, where you can edit, validate, run, and deploy DMN files.
+This version of DMN editor is compatible with DMN 1.5. The 9.0.x editor remains available and is referred to as the DMN Editor (classic). By default, the DMN Editor will be opened when you first open {CANVAS}. Older DMN files can be opened directly in the DMN Editor; however, if they are edited and saved in this editor, they will no longer be compatible with the DMN Editor (classic).
 
-This version of DMN editor is compatible with DMN 1.5. The 9.0.x editor remains available and is referred to as the DMN Editor (classic). By default, the DMN Editor will be opened when you first open {CANVAS}. 
-
-Older DMN files can be opened directly in the DMN Editor; however, if they are edited and saved in this editor, they will no longer be compatible with the DMN Editor (classic).
-
+=== Switching Between Editors
 You can switch between the two editors and your selected editor will be saved in the user preferences for future work.
 
 .Switch to DMN Editor (classic)
 image::tools/authoringDecisions/switch-to-legacy.gif[width=720]
 
-To switch back to the DMN Editor you can click on  "Try the DMN Editor" which will set the preference back to the DMN Editor.
+To switch back to the DMN Editor you can click on **Try the DMN Editor** which will set the preference back to the DMN Editor.
 
+=== Overview of DMN Editor Capabilities
 This section describes all aspects of the DMN Editor, its additional capabilities, followed by a detailed description of how to use them.
 
 The DMN Editor can open and edit DMN files from version 1.5 or below, but it will always save as a DMN 1.5.
@@ -29,7 +28,7 @@ The DMN Editor (classic) supports DMN version 1.2 with some additional 1.3 capab
 
 The following sections describe the DMN features, version by version, that are now supported in the DMN Editor.
 
-=== version 1.3
+==== version 1.3
 
 The DMN Editor (classic) supported a subset of 1.3 features, such as the temporal FEEL Functions.
 The DMN Editor supports Group nodes which enable you to create groups on the Decision Requirements Diagram (DRD), providing a better way to organize and visualize the model.
@@ -37,60 +36,61 @@ The DMN Editor supports Group nodes which enable you to create groups on the Dec
 .Group node
 image::tools/authoringDecisions/overview-1.3-group-node.png[width=300]
 
-=== version 1.4
+==== version 1.4
 
 The DMN Editor supports the following FEEL functions, Boxed Expression, and DRD representation available in DMN 1.4.
 
-FEEL Functions::
-The following FEEL functions are available: 
-* `context`
-* `context put`
-* `context merge`
-* `number floor`
-* `number ceiling`
-* `number round up`
-* `number round down`
-* `number round half up` 
-* `number round half down` 
-* `string join`
+* FEEL functions: 
++
+** `context`
+** `context put`
+** `context merge`
+** `number floor`
+** `number ceiling`
+** `number round up`
+** `number round down`
+** `number round half up` 
+** `number round half down` 
+** `string join`
 
-Boxed Expression::
-The Filter, Conditional, Iterator, Every and Some Boxed Expressions are available.
+* Boxed Expressions:
+** Filter
+** Conditional
+** Iterator
+** Every
+** Some
 
-DRD::
-Adds a marker on nodes that have a collection data type.
+* DRD: Adds a marker on nodes that have a collection data type.
 
 .Collection mark
 image::tools/authoringDecisions/overview-1.4-collection-marker.png[width=300]
 
-=== version 1.5
+==== version 1.5
 
 The DMN Editor supports new FEEL Functions, changes to the DRD and some general changes related to DMN 1.5.
 
-FEEL Functions::
-The `list replace` function and the scientific notation for numbers are available.
+* FEEL Functions:
+** List replace
+** Scientific notation for numbers
 
-DRD::
-A DRD option to provide an alternative representation of the Input Data node, which is more visually coherent with the BPMN model
+* DRD: A DRD option to provide an alternative representation of the Input Data node, which is more visually coherent with the BPMN model
 Changing the DRD option affects all Input Data nodes on the DRD.
-More about this in the DRD section.
+For more information see xref:../editing/authoring-decisions.adoc#DRD[DRD].
 
 // provide a link when I find this section
 
 .alternative Input Data node representation
 image::tools/authoringDecisions/overview-1.5-alternative-input-data-node.png[width=150]
 
-General::
-[id="import-to-default-namespace"]
-Import to default namespace:::
-+
+
+=== Import to default namespace
 Adds the possibility to import a DMN into the default namespace.
 This removes the necessity to give a name to the external model, enabling you to compose a complex model with multiple small models.
 
-One of the missing functionalities on the DMN Editor (classic) is the visual representation of nodes that have missing dependencies on the current DRD.
-
+=== Visualizing Missing Dependencies
+Unlike the DMN Editor (classic), DMN Editor provides a visual representation of nodes with missing dependencies in the current DRD.
 In the DMN editor You can have multiple DRDs and not necessarily import all nodes.
-This visual representation helps to show the missing requirements in the current DRD.
+The following visual representation shows the missing requirements in the current DRD.
 
 .DRD1 with a Person node as dependency of the My Decision node
 image::tools/authoringDecisions/overview-missing-functionalities-ellipsis-1.png[width=300]
@@ -98,9 +98,7 @@ image::tools/authoringDecisions/overview-missing-functionalities-ellipsis-1.png[
 .DRD2 with the My Decision node without the Person dependency.
 image::tools/authoringDecisions/overview-missing-functionalities-ellipsis-2.png[width=300]
 
-'''
-
-=== The Editor
+== Using the DMN Editor
 
 This section describes how to use the DMN Editor.
 
@@ -110,86 +108,44 @@ image::tools/authoringDecisions/new-editor-overview.png[720]
 The Diagram and Boxed Expression Editor can be accessed via the Editor tab (A).
 The data types editor can be accessed via the Data Types tab (B) and included models can be managed via the Included Models tab \(C).
 
-=== A. Diagram
+=== Using the diagram
 
 When you open the diagram for the first time, there are a few components to become familiar with.
 
 .DMN Editor diagram overview
 image::tools/authoringDecisions/new-editor-diagram-overview.png[720]
 
-. The editor empty state.
-+
-The DMN Editor empty state enables you to easily bootstrap a new model via two options: by
+* Editor empty state (1): The editor empty state enables you to easily bootstrap a new model via two options: by
 creating a Decision node with a Decision Table or by creating a Decision with an Input Data node.
 +
-. The node Palette which enables you to create:
-.. Decision Requirements Graph (DRG) nodes
-.. Artifact nodes
-.. All DRG nodes
-.. External nodes
-+
-. The DRD dropdown which enables you to change the currently open DRD, rename it, or change its properties.
-+
-. The properties panel of the selected element.
-. The overlay panel, with customizable style and visualization properties.
-. The auto layout button, to help you organize your DRD.
-. The diagram properties, where you can control the zoom or what you are visualizing.
 
-More about these functionalities are explained in the following sections.
-
-==== 1. Empty state
-
-In the empty state you can create a DMN model using one of the two options:
-
-. New Decision Table
-+
-Creates a new Decision node with an empty Decision Table.
-+
 .Decision node with a Decision Table
 image::tools/authoringDecisions/new-editor-diagram-empty-state-decision-node.png[width=300px]
 
-+
-. New Decision with Input Data
-+
-Creates a new Input Data and Decision node with an Information Requirement relationship.
-+
 .Input Data and Decision nodes
 image::tools/authoringDecisions/new-editor-diagram-empty-state-input-decision.png[width=300px]
 
-==== 2. Palette
+* Node Palette (2):  You can use  the Palette to interact with the DRD and DRG:
+** Add a new node to the DRD.
+** Use nodes from other DRDs.
+** Add nodes from external models.
+** Create artifact nodes to the DRD, improving documentation, organization, and visualization.
 
-You can use  the Palette enables to interact with the DRD and DRG:
-
-* Add a new node to the DRD.
-* Use nodes from other DRDs.
-* Add nodes from external models.
-* Create artifact nodes to the DRD, improving documentation, organization, and visualization.
-
-.a. Add DRG node
-
-To add a new DRG node you drag the desired node from the palette and drop it into the diagram.
-
+* Add DRG node (2a): To add a new DRG node you drag the desired node from the palette and drop it into the diagram.
++
 .Dragging a new Input Data node from the Palette
 image::tools/authoringDecisions/new-editor-diagram-drag-from-palette.gif[width=300px]
 
-.b. Artifact nodes
-
-Using the artifact nodes you have the tools to improve the documentation and visualization of the DRG by modifying the DRD.
+* Artifact nodes (2b): Using the artifact nodes you have the tools to improve the documentation and visualization of the DRG by modifying the DRD.
 The Group node creates a visual separation, and the Text Annotation enables to writing short documentation.
-
-.c. All DRG nodes
-
-Clicking on it will open a modal providing access to the list of all DRG nodes that are part of the current file.
+* All DRG nodes (2c): Clicking on it will open a modal providing access to the list of all DRG nodes that are part of the current file.
 It is possible to filter the nodes by name, and nodes that are part of the current DRD are grayish.
 Clicking and dragging the node name to the diagram will add the node to the current DRD.
 More about this can be found in the DRD section.
-
++
 .Dragging a Decision node from DRG nodes
 image::tools/authoringDecisions/new-editor-diagram-palette-all-drg-nodes.gif[width=300px]
-
-.d. External nodes
-
-All nodes that are part of the included models can be found here.
+* External nodes (2d): All nodes that are part of the included models can be found here. 
 
 NOTE: See the <<included-models, Included models>> section to learn more about **Included models**.
 
@@ -199,133 +155,166 @@ Clicking on it will open a dialog that shows all nodes separated by namespace. Y
 image::tools/authoringDecisions/new-editor-diagram-palette-external-nodes.gif[width=300px]
 
 You can also see the chosen name for the included model and the DMN file name it originates from.
-In the above example the name is “ex” and the filename “Another DMN.dmn”.
+In the above example the name is **ex** and the filename **Another DMN.dmn**.
 
-==== Nodes
+* The DRD dropdown (3): DRD dropdown enables you to change the currently open DRD, rename it, or change its properties. For more informations, see 
+* The properties panel (4): 
+The properties panel lets you manage the properties of a Decision element.
+Enabling the possibility to add detailed descriptions, and documentation links and tweak the font and shape styles.
+* The overlay panel (5):
+On the Overlay properties, it is possible to tweak user preferences, which helps with visualization and organization.
 
-In this section we explore all node features, for this, we will be using a Decision node.
+** Snapping: Makes the elements snap into an invisible grid.
+It is possible to tweak the grid layout by changing the "Horizontal" and "Vertical" values.
+
+.Enable/disable snapping
+image::tools/authoringDecisions/new-editor-overlay-snapping.gif[]
+
+** Highlight selected node(s) hierarchy: This option is very useful for complex models where the user needs to verify which nodes are somehow impacting the selected node.
+
+.Enable/disable node hierarchy
+image::tools/authoringDecisions/new-editor-overlay-hierarchy.gif[]
+
+** Show data type toolbar on nodes: Control if the data type toolbar is visible or not on the Input Data, Decision, BKM, and Decision Service nodes.
+
+.Enable/disable data type toolbar on nodes
+image::tools/authoringDecisions/new-editor-overlay-show-data-type.gif[]
+
+** Enable styles: It is possible to turn on/off the node styles.
+It is important to notice that this option will not change the file, only the visual representation.
+
+.Enable/disable data type toolbar on nodes
+image::tools/authoringDecisions/new-editor-overlay-style.gif[]
+
+* The auto layout (6): 
+The Autolayout is still a beta feature.
+It will automatically organize your model by arranging related nodes closer to each other.
+
+.Enable/disable data type toolbar on nodes
+image::tools/authoringDecisions/new-editor-autolayout.gif[]
+
+* The visualization controls (7):
+The visualization controls give the user the option to zoom in/out from the model, to make the viewport fit the current model, or to lock any interaction.
+
+
+== Using Node
+
+This section describes all node features, using a Decision node.
 
 .Decision node components
 image::tools/authoringDecisions/new-editor-diagram-node-overview.png[width=300px]
 
-. Node name
-+
+=== Node name
 The node name is validated for uniqueness.
 The editor does not allow you to rename a node to a name that is already being used by another node. Empty names are also invalid.
 Trying to rename a node to an invalid one will cause it to revert to its previous name.
 The only moment you can have nodes with the same name is when you create two or more nodes of the same type without renaming them.
-The following example illustrates two Decision nodes that were created without renaming and an Input Data node where we try to rename it to “New Decision”, and after it to an empty name.
-+
+The following example illustrates two Decision nodes that were created without renaming and an Input Data node where we try to rename it to **New Decision**, and after it to an empty name.
+
 .Node unique name
 image::tools/authoringDecisions/new-editor-diagram-node-unique-name.gif[width=300px]
-+
-. Node type
-+
+
+=== Node type
 Nodes that have a data type, show this information on top of the node.
 It is possible to change the node data type using the dropdown menu, or even access a custom data type to have a better visualization of the type.
 More about the Data Types are covered in the B section.
-+
+
 .Editing node data type
 image::tools/authoringDecisions/new-editor-diagram-node-data-type.gif[width=300px]
-+
-. New relationship
-+
+
+=== New relationship
+
 It is possible to create a new requirement or association relationship from the target node to another node respecting the DMN specification.
 The available options vary from node to node.
-+
+
 .Create new relationship
 image::tools/authoringDecisions/new-editor-diagram-node-new-relationship.gif[width=300px]
-+
-. New connected node
-+
+
+=== New connected node
+
 It is possible to create a new connected node from the target node.
 It will create a node with the respective relationship.
 The available options vary based on the node type and respect the DMN specification.
-+
+
 .Create new connected node
 image::tools/authoringDecisions/new-editor-diagram-node-new-connected.gif[width=300px]
-+
-. Edit
-+
+
+=== Edit node
 The Edit button is only available for the Decisions and Business Knowledge Model (BKM) nodes.
 Clicking on it opens the DMN Boxed Expression Editor with the node expression.
 The Boxed Expression Editor has access to the DRG context, and is powered by an auto-completion tool, which helps you to build expressions.
-+
+
 .Open node Boxed Expression Editor
 image::tools/authoringDecisions/new-editor-diagram-node-boxed-expression-editor.gif[width=500px]
-+
-. Properties panel
-+
+
+=== Properties panel
+
 Clicking on this button will open the Properties Panel of the node.
 On this panel, you can check and edit the node name, type, description, allowed answer, documentation links, font styles, and shape styles.
 You can also check the node ID, for more information see the "Properties Panel” section.
-+
+
 .Open node properties panel
 image::tools/authoringDecisions/new-editor-diagram-node-properties-panel.gif[width=500px]
-+
-. Resize handler
-+
+
+=== Resize handler
+
 You can click and drag he small arrow to resize the target node.
 Each node has a minimal width and height.
-+
+
 .Resize node
 image::tools/authoringDecisions/new-editor-diagram-node-resize.gif[width=500px]
 
-===== Decision Service
+=== Decision Service
 The **Decision Service** node, similar to the BKM node, is useful for reusing logic.
 You can also use it to wrap and structure a larger set of Decision nodes while producing a single output.
 
 .Decision Service Node
 image::tools/authoringDecisions/new-editor-decision-service-node.png[]
 
-**(1) Output decisions**
+* **Output decisions (1)**:
 These decisions (**Decision A** and **Decision B**) results will be present in the **Decision Service** output. 
 The number of nodes in this section (and their Data Types) determines whether the **Decision Service** will be a Simple or Complex Data Type.
 In case of multiple items in the **Output decisions** section we are sure the **Decision Service** output is a Complex type.
 In case of a single item in the **Output decisions** section the **Decision Service** output depends on the type of the item.
 
-**(2) Encapsulated decisions**
+* **Encapsulated decisions (2)**:
 These decision (**Decision C**) results will be not present in the **Decision Service** output.
 They will be used only for its computation. 
 
-**(3) Input decisions**
+* **Input decisions (3)**:
 These decisions (**Decision D**) are parameters for the **Decision Service** execution.
 You need to provide their values during **Decision Service** invocation.
 
-**(4) Input data**
+* **Input data (4)**:
 These inputs (**Input Data One**, **Input Data Two** and **Input Data Three**) are parameters for the **Decision Service** execution.
 You need to provide their values during **Decision Service** invocation. 
 
-**(5) Invoking this Decision Service in FEEL**
+* **Invoking this Decision Service in FEEL (5)**:
 Is an example of the **Decision Service** invocation expression with its parameters in correct order.
 To change the parameters order, you can drag and drop items from the **Input decisions** and **Input data** sections.
 
-In the **Decision Service** node, there is a divider line in the middle.
-The divider can be dragged to make **output** or **encapsulated** sections the required size.
+In the **Decision Service** node, there is a divider line in the middle. The divider can be dragged to make **output** or **encapsulated** sections the required size.
 
-The **Decision Service** node needs to be selected in order to see its context menus.
-You cannot just hover over the **Decision Service** node as you can with other DMN node types.
+NOTE: The **Decision Service** node needs to be selected in order to see its context menus. You cannot just hover over the **Decision Service** node as you can with other DMN node types.
 
-
-===== Unknown node
-
-Is a node with an invalid DMN element reference(`dmnElementRef`).
+=== Unknown node
+Unknown node is a node with an invalid DMN element reference(`dmnElementRef`).
 This node cannot be correctly rendered as the reference cannot be found in the current model.
 It is replaced by a placeholder node.
 
 .Unknown node example
 image::tools/authoringDecisions/new-editor-unknown-node.png[]
 
-(1) Reference is the `dmnElementRef` value that could not resolve to a node.
+Reference (1) is the `dmnElementRef` value that could not resolve to a node.
 The editor does not provide a feature to change this value.
 To change this value, open and edit the file manually outside the editor.
 The `dmnElementRef` has a `QName` value, with the `namespaceDeclarationName:nodeId` format.
 For elements that are referenced on the current namespace, `namespaceDeclarationName` is not present, which means the `dmnElementRef` will have the `nodeId` format.
+The `namespaceDeclarationName` part should be equal to the declaration name of the included model namespace, which must be included on the <<included-models, Included models>> tab.
+The `nodeId` should then refer to one of the nodes from the included model.
 
-- The `namespaceDeclarationName` part should be equal to the declaration name of the included model namespace, which must be included on the <<included-models, Included models>> tab.
-- The `nodeId` should then refer to one of the nodes from the included model.
-
-==== 3. DRD
+[id=drd]
+== Using DRD
 
 The new editor provides an improved experience with DRDs.
 In the image below you can see an overview of the functionality.
@@ -337,13 +326,13 @@ Clicking on (1) will open the DRD dropdown.
 To edit the DRD name, you can click on its name and type the new desired name.
 On (2), you can create new DRDs, which will automatically change to a new empty DRD.
 (3) is the list of DRDs on the DRG.
-Finally, 4 is the DRD options of the selected DRD.
+Finally, (4) is the DRD options of the selected DRD.
 
 .DRG nodes overview
 image::tools/authoringDecisions/new-editor-diagram-drg-nodes-overview.png[width=500px]
 
 In the example above, the user has created a new DRD and named it DRD2, which we can see on (1).
-Clicking on (2) will open the DRG nodes (*3*).
+Clicking on (2) will open the DRG nodes (3).
 In this example, the “My Decision” and “Person” nodes are present on the DRG but not in the current DRD.
 By clicking on it and dragging it into the diagram the node will be added to the current DRD.
 This behavior is illustrated below.
@@ -361,85 +350,44 @@ image::tools/authoringDecisions/new-editor-diagram-drd-overview-alternative-inpu
 Also, it is possible to change the classic shape to an alternative one, making it more visually cohesive with the BPMN model.
 This change affects the entire DRD, so it is not possible to have just one node with an alternative shape.
 
-==== 4. Properties panel
 
-The properties panel lets you manage the properties of a Decision element.
-Enabling the possibility to add detailed descriptions, and documentation links and tweak the font and shape styles.
-
-==== 5. Overlay properties
-
-On the Overlay properties, it is possible to tweak user preferences, which helps with visualization and organization.
-
-. Snapping -> Makes the elements snap into an invisible grid.
-It is possible to tweak the grid layout by changing the "Horizontal" and "Vertical" values.
-+
-.Enable/disable snapping
-image::tools/authoringDecisions/new-editor-overlay-snapping.gif[]
-+
-. Highlight selected node(s) hierarchy -> This option is very useful for complex models where the user needs to verify which nodes are somehow impacting the selected node.
-+
-.Enable/disable node hierarchy
-image::tools/authoringDecisions/new-editor-overlay-hierarchy.gif[]
-
-. Show data type toolbar on nodes -> Control if the data type toolbar is visible or not on the Input Data, Decision, BKM, and Decision Service nodes.
-+
-.Enable/disable data type toolbar on nodes
-image::tools/authoringDecisions/new-editor-overlay-show-data-type.gif[]
-
-. Enable styles -> It is possible to turn on/off the node styles.
-It is important to notice that this option will not change the file, only the visual representation.
-+
-.Enable/disable data type toolbar on nodes
-image::tools/authoringDecisions/new-editor-overlay-style.gif[]
-
-==== 6. Autolayout (beta)
-
-The Autolayout is still a beta feature.
-It will automatically organize your model by arranging related nodes closer to each other.
-
-.Enable/disable data type toolbar on nodes
-image::tools/authoringDecisions/new-editor-autolayout.gif[]
-
-==== 7. Visualization controls
-
-The visualization controls give the user the option to zoom in/out from the model, to make the viewport fit the current model, or to lock any interaction.
-
-==== 8. Working with Multiple DRDs in the DMN Editor
+=== Working with multiple DRDs in the DMN Editor
 
 The DMN editor supports multiple DRDs within a single model, all referencing a shared DRG. This capability allows decision modelers to organize complex logic into modular, focused views without duplicating underlying logic. Multiple DRDs can coexist in a model and may depict overlapping portions of the DRG.
 
-The DMN editor supports two visual representations of Decision Services:
+The DMN editor supports two visual representations of Decision Services: 
 
-`Collapsed Form`: 
-In the Collapsed Form, the Decision Service is displayed as a single, compact element on the DRD canvas. This form emphasizes simplicity and abstraction, allowing modelers to reference the service without displaying its internal details.
-The element’s user interface includes an expand button that, when clicked, reveals the full internal structure of the Decision Service. In its collapsed form, the internal decisions and components are hidden from view, allowing the diagram to remain clean and uncluttered. This is especially useful when the detailed logic of the service is not immediately relevant to the modeling task at hand.
+* **Collapsed Form**: 
+In the Collapsed Form, the Decision Service is displayed as a single, compact element on the DRD canvas. 
 
 .Collapsed Form
 image::tools/authoringDecisions/collaps_form.png[width=300px]
 
-`Expanded Form`:
-In the Expanded Form, the internal structure of the Decision Service is fully visible, shown within a distinct boundary that visually encapsulates all internal elements. All internal logic and decision dependencies are presented in detail, providing full visibility into how the service operates.
-A collapse button is available to return the Decision Service to its Collapsed Form when clicked. In the Expanded Form, the layout and structure of internal elements must remain consistent across all DRDs where the service is expanded. If the service is being expanded for the first time in any DRD, an auto-layout algorithm is used to generate a clean and organized visual structure. This expanded view is especially useful when a deeper understanding or modification of the service logic is required within a specific modeling context.
+* **Expanded Form**:
+In the Expanded Form, the internal structure of the Decision Service is fully visible, shown within a distinct boundary that visually encapsulates all internal elements.
 
 .Expanded Form
 image::tools/authoringDecisions/expand_form.png[width=300px]
 
-===== Expansion Rules and Conflict Management
-To ensure clarity and avoid visual conflicts, the editor enforces the following rules:
-*Exclusive Expansion: A Decision Service can only be expanded if none of its internal decisions are already expanded in another Decision Service on the same DRD.
-*Conflict Handling: If a conflict exists, the expand button is disabled (greyed out) for the affected service.
-*To resolve the conflict, collapse the currently expanded service that shares internal decisions.
+To ensure clarity and avoid visual conflicts, the DMN Editor enforces the following rules:
+
+* A Decision Service can only be expanded if none of its internal decisions are already included in another expanded Decision Service on the same DRD.
+
+* If a conflict exists, the expand button is disabled (greyed out) for the affected service.
+
+* To resolve the conflict, collapse the currently expanded service that shares internal decisions.
 These rules align with the DMN 1.5 specification and ensure a clean, non-overlapping diagram.
 
-=====  Synchronized Layout Across DRDs
-To maintain consistency:
-*Position and size changes to decisions within a Decision Service are automatically synchronized across all DRDs.
-*This ensures that the same Decision Service appears identically wherever it is used, reinforcing visual consistency and reducing modeling errors.
+To maintain consistency across multiple DRDS:
+
+* Position and size changes to decisions within a Decision Service are automatically synchronized across all DRDs.
+
+* This ensures that the same Decision Service appears identically wherever it is used, reinforcing visual consistency and reducing modeling errors.
 
 
-=== B. Data types
+== Data types
 
-The Data Types tab is where all custom data types of the DMN model are placed.
+The data types tab is where all custom data types of the DMN model are placed.
 The DMN Editor brings a brand new experience for managing custom data types.
 The following two images show a model without custom data types and the next are the data types of the DMN sample.
 
@@ -459,7 +407,7 @@ To paste a custom data type, you need to have one saved on your clipboard, and t
 .Empty data types tab overview
 image::tools/authoringDecisions/new-editor-data-types-overview.png[]
 
-Clicking on the "Create a custom data type" will open the data type editor where you can start creating your custom data type.
+Clicking on the **Create a custom data type** will open the data type editor where you can start creating your custom data type.
 
 .Creating a new data type
 image::tools/authoringDecisions/new-editor-data-types-empty-create.gif[]
@@ -512,7 +460,7 @@ image::tools/authoringDecisions/new-editor-data-types-with-types-struct-overview
 [loweralpha]
 . Adds a new property to the struct, but now we have an additional button on the bottom of the list.
 . For nested structs, this button will add a new property to the nested struct.
-. The properties' names.
+. The names of the properties.
 . The nested properties name.
 . Tells if the struct properties are nested structs.
 . The type of the struct property.
@@ -592,7 +540,6 @@ Once the model has been included as described above, you can switch back to the 
 
 .BKM node from included model
 image::tools/authoringDecisions/creating-external-bkm.png[Included models cards]
-
 
 == DMN Editor (classic)
 
