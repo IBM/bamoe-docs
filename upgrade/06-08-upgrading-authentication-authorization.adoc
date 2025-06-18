@@ -1,0 +1,269 @@
+= Upgrading authentication/authorization
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+In BAMOE v8, authentication and authorization were managed internally using WildFly and JAAS. BAMOE v9 shifts to a more modern and flexible approach by delegating all AAA (Authentication, Authorization, and Access Control) responsibilities to external systems.
+
+These systems include OIDC/OAuth2 providers like Keycloak, Microsoft Entra ID (Azure AD), and GitHub; API gateways or ingress controllers for token validation and routing; Kubernetes RBAC for service-level access control; and Git-based access control for repository permissions.
+
+For detailed guidance on securing Business Service API endpoints, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-securing-business-service-api-endpoints[official documentation].
+
+BAMOE v9 supports integration with several identity providers:
+
+* Keycloak (recommended) for both authoring and runtime
+* GitHub, GitLab, Bitbucket for authoring
+* LDAP via Keycloak federation for authoring
+* LDAP via WildFly Elytron for runtime
+
+== Security Mechanisms
+
+=== Quarkus
+
+Quarkus uses the OIDC extension for authentication, configured through the `application.properties` file. This setup supports bearer token authentication and role-based access control.
+
+Example configuration:
+
+[,properties]
+----
+quarkus.oidc.auth-server-url=https://keycloak.example.com/auth/realms/kie-realm
+quarkus.oidc.client-id=bamoe-app
+quarkus.oidc.credentials.secret=my-secret
+quarkus.http.auth.permission.authenticated.paths=/*
+quarkus.http.auth.permission.authenticated.policy=authenticated
+quarkus.oidc.roles.role-claim=realm_access.roles
+----
+
+To enable this, add the following Maven dependency:
+
+[,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-oidc</artifactId>
+</dependency>
+----
+
+More details are available in the https://quarkus.io/guides/security-properties[Quarkus security properties] guide and the https://quarkus.io/guides/security-oidc-bearer-token-authentication[OIDC bearer token guide].
+
+=== Spring Boot
+
+Spring Boot uses Spring Security with OAuth2 support. Security is configured via `application.properties`, and Spring Boot provides a default security configuration when the `spring-boot-starter-security` dependency is included:
+
+[,xml]
+----
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+----
+
+Default credentials can be set as follows:
+
+[,properties]
+----
+spring.security.user.name
+spring.security.user.password
+----
+
+If not configured, a random password is generated and printed in the console log.
+
+[,text]
+----
+Using default security password: c8be15de-4488-4490-9dc6-fab3f91435c6
+----
+
+To disable the default security configuration, either exclude the `SecurityAutoConfiguration` class in your main application:
+
+[,java]
+----
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+public class SpringBootSecurityApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBootSecurityApplication.class, args);
+    }
+}
+----
+
+Or use the following property:
+
+[,properties]
+----
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
+----
+
+*NOTE:* Disabling may cause issues if other components (like Actuator) depend on the excluded configuration.
+
+For custom security, define a configuration class using `@EnableWebSecurity` and `@Configuration`. This allows you to define multiple users and roles using `InMemoryUserDetailsManager`.
+
+[,java]
+----
+@Configuration
+@EnableWebSecurity
+public class BasicConfiguration {
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails user = User.withUsername("user")
+                .password(passwordEncoder.encode("password"))
+                .roles("USER")
+                .build();
+
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder.encode("admin"))
+                .roles("USER", "ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(request -> request.anyRequest()
+                        .authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .build();
+    }
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return encoder;
+    }
+}
+----
+
+*NOTE:* The @EnableWebSecurity annotation is crucial if we disable the default security configuration.
+
+To support OAuth2, include the following dependencies:
+
+[,xml]
+----
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+----
+
+Example OAuth2 configuration:
+
+[,properties]
+----
+spring.security.oauth2.client.registration.keycloak.client-id=bamoe-app
+spring.security.oauth2.client.registration.keycloak.client-secret=my-secret
+spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
+spring.security.oauth2.client.registration.keycloak.scope=openid,profile,email
+spring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.example.com/auth/realms/kie-realm
+----
+
+=== File-Based Authentication (Dev/Test Mode)
+
+For development or testing, file-based authentication can be used.
+
+In Quarkus:
+
+[,properties]
+----
+ quarkus.security.users.file.enabled=true
+ quarkus.security.users.file.users=user1=password,user2=password
+ quarkus.security.users.file.roles=user1=admin,user2=user
+----
+
+In Spring Boot:
+
+[,properties]
+----
+spring.security.user.name=admin
+spring.security.user.password=password
+spring.security.user.roles=admin
+----
+
+== Access Control
+
+Both Quarkus and Spring Boot support method-level security.
+
+In Quarkus:
+
+[,java]
+----
+ @RolesAllowed("admin")
+ @POST
+ public Response deployProcess(ProcessDefinition definition) { ... }
+----
+
+In Spring Boot:
+
+[,java]
+----
+ @PreAuthorize("hasRole('admin')")
+ @PostMapping("/deploy")
+ public ResponseEntity<?> deployProcess(...) { ... }
+----
+
+== LDAP Integration
+
+LDAP is not directly supported in BAMOE v9 runtimes. However, you can integrate LDAP through Keycloak's User Federation or use WildFly Elytron externally.
+
+For Quarkus, LDAP integration is possible using the Elytron extension:
+
+[,xml]
+----
+<dependency>
+   <groupId>io.quarkus</groupId>
+   <artifactId>quarkus-elytron-security-ldap</artifactId>
+</dependency>
+----
+
+More details are available in the https://quarkus.io/guides/security-ldap[Quarkus LDAP guide].
+
+== Security in BAMOE Components
+
+Business Services, the BAMOE Management Console, and Quarkus/Spring Boot runtimes are secured using OpenID Connect (OIDC). REST and GraphQL APIs are protected by bearer tokens (JWT), while Kafka integration can be secured using SASL or OAuth2.
+
+These components rely on an API Gateway for routing and enforcing security policies. Authentication and role-based authorization are handled by Keycloak or another OIDC-compliant identity provider. Kubernetes RBAC and Git-based access control manage infrastructure-level and source-level permissions. External identity providers such as LDAP, GitHub, or Azure AD can be federated through Keycloak.
+
+=== BAMOE Management Console Additional Configuration
+
+To enable secure service-to-service communication between the Business Service and the BAMOE Management Console, an additional setup using an OIDC proxy is required.
+
+Add the following dependencies to your `pom.xml`:
+
+[,xml]
+----
+<dependency>
+  <groupId>io.quarkiverse.oidc-proxy</groupId>
+  <artifactId>quarkus-oidc-proxy</artifactId>
+  <version>0.2.2</version>
+</dependency>
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-resteasy-client-oidc-token-propagation</artifactId>
+</dependency>
+----
+
+Then configure the application with the following properties in `application.properties`:
+
+[,properties]
+----
+quarkus.oidc.tenant-enabled=true
+quarkus.http.auth.permission.unsecure.paths=/health/*
+quarkus.http.auth.permission.unsecure.policy=permit
+quarkus.http.auth.permission.secure.paths=/*
+quarkus.http.auth.permission.secure.policy=authenticated
+----
+
+This setup ensures that the BAMOE Management Console can securely authenticate and propagate identity tokens when communicating with Business Services, maintaining a consistent and trusted identity context across the BAMOE architecture.
+
+== Example: process-security
+
+A working example of BAMOE security integration using Keycloak and OIDC is available in the `process-security` example. This example demonstrates:
+
+* Keycloak realm and client setup
+* Token-based authentication
+* Role-based access control
+* Secure endpoint configuration
