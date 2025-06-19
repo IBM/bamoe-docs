@@ -2,26 +2,21 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-In BAMOE v8, authentication and authorization were managed internally using WildFly and JAAS. BAMOE v9 shifts to a more modern and flexible approach by delegating all AAA (Authentication, Authorization, and Access Control) responsibilities to external systems.
+In BAMOE v8, authentication and authorization were handled internally using WildFly and JAAS. This tightly coupled approach has been replaced in BAMOE v9 with a more modern and flexible model that delegates all Authentication, Authorization, and Access Control (AAA) responsibilities to external systems.
 
-These systems include OIDC/OAuth2 providers like Keycloak, Microsoft Entra ID (Azure AD), and GitHub; API gateways or ingress controllers for token validation and routing; Kubernetes RBAC for service-level access control; and Git-based access control for repository permissions.
+For detailed guidance on securing Business Service API endpoints, refer to the official https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-securing-business-service-api-endpoints[BAMOE documentation].
 
-For detailed guidance on securing Business Service API endpoints, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-securing-business-service-api-endpoints[official documentation].
+== Security in BAMOE Components
 
-BAMOE v9 supports integration with several identity providers:
+In BAMOE v9, security is implemented using OpenID Connect (OIDC) across all major components, including Business Services, the BAMOE Management Console, and both Quarkus and Spring Boot runtimes. REST and GraphQL APIs are protected using JWT bearer tokens, while Kafka integration supports SASL and OAuth2 for secure communication. Unlike BAMOE v8, direct LDAP integration is no longer supported in version 9.
 
-* Keycloak (recommended) for both authoring and runtime
-* GitHub, GitLab, Bitbucket for authoring
-* LDAP via Keycloak federation for authoring
-* LDAP via WildFly Elytron for runtime
+These components rely on an API Gateway for routing and enforcing security policies. Authentication and role-based authorization are handled by an OIDC-compliant identity provider.
 
-== Security Mechanisms
-
-=== Quarkus
+=== Quarkus Runtime
 
 Quarkus uses the OIDC extension for authentication, configured through the `application.properties` file. This setup supports bearer token authentication and role-based access control.
 
-Example configuration:
+The example below uses a Keycloak as IdP:
 
 [,properties]
 ----
@@ -45,7 +40,7 @@ To enable this, add the following Maven dependency:
 
 More details are available in the https://quarkus.io/guides/security-properties[Quarkus security properties] guide and the https://quarkus.io/guides/security-oidc-bearer-token-authentication[OIDC bearer token guide].
 
-=== Spring Boot
+=== Spring Boot Runtime
 
 Spring Boot uses Spring Security with OAuth2 support. Security is configured via `application.properties`, and Spring Boot provides a default security configuration when the `spring-boot-starter-security` dependency is included:
 
@@ -134,7 +129,7 @@ public class BasicConfiguration {
 }
 ----
 
-*NOTE:* The @EnableWebSecurity annotation is crucial if we disable the default security configuration.
+*NOTE:* The `@EnableWebSecurity` annotation is crucial if we disable the default security configuration.
 
 To support OAuth2, include the following dependencies:
 
@@ -150,7 +145,7 @@ To support OAuth2, include the following dependencies:
 </dependency>
 ----
 
-Example OAuth2 configuration:
+Example OAuth2 configuration using Keycloak:
 
 [,properties]
 ----
@@ -160,72 +155,6 @@ spring.security.oauth2.client.registration.keycloak.authorization-grant-type=aut
 spring.security.oauth2.client.registration.keycloak.scope=openid,profile,email
 spring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.example.com/auth/realms/kie-realm
 ----
-
-=== File-Based Authentication (Dev/Test Mode)
-
-For development or testing, file-based authentication can be used.
-
-In Quarkus:
-
-[,properties]
-----
- quarkus.security.users.file.enabled=true
- quarkus.security.users.file.users=user1=password,user2=password
- quarkus.security.users.file.roles=user1=admin,user2=user
-----
-
-In Spring Boot:
-
-[,properties]
-----
-spring.security.user.name=admin
-spring.security.user.password=password
-spring.security.user.roles=admin
-----
-
-== Access Control
-
-Both Quarkus and Spring Boot support method-level security.
-
-In Quarkus:
-
-[,java]
-----
- @RolesAllowed("admin")
- @POST
- public Response deployProcess(ProcessDefinition definition) { ... }
-----
-
-In Spring Boot:
-
-[,java]
-----
- @PreAuthorize("hasRole('admin')")
- @PostMapping("/deploy")
- public ResponseEntity<?> deployProcess(...) { ... }
-----
-
-== LDAP Integration
-
-LDAP is not directly supported in BAMOE v9 runtimes. However, you can integrate LDAP through Keycloak's User Federation or use WildFly Elytron externally.
-
-For Quarkus, LDAP integration is possible using the Elytron extension:
-
-[,xml]
-----
-<dependency>
-   <groupId>io.quarkus</groupId>
-   <artifactId>quarkus-elytron-security-ldap</artifactId>
-</dependency>
-----
-
-More details are available in the https://quarkus.io/guides/security-ldap[Quarkus LDAP guide].
-
-== Security in BAMOE Components
-
-Business Services, the BAMOE Management Console, and Quarkus/Spring Boot runtimes are secured using OpenID Connect (OIDC). REST and GraphQL APIs are protected by bearer tokens (JWT), while Kafka integration can be secured using SASL or OAuth2.
-
-These components rely on an API Gateway for routing and enforcing security policies. Authentication and role-based authorization are handled by Keycloak or another OIDC-compliant identity provider. Kubernetes RBAC and Git-based access control manage infrastructure-level and source-level permissions. External identity providers such as LDAP, GitHub, or Azure AD can be federated through Keycloak.
 
 === BAMOE Management Console Additional Configuration
 
@@ -261,7 +190,7 @@ This setup ensures that the BAMOE Management Console can securely authenticate a
 
 == Example: process-security
 
-A working example of BAMOE security integration using Keycloak and OIDC is available in the `process-security` example. This example demonstrates:
+A working example of BAMOE security integration using Keycloak (as the IdP) and OIDC is available in the `process-security` example. This example demonstrates:
 
 * Keycloak realm and client setup
 * Token-based authentication
