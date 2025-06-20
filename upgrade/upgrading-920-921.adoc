@@ -181,13 +181,18 @@ If you are using the {MANAGEMENT_CONSOLE} and running your __Business Services__
 [#migrate-stateful-workflow-db]
 == Upgrading your stateful workflow database
 //TBD are scripts provided for the database migration?
-You can upgrade the database used by business services that run stateful workflows in BAMOE from version 9.2.0 to 9.2.1. Perform the upgrade using the database migration scripts included in the `bamoe-9.2.1-db-utils.zip` archive.
+You can upgrade the database used by Business Services that run stateful workflows in BAMOE from version 9.2.0 to 9.2.1. Perform the upgrade using the database migration scripts included in the `bamoe-9.2.1-db-utils.zip` archive.
 
 The archive provides scripts named `from--9.2.0--to--9.2.1.sql` for each subsystem in a Business Service that uses the Compact Architecture. These subsystems include Data-Index, Data-Audit, Jobs Service, User Tasks, and Runtime Persistence.
 
 Before you begin, make sure you upgrade both the services and the database together. Business Services running BAMOE 9.2.0 won’t work with a database that you’ve already migrated to BAMOE 9.2.1.
 
-To upgrade safely, back up your PostgreSQL and MS SQL database, test the migration in a staging environment, apply the scripts sequentially for each subsystem, schedule downtime for production, and verify that all services function correctly after the upgrade.
+To secure upgrade:
+* Back up your PostgreSQL and MS SQL database
+* Test the migration in a staging environment
+* Apply the scripts sequentially for each subsystem 
+* Schedule downtime for production
+* Verify that all services function correctly after the upgrade
 
 Avoid using KIE Flyway for automatic schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
 
