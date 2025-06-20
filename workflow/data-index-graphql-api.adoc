@@ -654,3 +654,126 @@ Where the following 4 instances will be returned starting from the 6th item in t
   }
 }
 ----
+
+== Mutation Capabilities
+In GraphQL, mutations are used to modify data on the server, such as creating, updating, or deleting records. Mutations are an essential part of GraphQL because they allow you to make changes to the underlying data while also returning a result or confirmation about the operation.
+
+In GraphQL, the syntax for a mutation is similar to that of a query. However, it is wrapped inside the mutation keyword. Mutations usually require input parameters, and they are passed as arguments. The arguments can be simple values (strings, integers, etc.) or complex objects. Like queries, you can use variables with mutations to make the request more flexible. This allows you to pass dynamic values instead of hardcoding them into the mutation.
+
+The following sections describe the main GraphQL mutation capabilities in {PRODUCT_SHORT}.
+
+=== Process Instance Abort
+The `ProcessInstanceAbort` functionality allows you to abort a process instance, effectively stopping the execution of the process before it completes normally. This can be useful in situations where a process instance should be canceled due to a failure, manual intervention, or other business needs.
+
+The following shows a sample GraphQL mutation for aborting a process instance by specifying the `id` of the instance as a query parameter:
+
+[source,json]
+----
+mutation ProcessInstanceAbort($id : String){
+  ProcessInstanceAbort(id : $id)
+}
+----
+
+=== Process Instance Retry
+
+The `ProcessInstanceRetry` functionality enables you to retry a failed instance or instance that is in `Error` state. This is useful when a process instance encounters a failure (e.g., due to an error, task failure, or external dependency issues) and you want to attempt it again. It triggers the completed method of the process instance to allow execution to continue. 
+
+The following shows an example `ProcessInstanceRetry` mutation, specifying the `id` of the instance as a parameter:
+
+[source,json]
+----
+mutation ProcessInstanceRetry($id : String){
+  ProcessInstanceRetry(id : $id)
+}
+----
+
+=== Process Instance Skip
+
+The `ProcessInstanceSkip` functionality enables you to skip a running process instance or a specific process instance state. Skip is similar to retry in the sense that it only applies to process instances in ERROR state. But instead of retrying the failed node instance, it just triggers the completed method of the process instance to allow execution to continue.
+
+The following shows an example `ProcessInstanceSkip` mutation, specifying the `id` of the instance as a query parameter:
+
+[source,json]
+----
+mutation ProcessInstanceSkip($id : String){
+  ProcessInstanceSkip(id : $id)
+}
+----
+
+=== Process Instance Variables Update
+
+The `ProcessInstanceUpdateVariables` functionality enables you to update the variables associated with a process instance. This mutation is useful for modifying the data associated with a process instance. You can update variables at any point in the process, such as when a decision needs to be made based on new input or when external factors influence the process flow. 
+
+The following shows an example `ProcessInstanceUpdateVariables` mutation, specifying the `id` of the instance and the values to be updated as a query parameter in JSON:
+
+[source,json]
+----
+mutation ProcessInstanceVariableUpdate($id : String, $variables : String){
+  ProcessInstanceUpdateVariables(id : $id, variables : $variables)
+}
+----
+
+=== Node Instance Trigger 
+
+The `NodeInstanceTrigger` mutation enables you to trigger a node in a process instance. A node is a unit of work in a process definition, such as a task, action, or decision point. Triggering a node involves moving the process instance to the next state or node, effectively advancing the process. 
+
+The following shows an example `NodeInstanceTrigger` mutation. The `nodeId` is included in the nodeInstances of a process instance passed in the `id` parameter. 
+
+[source,json]
+----
+mutation NodeInstanceTrigger($id : String, $nodeID : String){
+  NodeInstanceTrigger(id : $id, nodeID : $nodeID)
+}
+----
+
+=== Node Instance Retrigger 
+
+The `NodeInstanceReTrigger` mutation enables you to retrigger an existing node instance in a process instance. Retriggering a node instance involves moving the process instance to the next state or node, effectively advancing the process. The arguments need to be passed are the processInstanceId and the nodeInstanceId that needs to be triggered.
+
+The following shows an example `NodeInstanceRetrigger` mutation which retriggers a node instance using the `id`, which is similar to `nodeInstanceId` related to a process instance. The `id` of the process instance is passed as a parameter. 
+
+[source,json]
+----
+mutation NodeInstanceRetrigger($id : String, $nodeInstanceID : String){
+  NodeInstanceTrigger(id : $id, nodeInstanceID : $nodeID)
+}
+----
+
+=== Node Instance Cancel
+
+The `NodeInstanceCancel` mutation enables you to cancel a node instance within a `processInstance`. When a node is canceled, it stops the execution of that particular node and its associated activities within the process instance. This mutation is useful when you want to prevent further actions or states from being processed, either due to changes in business requirements, process errors, or exceptions.
+
+The following shows an example `NodeInstanceCancel` mutation which cancels the node instance corresponding to `nodeInstanceId` related to the process instance identified by `id` passed as a parameters. 
+
+[source,json]
+----
+mutation NodeInstanceCancel($id : String, $nodeInstanceID : String){
+  NodeInstanceCancel(id : $id, nodeInstanceID : $nodeID)
+}
+----
+
+=== Job Cancel
+
+The `JobCancel` functionality enables you to cancel a job that is either scheduled, in progress, or waiting in the job queue. This can be useful when you need to stop a job from executing or if it is no longer needed due to changes in the business process or external conditions.
+
+The following shows an example `JobCancel` mutation which cancels the Job instance corresponding to the `id` passed as a argument. 
+
+[source,json]
+----
+mutation JobCancel($id : String) {
+  JobCancel(id : $id)
+}
+----
+
+=== Job Reschedule 
+
+The JobReschedule functionality enables you to reschedule a job. This can be useful when the job was originally scheduled to run at a certain time, but due to external factors or changes in business requirements, the job needs to be executed at a later time.
+
+You can this mutation to reschedule a specific job by providing its `id` and also by specifying the parameters `expirationTime`, `repeatInterval` & repeatInterval as the `data` argument.
+
+[source,json]
+----
+mutation JobReschedule($id : String, $data : String) {
+  JobReschedule(id : $id, data : $data)
+}
+----

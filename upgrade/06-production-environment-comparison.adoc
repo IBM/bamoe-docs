@@ -23,13 +23,11 @@ image::upgrade/v8-production-environment-bamoe.png[v8 arch]
 
 BAMOE v9 introduces a modular and cloud-native architecture that replaces the centralized model of v8. The core unit of deployment is the Business Service, a microservice application that contains the business automation assets. A Business Service can be deployed as a container image generated during the Maven build process or executed directly using Java. It is also possible to run a plain Java application embedded with Drools and jBPM, without relying on Kogito.
 
-The BAMOE Management Console provides a lightweight, stateless web interface for interacting with the runtime environment. It connects to the Data Index, Jobs Service, and User Tasks subsystems to retrieve and display information about process instances, user tasks, and jobs. The console can be deployed manually or using Helm charts, depending on the environment.
+The BAMOE Management Console provides a lightweight, stateless web interface for interacting with the runtime environment. It connects to the Business Services and leverages the Data Index, Jobs Service, and User Tasks subsystems to retrieve and display information about process instances, user tasks, and jobs. The BAMOE Management Console is deployed as a container in a cloud environment, optionally using Helm Charts for convenience.
 
 The production environment may also include optional components such as a Database, an Identity Provider (IDP) for authentication, Apache Kafka for event-driven communication, and a Monitoring System (if using Data-Audit), integrated with Prometheus and Grafana for observability.
 
 This architecture supports flexible deployment models and aligns with modern container orchestration practices. Each Business Service is independently deployable and scalable, enabling a more maintainable and resilient production environment.
-
-For more details, see Deploying to Kubernetes or OpenShift with the Helm Chart.
 
 Please read https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-management-console[Deploying to Kubernetes or OpenShift with the Helm Chart] to know more about deploying BAMOE Management Console into Openshift using Helm Charts.
 
@@ -47,7 +45,7 @@ For OpenShift deployments, BAMOE v8 provides an OpenShift Operator, available in
 
 BAMOE v9 introduces a fundamentally different deployment model based on microservices. Business automation assets are no longer deployed to a centralized KIE Server. Instead, they are packaged as containerized Business Services, built using Quarkus or Spring Boot. These services can be deployed as standalone Java applications or as container images generated during the Maven build process.
 
-Because Business Services are independent microservices, BAMOE v9 does not include a dedicated load balancer like the Smart Router. Instead, users are free to use any load balancing solution compatible with their chosen runtime. In OpenShift environments, Business Services can be deployed as pods and scaled automatically using OpenShift's native autoscaling capabilities.
+Since Business Services are independent microservices, BAMOE v9 does not include a dedicated load balancer like the Smart Router. Instead, load balancing can be handled using any solution compatible with cloud environments. In OpenShift environments, Business Services can be deployed as pods and scaled automatically using OpenShift's native autoscaling capabilities.
 
 BAMOE v9 does not provide its own OpenShift Operator. Instead, it offers Helm charts to simplify deployment. The BAMOE Managemnet Console Helm Chart is available for installing the related components on Kubernetes or OpenShift clusters. These charts support flexible configuration and align with infrastructure-as-code practices. For more details, see Deploying to Kubernetes or OpenShift with the Helm Chart.
 
@@ -319,7 +317,7 @@ The table below outlines the key differences in API structure, authentication, d
 
 | *API Types*
 | KIE Server REST API for KIE containers and business assets
-| Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-api[Process API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api[User Tasks API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api[Data-Index API]
+| Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-management-api[Process Management API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-api[Process API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api[User Tasks API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api[Data-Index API]
 
 |
 | KIE Server Java client API
@@ -327,11 +325,11 @@ The table below outlines the key differences in API structure, authentication, d
 
 |
 | Controller REST API for KIE Server templates and instances
-| Not supported as KIE server does not exist
+| N/A
 
 |
 | Controller Java client API
-| Not Supported
+| N/A
 
 |
 | BPMN process fluent API for Business Central processes
@@ -339,7 +337,7 @@ The table below outlines the key differences in API structure, authentication, d
 
 |
 | Knowledge Store REST API for Business Central spaces and projects
-| Not supported
+| N/A
 
 |
 | Security Management REST API for Business Central groups, roles, and users
@@ -347,7 +345,7 @@ The table below outlines the key differences in API structure, authentication, d
 
 |
 | EJB API for KIE sessions and task services
-| Not supported
+| N/A
 |===
 
 == Monitoring & Observability
@@ -378,49 +376,10 @@ The table below outlines the key differences between BAMOE v8 and BAMOE v9.2 in 
 
 == Standard Operating Environment Differences
 
-Production Standard Operating Environment (SOE) differences between BAMOE v8 and v9 remains same as Development one's except with minor differences.
+The Standard Operating Environment (SOE) for BAMOE has evolved significantly between v8 and v9.2. These changes reflect the shift toward a more cloud-native, containerized architecture in BAMOE v9, which impacts supported platforms, middleware, and system requirements.
 
-|===
-| *Aspect* | *BAMOE 8* | *BAMOE 9.2*
+To understand the specific differences in supported environments, refer to the official IBM compatibility reports:
 
-| *Supported Java Versions*
-| Java 11
-| Java 17 (recommended for enhanced performance), GraalVM JDK 17 (For native builds)
+- https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=153E7E75477540829BD9AEBBC7ABB82C[BAMOE v8]
+- https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=BF430D4BABE04E40B2F9A5AF8333591A[BAMOE v9.2]
 
-| *Operating Systems (OS)*
-| Windows, Linux
-| Microsoft Windows Server 2022 , Red Hat Enterprise Linux 9.5 (RHEL), macOS Sequoia
-
-| *Container platform*
-| OpenShift Container Platform 4.16, Kubernetes 1.30
-| OpenShift Container Platform 4.16, 4.17 and 4.18 , Kubernetes 1.30
-
-| *Maven Version*
-| Maven 3.6.2+ (minimum) - Commonly used with Maven 3.8.6
-| Maven 3.9.6 (required for examples and builds) - Backward compatible with 3.8.x
-
-| *Databases*
-| PostgreSQL - MySQL - Oracle - Microsoft SQL Server (via KIE Server)
-| PostgreSQL 17.4 , Microsoft SQL Server (2022)
-
-| *Kafka*
-| 3.6.1
-| Kafka supported for event-driven processes (version 3.7.1)
-
-| *Quarkus*
-| Red Hat build of Quarkus (2.7.x)
-| Version 3.20.1
-
-| *Spring Boot*
-| Version 2.7.18
-| Version 3.4
-
-| *DMN*
-| Version 1.2
-| Version 1.5 (automatic upgrade from 1.2+)
-
-| *Testing & Simulation*
-| Embedded UI-test tools in Business Central
-| Unit testing via JUnit +
-https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=scenarios-authoring-unit-tests-test[Test Scenarios] supported in BAMOE Developer Tools for VS Code(New Test Scenario Editor compatible with DMN 1.5)
-|===
