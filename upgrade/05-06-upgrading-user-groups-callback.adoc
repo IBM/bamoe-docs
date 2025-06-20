@@ -51,11 +51,11 @@ Authorization: Bearer <my_access_token>
 
 In this case, query parameters like user and group are ignored. The identity is derived from the token claims, ensuring secure and consistent authentication.
 
-Refer to the xref:06-08-upgrading-authentication-authorization.adoc[Upgrading Authentication Authorization guide] to check how to setup OIDC effectevely.
+Refer to the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading Authentication Authorization guide] to check how to setup OIDC effectevely.
 
 === Integration with Identity Providers (IdPs)
 
-BAMOE v9 supports integration with external IdPs such as Keycloak. Roles or groups defined in the IdP can be used for task assignments. For example, if a user belongs to the `managers` group in Keycloak, tasks assigned to that group will be routed accordingly.
+BAMOE v9 supports integration with external Identity Providers (IdPs) that support OpenID Connect (OIDC). Roles or groups defined in the IdP can be used for task assignments. For example, if a user belongs to the `managers` group in the IdP, tasks assigned to that group will be routed accordingly.
 
 The identity and roles are extracted from the token and mapped to the `IdentityProvider` interface, which is used internally by the BAMOE runtime.
 
@@ -134,7 +134,7 @@ This example demonstrates a simple role-based assignment strategy based on the t
 
 === Integration with Identity Providers
 
-When integrated with an Identity Provider (IdP) such as Keycloak, the assignment strategy can leverage identity attributes like roles or groups to make assignment decisions. For instance, if Keycloak defines groups for HR and IT, tasks can be dynamically routed to users based on their group membership.
+When integrated with an Identity Provider (IdP), the assignment strategy can leverage identity attributes like roles or groups to make assignment decisions. For instance, if the IdP defines groups for HR and IT, tasks can be dynamically routed to users based on their group membership.
 
 The `IdentityProvider` interface in BAMOE v9 provides access to the authenticated user's identity and roles, typically derived from the runtime's security context (e.g., Quarkus `SecurityIdentity`). This ensures that task assignments are consistent with the authenticated user's permissions and organizational role.
 

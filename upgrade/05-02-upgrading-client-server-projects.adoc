@@ -1,0 +1,205 @@
+= Upgrading client-server projects
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This guide provides a step-by-step process for upgrading client-server projects from BAMOE v8 to v9, covering key changes in configuration, security, and deployment.
+While both versions use standard Maven project structures (e.g., `pom.xml`, `src/main/java`, `src/main/resources`), there are important differences that must be addressed to ensure a successful migration.
+
+== pom.xml
+
+The pom.xml file used in BAMOE v8 is not compatible with BAMOE v9. To create a compatible pom.xml, you can either use a BAMOE Accelerator or manually configure it from scratch.
+
+=== Manual upgrade
+
+If you prefer more control over your Maven configuration, you can manually upgrade your pom.xml by selecting the appropriate dependencies from the official BAMOE Maven repository:
+
+* https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=reference-bamoe-maven-repository-libraries[BAMOE Maven Repository Libraries]
+
+This approach is ideal for advanced users who want to fine-tune their project setup or integrate with existing enterprise build pipelines.
+
+=== Using BAMOE Accelerator
+
+BAMOE Accelerators are project templates with a ready-to-use structure designed to help you quickly get started with a Business Service project. These templates include a preconfigured pom.xml tailored for BAMOE v9.
+
+The easiest way to upgrade your project is to replace your existing v8 pom.xml with the one provided in the BAMOE v9 accelerator, available here:
+
+* https://github.com/IBM/bamoe-canvas-quarkus-accelerator[BAMOE Canvas Quarkus Accelerator (GitHub)].
+
+*NOTE:* Use the `pom.xml` content from a branch corresponding to to your BAMOE v9 version.
+
+BAMOE v9 offers two types of accelerators, depending on the nature of your Business Service project:
+
+* *DMN Accelerator* -- Focused on Decisions and Rules using DMN.
+* *Full Accelerator* -- Includes Workflows, Decisions and Rules, suitable for more complex automation scenarios.
+
+Choose the one that best matches your project requirements.
+
+BAMOE Accelerator templates can be used also directly from *BAMOE Canvas*. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=canvas-using-accelerators[BAMOE Documentation].
+
+*NOTE:* You can not simply *Apply Accelerator* from the *BAMOE Canvas* to whole BAMOE v8 Business Service project. It would result into invalid project structure. See the link:10-known-limitations.adoc[Known limitations] chapter.
+
+== application.properties [[application-properties]]
+
+The `application.properties` content of BAMOE v8 is not compatible with BAMOE v9.
+Below is a summary explaining what properties belongs to v8 and v9.
+
+|===
+| Feature | v8 | v9
+
+| `kieserver.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `drools.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `jbpm.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `kogito.*` properties
+| ❌ Not available
+| ✅ Introduced
+|===
+
+Furthermore, the BAMOE v9 `application.properties` content will depend on the used technology.
+
+*NOTE:* Please review https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=notes-supported-environments[BAMOE Supported environments].
+
+There is not one dedicated place that would list all possible configurations of BAMOE v9 `application.properties`.
+However a good way to explore the configuration is to search for `application.properties` string in the official https://www.ibm.com/docs/en/ibamoe/9.2.x[BAMOE Documentation].
+
+Similar to `pom.xml` also `application.properties` can be found in BAMOE Accelerators available https://github.com/IBM/bamoe-canvas-quarkus-accelerator[here].
+
+*NOTE:* Use `application.properties` content from a branch corresponding to to your BAMOE v9 version.
+
+=== Example: `application.properties` BAMOE 9 (Quarkus-based)
+
+[,properties]
+----
+# Server configuration
+quarkus.http.port=8080
+quarkus.log.level=INFO
+
+# Data source configuration (PostgreSQL)
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=kogito_user
+quarkus.datasource.password=kogito_pass
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/kogito_db
+quarkus.hibernate-orm.database.generation=update
+
+# Kogito persistence
+kogito.persistence.type=jdbc
+
+# Enable Kafka messaging
+mp.messaging.incoming.kogito_in.connector=smallrye-kafka
+mp.messaging.incoming.kogito_in.topic=kogito-events
+mp.messaging.incoming.kogito_in.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+mp.messaging.outgoing.kogito_out.connector=smallrye-kafka
+mp.messaging.outgoing.kogito_out.topic=kogito-responses
+mp.messaging.outgoing.kogito_out.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+# Enable OpenAPI and Swagger UI
+quarkus.swagger-ui.always-include=true
+quarkus.smallrye-openapi.path=/q/openapi
+
+# Tracing and monitoring
+quarkus.opentelemetry.enabled=true
+quarkus.opentelemetry.tracer.exporter.otlp.endpoint=http://localhost:4317
+quarkus.micrometer.export.prometheus.enabled=true
+quarkus.micrometer.export.prometheus.path=/metrics
+
+# Kogito add-ons
+kogito.addons.tracing.decision.enabled=true
+kogito.addons.monitoring.prometheus.enabled=true
+----
+
+=== Example: `application.properties` BAMOE 9 (Spring Boot-based)
+
+[,properties]
+----
+# Server configuration
+server.port=8080
+logging.level.root=INFO
+
+# Data source configuration (PostgreSQL)
+spring.datasource.url=jdbc:postgresql://localhost:5432/kogito_db
+spring.datasource.username=kogito_user
+spring.datasource.password=kogito_pass
+spring.jpa.hibernate.ddl-auto=update
+
+# Kogito persistence
+kogito.persistence.type=jdbc
+
+# Kafka configuration
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=kogito-group
+spring.kafka.consumer.auto-offset-reset=earliest
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.StringSerializer
+
+# Kogito Kafka topics
+kogito.events.incoming=kogito-events
+kogito.events.outgoing=kogito-responses
+
+# OpenAPI and Swagger
+springdoc.api-docs.path=/v3/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+
+# Tracing and monitoring
+management.endpoints.web.exposure.include=*
+management.endpoint.prometheus.enabled=true
+management.metrics.export.prometheus.enabled=true
+
+#kogito.addons.tracing.decision.enabled=true
+kogito.addons.monitoring.prometheus.enabled=true
+----
+
+== Security configurations
+
+In BAMOE v8, security was typically configured using WildFly’s built-in mechanisms or JBoss SSO. These approaches, while functional, were tightly coupled to the application server.
+
+With BAMOE v9, security configuration has shifted to a modern, standards-based model using external Identity Providers (IDPs) that support OpenID Connect (OIDC). This change aligns with cloud-native best practices and enables more flexible, centralized authentication and authorization strategies.
+
+For detailed steps on how to migrate your existing security configurations, refer to the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading Authentication and Authorization] section.
+
+== Asset upgrade
+
+Please, see xref:05-04-upgrading-individual-assets.adoc[Upgrading individual assets] guide to figure out how to upgrade individual assets.
+
+== API upgrade
+
+Please, see xref:06-production-environment-comparison.adoc#api-differences[Production environment comparison] guide to see API changes.
+
+== How do you know it worked?
+
+We need our upgraded BAMOE v9 project to be up and running.
+To do it we have two options described below.
+
+=== The quarkus dev:mode
+
+The upgraded BAMOE v9 project is a Maven Quarkus project that we can build and start locally as `mvn clean package` `mvn clen quarkus:dev`.
+The procedure is described also in getting started with business rule microservice https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=started-rule-service-in-15-minutes[BAMOE Documentation].
+
+Once the dev mode is up and running we should be able to see available Rest endpoints using the address: `+http://localhost:8080/q/swagger-ui/#/+`, however your `application.properties` needs to contain:
+
+[,properties]
+----
+quarkus.swagger-ui.always-include=true
+----
+
+=== Deployment to OpenShift
+
+Is described in getting started with deploying to OpenShift https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=gs-deploying-your-first-business-service-openshift-using-quarkus[BAMOE Documentation].
+
+Once the OpenShift deployment is up and running we should be able to see available Rest endpoints using the address: `[OpenShift deployment endpoint]/q/swagger-ui/#/`, however your `application.properties` needs to contain:
+
+[,properties]
+----
+quarkus.swagger-ui.always-include=true
+----
