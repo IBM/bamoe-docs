@@ -63,9 +63,53 @@ image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.
 [NOTE]
 For information on how to secure your _Business Service_ and expose the Indentity Provider URL to the {MANAGEMENT_CONSOLE} check xref:./security.adoc[Securing Business Service API endpoints]
 
-== Overview
+// adding the pre-configured runtimes here but it needs more thought on how to integrate with above
 
-The Management Console is a web application built using enveloped components. These enveloped components are React components used in different applications and environments. 
+=== Pre-configured connected runtimes
+
+It is possible set up a pre-configured list of runtimes, defined via an environment variable, available via the `env.json` file. Selecting a different AuthSession updates the state and closes the drawer. This allow users to connect to pre-defined listed runtimes without having to manually configure each one.
+
+Example of a value for the environment variable:
+
+[source,shell]
+----
+{
+    "BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES": [
+        {
+            "alias": "My Business Service 1",
+            "runtimeUrl": "http://localhost:8081",
+            "identityProviderUrl": "http://localhost:8181/realms/bamoe"
+        },
+        {
+            "alias": "My Business Service 2",
+            "runtimeUrl": "http://localhost:8082",
+            "identityProviderUrl": "http://localhost:8182/auth/realms/myrealm",
+            "clientId": "bamoe-management-console",
+            "scopes": "openid email profile offline_access",
+            "audience": "bamoe-service"
+        },
+        {
+            "alias": "My Business Service 3",
+            "runtimeUrl": "http://localhost:8083"
+        },
+        ...
+    ]
+} 
+----
+
+The only required properties are alias and `runtimeUrl`. The other properties are optional and can be used to configure the connection with an identity provider.
+
+If no `identityProviderUrl` is provided, the Management Console checks the quarkus-oidc-proxy endpoint to determine the Identity Provider URL (if the runtime is secured). 
+
+If no clientId, scopes or audience are provided, the Management Console uses default values. 
+
+If multiple runtimes share the same `indentityProviderUrl`, `clientId`, `scopes`, and `audience`, the Management Console should reuse the same token for all of them.
+
+On the first load, the Management Console will create AuthSessions for each runtime listed in the BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES environment variable. Each runtime will then start authenticating. 
+
+If the runtime requires authentication, the Management Console will redirect to the login page, unless the user is already authenticated with the same Identity Provider (using the same clientId, scopes, and audience), in this case the same token can be used for all runtimes.
+
+== Overview
 
 The Overview page displays a summary of all Process Instances, grouped by Process Definition ID. This includes basic information such as the name of the Process Definition, number of running instances, completed instances, and failed instances, represented by a bar graph. At the top there should be an aggregated bar graph for all Process Instances.
 
@@ -206,6 +250,17 @@ You can reschedule or cancel a job that is in scheduled or error state.
 You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
 --
 
+== Process Definitions
+
+The Process Definitions list page shows the list of process definitions available. They are displayed in an expandable list, which shows all the child process instances of the particular process definition when expanded.
+// to be completed
+
+=== Process Definition form page
+// to be completed
+
+=== Process Definition diagram
+// to be completed
+
 == Jobs
 
 The *Jobs* page displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, rescheduling a job, or canceling a job.
@@ -270,104 +325,5 @@ To stop impersonation, click the **Reset** button.
 
 [NOTE]
 When viewing User Tasks from a secured _Business Service_ with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
-
-== Multi-runtime support
-
-The multi-runtime helps in creating many instances of the single runtime ChannelAPI, one for each runtime, and then concatenate the results from each of them in a single list, handling some filtering and pagination capabilities in the new multi-runtime ChannelAPI.
-
-Example:
-
-[source,shell]
-----
-export type RuntimeList = {
-    runtimeUrl: string; // URL of the runtime
-    token?: string; // Optional token for authentication if needed
-    apolloClient?: ApolloClient<any>; // Optional Apollo client for GraphQL if needed
-    options?: { transformEndpointBaseUrl?: (url?: string) => string | undefined } // Optional options for the ChannelAPI
-}[];export class MultiRuntimeProcessListChanellApiImpl implements ProcessListChannelApi {
-  private readonly channelApis: ChannelApi[];
-  constructor(private readonly runtimes: RuntimeList) {
-    this.channelApis = runtimes.map(runtime => new ProcessListChannelApiImpl(runtime.apolloClient, runtime.options));
-  }
-  async processList__query(offset: number, limit: number): Promise<ProcessInstance[]> {
-    const results = (await Promise.all(
-        this.channelApis.map(api => api.processList__query(offset, limit))
-    )).flat();
-    const filteredResults = ...
-    const paginatedResults = ...
-    // Implement custom filtering and pagination logic here...
-    return paginatedResults;
-  }  ...
-} 
-----
-
-The pagination can be implemented by slicing the results based on the offset and limit. The total number of items must be the sum of all items from all runtimes.
-
-== All runtimes AuthSession option
-
-An AuthSession support is available when you want to see data from all currently connected runtime. This is used when you select `All` as a runtime option and pass to the ContextProviders to instantiate new `ChannelApiImpl` for each enveloped components.
-
-== AuthSession selector
-
-This will allow you to select the runtime that you want to interact with. Selecting a different AuthSession updates the state and closes the drawer.
-
-== Pre-configured connected runtimes
-
-Adds support for pre-configured list of runtimes, defined via an environment variable, available via the `env.json` file. This will allow users to connect to pre-defined list runtimes without having to manually configure each one.
-
-Example of a value for the environment variable:
-
-[source,shell]
-----
-{
-    "BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES": [
-        {
-            "alias": "My Business Service 1",
-            "runtimeUrl": "http://localhost:8081",
-            "identityProviderUrl": "http://localhost:8181/realms/bamoe"
-        },
-        {
-            "alias": "My Business Service 2",
-            "runtimeUrl": "http://localhost:8082",
-            "identityProviderUrl": "http://localhost:8182/auth/realms/myrealm",
-            "clientId": "bamoe-management-console",
-            "scopes": "openid email profile offline_access",
-            "audience": "bamoe-service"
-        },
-        {
-            "alias": "My Business Service 3",
-            "runtimeUrl": "http://localhost:8083"
-        },
-        ...
-    ]
-} 
-----
-
-Type Definition:
-
-[source,shell]
-----
-type RuntimeConnection = {
-    alias: string;
-    runtimeUrl: string;
-    identityProviderUrl?: string;
-    clientId?: string;
-    scopes?: string;
-    audience?: string;
-}; 
-
-----
-
-The only required properties are alias and `runtimeUrl`. The other properties are optional and can be used to configure the connection with an identity provider.
-
-If no `identityProviderUrl` is provided, the Management Console checks the quarkus-oidc-proxy endpoint to determine the Identity Provider URL (if the runtime is secured). 
-
-If no clientId, scopes or audience are provided, the Management Console should use default values. 
-
-If multiple runtimes share the same indentityProviderUrl, clientId, scopes, and audience, the Management Console should reuse the same token for all of them.
-
-On the first load, the Management Console will create AuthSessions for each runtime listed in the BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES env var, then, one by one, will start authenticating. 
-
-If the runtime requires authentication, the Management Console will redirect to the login page, unless the user is already authenticated with the same Identity Provider (using the same clientId, scopes, and audience), in this case the same token can be used for all runtimes.
 
 
