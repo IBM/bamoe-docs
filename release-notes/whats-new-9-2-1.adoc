@@ -58,9 +58,17 @@ The DMN editor now enables you to model your decisions in multiple Decision Requ
 == Enhancements for Workflow engine and runtime
 The following new functionality is available in the Workflow engine and runtime in {VERSION}.
 
-=== Improved handling for Process instance re-trigger operations in Workflow Engine
+=== Improved handling for Process instance retrigger operations in Workflow Engine
 
-xref:../[Learn more...]
+If a node instance fails in the middle of a process instance workflow and the error details are not available, it may impact your ability to retrigger the node and mark the process instance as successful. The following changes have been made to the Data Index GraphQL API as a consequence:
+
+The NodeInstance GraphQL interface now has `Retrigger` and `errorMessage` properties, enabling you to identify retriggered nodes and view associated error messages.
+
+The `nodeInstanceId` has been added to the `ProcessInstance` GraphQL `error` property, providing a direct reference to the node that caused the error.
+
+A new event state update event is now fired when a retrigger operation is performed on a process instance. This event sets the `ProcessInstance` GraphQL `state` property to `ACTIVE` and clears the `error` property, ensuring that the process state is accurately reflected in the Data Index.
+
+xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
 === Case management scenarios implemented through flexible processes
 You can now use BPMN extensions to provide case management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. Ad-hoc tasks refer to tasks that can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. xref:../workflow/authoring-workflows.adoc#case-management[Learn more...]
@@ -75,11 +83,16 @@ xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#multi-node[
 You can now use Oracle persistence for workflows in your _Business Service_. 
 xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Learn more...]
 
-=== Rescheduling SLAs and Scheduled Jobs in the Workflow Runtime
-xref:../workflow/overview.adoc[Learn more...]
+=== Querying and rescheduling SLAs and Jobs in the Workflow Runtime
+The ProcessInstance GraphQL interface has a new timers field that enables you to set timers on specific node instances within a process instance. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
-=== Query SLAs for workflows and process activities
-xref:../workflow/overview.adoc[Learn more...]
+There are two new endpoints in the Process Instance management API that enable you to retrieve the active times associated with a given process or node instance: 
+
+* `/management/processes/{processId}/instances/{processInstanceId}/timers`
+
+* `/management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers`
+
+xref:../workflow/management-apis.adoc[Learn more...]
 
 === Improved guidance for workflow evolution
 You may need to move process instances to a different server, update their process definition, or take them offline for maintenance without affecting the business logic. The Process Instance Migration Service enables you to to migrate running process instances from one deployment version to another. xref:../runtime-services-modeling/services-deployment.adoc#migration-PIM[Learn more...]
