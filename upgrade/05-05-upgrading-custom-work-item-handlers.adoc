@@ -5,15 +5,15 @@ include::../styles/images.adoc[]
 
 This guide explains how to migrate custom WorkItemHandlers from BAMOE v8 to BAMOE v9. It outlines the key differences in APIs, registration mechanisms, and execution models, and provides a step-by-step example of implementing and deploying a custom WorkItemHandler in BAMOE v9.
 
-== What Is a Custom Work Item in BAMOE?
+== What is a custom Work Item in BAMOE?
 
 In BAMOE, a Work Item represents a task or activity in a process that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing developers to plug in custom code to meet specific business requirements not covered by built-in functionality.
 
 Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
 
-== Differences Between BAMOE 8 and 9
+== Differences between BAMOE 8 and 9
 
-=== API and Lifecycle Changes
+=== API and lifecycle changes
 
 In BAMOE v8, custom WorkItemHandlers implemented the interface `org.kie.api.runtime.process.WorkItemHandler` and used the methods `+executeWorkItem(...)+` and `+abortWorkItem(...)+`.
 
@@ -24,7 +24,7 @@ In BAMOE v9, these methods are no longer supported. Instead, handlers must exten
 
 The new model is based on phases and transitions, which provide more flexibility and better integration with the Kogito runtime.
 
-=== Registration Changes
+=== Registration changes
 
 In v8, handlers were registered using `kie-deployment-descriptor.xml` or `kmodule.xml`.
 
@@ -42,14 +42,14 @@ public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
 }
 ----
 
-=== Annotation Support
+=== Annotation support
 
 The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as .wid files and placed in either:
 
 * the top-level `global/` directory, or
 * the `src/main/resources/` directory, optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
 
-== Creating a Custom WorkItemHandler in BAMOE 9
+== Creating a custom WorkItemHandler in BAMOE 9
 
 This section provides a step-by-step guide for implementing a custom WorkItemHandler in BAMOE v9, including project setup, handler definition, and integration with a BPMN process.
 
@@ -70,7 +70,7 @@ In your project's `pom.xml`, add the following dependency to enable the necessar
 </dependency>
 ----
 
-=== Creating .wid Files and Icons
+=== Creating .wid files and icons
 
 In BAMOE v9, the `@Wid` annotation is no longer supported. Instead, Work Item Definitions must be provided as `.wid` files. These files can be placed in:
 
@@ -104,7 +104,7 @@ Example `.wid` content:
 
 NOTE: In some cases, VS Code may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run `git add customtask.wid` to ensure the file is tracked. If the issue persists, try reopening the BAMOE project in a new VS Code workspace.
 
-=== Using the Custom Work Item in a BPMN Process
+=== Using the custom Work Item in a BPMN process
 
 Once your .wid file and handler class are in place, you can integrate the Custom Task into a BPMN process using the BAMOE Developer Tools.
 
@@ -114,25 +114,25 @@ Create a new BPMN file named `CustomTaskDemo.bpmn` in the `src/main/resources` d
 
 image::upgrade/upgrading-custom-work-item-handlers-devtoolview.png[width=250]
 
-==== Process Model
+==== Process model
 
 After adding the Custom Task, your process definition should resemble the following:
 
 image::upgrade/upgrading-custom-work-item-handlers-process_new.png[width=500]
 
-==== Define Process Variables
+==== Define process variables
 
 Create process variables to accept input values when starting the process instance. These variables will be mapped to the parameters defined in your `.wid` file.
 
 image::upgrade/upgrading-custom-work-item-handlers-processdata.png[width=250]
 
-==== Configure Data Assignments
+==== Configure data assignments
 
 Define the DataInput and DataOutput assignments for the custom Work Item. This ensures that the input values are passed to the handler and the output is captured in the process.
 
 image::upgrade/upgrading-custom-work-item-handlers-properties.png[width=90%]
 
-=== Implement the Custom WorkItemHandler
+=== Implement the custom WorkItemHandler
 
 To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.
 
@@ -175,7 +175,7 @@ public class MyConcatWorkItemHandler extends DefaultKogitoWorkItemHandler {
 }
 ----
 
-==== Registering the Custom WorkItemHandler
+==== Registering the custom WorkItemHandler
 
 To use a custom WorkItemHandler in a process instance, it must be registered before the process starts. This registration informs the engine which handler to invoke for a given task.
 
@@ -211,7 +211,7 @@ For native image compilation (optional):
 * Environment variable GRAALVM_HOME set accordingly
 * Note that GraalVM native image compilation typically requires other packages (glibc-devel, zlib-devel and gcc) to be installed too, please refer to GraalVM installation documentation for more details.
 
-==== Compile and Run in Local Dev Mode
+==== Compile and run in local dev mode
 
 Use Quarkus dev mode to run the application with hot reload support:
 
@@ -222,7 +222,7 @@ mvn clean compile quarkus:dev
 
 NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
 
-==== Package and Run in JVM Mode
+==== Package and run in JVM mode
 
 [,sh]
 ----
@@ -238,7 +238,7 @@ mvn clean package
 java -jar target\quarkus-app\quarkus-run.jar
 ----
 
-==== Package and Run using Local Native Image
+==== Package and run using local native image
 
 To compile a native executable, first add the following property to `application.properties`:
 
@@ -260,7 +260,7 @@ Run the generated executable:
 ./target/process-service-rest-call-quarkus-runner
 ----
 
-=== Submit a Request
+=== Submit a request
 
 To invoke the process, send a POST request to `+http://localhost:8080/CustomTaskDemo+` with the following payload:
 
@@ -288,7 +288,7 @@ curl -X 'POST' \
 }'
 ----
 
-=== Expected Output
+=== Expected output
 
 After submitting the request, you should see log output similar to the following:
 
