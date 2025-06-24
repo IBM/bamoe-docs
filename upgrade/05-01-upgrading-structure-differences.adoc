@@ -4,35 +4,35 @@ include::../styles/images.adoc[]
 
 This section outlines the key structural differences between BAMOE v8 and v9, including changes in project generation, runtime models, configuration mechanisms, and integration patterns. Whether you're migrating client-server or standalone projects, understanding these changes is essential for aligning with BAMOE v9 streamlined, code-first development model.
 
-== Comparison of BAMOE 8 and BAMOE 9 Execution Models: Client-Server vs. Standalone
+== Client-server and standalone comparison on BAMOE 8 and BAMOE 9.2
 
 |===
 | *Feature* | *Client-Server (BAMOE 8)* | *Standalone (BAMOE 8)* | *Client-Server (BAMOE 9.2)* | *Standalone (BAMOE 9.2)*
 
 | *Architecture*
-| Deployed in KIE Server, accessed via REST API
+| Deployed in KIE Server, accessed via REST API or JMS
 | Direct invocation in same JVM
-| Accessed via REST/gRPC
+| Accessed via REST/gRPC or Kafka
 | Direct invocation in same JVM
 
 | *Usage*
-| Models executed on server, results returned via REST
+| Models are executed on the server and results are returned via REST
 | Programmatic instantiation of `KieBase`/`KieSession`
-| Models executed on server, accessed via REST or gRPC
+| Models are executed on the server and accessed via REST or gRPC
 | Programmatic instantiation of `KieBase`/`KieSession`
 |===
 
 * For more details on upgrading xref:05-02-upgrading-client-server-projects.adoc[*Client-Server* projects], see the Client-Server Projects chapter.
 * For more details on upgrading xref:05-03-upgrading-standalone-projects.adoc[*Standalone* projects], see the Standalone Projects chapter
 
-== Project Generation: BAMOE 8 to 9
+== Project generation comparison on BAMOE 8 and 9.2 
 
 |===
 | *Aspect* | *BAMOE 8* | *BAMOE 9.2* | *Notes*
 
 | *Tooling Approach*
 | Web-based project creation via Business Central UI
-| CLI-based or IDE-based (VS Code) project generation
+| CLI or IDE-based (e.g., VS Code) project generation
 | BAMOE shifts from UI to developer-centric tooling.
 
 | *BAMOE Accelerators*
@@ -61,25 +61,25 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Encourages standard Git workflows.
 |===
 
-== Comparison of BAMOE 8 and BAMOE 9 Quarkus & Spring Boot
+== Comparison of BAMOE 8 vs BAMOE 9.2 Quarkus & Spring Boot
 
 |===
-| Feature | *BAMOE 8* | *BAMOE 9.2*
+| *Feature* | *BAMOE 8* | *BAMOE 9.2*
 
 | *Quarkus Version*
 | Quarkus 2.7.x
-| v9 is optimized for Quarkus - 3.20.1 (from 3.8)
+| Optimized for Quarkus 3.20.1
 
 | *Spring Boot Version*
 | Spring Boot 2.5.12
-| v9 is optimized for Spring Boot 3.4.6 (for Decisions and Rules)
+| Optimized for Spring Boot 3.4.6 (for Decisions and Rules)
 
 | *Runtime Integration*
 | Kogito extensions for Quarkus/Spring Boot
 | Native support for both Quarkus and Spring Boot
 
 | *Build Tooling*
-| Maven + Business Central UI
+| Maven CLI, Maven + Business Central UI
 | Maven CLI, Dev Services, Docker/K8s ready
 
 | *Configuration*
@@ -91,7 +91,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Uber-JAR, native image, or container
 |===
 
-== Configuration Changes of BAMOE 8 and BAMOE 9
+== Configuration comparison of BAMOE 8 and BAMOE 9.2
 
 |===
 | *Configuration Area* | *BAMOE 8* | *BAMOE 9.2* | *Migration Notes*
@@ -132,14 +132,14 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Migrate to CDI-based task handlers.
 
 | *Deployments*
-| Managed by Business Central; deploys to KIE Server via UI.
+| Managed by Business Central; Development: deploys to KIE Server manually or via UI; Production: deploys to KIE Server from CI/CD.
 | Build with `mvn package`; deploy as Uber-JAR or container (Docker/K8s).
 | Use Quarkus/Spring Boot-native deployment pipelines.
 
 | *Persistence*
 | Configured via `persistence.xml`.
 | Configured via `application.properties`;
-| Drop XML config; adopt Quarkus/Spring Boot-style persistence.
+| Migrate from XML-based configuration to Quarkus/Spring Boot-style persistence.
 
 | *Branch Management*
 | Git (JGit 5.x) via Business Central UI; VFS-based virtual Git.
@@ -147,7 +147,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Migrate to standard Git repositories and workflows.
 |===
 
-== Comparison of BAMOE 8 and BAMOE 9 Project Files
+== Project files comparison of BAMOE 8 and BAMOE 9
 
 |===
 | *File/Directory* | *BAMOE 8* | *BAMOE 9.2*
@@ -203,10 +203,10 @@ See xref:05-04-upgrading-individual-assets.adoc#wids[Work Item Definition] chapt
 | BAMOE supports custom persistence via Quarkus or Spring Boot configuration mechanisms.
 
 | *Test Scenario*
-| .scesim file typically placed under `src/test/resources` +
+| `.scesim` files are placed under `src/test/resources` +
 JUnit 4 support +
 Activator Annotation -- `@RunWith(org.drools.workbench.screens.scenariosimulation.backend.server.runner.ScenarioJunitActivator.class)`
-| Placed under `src/test/resources` +
+| `.scesim` files are placed under `src/test/resources` +
 JUnit 5 compatible +
 Activator Annotation -- `@TestScenarioActivator` +
 See xref:05-04-upgrading-individual-assets.adoc#scesim[Test Scenarios] chapter.

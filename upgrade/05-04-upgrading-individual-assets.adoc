@@ -24,21 +24,19 @@ In BAMOE v9, the BPMN editor no longer has access to the Java classes from your 
 
 Work Item Definitions are used together with Custom Work Item Handlers.
 
-==== Work Item Handlers (WIHs) Are Still Supported
+==== Work Item Handlers (WIHs) are still supported
 
 Custom Java classes can still be used to implement advanced logic in workflows. This remains the preferred approach for complex scenarios where fine-grained control is needed. For simpler use cases, BAMOE v9 can automatically generate a WIH when a Service Task is bound to a Java method. This automatic generation simplifies development and works transparently in most cases.
 
 For more information on implementing WIHs, refer to the xref:05-05-upgrading-custom-work-item-handlers.adoc[Work Item Handlers documentation].
 
-==== Work Item Definitions (WIDs) Still Work in BAMOE 9
+==== Work Item Definitions (WIDs) still Work in BAMOE 9
 
 WIDs continue to be used to describe the available WIHs to the BPMN editor. They allow the definition of custom nodes with associated icons, parameters, and results. The BPMN editor in BAMOE v9 can recognize and parse WIDs from your project just as it did in v8.
 
-==== What This Means for You
+If you are using BAMOE v9, you can continue using your existing WIDs without modification. For WIHs, please check xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading custom work item handlers] guide to see how to upgrade from v8. You can also take advantage of the new auto-generation capabilities for basic scenarios, while still writing custom Java handlers for advanced use cases.
 
-If you are using BAMOE v9, you can continue using your existing WIDs and WIHs without modification. You can also take advantage of the new auto-generation capabilities for basic scenarios, while still writing custom Java handlers for advanced use cases.
-
-=== Flexible Processes
+=== Flexible processes
 
 BAMOE v9 does not provide full support for Case Management (CMMN). Instead, it introduces a concept known as Flexible Processes, which emulate CMMN-like behavior using BPMN extensions.
 
@@ -86,7 +84,7 @@ To enable support for decision tables, ensure your project includes the followin
 
 == Test Scenarios (SCESIM) [[scesim]]
 
-=== Tooling Support
+=== Tooling support
 
 BAMOE v9 continues to support the execution of Test Scenarios via the Maven CLI, and no changes are required to the test files themselves when migrating from BAMOE v8. However, there are notable differences in tooling support and test execution behavior that you should be aware of.
 
@@ -96,7 +94,7 @@ Only the BAMOE Developer Tools for VS Code can be used to edit Test Scenarios in
 
 NOTE: Running DRL- and DMN-based Test Scenarios in the same Business Service project is not yet supported.
 
-=== JUnit Activator Migration
+=== JUnit activator migration
 
 The JUnit activator is typically located at `src/test/java/testscenario/ScenarioJunitActivatorTest.java`.
 
@@ -132,14 +130,15 @@ In BAMOE v9, form generation is supported exclusively through the BAMOE Develope
 
 NOTE: Complete forms generation is docummented in https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=code-form-generation-user-tasks[IBM Documentation].
 
-== Guided Assets [[guided-assets]]
+== Guided assets [[guided-assets]]
 
 Guided assets in BAMOE v8 were used primarily for rule modeling through graphical editors such as guided rules and guided decision tables. These assets are not supported in BAMOE v9, and there is no direct upgrade path for them.
 
-BAMOE v9 supports only DRL and XLS formats for rule definitions. Therefore, guided assets must be manually migrated to one of these supported formats. Depending on the editor used in BAMOE v8, you may have access to one of the following options:
+BAMOE v9 supports only DRL and XLS formats for rule definitions, and DMN for decisions. Therefore, guided assets must be manually migrated to one of these supported formats. Depending on the editor used in BAMOE v8, you may have access to one of the following options:
 
 * If the guided asset editor includes a Source tab, you can copy the DRL content and paste it into a new `.drl` file in your BAMOE v9 project.
 * If the editor provides a Convert to XLS button, you can use it to generate an `.xls` decision table, which can then be included in your BAMOE v9 Business Service project.
+* Alternatively, you can manually rewrite the logic in DRL, XLS, or DMN, depending on the nature of the decision and the compatibility of the logic.
 
 == DSL [[dsl]]
 

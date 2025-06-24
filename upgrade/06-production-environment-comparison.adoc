@@ -1,4 +1,4 @@
-= Production Environment Comparison
+= Production environment comparison
 
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
@@ -7,7 +7,7 @@ The shift from BAMOE v8 to v9 not only transforms the development experience but
 
 This section explores the key differences in production architecture, deployment models, runtime behavior, and operational tooling between BAMOE v8 and v9. Whether you're managing legacy environments or planning a migration, understanding these changes is essential for designing scalable, maintainable, and cloud-ready automation solutions.
 
-== Architecture Overview
+== Architecture overview
 
 === BAMOE 8
 
@@ -25,7 +25,7 @@ BAMOE v9 introduces a modular and cloud-native architecture that replaces the ce
 
 The BAMOE Management Console provides a lightweight, stateless web interface for interacting with the runtime environment. It connects to the Business Services and leverages the Data Index, Jobs Service, and User Tasks subsystems to retrieve and display information about process instances, user tasks, and jobs. The BAMOE Management Console is deployed as a container in a cloud environment, optionally using Helm Charts for convenience.
 
-The production environment may also include optional components such as a Database, an Identity Provider (IDP) for authentication, Apache Kafka for event-driven communication, and a Monitoring System (if using Data-Audit), integrated with Prometheus and Grafana for observability.
+The production environment may also include optional components such as a Database, an Identity Provider (IdP) for authentication, Apache Kafka for event-driven communication, and a Monitoring System (if using Data-Audit), integrated with Prometheus and Grafana for observability.
 
 This architecture supports flexible deployment models and aligns with modern container orchestration practices. Each Business Service is independently deployable and scalable, enabling a more maintainable and resilient production environment.
 
@@ -33,7 +33,7 @@ Please read https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-mana
 
 image::upgrade/v9-production-environment-bamoe.png[v9 arch]
 
-== Deployment & Runtime Model
+== Deployment & runtime model
 
 === BAMOE 8
 
@@ -64,7 +64,7 @@ Below table compares the differences between BAMOE v8 KIE Server and BAMOE v9 cl
 
 | *Deployment*
 | If KIE Server is integrated with business central, projects can be automatically packaged and deployed into KIE Server whereas when building projects outside Business Central users must KIE Server REST API to deploy into KIE Server.
-| Each Business Service project acts as microservice and can be deployed using standard deployment strategies for deploying Quarkus and Spring boot microservices.
+| Each Business Service project acts as microservice and can be deployed using standard deployment strategies for deploying Quarkus and Spring Boot microservices.
 
 | *API Management*
 | KIE Server exposes KIE Server REST APIs to interacts with deployed KIE containers and business assets like processes, tasks etc.
@@ -75,7 +75,7 @@ Below table compares the differences between BAMOE v8 KIE Server and BAMOE v9 cl
 | Use standard deployment strategies for deploying Quarkus and Spring Boot projects into Kubernetes/Openshift
 |===
 
-== Management Interfaces
+== Management interfaces
 
 Both BAMOE v8 and v9 provide tools to manage and monitor process instances, user tasks, and jobs running within Business Services. In BAMOE v8, these capabilities are integrated into Business Central, offering a unified interface for both authoring and runtime management. In contrast, BAMOE v9 separates these concerns, providing runtime management through the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-managing-live-workflows-using-bamoe-management-console[BAMOE Management Console], a lightweight web interface designed to interact with backend services such as the Data Index, Jobs Service, and User Tasks.
 
@@ -286,7 +286,7 @@ Users can select multiple jobs from jobs page and perform "`Cancel Selected`" ac
 | \
 |===
 
-== API Differences [[api-differences]]
+== API differences [[api-differences]]
 
 Both BAMOE v8 and v9 expose APIs to interact with business automation services, but the architecture and usage patterns differ significantly. In BAMOE v8, APIs are centralized and tied to the KIE Server, which manages containers and business assets. In BAMOE v9, APIs are decentralized and exposed directly by each Business Service, reflecting the shift to a microservice-based model.
 
@@ -348,7 +348,7 @@ The table below outlines the key differences in API structure, authentication, d
 | N/A
 |===
 
-== Monitoring & Observability
+== Monitoring & observability
 
 Both BAMOE v8 and v9 support monitoring of Business Services using Prometheus and Grafana. These tools enable users to collect, store, and visualize metrics related to business process execution and system performance. While the overall monitoring architecture remains similar across versions, there are important differences in how metrics are enabled, exposed, and integrated--especially in the context of microservice-based deployments in BAMOE v9.
 
@@ -358,7 +358,7 @@ The table below outlines the key differences between BAMOE v8 and BAMOE v9.2 in 
 | *Aspect* | *BAMOE 8* | *BAMOE 9.2*
 
 | *Enable/Disable metrics*
-| Prometheus extension can be enabled by setting `org.kie.prometheus.server.ext.disabled` to false when starting process server. If using BAMOE v8 on springboot, use `kieserver.prometheus.enabled=true` to enable prometheus.
+| Prometheus extension can be enabled by setting `org.kie.prometheus.server.ext.disabled` to false when starting process server. If using BAMOE v8 on Spring Boot, use `kieserver.prometheus.enabled=true` to enable prometheus.
 | BAMOE v9 provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. Users can disable specific metrics from being exported by using properties `kogito.monitoring.rule.useDefault=false, kogito.monitoring.process.useDefault=false, kogito.monitoring.interceptor.useDefault=false` See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business#_enabling_prometheus_metrics_monitoring_in_ibm_bamoe[Enabling Prometheus metrics monitoring in IBM BAMOE]
 
 | *REST Endpoint*
@@ -374,7 +374,7 @@ The table below outlines the key differences between BAMOE v8 and BAMOE v9.2 in 
 | Follow the same steps as BAMOE v8 openshift deployment but with changes in application properties to enable/disable metrics and changes in the endpoints. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business#_configuring_prometheus[Configuring Prometheus]
 |===
 
-== Standard Operating Environment Differences
+== Standard Operating Environment differences
 
 The Standard Operating Environment (SOE) for BAMOE has evolved significantly between v8 and v9.2. These changes reflect the shift toward a more cloud-native, containerized architecture in BAMOE v9, which impacts supported platforms, middleware, and system requirements.
 

@@ -18,7 +18,7 @@ BAMOE v9 replaces the `UserGroupCallback` mechanism with the `IdentityProvider` 
 
 The IdentityProvider interface provides methods such as `getIdentity()`, `getName()`, and `hasRole()`, and relies on the runtime's security context to resolve user identity and roles. This identity information can come from a JWT token or any other mechanism supported by the runtime.
 
-=== Behavior in Non-Secured Applications
+=== Behavior in non-secured applications
 
 For applications without OIDC enabled, user and group information can be passed directly via query parameters when interacting with user task endpoints. For example:
 
@@ -40,7 +40,7 @@ kogito.security.auth.enabled=false
 kogito.security.auth.impersonation.allowed-for-roles=managers
 ----
 
-=== Behavior in Secured Applications (OIDC Enabled)
+=== Behavior in secured applications (OIDC enabled)
 
 When OIDC is enabled and `kogito.security.auth.enabled=true`, user identity and roles are extracted from the bearer token provided in the Authorization header:
 
@@ -69,7 +69,7 @@ This ensures that identity resolution is consistent with the application's secur
 
 In BAMOE v8, task assignment was managed using the `AssignmentStrategy` mechanism, which allowed automatic allocation of user tasks based on predefined strategies. This was configured using the system property `org.jbpm.task.assignment.strategy`. If the strategy was not set, no automatic assignment was applied. The strategy name could also be passed as a data input to the user task.
 
-=== Assignment Strategies in BAMOE 8
+=== Assignment strategies in BAMOE 8
 
 BAMOE v8 supported several built-in strategies:
 
@@ -79,13 +79,13 @@ BAMOE v8 supported several built-in strategies:
 
 These strategies helped optimize task distribution based on workload, business logic, or fairness.
 
-=== Assignment Strategies in BAMOE 9
+=== Assignment strategies in BAMOE 9
 
 BAMOE v9 introduces a more flexible and extensible approach through the `UserTaskAssignmentStrategy` interface. Instead of relying on system properties and predefined strategies, developers can now implement custom logic tailored to specific business requirements.
 
 This interface is part of the Kogito runtime and integrates with the platform's security context to make informed assignment decisions.
 
-==== UserTaskAssignmentStrategy Interface
+==== UserTaskAssignmentStrategy interface
 
 The interface defines a single method, `computeAssignment`, which returns an optional user ID to whom the task should be assigned:
 
@@ -102,7 +102,7 @@ public interface UserTaskAssignmentStrategy {
 }
 ----
 
-==== Implementing a Custom Strategy
+==== Implementing a custom strategy
 
 To implement a custom assignment strategy, create a class that implements the `UserTaskAssignmentStrategy` interface. The logic inside `computeAssignment` can use task metadata, user roles, or any other contextual information.
 
