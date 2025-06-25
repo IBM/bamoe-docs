@@ -6,21 +6,22 @@ _Business Services_ are microservice Java applications built on top of Quarkus o
 
 Even though you can manually create everything from scratch, {PRODUCT_SHORT} provides an easier way to get started with pre-configured _Business Sevice_ projects–Accelerators.
 
-There are currently two available Accelerators to choose from:
+There are currently three available Accelerators to choose from:
 
 - **`Quarkus (DMN)`** - For _Business Services_ that will contain Decisions, Rules, or spreadsheet Decision Tables.
 - **`Quarkus (Full)`** - For _Business Services_ that will contain stateful Workflows in addition to Decisions, Rules, or spreadsheet Decision Tables.
-
-[NOTE]
-====
-Spring Boot is supported for Decisions, Rules, and spreadsheet Decision Tables services, however there is no Accelerator yet available for this framework. To get started with Spring Boot you can use https://github.com/IBM/bamoe-docs/tree/9.2.x/_code/docs/spring-boot/decisions/pom.xml[this sample pom.xml for Decisions.] or https://github.com/IBM/bamoe-docs/blob/9.2.x/_code/docs/spring-boot/rules/pom.xml[this sample pom.xml for Rules].
-====
+- **`Spring Boot (DMN)`** - For _Business Services_ that will contain Decisions, Rules, or spreadsheet Decision Tables.
 
 There are three options to use Accelerators to set up your project:
 
-* a. Create your Decisions and Workflows on {CANVAS} then apply an Accelerator.
-* b. Clone one of the Accelerators locally then create your Decisions and Workflows using {DEV_TOOLS}. 
-* c. (Advanced) Create a Java project manually, adding dependencies to the _Business Service_ project configuration file.
+* a. Create new Decisions and/or Workflows on {CANVAS} then apply an Accelerator.
+* b. Open a new or existing folder on VS Code with {DEV_TOOLS} installed, and apply an Accelerator.
+* c. (Advanced) Create a Java project manually, adding dependencies to the _Business Service_ project configuration file, using Accelerators as reference.
+
+[NOTE]
+====
+Configuring {CANVAS} and {DEV_TOOLS} with custom Accelerators is possible and encouraged, so new Business Services created in your organization follow standards and best practices crafted especially for your use-cases. Discover more on how to configure custom Accelerators on {CANVAS} and {DEV_TOOLS} at xref:../installation/canvas.adoc[Installing → {CANVAS}] and xref:../installation/developer-tools-for-vscode.adoc[Installing → {DEV_TOOLS}]
+====
 
 == a. Starting on {CANVAS}
 
@@ -34,43 +35,14 @@ If you want to continue developing on {DEV_TOOLS} after starting on {CANVAS}, yo
 
 Installing {DEV_TOOLS} is straighforward, an can be done directly in VS Code, simply follow xref:../installation/developer-tools-for-vscode.adoc[Installing → {DEV_TOOLS}].
 
-Unlike {CANVAS}, {DEV_TOOLS} does not currently provide any commands to create a new _Business Service_ project automatically, but using Git in a Terminal window is easy enough, since {PRODUCT_SHORT} Accelerators are publicly hosted on IBM's GitHub at the https://github.com/IBM/bamoe-canvas-quarkus-accelerator template repository, following the steps below will get your started:
+Since BAMOE 9.2.1, {DEV_TOOLS} provides commands to create a new _Business Service_ project more easily using Accelerators. The following steps will get you started:
 
-- Create a new folder in your preferred location and open it on VS Code.
-- Open a new Terminal window (`Terminal` → `New Terminal`)
-- Choose which Accelerator you want to start from and clone it:
+- Open a new or existing folder on VS Code.
+- _(optional)_ Create Business Automation assets, such as BPMN or DMN models.
+- Run the `BAMOE Developer Tools: Apply Accelerator` command.
+- Select which Accelerator you want to apply.
 
-[source,shell,subs="attributes"]
-----
-git clone {ACCELERATOR_REPO_LINK} -b {BOM_VERSION}-quarkus-dmn my-business-service-project
-----
-
-or
-
-[source,shell,subs="attributes"]
-----
-git clone {ACCELERATOR_REPO_LINK} -b {BOM_VERSION}-quarkus-full my-business-service-project
-----
-
-- Your _Business Service_ project on {PRODUCT_SHORT}, based on your Accelerator of choice will be ready for you in the `my-business-service-project` folder.
-
-- To unlink your newly created _Business Serivce_ project with the original Accelerator template repository, run
-
-[source,shell,subs="attributes"]
-----
-cd my-business-service-project && rm -rf .git && git init
-----
-
-- Your _Business Service_ project is now a fresh Git repository. You can create your first commit by running
-
-[source,shell,subs="attributes"]
-----
-git add . && git commit -m "First commit on my _Business Service_ project"
-----
-
-- In the `src/main/resources` folder, your can create or move Workflows (`.bpmn`), Decisions (`.dmn`), Rules (`.drl`), spreadsheet Decision Tables (`.xls` or `.xlsx`), or Test Scenario (`.scesim`) files.
-
-- Your _Business Service_ project is now ready to be developed!
+Your _Business Service_ project on {PRODUCT_SHORT}, based on your Accelerator of choice will be ready for you in the currently open folder and a new Git repository will be initiated for you if the currently open folder isn't one yet. Existing Business Automation assets will be moved to the correct locations, and existing modifications in your staging area will be kept, so you remain in control of your development flow.
 
 == c. (Advanced) Manually creating a Java project
 
