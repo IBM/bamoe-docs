@@ -38,7 +38,7 @@ minimal set of dependencies are:
 </dependency>
 ----
 
-* KIE JDBC Persistence Add-on for Quarkus: Enables persistence for the process engine with JDBC.
+* KIE JDBC Persistence Add-on for Quarkus: Enables persistence for the Workflow Engine with JDBC.
 
 [source,xml]
 ----
@@ -196,7 +196,7 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Oracle
 
-Additionally, if the _Business Service_ includes User Tasks or Job Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
 
 * META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
 * META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
@@ -307,7 +307,7 @@ It is possible to disable the default behavior and make the operation no longer 
 
 |`kogito.transactionEnabled` |Globally sets transactions as enabled for the entire application |Boolean |true
 
-|`kogito.processes.transactionEnabled` |Sets the transactions as enabled for the general Process API layer, overriding global behavior |Boolean |true
+|`kogito.processes.transactionEnabled` |Sets the transactions as enabled for the Process API layer, overriding global behavior |Boolean |true
 
 |`kogito.usertasks.transactionEnabled`|Sets the transactions as enabled for the new User Tasks API layer, overriding global behavior |Boolean |true
 |===
@@ -328,7 +328,7 @@ kogito.persistence.optimistic.lock=true
 
 [#multi-node]
 == Implementing multi-pod process services in a single database
-When running multiple instances of a process service on multiple pods in the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database and utimately the failure of the service. 
+When running multiple instances of a process service on multiple pods in the compact architecture, you must assign a unique Jobs Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Jobs Service and connection to the shared database and utimately the failure of the service. 
 
 NOTE: Jobs will only execute on the instance where they were originally scheduled.
 
