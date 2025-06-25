@@ -54,61 +54,61 @@ The pseudo-timeline below shows the safest strategy for evolving your Workflow m
 
 There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy. You can also use the 
 
-[#migration-PIM]
-== Migrating active process instances using the Process Instance Migration API
+// [#migration-PIM]
+// == Migrating active process instances using the Process Instance Migration API
 
-The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
+// The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
-The advantage of using this utility is that it:
+// The advantage of using this utility is that it:
 
-* _Preserves state_: During migration, process or task variables remain unchanged.
+// * _Preserves state_: During migration, process or task variables remain unchanged.
 
-* _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
+// * _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
 
-* _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
+// * _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
 
-* _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
+// * _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
 
-Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
+// Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
 
-Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
+// Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
 
-`POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
+// `POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
 
-`POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
+// `POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
 
-=== Starting and stopping processes
-You can use the following `curl` command to start a process:
+// === Starting and stopping processes
+// You can use the following `curl` command to start a process:
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
-----
+// [source,shell]
+// ----
+// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
+// ----
 
-You can use the following `curl` command to stop a process:
+// You can use the following `curl` command to stop a process:
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
-----
+// [source,shell]
+// ----
+// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
+// ----
 
-=== Example
-Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
+// === Example
+// Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
-{
-  "targetProcessId": <targetProcessId>
-  "targetProcessVersion": <targetProcessVersion>
-}    
-----
-Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
+// [source,shell]
+// ----
+// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
+// {
+//   "targetProcessId": <targetProcessId>
+//   "targetProcessVersion": <targetProcessVersion>
+// }    
+// ----
+// Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
 
-[source,shell]
-----
-{
-   "message":"All instances migrated",
-   "numberOfProcessInstanceMigrated":1
-}
-----
+// [source,shell]
+// ----
+// {
+//    "message":"All instances migrated",
+//    "numberOfProcessInstanceMigrated":1
+// }
+// ----
