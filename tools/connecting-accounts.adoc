@@ -18,3 +18,14 @@ The account linked to a repository can be changed at any time using the dropdown
 image::tools/image17.png[]
 
 The figure shows two connected accounts: one from from GitHub and another from a Kubernetes cluster, respectively.
+
+
+== Re-authentication Support in BAMOE Canvas
+
+BAMOE Canvas now supports seamless renewal of authentication sessions for both cloud and Git providers. The system introduces a **Re-authenticate** button for sessions that become invalid, allowing users to renew credentials without re-entering all configuration details manually.
+
+The re-authentication flow enables users to update expired or invalid authentication sessions efficiently. When a session becomes invalid due to token expiration or revocation, the system detects the invalid state, displays the **Re-authenticate** button next to the affected session, and launches a modal pre-filled with the session’s existing provider and account information. Users are prompted to enter a new valid token, which the system validates before updating the session in place. All session details except the token are pre-filled during this process.
+
+The user interface now integrates the re-authentication option across key areas of BAMOE Canvas where authentication sessions are utilized. In the **My Profile** section, users can view and manage all connected accounts, including re-authenticating any invalid ones. Within the Share Modal, the system prompts users to re-authenticate if the Git provider session is invalid when attempting to share resources. For Dev Deployments, cloud provider sessions now support re-authentication directly from the deployment interface.
+
+The system also includes improvements in session management. It tracks the validity of each authentication session in real-time and automatically marks sessions as invalid when tokens expire or are revoked.
