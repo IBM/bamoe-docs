@@ -51,11 +51,7 @@ See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
 
 == Step 3: Upgrade your _Business Service(s)_ project(s)
 
-_Business Service(s)_ project(s) can be upgraded in two ways, by:
-
-* Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
-
-* Creating a _Business Service_ project from scratch and moving your existing assets to it.
+_Business Service(s)_ project(s) can be upgraded by changing its Maven dependencies and configuration files.  
 
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}:
 
@@ -64,8 +60,8 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
 
-[#step-3a]
-== Step 3a: Upgrade _Business Service(s)_ project(s) on {PRODUCT_SHORT} version {VERSION_91X}
+[#step-3]
+== Step 3: Upgrade _Business Service(s)_ project(s) on {PRODUCT_SHORT} version {VERSION_91X}
 
 Once your {PRODUCT_SHORT} development environment installation is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_920} to {PRODUCT_SHORT} version {VERSION}.
 
@@ -137,37 +133,10 @@ If your _Busines Service_ project was using _org.jbpm:jbpm-quarkus-devui_ and yo
  + bamoe.devui.users.<username>.groups=<comma separated list of groups>
 ----
 
-
 [NOTE]
 ====
 Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.20[Quarkus 3.20 LTS migration guide] for any other change related to Quarkus.
 ====
-
-[#step-3b]
-== Step 3b: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
-
-If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
-
-For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
-
-The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
-
-Examples of supported business automation assets are:
-
-- Decision Model & Notation (DMN) decisions (`.dmn`)
-- Drools Rule Language (DRL) rules (`.drl`)
-- Business Process Model & Notation (BPMN) workflows (`.bpmn`)
-- Spreadsheet Decision Table files (`.xls` or `.xlsx`)
-- Standard Properties files (`.properties`)
-- Test Scenario files (`.scesim`)
-
-Copy all your assets from your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91X} to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
-
-[NOTE]
-====
-The proper folder for Test Scenario files is `src/test/resources`.
-====
-
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 . To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
@@ -193,7 +162,7 @@ Now you can start using your _Business Service_ project on {PRODUCT_SHORT} versi
 
 == Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
 
-After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
 
 It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
 
