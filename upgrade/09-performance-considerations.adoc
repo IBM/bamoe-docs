@@ -8,11 +8,15 @@ include::../styles/images.adoc[]
 Native build of a java application relies on static analysis of java code. While compilers have done huge improvements over the years, they of course could not foresee what will be the actual usage of the application at runtime, which, on the other side, is one of the main feature of the Java JIT. So, on one side the native images have a reduced size and extremely faster start-time compared with traditional jar, but on the other side, in the "long" term, traditional java compiled applications could achieve better performances, due to on-the-fly optimization.
 So, as a rule of thumb, native images are good candidates for environments where extremely fast and dynamic adaptation of running instances is required. On the other side, for more stable and long-lived kind of setup, actual performances of both solutions should be evaluated with ad-hoc stress tests to identify the best solution.
 
-== Recommendations to improve performance
+== Decision engine
 
-=== Rule engine
+The Decision Engine in BAMOE v9 has been enhanced to optimize decision-making processes and deliver improved performance compared to BAMOE v8.
 
-==== Rule authoring (more detailed explanation could be found from https://kie.apache.org/docs/10.0.x/drools/drools/rule-engine/index.html#performance-tuning-rule-engine-ref_rule-engine[official documentation])
+If you encounter any performance degradations or unexpected behavior after upgrading, please file a support ticket with relevant details so our team can investigate promptly.
+
+== Rule engine recommendations to improve performance
+
+=== Rule authoring
 
 . Don't use accessors with side-effects:
 +
@@ -214,14 +218,18 @@ a. LambdaIntrospector.methodFingerprintsMap cache is used in executable model bu
 System property `drools.betaNodeRangeIndexEnabled=true`
 
 
-==== Troubleshooting memory leak (https://blog.kie.org/2022/09/drools-trouble-shooting-memory-issues.html)
+More information can be found on the https://kie.apache.org/docs/10.0.x/drools/drools/rule-engine/index.html#performance-tuning-rule-engine-ref_rule-engine[community documentation].
+
+=== Troubleshooting memory leak
 
 . capture heap dump `jmap -dump:format=b,file=heap.bin [JAVA_PID]` 
 
 . analyze it for suspicious objects (e.g. unexpected amount of StatefulKnowlegeSessionImpl) 
 . try to identify reason for such amount
 
-==== Troubleshooting OutOfMemory error
+More information can be found on https://blog.kie.org/2022/09/drools-trouble-shooting-memory-issues.html[Drools trouble shooting memory issues].
+
+=== Troubleshooting OutOfMemory error
 
 . set the `-XX:+HeapDumpOnOutOfMemoryError` flags, to have memory heap dumped when it occurs 
 
@@ -229,7 +237,7 @@ System property `drools.betaNodeRangeIndexEnabled=true`
 
 . verify if rules could be rewritten to avoid such consumption
 
-==== Troubleshooting Rules bottle-neck (https://blog.kie.org/2021/07/how-to-find-a-bottle-neck-in-your-rules-for-performance-analysis.html)
+=== Troubleshooting Rules bottle-neck
 
 NOTE: DO NOT DO THAT IN PRODUCTION ENVIRONMENT: THIS PROCEDURE IS MEANT TO BE EXECUTED IN TESTING ENVIRONMENT 
 
@@ -393,7 +401,7 @@ when
 result.size() = 100
 ----
 
-===== ReteDumper usage
+==== ReteDumper usage
 
 Inside a "java-embedded" application, instantiate and execute programmatically `ReteDumper` is easy, since kiebase instance is at disposal; e.g.:
 
@@ -482,3 +490,5 @@ public class DumperEntryPoint {
 . compile the application with `mvn clean install` (or similar, provided the `test` phase is invoked)
 
 . generated rete and associated rules will be printed in console.
+
+More information can be found on https://blog.kie.org/2021/07/how-to-find-a-bottle-neck-in-your-rules-for-performance-analysis.html[How to find a bottle neck in your rules for performance analysis].
