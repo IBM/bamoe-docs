@@ -10,17 +10,17 @@ This section describes the steps you will need to take to upgrade _Business Serv
 
 This guide will walk you through upgrading your:
 
-* {PRODUCT_SHORT} development environment installation with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+* {PRODUCT_SHORT} development environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
 
 * _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
+* {PRODUCT_SHORT} production environment with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
 
 == Step 1: Download product archives
 
 Start by downloading the product archives from either {PRODUCT_FIX_CENTRAL_PAGE_LINK}[IBM Fix Central] which requires an active support subscription to {PRODUCT}, {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. For more information see https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document]. 
 
-== Step 2: Upgrade your {PRODUCT_SHORT} development environment installation
+== Step 2: Upgrade your {PRODUCT_SHORT} development environment
 
 When you upgrade your {PRODUCT_SHORT} development environment, you must upgrade {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}. 
 
@@ -51,34 +51,21 @@ See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
 
 == Step 3: Upgrade your _Business Service(s)_ project(s)
 
-_Business Service(s)_ project(s) can be upgraded in two ways, by:
-
-* Updating an existing _Business Service_ project with its artifacts by changing the Maven dependencies. 
-
-* Creating a _Business Service_ project from scratch and moving your existing assets to it.
+_Business Service(s)_ project(s) can be upgraded by changing its Maven dependencies and configuration files.  
 
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}:
 
 - https://openjdk.org[JDK 17] is installed.
 - https://maven.apache.org[Apache Maven 3.9.6] is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
-- Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
+- Upgraded {PRODUCT_SHORT} development environment with {MVN_REPO} @ {IMAGE_VERSION}
 
-[#step-3a]
-== Step 3a: Upgrade _Business Service(s)_ project(s) on {PRODUCT_SHORT} version {VERSION_91X}
-
-Once your {PRODUCT_SHORT} development environment installation is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_920} to {PRODUCT_SHORT} version {VERSION}.
+Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_920} to {PRODUCT_SHORT} version {VERSION}.
 
 The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
-[WARNING]
-====
-If you come across some difficulties when trying to upgrade your existing _Business Service_ projects we recommend creating a new project following xref:#step-3b[Step 3b: Upgrade Business Service projects on {PRODUCT_SHORT} versions {VERSION_90X} or {VERSION_91X}].
-====
-
 [start=1]
 . Upgrade the Quarkus version in the project POM file to the currently supported version `3.20`:
-
 
 [start=2]
 . Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION}:
@@ -95,54 +82,66 @@ If you come across some difficulties when trying to upgrade your existing _Busin
 ----
 
 [start=3]
+. If you're upgrading a Business Service project containing stateful Workflows, upgrade the Quarkus Dev UI to its new `artifactId`.
++
+[source,diff,subs="+attributes"]
+----
+<dependency>
+-  <groupId>org.jbpm</groupId>
+-  <artifactId>jbpm-quarkus-devui</artifactId>
++  <groupId>com.ibm.bamoe</groupId>
++  <artifactId>bamoe-quarkus-devui</artifactId>
+</dependency>
+----
+
+[start=4]
+. If you are using the {MANAGEMENT_CONSOLE} and running your _Business Services_ with the `quarkus-oidc-proxy` extension you will need to upgrade the extension from version `0.1.2` or `0.1.3` to version `0.2.2` in your POM file. This is because of the Quarkus version upgrade from `3.15` to `3.20` (see xref:../runtime-services-modeling/security.adoc[Securing __Business Service API__ endpoints])
++
+[source,diff,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.quarkiverse.oidc-proxy</groupId>
+  <artifactId>quarkus-oidc-proxy</artifactId>
+-  <version>0.1.2</version>
+-  <version>0.1.3</version>
++  <version>0.2.2</version>
+</dependency>
+----
+
+
+[start=5]
 . Update the `application.properties` file.
 +
 {PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
-
++
 +
 [source,diff]
 ----
- +++ quarkus.devservices.enabled=false
+ + quarkus.devservices.enabled=false
 ----
-If your project uses _io.quarkus:quarkus-oidc_, you may also need to add the following line:
-
++
+If your _Business Service_ project uses _io.quarkus:quarkus-oidc_, you may also need to add the following line:
++
 +
 [source,diff]
 ----
- +++ quarkus.smallrye-openapi.auto-add-bad-request-response=false
+ + quarkus.smallrye-openapi.auto-add-bad-request-response=false
 ----
 This fixes a known limitation with auto-generated OpenAPI specifications while using the _io.quarkus:quarkus-oidc_ extension.
 
-[NOTE]
-====
-Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
-====
-
-[#step-3b]
-== Step 3b: Creating a _Business Service_ project on {PRODUCT_SHORT} version {VERSION} from scratch
-
-If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
-
-For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
-
-The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
-
-Examples of supported business automation assets are:
-
-- Decision Model & Notation (DMN) decisions (`.dmn`)
-- Drools Rule Language (DRL) rules (`.drl`)
-- Business Process Modeling & Notation (BPMN) workflows (`.bpmn`)
-- Spreadsheet Decision Table files (`.xls` or `.xlsx`)
-- Standard Properties files (`.properties`)
-- Test Scenario files (`.scesim`)
-
-Copy all your assets from your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_91X} to the respective folders on the new project on {PRODUCT_SHORT} version {VERSION}. If you have custom Java code or any other type of file in your _Business Service_ project, move them to the same location as you had before, following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+[start=6]
+If your _Busines Service_ project was using _org.jbpm:jbpm-quarkus-devui_ and you upgraded it to _com.ibm.bamoe:bamoe-quarkus-devui_, you also need to update its configuration:
++
+[source,diff]
+----
+ - jbpm.devui.users.<username>.groups=<comma separated list of groups>
+ + bamoe.devui.users.<username>.groups=<comma separated list of groups>
+----
 
 [NOTE]
 ====
-The proper folder for Test Scenario files is `src/test/resources`.
+Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.20[Quarkus 3.20 LTS migration guide] for any other change related to Quarkus.
 ====
-
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 . To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
@@ -166,9 +165,9 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
-== Step 5: Upgrade your {PRODUCT_SHORT} production environment installation
+== Step 5: Upgrade your {PRODUCT_SHORT} production environment
 
-After upgrading your _Business Services_ source code (Steps 3a or 3b), you need to upgrade {MANAGEMENT_CONSOLE} before deploying a new version of the upgraded _Business Services_.
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade {MANAGEMENT_CONSOLE} and your stateful Workflows database before deploying a new version of the upgraded _Business Services_.
 
 It is recommended that you use the https://docs.openshift.com/container-platform/4.16/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
 
@@ -176,20 +175,18 @@ If you are getting started with stateful Workflows, follow xref:../installation/
 
 Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
 
-If you are using the {MANAGEMENT_CONSOLE} and running your __Business Services__ with the `quarkus-oidc-proxy` extension you will need to upgrade the extension from version `0.1.2` or `0.1.3` to version `0.2.2` in your POM file. This is because of the Quarkus version upgrade from `3.15` to `3.20` (see xref:../runtime-services-modeling/security.adoc[Securing __Business Service API__ endpoints])
-
 [#migrate-stateful-workflow-db]
-=== Upgrading your stateful workflow database
+=== Upgrading your stateful Workflow database(s)
 
-You can upgrade the database used by Business Services that run stateful workflows in BAMOE from version 9.2.0 to 9.2.1. Perform the upgrade using the database migration scripts included in the `bamoe-9.2.1-db-utils.zip` archive.
+You can upgrade your database(s) used by _Business Services_ that run stateful workflows in BAMOE from version 9.2.0 to 9.2.1. Perform the upgrade using the database migration scripts included in the `bamoe-9.2.1-db-utils.zip` archive.
 
-The archive provides scripts named `from--9.2.0--to--9.2.1.sql` for each subsystem in a Business Service that uses the Compact Architecture. These subsystems include Data-Index, Data-Audit, Jobs Service, User Tasks, and Runtime Persistence.
+The archive provides scripts named `from--9.2.0--to--9.2.1.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture. These subsystems are Data-Index, Data-Audit, Jobs Service, User Tasks, and Runtime Persistence.
 
-Before you begin, make sure you upgrade both the services and the database together. Business Services running BAMOE 9.2.0 does not work with a database that you have already migrated to BAMOE 9.2.1.
+Before you begin, make sure you upgrade your _Business Services_ and your database(s) together. _Business Services_ running BAMOE 9.2.0 will not work with a database that you have already migrated to BAMOE 9.2.1.
 
 To upgrade safely:
 
-* Back up your PostgreSQL and MS SQL database
+* Back up your PostgreSQL or MS SQL Server database
 
 * Test the migration in a staging environment
 
@@ -199,6 +196,6 @@ To upgrade safely:
 
 * Verify that all services function correctly after the upgrade
 
-Avoid using KIE Flyway for automatic schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
+Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
 
 For more information, see xref:../runtime-services-modeling/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].

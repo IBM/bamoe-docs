@@ -106,18 +106,18 @@ If you come across some difficulties when trying to upgrade your existing _Busin
 [start=3]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+{PRODUCT_SHORT} version {VERSION} does not fully support Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
 
 +
 [source,diff]
 ----
- +++ quarkus.devservices.enabled=false
+ + quarkus.devservices.enabled=false
 ----
 
 
 [NOTE]
 ====
-Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change related to Quarkus.
 ====
 
 [#step-3b]
@@ -133,7 +133,7 @@ Examples of supported business automation assets are:
 
 - Decision Model & Notation (DMN) decisions (`.dmn`)
 - Drools Rule Language (DRL) rules (`.drl`)
-- Business Process Modeling & Notation (BPMN) workflows (`.bpmn`)
+- Business Process Model & Notation (BPMN) workflows (`.bpmn`)
 - Spreadsheet Decision Table files (`.xls` or `.xlsx`)
 - Standard Properties files (`.properties`)
 - Test Scenario files (`.scesim`)
@@ -181,11 +181,11 @@ Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you
 [id="migrate-tech-preview"]
 == Upgrading from {PRODUCT_SHORT} version {VERSION_911} technology preview for stateful Workflows
 
-In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
+In the {VERSION_911} technology preview the Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
 
 * The new User Tasks API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID` is the key and most of the time it is the only actor to operate with the new API. 
 +
-In version {VERSION_911}, the General Process API entrypoints are based on the following pattern:
+In version {VERSION_911}, the Process API entrypoints are based on the following pattern:
 +
 `http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +
@@ -195,7 +195,7 @@ In version {VERSION} the User Task API entrypoints are based on the following pa
 
 * The Task ID used in the User Tasks is not the same ID required in the Process API. The reason for this behavior is that the new API relies on a new subsystem. The subsystem base has its own IDs, that are not recognized by the Process API. This is an important point to understand before you start upgrading to the new API. 
 +
-For example the `<task-instance-id>` referenced in the General Process API call:
+For example the `<task-instance-id>` referenced in the Process API call:
 +
 `http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +

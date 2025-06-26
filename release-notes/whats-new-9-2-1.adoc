@@ -3,90 +3,93 @@ include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 
-This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VERSION}. Highlights include new integrations with Gitlab and Bit Bucket, a new BPMN editor available as a technology preview and improvements to stateful Workflow management of SLAs and managing different workflow execution scenarios. 
+This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VERSION}. Highlights include new integrations with GitLab and Bitbucket (including Bitbucket Data Center), a new BPMN Editor available as a Technology Preview, a more capable Management Console optimized for robust Business Automation solutions composed by many _Business Services_, and improvements to stateful Workflow management of SLAs and different workflow execution scenarios. 
 
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
 
-* Quarkus - 3.20
-* Red Hat Enterprise Linux (RHEL) 9.6
-* PostgreSQL - 17.x
-* (New!) Oracle 23ai _(for Workflow runtime)_
+* Quarkus - 3.20 LTS _(from 3.15 LTS)_
+* OpenShift Container Platform - 4.18 _(4.16 still supported)_
+* PostgreSQL - 17.x _(16.8 still supported)_
+* (New!) Oracle 23ai _(for Workflow Runtime)_
+* Red Hat Enterprise Linux (RHEL) 9.6 _(9.4 still supported)_
+
 
 More information in xref:supported-environments.adoc[Supported Environments].
 
 == Upgrading to {VERSION}
 The Upgrade section of the documentation has been expanded to cover the supported upgrade scenarios for {PRODUCT_SHORT} {VERSION} which now includes two new scenarios:
 
-* (New!) the key changes and the upgrade process between {VERSION_80X} projects and applications. xref:../upgrade/upgrading-80x-921.adoc[Learn more...]
+* (New!) the key changes and the upgrade process between {VERSION_80X} projects and applications into {VERSION_92X}. xref:../upgrade/upgrading-80x-921.adoc[Learn more...]
 
 * the upgrade process from {VERSION_91X} and {VERSION_92X}. xref:../upgrade/upgrading-91x-92x.adoc[Learn more...]
 
 * (New!) the upgrade process from {VERSION_920} and {VERSION_921}. xref:../upgrade/upgrading-920-921.adoc[Learn more...]
 
 
-== Technology preview - New BPMN Editor
-A new BPMN Editor is available in {CANVAS}, {DEV_TOOLS} and as a standalone Javascript component. This editor...
-xref:../workflow/authoring-workflows-techpreview.adoc[Learn more...]
+== BPMN Editor (Technology Preview)
+A new BPMN Editor is available in {CANVAS}, {DEV_TOOLS} and as a standalone JavaScript library. This new BPMN Editor continues the efforts towards a modernized technology stack based on React and newer versions of PatternFly, and includes faster startup times for big BPMN models, a new dedicated "Correlations" screen for modeling event-driven Workflows, and UI elements and UX that goes hand-in-hand with existing DMN and Test Scenario Editors. xref:../workflow/authoring-workflows-techpreview.adoc[Learn more...]
 
-== Integration of Canvas with GitLab and Bitbucket Data Center
-You can now enable {CANVAS} users to work with GitLab by setting it up through an optional environmental variable `KIE_SANDBOX_AUTH_PROVIDERS`. xref:../installation/canvas.adoc#canvas-gitrepo-config[Learn more...]
 
-Information on using general Git functionality in {CANVAS} is available in xref:../tools/working-with-git.adoc[Canvas]
+== GitLab, Bitbucket, and Bitbucket Data Center integrations available for {CANVAS}
+You can now enable {CANVAS} users to work with GitLab, Bitbucket and Bitbucket Data Center by setting it up through an optional environmental variable `KIE_SANDBOX_AUTH_PROVIDERS`. xref:../installation/canvas.adoc#canvas-gitrepo-config[Learn more...]
 
-== Accelerators available as commands in {DEV_TOOLS}
-Accelerators are now available as commands in {DEV_TOOLS} which makes it easier to create new projects and configure your own accelerators
+Information on using general Git functionality in {CANVAS} is available in xref:../tools/working-with-git.adoc[Canvas ]
+
+== Accelerators now available as commands in {DEV_TOOLS}
+Accelerators are now available as commands in {DEV_TOOLS}, making it easier to create new _Business Service_ projects from empty folders or plain business automations assets. Configuring custom Accelerators is also possible using the built-in Settings mechanism directly on VS Code.
 xref:../getting-started/project-setup.adoc[Learn more...]
 
 
-== Renew authentication to cloud and Git providers in {CANVAS}
-Users can now renew expired AuthSessions without re-entering all details manually. xref:../tools/connecting-accounts.adoc[Learn more...]
+== Spring Boot (DMN) Accelerator now available in {CANVAS} and {DEV_TOOLS}
+A new Accelerator for getting started with Spring Boot-based _Business Service_ projects focused on Decisions and Rules is now available, allowing you to instantly transform empty folders or draft DMN models into executable projects. xref:../getting-started/project-setup.adoc[Learn more...]
 
-== Enable authentication to a private repository in {CANVAS}
+== Accelerators hosted in private repositoties now available in {CANVAS}
+You can now configure your {CANVAS} installation to point to custom Accelerators hosted in private repositories and enable {CANVAS} to athenticate and access them. Configuring custom Accelerators allows your _Business Service_ projects to be created and developed with your company standards and practices and to enable development in an air-gapped environment. xref:../installation/canvas.adoc[Learn more...]
 
-You can now configure your {CANVAS} installation to point to a custom accelerator and enable {CANVAS} to athenticate and access a private repository. There are two main reasons to do this: to align all __Business Service__ projects developed with your company standards and practices, or to enable development in an air gapped environment. A custom project accelerator can now be stored in a private Git repository.
 
-xref:../installation/canvas.adoc[Learn more...]
+== Live validation messages now available for BPMN and DMN models on {DEV_TOOLS}
+When editing BPMN and DMN models on VS Code, live validation messages will appear under the "Problems" tab, allowing you to instantly fix mistakes and anticipate fixes during development. xref:../tools/developer-tools-for-vscode.adoc[Learn more...]
 
-== Static file validation
 
-You can use the feature static file validation which is available in {DEV_TOOLS}. It offers you the real-time validation. xref:../tools/developer-tools-for-vscode.adoc[Learn more...]
+== Federeated, pre-configured connected _Business Services_, Overview screen, and more capable tables and filters available on {MANAGEMENT_CONSOLE}
+* Pre-configured connected _Business Services_ bundled with the Management Console deployment.
+* Listing Process Definitions and creating new Process Instances.
+* Listing Process Instances, Tasks, and Jobs from all connected _Business Services_ simultaneously.
+* Viewing a dashboard with a basic summary of all Process Instances, grouped by the Process Definition.
+* Improved filtering and search capabilities to manage large numbers of processes.
+* Improved visualization of Process Instances, Tasks, and Jobs, adding new columns.
+* Ability to view the Process Definition diagram in certain contexts. 
+* Additional Jobs actions such as retry failed Jobs, changing inputs before retry.
 
-== Improved support for Decision Services in multiple DRDs in the DMN Editor
-The DMN editor now enables you to model your decisions in multiple Decision Requirement Diagrams (DRDs), managing them as a single underlying Decision Requirements Graph (DRG). This enables modelers to break down complex decision logic into manageable, focused views. xref:../editing/authoring-decisions.html[Learn more...]
+xref:../runtime-services-modeling/consoles.adoc[Learn more...]
 
-== Enhancements for Workflow engine and runtime
-The following new functionality is available in the Workflow engine and runtime in {VERSION}.
 
-=== Improved handling for Process instance retrigger operations in Workflow Engine
+== Enhancements for Workflow Engine and Runtime
+The following new functionality is available in the Workflow Engine and Runtime in {VERSION}.
 
-If a node instance fails in the middle of a process instance workflow and the error details are not available, it may impact your ability to retrigger the node and mark the process instance as successful. The following changes have been made to the Data Index GraphQL API as a consequence:
+=== Oracle database support for stateful Workflows
+You can now use Oracle as persistence for Workflows in your _Business Services_, expading your possibilites when choosing the right persistence layer for your deployments.
+xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Learn more...]
+
+=== Case Management scenarios implemented through Flexible Processes
+You can now use BPMN extensions to provide Case Management functionality through __Flexible Processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. Ad-hoc tasks refer to tasks that can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. xref:../workflow/authoring-workflows.adoc#case-management[Learn more...]
+
+=== Process Instance retrigger operations improved
+If a node instance fails in the middle of a process instance and the error details are not available, it may impact your ability to retrigger the node and mark the process instance as successful. The following changes have been made to the Data-Index GraphQL API as a consequence:
 
 The NodeInstance GraphQL interface now has `Retrigger` and `errorMessage` properties, enabling you to identify retriggered nodes and view associated error messages.
 
 The `nodeInstanceId` has been added to the `ProcessInstance` GraphQL `error` property, providing a direct reference to the node that caused the error.
 
-A new event state update event is now fired when a retrigger operation is performed on a process instance. This event sets the `ProcessInstance` GraphQL `state` property to `ACTIVE` and clears the `error` property, ensuring that the process state is accurately reflected in the Data Index.
+A new event state update event is now fired when a retrigger operation is performed on a process instance. This event sets the `ProcessInstance` GraphQL `state` property to `ACTIVE` and clears the `error` property, ensuring that the process state is accurately reflected in the Data-Index.
 
 xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
-=== Case management scenarios implemented through flexible processes
-You can now use BPMN extensions to provide case management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. Ad-hoc tasks refer to tasks that can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. xref:../workflow/authoring-workflows.adoc#case-management[Learn more...]
-
-=== Guidance on implementing multi-pod Process Services in a single database
-When running multiple instances of a process service on multiple pods using the compact architecture, you must assign a unique Job Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Job Service and connection to the shared database. 
-
-
-xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#multi-node[Learn more...]
-
-=== Oracle database support for stateful workflows
-You can now use Oracle persistence for workflows in your _Business Service_. 
-xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Learn more...]
-
-=== Querying and rescheduling SLAs and Jobs in the Workflow Runtime
+=== Querying and rescheduling SLAs and Jobs
 The ProcessInstance GraphQL interface has a new timers field that enables you to set timers on specific node instances within a process instance. xref:../workflow/data-index-graphql-api.adoc[Learn more...]
 
-There are two new endpoints in the Process Instance management API that enable you to retrieve the active times associated with a given process or node instance: 
+There are two new endpoints in the Process Management API that enable you to retrieve the active timers associated with a given process or node instance:
 
 * `/management/processes/{processId}/instances/{processInstanceId}/timers`
 
@@ -94,36 +97,31 @@ There are two new endpoints in the Process Instance management API that enable y
 
 xref:../workflow/management-apis.adoc[Learn more...]
 
-=== Improved guidance for workflow evolution
-You may need to move process instances to a different server, update their process definition, or take them offline for maintenance without affecting the business logic. The Process Instance Migration Service enables you to to migrate running process instances from one deployment version to another. xref:../runtime-services-modeling/services-deployment.adoc#migration-PIM[Learn more...]
+=== Documented guidance on deploying multi-pod _Business Services_ containing stateful Workflows connected to single database
+When running multiple instances of a _Business Service_ containing stateful Workflows on multiple pods using the compact architecture, assigning a unique Jobs Service Management ID to each instance allows you to horizontally scale your _Business Service_ deployments, effectivelly increasing throughput and response times. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#multi-node[Learn more...]
 
-=== Optimistic locking for multithreading in a business service using workflow
+// === Documented Process Instance Migration (PIM) usage based on Process Management API
+// You can now move process instances to newer versions of your Workflows, whenever new Process Definitions are deployed, allowing for process instances on waiting states to be updated to newer sequence flows, policies, and regulations that might only be covered in newer versions of your business processes. xref:../runtime-services-modeling/services-deployment.adoc#migration-PIM[Learn more...]
 
-In an environment with multithreaded access to a __Business Service__ the workflow engine needs to ensure proper state of the runtime data. A new optimistic locking property has been added to manage concurrent access of database entities, avoiding race conditions. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#multithreading[Learn more...]
+=== Optimistic locking for multithreading in _Business Services_ containing stateful Workflows
+In an environment with multithreaded access to a _Business Service_ the Workflow Engine needs to ensure proper state of the runtime data. A new optimistic locking property has been added to manage concurrent access of database entities, avoiding race conditions, thus improving reliability and resilience of your _Business Services_ containing stateful Workflows. xref:../workflow/configuring-persistence-for-stateful-workflows.adoc#multithreading[Learn more...]
  
-== New Test Scenario Activator class based on JUnit 5 
-
-A new Test Scenario (*.scesim) Activator class (`@TestScenarioActivator`) based on JUnit 5 can now be used, replacing `org.kogito.scenariosimulation.runner.KogitoJunitActivator.class`. xref:../editing/authoring-scesim.adoc[Learn more...]
 
 
-== Import data types from Java classes in DMN Editor
+== Authentication renewal now available to Cloud and Git providers in {CANVAS}
+You can now renew expired authentication tokens for connected accounts without re-entering all details manually and having to update individual projects after re-authenticating, saving you time whenever authentication tokens expire. xref:../tools/connecting-accounts.adoc[Learn more...]
 
-You can now import Java classes as data types in the DMN Editor in {DEV_TOOLS} providing similar functionality to that which is available in the DMN editor (Classic). xref:../tools/importing-dmn-data-types-from-java-classes.adoc[Learn more...]
+
+== Decision Services in multiple DRDs improvements in DMN Editor
+The DMN Editor now enables you to consistently depict Decision Services across multiple Decision Requirement Diagrams (DRDs) automatically, enabling modelers to more easily break down complex decision logic into manageable, focused views, without having to manually adjust after making changes. xref:../editing/authoring-decisions.html[Learn more...]
 
 
-== {MANAGEMENT_CONSOLE} Enhancements in Production
-There are a number of usability improvements in the Management Console:
+== Test Scenario Activator class based on JUnit 5 available for unit-testing Decisions
+A new Test Scenario Activator class (`@TestScenarioActivator`) based on JUnit 5 can now be used, replacing `org.kogito.scenariosimulation.runner.KogitoJunitActivator.class`. xref:../editing/authoring-scesim.adoc[Learn more...]
 
-* Pre-configured connected runtimes bundled with the Management Console deployment.
-* Listing Process Definitions and creating new Process Instances.
-* Listing Process Instances, Tasks, and Jobs from all connected runtimes simultaneously.
-* Viewing a dashboard with a basic summary of all Process Instances, grouped by the Process Definition.
-* Improved filtering and search capabilities to manage large numbers of processes.
-* Improved visualization of process instances, tasks, and jobs, adding new columns.
-* Ability to view the Process Definition diagram in certain contexts. 
-* Additional Jobs actions such as retry failed jobs, changing inputs before retry.
 
-xref:../runtime-services-modeling/consoles.adoc[Learn more...]
+== Importing Data Types from Java classes in DMN Editor avaialble in {DEV_TOOLS}
+You can now import Java classes as Data Types in the DMN Editor in {DEV_TOOLS} providing similar functionality to that which is available in the DMN Editor (classic). xref:../tools/importing-dmn-data-types-from-java-classes.adoc[Learn more...]
 
 
 == General bug fixes and enhancements
