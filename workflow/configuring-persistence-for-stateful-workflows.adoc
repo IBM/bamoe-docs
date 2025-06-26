@@ -313,9 +313,9 @@ It is possible to disable the default behavior and make the operation no longer 
 |===
 
 [#multithreading]
-== Multithreaded access to a business service
-In an environment with multi-threaded access to a business service the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
-In {PRODUCT_SHORT} use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
+== Multi-threaded access to a _Business Service_
+In an environment with multi-threaded access to a _Business Service_ the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
+Use optimistic locking to ensure that concurrent access of the same database entity (E.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
 
 [source,properties]
 ----
@@ -325,30 +325,3 @@ kogito.persistence.optimistic.lock=true
 
 - With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime. For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance.
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
-
-[#multi-node]
-== Implementing multi-pod process services in a single database
-When running multiple instances of a process service on multiple pods in the compact architecture, you must assign a unique Jobs Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Jobs Service and connection to the shared database and utimately the failure of the service. 
-
-NOTE: Jobs will only execute on the instance where they were originally scheduled.
-
-=== Configuration steps for multi-pod setup
-
-Each instance of an application must have its own unique management id. This can be specified at application startup using the following configuration option:
-
-[source,properties]
-----
-kogito.jobs-service.management.heartbeat.management-id=<id_string>
-----
-
-Where `<id-string>` does not need to follow any pattern or order and only needs to be unique for each pod in the deployment. If you do not specify a string it defaults to `kogito-jobs-service-leader`. 
-
-This configuration option can be set in a number of ways including:
-
-. Environment variable (or process such as Kubernetes ConfigMap that manages environment variables for a pod)
-. System property
-. META-INF/application.properties
-
-Solution 1 is the preferred way to set the configuration option and avoid making modifications to code or deployment descriptors. 
-
-NOTE: We do not document tools and best practices for testing a deployment configuration or recovery in a multi-node setup. However we recommend thorough testing of scenarios such as pod failure, load balancing, and database replication prior to deploying in a multiple pod configuration.  

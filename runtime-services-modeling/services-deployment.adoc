@@ -30,7 +30,7 @@ kie.flyway.enabled=false
 
 If everything is correctly set, at the first project execution all the tables will be automatically added.
 
-== Evolving stateful Workflows across multiple Business Service deployments
+== Evolving stateful Workflows across _Business Service_ deployments
 
 When deployed Workflow services start to be consumed and Process Instances start to be created, if you subsequently make changes to the project or the BPMN files and re-deploy, there are a few things to be considered.
 
@@ -52,7 +52,32 @@ The pseudo-timeline below shows the safest strategy for evolving your Workflow m
 - - `MyWorkflow.bpmn` _(Deleted once there are no more *active* Process Instances)_
 - ⊙ `MyWorkflowV2.bpmn` _(Kept)_
 
-There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy. You can also use the 
+There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy.
+
+[#multi-pod]
+== Implementing multi-Pod Business Services containing stateful Workflows with a single database
+When running multiple instances of a process service on multiple Pods in the Compact Architecture, you must assign a unique Jobs Service Management ID to each instance. This is to avoid multiple instances attempting to assume leadership over the Jobs Service and connection to the shared database and utimately the failure of the service. 
+
+NOTE: Jobs will only execute on the instance where they were originally scheduled.
+
+=== Configuration steps for multi-Pod setup
+
+Each instance of a _Business Service_ must have its own unique Jobs Service Management ID. This can be specified at application startup using the following configuration option:
+
+[source,properties]
+----
+kogito.jobs-service.management.heartbeat.management-id=<id_string>
+----
+
+Where `<id-string>` does not need to follow any pattern or order and only needs to be unique for each Pod in the deployment. If you do not specify a string it defaults to `kogito-jobs-service-leader`. 
+
+This configuration option can be set in a number of ways including:
+
+. Environment variable (recommended) (preferrably via Kubernetes' `ConfigMap`, that manages environment variables for a Pod)
+. System property
+. META-INF/application.properties
+
+NOTE: We do not document tools and best practices for testing a deployment configuration or recovery in a multi-Pod setup, however we recommend thorough testing of scenarios such as Pod failure, load balancing, and database replication prior to deploying in a multiple Pod configuration.  
 
 // [#migration-PIM]
 // == Migrating active process instances using the Process Instance Migration API
