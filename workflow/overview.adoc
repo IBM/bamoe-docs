@@ -62,7 +62,7 @@ Data-Index support queries through GraphQL (basic.schema.graphqls). For using th
 
 === Using the Data-Index add-on
 
-Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The same dependency is used to specify the storage of the Data-Index and the transport tier simultaneously.
+The following dependency is used to configure the Data-Index subsystem with persistency simultaneously.
 
 [source,xml]
 ----
@@ -85,7 +85,7 @@ Configuring persistence for the Data-Index subsystem will require a JDBC Driver 
 [#data-audit]
 == The Data-Audit subsystem
 
-The Data-Audit subsystem enables the storage of events issued by the following process elements and persists them in the Data-Index subsystem:
+The Data-Audit subsystem listens to events issued by the following components and persists them in the configured storage:
 
 * Workflow Engine
 * User Tasks
@@ -189,13 +189,9 @@ Jobs Service takes care of scheduling jobs, in particular timers such as those f
 .Graphical view of the Jobs Service subsystem
 image::job_service.png[]
 
-When a client invokes the Jobs Service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
-Once the request reaches the Jobs Service it creates the job internally, and stores the data on job status in the storage.
-When the job times out, the component calls the sink (either in-vm or via HTTP request) to signal to the client.
-
 === Using the Jobs Service add-on
 
-To use the Jobs Service add-on in your project you must include the dependency related to the transport tier (in-vm):
+To use the Jobs Service add-on in your project you must include the following dependencies:
 
 [source,xml]
 ----
@@ -204,7 +200,7 @@ To use the Jobs Service add-on in your project you must include the dependency r
   <artifactId>kogito-addons-quarkus-jobs</artifactId>
 </dependency>
 
-<!-- Required for transport tier definition -->
+<!-- Required for exposing Job Resources API -->
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
@@ -235,14 +231,14 @@ manual intervention of a user. When a process instance reaches a `User Task` nod
 instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
 
 The User Tasks subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
-tasks through the different phases of their life cycle until they reach a `Completion` state.
+tasks through the different phases of their life cycle until they reach a **Completed** state.
 
 The User Tasks subsystem provides the following features:
 
-* Runs as a collocated service in the Workflow Engine with no extra configuration in the required in the application.
-* Generic set of REST Apis to interact with it, enabling users to transition tasks between the different lifecycle phases,
-modify task data (inputs and outputs), add comments and attachments on tasks.
-* Customizable *User Task Assignment Strategy* to automatically assign tasks to users during the task `Activate` phase (also known as `UserGroupCallback` in previous {PRODUCT_SHORT} versions)
+* Runs as a collocated service in the Workflow Engine with no extra configuration required in the application.
+* Generic set of REST API endpoints to interact with it, enabling users to transition User Tasks between the different lifecycle phases,
+modify User Task data (inputs and outputs), add comments and attachments to User Tasks.
+* Customizable *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase.
 * Customizable User Task life cycle
 
 === The User Task life cycle
@@ -261,7 +257,7 @@ With the task *Reserved*, the owner will be able to complete the task (`Complete
 
 User Tasks in *Ready* or *Reserved* state, are can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
 
-Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, that will make the task terminate in a *Failed* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
+Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, that will make the task terminate in a *Error* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
 
 NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
 
