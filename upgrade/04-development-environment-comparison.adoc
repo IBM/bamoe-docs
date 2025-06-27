@@ -2,9 +2,9 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-The transition from BAMOE version {VERSION_80X} to version {VERSION_90X} marks a significant shift in how business automation solutions are developed and maintained. While version {VERSION_80X} relied on a centralized, monolithic architecture centered around Business Central, version {VERSION_90X} introduces a modular, cloud-native approach that separates the responsibilities of business users and developers.
+The transition from BAMOE version {VERSION_80X} to version {VERSION_92X} marks a significant shift in how business automation solutions are developed and maintained. While version {VERSION_80X} relied on a centralized, monolithic architecture centered around Business Central, version {VERSION_92X} introduces a modular, cloud-native approach that separates the responsibilities of business users and developers.
 
-This section introduces the new development experience in BAMOE version {VERSION_90X}, highlighting the tools and architectural changes that support a more flexible and scalable workflow.
+This section introduces the new development experience in BAMOE version {VERSION_92X}, highlighting the tools and architectural changes that support a more flexible and scalable workflow.
 
 == Installation and architecture overview
 
@@ -17,7 +17,7 @@ Business Central was deployed alongside a KIE Server for developing and producti
 
 In BAMOE version {VERSION_80X}, development was tightly coupled to Business Central, which served as the central UI for authoring, testing, and deploying business assets. Building the project resulted into a KJAR (KIE JAR, a specialized JAR for KIE projects).
 
-=== BAMOE version {VERSION_90X} - BAMOE Canvas
+=== BAMOE version {VERSION_92X} - BAMOE Canvas
 
 image::upgrade/v9-development-environment-bamoe-canvas.png[BAMOE Canvas]
 
@@ -29,7 +29,7 @@ In addition, BAMOE Canvas includes BAMOE Extended Services, which enable the DMN
 
 For detailed setup instructions, refer to the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-canvas[BAMOE Canvas documentation].
 
-=== BAMOE version {VERSION_90X} - BAMOE Developer Tools for VS Code
+=== BAMOE version {VERSION_92X} - BAMOE Developer Tools for VS Code
 
 image::upgrade/v9-development-environment-bamoe-developer-tools.png[BAMOE Canvas]
 
@@ -41,7 +41,7 @@ To get started with the BAMOE Developer Tools for VS Code, follow the setup inst
 
 === Creating projects
 
-Unlike Business Central, BAMOE version {VERSION_90X} does not use the concept of Spaces. Projects are now organized using Git repositories and follow standard Maven structures. A project can be implemented using Kogito with Quarkus, Spring Boot, or plain Java with Drools or jBPM.
+Unlike Business Central, BAMOE version {VERSION_92X} does not use the concept of Spaces. Projects are now organized using Git repositories and follow standard Maven structures. A project can be implemented using Kogito with Quarkus, Spring Boot, or plain Java with Drools or jBPM.
 
 ==== BAMOE Canvas
 
@@ -73,7 +73,7 @@ The BAMOE Developer Tools for VS Code offer a full-featured environment for deve
 
 In BAMOE version {VERSION_80X}, Business Central managed source code through an internal Git server. Projects were stored in a hidden `.niogit` directory on the server's file system, and access was limited to the Business Central interface.
 
-In BAMOE version {VERSION_90X}, Git integration is a core part of the development workflow, but the approach differs between BAMOE Canvas and the BAMOE Developer Tools for VS Code.
+In BAMOE version {VERSION_92X}, Git integration is a core part of the development workflow, but the approach differs between BAMOE Canvas and the BAMOE Developer Tools for VS Code.
 
 ==== BAMOE Canvas
 
@@ -95,7 +95,7 @@ While BAMOE Canvas simplifies Git for business users, the BAMOE Developer Tools 
 
 In BAMOE version {VERSION_80X}, Maven builds were triggered internally by Business Central. When a project was built through the UI, Business Central used an embedded Maven engine to compile the assets into a KJAR (KIE JAR), which was then deployed to a KIE Server. The internal Maven repository was also managed by Business Central, and users had limited visibility or control over the build process.
 
-In BAMOE version {VERSION_90X}, projects are built using standard Maven tools, and the build process is fully externalized. The BAMOE Maven Repository provides all required dependencies and can be deployed as a standalone container or installed locally.
+In BAMOE version {VERSION_92X}, projects are built using standard Maven tools, and the build process is fully externalized. The BAMOE Maven Repository provides all required dependencies and can be deployed as a standalone container or installed locally.
 
 BAMOE Canvas does not perform builds directly, but when a workspace is initialized with an Accelerator, it includes Maven configuration files that reference the BAMOE Maven Repository. Projects can then be exported and built externally.
 
@@ -107,7 +107,7 @@ For installation and configuration instructions, refer to the https://www.ibm.co
 
 In BAMOE version {VERSION_80X}, user authentication was handled through a centralized login screen provided by Business Central. Authentication and user management were typically delegated to the application server, such as JBoss EAP or WildFly, using standard Java EE security mechanisms. This setup was tightly coupled to the deployment environment and often required administrative configuration on the server side.
 
-In BAMOE version {VERSION_90X}, authentication is decentralized and aligned with modern cloud-native practices. Each tool--BAMOE Canvas and the BAMOE Developer Tools for VS Code--handles authentication differently, based on its integration with Git.
+In BAMOE version {VERSION_92X}, authentication is decentralized and aligned with modern cloud-native practices. Each tool--BAMOE Canvas and the BAMOE Developer Tools for VS Code--handles authentication differently, based on its integration with Git.
 
 ==== BAMOE Canvas
 
@@ -121,13 +121,13 @@ The BAMOE Developer Tools for VS Code rely on the developer's local Git configur
 
 This approach gives developers full control over how they authenticate and manage access to repositories, and it integrates seamlessly with enterprise Git workflows and credential managers.
 
-By shifting authentication to Git, BAMOE version {VERSION_90X} eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
+By shifting authentication to Git, BAMOE version {VERSION_92X} eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
 
 === Building and deploying in development mode
 
 In BAMOE version {VERSION_80X}, builds were often triggered through the Business Central UI, which provided a tightly integrated authoring and deployment experience to a connected KIE Server. However, alternative approaches were also supported, such as building with Maven and deploying through CI/CD pipelines, depending on the project setup and environment.
 
-BAMOE version {VERSION_90X} adopts a more open and developer-friendly model. Projects are structured as standard Maven applications, allowing developers to build using the Maven CLI, integrate with IDEs, and automate deployments through CI/CD pipelines. Deployment targets include Kubernetes-native solutions.
+BAMOE version {VERSION_92X} adopts a more open and developer-friendly model. Projects are structured as standard Maven applications, allowing developers to build using the Maven CLI, integrate with IDEs, and automate deployments through CI/CD pipelines. Deployment targets include Kubernetes-native solutions.
 
 ==== BAMOE Canvas
 
@@ -143,7 +143,7 @@ Developers can also configure local or remote development environments, use cont
 
 == Standard Operating Environment differences
 
-The Standard Operating Environment (SOE) for BAMOE has evolved significantly between version {VERSION_80X} and version {VERSION_92X}. These changes reflect the shift toward a more cloud-native, containerized architecture in BAMOE version {VERSION_90X}, which impacts supported platforms, middleware, and system requirements.
+The Standard Operating Environment (SOE) for BAMOE has evolved significantly between version {VERSION_80X} and version {VERSION_92X}. These changes reflect the shift toward a more cloud-native, containerized architecture in BAMOE version {VERSION_92X}, which impacts supported platforms, middleware, and system requirements.
 
 To understand the specific differences in supported environments, refer to the official IBM compatibility reports:
 
