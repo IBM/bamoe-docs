@@ -132,6 +132,21 @@ defined, and extensions
 |===
 
 
+== Authentication in User Task API endpoints
+The xref:../workflow/user-tasks.adoc[User Task API] integrates seamlessly with Authentication and Authorization mechanisms of Quarkus, with the option to receive `user` and `groups` as QueryParameters. For this integration to happen, the following properties should be set in the `application.properties` file of your _Business Service_ project:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
+
+|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
+Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
+
+|===
+
+
 [#mgmt-console-oidc-proxy]
 == Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_
 
