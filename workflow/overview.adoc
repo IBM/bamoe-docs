@@ -7,7 +7,7 @@ You can use BAMOE to develop stateful Workflow services using Business Process M
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
-The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
+The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on BAMOE. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
 == Components of Compact Architecture
 The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful Workflows.
@@ -28,7 +28,7 @@ The following table details the different components in Compact Architecture, in
 |Storage | External system | Mandatory | N/A
 |===
 
-The following figure shows how they relate to each other in a deployment architecture. 
+The following figure shows how they relate to each other in a Business Service. 
 
 .The different components of Compact Architecture
 image::wf-compact-arch.png[]
@@ -37,11 +37,11 @@ Workflow models:: BPMN files containing a sequence flow. Workflow models are com
 
 Workflow Engine:: The jBPM-powered engine for executing Workflows and which can delegate certain capabilities to other subsystems, like User Tasks or Jobs.
 
-Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, escalability, authentication and authorization, DI (dependency injection) etc.
+Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, escalability, authentication and authorization, DI (dependency injection) etc. Quarkus is the only supported Runtime at the moment.
 
 Data-Index:: Allows the last snapshot of the process state to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
-Data-Audit:: Allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data comming from events.
+Data-Audit:: Allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data coming from events.
 
 Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
 
@@ -56,25 +56,9 @@ The Data-Index subsystem is used to store a snapshot of the latest state of the 
 .Graphical view of the Data-Index subsystem
 image::data-index.png[]
 
-The concepts to understand the above picture are:
-
-Transport:: the medium used to transfer events between the runtime and the Data-Index service. The transport is in-vm.
-
-Storage:: the persistence tier of the Data-Index component.
-
-Data-Index:: the main component responsible for creating/updating the Data-Index, and for providing query capabilities.
-
-
 === Querying
 
-Data-Index support queries through graphQL (basic.schema.graphqls). For using the endpoint you just need to explore in your deployment the URI:
-
-[source,]
-----
-http://localhost:8080/<root-path>/graphql-ui/
-----
-
-to start working with the queries defined by the schema aforementioned.
+Data-Index support queries through GraphQL (basic.schema.graphqls). For using the endpoint you just need to access the `/graphql-ui/` path. E.g., http://localhost:8080/graphql-ui/ for a _Business Service_ running locally.
 
 === Using the Data-Index add-on
 
@@ -88,6 +72,16 @@ Use the Data-Index add-on to enable Quarkus to use in-vm transport tier. The sam
 </dependency>
 ----
 
+Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
+</dependency>
+----
+
 [#data-audit]
 == The Data-Audit subsystem
 
@@ -97,7 +91,7 @@ The Data-Audit subsystem enables the storage of events issued by the following p
 * User Tasks
 * Jobs Service
 
-The system contains several modules and common modules to redistribute responsibilities. The main features of this system are:
+The subsystem contains several modules and common modules to redistribute responsibilities. The main features of this subsystem are:
 
 * runs as colocated services with Quarkus 
 * contains a module that enables you to implement your own subsystem
@@ -105,22 +99,11 @@ The system contains several modules and common modules to redistribute responsib
 * provides extension points to develop new storage easily
 * provides extension points to develop new queries extending graphql definitions
 
-.Graphical view of the Data-Audit subsystem
-image::data-audit-design.png[]
-
-Data-Audit Common:: Provides the common framework to create implementations.
-
-Data-Audit «Quarkus»:: Provides the wiring to use Data-Audit with Quarkus as colocated service in a deployment.
-
-Data-Audit JPA Common:: Provides the common extension that does not depend on the runtime.
-
-Data-Audit JPA «Quarkus»:: Provides the wiring between the specific implementation and Quarkus System.
-
 === Querying
 
-The way to retrieve information from the Data-Audit is using GraphQL. This way we can abstract how the information is retrieved and allow different needs depending on the user.
+The way to retrieve information from the Data-Audit is using GraphQL. This way you can abstract how the information is retrieved and allow different needs depending on the user.
 
-The Path is `$\{HOST}/data-audit/q` for sending GraphQL queries.
+The path is `$\{HOST}/data-audit/q` for sending GraphQL queries.
 
 ==== Example 1
 
@@ -160,29 +143,20 @@ curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POS
 }'|jq
 ----
 
-=== Java Persistence API (JPA) implementation
-
-The JPA implementation allows you to store the events to be persisted in a database.
-To use this you will need to set up the datasource.
-
 === Extension Points
 
-Some extensions depend on the runtime and others do not.
-
 `org.kogito.kie.app.audit.spi.DataAuditContextFactory`:: depends on the runtime and enables the creation of the context needed by a particular implementation.
-
-The following extension points do not depend on the runtime:
 
 `org.kie.kogito.app.audit.spi.DataAuditStore`:: stores the data in particular way.
 
 `org.kie.kogito.app.audit.spi.GraphQLSchemaQuery<T>`:: enables execution of a GraphQL query.
 
-`org.kie.kogito.app.audit.spi.GraphQLSchemaQueryProvider`:: enables the subsystem to identify additional queries provided by the end user.
+`org.kie.kogito.app.audit.spi.GraphQLSchemaQueryProvider`:: enables the subsystem to identify additional configured queries.
 
 
 === Using the Data-Audit add-on
 
-You need to add two different dependencies to your project  for a collocated service.
+You need to add two different dependencies to your _Business Service_ project:
 
 [source,xml]
 ----
@@ -191,16 +165,14 @@ You need to add two different dependencies to your project  for a collocated ser
   <artifactId>kogito-addons-quarkus-data-audit</artifactId>
 </dependency>
 
+<!-- Required for persistence -->
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kogito-addons-quarkus-data-audit-jpa</artifactId>
 </dependency>
 ----
 
-The first dependency is related how to you want to deploy it. In this case it is deployed as a collocated/embedded service.
-The second dependency specifies the implementation you want to use.
-
-Each implementation might require additional dependencies. In this case a driver may be required to use a Java Persistence API (JPA) implementation.
+Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
 
 [source,xml]
 ----
@@ -210,34 +182,16 @@ Each implementation might require additional dependencies. In this case a driver
 </dependency>
 ----
 
-No additional configuration is required besides the default datasource use by the application already.
-
-
 [#jobs-service]
 == The Jobs Service subsystem
-Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers.
-It is also used for User Tasks notifications.
+Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers. It is also used for User Tasks notifications.
 
-By collocating the Jobs Service with the other stateful Workflows subsystems in a _Business Service_, the Jobs Service add-on enables direct communication.
-
-It uses the Data Source as the app.
-
-The Jobs Service subsystem only supports Quarkus at the moment and persistence can be configured for PostgreSQL or Microsoft SQL Server databases.
-
-=== How it works
-
-.Graphical view of the Jobs Service flow
+.Graphical view of the Jobs Service subsystem
 image::job_service.png[]
 
 When a client invokes the Jobs Service, the client component sends a message through the transport tier containing the information required to call back the sink once the job times out.
 Once the request reaches the Jobs Service it creates the job internally, and stores the data on job status in the storage.
 When the job times out, the component calls the sink (either in-vm or via HTTP request) to signal to the client.
-
-==== Definitions
-transport:: the medium used to transfer a message between client component and Jobs Service. The transport can be HTTP, Kafka or in-vm.
-sink:: is the client endpoint callback.
-storage:: is the persistence tier of the jobs being current scheduled.
-Jobs Service:: it the main component containing the logic of scheduling a job and storing data.
 
 === Using the Jobs Service add-on
 
@@ -245,38 +199,32 @@ To use the Jobs Service add-on in your project you must include the dependency r
 
 [source,xml]
 ----
-<!-- Required for the Jobs Service add-on transport tier definition -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-jobs</artifactId>
+</dependency>
+
+<!-- Required for transport tier definition -->
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
 </dependency>
 
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs</artifactId>
-</dependency>
-----
-
-Following that you must include the storage to be used, PostgreSQL:
-
-[source,xml]
-----
-<!-- Required for the Jobs Service add-on storage definition -->
+<!-- Required for persistence -->
 <dependency>
   <groupId>org.kie.kogito</groupId>
   <artifactId>jobs-service-storage-jpa</artifactId>
 </dependency>
 ----
 
-In this case for postgresql in-vm, your main available data source is automatically used. Here is an example of this configuration:
-	
-[source,properties]
+Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
+
+[source,xml]
 ----
-kogito.persistence.type=jdbc
-quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=kogito-user
-quarkus.datasource.password=kogito-pass
-quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://localhost:5432/kogito}
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
+</dependency>
 ----
 
 [#user-tasks]
@@ -287,7 +235,7 @@ manual intervention of a user. When a process instance reaches a `User Task` nod
 instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
 
 The User Tasks subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
-tasks through the different phases of their User Task life cycle until they reach a `Completion state.
+tasks through the different phases of their life cycle until they reach a `Completion` state.
 
 The User Tasks subsystem provides the following features:
 
@@ -320,7 +268,8 @@ NOTE: During the `Activate` and `Reassign` phases, if the task has a single pote
 === Persisting User Tasks data
 
 The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in database
-using the default application Data Source using the `jbpm-addons-quarkus-usertask-storage-jpa` add-on.
+using the default application Data Source.
+
 To enable this functionality, the following dependency needs to be added to the application `pom.xml` file:
 
 [source,xml]
@@ -328,6 +277,16 @@ To enable this functionality, the following dependency needs to be added to the 
 <dependency> 
   <groupId>org.jbpm</groupId> 
   <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
+</dependency>
+----
+
+Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
 </dependency>
 ----
 
