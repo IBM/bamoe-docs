@@ -44,6 +44,92 @@ Flexible Processes are implemented as BPMN models with the AdHoc property set to
 
 While this approach does not replicate all features of CMMN, it provides a practical alternative for many use cases. For detailed guidance on migrating Case Management projects to Flexible Processes, see the xref:05-10-upgrading-case-management-project.adoc[Upgrading Case Management Projects section].
 
+=== BPMN and DRLs [[bpmn-and-drl]]
+
+BAMOE v9 introduces important architectural changes that affect how DRL rules interact with other assets. Notably, shared KIE sessions between BPMN workflows and the rule engine are no longer supported. This means that facts inserted or modified within a DRL rule are not accessible to BPMN processes. Any logic that previously relied on shared working memory between processes and rules must now be refactored to use explicit data passing or service calls.
+
+As a result, functions such as insert(), retract(), update(), and delete() will no longer have any effect from the BPMN perspective. Additionally, using DROOLS or MVEL expressions in gateways to access KIE Session values is no longer supported.
+
+To migrate your BPMN processes that use DRLs, you need to:
+
+- Use Input/Output data mapping to pass data between the process and the rules;
+- Refactor the DRL rules to operate on the mapped data directly;
+- Use Java expressions in gateways and conditions instead of DROOLS expressions.
+
+==== Example
+
+The diagram below shows a Validation Business Rules task that runs a DRL. The result of the rule evaluation is then used in a gateway to determine the next step in the process: either proceeding to Mortgage Calculation or handling a Validation Error.
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram.png[width=500]
+
+The Validation node uses the following data mapping, which does not require changes for this migration:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-validation-data-mapping.png[width=600]
+
+The original DRL used in BAMOE v8 looks like this:
+
+```java
+rule "Validate Down Payment"
+	ruleflow-group "validation"
+	when
+		app : Application( downpayment == 0 || downpayment >= app.property.saleprice )
+	then
+		ValidationErrorDO fact0 = new ValidationErrorDO();
+		fact0.setError( "Down payment cannot be 0, greater than, or equal to the property sale price." );
+		insert( fact0 );
+		System.out.println("Executed Rule: " + drools.getRule().getName() );
+		app.setErrors( fact0 );
+end
+```
+
+In BAMOE v9, since insert() is no longer effective, we remove it and update the rule as follows:
+
+```java
+rule "Validate Down Payment"
+    ruleflow-group "validation"
+    when
+        app : Application( downpayment == 0 || downpayment >= app.property.saleprice )
+    then
+        ValidationErrorDO error = new ValidationErrorDO();
+        error.setError("Down payment cannot be 0, greater than, or equal to the property sale price.");
+        System.out.println("Executed Rule: " + drools.getRule().getName());
+        app.setErrors(error);
+end
+```
+
+With this change in place, the gateway conditions must also be updated.
+
+BAMOE v8 used a DROOLS expression:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-bpmn-migration-example-diagram-gateway-edge-drools.png[width=600]
+
+BAMOE v9 must use a Java expression instead:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-bpmn-migration-example-diagram-gateway-edge-java.png[width=600]
+
+In this example, the Retract Validation Business Rule task previously used a DRL to remove the inserted error fact:
+
+```java
+rule "RetractValidationErr"
+	dialect "mvel"
+	ruleflow-group "error"
+	when
+		vdo : ValidationErrorDO( )
+	then
+		retract( vdo );
+end
+```
+
+Since there is no shared KIE session in BAMOE v9, this rule no longer serves a purpose and can be safely removed.
+
+In this example, the Business Rules tasks did not require changes to their data mappings. However, in other cases, you may need to:
+
+- Add additional process variables;
+- Adjust the data mapping;
+- Modify the domain classes to support the new interaction model.
+
+These changes ensure that your BPMN processes and DRL rules remain compatible and effective in BAMOE v9.
+
 == Decisions (DMN) [[dmn]]
 
 In BAMOE v8, decision models were created using the Classic DMN Editor. While this editor is still available in BAMOE v9, it has been deprecated and is no longer recommended for use. BAMOE v9 introduces the DMN Editor as the default, which supports models up to DMN version 1.5. When a model is saved using the DMN Editor, it is automatically upgraded to version 1.5.
@@ -60,9 +146,7 @@ In BAMOE v8, users could author, edit, and execute PMML (Predictive Model Markup
 
 == Rules (DRL) [[drl]]
 
-All DRL rules authored in BAMOE v8 are fully compatible with BAMOE v9. No changes to rule syntax or structure are required for them to execute correctly in the new runtime.
-
-However, BAMOE v9 introduces important architectural changes that affect how DRL rules interact with other assets. Notably, shared KIE sessions between BPMN workflows and the rule engine are no longer supported. This means that facts inserted or modified within a DRL rule are not accessible to BPMN processes. Any logic that previously relied on shared working memory between processes and rules must now be refactored to use explicit data passing or service calls.
+All DRL rules authored in BAMOE v8 are fully compatible with BAMOE v9. No changes to rule syntax or structure are required for them to execute correctly in the new runtime. The exception is when DRL rules are used in conjunction with BPMN processes. In such cases, please refer to the xref:bpmn-and-drl[BPMN and DRL] section to understand the required changes.
 
 While the rule execution engine remains compatible, it is recommended to review your DRL files for deprecated constructs, opportunities to align with BAMOE v9 best practices, and changes in Java enums, global variables, or data objects that may have been updated in format or location.
 
