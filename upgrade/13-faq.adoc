@@ -1,0 +1,42 @@
+= FAQ
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section provides answers to frequently asked questions about upgrading from BAMOE v8 to BAMOE v9.
+
+== How to *migrate* a BAMOE v8 KJAR to BAMOE v9?
+
+BAMOE v9 no longer includes the KIE Server, so you cannot deploy a KJAR directly to a server as in v8. To make your KJAR compatible with BAMOE v9, you should duplicate your project (to preserve a backup) and follow the steps outlined in the xref:05-00-upgrading-projects[Upgrading Projects] section.
+
+This leads to a related question:
+
+== Is it possible to *use* a BAMOE v8 KJAR in BAMOE v9?
+
+Yes, you can use a BAMOE v8 KJAR in BAMOE v9, but only in **Embedded Java mode**. This is supported for both:
+- https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=scenarios-executing-decisions-in-embedded-java-mode#_complete_example[Decisions]
+- https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=scenarios-executing-rules-in-embedded-java-mode[Rules]
+
+
+== What is the Business Service deployment granularity?
+
+In BAMOE v9.2, a _Business Service_ is a standalone, containerized application that encapsulates domain-specific logic, such as Workflows, Decisions, Rules, or Decision Tables, and is built using Quarkus or Spring Boot. Each Business Service can be versioned, monitored, and managed independently, aligning with modern microservices best practices.
+
+This represents a shift from BAMOE v8, where multiple business assets were typically bundled into a single KJAR and deployed to a centralized KIE Server.
+
+With BAMOE v9, **you define the granularity of your deployments**. You have the flexibility to:
+- **Bundle multiple business assets** (e.g., BPMN, DMN, DRL) into a single Business Service
+- **Deploy multiple Business Services** within the same Kubernetes pod for tighter coupling or resource efficiency
+- **Separate Business Services** into distinct deployments to improve modularity, scalability, and maintainability
+
+This flexibility allows you to tailor your deployment strategy to your organization's architecture, performance, and operational requirements. For additional information, see https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/9.2.x?topic=services-deploying-business[Deploying Business Services].
+
+
+== What are the alternatives to Smart Router?
+
+Since Smart Router is no longer available in BAMOE v9, you can achieve similar load balancing using any solution compatible with cloud environments. 
+
+== What are the alternatives to the BAMOE v8 Operator?
+
+BAMOE v9 does not provide its own Operator. Instead, it offers Helm charts to simplify deployment. The BAMOE Management Console Helm Chart is available for installing the related components on Kubernetes or OpenShift clusters. These charts support flexible configuration and align with infrastructure-as-code practices. For more details, see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-management-console[Deploying to Kubernetes or OpenShift with the Helm Chart].
+
+

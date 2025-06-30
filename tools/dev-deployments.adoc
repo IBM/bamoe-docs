@@ -23,7 +23,7 @@ After clicking Deploy, you will be presented with options for different types of
 == Quarkus Blank App
 
 .Quarkus Blank App deployment option
-image::tools/devDeployments/deployment-option-kogito-quarkus-blank-app.png[]
+image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
 
 This is the most "hands-off" Dev Deployment option, but it has a few requirements:
 
@@ -49,7 +49,7 @@ Images used in this deployment:
 == Custom Image
 
 .Custom Image deployment option
-image::tools/devDeployments/deployment-option-custom-image.png[]
+image::tools/devDeployments/deployment-option-custom-image.png[width=600]
 
 The Custom Image option is the most configurable one and should allow users to create all kinds of different deployments. The deployed image can be changed to whatever the user decides, alongside the container port and initial container command to be executed.
 
@@ -68,7 +68,7 @@ NOTE: This image is used by default, but it can be changed to any other availabl
 === Deployment tokens
 
 .Dev Deployment tokens list
-image::tools/devDeployments/tokens.png[]
+image::tools/devDeployments/tokens.png[width=720]
 
 Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster (see the topic below). These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
 
@@ -154,7 +154,7 @@ Before any Dev Deployment can be made, a new Kubernetes or OpenShift cluster con
 When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Deployment happens. Here is a basic step-by-step:
 
 1. {CANVAS} will zip all the files in the workspace being deployed (ignoring .git directories);
-2. Then it will load the chosen deployment option (Custom Image or Kogito Quarkus Blank app) YAML files and modify them dynamically:
+2. Then it will load the chosen deployment option (Custom Image or Quarkus Blank app) YAML files and modify them dynamically:
  - Applying the required patches to set {CANVAS} labels, annotations, and resource names;
  - Applying patches related to the parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens);
  - Interpolate all tokens with their corresponding values, including parameters;
@@ -168,7 +168,7 @@ When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Dep
 6. The Dev Deployment Upload Service receives the .zip file and extracts it to the defined path (this path is set using the configured environment variables on the container). After the extraction is over, the service ends with a status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever is defined in the Custom Image option parameter);
 7. A quarkus application starts loading inside the container, while {CANVAS} starts polling the container to check if the quarkus app is ready;
 8. When quarkus finishes loading, and the polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
- - The Quarkus Swagger UI, if deployed via Custom Image or Kogito Quarkus Blank App options, without the DMN Form Webapp parameter;
+ - The Quarkus Swagger UI, if deployed via Custom Image or Quarkus Blank App options, without the DMN Form Webapp parameter;
  - The DMN Form Webapp if the checkbox for it was checked when creating the deployment;
 9. Users can interact with the Dev Deployment and test/validate their decisions and processes; after that is finished, it is possible to delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
 

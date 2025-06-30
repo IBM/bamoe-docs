@@ -4,14 +4,40 @@ include::../styles/images.adoc[]
 
 This section describes the different aspects to take into account when you are designing stateful Workflows. 
 
+[#new-bpmn-editor]
+== Authoring Workflows with BPMN Editor (Tech Preview)
 
-== Authoring Workflows with BPMN models in {CANVAS}
+Since version 9.2.1, {PRODUCT_SHORT} includes a new BPMN Editor as Technology Preview, bringing faster startup times and retro-compatibility with BPMN Editor (classic). The new BPMN Editor (Tech Preview) is avaialble on {CANVAS}, {DEV_TOOLS}, and as a standalone JavaScript library.
 
-Process authoring on {CANVAS} happens inside the Editor page for Workflow, where you can edit and validate BPMN files.
+.Empty Workflow on BPMN Editor (Tech Preview)
+image::workflow/new-bpmn-editor.png[BPMN Editor (Tech Preview)]
 
-Following are the elements present in the BPMN Editor:
+=== Enchancements
 
-.Editor page for a Workflow on {CANVAS} with highlighted elements of the BPMN Editor
+Some features from BPMN Editor (classic) have been improved on BPMN Editor (Tech Preview):
+
+- Correlation Properties and Keys can now be edited on a dedicated new Panel;
+- Process Variables can now be edited on a dedicated Panel;
+- Morphing a node into another variant (E.g., Task → User Task) can now be done with consistent keyboard shortcuts;
+- Grid snapping is now available, just like on DMN Editor;
+- A live preview of a new node will be rendered when dragging from the Palette;
+- The Group node is now available to visualize enclose nodes that share similar context;
+- `Assignments` (`Data I/O`) is now under `Data Mapping`.
+
+=== Limitations
+
+Some features from BPMN Editor (classic) are not yet available on BPMN Editor (Tech Preview):
+
+- Support for WorkItemDefinition (WID) files and custom nodes;
+- Support for Milestones;
+- Deleting Data Types, Messages, Signals, Errors;
+- Compensation Associations rendering as Sequence Flows.
+
+== Authoring Workflows with BPMN Editor (classic)
+
+Following are the elements present in BPMN Editor (classic):
+
+.Editor page for a Workflow with highlighted elements of the BPMN Editor (classic)
 image::tools/image5.jpg[]
 
 . *Node palette* → From here you can select node types and their variations.
@@ -20,9 +46,7 @@ image::tools/image5.jpg[]
 [loweralpha]
 .. Properties → Lets you manage the properties of a Workflow element.
 .. Navigator → Displays a minimap with the diagram of your Workflow and a list of all elements present on it.
-. *Keyboard shortcuts panel toggle →* Clicking here toggles a panel with information about keyboard shortcuts available in the BPMN Editor.
-
-Toggling the Problems tab lets you see static validation errors that {CANVAS} reports while you are developing your Workflows.
+. *Keyboard shortcuts panel toggle →* Clicking here toggles a panel with information about keyboard shortcuts available in the BPMN Editor (classic).
 
 Developing Workflows through BPMN files is a complex subject and has many intricacies that are beyond the scope of this document.
 For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/2.0.2/PDF[Business Process Model And Notation (BPMN) specification].
@@ -31,18 +55,17 @@ For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/
 == Invoking a Decision from a Workflow
 
 A common use case for a Workflow is to invoke Decisions as part of its logic.
-It is easy to achieve that on {CANVAS}.
-On your Workflow, create a new “Business Rule” task node.
+On your Workflow, create a new “Business Rule Task" node.
 
-.Node palette open for Task nodes inside the BPMN Editor on {CANVAS}
-image::tools/image9.png[]
+.Node palette open for Task nodes inside the BPMN Editor (classic)
+image::tools/image9.png[width=360]
 
 Open the “Properties” panel using the first icon at the “Side panel strip” and look for Implementation/Execution.
 There, you can change the "Rule language" to "DMN". Select the file you want and the Decision inside it.
 Here is an example:
 
 .Implementation/Execution section of the Properties panel for a Business Rule Task inside a Workflow
-image::tools/image23.png[]
+image::tools/image23.png[width=360]
 
 When your Workflow executes, this Decision will be invoked with the inputs being passed to the Business Rule task.
 The result of the Decision will be the output of the Business Rule task.
@@ -52,8 +75,8 @@ The result of the Decision will be the output of the Business Rule task.
 
 . Click anywhere in the diagram area and then click on the properties tab to access the properties panel.
 +
-.{CANVAS} for workflow showing properties
-image::wf-tutorial/canvas-wf-1.png[Canvas for workflow showing properties]
+.BPMN Editor (classic) properties
+image::wf-tutorial/canvas-wf-1.png[BPMN Editor (classic) Global Properties]
 
 . Set the following properties:
  * *Name*: Provide a label for the process.
@@ -66,7 +89,7 @@ image::wf-tutorial/canvas-wf-1.png[Canvas for workflow showing properties]
  ** Data type refers to a Java type. If you click Select Custom, the field turns into the fully qualified name of the class. 
 
 .Process properties
-image::wf-tutorial/input-data-2.png[Setting process properties]
+image::wf-tutorial/input-data-2.png[Process properties]
 
 
 === Define Workflow Elements
@@ -156,7 +179,7 @@ Holiday Management:: This feature allows businesses to incorporate holidays into
 Accurate Time Intervals:: The Business Calendar calculates accurate time intervals between tasks by excluding non-working hours and holidays. This ensures that process deadlines and task delays reflect the actual business operations, which is critical for meeting service-level agreements (SLAs) and managing deadlines.
 
 
-=== Enabling Business Calendar Functionality
+=== Enabling Business Calendar functionality
 
 To enable the Business Calendar functionality in your application, follow these steps:
 
@@ -264,7 +287,7 @@ import java.util.*;
 import org.kie.kogito.calendar.BusinessCalendar;
 +
 /**
- * Custom Business Calendar Example.
+ * Custom Business Calendar example.
  * Modify this class to implement your own scheduling logic.
  */
 public class CustomCalendar implements BusinessCalendar {
@@ -272,7 +295,7 @@ public class CustomCalendar implements BusinessCalendar {
     @Override
     public long calculateBusinessTimeAsDuration(String timeExpression) {
         // Implement custom logic to calculate business time duration
-      // Note:The returned long value is in milliseconds. Duration can be set at least 1000 ms or longer to prevent immediate execution.
+        // NOTE: The returned value is in milliseconds (ms). Duration can be set to at least 1000ms or longer to prevent immediate execution.
         return 1000;
     }
 
@@ -344,9 +367,9 @@ public class CustomUserTaskAssignmentStrategy extends BasicUserTaskAssignmentStr
 ----
 
 [#case-management]
-== Using Flexible processes for Case management
+== Using Flexible processes for Case Management
 
-{PRODUCT_SHORT} uses BPMN extensions to provide case management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. 
+{PRODUCT_SHORT} uses BPMN extensions to provide Case Management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. 
 
 An ad-hoc task can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. 
 
@@ -370,31 +393,31 @@ The following sections contain more information on each of the components of a f
 
 You can create an ad-hoc process by enabling the `Ad-Hoc` property in the process definition properties panel. This property enables the process to use ad-hoc auto-start fragments, such as ad-hoc subprocesses and ad-hoc tasks. Once your process definition is set to ad-hoc, it no longer requires strict start and end events.
 
-image::workflow/adhoc-proc-props.png[Ad-hoc process property settings]
+image::workflow/adhoc-proc-props.png[Ad-hoc process properties,width=360]
 
 === Ad-hoc subprocesses
 
 An ad-hoc subprocess is similar to a Stage in Case Management. It contains embedded inner activities and is itself part of another process. It is a standard BPMN component and therefore supported by {PRODUCT_SHORT}. 
 
-image::workflow/adhoc-sub-proc.png[Ad-hoc subprocess]
+image::workflow/adhoc-sub-proc.png[Ad-hoc subprocess,width=240]
 
 === Ad-hoc auto-start fragments
 
 An ad-hoc auto-start fragment is any ad-hoc process, ad-hoc subprocess, or ad-hoc task with the AdHoc Autostart property enabled. This property enables the fragment to automatically start when the process is created instead of being started by the completion of the previous node or by a signal event.However, when this flag is not set, the only way to trigger the node execution is with a signal. Processes receive signals externally through the REST API, internally by using events or programmatically.
 
-image::workflow/adhoc-auto-st.png[Ad-hoc auto-start property settings]
+image::workflow/adhoc-auto-st.png[Ad-hoc auto-start properties,width=360]
 
 
 === Milestones
 
 A milestone is a standard CMMN component that is represented as a BPMN custom task. A milestone represents a single point of achievement within a process instance. You can use milestones to flag certain events to trigger other tasks or track the progress of the process.
 
-image::workflow/adhoc-milestone.png[Ad-hoc milestone]
+image::workflow/adhoc-milestone.png[Ad-hoc milestone,width=240]
 
-=== REST API requests as signals
+=== REST API requests as Signals
 
-A REST API request can serve as a signal event to trigger milestones or to create and start ad-hoc fragments such as ad-hoc processes, ad-hoc subprocesses, or tasks. For non-flexible processes, an empty POST request for a process triggers the start node, whereas in a flexible process, the request creates the process instance. Similarly for ad-hoc tasks, an empty POST request instantiates the task node. All ad-hoc auto-start fragments with the `Ad-Hoc Autostart` property , are started automatically when the process is created.
+A REST API request can serve as a signal event to trigger Milestones or to create and start ad-hoc fragments such as ad-hoc processes, ad-hoc subprocesses, or tasks. For non-flexible processes, an empty POST request for a process triggers the start node, whereas in a flexible process, the request creates the process instance. Similarly for ad-hoc tasks, an empty POST request instantiates the task node. All ad-hoc auto-start fragments with the `Ad-Hoc Autostart` property , are started automatically when the process is created.
 
 === Implementing flexible, one-off business cases
 
-An example application `flexible-process-quarkus` can be found in xref:../getting-started/examples.adoc[Example Business Service projects]. This example shows the use of flexible processes to implement a case management scneario using ad-hoc subprocesses, milestones, and DMN business rule integration. 
+An example application `flexible-process-quarkus` can be found in xref:../getting-started/examples.adoc[Example Business Service projects]. This example shows the use of flexible processes to implement a Case Management scneario using Ad-hoc subprocesses, Milestones, and a DMN Business Rule Task. 
