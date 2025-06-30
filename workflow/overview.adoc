@@ -39,26 +39,26 @@ Workflow Engine:: The jBPM-powered engine for executing Workflows and which can 
 
 Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, escalability, authentication and authorization, DI (dependency injection) etc. Quarkus is the only supported Runtime at the moment.
 
-Data-Index:: Allows the last snapshot of the process state to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
+Data-Index:: See below.
 
-Data-Audit:: Allows the inspection of what happened during workflow execution. It should be able to replay the process. The system stores all diff event data coming from events.
+Data-Audit:: See below.
 
-Jobs Service:: allows the execution of timed events. In the case of Workflows with BPMN it is required for timers, deadlines and notifications. 
+Jobs Service:: See below.
 
-User Tasks:: is a subsystem that allows User Tasks to be executed. It provides a lifecycle internally. This should not be confused with a User Task node in the workflow. The User Task node uses this subsystem to implement User Tasks.
+User Tasks:: See below.
 
 Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database like PostgreSQL.
 
 [#data-index]
 == The Data-Index subsystem
-The Data-Index subsystem is used to store a snapshot of the latest state of the process instance. 
+The Data-Index subsystem is used to store a snapshot of the latest state of the process instance and allows it to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
 .Graphical view of the Data-Index subsystem
 image::data-index.png[]
 
-=== Querying
-
 Data-Index support queries through GraphQL (basic.schema.graphqls). For using the endpoint you just need to access the `/graphql-ui/` path. E.g., http://localhost:8080/graphql-ui/ for a _Business Service_ running locally.
+
+See the associated xref:data-index-graphql-api.html[Data-Index GraphQL API]
 
 === Using the Data-Index add-on
 
@@ -85,11 +85,13 @@ Configuring persistence for the Data-Index subsystem will require a JDBC Driver 
 [#data-audit]
 == The Data-Audit subsystem
 
-The Data-Audit subsystem listens to events issued by the following components and persists them in the configured storage:
+Allows the inspection of what happened during process execution. It should be able to replay the process. The system stores all diff event data coming from events. The Data-Audit subsystem listens to events issued by the following components and persists them in the configured storage:
 
 * Workflow Engine
 * User Tasks
 * Jobs Service
+
+See the associated xref:data-audit-api.html[Data-Audit API]
 
 
 === Using the Data-Audit add-on
@@ -179,6 +181,8 @@ modify User Task data (inputs and outputs), add comments and attachments to User
 * Customizable *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase.
 * Customizable User Task life cycle
 
+See the associated xref:user-tasks.html[User Tasks API]
+
 === The User Task life cycle
 
 The User Tasks subsystem defines a Default life cycle that enables users to transition a task through different phases that will change
@@ -201,8 +205,7 @@ NOTE: During the `Activate` and `Reassign` phases, if the task has a single pote
 
 === Persisting User Tasks data
 
-The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in database
-using the default application Data Source.
+The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database.
 
 To enable this functionality, the following dependency needs to be added to the application `pom.xml` file:
 
