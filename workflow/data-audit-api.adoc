@@ -1,0 +1,49 @@
+= Data-Audit API
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+
+The way to retrieve information from the Data-Audit is using GraphQL. This way you can abstract how the information is retrieved and allow different needs depending on the user.
+
+The path is `http://localhost:8080/data-audit/q` for sending GraphQL queries.
+
+== Example 1
+
+Execute a registered query, e.g. `GetAllProcessInstancesState` with a definition of data fields that should be returned:
+
+[source,console]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://localhost:8080/data-audit/q/ -d '
+{
+    "query": "{GetAllProcessInstancesState {eventId, processInstanceId, eventType, eventDate}}"
+}'|jq
+----
+
+To retrieve the GraphQL schema definition including a list of all registered queries, run a GET command to the `http://localhost:8080/data-audit/r` endpoint. This endpoint can also be used to register new queries.
+
+== Example 2
+
+Register a new query with a complex data type:
+
+[source,]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://localhost:8080/data-audit/r/ -d '
+{
+    "identifier" : "tests",
+    "graphQLDefinition" : "type EventTest { jobId : String, processInstanceId: String} type Query { tests (pagination: Pagination) : [ EventTest ] } ",
+    "query" : "SELECT o.job_id, o.process_instance_id FROM job_execution_log o"
+}'
+----
+
+Once registered, the new query can be executed similar to the pre-registered ones using the `http://localhost:8080/data-audit/q` endpoint:
+
+[source,]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://localhost:8080/data-audit/q/ -d '
+{
+    "query": "{tests {jobId, processInstanceId}}"
+}'|jq
+----
+
+
