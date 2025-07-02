@@ -47,7 +47,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 
 | *IDE Integration*
 | Business Central UI
-| *VS Code Extensions* for BAMOE Developer Tools
+| *BAMOE Developer Tools for VS Code* extension
 | Supports hot reload, debugging, and asset editing.
 
 | *Customization*
@@ -68,14 +68,14 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 
 | *Quarkus Version*
 | Quarkus 2.7.x
-| Optimized for Quarkus 3.20.1
+| Quarkus 3.20.1
 
 | *Spring Boot Version*
 | Spring Boot 2.5.12
-| Optimized for Spring Boot 3.4.6 (for Decisions and Rules)
+| Spring Boot 3.4.6 (for Decisions and Rules)
 
 | *Runtime Integration*
-| Kogito extensions for Quarkus/Spring Boot
+| Kogito extensions for Quarkus and Spring Boot
 | Native support for both Quarkus and Spring Boot
 
 | *Build Tooling*
@@ -107,14 +107,14 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Move fully to Maven for build metadata; use `application.properties` for runtime.
 
 | *Dependencies*
-| Managed via Business Central UI; tied to RHPAM BOMs.
+| Managed via Business Central UI; tied to RHPAM BOMs or via `pom.xml`.
 | Managed via `pom.xml`.
 | Replace RHPAM BOMs with Kogito/Quarkus/Spring Boot dependencies.
 
 | *KIE Bases*
 | Declared in `kmodule.xml`; required.
-| Optional; can be declared in code using `KieModuleModel` API or annotations. Check https://kie.apache.org/docs/10.0.x/drools/drools/KIE/index.html#_definingakiemoduleprogrammatically[Drools documentation].
-| In BAMOE v9, the use of KieBase--like KieSession--is no longer central to workflow execution. While still available for embedded or rule-based use cases, it is considered part of the Drools internals and should be avoided in workflow-centric applications. Prefer Java-based KIE module definitions for native compatibility and to align with the code generation approach recommended in v9.
+| N/A
+| 
 
 | *Data Objects*
 | Auto-generated POJOs in UI, editable in `src/main/java`.
@@ -123,13 +123,14 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 
 | *Validation*
 | Real-time via UI on save/build.
-| Via `mvn verify`, IDE plugins, or Quarkus/Spring Dev Mode.
+| Via `mvn verify`, VS Code "Problems" tab, BAMOE Canvas "Problems" tab or Quarkus/Spring Dev Mode.
 | Use IDE + Dev Mode for live validation.
 
 | *Custom Tasks*
 | `.wid` files + `workitem.conf` + deployment descriptor (`kie-deployment-descriptor.xml`).
-| `.wid` files still optional; better: use `@ServiceTaskHandler` + CDI beans.
-| Migrate to CDI-based task handlers.
+| `.wid` files + handler extending `org.kie.kogito.process.impl
+.DefaultWorkItemHandlerConfig`;
+| 
 
 | *Deployments*
 | Managed by Business Central; Development: deploys to KIE Server manually or via UI; Production: deploys to KIE Server from CI/CD.
@@ -169,10 +170,10 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Handled in code or rule headers; concept retained but implementation changed. +
 See xref:05-04-upgrading-individual-assets.adoc#global-variables[Global variables] chapter.
 
-| *WorkItemDefinitions.wid*
-| Defines custom Work Item Handlers (e.g., REST calls in BPMN)
-| Format unchanged, but BAMOE encourages Java service tasks instead. +
-See xref:05-04-upgrading-individual-assets.adoc#wids[Work Item Definition] chapter.
+| *.wid*
+| Defines custom Work Item Handlers
+| Defines custom Work Item Handlers. 
+See xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading Work Item Handlers] to check what you need to address.
 
 | *patterns.json*
 | UI form templates for human tasks
@@ -180,15 +181,15 @@ See xref:05-04-upgrading-individual-assets.adoc#wids[Work Item Definition] chapt
 
 | *themes.json*
 | UI theming for Business Central
-| BAMOE CLI and web tools do not support UI theming.
+| BAMOE Developer Tools for VS Code, BAMOE Canvas and BAMOE Management Console do not support UI theming.
 
 | *src/main/resources/META-INF/*
 | Metadata for KIE containers
-| Still used for backward compatibility, but less dependency on static XMLs.
+| Still used for BAMOE v9 _Business Service_ metadata files.
 
 | *kmodule.xml*
 | Defines KIE bases, sessions, and includes
-| Can be omitted in BAMOE in favor of programmatic KieContainer creation.
+| Not present. 
 
 | *kie-deployment-descriptor.xml*
 | Deployment settings (runtime strategy, marshalling, etc.)
@@ -196,13 +197,15 @@ See xref:05-04-upgrading-individual-assets.adoc#wids[Work Item Definition] chapt
 
 | *persistence.xml*
 | JPA configuration for process persistence
-| BAMOE supports custom persistence via Quarkus or Spring Boot configuration mechanisms. Read more on https://ibmdocs-test.dcs.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-configuring-persistence-stateful[Configuring persistence for stateful Workflows]
+| BAMOE supports custom persistence via Quarkus or Spring Boot configuration mechanisms. Read more on https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-configuring-persistence-stateful[Configuring persistence for stateful Workflows]
 
 | *Test Scenario*
 | `.scesim` files are placed under `src/test/resources` +
 JUnit 4 support +
-Activator Annotation -- `@RunWith(org.drools.workbench.screens.scenariosimulation.
-backend.server.runner.ScenarioJunitActivator.class)`
+Activator Annotation -- `@RunWith(org.drools.workbench
+.screens.scenariosimulation
+.backend.server.runner
+.ScenarioJunitActivator.class)`
 | `.scesim` files are placed under `src/test/resources` +
 JUnit 5 compatible +
 Activator Annotation -- `@TestScenarioActivator` +
