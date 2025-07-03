@@ -22,8 +22,8 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Programmatic instantiation of `KieBase`/`KieSession`
 |===
 
-* For more details on upgrading xref:05-02-upgrading-client-server-projects.adoc[*Client-Server* projects], see the Client-Server Projects chapter.
-* For more details on upgrading xref:05-03-upgrading-standalone-projects.adoc[*Standalone* projects], see the Standalone Projects chapter
+* For more details on upgrading see the xref:05-02-upgrading-client-server-projects.adoc[*Client-Server* projects] section.
+* For more details on upgrading see the xref:05-03-upgrading-standalone-projects.adoc[*Standalone* projects] section.
 
 == Project generation comparison on BAMOE 8 and 9.2 
 
@@ -33,7 +33,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | *Tooling Approach*
 | Web-based project creation via Business Central UI
 | CLI or IDE-based (e.g., VS Code) project generation
-| BAMOE shifts from UI to developer-centric tooling.
+| v9 shifts from UI to developer-centric tooling.
 
 | *BAMOE Accelerators*
 | Not available
@@ -53,7 +53,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | *Customization*
 | Through Business Central UI and XML descriptors
 | Through `application.properties`, annotations, and Quarkus/Spring Boot extensions
-| BAMOE favors code-first, config-light development.
+| v9 favors code-first, config-light development.
 
 | *Git Integration*
 | JGit-based virtual Git in Business Central UI
@@ -83,12 +83,12 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Maven CLI, Dev Services, Docker/K8s ready
 
 | *Configuration*
+| `application.properties`, `pom.xml`, `kmodule.xml`, `kie-deployment-descriptor.xml`, `persistence.xml`
 | `application.properties`, `pom.xml`
-| Same, but with Quarkus/Spring Boot extensions
 
 | *Deployment*
 | KIE Server or custom runtime
-| Uber-JAR, native image, or container
+| Uber-JAR, native image, or container image
 |===
 
 == Configuration comparison of BAMOE 8 and BAMOE 9.2
@@ -114,7 +114,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | *KIE Bases*
 | Declared in `kmodule.xml`; required.
 | N/A
-| 
+| N/A
 
 | *Data Objects*
 | Auto-generated POJOs in UI, editable in `src/main/java`.
@@ -127,7 +127,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | Use IDE + Dev Mode for live validation.
 
 | *Custom Tasks*
-| `.wid` files + `workitem.conf` + deployment descriptor (`kie-deployment-descriptor.xml`).
+| `.wid` files + `workitem.conf` + `kie-deployment-descriptor.xml`.
 | `.wid` files + handler extending `org.kie.kogito.process.impl
 .DefaultWorkItemHandlerConfig`;
 | 
@@ -168,7 +168,7 @@ This section outlines the key structural differences between BAMOE v8 and v9, in
 | *global/ directory*
 | Defines global variables (e.g., services, constants)
 | Handled in code or rule headers; concept retained but implementation changed. +
-See xref:05-04-upgrading-individual-assets.adoc#global-variables[Global variables] chapter.
+See xref:05-04-upgrading-individual-assets.adoc#global-variables[Global variables] section.
 
 | *.wid*
 | Defines custom Work Item Handlers
@@ -177,7 +177,7 @@ See xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading Work Item Hand
 
 | *patterns.json*
 | UI form templates for human tasks
-| BAMOE does not have integrated UI form modeler like Business Central.
+| BAMOE Developer Tools for VS Code provides a command to generate forms, and BAMOE Quarkus Dev UI provides a form editor. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=code-form-generation-user-tasks[Form code generation functionality] section.
 
 | *themes.json*
 | UI theming for Business Central
@@ -192,12 +192,12 @@ See xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading Work Item Hand
 | Not present. 
 
 | *kie-deployment-descriptor.xml*
-| Deployment settings (runtime strategy, marshalling, etc.)
-| BAMOE uses code-based configuration; runtime strategy is defined via Quarkus or Spring Boot APIs.
+| Deployment descriptors configuration, are applied during KJAR deployment.
+| Configurations and activators are in Java and `application.properties` file. Read https://ibm.com/docs/en/ibamoe/9.2.x?topic=developing-stateful-workflows[Developing stateful Workflows] section for more information.
 
 | *persistence.xml*
 | JPA configuration for process persistence
-| BAMOE supports custom persistence via Quarkus or Spring Boot configuration mechanisms. Read more on https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-configuring-persistence-stateful[Configuring persistence for stateful Workflows]
+| Persistence is available for stateful workflows, and should be configure following the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-configuring-persistence-stateful[Configuring persistence for stateful Workflows] guide.
 
 | *Test Scenario*
 | `.scesim` files are placed under `src/test/resources` +
@@ -209,5 +209,5 @@ Activator Annotation -- `@RunWith(org.drools.workbench
 | `.scesim` files are placed under `src/test/resources` +
 JUnit 5 compatible +
 Activator Annotation -- `@TestScenarioActivator` +
-See xref:05-04-upgrading-individual-assets.adoc#scesim[Test Scenarios] chapter.
+See xref:05-04-upgrading-individual-assets.adoc#scesim[Test Scenarios] section.
 |===
