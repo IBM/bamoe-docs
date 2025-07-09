@@ -38,7 +38,7 @@ minimal set of dependencies are:
 </dependency>
 ----
 
-* KIE JDBC Persistence Add-on for Quarkus: Enables persistence for the process engine with JDBC.
+* KIE JDBC Persistence Add-on for Quarkus: Enables persistence for the Workflow Engine with JDBC.
 
 [source,xml]
 ----
@@ -49,7 +49,7 @@ minimal set of dependencies are:
 ----
 
 NOTE: For full information about how to configure DataSources in Quarkus, check the
-https://quarkus.io/version/3.15/guides/datasource[Configure data sources in Quarkus] guide.
+https://quarkus.io/version/3.20/guides/datasource[Configure data sources in Quarkus] guide.
 
 
 === Configuring persistence for PostgreSQL
@@ -121,7 +121,7 @@ quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0
 kogito.persistence.type=jdbc
 ----
 
-NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services, ensure to read the https://quarkus.io/version/3.15/guides/databases-dev-services[Dev Services for Databases] guide and apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.15/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
+NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services, ensure to read the https://quarkus.io/version/3.20/guides/databases-dev-services[Dev Services for Databases] guide and apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.20/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
 
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
@@ -147,6 +147,76 @@ And in the `application.properties`:
 [source,properties]
 ----
 quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+==== Transaction isolation settings for Microsoft SQL Server
+
+In order to ensure {PRODUCT_SHORT} is working properly when configured with a Microsoft SQL Server database, the following settings need to be applied at the database level:
+[source,properties]
+----
+    ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
+    ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
+----
+
+These settings are required to prevent database deadlocks when resources in {PRODUCT_SHORT} are accessed concurrently.
+
+=== Configuring persistence for Oracle
+
+To configure Oracle persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-oracle</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Oracle
+quarkus.datasource.db-kind=oracle
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+==== {PRODUCT_SHORT} mappings for Oracle
+
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+
+* META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-oracle-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
 ----
 
 
@@ -202,26 +272,6 @@ Your development database schema will be automatically created for you.
 For production environemnts, see xref:../runtime-services-modeling/services-deployment.adoc##production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
 ====
 
-
-== Authentication in User Task API endpoints
-The xref:../user-tasks.adoc[User Task API] layer integrates an  Authentication layer.  All the endpoints in the User Task API layer require, as QueryParameters, the groups and the user associated with a User Task under management.
-To enable the Authentication in the User Task API endpoints, the following properties should be set in the `application.properties` file of your project:
-
-[cols="1,1,1,1"]
-|===
-|*Property* |*Description* |*Type* |*Default* 
-
-|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
-
-|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
-Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
-
-|===
-
-
-To have a fully enabled authentication mechanism working for the User Tasks with the above features, you will need to have the entire Authentication/Authorization layer configured, as described in the xref:../runtime-services-modeling/security.adoc[Security section]
-
-
 [#transactions]
 == Transactional operations on Compact Architecture
 All the operations performed by the Process API layer on the Compact Architecture are transactional. In detail, all the endpoints are now compliant with the ACID properties, namely that in case of failure during a transaction, the action is undone, and any applied change is rolled back to  restore the consistent state that existed before the transactional operation started. This makes all the operations performed on the Compact Architecture reliable and safe. 
@@ -237,8 +287,21 @@ It is possible to disable the default behavior and make the operation no longer 
 
 |`kogito.transactionEnabled` |Globally sets transactions as enabled for the entire application |Boolean |true
 
-|`kogito.processes.transactionEnabled` |Sets the transactions as enabled for the general Process API layer, overriding global behavior |Boolean |true
+|`kogito.processes.transactionEnabled` |Sets the transactions as enabled for the Process API layer, overriding global behavior |Boolean |true
 
 |`kogito.usertasks.transactionEnabled`|Sets the transactions as enabled for the new User Tasks API layer, overriding global behavior |Boolean |true
 |===
 
+[#multithreading]
+== Multi-threaded access to a _Business Service_
+In an environment with multi-threaded access to a _Business Service_ the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
+Use optimistic locking to ensure that concurrent access of the same database entity (E.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
+
+[source,properties]
+----
+# Enable optimistic locking
+kogito.persistence.optimistic.lock=true
+----
+
+- With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime. For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance.
+- With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.

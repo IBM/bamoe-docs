@@ -1,0 +1,140 @@
+# Upgrading UserGroupCallbak and AssignmentStrategy
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+== Upgrading UserGroupCallback
+
+In BAMOE v8, the `UserGroupCallback` interface served the purpose of an identity provider and also acted as a user repository. This interface facilitated integration with external identity management systems such as LDAP, databases, or properties files to resolve user identities and their associated groups.
+
+Key implementations included:
+
+* JAASUserGroupCallbackImpl: Integrated with the application server's security context to fetch user and group information.
+* DBUserGroupCallbackImpl: Retrieved user and group details from a database.
+* LDAPUserGroupCallbackImpl: Accessed user and group information from an LDAP directory.
+* PropsUserGroupCallbackImpl: Defined users and groups via a properties file.
+* Custom Implementations: Allowed for bespoke integrations with other identity systems.
+
+BAMOE v9 replaces the `UserGroupCallback` mechanism with the `IdentityProvider` interface, aligning with modern security practices. Authentication and authorization are now delegated to the runtime environment (Quarkus or Spring Boot), which integrates with external identity providers using OpenID Connect (OIDC) and OAuth 2.0.
+
+The IdentityProvider interface provides methods such as `getIdentity()`, `getName()`, and `hasRole()`, and relies on the runtime's security context to resolve user identity and roles. This identity information can come from a JWT token or any other mechanism supported by the runtime.
+
+=== Behavior in non-secured applications
+
+For applications without OIDC enabled, user and group information can be passed directly via query parameters when interacting with user task endpoints. For example:
+
+[,java]
+----
+POST /usertasks/instances/{id}/transition?user=admin&group=Manager&group=IT
+----
+
+This constructs an `IdentityProvider` for user admin with roles Manager and IT.
+
+This behavior is only allowed when:
+
+* Authentication is disabled (`kogito.security.auth.enabled=false`), or
+* The authenticated user is allowed to impersonate others via the `kogito.security.auth.impersonation.allowed-for-roles` property.
+
+[,properties]
+----
+kogito.security.auth.enabled=false
+kogito.security.auth.impersonation.allowed-for-roles=managers
+----
+
+=== Behavior in secured applications (OIDC enabled)
+
+When OIDC is enabled and `kogito.security.auth.enabled=true`, user identity and roles are extracted from the bearer token provided in the Authorization header:
+
+[,sh]
+----
+Authorization: Bearer <my_access_token>
+----
+
+In this case, query parameters like user and group are ignored. The identity is derived from the token claims, ensuring secure and consistent authentication.
+
+Refer to the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading Authentication Authorization guide] to check how to setup OIDC effectevely.
+
+=== Integration with Identity Providers (IdPs)
+
+BAMOE v9 supports integration with external Identity Providers (IdPs) that support OpenID Connect (OIDC). Roles or groups defined in the IdP can be used for task assignments. For example, if a user belongs to the `managers` group in the IdP, tasks assigned to that group will be routed accordingly.
+
+The identity and roles are extracted from the token and mapped to the `IdentityProvider` interface, which is used internally by the BAMOE runtime.
+
+=== QuarkusIdentityProvider
+
+In Quarkus-based BAMOE applications, the `QuarkusIdentityProvider` acts as a bridge between the Quarkus security context and the Kogito runtime. It extracts user and role information from the Quarkus security context and exposes it to the Workflow Engine.
+
+This ensures that identity resolution is consistent with the application's security configuration and that role-based access control is enforced correctly.
+
+== Upgrading AssignmentStrategy
+
+In BAMOE v8, task assignment was managed using the `AssignmentStrategy` mechanism, which allowed automatic allocation of user tasks based on predefined strategies. This was configured using the system property `org.jbpm.task.assignment.strategy`. If the strategy was not set, no automatic assignment was applied. The strategy name could also be passed as a data input to the user task.
+
+=== Assignment strategies in BAMOE 8
+
+BAMOE v8 supported several built-in strategies:
+
+* Potential Owner Busyness Strategy: Assigned tasks to the least busy user among the potential owners.
+* Business Rules Strategy: Used Drools rules to determine task ownership dynamically.
+* RoundRobin Strategy: Distributed tasks evenly among available users.
+
+These strategies helped optimize task distribution based on workload, business logic, or fairness.
+
+=== Assignment strategies in BAMOE 9
+
+BAMOE v9 introduces a more flexible and extensible approach through the `UserTaskAssignmentStrategy` interface. Instead of relying on system properties and predefined strategies, developers can now implement custom logic tailored to specific business requirements.
+
+This interface is part of the Kogito runtime and integrates with the platform's security context to make informed assignment decisions.
+
+==== UserTaskAssignmentStrategy interface
+
+The interface defines a single method, `computeAssignment`, which returns an optional user ID to whom the task should be assigned:
+
+[,java]
+----
+public interface UserTaskAssignmentStrategy {
+    static final String DEFAULT_NAME = "default";
+
+    default String getName() {
+        return getClass().getName();
+    }
+
+    Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider);
+}
+----
+
+==== Implementing a custom strategy
+
+To implement a custom assignment strategy, create a class that implements the `UserTaskAssignmentStrategy` interface. The logic inside `computeAssignment` can use task metadata, user roles, or any other contextual information.
+
+Example:
+
+[,java]
+----
+import org.kie.kogito.process.workitem.UserTaskAssignmentStrategy;
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class CustomUserTaskAssignmentStrategy implements UserTaskAssignmentStrategy {
+    @Override
+    public Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider) {
+        System.out.println("Computing assignment using custom User Task assignment strategy.");
+        // Your custom logic goes here. For example:
+        if ("hr_interview".equals(userTaskInstance.getTaskName())) {
+            return Optional.of("recruiter");
+        } else if ("it_interview".equals(userTaskInstance.getTaskName())) {
+            return Optional.of("developer");
+        } else {
+            return Optional.empty();
+        }
+    }
+}
+----
+
+This example demonstrates a simple role-based assignment strategy based on the task name.
+
+=== Integration with Identity Providers
+
+When integrated with an Identity Provider (IdP), the assignment strategy can leverage identity attributes like roles or groups to make assignment decisions. For instance, if the IdP defines groups for HR and IT, tasks can be dynamically routed to users based on their group membership.
+
+The `IdentityProvider` interface in BAMOE v9 provides access to the authenticated user's identity and roles, typically derived from the runtime's security context (e.g., Quarkus `SecurityIdentity`). This ensures that task assignments are consistent with the authenticated user's permissions and organizational role.
+

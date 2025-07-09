@@ -24,24 +24,24 @@ If this add-on is not enabled for your _Business Service_, the {MANAGEMENT_CONSO
 
 {MANAGEMENT_CONSOLE} consists of the following pages that allow you to interact with your process instances and data:
 
-* *Process Instances*: List process and subprocess instances and filter them by status or business key;
+* *Process Instances*: List process and subprocess instances and filter them by Process Definition ID/name, Process Instance ID, business key, or status.
 
-* *Jobs*: List available jobs, filter them by status, and perform actions for any individual one, such as view details, reschedule, or cancel.
+* *Jobs*: List available jobs, filter them by Process Instance ID, Task ID, Process Definition ID/name, status, and perform actions for any individual one, such as view details, reschedule, or cancel.
 
-* *Tasks*: List User Tasks from Processes, filter them by status or name, and submit forms to fulfill tasks.
+* *Tasks*: List User Tasks from Processes, filter them by Process Instance ID, Task ID, Process Definition ID/name, status or name, and submit forms to fulfill tasks.
 
 But before you can use these pages, you need to connect your _Business Service_ to the {MANAGEMENT_CONSOLE}.
 
 == Connecting to a _Business Service_
 
-image::runtime-services-modeling/mgmt-console-home-no-connections.png[Image of {MANAGEMENT_CONSOLE} home page without connections]
-
-To do so, click on the **+ Connect to a runtime…** button and fill in the required information on the
+You will be connected to a  _Business Service_ by clicking the **+ Connect to a runtime…** button and filling the required information on the
 modal:
 
 - **Alias**: The name to give your connected _Business Service_ instance (can be anything that helps you identify it).
 - **URL**: The _Business Service_ root URL (E.g., http://localhost:8080).
 - **Force login prompt (for secured runtimes only)**: Check this if you are already logged in your Identity Provider but would like to log in again (maybe with a different user).
+
+image::runtime-services-modeling/mgmt-console-home-no-connections.png[Image of {MANAGEMENT_CONSOLE} home page without connections]
 
 More settings are available in the **Advanced OpenID Connect settings** section:
 
@@ -63,12 +63,64 @@ image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.
 [NOTE]
 For information on how to secure your _Business Service_ and expose the Indentity Provider URL to the {MANAGEMENT_CONSOLE} check xref:./security.adoc[Securing Business Service API endpoints]
 
+// adding the pre-configured runtimes here but it needs more thought on how to integrate with above
+
+=== Pre-configured connected runtimes
+
+It is possible set up a pre-configured list of runtimes, defined via an environment variable, available via the `env.json` file. Selecting a different AuthSession updates the state and closes the drawer. This allow users to connect to pre-defined listed runtimes without having to manually configure each one.
+
+Example of a value for the environment variable:
+
+[source,shell]
+----
+{
+    "BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES": [
+        {
+            "alias": "My Business Service 1",
+            "runtimeUrl": "http://localhost:8081",
+            "identityProviderUrl": "http://localhost:8181/realms/bamoe"
+        },
+        {
+            "alias": "My Business Service 2",
+            "runtimeUrl": "http://localhost:8082",
+            "identityProviderUrl": "http://localhost:8182/auth/realms/myrealm",
+            "clientId": "bamoe-management-console",
+            "scopes": "openid email profile offline_access",
+            "audience": "bamoe-service"
+        },
+        {
+            "alias": "My Business Service 3",
+            "runtimeUrl": "http://localhost:8083"
+        },
+        ...
+    ]
+} 
+----
+
+The only required properties are alias and `runtimeUrl`. The other properties are optional and can be used to configure the connection with an identity provider.
+
+If no `identityProviderUrl` is provided, the Management Console checks the quarkus-oidc-proxy endpoint to determine the Identity Provider URL (if the runtime is secured). 
+
+If no clientId, scopes or audience are provided, the Management Console uses default values. 
+
+If multiple runtimes share the same `indentityProviderUrl`, `clientId`, `scopes`, and `audience`, the Management Console should reuse the same token for all of them.
+
+On the first load, the Management Console will create AuthSessions for each runtime listed in the BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES environment variable. Each runtime will then start authenticating. 
+
+If the runtime requires authentication, the Management Console will redirect to the login page, unless the user is already authenticated with the same Identity Provider (using the same clientId, scopes, and audience), in this case the same token can be used for all runtimes.
+
+== Overview
+
+The Overview page displays a summary of all Process Instances, grouped by Process Definition ID. This includes basic information such as the name of the Process Definition, number of running instances, completed instances, and failed instances, represented by a bar graph. At the top there should be an aggregated bar graph for all Process Instances.
+
+image::runtime-services-modeling/mgmt-console-overview.png[Image of {MANAGEMENT_CONSOLE} overview]
+
 == Process Instances
+
+The Process Instances page shows the list of process instances available. They are displayed in an expandable list, which shows all the child process instances of the particular process instance when expanded.
 
 .Process Instances page
 image::runtime-services-modeling/mgmt-console-process-instances.png[Image of Process Instance list section]
-
-The Process Instances page shows the list of process instances available. They are displayed in an expandable list, which shows all the child process instances of the particular process instance when expanded.
 
 Each row in the list contains the information about the process instance, including details like _name_, _status_, _endpoint_ etc. The list also provides many ways to filter out the process instances and perform management operations.
 
@@ -86,7 +138,7 @@ The *Process Details* page consists of the following panels:
 * Jobs panel
 
 
-=== Process Diagram panel:
+=== Process Diagram panel
 --
 This panel enables you to explore the Process diagram and execution path of the related process instance.
 The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` resources using the {PRODUCT_SHORT} Process SVG add-on configuration included in the {MANAGEMENT_CONSOLE}.
@@ -97,7 +149,7 @@ image::runtime-services-modeling/mgmt-console-process-diagram-panel.png[Image of
 This panel includes different controls to view the Process diagram, such as *Selection*, *Pan*, *Zoom in*, *Zoom out*, and *Fit to viewer*.
 --
 
-=== Details panel:
+=== Details panel
 --
 This panel displays the basic Process instance information and provides links to the related Process runtime UI.
 If the Process instance is related to other Process instances, then links to the parent and subprocess instances are also available in the *Details* panel.
@@ -123,7 +175,7 @@ image::runtime-services-modeling/mgmt-console-process-details-endpoint.png[Image
 * *Sub Processes*: Subprocess of the instance (if linked). You can click and navigate to the subprocess instances.
 --
 
-=== Process Variables panel:
+=== Process Variables panel
 --
 The *Process Variables* panel displays the Process instance domain data in a tree structure.
 When you hover the mouse on different elements, the available actions are displayed.
@@ -151,7 +203,7 @@ To save the changes that you made to the process variable, click *Save*, or clic
 If you want to revert the changes, click the refresh icon.
 --
 
-=== Timeline panel:
+=== Timeline panel
 --
 The *Timeline* panel displays the list of node instances related to the Process instance sorted by the start time.
 Each node consists of an icon, indicating the state of the node, such as active, completed, or error.
@@ -166,7 +218,7 @@ The node actions in the *Timeline* panel are connected with the _Business Servic
 If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*.
 --
 
-=== Node Trigger panel:
+=== Node Trigger panel
 --
 The *Node Trigger* panel displays the list of all Process Definition nodes in a drop-down.
 When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*.
@@ -176,7 +228,7 @@ Click the *Trigger* button, to trigger the selected node.
 image::runtime-services-modeling/mgmt-console-node-trigger-panel.png[Image of node trigger panel in {MANAGEMENT_CONSOLE}]
 --
 
-=== Milestones panel:
+=== Milestones panel
 --
 The *Milestones* panel displays a list of the milestones for the Process instance, if applicable.
 
@@ -184,7 +236,7 @@ The *Milestones* panel displays a list of the milestones for the Process instanc
 image::runtime-services-modeling/mgmt-console-milestones-panel.png[Image of milestones panel in {MANAGEMENT_CONSOLE}]
 --
 
-=== Jobs panel:
+=== Jobs panel
 --
 The *Jobs* panel displays the list of available jobs that are related to the Process instance.
 
@@ -198,6 +250,12 @@ You can reschedule or cancel a job that is in scheduled or error state.
 You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
 --
 
+== Process Definitions
+
+The Process Definitions list page shows the list of process definitions available. They are displayed in an expandable list, which shows all the child process instances of the particular process definition when expanded.
+
+image::runtime-services-modeling/mgmt-console-process-definition-page.png[Image of Process Definition page in {MANAGEMENT_CONSOLE}]
+
 == Jobs
 
 The *Jobs* page displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, rescheduling a job, or canceling a job.
@@ -208,22 +266,22 @@ image::runtime-services-modeling/mgmt-console-jobs-list.png[Image of Jobs List p
 Clicking on the actions menu for each actions shows a list of available actions: *Details*, *Reschedule*, and *Cancel*.
 
 .Job actions menu
-image::runtime-services-modeling/mgmt-console-job-menu.png[Image of Jobs List page in {MANAGEMENT_CONSOLE}]
+image::runtime-services-modeling/mgmt-console-job-menu.png[Image of Jobs List page in {MANAGEMENT_CONSOLE},300]
 
 === Jobs Details
 
 .Job details modal
-image::runtime-services-modeling/mgmt-console-job-details.png[Image of Jobs details modal]
+image::runtime-services-modeling/mgmt-console-job-details.png[Image of Jobs details modal,720]
 
 === Jobs reschedule
 
 .Job reschedule modal
-image::runtime-services-modeling/mgmt-console-job-reschedule.png[Image of Jobs reschedule]
+image::runtime-services-modeling/mgmt-console-job-reschedule.png[Image of Jobs reschedule,400]
 
 === Jobs cancel
 
 .Job cancel success modal
-image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel modal]
+image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel modal,400]
 
 You can also cancel the multiple jobs at the same time by selecting the jobs to be canceled and clicking the *Cancel Selected* button.
 
@@ -262,3 +320,5 @@ To stop impersonation, click the **Reset** button.
 
 [NOTE]
 When viewing User Tasks from a secured _Business Service_ with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
+
+

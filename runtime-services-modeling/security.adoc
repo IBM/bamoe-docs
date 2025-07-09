@@ -3,7 +3,7 @@ include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 
-_Business Services_ on {PRODUCT_SHORT} rely on Quakus or Spring Boot for configuring authentication and authorization, and will query their provided security-related data for information about who is the authenticated user performing a request and what permissions (roles/groups) they have, especially the stateful Workflows subsystem for User Tasks.
+_Business Services_ on {PRODUCT_SHORT} rely on Quarkus or Spring Boot for configuring authentication and authorization, and will query their provided security-related data for information about who is the authenticated user performing a request and what permissions (roles/groups) they have, especially the stateful Workflows subsystem for User Tasks.
 
 After configuring your _Business Service_ correctly to integrate its security layer, it is possible to rely on an external Identity Providers (IdPs) like Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution.
 
@@ -12,7 +12,7 @@ After configuring your _Business Service_ correctly to integrate its security la
 
 == Authentication (Quarkus)
 
-Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.15/guides/security-oidc-bearer-token-authentication[guide] that explains how to do the set up correctly.
+Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.20/guides/security-oidc-bearer-token-authentication[guide] that explains how to do the set up correctly.
 
 The first step is to configure the Quarkus OpenID Connect (OIDC) extension by setting the properties in the `src/main/resources/application.properties` file. 
 
@@ -30,7 +30,7 @@ quarkus.oidc.credentials.secret=secret
 quarkus.oidc.application-type=hybrid
 ----
 
-The following table describes in detail the properties suggested in the example, but it is only a subset of https://quarkus.io/version/3.15/guides/security-oidc-configuration-properties-reference[all properties available here].
+The following table describes in detail the properties suggested in the example, but it is only a subset of https://quarkus.io/version/3.20/guides/security-oidc-configuration-properties-reference[all properties available here].
 
 
 [%header,cols=4]
@@ -67,7 +67,7 @@ property should be set as
 
 == Authorization (Quarkus)
 
-Quarkus incorporates a pluggable web security layer. When security is active, the system performs a permission check on all HTTP requests to determine if they should proceed. For more information, see the official Quarkus guide for https://quarkus.io/version/3.15/guides/security-authorize-web-endpoints-reference[Authorization of web endpoints].
+Quarkus incorporates a pluggable web security layer. When security is active, the system performs a permission check on all HTTP requests to determine if they should proceed. For more information, see the official Quarkus guide for https://quarkus.io/version/3.20/guides/security-authorize-web-endpoints-reference[Authorization of web endpoints].
 
 Following is an example of the configuration:
 
@@ -132,6 +132,21 @@ defined, and extensions
 |===
 
 
+== Authentication in User Task API endpoints
+The xref:../workflow/user-tasks.adoc[User Task API] integrates seamlessly with Authentication and Authorization mechanisms of Quarkus, with the option to receive `user` and `groups` as QueryParameters. For this integration to happen, the following properties should be set in the `application.properties` file of your _Business Service_ project:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
+
+|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
+Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
+
+|===
+
+
 [#mgmt-console-oidc-proxy]
 == Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_
 
@@ -146,8 +161,8 @@ To add the `quarkus-oidc-proxy` extension, you need to add the following code to
 <dependency>
   <groupId>io.quarkiverse.oidc-proxy</groupId>
   <artifactId>quarkus-oidc-proxy</artifactId>
-  <version>0.1.3</version>
+  <version>0.2.2</version>
 </dependency>
 ----
 
-NOTE: Version 0.1.3 of `quarkus-oidc-proxy` is compatible with Quarkus 3.15 (LTS). Do not use versions 0.2.x.
+NOTE: Version 0.2.2 of `quarkus-oidc-proxy` is compatible with Quarkus 3.20 (LTS). Do not use versions 0.1.x or 0.3.x.

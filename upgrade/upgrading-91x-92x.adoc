@@ -2,9 +2,11 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-The usual upgrade path recommended for users is to upgrade to the next version (n) before upgrading to an n+1 version. However because of the similiarites between {VERSION_910} and {VERSION_911} this section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911}. 
+This section describes how to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_910} and {VERSION_911} to the most recent {VERSION_92X}. See the following docs if you are upgrading from a version prior to this:
 
-NOTE: Due to the significant architecture change between {PRODUCT_SHORT} {VERSION_80X} and 9.x, if you have not already upgraded to versions {VERSION_90X} or {VERSION_91X}, we do not recommend that you upgrade to {VERSION_920}. When the required features are available in a 9.2.x release the detailed migration procedures will be provided. 
+* xref:upgrading-80x-921.adoc[Upgrading from {VERSION_80X}]
+* xref:https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=upgrading[Upgrading from {VERSION_90X}]
+* xref:upgrading-920-921.adoc[Upgrading from {VERSION_92X}]
 
 Depending on the complexity of your installation, you might want IBM(R) Services to participate in your project. If so, contact your IBM service representative.
 
@@ -16,7 +18,7 @@ This guide will walk you through upgrading your:
 
 * {PRODUCT_SHORT} production environment installation with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
 
-If you are using the {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:#migrate-tech-preview[this section].
+If you are using the {VERSION_91X} technology preview for stateful Workflows, you will find instructions on what to do to migrate your stateful workflow projects in xref:migrate-tech-preview[this section].
 
 == Step 1: Download product archives
 
@@ -71,13 +73,6 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} development environment installation with {MVN_REPO} @ {IMAGE_VERSION}
 
-[NOTE]
-====
-After completing the upgrade of your _Business Service_ project, you might want to consider upgrading your business Rules to use new DRL features, such as `rule units` and `OOPATH syntax`.
-
-Refer to xref:../reference-guide/drl.adoc[Reference → Drools Rule Language (DRL)] for information on upgrading to the latest version of Drools Rule Language (DRL).
-====
-
 [#step-3a]
 == Step 3a: Upgrade _Business Service(s)_ project(s) on {PRODUCT_SHORT} version {VERSION_91X}
 
@@ -111,18 +106,18 @@ If you come across some difficulties when trying to upgrade your existing _Busin
 [start=3]
 . Update the `application.properties` file.
 +
-{PRODUCT_SHORT} version {VERSION} does not fully support the Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
+{PRODUCT_SHORT} version {VERSION} does not fully support Quarkus Dev Services and hence it is required to disable this feature by adding the following line to the `src/main/resources/application.properties` file:
 
 +
 [source,diff]
 ----
- +++ quarkus.devservices.enabled=false
+ + quarkus.devservices.enabled=false
 ----
 
 
 [NOTE]
 ====
-Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change that is related to Quarkus.
+Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 migration guide] for any other change related to Quarkus.
 ====
 
 [#step-3b]
@@ -130,7 +125,7 @@ Refer https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.0[Quarkus v3 m
 
 If you have experienced some difficulties when trying to upgrade your project you can create a new _Business Service_ project from scratch and import your existing business automation assets (Workflows, Decisions, Rules, and Decision Tables) to the new project.
 
-For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup and walkthrough] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+For more information, see xref:../getting-started/project-setup.adoc[Getting started → Initial Business Service project setup] to create a new _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
 The most significant folder is `src/main/resources`, which is where new or upgraded business automation asset files must be stored.
 
@@ -138,7 +133,7 @@ Examples of supported business automation assets are:
 
 - Decision Model & Notation (DMN) decisions (`.dmn`)
 - Drools Rule Language (DRL) rules (`.drl`)
-- Business Process Modeling & Notation (BPMN) workflows (`.bpmn`)
+- Business Process Model & Notation (BPMN) workflows (`.bpmn`)
 - Spreadsheet Decision Table files (`.xls` or `.xlsx`)
 - Standard Properties files (`.properties`)
 - Test Scenario files (`.scesim`)
@@ -183,14 +178,14 @@ If you are getting started with stateful Workflows, follow xref:../installation/
 
 Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
 
-[#migrate-tech-preview]
+[id="migrate-tech-preview"]
 == Upgrading from {PRODUCT_SHORT} version {VERSION_911} technology preview for stateful Workflows
 
-In the {VERSION_911} technology preview the general Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
+In the {VERSION_911} technology preview the Process API was used to call your stateful process. In this version a new User Tasks API is built on top of a dedicated User Tasks subsystem. As a direct impact of that there are three key changes to be taken into account:
 
 * The new User Tasks API does not require global parameters related to the whole process (such as `process ID`, `process instance ID` and `task name`). The `task ID` is the key and most of the time it is the only actor to operate with the new API. 
 +
-In version {VERSION_911}, the General Process API entrypoints are based on the following pattern:
+In version {VERSION_911}, the Process API entrypoints are based on the following pattern:
 +
 `http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +
@@ -200,7 +195,7 @@ In version {VERSION} the User Task API entrypoints are based on the following pa
 
 * The Task ID used in the User Tasks is not the same ID required in the Process API. The reason for this behavior is that the new API relies on a new subsystem. The subsystem base has its own IDs, that are not recognized by the Process API. This is an important point to understand before you start upgrading to the new API. 
 +
-For example the `<task-instance-id>` referenced in the General Process API call:
+For example the `<task-instance-id>` referenced in the Process API call:
 +
 `http://<host:port>/<process-id>/<process-instance>/<task-name>/<task-instance-id>`
 +

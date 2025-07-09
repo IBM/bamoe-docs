@@ -1,0 +1,26 @@
+= Live data considerations
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+As highlighted in previous chapters of this document, migrating from BAMOE v8 to v9 involves more than just upgrading libraries, it's a shift in architecture, development model, and runtime behavior. The persistence data model has undergone significant changes between the two versions, resulting in several differences between the database schemas. In order to reflect the modular nature of a BAMOE v9 application, the database schema is composed of several individual modules for each of the workflow related subsystems provided by the framework. In contrast, the database schema in v8 resembles the monolithic approach of the legacy product architecture, with only some of the components being optional (eg. audit logging) or configurable (eg. timer implementation).
+
+To get an understanding of the differences in the data model between the two versions, please refer to the corresponding links of the BAMOE documentation:
+
+* https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=settings-managing-monitoring-kie-server[BAMOE v8 session persistence entities]
+* https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=reference-bamoe-stateful-workflows-subsystems-database-tables[BAMOE v9.2 database tables]
+
+NOTE: In addition to the differences in the relational models, it is important to highlight that the process state in each version is persisted in binary format. In order to properly read/write this data, each version contains specific classes to marshall/unmarshall the data between the binary format stored in the database, and the object graph used at runtime. Binary data persisted with the legacy v8 libraries cannot be loaded directly by the new v9 libraries.
+
+In order to upgrade BAMOE workflow projects from version 8 to 9, including persistent data, the following approach is recommended:
+
+. Upgrade the project structure as outlined in xref:05-02-upgrading-client-server-projects.adoc[Upgrading Client-Server Projects]
+. If required, upgrade individual workflow assets as described in xref:05-04-upgrading-individual-assets.adoc[Upgrading Individual Assets]
+. Provision a new database instance to be used with the upgraded BAMOE v9 project
+. Run the legacy v8 environment side-by-side with the new v9 environment
+. Ensure that traffic is routed properly between the two environments:
+ ** Any requests related to instances created in the legacy v8 environment need to be directed to this environment
+ ** Any new requests, such as for starting new process instances, should be directed to the new v9 environment
+. Once all active processes in the legacy v8 environment have been completed, this environment can be decommissioned.
+
+
+

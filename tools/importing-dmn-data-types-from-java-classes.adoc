@@ -1,20 +1,11 @@
-== Importing DMN Data Types from Java classes
+= Importing DMN Data Types from Java classes
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-{DEV_TOOLS} allows you to create DMN Data Types directly from Java POJOs. This step-by-step guide aims to describe how effectively using it.
+{DEV_TOOLS} allows you to create DMN Data Types directly from Java classes. The following section describes an example scenario to demonstrate how to do this in the DMN Editor.
 
-NOTE: This feature is currently available in the DMN Editor (classic) only.
-
-=== Prerequisites
-* {DEV_TOOLS} @ {VERSION}
-* VS Code (1.66.0+)
-* Language Support for Java(TM) by Red Hat (1.31+) VS Code extension
-* Your domain’s Java Classes;
-* The Activator, a Java class file (Activator.java) required to activate the functionality;
-
-=== Project Setup
-Any _Business Service_ project that holds DMN assets is a perfect pick can be used as a reference. This guide will refer to an existing project that lives in the xref:../getting-started/examples.html[kie-kogito-examples], which already contains DMN assets. The steps to follow are:
+== Project Setup
+You can start with any _Business Service_ project that contains DMN assets, however this guide refers to an existing project that can be found in example package described here the xref:../getting-started/examples.html[kie-kogito-examples]. Follow these steps to set-up the project:
 
 1. Clone the `incubator-kie-kogito-examples` repository.
 2. Open VS Code and navigate to `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-quarkus-example`.
@@ -23,16 +14,16 @@ Any _Business Service_ project that holds DMN assets is a perfect pick can be us
 +
 image::developer-tools/dmn-import-java-classes-activator.png[]
 
-=== Importing your Java Classes as DMN Types
+== Importing your Java Classes as DMN Types
 
-Open your target DMN file, the reference for this guide is the `TrafficViolation.dmn` file already available in the example project. Go to the `Data Types` tab. Here, you should notice a  button: `Import Java Classes`.
-Be aware that this button is enabled only if the previously described requirements are satisfied.
+Open your target DMN file, the reference for this guide is the `TrafficViolation.dmn` file already available in the example project. Go to the `Data Types` tab. Select `Import Java Classes` from the drop-down list.
+Be aware that this option is enabled only if the previously described requirements are satisfied.
 
 image::developer-tools/dmn-import-java-classes-button.png[]
 
-After clicking that button, the Import Java Classes panel will appear. At this point, follow these steps:
+After selecting the option, the `Import Java Classes` panel will appear. At this point, follow these steps:
 
-* **Select Java Classes:** In the search box, put the name of the Java Class you want to import as a DMN Type. You can use the class simple name (eg. Book) or the full qualified name (eg. dto.Book). Below the search box, a list with all Java Classes that match the provided key will appear. Select the ones you want to import. When ready, click on the `Next` button.
+* **Select Java Classes:** In the search box, specify the name of the Java Class you want to import as a DMN Type. You can use the class simple name (eg. Book) or the full qualified name (eg. dto.Book). In the search box, a list with all Java Classes that match the provided key will appear. Select the ones you want to import. When ready, click on the `Next` button.
 +
 image::developer-tools/dmn-import-java-classes-selection.png[]
 +
@@ -43,3 +34,64 @@ image::developer-tools/dmn-import-java-classes-fields.png[]
 * **Import:** Press the `Import` button. This will automatically import the selected Java Class in the DMN Data Type tab.
 +
 image::developer-tools/dmn-import-java-classes-imported.png[]
++
+
+[NOTE]
+====
+
+If the existing data type is not available in the list, it will display a screen with options like 'Create a custom data type` or `Import Java classes` or `Paste data type`. You can select `Import Java classes`.
+
+If you try to import a data type from a Java class that already exists in another DMN file referenced in your Business Service project, the editor will detect a conflict and a dialog will ask you to confirm your preferred action.
+
+====
++
+image::developer-tools/dmn-import-java-classes-datatype.png[]
+
+== About conflicts while importing data types
+
+When working with DMN models, especially when including external models, it is important to know how data types are managed and how conflicts are resolved. This section outlines the behavior and options available when data type conflicts occur during import.
+
+=== Data type classification
+
+You have the followng two types of data type classification:
+
+* Internal Data Types: These are data types defined within the current DMN model.
+
+* External Data Types: These are data types that originate from an included (imported) DMN model.
+
+=== Conflict scenarios and resolution options
+
+When importing a DMN model, conflicts might arise if a data type with the same name already exists in the current model. The resolution options vary depending on whether the conflict involves internal or external data types.
+
+=== Internal data type conflicts
+
+If the conflict is between two internal data types which means if the existing and the imported data types are both defined within the current model, the following options are available:
+
+* *Replace*: The existing data type is replaced with the imported one.
+
+* *Keep Both*: Both data types are retained. The imported data type is added with a modified name (for example, DataType-1, DataType-2, etc.) to avoid naming collisions.
+
++
+image::developer-tools/dmn-import-java-classes-internal-conflict.png[]
+
+=== External data type conflicts
+
+* *Replace*: This is disabled.
+
+* *Keep Both*: This is the only available option. Since external data types cannot be modified, the imported data type is retained with a unique name to distinguish it from the existing one (for example, DataType-1, DataType-2, etc).
+
++
+image::developer-tools/dmn-import-java-classes-external-conflict.png[]
+
+=== Mixed Conflicts (Internal and External)
+
+In cases where both internal and external data types with the same name exist:
+
+* For the internal data type, both `Replace` and `Keep Both` options are available.
+
+* For the external data type, only the `Keep Both` option is enabled, `Replace` is disabled.
+
++
+image::developer-tools/dmn-import-java-classes-mixed-conflict.png[]
+
+In `Keep Both` option, when the user selects multiple Java classes with the same name from the list of Java classes, you can rename them as `javaclassname-1`, `javaclassname-2`, and so on.

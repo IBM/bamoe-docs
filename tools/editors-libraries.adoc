@@ -2,22 +2,247 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-From version {VERSION_911} the editors used in both {CANVAS} and {DEV_TOOLS} are also available as standalone JavaScript libraries that can be embedded into any frontend web application.
+Since version {VERSION_911} the BPMN and DMN Editors used in both {CANVAS} and {DEV_TOOLS} are also available as standalone JavaScript libraries that can be embedded into any frontend web application.
 
 They are available by importing the following libraries from NPM:
 
+* {STANDALONE_DMN_EDITOR_LINK}[**@ibm/bamoe-standalone-bpmn-editor**]: The new and modern BPMN Editor (Tech Preview) - _Since 9.2.1_
+* {STANDALONE_BPMN_EDITOR_LINK}[**@ibm/bamoe-standalone-dmn-editor**]: The new and modern DMN Editor
 * {STANDALONE_EDITORS_CLASSIC_LINK}[**@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic**]: The BPMN and DMN Editors (classic)
-* {STANDALONE_DMN_EDITOR_LINK}[**@ibm/bamoe-standalone-dmn-editor**]: The new and modern DMN Editor
+
+== BPMN Editor (Tech Preview)
+
+The modern BPMN Editor, built with React, is faster and aims to be retro-compatible with BPMN Editor (classic), supporting the BPMN 2.0 specifications while maintaining the same simple-to-use API.
+
+.BPMN Editor
+image::tools/editorsLibraries/new-bpmn-editor.jpg[]
+
+=== Installing and using the BPMN Editor
+
+. Add the library to the project's `package.json`:
++
+[source,shell,subs="+attributes"]
+----
+npm install @ibm/bamoe-standalone-bpmn-editor@{NPM_VERSION}
+----
+
+. Import the editor library to a JavaScript file with the following statement:
++
+[source,javascript,subs="+attributes"]
+----
+import * as BpmnEditor from "@ibm/bamoe-standalone-bpmn-editor/dist"
+----
+
+. Add a 'div' element for the Editor in the HTML; the library uses this 'div' as a container to load an iFrame with the Editor's resources:
++
+[source,html,subs="+attributes"]
+----
+<div id="new-bpmn-editor-container"/>
+----
+
+. Load the Editor by passing the reference to the `div` container as follows:
++
+[source,javascript,subs="+attributes"]
+----
+const bpmnEditor = BpmnEditor.open({
+  container: document.getElementById("bpmn-editor-container"),
+  initialContent: Promise.resolve(""),
+  initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.bpmn",
+  readOnly: false,
+  origin: "*",
+  onError: () => {},
+  resources: new Map([
+    [
+      "MyDecision.dmn",
+      {
+        contentType: "text",
+        content: Promise.resolve("")
+      }
+    ]
+  ])
+});
+----
+
+Where the following table describes the parameters:
+ 
+[%header,cols=4]
+[%autowidth]
+|===
+| Parameter | Description | Required/Optional | Examples
+|`container` | Specifies the HTML element that the Editor is appended to. | Mandatory |
+|`initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` | Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). | Mandatory | 
+* `model.dmn`
+
+* `myPath/model.dmn`
+
+* `parent/child/filename.dmn`
+
+|`initialContent` | Accepts a Promise that resolves to the contents of a .dmn file. It can be an empty.  | Mandatory   |
+* `Promise.resolve("")`
+
+* `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
+
+* `fetch("MyDecision.dmn").then(content => content.text())` 
+
+| `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `false`. | Optional|
+| `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
+| `onError` | Accepts a function that is called when the Editor encounters an error at any moment. This parameter defaults to () ⇒ {}). | Optional  |
+| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the BPMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `contentType` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
+* `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])` 
+
+* `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
+
+|===
+
+
+NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the BPMN and DMN Editors. BPMN and DMN Editors (classic) do not have the concept of relative paths, so every mapped resource is available.
+
+The returned object (`bpmnEditor`) will contain the following methods needed to manipulate the Editor:
+
+`getContent(): Promise<string>`:: Returns a Promise that contains the Editor's content.
+
+`setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+
+`getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
+
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: 
+Setup a callback function that is automatically called on every content change in the Editor. It returns the same function that needs to be used for unsubscription.
+
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
+
+`markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
+
+`undo(): void`:: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`redo(): void`:: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`close(): void`:: Closes the Editor.
+
+`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
+
+NOTE: As of now, the BPMN Editor does not expose the `canvas` property.
+
+== DMN Editor
+
+The modern DMN Editor, built with React, is faster and supports up to DMN 1.5 specifications while maintaining the same simple-to-use API.
+
+.DMN Editor
+image::tools/editorsLibraries/new-dmn-editor.png[]
+
+=== Installing and using the DMN Editor
+
+. Add the library to the project's `package.json`:
++
+[source,shell,subs="+attributes"]
+----
+npm install @ibm/bamoe-standalone-dmn-editor@{NPM_VERSION}
+----
+
+. Import the editor library to a JavaScript file with the following statement:
++
+[source,javascript,subs="+attributes"]
+----
+import * as DmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
+----
+
+. Add a 'div' element for the Editor in the HTML; the library uses this 'div' as a container to load an iFrame with the Editor's resources:
++
+[source,html,subs="+attributes"]
+----
+<div id="new-dmn-editor-container"/>
+----
+
+. Load the Editor by passing the reference to the `div` container as follows:
++
+[source,javascript,subs="+attributes"]
+----
+const dmnEditor = DmnEditor.open({
+  container: document.getElementById("new-dmn-editor-container"),
+  initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.dmn",
+  initialContent: Promise.resolve(""),
+  readOnly: false,
+  origin: "*",
+  onError: () => {},
+  resources: new Map([
+    [
+      "MyDecision.dmn",
+      {
+        contentType: "text",
+        content: Promise.resolve("")
+      }
+    ]
+  ])
+});
+----
+
+Where the following table describes the parameters:
+ 
+[%header,cols=4]
+[%autowidth]
+|===
+| Parameter | Description | Required/Optional | Examples
+|`container` | Specifies the HTML element that the Editor is appended to. | Mandatory |
+|`initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` | Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). | Mandatory | 
+* `model.dmn`
+
+* `myPath/model.dmn`
+
+* `parent/child/filename.dmn`
+
+|`initialContent` | Accepts a Promise that resolves to the contents of a .dmn file. It can be an empty.  | Mandatory   |
+* `Promise.resolve("")`
+
+* `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
+
+* `fetch("MyDecision.dmn").then(content => content.text())` 
+
+| `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `false`. | Optional|
+| `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
+| `onError` | Accepts a function that is called when the Editor encounters an error at any moment. This parameter defaults to () ⇒ {}). | Optional  |
+| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `contentType` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
+* `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])` 
+
+* `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
+
+|===
+
+
+NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the DMN Editor. The BPMN and DMN Editors (classic) do not have the concept of relative paths, so every mapped resource is available.
+
+The returned object (`dmnEditor`) will contain the following methods needed to manipulate the Editor:
+
+`getContent(): Promise<string>`:: Returns a Promise that contains the Editor's content.
+
+`setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
+
+`getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
+
+`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: 
+Setup a callback function that is automatically called on every content change in the Editor. It returns the same function that needs to be used for unsubscription.
+
+`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
+
+`markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
+
+`undo(): void`:: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`redo(): void`:: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
+
+`close(): void`:: Closes the Editor.
+
+`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
+
+NOTE: As of now, the DMN Editor does not expose the `canvas` property.
 
 == BPMN and DMN Editors (classic)
 
 The following classic GWT-based editors are available as JavaScript file for each Editor.
 
-.DMN Editor classic
+.DMN Editor (classic)
 image::tools/editorsLibraries/dmn-editor-classic.png[]
 
 
-.BPMN Editor classic
+.BPMN Editor (classic)
 image::tools/editorsLibraries/bpmn-editor-classic.png[]
 
 
@@ -52,21 +277,21 @@ import * as DmnEditor from "@ibm/bamoe-standalone-bpmn-and-dmn-editors-classic/d
 
 [source,javascript,subs="+attributes"]
 ----
-const bpmnEditor = BpmnEditor.open({
-  container: document.getElementById("bpmn-editor-container")
-  initialContent: Promise.resolve("")
-  readOnly: false
-  origin: "*"
-  onError: () => {}
+const bpmnEditorClassic = BpmnEditor.open({
+  container: document.getElementById("bpmn-editor-container"),
+  initialContent: Promise.resolve(""),
+  readOnly: false,
+  origin: "*",
+  onError: () => {},
   resources: new Map([])
 });
 
-const dmnEditor = DmnEditor.open({
-  container: document.getElementById("dmn-editor-container")
-  initialContent: Promise.resolve("")
-  readOnly: false
-  origin: "*"
-  onError: () => {}
+const dmnEditorClassic = DmnEditor.open({
+  container: document.getElementById("dmn-editor-container"),
+  initialContent: Promise.resolve(""),
+  readOnly: false,
+  origin: "*",
+  onError: () => {},
   resources: new Map([])
 });
 ----
@@ -138,109 +363,3 @@ The returned objects, (`bpmnEditor` and `dmnEditor`) will contain the following 
  `applyState(uuid: string, state: string): Promise<void>`:: Applies state to a node given the UUID [None, Selected, Highlight, Invalid].
 
  `centerNode(uuid: string): Promise<void>`:: Centers node on the viewable diagram.
-
-== New DMN Editor
-
-The modern DMN Editor, built with React, is faster and supports up to DMN 1.5 specifications while maintaining the same simple-to-use API.
-
-.New DMN Editor
-image::tools/editorsLibraries/new-dmn-editor.png[]
-
-=== Installing and using the new DMN Editor
-
-Follow these steps to install the new DMN Editor
-
-. Add the library to the project's `package.json`:
-+
-[source,shell,subs="+attributes"]
-----
-npm install @ibm/@ibm/bamoe-standalone-dmn-editor@{NPM_VERSION}
-----
-
-. Import the editor library to a JavaScript file with the following statement:
-+
-[source,javascript,subs="+attributes"]
-----
-import * as NewDmnEditor from "@ibm/bamoe-standalone-dmn-editor/dist"
-----
-
-. Add a 'div' element for the Editor in the HTML; the library uses this 'div' as a container to load an iFrame with the Editor's resources:
-+
-[source,html,subs="+attributes"]
-----
-<div id="new-dmn-editor-container"/>
-----
-
-. Load the Editor by passing the reference to the `div` container as follows:
-+
-[source,javascript,subs="+attributes"]
-----
-const newDmnEditor = NewDmnEditor.open({
-  container: document.getElementById("new-dmn-editor-container")
-  initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot: "model.dmn"
-  initialContent: Promise.resolve("")
-  readOnly: false
-  origin: "*"
-  onError: () => {}
-  resources: new Map([])
-});
-----
-
-Where the following table describes the parameters:
- 
-[%header,cols=4]
-[%autowidth]
-|===
-| Parameter | Description | Required/Optional | Examples
-|`container` | Specifies the HTML element that the Editor is appended to. | Mandatory |
-|`initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` | Specifies the POSIX path relative to the workspace root which is `/` by default, including the file name. The path is useful for locating the file in the workspace, especially in relation to other resources (defined by the `resources` parameters). | Mandatory | 
-* `model.dmn`
-
-* `myPath/model.dmn`
-
-* `parent/child/filename.dmn`
-
-|`initialContent` | Accepts a Promise that resolves to the contents of a .dmn file. It can be an empty.  | Mandatory   |
-* `Promise.resolve("")`
-
-* `Promise.resolve("<DMN_CONTENT_DIRECTLY_HERE>")`
-
-* `fetch("MyDecision.dmn").then(content => content.text())` 
-
-| `readOnly` | You can use `false` for content edition and `true` for read-only mode, where the editor does not allow changes. Default is  `false`. | Optional|
-| `origin` | If accessing the application via the `file://` protocol, it defaults to `*`; otherwise, it defaults to `window.location.origin`. | Optional|
-| `onError` | Accepts a function that is called when the Editor encounters an error at any moment. This parameter defaults to () ⇒ {}). | Optional  |
-| `resources` |This parameter defaults to an empty Map; Map of resources that will be provided for the Editor. For instance, this parameter can be used to provide included models for the DMN Editor. Each entry in the map has the resource POSIX path (similar to the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter) as the key and an object that contains the `contentType` (`text` or `binary`), and the resource `content` (Promise similar to the `initialContent` parameter) as its value. The resources are located in a parent directory (in relation to the current content path, defined by the `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot`) which will not be listed to be used as an Included Model.  | Optional  | 
-* `resources: new Map([["types.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...], [...]])` 
-
-* `resources: new Map([["/types/typeA.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], ["/extras/decision.dmn", { contentType: "text", content: Promise.resolve("<DMN_CONTENTS_HERE>")}], [...]])`
-
-|===
-
-
-NOTE: The `initialFileNormalizedPosixPathRelativeToTheWorkspaceRoot` parameter is only available for the new DMN Editor. The BPMN and DMN Editors (classic) do not have the concept of relative paths, so every mapped resource is available.
-
-The returned object (`newDmnEditor`) will contain the following methods needed to manipulate the Editor:
-
-`getContent(): Promise<string>`:: Returns a Promise that contains the Editor's content.
-
-`setContent(normalizedPosixPathRelativeToTheWorkspaceRoot: string, content: string): Promise<void>`:: Sets the content of the editor. The returning Promise will be rejected if setting the content fails.
-
-`getPreview(): Promise<string>`:: Returns a Promise that resolves to the SVG string of the current diagram.
-
-`subscribeToContentChanges(callback: (isDirty: boolean) => void): (isDirty: boolean) => void`:: 
-Setup a callback function that is automatically called on every content change in the Editor. It returns the same function that needs to be used for unsubscription.
-
-`unsubscribeToContentChanges(callback: (isDirty: boolean) => void): void`:: Unsubscribes the callback function from being called when the content changes.
-
-`markAsSaved(): void`:: Resets the editor state by signaling that the content is saved. It also fires the subscribed callbacks for content changes.
-
-`undo(): void`:: Undo the last change in the Editor. It will also fire the subscribed callbacks of content changes.
-
-`redo(): void`:: Redo the last undone change in the Editor. It will also fire the subscribed callbacks of content changes.
-
-`close(): void`:: Closes the Editor.
-
-`envelopeApi: MessageBusClientApi<KogitoEditorEnvelopeApi>`:: An Advanced Editor API.
-
-NOTE: As of now, the new DMN Editor does not expose the `canvas` property.

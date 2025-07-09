@@ -1,0 +1,140 @@
+= Key differences between BAMOE version 8.0.x and version 9.2.x
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Migrating from BAMOE version {VERSION_80X} to version {VERSION_92X} involves more than just upgrading libraries, it's a shift in architecture, development model, and runtime behavior. This section highlights the most important differences to help you understand what has changed and how it may impact your applications and what to expect when transitioning to the new BAMOE version {VERSION_92X}.
+
+== Development environment
+
+=== From monolith to cloud-native
+
+BAMOE version {VERSION_80X} followed a centralized architecture with Business Central and KIE Server. BAMOE version {VERSION_92X} adopts a cloud-native approach, built on Kogito, where business logic is packaged as independent microservices or embedded into applications. Each unit of business logic is now packaged as a Business Service (a deployable runtime microservice), developed as a _Business Service_ project (its source code state). Read more about it on https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=started-initial-business-service-project-setup[Business Service project setup]
+
+=== Business Central gives way to new development stack
+
+Business Central is no longer part of the toolchain. It is replaced by:
+
+* *BAMOE Developer Tools for VS Code* -- crafted for developers.
+* *BAMOE Canvas* -- crafted with business analysts in mind.
+* *BAMOE Maven Repository* - for allowing Business Service projects to be developed and tested.
+
+Learn more in the xref:04-development-environment-comparison.adoc[Development environment comparison section].
+
+=== Authoring and execution split
+
+In version {VERSION_92X}, there's a clean separation between asset authoring (offline, in source control) and runtime execution (packaged into applications or services).
+
+=== KIE Server is replaced by microservices, called _Business Services_
+
+In BAMOE version {VERSION_80X}, the KIE Server acted as a centralized runtime engine, following a client-server architecture. Applications would interact with it over REST or JMS to execute business processes, rules, and decisions.
+
+In BAMOE version {VERSION_92X}, this centralized model is replaced by a decentralized, cloud-native approach:
+
+* You now build and deploy business automation assets (processes, rules, and decisions) as independent microservices, using Kogito with Quarkus or Spring Boot. These services expose REST endpoints automatically. Learn more in xref:05-02-upgrading-client-server-projects.adoc[Upgrading client-server projects].
+* Alternatively, you can embed business logic directly into Java applications. This is not the same as a Kogito-based service. It refers to plain Java applications that use the Drools or jBPM libraries directly, without relying on the Kogito runtime. Learn more in xref:05-03-upgrading-standalone-projects.adoc[Upgrading standalone projects].
+
+=== No more shared KIE Sessions
+
+In BAMOE version {VERSION_80X}, KIE sessions (stateful/stateless) were managed centrally by the KIE Server and exposed via REST or JMS. This allowed shared access to rule and process execution contexts.
+
+In BAMOE version {VERSION_92X}, KIE sessions still exist, but they are embedded within each _Business Service_. They are no longer shared or exposed through a centralized runtime.
+
+This architectural change removes the ability to access or manipulate shared rule facts across processes via a central session. This change affects how DRLs and BPMN workflows works together. Check how address this change on xref:05-04-upgrading-individual-assets.adoc#drl[Upgrading individual assets].
+
+== Runtime behavior and persistence
+
+=== Persistence and state management
+
+Like in BAMOE version {VERSION_80X}, in BAMOE version {VERSION_92X} persistence is optional and explicitly configured when needed. Official support includes:
+
+* PostgreSQL 16.8 and 17.4
+* Microsoft SQL Server 2022
+* Oracle 23ai
+
+This ensures compatibility and support for these platforms, aligning with IBM's tested environments.
+
+=== Event-driven architecture
+
+BAMOE version {VERSION_92X} supports reactive, event-driven applications through integration with Apache Kafka. Quarkus provides the most complete support for BPMN and reactive messaging in this context.
+
+Learn more in the xref:05-09-upgrading-event-streaming.adoc[Upgrading event streaming].
+
+== Production environment
+
+Learn more in the xref:06-production-environment-comparison.adoc[Production environment comparison section].
+
+=== Runtime execution model
+
+Each Business Service project can be packaged and deployed as an independent microservice.
+
+=== SmartRouter
+
+SmartRouter is not available in BAMOE version {VERSION_92X}. Service discovery and orchestration are now handled through Kubernetes-native solutions.
+
+=== Monitoring and management
+
+Business Central's runtime dashboards are replaced by:
+
+* BAMOE Management Console
+* Operational data exposed via REST and GraphQL APIs
+* Integration with observability tools such as Prometheus and Grafana
+
+== Asset authoring and compatibility
+
+=== DMN
+
+The DMN Editor is rebuilt using React, supports DMN 1.5, and offers better integration and validation.
+
+=== Guided assets
+
+Guided Rules, Guided Decision Tables, and other guided assets are no longer supported. These must be converted to DRL or DMN format.
+  Learn more in the xref:05-04-upgrading-individual-assets.adoc#guided-assets[Guided Assets] chapter for more information.
+
+=== DSL and DSLR
+
+Domain Specific Language and Domain Specific Language rule are no longer supported. These must be converted to DRL format. Learn more in xref:05-04-upgrading-individual-assets.adoc#guided-assets[Guided Assets].
+
+=== Test Scenarios
+
+The new Test Scenario Editor supports DMN 1.5. DRL-based Test Scenarios have limited support. Currently, mixing DRL and DMN in the same test module is not supported.
+Learn more in the xref:05-04-upgrading-individual-assets.adoc#test-scenarios-scesim[Test Scenarios (SCESIM)] chapter for more information.
+
+=== Forms
+
+Version {VERSION_80X} Forms are not compatible in version {VERSION_92X}. New forms must be created using BAMOE Developer Tools for VS Code.
+Learn more in the xref:05-04-upgrading-individual-assets.adoc#forms[Forms] chapter for more information.
+
+== Security and governance
+
+=== Authentication & authorization
+
+BAMOE version {VERSION_92X} integrates with external Identity Providers (IdPs) that support OpenID Connect (OIDC), using the security capabilities of the chosen runtime (Quarkus or Spring Boot). This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure.
+
+=== User and role management
+
+User and role definitions are no longer handled via Business Central. Instead, they must be configured externally using your selected IdP or through application-level configuration, depending on the runtime. This allows for centralized identity and access control across services.
+
+Learn more in the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading authentication/authorization] for more details.
+
+== Versioning and collaboration
+
+=== External Git integration
+
+Source control and collaboration are now managed using external Git platforms (e.g., GitHub, GitLab, and Bitbucket), which integrates more naturally with modern CI/CD workflows. The mentioned Git providers are supported by *BAMOE Canvas*.
+
+== Deployment and CI/CD integration
+
+=== Deployment targets
+
+BAMOE version {VERSION_92X} is optimized for Cloud-native solutions. Business Services are packaged as container images and deployed using Kubernetes manifests or Helm charts.
+
+=== CI/CD integration
+
+All business assets are stored as plain text files in Git, making them ideal for CI/CD pipelines.
+
+== Testing
+
+In BAMOE version {VERSION_80X}, Business Central provided a graphical interface for authoring and executing tests, including support for Test Scenarios files.
+
+In BAMOE version {VERSION_92X}, testing is fully integrated into the developer workflow using Maven-based unit and integration tests.
+Test Scenario files are still supported and can be executed using Maven. Graphical components for executing tests and vieweing results is provided by VS Code or other IDEs that support JUnit. Test outcomes are available in the console or build output too.

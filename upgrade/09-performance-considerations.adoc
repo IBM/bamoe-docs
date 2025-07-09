@@ -1,0 +1,494 @@
+= Performance considerations
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+== Native vs not-native build
+
+Native build of a Java application, that can be archieve using GraalVM, relies on static analysis of Java code. While compilers have done huge improvements over the years, they of course could not foresee what will be the actual usage of the application at runtime, which, on the other side, is one of the main feature of the Java JIT. So, on one side the native images have a reduced size and extremely faster start-time compared with traditional jar, but on the other side, in the "long" term, traditional Java compiled applications could achieve better performances, due to on-the-fly optimization.
+So, as a rule of thumb, native images are good candidates for environments where extremely fast and dynamic adaptation of running instances is required. On the other side, for more stable and long-lived kind of setup, actual performances of both solutions should be evaluated with ad-hoc stress tests to identify the best solution.
+
+== Decision engine
+
+The Decision Engine in BAMOE v9 has been enhanced to optimize decision-making processes and deliver improved performance compared to BAMOE v8.
+
+If you encounter any performance degradations or unexpected behavior after upgrading, please file a support ticket with relevant details so our team can investigate promptly.
+
+== Rule engine recommendations to improve performance
+
+=== Rule authoring
+
+. Don't use accessors with side-effects:
++
+[,java]
+----
+Person( incrementAndGetAge() == 10 ) // Do not do this.
+----
+
+. Don't use values that could change between different constraints evaluations:
++
+[,java]
+----
+Person( birthday >= new Date()) // Do not do this.
+----
+
+. Do not use `eval`
++
+[,java]
+----
+// Do not do this
+rule "Check Address"
+when
+ $p : Person()
+ $a : Address()
+ eval( $p.getName() == "Mario" &&
+     $a.getStreet() == "Main Street" &&
+     $a == $p.getAddress() )
+ then
+         // omitted code...     +
+end
+
+//.. but do this
+rule "Check Address"
+when
+    $p : Person( name == "Mario" )
+    $a : Address( street == "Main Street",
+                  this == $p.address )
+    then
+            // omitted code...
+end
+----
+
+. List the most restrictive rule conditions first; e.g if `Hotel` is rarely instantiated
++
+[,java]
+----
+// Preferred condition order
+rule "Check Booking"
+when
+    $h: Hotel()
+    $f: Flight()
+    then
+            // omitted code...
+end
+
+// Inefficient condition order
+rule "Check Booking"
+when
+    $f: Flight()
+    $h: Hotel()
+    then
+        // omitted code...
+end
+----
+
+. Avoid iterating over large collections of objects with `from`; e.g.
++
+[,java]
+----
+// Do not do this
+rule "Check Booking"
+when
+ $c: Company();
+ $e: Employee ( salary > 100000.00)
+     from $c.employees
+ then
+     // omitted code...
+end
+
+//.. but do this
+rule "Check Booking"
+when
+    $c: Company();
+    $e: Employee ( salary > 100000.00,
+                   company == $c )
+    then
+            // omitted code...
+end
+----
+
+. Use event listeners instead of println statements for debug logging
++
+[,java]
+----
+// Do not do this
+rule "Delete Mario"
+when
+    $p: Person( name == "Mario" )
+then
+    System.out.println("Deleting " + $p);
+    delete($p);
+    System.out.println("Delete Mario fired");
+end
+//.. but do this
+rule "Delete Mario"
+when
+    $p: Person( name == "Mario" )
+then
+    delete($p);
+end
+
+// Java code
+ksession.addEventListener( new DefaultRuleRuntimeEventListener() {
+    public void objectDeleted( ObjectDeletedEvent event ) {
+        System.out.println("Deleting " + event.getOldObject());
+    }
+} );
+ksession.addEventListener( new DefaultAgendaEventListener() {
+    public void afterMatchFired( AfterMatchFiredEvent event ) {
+        String ruleName = event.getMatch().getRule().getName();
+        System.out.println( ruleName + " fired");
+    }
+} );
+----
+
+. Consolidate rules using named consequences (i.e., merge multiple rules, if possible)
++
+[,java]
+----
+// Splitted rules
+rule "Give 10% discount to customers older than 60"
+when
+     $customer : Customer( age > 60 )
+ then
+     modify($customer) { setDiscount( 0.1 ) };
+end
+
+rule "Give free parking to customers older than 60"
+when
+        $customer : Customer( age > 60 )
+        $car : Car( owner == $customer )
+    then
+        modify($car) { setFreeParking( true ) };
+end
+
+// Consolidate rules with named consequences
+rule "Give 10% discount and free parking to customers older than 60"
+when
+        $customer : Customer( age > 60 )
+        do[giveDiscount] // invoke the named consequence
+        $car : Car( owner == $customer )
+    then
+        modify($car) { setFreeParking( true ) };
+    then[giveDiscount] // named consequence
+        modify($customer) { setDiscount( 0.1 ) };
+end
+----
+
+. Use sequential mode for stateless KIE sessions that do not require important Drools rule engine updates
+`-Ddrools.sequential=true`
+
+. Use simple operations with event listeners, i.e. use event listeners for simple operations, such as debug logging and setting properties
+
+. Remove listeners from KIE session after their usage:
++
+[,java]
+----
+Listener listener = ...;
+StatelessKnowledgeSession ksession = createSession();
+try {
+    ksession.insert(fact);
+    ksession.fireAllRules();
+    ...
+} finally {
+    if (session != null) {
+        ksession.detachListener(listener);
+        ksession.dispose();
+    }
+}
+----
+
+. Configure LambdaIntrospector cache size for an executable model build
+a. LambdaIntrospector.methodFingerprintsMap cache is used in executable model build, and has default size of 32: smaller size reduce the memory usage but slow down build performance
+`drools.lambda.introspector.cache.size=12`
+
+. Use lambda externalization for executable model
+`drools.externaliseCanonicalModelLambda=true`
+
+. Configure alpha node range index threshold (default = 9)
+`drools.alphaNodeRangeIndexThreshold=4`
+
+. Enable join node range index example kmodule.xml
++
+[,xml]
+----
+<kbase name="KBase1" betaRangeIndex="enabled">
+----
+
+System property `drools.betaNodeRangeIndexEnabled=true`
+
+
+More information can be found on the https://kie.apache.org/docs/10.0.x/drools/drools/rule-engine/index.html#performance-tuning-rule-engine-ref_rule-engine[community documentation].
+
+=== Troubleshooting memory leak
+
+. capture heap dump `jmap -dump:format=b,file=heap.bin [JAVA_PID]` 
+
+. analyze it for suspicious objects (e.g. unexpected amount of StatefulKnowlegeSessionImpl) 
+. try to identify reason for such amount
+
+More information can be found on https://blog.kie.org/2022/09/drools-trouble-shooting-memory-issues.html[Drools trouble shooting memory issues].
+
+=== Troubleshooting OutOfMemory error
+
+. set the `-XX:+HeapDumpOnOutOfMemoryError` flags, to have memory heap dumped when it occurs 
+
+. identify objects that consume the bigger space on heap 
+
+. verify if rules could be rewritten to avoid such consumption
+
+=== Troubleshooting Rules bottle-neck
+
+NOTE: DO NOT DO THAT IN PRODUCTION ENVIRONMENT: THIS PROCEDURE IS MEANT TO BE EXECUTED IN TESTING ENVIRONMENT 
+
+. enable metric logging
++
+[,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-metric</artifactId>
+</dependency>
+----
+
+. enable metric-logging `-Ddrools.metric.logger.enabled=true` 
+
+. optionally configure logging threshold in microseconds (default 500) `-Ddrools.metric.logger.threshold=100` 
+
+. enable trace level logging for MetricLogUtils
++
+[,xml]
+----
+  <logger name="org.drools.metric.util.MetricLogUtils" level="trace"/>
+----
+
+. dump instantiated kiebase with ReteDumper utility (see [ReteDumper usage](#retedumper-usage))
+output, e.g.:
++
+[,text]
+----
+[EntryPointNode(1) EntryPoint::DEFAULT ] on Partition(MAIN)
+[ObjectTypeNode(3)::EntryPoint::DEFAULT objectType=[ClassObjectType class=com.sample.Customer] expiration=-1ms ] on Partition(MAIN)
+[LeftInputAdapterNode(4)] on Partition(1) Ld 0 Li 0
+[JoinNode(6) - [ClassObjectType class=com.sample.Order]] on Partition(1) Ld 0 Li 0 Rd 22 Ri 22
+[JoinNode(7) - [ClassObjectType class=com.sample.Order]] $o1.id, price > $o1.price]> on Partition(1) Ld -1 Li -1 Rd 22 Ri 22
+[ AccumulateNode(8) ] on Partition(1) Ld -1 Li -1 Rd 18 Ri 18
+[EvalConditionNode(9)]: cond=com.sample.Rule_Collect_expensive_orders_combination930932360Eval1Invoker@ee2a6922] on Partition(1) Ld -1 Li -1
+[RuleTerminalNode(10): rule=Collect expensive orders combination] on Partition(1) d -1 i -1
+[ObjectTypeNode(5)::EntryPoint::DEFAULT objectType=[ClassObjectType class=com.sample.Order] expiration=-1ms ] on Partition(MAIN)
+[JoinNode(6) - [ClassObjectType class=com.sample.Order]] on Partition(1) Ld 0 Li 0 Rd 22 Ri 22
+[JoinNode(7) - [ClassObjectType class=com.sample.Order]] $o1.id, price > $o1.price]> on Partition(1) Ld -1 Li -1 Rd 22 Ri 22
+[ AccumulateNode(8) ] on Partition(1) Ld -1 Li -1 Rd 18 Ri 18
+[ObjectTypeNode(2)::EntryPoint::DEFAULT objectType=[ClassObjectType class=org.drools.core.reteoo.InitialFactImpl] expiration=-1ms ] on Partition(MAIN)
+----
+
+. dump nodes with associated rules
+output, e.g.:
++
+[,text]
+----
+[LeftInputAdapterNode(4)] : [Collect expensive orders combination]
+[ObjectTypeNode(3)::EntryPoint::DEFAULT objectType=[ClassObjectType class=com.sample.Customer] expiration=-1ms ] : [Collect expensive orders combination]
+[JoinNode(7) - [ClassObjectType class=com.sample.Order]] : [Collect expensive orders combination]
+[EntryPointNode(1) EntryPoint::DEFAULT ] : []
+[ObjectTypeNode(2)::EntryPoint::DEFAULT objectType=[ClassObjectType class=org.drools.core.reteoo.InitialFactImpl] expiration=-1ms ] : []
+[RuleTerminalNode(10): rule=Collect expensive orders combination] : [Collect expensive orders combination]
+[EvalConditionNode(9)]: cond=com.sample.Rule_Collect_expensive_orders_combination930932360Eval1Invoker@ee2a6922] : [Collect expensive orders combination]
+[ObjectTypeNode(5)::EntryPoint::DEFAULT objectType=[ClassObjectType class=com.sample.Order] expiration=-1ms ] : [Collect expensive orders combination]
+[ AccumulateNode(8) ] : [Collect expensive orders combination]
+[JoinNode(6) - [ClassObjectType class=com.sample.Order]] : [Collect expensive orders combination]
+----
+
+. fire rule evaluation 
+
+. analyze metric logs to find suspicious rules, e.g.
++
+[,text]
+----
+...
+2021-07-22 12:27:49,077 [main] TRACE [ AccumulateNode(8) ], evalCount:4950000, elapsedMicro:1277578
+...
+----
++
+find the associated rule from nodes with associated rules dump, e.g.:
++
+[,text]
+----
+...
+[JoinNode(7) - [ClassObjectType class=com.sample.Order]], evalCount:100000, elapsedMicro:205274 [ AccumulateNode(8) ] : [Collect expensive orders combination]
+...
+----
+
+. inspect rule definition, e.g.:
++
+[,text]
+----
+rule "Collect expensive orders combination"
+when
+  $c : Customer()
+  $o1 : Order(customer == $c)
+  $o2 : Order(customer == $c, id > $o1.id, price > $o1.price)
+  $maxPrice : Integer() from accumulate (Order(customer == $c, $price : price), max($price))
+  eval($o1.getPrice() > ($maxPrice - 50))
+then
+...
+end
+----
+
+. in this example, eval count is very large, so we need to understand what happened in the previous node
++
+[,text]
+----
+...
+[JoinNode(7) - [ClassObjectType class=com.sample.Order]], evalCount:100000, elapsedMicro:205274
+...
+----
+
+. refactor rule, e.g. (accumulate is evaluated for every $o1/$o2 pair, while it should be evaluated just once per customer, so move $maxPrice definition soon after $c):
++
+[,text]
+----
+when
+    $c : Customer()
+    $maxPrice : Integer() from accumulate (Order(customer == $c, $price : price), max($price))
+    $o1 : Order(customer == $c)
+    $o2 : Order(customer == $c, id > $o1.id, price > $o1.price)
+    eval($o1.getPrice() > ($maxPrice - 50))
+----
+
+
+
+. run with modified rule, and check log again, e.g.:
++
+[,text]
+----
+2021-07-22 12:27:17,551 [main] TRACE [ AccumulateNode(8) ], evalCount:1000, elapsedMicro:16533
+2021-07-22 12:27:17,557 [main] TRACE [JoinNode(7) - [ClassObjectType class=com.sample.Order]], evalCount:1000, elapsedMicro:3954
+2021-07-22 12:27:17,742 [main] TRACE [JoinNode(8) - [ClassObjectType class=com.sample.Order]], evalCount:100000, elapsedMicro:184526
+2021-07-22 12:27:17,764 [main] TRACE [EvalConditionNode(9)]: cond=com.sample.Rule_Collect_expensive_orders_combination930932360Eval1Invoker@ee2a6922], evalCount:49500, elapsedMicro:21321
+-> elapsed time (ms) : 285
+result.size() = 100
+----
+
+. further improvements, e.g.: 
++
+[,text]
+----
+...
+[JoinNode(8) - [ClassObjectType class=com.sample.Order]], evalCount:100000, 
+...
+2021-07-22 12:27:17,764 [main] TRACE [EvalConditionNode(9)]: ... evalCount:49500,
+----
++
+still relevant 14. refactor rule again, e.g. (constraint `$o1.getPrice() > ($maxPrice - 50)` used in eval is very restrictive, so it should be evaluated earlier; moreover, eval usage should be removed in favor of field constraint for $o1):
++
+[,text]
+----
+when
+    $c : Customer()
+    $maxPrice : Integer() from accumulate (Order(customer == $c, $price : price), max($price))
+    $o1 : Order(customer == $c, price > ($maxPrice - 50))
+    $o2 : Order(customer == $c, id > $o1.id, price > $o1.price)
+----
+. run with modified rule, and check log again, e.g.: 
++
+[,text]
+----
+2021-07-22 12:25:47,304 [main] TRACE [ AccumulateNode(8) ], evalCount:1000, elapsedMicro:17837
+2021-07-22 12:25:47,395 [main] TRACE [JoinNode(7) - [ClassObjectType class=com.sample.Order]], evalCount:1000, elapsedMicro:89392
+2021-07-22 12:25:47,429 [main] TRACE [JoinNode(8) - [ClassObjectType class=com.sample.Order]], evalCount:5000, elapsedMicro:33830
+-> elapsed time (ms) : 195
+result.size() = 100
+----
+
+==== ReteDumper usage
+
+Inside a "java-embedded" application, instantiate and execute programmatically `ReteDumper` is easy, since kiebase instance is at disposal; e.g.:
+
+[,java]
+----
+ReteDumper reteDumper = new ReteDumper(); reteDumper.dump(kbase); ReteDumper.dumpRete(kieBase); 
+----
+
+
+
+Inside a Springboot/Quarkus REST application, on the other side, this object is not available for CDI injection, so a "trick" is needed to execute it:
+
+. create a "Dumper" entrypoint, e.g.
++
+RuleUnit flavor
++
+[,java]
+----
+@RestController
+@RequestMapping("/dumper")
+public class DumperEntryPoint {
+
+    @Autowired(required = false)
+    RuleUnit<_type_of_generated_ruleunit> ruleUnit;
+
+    public DumperEntryPoint() {
+    }
+
+    public DumperEntryPoint(RuleUnit<org.kie.kogito.queries.LoanUnit> ruleUnit) {
+        this.ruleUnit = ruleUnit;
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public String execute() {
+        RuleUnitInstance<org.kie.kogito.queries.LoanUnit> instance = ruleUnit.createInstance(new LoanUnit());
+        RuleUnitExecutorImpl evaluator = (RuleUnitExecutorImpl) ((ReteEvaluatorBasedRuleUnitInstance) instance).getEvaluator();
+        InternalRuleBase ruleBase = evaluator.getRuleBase();
+        ReteDumper.dumpRete(ruleBase);
+        ReteDumper.dumpAssociatedRulesRete((KieBase) ruleBase);
+        instance.close();
+        return "Rete is dumped";
+    }
+}
+----
++
+Legacy flavor
++
+[,java]
+----
+@RestController
+@RequestMapping("/dumper")
+public class DumperEntryPoint {
+
+    private final KieRuntimeBuilder kieRuntimeBuilder;
+
+    public DumperEntryPoint(KieRuntimeBuilder kieRuntimeBuilder) {
+        this.kieRuntimeBuilder = kieRuntimeBuilder;
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public String execute() {
+        KieSession session = kieRuntimeBuilder.newKieSession();
+        KieBase kieBase = session.getKieBase();
+        ReteDumper.dumpRete(kieBase);
+        ReteDumper.dumpAssociatedRulesRete(kieBase);
+        return "Rete is dumped";
+    }
+}
+----
+
+. create a unit test that invoke such REST endpoint; e.g.
++
+[,java]
+----
+@Test
+    public void testDumper() {
+        given()
+                .when()
+                .get("/dumper")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Rete is dumped"));
+    }
+----
+
+. compile the application with `mvn clean install` (or similar, provided the `test` phase is invoked)
+
+. generated rete and associated rules will be printed in console.
+
+More information can be found on https://blog.kie.org/2021/07/how-to-find-a-bottle-neck-in-your-rules-for-performance-analysis.html[How to find a bottle neck in your rules for performance analysis].

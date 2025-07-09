@@ -1,0 +1,311 @@
+= Upgrading individual assets
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+As part of the migration from BAMOE v8 to v9, individual project assets may require updates to ensure compatibility with the new runtime and tooling. While BAMOE v9 maintains strong backward compatibility, it introduces improvements in modeling tools, validation, and execution behavior that may affect how assets are interpreted or executed.
+
+This section provides practical guidance for upgrading each asset type, highlighting:
+
+* What has changed in v9
+* What remains compatible
+* Steps you should take to ensure a smooth transition
+* Whether you're working with BPMN workflows, DMN decision models, DRL rules, or guided assets, this section will help you confidently adapt your assets to the new platform.
+
+== Workflows (BPMN) [[bpmn]]
+
+To migrate a BPMN v8 asset to v9, open the BPMN model using either BAMOE Canvas or the BAMOE Developer Tools for VS Code. After making any minimal change, such as adjusting a node or modifying a property, and saving the file, the editor will apply non-destructive updates. These updates typically involve changes to XML element IDs or character escaping and do not affect the logic or behavior of the model.
+
+=== BPMN and Java classes
+
+In BAMOE v9, the BPMN editor no longer has access to the Java classes from your Business Service project. As a result, when defining BPMN variables, you must manually enter the fully qualified class names, such as `org.acme.MyCustomType`. The editor does not support auto-completion or classpath integration, so this step must be done explicitly.
+
+=== Work Item Definitions (WIDs) [[wids]]
+
+Work Item Definitions are used together with Custom Work Item Handlers.
+
+==== Work Item Handlers (WIHs) are still supported
+
+Custom Java classes can still be used to implement advanced logic in workflows. This remains the preferred approach for complex scenarios where fine-grained control is needed. For simpler use cases, BAMOE v9 can automatically generate a WIH when a Service Task is bound to a Java method. This automatic generation simplifies development and works transparently in most cases.
+
+For more information on implementing WIHs, refer to the xref:05-05-upgrading-custom-work-item-handlers.adoc[Work Item Handlers documentation].
+
+==== Work Item Definitions (WIDs) still Work in BAMOE 9
+
+WIDs continue to be used to describe the available WIHs to the BPMN editor. They allow the definition of custom nodes with associated icons, parameters, and results. The BPMN editor in BAMOE v9 can recognize and parse WIDs from your project just as it did in v8.
+
+If you are using BAMOE v9, you can continue using your existing WIDs without modification. For WIHs, please check xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading custom work item handlers] guide to see how to upgrade from v8. You can also take advantage of the new auto-generation capabilities for basic scenarios, while still writing custom Java handlers for advanced use cases.
+
+=== Flexible processes
+
+BAMOE v9 does not provide full support for Case Management (CMMN). Instead, it introduces a concept known as Flexible Processes, which emulate CMMN-like behavior using BPMN extensions.
+
+Flexible Processes are implemented as BPMN models with the AdHoc property set to true. This property enables a more flexible execution model where tasks can be triggered based on runtime conditions or user input, rather than following a strictly defined sequence.
+
+While this approach does not replicate all features of CMMN, it provides a practical alternative for many use cases. For detailed guidance on migrating Case Management projects to Flexible Processes, see the xref:05-10-upgrading-case-management-project.adoc[Upgrading Case Management Projects section].
+
+=== BPMN and DRLs [[bpmn-and-drl]]
+
+BAMOE v9 introduces important architectural changes that affect how DRL rules interact with other assets. Notably, shared KIE sessions between BPMN workflows and the rule engine are no longer supported. This means that facts inserted or modified within a DRL rule are not accessible to BPMN processes. Any logic that previously relied on shared working memory between processes and rules must now be refactored to use explicit data passing or service calls.
+
+As a result, functions such as insert(), retract(), update(), and delete() will no longer have any effect from the BPMN perspective. Additionally, using DROOLS or MVEL expressions in gateways to access KIE Session values is no longer supported.
+
+To migrate your BPMN processes that use DRLs, you need to:
+
+- Use Input/Output data mapping to pass data between the process and the rules;
+- Refactor the DRL rules to operate on the mapped data directly;
+- Use Java expressions in gateways and conditions instead of DROOLS expressions.
+
+==== Example
+
+The diagram below shows a Validation Business Rules task that runs a DRL. The result of the rule evaluation is then used in a gateway to determine the next step in the process: either proceeding to Mortgage Calculation or handling a Validation Error.
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram.png[width=500]
+
+The Validation node uses the following data mapping, which does not require changes for this migration:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-validation-data-mapping.png[width=600]
+
+The original DRL used in BAMOE v8 looks like this:
+
+```java
+rule "Validate Down Payment"
+	ruleflow-group "validation"
+	when
+		app : Application( downpayment == 0 || downpayment >= app.property.saleprice )
+	then
+		ValidationErrorDO fact0 = new ValidationErrorDO();
+		fact0.setError( "Down payment cannot be 0, greater than, or equal to the property sale price." );
+		insert( fact0 );
+		System.out.println("Executed Rule: " + drools.getRule().getName() );
+		app.setErrors( fact0 );
+end
+```
+
+In BAMOE v9, since insert() is no longer effective, we remove it and update the rule as follows:
+
+```java
+rule "Validate Down Payment"
+    ruleflow-group "validation"
+    when
+        app : Application( downpayment == 0 || downpayment >= app.property.saleprice )
+    then
+        ValidationErrorDO error = new ValidationErrorDO();
+        error.setError("Down payment cannot be 0, greater than, or equal to the property sale price.");
+        System.out.println("Executed Rule: " + drools.getRule().getName());
+        app.setErrors(error);
+end
+```
+
+With this change in place, the gateway conditions must also be updated.
+
+BAMOE v8 used a DROOLS expression:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-bpmn-migration-example-diagram-gateway-edge-drools.png[width=600]
+
+BAMOE v9 must use a Java expression instead:
+
+image::upgrade/05-04-upgrading-individual-assets-bpmn-migration-example-diagram-bpmn-migration-example-diagram-gateway-edge-java.png[width=600]
+
+In this example, the Retract Validation Business Rule task previously used a DRL to remove the inserted error fact:
+
+```java
+rule "RetractValidationErr"
+	dialect "mvel"
+	ruleflow-group "error"
+	when
+		vdo : ValidationErrorDO( )
+	then
+		retract( vdo );
+end
+```
+
+Since there is no shared KIE session in BAMOE v9, this rule no longer serves a purpose and can be safely removed.
+
+In this example, the Business Rules tasks did not require changes to their data mappings. However, in other cases, you may need to:
+
+- Add additional process variables;
+- Adjust the data mapping;
+- Modify the domain classes to support the new interaction model.
+
+These changes ensure that your BPMN processes and DRL rules remain compatible and effective in BAMOE v9.
+
+== Decisions (DMN) [[dmn]]
+
+In BAMOE v8, decision models were created using the Classic DMN Editor. While this editor is still available in BAMOE v9, it has been deprecated and is no longer recommended for use. BAMOE v9 introduces the DMN Editor as the default, which supports models up to DMN version 1.5. When a model is saved using the DMN Editor, it is automatically upgraded to version 1.5.
+
+To upgrade a DMN model in BAMOE Canvas, simply opening the model does not trigger the upgrade. You must make a trivial change, such as renaming a node or editing a label, for the upgrade to take effect. These changes are saved automatically. In the BAMOE Developer Tools for VS Code, changes are saved either manually or automatically if the autosave feature is enabled. Regardless of the save method, you should still make a trivial change to ensure the model is properly upgraded.
+
+=== DMN and Java classes
+
+Java-backed DMN types can only be created using the BAMOE Developer Tools for VS Code. Once created, these types are embedded in the DMN model and can be used in both the VS Code extension and BAMOE Canvas. This allows for consistent type usage across tools, even though the creation process is limited to the BAMOE Developer Tools for VS Code.
+
+=== DMN and PMML models
+
+In BAMOE v8, users could author, edit, and execute PMML (Predictive Model Markup Language) models directly within the platform. However, in BAMOE v9, PMML is currently not available. Support for PMML may be reconsidered in future releases.
+
+== Rules (DRL) [[drl]]
+
+All DRL rules authored in BAMOE v8 are fully compatible with BAMOE v9. No changes to rule syntax or structure are required for them to execute correctly in the new runtime. The exception is when DRL rules are used in conjunction with BPMN processes. In such cases, please refer to the xref:bpmn-and-drl[BPMN and DRL] section to understand the required changes.
+
+While the rule execution engine remains compatible, it is recommended to review your DRL files for deprecated constructs, opportunities to align with BAMOE v9 best practices, and changes in Java enums, global variables, or data objects that may have been updated in format or location.
+
+Additionally, BAMOE v9 supports Rule Units as an alternative way to organize and execute DRL rules. Rule Units allow rules to be grouped into isolated execution contexts, enabling more modular and testable designs. Migrating to Rule Units is optional, and existing DRL rules can continue to function without modification. Read mode about it on https://kie.apache.org/docs/10.0.x/drools/drools/language-reference/index.html#con-drl-rule-units_drl-rules[Drools documentation].
+
+== Decision Tables (XLS or XLSX) [[decision-tables]]
+
+Spreadsheet-based decision tables in `.xls` or `.xlsx` format continue to be supported in BAMOE v9 Business Service projects. These assets can be used without modification, provided the appropriate dependency is declared in your project's pom.xml file.
+
+Although BAMOE v9 does not include a built-in editor for decision tables, you can continue to author and maintain them using external spreadsheet tools. Once authored, the decision tables can be placed in the appropriate resource directory of your project and will be picked up by the engine at runtime.
+
+To enable support for decision tables, ensure your project includes the following Maven dependency:
+
+[,xml]
+----
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-decisiontables</artifactId>
+    </dependency>
+----
+
+== Test Scenarios (SCESIM) [[scesim]]
+
+=== Tooling support
+
+BAMOE v9 continues to support the execution of Test Scenarios via the Maven CLI, and no changes are required to the test files themselves when migrating from BAMOE v8. However, there are notable differences in tooling support and test execution behavior that you should be aware of.
+
+In BAMOE v8, the development environment provided tooling for both DRL-based and DMN-based Test Scenarios. In contrast, BAMOE v9 offers tooling support exclusively for DMN-based Test Scenarios. This limitation is currently documented as a xref:11-not-supported.adoc[not supported] feature.
+
+Only the BAMOE Developer Tools for VS Code can be used to edit Test Scenarios in v9. BAMOE Canvas does not support Test Scenario editing. To upgrade a Test Scenario from v8, it is sufficient to open and save the file using the v9 tooling. There is no need to change the file's location within the Business Service project structure.
+
+Additionally, BAMOE v9 introduces a new Test Scenario Editor compatible with DMN 1.5. The classic Test Scenario editor is still available, but with support limited to DMN 1.2.
+
+NOTE: Running DRL- and DMN-based Test Scenarios in the same Business Service project is not yet supported.
+
+=== JUnit activator migration
+
+The JUnit activator is typically located at `src/test/java/testscenario/ScenarioJunitActivatorTest.java`.
+
+In BAMOE v8, Test Scenarios were executed using the `ScenarioJunitActivator` class. BAMOE v9 introduces a new activator, `KogitoJunitActivator`, which is required for DMN-based Test Scenarios. These two activators behave differently and are not interchangeable. Specifically, `ScenarioJunitActivator` supports only DRL-based scenarios, while `KogitoJunitActivator` supports only DMN-based ones.
+
+You must update your test activator class based on the type of Test Scenario you are running. For DMN-based scenarios in BAMOE v9, replace the following line in your test class:
+
+Replace:
+
+----
+`@org.junit.runner.RunWith(org.drools.scenariosimulation.backend.runner.ScenarioJunitActivator.class)`
+----
+
+With:
+
+----
+`@org.junit.runner.RunWith(org.kogito.scenariosimulation.runner.KogitoJunitActivator.class)`
+----
+
+After updating the test activator, you may also need to adjust your `pom.xml` file to ensure the correct dependencies are included. The required changes depend on whether your project follows a standalone or client-server architecture. For detailed guidance, refer to the appropriate migration guide:
+
+* *standalone* xref:05-03-upgrading-standalone-projects.adoc[migration guide].
+* *client-server* xref:05-02-upgrading-client-server-projects.adoc[migration guide].
+
+== Predictive models (PMML) [[pmml]]
+
+In BAMOE v8, users could author, edit, and execute PMML (Predictive Model Markup Language) models directly within the platform. However, in BAMOE v9, PMML is currently not available. Support for PMML may be reconsidered in future releases.
+
+== Forms [[forms]]
+
+BAMOE v8 forms are not compatible with the BAMOE v9 form infrastructure. As a result, all forms must be recreated from scratch when migrating to BAMOE v9. This is due to significant changes in the underlying form model and rendering engine. For more information, see xref:10-known-limitations.adoc[Known Limitations].
+In BAMOE v9, form generation is supported exclusively through the BAMOE Developer Tools for VS Code. BAMOE Canvas does not support form creation or editing.
+
+NOTE: Complete forms generation is documented in https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=code-form-generation-user-tasks[IBM Documentation].
+
+== Guided assets [[guided-assets]]
+
+Guided assets in BAMOE v8 were used primarily for rule modeling through graphical editors such as guided rules and guided decision tables. These assets are not supported in BAMOE v9, and there is no direct upgrade path for them.
+
+BAMOE v9 supports only DRL and XLS formats for rule definitions, and DMN for decisions. Therefore, guided assets must be manually migrated to one of these supported formats. Depending on the editor used in BAMOE v8, you may have access to one of the following options:
+
+* If the guided asset editor includes a Source tab, you can copy the DRL content and paste it into a new `.drl` file in your BAMOE v9 project.
+* If the editor provides a Convert to XLS button, you can use it to generate an `.xls` decision table, which can then be included in your BAMOE v9 Business Service project.
+* Alternatively, you can manually rewrite the logic in DRL, XLS, or DMN, depending on the nature of the decision and the compatibility of the logic.
+
+== DSL [[dsl]]
+
+The DSL feature from BAMOE v8 is deprecated and *not recommended* for use in BAMOE v9.
+
+In BAMOE v8, DSLs were commonly used with guided assets such as guided rules and guided decision tables. These editors typically included a Source tab that displayed the underlying DRL content. To migrate your DSL-based assets to BAMOE v9, you must manually copy the content from the Source tab and save it as a `.drl` file in your BAMOE v9 Business Service project.
+
+This manual conversion ensures compatibility with the v9 runtime and aligns your project with the supported authoring model.
+
+== Packages [[packages]]
+
+The concept of packages in BAMOE is based on standard Java project structure and remains fully supported in BAMOE v9. There are no changes required when migrating package structures from v8 to v9.
+
+Both BAMOE Canvas and the BAMOE Developer Tools for VS Code can open and work with Business Service projects organized into packages. These packages correspond directly to folder structures in your project and are used to group related assets logically.
+
+== Enums [[enums]]
+
+In BAMOE v8, enums were often defined as part of guided assets, such as guided decision tables or guided rules. These enums used a format specific to the v8 tooling and were not directly compatible with Java enums. In BAMOE v9, guided assets are no longer supported, and enums must be refactored into standard Java enum classes.
+
+=== Java Enum in DRL
+
+Once you have converted your v8 enum into a Java enum, you can use it in DRL files as shown below:
+
+[,java]
+----
+package com.example.constants;
+
+public enum Conditions {
+    MINIMAL_AGE(18);
+
+    private final int value;
+
+    Conditions(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
+----
+
+[,java]
+----
+import com.example.model.Customer
+import com.example.constants.Conditions
+
+// Function definition
+function int getMinimalAge() {
+    return Conditions.MINIMAL_AGE.getValue();
+}
+
+
+rule "Check minimal age"
+when
+    $c : Customer(age < getMinimalAge())
+then
+    System.out.println($c.getName() + " is underage.");
+end
+----
+
+=== Conditional Enums
+
+BAMOE v8 supported conditional enums, where the set of allowed values could depend on the value of another field. For example, a student might be offered benefits such as "phone" and "sportcard", while a graduate might also be eligible for "car rental".
+
+This behavior can be replicated in BAMOE v9 using utility methods in Java enums or helper classes. However, there is no direct or standardized migration path for conditional enums, and implementation will depend on your specific business logic.
+
+== Data Objects [[data-objects]]
+
+There is no specific migration step required for Data Objects when moving from BAMOE v8 to v9. However, it is important to note that in BAMOE v9, Data Object assets are supported in read-only mode. This means that while they can still be used by the runtime engine, they cannot be edited using BAMOE tooling. To modify Data Objects, you must use an external editor.
+
+== Global variables [[global-variables]]
+
+In BAMOE v8, global variables could be defined and managed through a dedicated asset type. This asset type is no longer available in BAMOE v9. As a result, any global variables used in your rules must now be declared directly within your DRL files.
+
+This change simplifies the project structure but requires manual migration of global variable declarations. Review your v8 global variable definitions and move them into the appropriate DRL files to ensure they are available at runtime.
+
+== Properties [[properties]]
+
+The migration of `.properties` files from BAMOE v8 to v9 depends entirely on the content of the file. Some properties may remain valid, while others may have been deprecated or replaced.
+
+To determine whether a specific property is still supported or requires modification, refer to the xref:05-02-upgrading-client-server-projects.adoc#application-properties[`application.properties`] section of the client-server migration guide. This section provides detailed guidance on supported configuration keys and their expected values in BAMOE v9.

@@ -14,7 +14,7 @@ The `kie-addons-quarkus-process-management` is an extension for {PRODUCT_SHORT} 
 </dependency>
 ----
 
-With the Process Management endpoints, it’s possible to operate with the following Entities:
+With the Process Management API endpoints, it’s possible to operate with the following Entities:
 
 * Processes (GET, POST, DELETE)
 * ProcessInstance (GET)
@@ -22,7 +22,7 @@ With the Process Management endpoints, it’s possible to operate with the follo
 * ProcessError (GET)
 * WorkItem (GET)
 
-The following sections describe the Process Instance Management API in detail.
+The following sections describe the Process Management API in detail.
 
 ===  /management/processes
 
@@ -138,7 +138,7 @@ The following sections describe the Process Instance Management API in detail.
 |===
 |*Type* |POST
 
-|*Description* |It migrates the process from given process and process instance to the target process and process instance.
+|*Description* |It migrates the process instance specified by the processID and processInstanceID to the target process and process instance.
 
 |*Inputs* |
 * processId: String (PathParameter)
@@ -171,7 +171,7 @@ The following sections describe the Process Instance Management API in detail.
 
 [cols="1,1a"]
 |===
-|*Type* |POST
+|*Type* |GET
 
 |*Description* |This endpoint returns the list of workItems in the specified process instance
 
@@ -266,6 +266,69 @@ The following sections describe the Process Instance Management API in detail.
 
 |===
 
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/sla
+
+[cols="1,1a"]
+|===
+|*Type* |PATCH
+
+|*Description* |This endpoint updates the SLA Due Date of the specified node in a process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* nodeInstanceId: String (PathParameter)
+* expirationTime: String (JSON payload)
+
+|*Output* a| * The result of the operation as string.
+
+
+* A _BAD REQUEST_ error is returned if processId, processInstanceId or nodeInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId, processInstanceId or nodeInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'PATCH' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/sla' \
+-H 'accept: */*'
+-H 'Content-Type: application/json'
+-d '{
+  "expirationTime": "2025-12-31T00:00:00.000Z"
+}'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the list of active timers associated with the given node instance of the defined process instance
+
+|*Inputs* |
+* nodeInstanceId: String (PathParameter)
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * A list of active timers associated with the given node instance of the defined process instance. It includes the following details
+
+* targetProcessId : String
+* processInstanceId : String
+* nodeInstanceId : String
+* timerId: String
+* description : String
+
+
+* A _BAD REQUEST_ error is returned if nodeInstanceId, processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if nodeInstanceId, processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodeInstances/{nodeInstanceId}/timers' \
+-H 'accept: */*'
+
+|===
 
 ===  /management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}
 
@@ -290,7 +353,7 @@ The following sections describe the Process Instance Management API in detail.
 |*Example* |
 
  curl -X 'POST' \
-'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeInstanceId}' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/nodes/{nodeId}' \
 -H 'accept: */*' \
 -d ''
 
@@ -357,21 +420,83 @@ The following sections describe the Process Instance Management API in detail.
 
 |===
 
+===  /management/processes/{processId}/instances/{processInstanceId}/sla
+
+[cols="1,1a"]
+|===
+|*Type* |PATCH
+
+|*Description* |This endpoint updates the SLA Due Date of a process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+* expirationTime: String (JSON payload)
+
+|*Output* a| * The result of the operation as string.
+
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'PATCH' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/sla' \
+-H 'accept: */*'
+-H 'Content-Type: application/json'
+-d '{
+  "expirationTime": "2025-12-31T00:00:00.000Z"
+}'
+|===
+
+===  /management/processes/{processId}/instances/{processInstanceId}/timers
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint returns the list of active timers associated with the given process instance
+
+|*Inputs* |
+* processId: String (PathParameter)
+* processInstanceId: String (PathParameter)
+
+|*Output* a| * A list of active timers associated with the given process instance. It includes the following details
+
+* targetProcessId : String
+* processInstanceId : String
+* nodeInstanceId : String
+* timerId: String
+* description : String
+
+
+* A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
+* A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
+
+|*Example* |
+
+ curl -X 'GET' \
+'http://localhost:8080/management/processes/{processId}/instances/{processInstanceId}/timers' \
+-H 'accept: */*'
+
+|===
+
 ===  /management/processes/{processId}/migrate
 
 [cols="1,1a"]
 |===
 |*Type* |POST
 
-|*Description* |It will migrate all instances corresponding to the mentioned process to the target process
+|*Description* |It will migrate all active process instances of the processID to the target process
 
 |*Inputs* |
 * processId: String (PathParameter)
 * targetProcessId: String (Query Parameter)
 * targetProcessVersion: String (Query Parameter)
 
-|*Output* a| * Returns the response with details of the migrated instances .
-Includes below details
+|*Output* a| Returns the response with details of the migrated instances including:
+
 * id : String
 * numberOfProcessInstanceMigrated : String
 
@@ -478,7 +603,7 @@ In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work 
 In {PRODUCT_SHORT}, the usage of this API is currently not recommended. To work with Jobs, you can use the xref:../workflow/data-index-graphql-api.html[Data-Index GraphQL API] instead.
 
 
-== Job Service Management Resource API
+== Jobs Service Management Resource API
 
 In {PRODUCT_SHORT}, this API is currently not used. It might be removed in future versions of the product.
 

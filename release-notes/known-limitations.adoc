@@ -11,31 +11,35 @@ Table 1. Known limitations
 
 |Limitation | Description
 
-|{Canvas} cannot import files from GitHub using the raw URL, '/:org/:repo/refs/heads/:tree/:path*'.
-|Due to the GitHub API change, the raw URL does not work. Use the URL, '/:org/:repo/:tree/:path*' to import files from GitHub.
-
-See https://www.ibm.com/mysupport/aCIKe000000XfIg[issue,window=_blank]
-
-
-|Standalone BPMN and DMN Editors (classic): The standalone editors examples show some minor issues 
-|* Read-only not applied to process variable tags. It can be edited even if a BPMN diagram is set to read-only in the standalone BPMN Editor (classic).
-
-* Incorrect reference of state-control. Though BPMN is mentioned in the top toolbar with buttons for loading files, it refers to DMN.
-
-* Read-only not applied to boxed expressions as it can be edited even if a DMN diagram is set to read-only in the standalone DMN Editor (classic).
-
-See https://www.ibm.com/mysupport/aCIKe000000XfJo[issue,window=_blank]
-
-
-|{PRODUCT_SHORT} examples may not work on  more recent container platforms.
-|Some of the examples for user reference  are built with Docker Image format 1 (IIRC), which might not work for newer container platforms or versions.
-
-For reference, see xref:../getting-started/examples.adoc[Example applications]
-
 |The event subsystem in the {PRODUCT_SHORT} workflow engine does not have transactional support.
 |Using transactions that emit events through an emitter like Kafka or CloudEvents in _Business Services_ with Compact Architecture with at least runtime persistence may throw a transaction error with message 'enlisted connection used without active transaction' after starting a process instance.
 
 |In a _Business Service_, Workflows subsystem event related messages are sent even if the process execution fails due to a DB error.
 |In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
 
+|Native compilation support for workflow projects.
+
+|Using certain dependencies (for example, jobs-service-storage-jpa) might cause native builds to fail due to unsupported methods like `Object.wait0`.
+
+* You might encounter build-time failures if you attempt to use native compilation with DMN, and DRL projects in version 9.2.0. These problems are fixed in version 9.2.1.
+
+* Workflow (BPMN) projects do not support native compilation in version 9.2.0 and 9.2.1.
+
+|OpenAPI spec auto-generation when using the _io.quarkus:quarkus-oidc_ extension.
+
+|The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated.
+
+* This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
+
+* As a workaround, add the following to your *application.properties* file:
+`quarkus.smallrye-openapi.auto-add-bad-request-response=false`
+
+* This property will make it so that the "400 Bad Request" outputs are not added to the auto-generated OpenAPI specifications.
+
+|Apply an Accelerator in Developer Tools for VS Code fails in Windows.
+|In the Developer Tools for VS Code, when user tries to apply an Accelerator using Windows, it fails with the message:
+
+_Error: ENOENT: no such file or directory, unlink '[workspace-root]\.kie-sandbox\accelerator.yaml'._
+
+Workaround: User can manually create the folder `.kie-sandbox` in the VS Code workspace folder root with an empty file called `accelerator.yaml`. Then, when the Accelerator is applied, the `accelerator.yaml` will be filled with the proper content.
 |===

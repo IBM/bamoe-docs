@@ -1,0 +1,213 @@
+= Structure differences
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section outlines the key structural differences between BAMOE v8 and v9, including changes in project generation, runtime models, configuration mechanisms, and integration patterns. Whether you're migrating client-server or standalone projects, understanding these changes is essential for aligning with BAMOE v9 streamlined, code-first development model.
+
+== Client-server and standalone comparison on BAMOE 8 and BAMOE 9.2
+
+|===
+| *Feature* | *Client-Server (BAMOE 8)* | *Standalone (BAMOE 8)* | *Client-Server (BAMOE 9.2)* | *Standalone (BAMOE 9.2)*
+
+| *Architecture*
+| Deployed in KIE Server, accessed via REST API or JMS
+| Direct invocation in same JVM
+| Accessed via REST/gRPC or Kafka
+| Direct invocation in same JVM
+
+| *Usage*
+| Models are executed on the server and results are returned via REST
+| Programmatic instantiation of `KieBase`/`KieSession`
+| Models are executed on the server and accessed via REST or gRPC
+| Programmatic instantiation of `KieBase`/`KieSession`
+|===
+
+* For more details on upgrading see the xref:05-02-upgrading-client-server-projects.adoc[*Client-Server* projects] section.
+* For more details on upgrading see the xref:05-03-upgrading-standalone-projects.adoc[*Standalone* projects] section.
+
+== Project generation comparison on BAMOE 8 and 9.2 
+
+|===
+| *Aspect* | *BAMOE 8* | *BAMOE 9.2* | *Notes*
+
+| *Tooling Approach*
+| Web-based project creation via Business Central UI
+| CLI or IDE-based (e.g., VS Code) project generation
+| v9 shifts from UI to developer-centric tooling.
+
+| *BAMOE Accelerators*
+| Not available
+| *BAMOE Accelerators*: Predefined templates for BPMN/DMN projects
+| Useful for rapid prototyping and domain-driven APIs. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=canvas-using-accelerators[Canvas using accelerators].
+
+| *Maven Archetypes*
+| Limited or not exposed directly to users
+| *Custom Maven Archetypes* available via GitHub
+| Enables consistent project scaffolding via CLI.
+
+| *IDE Integration*
+| Business Central UI
+| *BAMOE Developer Tools for VS Code* extension
+| Supports hot reload, debugging, and asset editing.
+
+| *Customization*
+| Through Business Central UI and XML descriptors
+| Through `application.properties`, annotations, and Quarkus/Spring Boot extensions
+| v9 favors code-first, config-light development.
+
+| *Git Integration*
+| JGit-based virtual Git in Business Central UI
+| Native Git support via IDE or CLI
+| Encourages standard Git workflows.
+|===
+
+== Comparison of BAMOE 8 vs BAMOE 9.2 Quarkus & Spring Boot
+
+|===
+| *Feature* | *BAMOE 8* | *BAMOE 9.2*
+
+| *Quarkus Version*
+| Quarkus 2.7.x
+| Quarkus 3.20.1
+
+| *Spring Boot Version*
+| Spring Boot 2.5.12
+| Spring Boot 3.4.6 (for Decisions and Rules)
+
+| *Runtime Integration*
+| Kogito extensions for Quarkus and Spring Boot
+| Native support for both Quarkus and Spring Boot
+
+| *Build Tooling*
+| Maven CLI, Maven + Business Central UI
+| Maven CLI, Dev Services, Docker/K8s ready
+
+| *Configuration*
+| `application.properties`, `pom.xml`, `kmodule.xml`, `kie-deployment-descriptor.xml`, `persistence.xml`
+| `application.properties`, `pom.xml`
+
+| *Deployment*
+| KIE Server or custom runtime
+| Uber-JAR, native image, or container image
+|===
+
+== Configuration comparison of BAMOE 8 and BAMOE 9.2
+
+|===
+| *Configuration Area* | *BAMOE 8* | *BAMOE 9.2* | *Migration Notes*
+
+| *Maven Configuration*
+| Maven 3.6.x, Java 8 or 11; config via Business Central UI + `settings.xml`.
+| Maven 3.9.6+, Java 17; CLI or container-based Maven config.
+| Upgrade project to modern Maven + Java 17 standards.
+
+| *General Settings*
+| `groupId`, `artifactId`, `version` managed via Business Central UI and `pom.xml`.
+| Defined in `pom.xml`; runtime configs in `application.properties`.
+| Move fully to Maven for build metadata; use `application.properties` for runtime.
+
+| *Dependencies*
+| Managed via Business Central UI; tied to RHPAM BOMs or via `pom.xml`.
+| Managed via `pom.xml`.
+| Replace RHPAM BOMs with Kogito/Quarkus/Spring Boot dependencies.
+
+| *KIE Bases*
+| Declared in `kmodule.xml`; required.
+| N/A
+| N/A
+
+| *Data Objects*
+| Auto-generated POJOs in UI, editable in `src/main/java`.
+| Manually defined in codebase or imported via JARs.
+| Refactor and extract POJOs into Maven modules or shared libraries.
+
+| *Validation*
+| Real-time via UI on save/build.
+| Via `mvn verify`, VS Code "Problems" tab, BAMOE Canvas "Problems" tab or Quarkus/Spring Dev Mode.
+| Use IDE + Dev Mode for live validation.
+
+| *Custom Tasks*
+| `.wid` files + `workitem.conf` + `kie-deployment-descriptor.xml`.
+| `.wid` files + handler extending `org.kie.kogito.process.impl
+.DefaultWorkItemHandlerConfig`;
+| 
+
+| *Deployments*
+| Managed by Business Central; Development: deploys to KIE Server manually or via UI; Production: deploys to KIE Server from CI/CD.
+| Build with `mvn package`; deploy as Uber-JAR or container (Docker/K8s).
+| Use Quarkus/Spring Boot-native deployment pipelines.
+
+| *Persistence*
+| Configured via `persistence.xml`.
+| Configured via `application.properties`;
+| Migrate from XML-based configuration to Quarkus/Spring Boot-style persistence.
+
+| *Branch Management*
+| Git (JGit 5.x) via Business Central UI; VFS-based virtual Git.
+| Managed via Git-based workflows using standard Git tools (e.g., Git CLI) and integrations with supported Git platforms such as GitHub, GitLab, and Bitbucket.
+| Migrate to standard Git repositories and workflows.
+|===
+
+== Project files comparison of BAMOE 8 and BAMOE 9
+
+|===
+| *File/Directory* | *BAMOE 8* | *BAMOE 9.2*
+
+| *project.repositories*
+| Defines Maven repos for dependency resolution
+| Replaced by standard Maven `settings.xml` configuration.
+
+| *project.imports*
+| Lists Java classes imported
+| Not present. Imports are now handled via source code or rule headers directly; simplified config.
+
+| *package-names-white-list*
+| Security: Lists allowed Java packages
+| Not present. Replaced with standard module packaging & Maven/Java constraints.
+
+| *global/ directory*
+| Defines global variables (e.g., services, constants)
+| Handled in code or rule headers; concept retained but implementation changed. +
+See xref:05-04-upgrading-individual-assets.adoc#global-variables[Global variables] section.
+
+| *.wid*
+| Defines custom Work Item Handlers
+| Defines custom Work Item Handlers. 
+See xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading Work Item Handlers] to check what you need to address.
+
+| *patterns.json*
+| UI form templates for human tasks
+| BAMOE Developer Tools for VS Code provides a command to generate forms, and BAMOE Quarkus Dev UI provides a form editor. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=code-form-generation-user-tasks[Form code generation functionality] section.
+
+| *themes.json*
+| UI theming for Business Central
+| BAMOE Developer Tools for VS Code, BAMOE Canvas and BAMOE Management Console do not support UI theming.
+
+| *src/main/resources/META-INF/*
+| Metadata for KIE containers
+| Still used for BAMOE v9 _Business Service_ metadata files.
+
+| *kmodule.xml*
+| Defines KIE bases, sessions, and includes
+| Not present. 
+
+| *kie-deployment-descriptor.xml*
+| Deployment descriptors configuration, are applied during KJAR deployment.
+| Configurations and activators are in Java and `application.properties` file. Read https://ibm.com/docs/en/ibamoe/9.2.x?topic=developing-stateful-workflows[Developing stateful Workflows] section for more information.
+
+| *persistence.xml*
+| JPA configuration for process persistence
+| Persistence is available for stateful workflows, and should be configure following the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-configuring-persistence-stateful[Configuring persistence for stateful Workflows] guide.
+
+| *Test Scenario*
+| `.scesim` files are placed under `src/test/resources` +
+JUnit 4 support +
+Activator Annotation -- `@RunWith(org.drools.workbench
+.screens.scenariosimulation
+.backend.server.runner
+.ScenarioJunitActivator.class)`
+| `.scesim` files are placed under `src/test/resources` +
+JUnit 5 compatible +
+Activator Annotation -- `@TestScenarioActivator` +
+See xref:05-04-upgrading-individual-assets.adoc#scesim[Test Scenarios] section.
+|===

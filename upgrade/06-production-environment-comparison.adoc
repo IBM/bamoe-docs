@@ -1,0 +1,359 @@
+= Production environment comparison
+
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+The shift from BAMOE v8 to v9 not only transforms the development experience but also significantly changes how business automation solutions are deployed, managed, and operated in production. While v8 relied on a centralized runtime model with KIE Server and Smart Router, v9 embraces a cloud-native architecture built around containerized services, Kubernetes orchestration, and modern operational practices.
+
+This section explores the key differences in production architecture, deployment models, runtime behavior, and operational tooling between BAMOE v8 and v9. Whether you're managing legacy environments or planning a migration, understanding these changes is essential for designing scalable, maintainable, and cloud-ready automation solutions.
+
+== Architecture overview
+
+=== BAMOE 8
+
+The architecture of BAMOE v8 is based on a centralized and tightly coupled set of components that support both authoring and runtime execution of business automation assets. The core components include Business Central, KIE Server, Business Central Monitoring, and optionally, the Smart Router.
+
+Business Central provides a web-based interface for authoring business processes, rules, and other automation assets. Once developed and built, these assets are typically packaged as KJARs and deployed to a KIE Server, which handles their execution. Business Central Monitoring offers runtime visibility into process and task execution. In distributed environments, the Smart Router acts as a gateway, routing client requests to the appropriate KIE Server instance.
+
+This architecture supports multiple deployment targets, including embedded Java applications and OpenShift-based containerized environments. While robust and familiar, it is monolithic in nature and can present challenges in terms of scalability, flexibility, and integration with modern cloud-native infrastructure.
+
+image::upgrade/06-production-environment-bamoe-business-central.png[v8 arch]
+
+=== BAMOE 9
+
+BAMOE v9 introduces a modular and cloud-native architecture that replaces the centralized model of v8. The core unit of deployment is the Business Service, a microservice application that contains the business automation assets. A Business Service can be deployed as a container image generated during the Maven build process or executed directly using Java. It is also possible to run a plain Java application embedded with Drools and jBPM, without relying on Kogito.
+
+The BAMOE Management Console provides a lightweight, stateless web interface for interacting with the runtime environment. It connects to the Business Services and leverages the Data-Index, Jobs Service, and User Tasks subsystems to retrieve and display information about process instances, user tasks, and jobs. The BAMOE Management Console is deployed as a container in a cloud environment, optionally using Helm Charts for convenience.
+
+The production environment may also include optional components such as a Database, an Identity Provider (IdP) for authentication, Apache Kafka for event-driven communication, and a Monitoring System (if using Data-Audit), integrated with Prometheus and Grafana for observability.
+
+This architecture supports flexible deployment models and aligns with modern container orchestration practices. Each Business Service is independently deployable and scalable, enabling a more maintainable and resilient production environment.
+
+Please read https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-management-console[Deploying to Kubernetes or OpenShift with the Helm Chart] to know more about deploying BAMOE Management Console into Openshift using Helm Charts.
+
+image::upgrade/06-production-environment-bamoe.png[v9 arch]
+
+== Deployment & runtime model [[deployment-runtime-model]]
+
+=== BAMOE 8
+
+In BAMOE v8, deployment is centered around a set of tightly coupled components including Business Central, KIE Server, and optionally the Smart Router. Applications are typically packaged as KJARs and deployed to a configured KIE Server. The Smart Router, available as an add-on and as a container image in the Red Hat OpenShift Image Catalog, acts as an intelligent load balancer. It routes client requests to the appropriate KIE Server instance and aggregates data across multiple servers, simplifying endpoint management in distributed environments.
+
+For OpenShift deployments, BAMOE v8 provides an OpenShift Operator, available in the OpenShift Container Platform Catalog. This operator automates the setup of environments that include Business Central, Business Central Monitoring, Process Server, and Smart Router, streamlining the deployment process on OpenShift clusters.
+
+=== BAMOE 9
+
+BAMOE v9 introduces a fundamentally different deployment model based on microservices. Business automation assets are no longer deployed to a centralized KIE Server. Instead, they are packaged as containerized Business Services, built using Quarkus or Spring Boot. These services can be deployed as standalone Java applications or as container images generated during the Maven build process.
+
+Since Business Services are independent microservices, BAMOE v9 does not include a dedicated load balancer like the Smart Router. Instead, load balancing can be handled using any solution compatible with cloud environments. In OpenShift environments, Business Services can be deployed as pods and scaled automatically using OpenShift's native autoscaling capabilities.
+
+BAMOE v9 does not provide its own OpenShift Operator. Instead, it offers Helm charts to simplify deployment. The BAMOE Management Console Helm Chart is available for installing the related components on Kubernetes or OpenShift clusters. These charts support flexible configuration and align with infrastructure-as-code practices. For more details, see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=installing-bamoe-management-console[Deploying to Kubernetes or OpenShift with the Helm Chart].
+
+== KIE Server vs. cloud-native Business Services
+
+BAMOE v8 projects are packaged as a Knowledge JAR (KJAR) file and deployed to a KIE Server that runs the decision services, process applications, and other deployable assets from the KJAR file whereas in BAMOE BAMOE v9, Each Business Service project is a cloud-native microservice application built around a given set of models.
+
+Below table compares the differences between BAMOE v8 KIE Server and BAMOE v9 cloud-native Business Services (powered by Kogito).
+
+|===
+| *Aspect* | *KIE Server (BAMOE 8)* | *Cloud-native Business Services (BAMOE 9.2)*
+
+| *Packaging*
+| Each project in BAMOE v8 is packaged as a Knowledge JAR (KJAR) file with configuration files such as a Maven pom.xml and a KIE module descriptor file (kmodule.xml), which contains the KIE base and KIE session configurations for the assets in the project.
+| BAMOE v9 Business Service projects can be packaged as a Container image, JAR file or Native Executable.
+
+| *Deployment*
+| If KIE Server is integrated with business central, projects can be automatically packaged and deployed into KIE Server whereas when building projects outside Business Central users must KIE Server REST API to deploy into KIE Server.
+| Each Business Service project acts as microservice and can be deployed using standard deployment strategies for deploying Quarkus and Spring Boot microservices.
+
+| *API Management*
+| KIE Server exposes KIE Server REST APIs to interacts with deployed KIE containers and business assets like processes, tasks etc.
+| Use standard tools provided by the container platform of choice to manage containers and Process API, User Task API, Process Management API, Data-Index API to interact with processes and tasks management features.
+
+| *Cloud deployment*
+| All individual components like Business Central, KIE Server, Smart Router can be deployed in Openshift/Kubernetes pods
+| Use standard deployment strategies for deploying Quarkus and Spring Boot projects into Kubernetes/Openshift
+|===
+
+== Management interfaces
+
+Both BAMOE v8 and v9 provide tools to manage and monitor process instances, user tasks, and jobs running within Business Services. In BAMOE v8, these capabilities are integrated into Business Central, offering a unified interface for both authoring and runtime management. In contrast, BAMOE v9 separates these concerns, providing runtime management through the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-managing-live-workflows-using-bamoe-management-console[BAMOE Management Console], a lightweight web interface designed to interact with backend services such as the Data-Index, Jobs Service, and User Tasks.
+
+The table below compares the key management features available in each version, highlighting how functionality has evolved or shifted between the two architectures.
+
+|===
+| *Topic* | *BAMOE 8 Business Central* | *BAMOE 9.2 Management Console*
+
+| *Process definitions*
+| List all process definitions that are deployed in the platform.
+| User can access process definitions list by going to Processes > Process Definitions Tab.
+
+| *Process Instances*
+| Start +
+Ability to start process instances from process definitions from within Business Central.
+| Start +
+Process instances can be started by going to Process definitions tab and clicking on "Start new process" actions. Process instances can also be started using REST API or Message broker events.
+
+|
+| List and filter +
+Contains screen to list process instances and apply advanced filtering options
+| List and filter +
+View and apply simple filters on process instance list. For Advanced filtering use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api#_filtering[BAMOE Data-Index GraphQL API] .
+
+|
+| Process variables Tab +
+Displayed in table format and provides feature to edit values of process variables.
+| Process variables Panel +
+Displayed in tree format with ability to hover and perform actions on tree nodes. Possible actions are add, copy, edit and remove.
+
+|
+| Process Diagram +
+View process instance diagram with current active node
+| Process Diagram +
+View process instance diagram with current active node
+
+|
+| Process log +
+Contains list of node instance related to process instance sorted by start time.
+| Process timeline panel +
+Similar to v8 process logs but we can click an active node and perform node actions like re trigger, cancel or skip on that node.
+
+|
+| Process details +
+Contains details about process instance in read only mode.
+| Process details +
+Displays the basic Process instance information and provides links to the related Process runtime UI.
+
+|
+| Node trigger +
+Node can be triggered from the process diagram tab under node actions dropdown.
+| Node trigger +
+Nodes can be triggered from Node trigger panel in process instance screen.
+
+|
+| Documents +
+Business Central has capability to view documents added for process instances.
+| Documents +
+BAMOE Management Console does not have the capability. You can use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api#_usertasksinstancetaskidattachments[BAMOE User Task API] to add and get all documents.
+
+|
+| Abort process instance +
+Can be aborted from process instances list
+| Abort process instance +
+Can be aborted from process instance list
+
+|
+| Signal process instance +
+It is possible to signal a process instance from Business Central
+| Signal process instance +
+It is not possible to do so in BAMOE Management Console UI. If the process has signals configured (being a signal start event, or intermediate signals) codegen will generate specific REST endpoints that will allow to signal whole process container or just specific process instance.
+
+|
+| Bulk actions +
+Business Central allows bulk actions on process instances list
+| BAMOE management console allows users to select process instances from the process instances list and perform actions like abort, skip and retry.
+
+| *Tasks*
+| Access +
+Tasks inbox can accessed by Menu > Track > Task Inbox in Business Central
+| Access +
+It can be accessed by going to Task panel in BAMOE Management Console.
+
+|
+| List Tasks +
+Task inbox only contains tasks assigned to the user or user group.  To manage all the tasks, users must be specified as a process administrator.
+| List Tasks +
+By default, users can view tasks for all users and processes. User can operate with task assigned to themselves or tasks which he's the administrator for.
+
+|
+| Claim Tasks +
+Business Central enables users to claim a task if tasks is assigned to multiple users or user group to which the user belongs.
+| Claim Tasks +
+Users can directly submit a task if it is assigned to the current user or user group. They can also use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api#_usertasksinstancetaskidtransition_2[BAMOE User task API] to claim specific task. If authenticated as a user with https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-managing-live-workflows-using-bamoe-management-console#_impersonation[impersonation] powers they can also submit on behalf of other users.
+
+|
+| Delegate Tasks +
+Tasks can be delegated by going to task > Assignments tab
+| Delegate Tasks +
+BAMOE Management Console does not allow delegating tasks to other users or group. Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api#_usertasksinstancetaskidinputs[BAMOE User Task API] instead
+
+|
+| Delegate Tasks +
+Tasks can be delegated by going to task > Assignments tab
+| Delegate Tasks +
+BAMOE Management Console does not allow delegating tasks to other users or group. Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api#_usertasksinstancetaskidinputs[BAMOE User Task API] instead
+
+|
+| Tasks Details +
+Status of the tasks can be checked in "`Details`" and   "`Logs "` tabs
+| Tasks Details +
+It can be checked by clicking on "`View details`" button in tasks page.
+
+|
+| Task Filter +
+Allow basic and advanced filtering.
+| Task Filter +
+BAMOE Management Console allows only basic filtering based on Task status. For Advanced filtering use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api#_filtering[BAMOE Data-Index GraphQL API]
+
+|
+| Set task priority and due date +
+Users can set due date and Task priority from Task inbox see https://docs.redhat.com/en/documentation/red_hat_process_automation_manager/7.13/html/developing_process_services_in_red_hat_process_automation_manager/manage-tasks-con-managing-and-monitoring-processes#using-MVEL-to-set-task-priority_managing-and-monitoring-processes[here]
+| Set task priority and due date +
+BAMOE Management Console does not support this feature. Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-management-api#_process_management_api[Process Management API] instead
+
+|
+| Bulk actions on tasks +
+Business Central allows bulk operations on task inbox and task page
+| Bulk actions on tasks +
+Not available in BAMOE Management Console
+
+|
+| View and add comments to a task +
+You can add comments to a task and also view the existing comments of a task in Business Central.
+| View and adding comments to a task +
+Not available in BAMOE Management Console, Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api#_usertasksinstancetaskidcomments[BAMOE User Task API] instead
+
+|
+| View the history log of a task +
+You can view the history log of a task in Business Central from the Logs tab of task
+| View the history log of a task +
+Not available in BAMOE Management Console. Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-overview-stateful-compact-architecture#_querying_2[BAMOE Data-Audit GraphQL API] instead
+
+| *Jobs*
+| List jobs +
+Can be accessed by going to Menu > Manage > Jobs
+| List jobs +
+In process details page users can view the list of jobs associated to the process instance or by clicking on "`Jobs`" Menu from home page.
+
+|
+| Create Job +
+Users can create jobs from jobs page by clicking on "`New Job`" button.
+| Create Job +
+BAMOE Management Console UI does not support creating jobs. Jobs can only be created within _Business Services_.
+
+|
+| Action +
+Allows reschedule, cancel and details actions on jobs.
+| Action +
+Allows reschedule, cancel and details actions on jobs.
+
+|
+| Bulk Action +
+Business Central allows bulk actions on jobs page.
+| Bulk Action +
+Users can select multiple jobs from jobs page and perform "`Cancel Selected`" action.
+
+| *Execution Errors*
+| Business Central provides feature to view, manage and filter errors when executing a process instance.
+| BAMOE Management Console does not have that capability. Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-management-api#_managementprocessesprocessidinstancesprocessinstanceiderror[BAMOE Management API] or https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api#_process_instances[BAMOE Data-Index GraphQL API] instead
+
+| *Process Reports*
+| Business Central provides feature to view process reports in dashboard and table format.
+| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business[Monitoring Business Services]. You can also use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api#_process_instances[BAMOE Data-Index GraphQL API]  to query data for your own monitoring systems.
+
+| *Tasks Reports*
+| Business Central provides feature to view Task reports in dashboard or table format.
+| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business[Monitoring Business Services]. You can also use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api#_user_tasks[BAMOE Data-Index GraphQL API] to query data for your own monitoring systems.
+
+| *Custom queries*
+| Can be done using the `ExecuteSQLQueryCommand` executor command. Check the https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=services-managing-monitoring-business-processes-in-business-central#custom-query-proc_managing-and-monitoring-processes[Running a custom query] section.
+| It is possible to use the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-overview-stateful-compact-architecture#_querying_2[BAMOE Data-Audit GraphQL API] to perform custom queries.
+|===
+
+== API differences [[api-differences]]
+
+Both BAMOE v8 and v9 expose APIs to interact with business automation services, but the architecture and usage patterns differ significantly. In BAMOE v8, APIs are centralized and tied to the KIE Server, which manages containers and business assets. In BAMOE v9, APIs are decentralized and exposed directly by each Business Service, reflecting the shift to a microservice-based model.
+
+The table below outlines the key differences in API structure, authentication, documentation, and supported features:
+
+|===
+|  | *BAMOE 8* | *BAMOE 9.2*
+
+| *Architecture*
+| BAMOE v8 exposes KIE APIs to interact with Process Servers, KIE containers and business assets.
+| BAMOE v9 allows for creating domain-specific APIs that can be exposed through REST endpoints or events. BAMOE v9 doesn't support APIs to interact with containers and servers as business assets are no longer deployed in internal KIE Server.
+
+| *Authentication*
+| API's are authenticated by security provider configured on the platform for example, Wildfly elytron, Wildfly keycloak or LDAP .
+| BAMOE v9 rely on Quarkus or Spring Boot security for authentication and authorization. see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-securing-business-service-api-endpoints[Securing Business Service API] endpoints.
+
+| *Authorization*
+| Users roles/groups can be configured in the security provider. Only users with "`kie-server`" roles are able to access KIE APIs.
+| Users can use Quarkus or Spring Boot API authorization mechanisms to allow only users with specific roles to access specific endpoints. see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-securing-business-service-api-endpoints#_authorization_quarkus[Authorization]
+
+| *API Documentation*
+| Swagger documentation available at `+http://SERVER:PORT/kie-server/docs+`.
+| Swagger UI documentation for Domain and Management APIs are available at `+http://SERVER:PORT/q/swagger-ui+`. See Using the https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-running-locally-bamoe-quarkus-dev-ui#_using_the_swagger_ui[Swagger UI].
+
+| *Event-driven Capabilities*
+| In BAMOE v8, Event driven capabilities are less emphasized.
+| Users can expose domain-specific data through events or in a data index so that the data can be consumed and queried by other services in real time.
+
+| *API Types*
+| KIE Server REST API for KIE containers and business assets
+| Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-management-api[Process Management API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-api[Process API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-user-tasks-api[User Tasks API], https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-index-graphql-api[Data-Index GraphQL API], and https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-data-audit-api[Data-Audit API]
+
+|
+| KIE Server Java client API
+| Does not support Java client API, use REST and GraphQL API endpoints instead.
+
+|
+| Controller REST API for KIE Server templates and instances
+| N/A
+
+|
+| Controller Java client API
+| N/A
+
+|
+| BPMN process fluent API for Business Central processes
+| Use https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=workflows-process-api[Process API]
+
+|
+| Knowledge Store REST API for Business Central spaces and projects
+| N/A
+
+|
+| Security Management REST API for Business Central groups, roles, and users
+| Not supported, use Quarkus or Spring Boot supported security mechanism.
+
+|
+| EJB API for KIE sessions and task services
+| N/A
+|===
+
+== Monitoring & observability
+
+Both BAMOE v8 and v9 support monitoring of Business Services using Prometheus and Grafana. These tools enable users to collect, store, and visualize metrics related to business process execution and system performance. While the overall monitoring architecture remains similar across versions, there are important differences in how metrics are enabled, exposed, and integrated--especially in the context of microservice-based deployments in BAMOE v9.
+
+The table below outlines the key differences between BAMOE v8 and BAMOE v9.2 in terms of monitoring configuration, endpoints, and platform support.
+
+|===
+| *Aspect* | *BAMOE 8* | *BAMOE 9.2*
+
+| *Enable/Disable metrics*
+| Prometheus extension can be enabled by setting `org.kie.prometheus.server.ext.disabled` to false when starting process server. If using BAMOE v8 on Spring Boot, use `kieserver.prometheus.enabled=true` to enable prometheus.
+| BAMOE v9 provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. Users can disable specific metrics from being exported by using properties `kogito.monitoring.rule.useDefault=false, kogito.monitoring.process.useDefault=false, kogito.monitoring.interceptor.useDefault=false` See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business#_enabling_prometheus_metrics_monitoring_in_ibm_bamoe[Enabling Prometheus metrics monitoring in IBM BAMOE]
+
+| *REST Endpoint*
+| Process server publish the metrics to REST API endpoint `+http://<host:port>/kie-server/services/rest/metrics+`
+| Metrics are available at REST API endpoint `+http://<host:port>/metrics+`. Users can also interact with your collected metrics and application targets in the Prometheus expression browser at `+http://<host:port>/graph+` and `+http://<host:port>/targets+` .
+
+| *Graphana Integration*
+| Supports default and custom Graphana dashboard
+| Supports default and custom Graphana dashboard  see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business#_custom_grafana_dashboards_in_ibm_bamoe[Custom Grafana dashboards in IBM BAMOE]
+
+| *Red hat Openshift support*
+| Users can configure Prometheus metrics monitoring for Process Server on Red Hat OpenShift Container Platform. See https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=settings-managing-monitoring-kie-server[Managing and monitoring KIE Server]
+| Follow the same steps as BAMOE v8 openshift deployment but with changes in application properties to enable/disable metrics and changes in the endpoints. See https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-monitoring-business#_configuring_prometheus[Configuring Prometheus]
+|===
+
+== Standard Operating Environment differences
+
+The Standard Operating Environment (SOE) for BAMOE has evolved significantly between v8 and v9.2. These changes reflect the shift toward a more cloud-native, containerized architecture in BAMOE v9, which impacts supported platforms, middleware, and system requirements.
+
+To understand the specific differences in supported environments, refer to the official IBM compatibility reports:
+
+- https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=153E7E75477540829BD9AEBBC7ABB82C[BAMOE v8]
+- https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=BF430D4BABE04E40B2F9A5AF8333591A[BAMOE v9.2]
+
