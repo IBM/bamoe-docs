@@ -1168,3 +1168,208 @@ Returns node instances for a specified work item in a specified process instance
   "sla-due-date": null
 }
 ----
+
+== [GET] /server/queries/variables/processes
+
+.Request parameters
+[cols="25%,45%,15%,15%", frame="all", options="header"]
+|===
+|Name
+|Description
+|Type
+|Requirement
+
+|`page`
+|Page number at which to start (default: `0`)
+|Integer
+|Optional
+
+|`pageSize`
+|Number or results per page (default: `10`)
+|Integer
+|Optional
+
+|`sort`
+|Sort column for results
+|String
+|Optional
+
+|`sortOrder`
+|Ascending (`true`) or descending (`false`) sort order for results
+|Boolean
+|Optional
+|===
+
+.Example GET endpoint with parameters
+[source]
+----
+http://localhost:8080/kie-server/services/rest/server/queries/variables/processes?page=0&pageSize=10&asc=true
+----
+
+
+.Example server response (JSON)
+[source,json]
+----
+{
+  "process-instance-vars": [
+    {
+      "process-instance-id": 2,
+      "process-id": "TimerTest.HumanTaskTest",
+      "process-name": "HumanTaskTest",
+      "process-version": "1.0",
+      "process-instance-state": 1,
+      "container-id": "TimerTest_1.0.0-SNAPSHOT",
+      "initiator": "rhpamadmin",
+      "start-date": 1751890285658,
+      "process-instance-desc": null,
+      "correlation-key": "2",
+      "parent-instance-id": null,
+      "last-modification-date": null,
+      "active-user-tasks": null,
+      "process-instance-variables": {
+        "initiator": "rhpamadmin"
+      }
+    },
+    {
+      "process-instance-id": 3,
+      "process-id": "TimerTest.HumanTaskTest",
+      "process-name": "HumanTaskTest",
+      "process-version": "1.0",
+      "process-instance-state": 1,
+      "container-id": "TimerTest_1.0.0-SNAPSHOT",
+      "initiator": "rhpamadmin",
+      "start-date": 1751890809656,
+      "process-instance-desc": null,
+      "correlation-key": "3",
+      "parent-instance-id": null,
+      "last-modification-date": null,
+      "active-user-tasks": null,
+      "process-instance-variables": {
+        "initiator": "rhpamadmin"
+      }
+    }
+  ]
+} 
+----
+
+== [GET] /server/queries/variables/processes/tasks
+
+.Request parameters
+[cols="25%,45%,15%,15%", frame="all", options="header"]
+|===
+|Name
+|Description
+|Type
+|Requirement
+
+|`page`
+|Page number at which to start (default: `0`)
+|Integer
+|Optional
+
+|`pageSize`
+|Number or results per page (default: `10`)
+|Integer
+|Optional
+
+|`sort`
+|Sort column for results
+|String
+|Optional
+
+|`sortOrder`
+|Ascending (`true`) or descending (`false`) sort order for results
+|Boolean
+|Optional
+|===
+
+.Example GET endpoint with parameters
+[source]
+----
+http://localhost:8080/kie-server/services/rest/server/queries/variables/processes/tasks?page=0&pageSize=10&orderBy=task.id&asc=true
+----
+
+
+.Example server response (JSON)
+[source,json]
+----
+
+
+{
+  "user-task-with-vars-instance": [
+    {
+      "id": 2,
+      "name": "Task",
+      "description": null,
+      "actual-owner": "rhpamadmin",
+      "correlation-key": "2",
+      "potential-owners": [
+        "rhpamadmin"
+      ],
+      "process-definition-id": "TimerTest.HumanTaskTest",
+      "process-instance-id": 2,
+      "task-instance-input-variables": null,
+      "process-variables": {
+        "initiator": "rhpamadmin"
+      },
+      "status": "Reserved"
+    },
+    {
+      "id": 3,
+      "name": "Task",
+      "description": null,
+      "actual-owner": "rhpamadmin",
+      "correlation-key": "3",
+      "potential-owners": [
+        "rhpamadmin"
+      ],
+      "process-definition-id": "TimerTest.HumanTaskTest",
+      "process-instance-id": 3,
+      "task-instance-input-variables": null,
+      "process-variables": {
+        "initiator": "rhpamadmin"
+      },
+      "status": "Reserved"
+    },
+    {
+      "id": 4,
+      "name": "Task",
+      "description": null,
+      "actual-owner": "rhpamadmin",
+      "correlation-key": "3",
+      "potential-owners": [
+        "rhpamadmin"
+      ],
+      "process-definition-id": "TimerTest.HumanTaskTest",
+      "process-instance-id": 3,
+      "task-instance-input-variables": null,
+      "process-variables": {
+        "initiator": "rhpamadmin"
+      },
+      "status": "Reserved"
+    },
+    {
+      "id": 5,
+      "name": "Task",
+      "description": null,
+      "actual-owner": "rhpamadmin",
+      "correlation-key": "2",
+      "potential-owners": [
+        "rhpamadmin"
+      ],
+      "process-definition-id": "TimerTest.HumanTaskTest",
+      "process-instance-id": 2,
+      "task-instance-input-variables": null,
+      "process-variables": {
+        "initiator": "rhpamadmin"
+      },
+      "status": "Suspended"
+    }
+  ]
+} 
+
+ 
+
+ 
+
+----
