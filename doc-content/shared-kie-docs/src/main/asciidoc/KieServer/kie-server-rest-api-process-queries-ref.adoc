@@ -1220,12 +1220,43 @@ Retrieves process instances along with their variables.
 |Optional
 |===
 
-.Example GET endpoint with parameters
+.Example POST endpoint with parameters
 [source]
 ----
 http://localhost:8080/kie-server/services/rest/server/queries/variables/processes?page=0&pageSize=10&asc=true
 ----
 
+.Example request body (JSON)
+[source,json]
+----
+{
+  "attributes-query-params": [
+    {
+      "cond-column": "TASK_STATUS",
+      "cond-operator": "IN",
+      "cond-values": [
+        "Created",
+        "Ready",
+        "InProgress",
+        "Reserved",
+        "Suspended"
+      ]
+    },
+    {
+      "cond-column": "PROCESS_DEFINITION_ID",
+      "cond-operator": "EQUALS_TO",
+      "cond-values": [
+        "TimerTest.HumanTaskTest"
+      ]
+    }
+  ],
+  "task-query-params": null,
+  "process-query-params": null,
+  "case-query-params": null,
+  "pot-owners-query-param": null,
+  "pot-owners": null
+} 
+----
 
 .Example server response (JSON)
 [source,json]
@@ -1306,17 +1337,49 @@ Retrieves user tasks along with process variables.
 |Optional
 |===
 
-.Example GET endpoint with parameters
+.Example POST endpoint with parameters
 [source]
 ----
 http://localhost:8080/kie-server/services/rest/server/queries/variables/processes/tasks?page=0&pageSize=10&orderBy=task.id&asc=true
 ----
 
+.Example request body (JSON)
+[source,json]
+----
+
+{
+  "attributes-query-params": [
+    {
+      "cond-column": "TASK_STATUS",
+      "cond-operator": "IN",
+      "cond-values": [
+        "Created",
+        "Ready",
+        "InProgress",
+        "Reserved",
+        "Suspended"
+      ]
+    },
+    {
+      "cond-column": "PROCESS_DEFINITION_ID",
+      "cond-operator": "EQUALS_TO",
+      "cond-values": [
+        "TimerTest.HumanTaskTest"
+      ]
+    }
+  ],
+  "task-query-params": null,
+  "process-query-params": null,
+  "case-query-params": null,
+  "pot-owners-query-param": null,
+  "pot-owners": null
+}
+
+----
 
 .Example server response (JSON)
 [source,json]
 ----
-
 
 {
   "user-task-with-vars-instance": [
