@@ -1,8 +1,8 @@
 [id='manage-service-tasks-proc-vscode_{context}']
 
-= Managing custom tasks in {CENTRAL} with Visual Studio Code
+= Managing custom tasks in Visual Studio Code
 
-This guide explains how to migrate custom WorkItemHandlers from BAMOE v8 to BAMOE v9. It outlines the key differences in APIs, registration mechanisms, and execution models, and provides a step-by-step example of implementing and deploying a custom WorkItemHandler in BAMOE v9.
+This guide explains how to implement and manage custom WorkItemHandlers in BAMOE. It describes the APIs, registration mechanisms, and execution models, and provides a step-by-step example of implementing and deploying a custom WorkItemHandler.
 
 == What is a custom Work Item in BAMOE?
 
@@ -10,47 +10,9 @@ In BAMOE, a Work Item represents a task or activity in a process that typically 
 
 Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
 
-== Differences between BAMOE 8 and 9
+== Creating a custom WorkItemHandler
 
-=== API and lifecycle changes
-
-In BAMOE v8, custom WorkItemHandlers implemented the interface `org.kie.api.runtime.process.WorkItemHandler` and used the methods `+executeWorkItem(...)+` and `+abortWorkItem(...)+`.
-
-In BAMOE v9, these methods are no longer supported. Instead, handlers must extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override:
-
-* `+activateWorkItemHandler(...)+` -- for executing the task
-* `+abortWorkItemHandler(...)+` -- for handling abort scenarios
-
-The new model is based on phases and transitions, which provide more flexibility and better integration with the Kogito runtime.
-
-=== Registration changes
-
-In v8, handlers were registered using `kie-deployment-descriptor.xml` or `kmodule.xml`.
-
-In v9, handlers must be registered programmatically by extending `org.kie.kogito.process.impl.DefaultWorkItemHandlerConfig`.
-
-Example:
-
-[,Java]
-----
-@ApplicationScoped
-public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
-    {
-        register("MyConcatDefinitions", new MyConcatWorkItemHandler());
-    }
-}
-----
-
-=== Annotation support
-
-The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as .wid files and placed in either:
-
-* the top-level `global/` directory, or
-* the `src/main/resources/` directory, optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
-
-== Creating a custom WorkItemHandler in BAMOE 9
-
-This section provides a step-by-step guide for implementing a custom WorkItemHandler in BAMOE v9, including project setup, handler definition, and integration with a BPMN process.
+This section provides a step-by-step guide for implementing a custom WorkItemHandler BAMOE, including project setup, handler definition, and integration with a BPMN process.
 
 To get started, create a BAMOE Maven project using the BAMOE Accelerator:
 
@@ -69,9 +31,11 @@ In your project's `pom.xml`, add the following dependency to enable the necessar
 </dependency>
 ----
 
+include::{jbpm-dir}/BPMN2/custom-tasks-work-item-definitions-con.adoc[leveloffset=+2]
+
 === Creating .wid files and icons
 
-In BAMOE v9, the `@Wid` annotation is no longer supported. Instead, Work Item Definitions must be provided as `.wid` files. These files can be placed in:
+Instead, Work Item Definitions must be provided as `.wid` files. These files can be placed in:
 
 * The top-level `global/` directory, or
 * The `src/main/resources/` directory, optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
