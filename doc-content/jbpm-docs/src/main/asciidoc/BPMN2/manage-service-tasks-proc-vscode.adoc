@@ -2,417 +2,96 @@
 
 = Managing custom tasks in Visual Studio Code
 
-This guide explains how to implement and manage custom WorkItemHandlers in BAMOE. It describes the APIs, registration mechanisms, and execution models, and provides a step-by-step example of implementing and deploying a custom WorkItemHandler.
+This guide explains how to create, package, and deploy custom Work Item Handlers using Visual Studio Code and Apache Maven, targeting Red Hat Process Automation Manager.
 
-== What is a custom Work Item in BAMOE?
+== Prerequisites
 
-In BAMOE, a Work Item represents a task or activity in a process that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing developers to plug in custom code to meet specific business requirements not covered by built-in functionality.
+Ensure the following tools are installed:
 
-Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
+* Java JDK 11 or later
+* Apache Maven
+* Visual Studio Code with Java and Maven extensions
 
-== Creating a custom WorkItemHandler
+== Adding Maven Dependencies
 
-This section provides a step-by-step guide for implementing a custom WorkItemHandler BAMOE, including project setup, handler definition, and integration with a BPMN process.
+Open your project in VS Code and edit the `pom.xml` file to include any required dependencies for your Work Item Handler. For example:
 
-To get started, create a BAMOE Maven project using the BAMOE Accelerator:
-
-[,sh]
+[source,xml]
 ----
-git clone https://github.com/IBM/bamoe-canvas-quarkus-accelerator -b 9.2.0-ibm-0004-quarkus-full my-business-service-project
-----
-
-In your project's `pom.xml`, add the following dependency to enable the necessary APIs:
-
-[,xml]
-----
-<dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-api</artifactId>
-</dependency>
+<dependencies>
+  <dependency>
+    <groupId>org.kie</groupId>
+    <artifactId>kie-api</artifactId>
+    <version>7.73.0.Final</version>
+  </dependency>
+  <!-- Add other dependencies as needed -->
+</dependencies>
 ----
 
-=== Work item definitions
+== Packaging the Project
 
-{PRODUCT} requires a work item definition (WID) file to identify the data fields to show in {CENTRAL} and accept API calls. The WID file is a mapping between user interactions with {PRODUCT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in {CENTRAL}, the icon used to designate the custom task, and the work item handler the custom task will map to.
+In the terminal, navigate to the root folder of your project (where `pom.xml` is located) and run:
 
-In {PRODUCT}  you can create a WID file in two ways:
-
-* Use a `@Wid` annotation when coding the work item handler.
-* Create a `.wid` text file. For example, `definitions-example.wid`.
-
-== @Wid Annotation
-The `@Wid` annotation is automatically created when you generate a work item handler project using the Maven archetype. You can also add the annotation manually.
-
-.@Wid Example
-[source,options="nowrap"]
-----
-@Wid(widfile="MyWorkItemDefinitions.wid",
-    name="MyWorkItemDefinitions",
-    displayName="MyWorkItemDefinitions",
-    icon="",
-    defaultHandler="mvel: new com.redhat.MyWorkItemWorkItemHandler()",
-    documentation = "myworkitem/index.html",
-    parameters={
-      @WidParameter(name="SampleParam", required = true),
-      @WidParameter(name="SampleParamTwo", required = true)
-    },
-    results={
-      @WidResult(name="SampleResult")
-    },
-    mavenDepends={
-      @WidMavenDepends(group="com.redhat",
-      artifact="myworkitem",
-      version="7.52.0.Final-example-00007")
-    },
-    serviceInfo={
-      @WidService(category = "myworkitem",
-      description = "${description}",
-      keywords = "",
-      action = @WidAction(title = "Sample Title"),
-      authinfo = @WidAuth(required = true,
-      params = {"SampleParam", "SampleParamTwo"},
-      paramsdescription = {"SampleParam", "SampleParamTwo"},
-      referencesite = "referenceSiteURL"))
-    }
-)
-----
-
-.@Wid parameter descriptions
-[cols="30%,70%a", frame="all", options="header"]
-|===
-|Parameter
-|Description
-|`@Wid`
-|Top-level annotation to auto-generate WID files.
-|`widfile`
-|Name of the file that is automatically created for the custom task when it is deployed in {PRODUCT}.
-|`name`
-|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
-|`displayName`
-|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
-|`icon`
-|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
-|`description`
-|Description of the custom task.
-|`defaultHandler`
-|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
-|`documentation`
-|Path to an HTML file in the current project that contains a description of the custom task.
-|`@WidParameter`
-|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. More than one parameter can be specified:
-
-`name` - A name for the parameter.
-
-NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
-
-`required` - Boolean value indicating whether the parameter is required for the custom task to execute.
-
-|`@WidResult`
-|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. You can specify more than one result:
-
-`name` - A name for the result.
-
-NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
-
-|`@WidMavenDepends`
-|Child annotation of `@Wid`. Specifies Maven dependencies that will be required for the correct functioning of the work item handler. You can specify more than one dependency:
-
-`group` - Maven group ID of the dependency.
-
-`artifact` - Maven artifact ID of the dependency.
-
-`version` - Maven version number of the dependency.
-
-|`@WidService`
-|Child annotation of `@Wid`. Specifies values that will be populated in the service repository.
-
-`category` - The UI palette category that the handler will be placed. This value should match the `category` field of the `@Wid` annotation.
-
-`description` - Description of the handler that will be displayed in the service repository.
-
-`keywords` - Comma-separated list of keywords that apply to the handler. Note: Currently not used by the {CENTRAL} service repository.
-
-`action` - The `@WidAction` object.
-
-`authinfo` - The `@WidAuth` object. Optional.
-|`@WidAction`
-|Object of `@WidService`.
-
-`title` - The title for the handler action.
-
-`description` - The description for the handler action.
-|`@WidAuth`
-|Object of `@WidService`.
-
-`required` - The boolean value that determines whether authentication is required.
-
-`params` - The array containing the authentication parameters required.
-
-`paramsdescription` - The array containing the descriptions for each authentication parameter.
-
-`referencesite` - The URL to where the handler documentation can be found. Note: Currently not used by the {CENTRAL} service repository.
-|===
-
-== Text File
-A global `WorkDefinitions` WID text file is automatically generated by new projects when a business process is added. The WID text file is similar to the JSON format but is not a completely valid JSON file. You can open this file in {CENTRAL}. You can create additional WID files by selecting *Add Asset* > *Work item definitions* from an existing project.
-
-.Text file example
-[source,json,options="nowrap"]
-----
-[
-  [
-    "name" : "MyWorkItemDefinitions",
-    "displayName" : "MyWorkItemDefinitions",
-    "category" : "",
-    "description" : "",
-    "defaultHandler" : "mvel: new com.redhat.MyWorkItemWorkItemHandler()",
-    "documentation" : "myworkitem/index.html",
-    "parameters" : [
-      "SampleParam" : new StringDataType(),
-      "SampleParamTwo" : new StringDataType()
-    ],
-    "results" : [
-      "SampleResult" : new StringDataType()
-    ],
-    "mavenDependencies" : [
-      "com.redhat:myworkitem:7.52.0.Final-example-00007"
-    ],
-    "icon" : ""
-  ]
-]
-----
-
-The file is structured as a plain-text file using a JSON-like structure. The filename extension is `.wid`.
-
-.Text file parameter descriptions
-[cols="30%,70%a", frame="all", options="header"]
-|===
-|
-|Description
-|`name`
-|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
-|`displayName`
-|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
-|`icon`
-|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
-|`category`
-|Name of a category within the {CENTRAL} palette under which this custom task is displayed.
-|`description`
-|Description of the custom task.
-|`defaultHandler`
-|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
-|`documentation`
-|Path to an HTML file in the current project that contains a description of the custom task.
-|`parameters`
-|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one parameter can be specified.
-|`results`
-|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. Results use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one result can be specified.
-|`mavenDependencies`
-|Optional: Specifies Maven dependencies required for the correct functioning of the work item handler. Dependencies can also be specified in the work item handler `pom.xml` file. Dependencies are in the format `<group>:<artifact>:<version>`. More than one dependency may be specified
-|===
-
-{PRODUCT} tries to locate a `.wid` file in two locations by default:
-
-* Within {CENTRAL} in the project's top-level `global/` directory. This is the location of the default `WorkDefinitions.wid` file that is created automatically when a project first adds a business process asset.
-* Within {CENTRAL} in the project's `src/main/resources/` directory. This is where WID files created within a project in {CENTRAL} will be placed. A WID file may be created at any level of a Java package, so a WID file created at a package location of `<default>` will be created directly inside `src/main/resources/` while a WID file created at a package location of `com.redhat` will be created at `src/main/resources/com/redhat/`
-
-WARNING: {PRODUCT} does not validate that the value for the `defaultHandler` tag is executable or is a valid Java class. Specifying incorrect or invalid classes for this tag will return errors.
-
-
-=== Using the custom Work Item in a BPMN process
-
-Once your .wid file and handler class are in place, you can integrate the Custom Task into a BPMN process using the BAMOE Developer Tools.
-
-==== Create a BPMN file
-
-Create a new BPMN file named `CustomTaskDemo.bpmn` in the `src/main/resources` directory of your project. Then, from the palette, drag and drop your Custom Task (MyConcatDefinitions) onto the BPMN editor canvas.
-
-image::upgrade/upgrading-custom-work-item-handlers-devtoolview.png[width=250]
-
-==== Process model
-
-After adding the Custom Task, your process definition should resemble the following:
-
-image::upgrade/upgrading-custom-work-item-handlers-process_new.png[width=500]
-
-==== Define process variables
-
-Create process variables to accept input values when starting the process instance. These variables will be mapped to the parameters defined in your `.wid` file.
-
-image::upgrade/upgrading-custom-work-item-handlers-processdata.png[width=250]
-
-==== Configure data assignments
-
-Define the DataInput and DataOutput assignments for the custom Work Item. This ensures that the input values are passed to the handler and the output is captured in the process.
-
-image::upgrade/upgrading-custom-work-item-handlers-properties.png[width=90%]
-
-=== Implement the custom WorkItemHandler
-
-To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.
-
-[,java]
-----
-import org.kie.kogito.internal.process.workitem.KogitoWorkItem;
-import org.kie.kogito.internal.process.workitem.KogitoWorkItemHandler;
-import org.kie.kogito.internal.process.workitem.KogitoWorkItemManager;
-import org.kie.kogito.internal.process.workitem.WorkItemTransition;
-import org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler;
-import org.slf4j.LoggerFactory;
-
-public class MyConcatWorkItemHandler extends DefaultKogitoWorkItemHandler {
-
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MyConcatWorkItemHandler.class);
-
-    @Override
-    public Optional<WorkItemTransition> activateWorkItemHandler(KogitoWorkItemManager manager, KogitoWorkItemHandler handler, KogitoWorkItem workItem, WorkItemTransition transition) {
-
-        for (String parameter : workItem.getParameters().keySet()) {
-            LOG.info(parameter + " = " + workItem.getParameters().get(parameter));
- }
-
-        Map<String, Object> results = new HashMap<String, Object>();
-
-        String firstName = (String) workItem.getParameter("FirstName");
-        String lastName = (String) workItem.getParameter("LastName");
-        String fullName = firstName + " " + lastName;
-
-        results.put("FullName", fullName);
-
-        return Optional.of(handler.completeTransition(workItem.getPhaseStatus(), results));
-
- }
-    @Override
-    public Optional<WorkItemTransition> abortWorkItemHandler(KogitoWorkItemManager manager, KogitoWorkItemHandler handler, KogitoWorkItem workItem, WorkItemTransition transition) {
-        LOG.info("Aborting work item " + workItem);
-        return Optional.of(this.workItemLifeCycle.newTransition("abort", workItem.getPhaseStatus(), workItem.getResults()));
- }
-}
-----
-
-==== Registering the custom WorkItemHandler
-
-To use a custom WorkItemHandler in a process instance, it must be registered before the process starts. This registration informs the engine which handler to invoke for a given task.
-
-Register your handler by extending `DefaultWorkItemHandlerConfig`:
-
-[,java]
-----
-import org.kie.kogito.process.impl.DefaultWorkItemHandlerConfig;
-import jakarta.enterprise.context.ApplicationScoped;
-
-@ApplicationScoped
-public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
-
-    {
-        register("MyConcatDefinitions", new MyConcatWorkItemHandler());
-    }
-}
-----
-
-=== Build and run
-
-==== Prerequisites
-
-Ensure the following tools are installed and configured:
-
-* Java 17+ installed
-* Environment variable JAVA_HOME set accordingly
-* Maven 3.9.6+ installed
-
-For native image compilation (optional):
-
-* GraalVM 21.0.2+ installed
-* Environment variable GRAALVM_HOME set accordingly
-* Note that GraalVM native image compilation typically requires other packages (glibc-devel, zlib-devel and gcc) to be installed too, please refer to GraalVM installation documentation for more details.
-
-==== Compile and run in local dev mode
-
-Use Quarkus dev mode to run the application with hot reload support:
-
-[,sh]
-----
-mvn clean compile quarkus:dev
-----
-
-NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
-
-==== Package and run in JVM mode
-
-[,sh]
+[source,bash]
 ----
 mvn clean package
-java -jar target/quarkus-app/quarkus-run.jar
 ----
 
-On windows
+This command compiles the project and creates output files in the `target/` directory.
 
-[,sh]
-----
-mvn clean package
-java -jar target\quarkus-app\quarkus-run.jar
-----
+== Output Files
 
-==== Package and run using local native image
+After packaging, the following files will be generated in the `target/` directory:
 
-To compile a native executable, first add the following property to `application.properties`:
+[cols="1,2", options="header"]
+|===
+| File Name | Description
 
-----
-quarkus.native.auto-service-loader-registration=true
-----
+| `myworkitems-<version>.jar`
+| Used for direct deployment to Red Hat Process Automation Manager.
 
-Then build the native image:
+| `myworkitems-<version>.zip`
+| Used for deployment via a service repository.
+|===
 
-[,sh]
-----
-mvn clean package -Pnative
-----
+Replace `<version>` with the version specified in your `pom.xml`.
 
-Run the generated executable:
+== Implementing the Work Item Handler
 
-[,sh]
-----
-./target/process-service-rest-call-quarkus-runner
-----
+Here are key code snippets and their purposes when implementing a custom Work Item Handler:
 
-=== Submit a request
+[cols="1,2", options="header"]
+|===
+| Parameter / Code Snippet | Description
 
-To invoke the process, send a POST request to `+http://localhost:8080/CustomTaskDemo+` with the following payload:
+| `RequiredParameterValidator.validate(this.getClass(), workItem);`
+| Ensures all required parameters are present. Throws `IllegalArgumentException` if any are missing.
 
-[,json]
-----
-{
-  "FirstName": "Alex",
-  "LastName": "Tom"
+| `String sampleParam = (String) workItem.getParameter("SampleParam");`
+| Retrieves a parameter from the `WorkItem`. The parameter name is always a string. Casting may be required.
 
-}
-----
+| `// complete workitem impl…`
+| Placeholder for your custom Java logic that executes when the handler is triggered.
 
-Example using `curl`:
+| `results.put("SampleResult", sampleResult);`
+| Adds output data to the result map. These values are passed back to the process.
 
-[,sh]
-----
-curl -X 'POST' \
- 'http://localhost:8080/CustomTaskDemo' \
-  -H 'accept: */*' \
- -H 'Content-Type: application/json' \
-  -d '{
- "FirstName": "Alex",
- "LastName": "Tom"
+| `manager.completeWorkItem(workItem.getId(), results);`
+| Marks the work item as complete and sends the results to the process engine.
 
-}'
-----
+| `abortWorkItem()`
+| Optional method to abort the work item. Can be left empty if not needed.
+|===
 
-=== Expected output
+== Deploying the Custom Task
 
-After submitting the request, you should see log output similar to the following:
+Follow the official Red Hat documentation for deployment:
 
-[,text]
-----
-2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) FirstName = Alex
-2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) LastName = Tom
-2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) TaskName = MyConcatDefinitions
-2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) NodeName = MyConcatDefinitions
-2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) UNIQUE_TASK_ID = _E2D196C3-0F09-490A-9E26-F4F4BA04BD8C
-Full name:Alex Tom
-----
+https://docs.redhat.com/en/documentation/red_hat_process_automation_manager/7.7/html/custom_tasks_and_work_item_handlers_in_business_central/custom-tasks-deploying-custom-tasks-proc-custom-tasks[Deploying Custom Tasks]
+
+== Registering the Custom Task
+
+After deployment, register the task in Business Central:
+
+https://docs.redhat.com/en/documentation/red_hat_process_automation_manager/7.7/html/custom_tasks_and_work_item_handlers_in_business_central/registering-custom-tasks-proc-custom-tasks[Registering Custom Tasks]
+
