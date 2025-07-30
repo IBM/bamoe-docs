@@ -12,86 +12,416 @@ Ensure the following tools are installed:
 * Apache Maven
 * Visual Studio Code with Java and Maven extensions
 
-== Adding Maven Dependencies
 
-Open your project in VS Code and edit the `pom.xml` file to include any required dependencies for your Work Item Handler. For example:
+
+== Creating custom tasks in  VS code BPMN extension
+To create custom tasks in the VS Code BPMN extension, follow the subsequent steps:
+
+. Login into business-central and create a project.
+
+. Goto Project settings tab and copy the project git url.
+
+. Clone the project into your local filesystem or vscode using the command line or terminal.
++
 
 [source,xml]
 ----
-<dependencies>
-  <dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kie-api</artifactId>
-    <version>7.73.0.Final</version>
-  </dependency>
-  <!-- Add other dependencies as needed -->
-</dependencies>
+git clone ssh://$UserName@localhost:8001/MySpace/TestProject
 ----
 
-== Packaging the Project
+. Work Item Definitions can be provided as `.wid` files or through `@wid` annotation. These files can be placed in:
++
 
-In the terminal, navigate to the root folder of your project (where `pom.xml` is located) and run:
+* The top-level global/ directory
 
-[source,bash]
+* The src/main/resources/ directory, optionally within a Java package structure (For example, src/main/resources/com/ibm/)
+
+For more information about `.wid` files, see xref:work-item-definitions[Work item definitions].
+
+NOTE: Icons for custom tasks can be placed in the same directory as the .wid file. 
+
+. Access the custom task from the process pallet in the VS Code.
+
+NOTE: In some cases, VS Code may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run git add `customtask.wid` to ensure the file is tracked. If the issue persists, try opening the BAMOE project in a new VS Code workspace.
+
+[id='work-item-definitions']
+=== Work item definitions
+
+{PRODUCT} requires a work item definition (WID) file to identify the data fields to show in {CENTRAL} and accept API calls. The WID file is a mapping between user interactions with {PRODUCT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in {CENTRAL}, the icon used to designate the custom task, and the work item handler the custom task will map to.
+
+==== wid file
+
+wid file (short for Work Item Definition) is an XML-like configuration file used in Red Hat Process Automation Manager (and formerly in jBPM) to define custom tasks that can be used in business processes. It provides metadata about the task, such as its name, parameters, results, icons, and the Java class that implements its behavior.
+The .wid file acts as a bridge between the process designer (like Business Central or VS Code with BPMN plugins) and the underlying Java implementation of the custom task. It allows the task to appear in the process palette and be configured visually.
+
+
+[source,xml]
+
 ----
-mvn clean package
+[
+    [
+        "name" : "MyDecisionTask",
+        "displayName" : "MyDecision Task",
+        "category" : "jbpm-workitems-bpmn2",
+        "description" : "",
+        "defaultHandler" : "mvel: new org.jbpm.process.workitem.bpmn2.DecisionTaskHandler()",
+        "documentation" : "jbpm-workitems-bpmn2/index.html",
+        "icon" : "defaultdecisiontaskicon.png",
+
+        "parameters" : [
+            "Model" : new StringDataType(),
+            "Namespace" : new StringDataType(),
+            "Decision" : new StringDataType()
+        ]
+    ]
+]
 ----
 
-This command compiles the project and creates output files in the `target/` directory.
-
-== Output Files
-
-After packaging, the following files will be generated in the `target/` directory:
-
-[cols="1,2", options="header"]
+.wid file parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
 |===
-| File Name | Description
-
-| `myworkitems-<version>.jar`
-| Used for direct deployment to Red Hat Process Automation Manager.
-
-| `myworkitems-<version>.zip`
-| Used for deployment via a service repository.
-|===
-
-Replace `<version>` with the version specified in your `pom.xml`.
-
-== Implementing the Work Item Handler
-
-Here are key code snippets and their purposes when implementing a custom Work Item Handler:
-
-[cols="1,2", options="header"]
-|===
-| Parameter / Code Snippet | Description
-
-| `RequiredParameterValidator.validate(this.getClass(), workItem);`
-| Ensures all required parameters are present. Throws `IllegalArgumentException` if any are missing.
-
-| `String sampleParam = (String) workItem.getParameter("SampleParam");`
-| Retrieves a parameter from the `WorkItem`. The parameter name is always a string. Casting may be required.
-
-| `// complete workitem impl…`
-| Placeholder for your custom Java logic that executes when the handler is triggered.
-
-| `results.put("SampleResult", sampleResult);`
-| Adds output data to the result map. These values are passed back to the process.
-
-| `manager.completeWorkItem(workItem.getId(), results);`
-| Marks the work item as complete and sends the results to the process engine.
-
-| `abortWorkItem()`
-| Optional method to abort the work item. Can be left empty if not needed.
+|
+|Description
+|`name`
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
+|`displayName`
+|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
+|`icon`
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|`category`
+|Name of a category within the {CENTRAL} palette under which this custom task is displayed.
+|`description`
+|Description of the custom task.
+|`defaultHandler`
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|`documentation`
+|Path to an HTML file in the current project that contains a description of the custom task.
+|`parameters`
+|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one parameter can be specified.
+|`results`
+|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. Results use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one result can be specified.
+|`mavenDependencies`
+|Optional: Specifies Maven dependencies required for the correct functioning of the work item handler. Dependencies can also be specified in the work item handler `pom.xml` file. Dependencies are in the format `<group>:<artifact>:<version>`. More than one dependency may be specified
 |===
 
-== Deploying the Custom Task
+==== @Wid Annotation
+The `@Wid` annotation is automatically created when you generate a work item handler project using the Maven archetype. You can also add the annotation manually.
 
-Follow the official Red Hat documentation for deployment:
+.@Wid Example
+[source,options="nowrap"]
+----
+@Wid(widfile="MyWorkItemDefinitions.wid",
+    name="MyWorkItemDefinitions",
+    displayName="MyWorkItemDefinitions",
+    icon="",
+    defaultHandler="mvel: new com.redhat.MyWorkItemWorkItemHandler()",
+    documentation = "myworkitem/index.html",
+    parameters={
+      @WidParameter(name="SampleParam", required = true),
+      @WidParameter(name="SampleParamTwo", required = true)
+    },
+    results={
+      @WidResult(name="SampleResult")
+    },
+    mavenDepends={
+      @WidMavenDepends(group="com.redhat",
+      artifact="myworkitem",
+      version="7.52.0.Final-example-00007")
+    },
+    serviceInfo={
+      @WidService(category = "myworkitem",
+      description = "${description}",
+      keywords = "",
+      action = @WidAction(title = "Sample Title"),
+      authinfo = @WidAuth(required = true,
+      params = {"SampleParam", "SampleParamTwo"},
+      paramsdescription = {"SampleParam", "SampleParamTwo"},
+      referencesite = "referenceSiteURL"))
+    }
+)
+----
 
-https://docs.redhat.com/en/documentation/red_hat_process_automation_manager/7.7/html/custom_tasks_and_work_item_handlers_in_business_central/custom-tasks-deploying-custom-tasks-proc-custom-tasks[Deploying Custom Tasks]
+.@Wid parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
+|===
+|Parameter
+|Description
+|`@Wid`
+|Top-level annotation to auto-generate WID files.
+|`widfile`
+|Name of the file that is automatically created for the custom task when it is deployed in {PRODUCT}.
+|`name`
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
+|`displayName`
+|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
+|`icon`
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|`description`
+|Description of the custom task.
+|`defaultHandler`
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|`documentation`
+|Path to an HTML file in the current project that contains a description of the custom task.
+|`@WidParameter`
+|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. More than one parameter can be specified:
 
-== Registering the Custom Task
+`name` - A name for the parameter.
 
-After deployment, register the task in Business Central:
+NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
 
-https://docs.redhat.com/en/documentation/red_hat_process_automation_manager/7.7/html/custom_tasks_and_work_item_handlers_in_business_central/registering-custom-tasks-proc-custom-tasks[Registering Custom Tasks]
+`required` - Boolean value indicating whether the parameter is required for the custom task to execute.
 
+|`@WidResult`
+|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. You can specify more than one result:
+
+`name` - A name for the result.
+
+NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
+
+|`@WidMavenDepends`
+|Child annotation of `@Wid`. Specifies Maven dependencies that will be required for the correct functioning of the work item handler. You can specify more than one dependency:
+
+`group` - Maven group ID of the dependency.
+
+`artifact` - Maven artifact ID of the dependency.
+
+`version` - Maven version number of the dependency.
+
+|`@WidService`
+|Child annotation of `@Wid`. Specifies values that will be populated in the service repository.
+
+`category` - The UI palette category that the handler will be placed. This value should match the `category` field of the `@Wid` annotation.
+
+`description` - Description of the handler that will be displayed in the service repository.
+
+`keywords` - Comma-separated list of keywords that apply to the handler. Note: Currently not used by the {CENTRAL} service repository.
+
+`action` - The `@WidAction` object.
+
+`authinfo` - The `@WidAuth` object. Optional.
+|`@WidAction`
+|Object of `@WidService`.
+
+`title` - The title for the handler action.
+
+`description` - The description for the handler action.
+|`@WidAuth`
+|Object of `@WidService`.
+
+`required` - The boolean value that determines whether authentication is required.
+
+`params` - The array containing the authentication parameters required.
+
+`paramsdescription` - The array containing the descriptions for each authentication parameter.
+
+`referencesite` - The URL to where the handler documentation can be found. Note: Currently not used by the {CENTRAL} service repository.
+|===
+
+== Creating work item handler projects
+
+Create the software project to contain all configurations, mappings, and executable code for the custom task.
+
+You can create a work item handler from scratch or use a Maven archetype to create an example project. Red Hat Process Automation Manager provides the jbpm-workitems-archetype from the Red Hat Maven repository for this purpose.
+
+. Open the command line and create a directory where you will build your work item handler such as workitem-home:
++
+
+[source,xml]
+----
+mkdir workitem-home
+----
+
+. Check the Maven settings.xml file and ensure that the Red Hat Maven repository is included in the repository list.
+For example, to add the online Red Hat Maven repository to your Maven settings.xml file:
++
+[source,xml]
+----
+<settings>
+
+  <profiles>
+
+    <profile>
+
+      <id>my-profile</id>
+
+      <activation>
+
+        <activeByDefault>true</activeByDefault>
+
+      </activation>
+
+      <repositories>
+
+        <repository>
+
+          <id>redhat-ga</id>
+
+          <url>http://maven.repository.redhat.com/ga/</url>
+
+          <snapshots>
+
+            <enabled>false</enabled>
+
+          </snapshots>
+
+          <releases>
+
+            <enabled>true</enabled>
+
+          </releases>
+
+        </repository>
+
+        ...
+
+      </repositories>
+
+    </profile>
+
+  </profiles>
+
+  ...
+
+</settings>
+----
+
+. In the workitem-home directory, execute the following command:
++
+
+[source,xml]
+----
+$ mvn archetype:generate \
+-DarchetypeGroupId=org.jbpm \
+-DarchetypeArtifactId=jbpm-workitems-archetype \
+-DarchetypeVersion=7.67.2.Final-redhat-00034 \
+-Dversion=1.0.0-SNAPSHOT \
+-DgroupId=com.ibm \
+-DartifactId=myworkitem \
+-DclassPrefix=MyWorkItem
+----
+
+.parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
+|===
+|Parameter
+|Description
+|`-DarchetypeGroupId`
+|Specific to the archetype and must remain unchanged.
+|`-DarchetypeArtifactId`
+|Specific to the archetype and must remain unchanged.
+|`-DarchetypeVersion`
+|Red Hat library version that is searched for when Maven attempts to download the jbpm-workitems-archetype artifact.
+|`-Dversion`
+|Version of your specific project. For example, 1.0.0-SNAPSHOT.
+|`-DgroupId`
+|Maven group of your specific project. For example, com.redhat.
+|`-DartifactId`
+|Maven ID of your specific project. For example, myworkitem.
+|`-DclassPrefix`
+|String added to the beginning of Java classes when Maven generates the classes for easier identification. For example, MyWorkItem.
+|===
+
+A myworkitem folder is created in the workitem-home directory. For example:
+
+[source,xml]
+----
+assembly/
+  assembly.xml
+src/
+  main/
+    java/
+      com/
+        ibm/
+          MyWorkItemWorkItemHandler.java
+    repository/
+    resources/
+  test/
+    java/
+      com/
+        ibm/
+          MyWorkItemWorkItemHandlerTest.java
+          MyWorkItemWorkItemIntegrationTest.java
+    resources/
+      com/
+        ibm/
+pom.xml
+-----
+
+.Add any Maven dependencies required by the work item handler class to the pom.xml file.
+
+.To create a deployable JAR for this project, in the parent project folder where the pom.xml file is located, execute the following command:
++
+
+[source,xml]
+----
+$ mvn clean package
+----
+
+Several files are created in the target/ directory which include the following two main files:
+
+* myworkitems-<version>.jar: Used for direct deployment to Red Hat Process Automation Manager.
+* myworkitems-<version>.zip: Used for deployment using a service repository.
+
+
+== Work item handler project customization
+
+You can customize the code of a work item handler project. There are two Java methods required by a work item handler, executeWorkItem and abortWorkItem.
+
+* executeWorkItem(WorkItem workItem, WorkItemManager manager): Executed by default when the work item handler is run.
+* abortWorkItem(WorkItem workItem, WorkItemManager manager): Executed when the work item is aborted.
+
+In both methods, the WorkItem parameter contains any of the parameters entered into the custom task through a GUI or API call, and the WorkItemManager parameter is responsible for tracking the state of the custom task.
+
+[source,xml]
+----
+RequiredParameterValidator.validate(this.getClass(), workItem);
+
+      // sample parameters
+      String sampleParam = (String) workItem.getParameter("SampleParam");
+      String sampleParamTwo = (String) workItem.getParameter("SampleParamTwo");
+
+      // complete workitem impl...
+
+      // return results
+      String sampleResult = "sample result";
+      Map<String, Object> results = new HashMap<String, Object>();
+      results.put("SampleResult", sampleResult);
+      manager.completeWorkItem(workItem.getId(), results);
+    } catch(Throwable cause) {
+      handleException(cause);
+    }
+	}
+
+	@Override
+	public void abortWorkItem(WorkItem workItem, WorkItemManager manager) {
+    // similar
+	}
+}
+----
+
+.parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
+|===
+|Parameter
+|Description
+|`RequiredParameterValidator.validate(this.getClass(), workItem);`
+|Checks that all parameters marked “required” are present. If they are not, an IllegalArgumentException is thrown.
+
+|`String sampleParam = (String) workItem.getParameter("SampleParam");`
+|Example of getting a parameter from the WorkItem class. The name is always a string. For example, WorkItem. In the example, SampleParam is always a string but the object associated with it can be many things and require a cast in order to avoid errors.
+
+|`// complete workitem impl…`
+|Executes the custom Java code when a parameter is received.
+
+|`results.put("SampleResult", sampleResult);`
+|Passes results to the custom task. The results are placed in the data output areas of the custom task.
+
+|`manager.completeWorkItem(workItem.getId(), results);`
+|Marks the work item handler as complete. The WorkItemManager controls the state of the work item and is responsible for getting the WorkItem ID and associate the results with the correct custom task.
+
+|`abortWorkItem()`
+|Aborts the custom Java code. May be left blank if the work item is not designed to be aborted
+
+|===
+
+== Deploying Custom Tasks
