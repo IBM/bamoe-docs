@@ -50,7 +50,7 @@ In some cases, VS Code may not immediately recognize the `.wid` file, causing th
 [id='work-item-definitions']
 == Work item definitions
 
-{PRODUCT} requires a work item definition (WID) file to identify the data fields to show in VS Code and accept API calls. The WID file is a mapping between user interactions with {PRODUCT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in VS Code, the icon used to designate the custom task, and the work item handler the custom task will map to.
+{PRODUCT_SHORT} requires a work item definition (WID) file to identify the data fields to show in VS Code and accept API calls. The WID file is a mapping between user interactions with {PRODUCT_SHORT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in VS Code, the icon used to designate the custom task, and the work item handler the custom task will map to.
 
 .wid file
 
@@ -86,7 +86,7 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 |Parameter
 |Description
 |`name`
-|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT_SHORT}.
 |`displayName`
 |Displayed name of the custom task. This name is displayed in the palette in VS Code.
 |`icon`
@@ -96,7 +96,7 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 |`description`
 |Description of the custom task.
 |`defaultHandler`
-|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT_SHORT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
 |`documentation`
 |Path to an HTML file in the current project that contains a description of the custom task.
 |`parameters`
@@ -152,9 +152,9 @@ The `@Wid` annotation is automatically created when you generate a work item han
 |`@Wid`
 |Top-level annotation to auto-generate WID files.
 |`widfile`
-|Name of the file that is automatically created for the custom task when it is deployed in {PRODUCT}.
+|Name of the file that is automatically created for the custom task when it is deployed in {PRODUCT_SHORT}.
 |`name`
-|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT_SHORT}.
 |`displayName`
 |Displayed name of the custom task. This name is displayed in the palette in VS Code.
 |`icon`
@@ -162,7 +162,7 @@ The `@Wid` annotation is automatically created when you generate a work item han
 |`description`
 |Description of the custom task.
 |`defaultHandler`
-|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT_SHORT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
 |`documentation`
 |Path to an HTML file in the current project that contains a description of the custom task.
 |`@WidParameter`
@@ -433,14 +433,11 @@ RequiredParameterValidator.validate(this.getClass(), workItem);
 
 == Deploying custom tasks
 
-Work item handlers, as custom code, are created outside of {PRODUCT}. To use the code in your custom task, the code must be deployed to the server. Work item handler projects must be Java JAR files that can be placed into a Maven repository.
+Work item handlers, as custom code, are created outside of {PRODUCT_SHORT}. To use the code in your custom task, the code must be deployed to the server. Work item handler projects must be Java JAR files that can be placed into a Maven repository.
 
-In {PRODUCT} you can deploy custom tasks using two methods:
+In {PRODUCT_SHORT} you can deploy custom tasks using two methods:
 
 * Within a VS Code custom task repository.
-ifdef::DM,PAM[]
-For more information, see {URL_DEVELOPING_PROCESS_SERVICES}/assembly-managing-and-monitoring-business-processes.html[_{MANAGING_PROCESSES}_].
-endif::[]
 * Outside of VS Code, you can manually copy the JAR files into the Maven repository.
 
 .Using a VS Code custom task repository
@@ -471,19 +468,18 @@ VS Code automatically creates or reuses the Maven repository folder. By default 
 <startup location>/repositories/kie/global/com/redhat/myworkitem/1.0.0-SNAPSHOT/myworkitems-1.0.0-SNAPSHOT.jar
 ----
 
-Any artifacts copied in this fashion are available to {PRODUCT} without a server restart. Viewing the artifact in the VS Code *Artifacts* page requires clicking *Refresh*.
+Any artifacts copied in this fashion are available to {PRODUCT_SHORT} without a server restart. Viewing the artifact in the VS Code *Artifacts* page requires clicking *Refresh*.
 
 
 == Registering custom tasks
 
-{PRODUCT} must know how to associate a custom task work item with the code executed by the work item handler. The work item definition file links the custom task with the work item handler by name and Java class. The work item handler’s Java class has to be registered as usable in {PRODUCT}.
+{PRODUCT} must know how to associate a custom task work item with the code executed by the work item handler. The work item definition file links the custom task with the work item handler by name and Java class. The work item handler’s Java class has to be registered as usable in {PRODUCT_SHORT}.
 
 NOTE: Service repositories contain domain-specific services that provide integration of your processes with different types of systems. Registering a custom task is not necessary when using a service repository because the import process registers the custom task.
 
-{PRODUCT} creates a WID file by default for projects that contain at least one business process. You can create a WID file when registering a work item handler or edit the default WID file.
+{PRODUCT_SHORT} creates a WID file by default for projects that contain at least one business process. You can create a WID file when registering a work item handler or edit the default WID file.
 ifdef::DM,PAM[]
-For more information about WID file locations or formatting, see xref:custom-tasks-work-item-definitions-con-{context}[].
-endif::[]
+For more information about WID file locations or formatting, see xref:work-item-definitions[Work item definitions].
 
 For non-service repository deployments, work item handlers can be registered in two ways:
 
