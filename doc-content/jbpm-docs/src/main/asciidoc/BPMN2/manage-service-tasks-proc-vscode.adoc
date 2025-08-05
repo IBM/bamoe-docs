@@ -2,9 +2,9 @@
 
 = Managing custom tasks in Visual Studio Code
 
-This guide explains how to create, package, and deploy custom Work Item Handlers using Visual Studio Code and Apache Maven, targeting Red Hat Process Automation Manager.
+In Visual Studio Code, managing custom tasks for {PRODUCT} involves defining and deploying user-defined Work Item Handlers (WIHs) that extend BPMN capabilities to support external operations such as REST calls, database interactions, or SOAP services. These handlers are Java classes that implement the `org.kie.api.runtime.process.WorkItemHandler` interface, using the `executeWorkItem(...)` and `abortWorkItem(...)` methods to control task execution. Handlers are registered through configuration files like `kie-deployment-descriptor.xml` or `kmodule.xml`, while task metadata is described in `.wid` files using MVEL syntax. These `.wid` files should be placed either in the global directory under the project root or alongside the BPMN file. This guide outlines how to create, configure, and deploy custom tasks using Visual Studio Code.
 
-== Prerequisites
+.Prerequisites
 
 Ensure the following tools are installed:
 
@@ -13,11 +13,10 @@ Ensure the following tools are installed:
 * Visual Studio Code with Java and Maven extensions
 
 
-
 == Creating custom tasks in  VS code BPMN extension
 To create custom tasks in the VS Code BPMN extension, follow the subsequent steps:
 
-. Login into business-central and create a project.
+. Login into VS Code and create a project.
 
 . Goto Project settings tab and copy the project git url.
 
@@ -29,27 +28,26 @@ To create custom tasks in the VS Code BPMN extension, follow the subsequent step
 git clone ssh://$UserName@localhost:8001/MySpace/TestProject
 ----
 
-. Work Item Definitions can be provided as `.wid` files or through `@wid` annotation. These files can be placed in:
+. Work Item Definitions can be provided as `.wid` files or through `@wid` annotation. For more information about `.wid` files, see xref:work-item-definitions[Work item definitions]. The `.wid` files can be placed in:
 +
 
-* The top-level global/ directory
+* The top-level global/ directory, or
 
 * The src/main/resources/ directory, optionally within a Java package structure (For example, src/main/resources/com/ibm/)
 
-For more information about `.wid` files, see xref:work-item-definitions[Work item definitions].
 
-NOTE: Icons for custom tasks can be placed in the same directory as the .wid file. 
+NOTE: Icons for custom tasks can be placed in the same directory as the `.wid` file. 
 
 . Access the custom task from the process pallet in the VS Code.
 
 NOTE: In some cases, VS Code may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run git add `customtask.wid` to ensure the file is tracked. If the issue persists, try opening the BAMOE project in a new VS Code workspace.
 
 [id='work-item-definitions']
-=== Work item definitions
+== Work item definitions
 
-{PRODUCT} requires a work item definition (WID) file to identify the data fields to show in {CENTRAL} and accept API calls. The WID file is a mapping between user interactions with {PRODUCT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in {CENTRAL}, the icon used to designate the custom task, and the work item handler the custom task will map to.
+{PRODUCT} requires a work item definition (WID) file to identify the data fields to show in VS Code and accept API calls. The WID file is a mapping between user interactions with {PRODUCT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in VS Code, the icon used to designate the custom task, and the work item handler the custom task will map to.
 
-==== wid file
+.wid file
 
 wid file (short for Work Item Definition) is an XML-like configuration file used in Red Hat Process Automation Manager (and formerly in jBPM) to define custom tasks that can be used in business processes. It provides metadata about the task, such as its name, parameters, results, icons, and the Java class that implements its behavior.
 The .wid file acts as a bridge between the process designer (like Business Central or VS Code with BPMN plugins) and the underlying Java implementation of the custom task. It allows the task to appear in the process palette and be configured visually.
@@ -80,16 +78,16 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 .wid file parameter descriptions
 [cols="30%,70%a", frame="all", options="header"]
 |===
-|
+|Parameter
 |Description
 |`name`
 |Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
 |`displayName`
-|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
+|Displayed name of the custom task. This name is displayed in the palette in VS Code.
 |`icon`
-|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
 |`category`
-|Name of a category within the {CENTRAL} palette under which this custom task is displayed.
+|Name of a category within the VS Code palette under which this custom task is displayed.
 |`description`
 |Description of the custom task.
 |`defaultHandler`
@@ -97,14 +95,14 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 |`documentation`
 |Path to an HTML file in the current project that contains a description of the custom task.
 |`parameters`
-|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one parameter can be specified.
+|Specifies the values to be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one parameter can be specified.
 |`results`
-|Specifies the values to be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. Results use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one result can be specified.
+|Specifies the values to be populated in the VS Code GUI or expected by API calls as data outputs for the custom task. Results use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one result can be specified.
 |`mavenDependencies`
 |Optional: Specifies Maven dependencies required for the correct functioning of the work item handler. Dependencies can also be specified in the work item handler `pom.xml` file. Dependencies are in the format `<group>:<artifact>:<version>`. More than one dependency may be specified
 |===
 
-==== @Wid Annotation
+.@Wid Annotation
 The `@Wid` annotation is automatically created when you generate a work item handler project using the Maven archetype. You can also add the annotation manually.
 
 .@Wid Example
@@ -153,9 +151,9 @@ The `@Wid` annotation is automatically created when you generate a work item han
 |`name`
 |Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT}.
 |`displayName`
-|Displayed name of the custom task. This name is displayed in the palette in {CENTRAL}.
+|Displayed name of the custom task. This name is displayed in the palette in VS Code.
 |`icon`
-|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in {CENTRAL}. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
 |`description`
 |Description of the custom task.
 |`defaultHandler`
@@ -163,7 +161,7 @@ The `@Wid` annotation is automatically created when you generate a work item han
 |`documentation`
 |Path to an HTML file in the current project that contains a description of the custom task.
 |`@WidParameter`
-|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data inputs for the custom task. More than one parameter can be specified:
+|Child annotation of `@Wid`. Specifies values that will be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. More than one parameter can be specified:
 
 `name` - A name for the parameter.
 
@@ -172,7 +170,7 @@ NOTE: Due to the possibility of this name being used in API calls over transfer 
 `required` - Boolean value indicating whether the parameter is required for the custom task to execute.
 
 |`@WidResult`
-|Child annotation of `@Wid`. Specifies values that will be populated in the {CENTRAL} GUI or expected by API calls as data outputs for the custom task. You can specify more than one result:
+|Child annotation of `@Wid`. Specifies values that will be populated in the VS Code GUI or expected by API calls as data outputs for the custom task. You can specify more than one result:
 
 `name` - A name for the result.
 
@@ -194,7 +192,7 @@ NOTE: Due to the possibility of this name being used in API calls over transfer 
 
 `description` - Description of the handler that will be displayed in the service repository.
 
-`keywords` - Comma-separated list of keywords that apply to the handler. Note: Currently not used by the {CENTRAL} service repository.
+`keywords` - Comma-separated list of keywords that apply to the handler. Note: Currently not used by the VS Code service repository.
 
 `action` - The `@WidAction` object.
 
@@ -214,14 +212,14 @@ NOTE: Due to the possibility of this name being used in API calls over transfer 
 
 `paramsdescription` - The array containing the descriptions for each authentication parameter.
 
-`referencesite` - The URL to where the handler documentation can be found. Note: Currently not used by the {CENTRAL} service repository.
+`referencesite` - The URL to where the handler documentation can be found. Note: Currently not used by the VS Code service repository.
 |===
 
 == Creating work item handler projects
 
 Create the software project to contain all configurations, mappings, and executable code for the custom task.
 
-You can create a work item handler from scratch or use a Maven archetype to create an example project. Red Hat Process Automation Manager provides the jbpm-workitems-archetype from the Red Hat Maven repository for this purpose.
+You can create a work item handler from scratch or use a Maven archetype to create an example project. BAMOE provides the `jbpm-workitems-archetype` from the Maven repository for this purpose.
 
 . Open the command line and create a directory where you will build your work item handler such as workitem-home:
 +
@@ -231,8 +229,8 @@ You can create a work item handler from scratch or use a Maven archetype to crea
 mkdir workitem-home
 ----
 
-. Check the Maven settings.xml file and ensure that the Red Hat Maven repository is included in the repository list.
-For example, to add the online Red Hat Maven repository to your Maven settings.xml file:
+. Check the Maven `settings.xml` file and ensure that the Red Hat Maven repository is included in the repository list.
+For example, to add the online Red Hat Maven repository to your Maven `settings.xml` file:
 +
 
 [source,xml]
@@ -322,7 +320,7 @@ $ mvn archetype:generate \
 |String added to the beginning of Java classes when Maven generates the classes for easier identification. For example, MyWorkItem.
 |===
 
-A myworkitem folder is created in the workitem-home directory. For example:
+ A `myworkitem` folder is created in the workitem-home directory. For example:
 
 [source,xml]
 ----
@@ -348,9 +346,9 @@ src/
 pom.xml
 ----
 
-. Add any Maven dependencies required by the work item handler class to the pom.xml file.
+. Add any Maven dependencies required by the work item handler class to the `pom.xml` file.
 
-. To create a deployable JAR for this project, in the parent project folder where the pom.xml file is located, execute the following command:
+. To create a deployable JAR for this project, in the parent project folder where the `pom.xml` file is located, execute the following command:
 +
 
 [source,xml]
@@ -358,21 +356,22 @@ pom.xml
 $ mvn clean package
 ----
 
-Several files are created in the target/ directory which include the following two main files:
+Several files are created in the target directory which include the following two main files:
 
-* myworkitems-<version>.jar: Used for direct deployment to Red Hat Process Automation Manager.
+* `myworkitems-<version>.jar`: Used for direct deployment to Red Hat Process Automation Manager.
 
-* myworkitems-<version>.zip: Used for deployment using a service repository.
+* `myworkitems-<version>.zip`: Used for deployment using a service repository.
+
 
 == Work item handler project customization
 
-You can customize the code of a work item handler project. There are two Java methods required by a work item handler, executeWorkItem and abortWorkItem.
+You can customize the code of a work item handler project. Following are the Java methods required by a work item handler:
 
-* executeWorkItem(WorkItem workItem, WorkItemManager manager): Executed by default when the work item handler is run.
+* `executeWorkItem` (WorkItem workItem, WorkItemManager manager): Executed by default when the work item handler is run.
 
-* abortWorkItem(WorkItem workItem, WorkItemManager manager): Executed when the work item is aborted.
+* `abortWorkItem` (WorkItem workItem, WorkItemManager manager): Executed when the work item is aborted.
 
-In both methods, the WorkItem parameter contains any of the parameters entered into the custom task through a GUI or API call, and the WorkItemManager parameter is responsible for tracking the state of the custom task.
+In both methods, the WorkItem parameter contains any of the parameters entered into the custom task through a GUI or API call, and the `WorkItemManager` parameter is responsible for tracking the state of the custom task.
 
 [source,xml]
 ----

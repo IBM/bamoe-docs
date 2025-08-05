@@ -2,9 +2,21 @@
 
 = Managing custom tasks in {CENTRAL}
 
+
+
 Custom tasks (work items) are tasks that can run custom logic. You can customize and reuse custom tasks across multiple business processes or across all projects in {CENTRAL}. You can also add custom elements in the designer palette, including name, icon, sub-category, input and output parameters, and documentation. {PRODUCT} provides a set of custom tasks within the custom task repository in {CENTRAL}. You can enable or disable the default custom tasks and upload custom tasks into {CENTRAL} to implement the tasks in the relevant processes.
 
+In {CENTRAL}, each task in a process diagram has a `WorkItemDefinition` Java class with an associated `WorkItemHandler` Java class. You can define a `WorkItemDefinition` using an MVFLEX Expression Language (MVEL) map as part of a MVEL list in a `.wid` file. Place the `.wid` file in the `global` directory under the project root or in the directory of the BPMN file. The work item handler contains Java code registered with {CENTRAL} and implements `org.kie.api.runtime.process.WorkItemHandler`.
+The Java code of the work item handler is executed when the task is triggered. You can customize and register a work item handler to execute your own Java code in custom tasks.
+
 NOTE: {PRODUCT} includes a limited set of supported custom tasks. Custom tasks that are not included in {PRODUCT} are not supported.
+
+.Prerequisites
+* {CENTRAL} is deployed and is running on a web or application server.
+* You are logged in to {CENTRAL}.
+* Maven is installed.
+* The host has access to the Internet. The build process uses the Internet for downloading Maven packages from external repositories.
+* Your system has access to the Red Hat Maven repository either locally or online
 
 .Procedure
 . In {CENTRAL}, click image:project-data/gear-icon.png[] in the upper-right corner and select *Custom Tasks Administration*.
