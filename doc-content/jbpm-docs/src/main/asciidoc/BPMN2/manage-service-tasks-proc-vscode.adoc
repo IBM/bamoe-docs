@@ -2,7 +2,7 @@
 
 = Managing custom tasks in Visual Studio Code
 
-In Visual Studio Code, managing custom tasks for {PRODUCT} involves defining and deploying user-defined Work Item Handlers (WIHs) that extend BPMN capabilities to support external operations such as REST calls, database interactions, or SOAP services. These handlers are Java classes that implement the `org.kie.api.runtime.process.WorkItemHandler` interface, using the `executeWorkItem(...)` and `abortWorkItem(...)` methods to control task execution. Handlers are registered through configuration files like `kie-deployment-descriptor.xml` or `kmodule.xml`, while task metadata is described in `.wid` files using MVEL syntax. These `.wid` files should be placed either in the global directory under the project root or alongside the BPMN file. This section outlines how to create, configure, and deploy custom tasks using Visual Studio Code.
+In Visual Studio Code, managing custom tasks for {PRODUCT} involves defining and deploying Work Item Handlers (WIHs) that extend BPMN capabilities to support external operations such as REST calls, database interactions, or SOAP services. These handlers are Java classes that implement the `org.kie.api.runtime.process.WorkItemHandler` interface, using the `executeWorkItem(...)` and `abortWorkItem(...)` methods to control task execution. Handlers are registered through configuration files like `kie-deployment-descriptor.xml` or `kmodule.xml`, while task metadata is described in `.wid` files using MVEL syntax. These `.wid` files should be placed either in the global directory under the project root or alongside the BPMN file. The subsequent sections outlines how to create, configure, and deploy custom tasks using VS Code.
 
 .Prerequisites
 
@@ -20,7 +20,7 @@ To create custom tasks in the VS Code BPMN extension, follow the subsequent step
 
 . Goto Project settings tab and copy the project git url.
 
-. Clone the project into your local filesystem or vscode using the command line or terminal.
+. Clone the project into your local filesystem or VS Code using the following command:
 +
 
 [source,xml]
@@ -31,7 +31,7 @@ git clone ssh://$UserName@localhost:8001/MySpace/TestProject
 . Work Item Definitions can be provided as `.wid` files or through `@wid` annotation. For more information about `.wid` files, see xref:work-item-definitions[Work item definitions]. The `.wid` files can be placed in:
 +
 * The top-level `global/` directory, or
-* The `src/main/resources/` directory, optionally within a Java package structure (For example, src/main/resources/com/ibm/)
+* The `src/main/resources/` directory, optionally within a Java package structure (For example, `src/main/resources/com/ibm/`)
 +
 [NOTE]
 ====
@@ -43,7 +43,7 @@ Icons for custom tasks can be placed in the same directory as the `.wid` file.
 +
 [NOTE]
 ====
-In some cases, VS Code may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run git add `customtask.wid` to ensure the file is tracked. If the issue persists, try opening the BAMOE project in a new VS Code workspace.
+In some cases, VS Code may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run git and `customtask.wid` to ensure the file is tracked. If the issue persists, try opening the BAMOE project in a new VS Code workspace.
 ====
 
 
@@ -54,7 +54,7 @@ In some cases, VS Code may not immediately recognize the `.wid` file, causing th
 
 .wid file
 
-wid file (short for Work Item Definition) is an XML-like configuration file used in Red Hat Process Automation Manager (and formerly in jBPM) to define custom tasks that can be used in business processes. It provides metadata about the task, such as its name, parameters, results, icons, and the Java class that implements its behavior.
+The `.wid` file (short for Work Item Definition) is an XML-like configuration file used in {PRODUCT_SHORT} to define custom tasks that can be used in business processes. It provides metadata about the task, such as its name, parameters, results, icons, and the Java class that implements its behavior.
 The .wid file acts as a bridge between the process designer (like Business Central or VS Code with BPMN plugins) and the underlying Java implementation of the custom task. It allows the task to appear in the process palette and be configured visually.
 
 .wid example
@@ -89,8 +89,6 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 |Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT_SHORT}.
 |`displayName`
 |Displayed name of the custom task. This name is displayed in the palette in VS Code.
-|`icon`
-|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
 |`category`
 |Name of a category within the VS Code palette under which this custom task is displayed.
 |`description`
@@ -99,12 +97,10 @@ The .wid file acts as a bridge between the process designer (like Business Centr
 |The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT_SHORT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
 |`documentation`
 |Path to an HTML file in the current project that contains a description of the custom task.
+|`icon`
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
 |`parameters`
-|Specifies the values to be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one parameter can be specified.
-|`results`
-|Specifies the values to be populated in the VS Code GUI or expected by API calls as data outputs for the custom task. Results use the `<key> : <DataType>` format. Accepted data types are `StringDataType()`, `IntegerDataType()`, and `ObjectDataType()`. More than one result can be specified.
-|`mavenDependencies`
-|Optional: Specifies Maven dependencies required for the correct functioning of the work item handler. Dependencies can also be specified in the work item handler `pom.xml` file. Dependencies are in the format `<group>:<artifact>:<version>`. More than one dependency may be specified
+|Specifies the values to be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `Model`, `Namespace`, and `Decision`. More than one parameter can be specified.
 |===
 
 .@Wid Annotation
@@ -235,7 +231,7 @@ mkdir workitem-home
 ----
 
 . Check the Maven `settings.xml` file and ensure that the Red Hat Maven repository is included in the repository list.
-For example, to add the online Red Hat Maven repository to your Maven `settings.xml` file:
+For example, to add the online Red Hat Maven repository to your Maven `settings.xml` file see the subsequent command:
 +
 
 [source,xml]
@@ -326,7 +322,7 @@ $ mvn archetype:generate \
 |String added to the beginning of Java classes when Maven generates the classes for easier identification. For example, MyWorkItem.
 |===
 +
-A `myworkitem` folder is created in the workitem-home directory. For example:
+After executing the command a `myworkitem` folder is created in the workitem-home directory. For example:
 +
 [source,xml]
 ----
@@ -362,7 +358,7 @@ pom.xml
 $ mvn clean package
 ----
 
-Several files are created in the target directory which include the following two main files:
+As a result, several files are created in the target directory which include the following two main files:
 
 * `myworkitems-<version>.jar`: Used for direct deployment to Red Hat Process Automation Manager.
 
@@ -371,13 +367,13 @@ Several files are created in the target directory which include the following tw
 
 == Work item handler project customization
 
-You can customize the code of a work item handler project. Following are the Java methods required by a work item handler:
+You can customize the code of a work item handler project. The Java methods required by a work item handler are as follows:
 
 * `executeWorkItem` (WorkItem workItem, WorkItemManager manager): Executed by default when the work item handler is run.
 
 * `abortWorkItem` (WorkItem workItem, WorkItemManager manager): Executed when the work item is aborted.
 
-In both methods, the WorkItem parameter contains any of the parameters entered into the custom task through a GUI or API call, and the `WorkItemManager` parameter is responsible for tracking the state of the custom task.
+In both methods, the WorkItem parameter contains the parameters entered into the custom task through a GUI or API call. The `WorkItemManager` parameter is responsible for tracking the state of the custom task.
 
 [source,xml]
 ----
@@ -433,133 +429,9 @@ RequiredParameterValidator.validate(this.getClass(), workItem);
 
 == Deploying custom tasks
 
-Work item handlers, as custom code, are created outside of {PRODUCT_SHORT}. To use the code in your custom task, the code must be deployed to the server. Work item handler projects must be Java JAR files that can be placed into a Maven repository.
-
-In {PRODUCT_SHORT} you can deploy custom tasks using two methods:
-
-* Within a VS Code custom task repository.
-* Outside of VS Code, you can manually copy the JAR files into the Maven repository.
-
-.Using a VS Code custom task repository
-
-You can enable, disable, and deploy custom tasks within a VS Code custom task repository.
-ifdef::DM,PAM[]
-For more information, see xref:manage-service-tasks-proc-vscode_{context}[Managing custom tasks in Visual Studio Code].
-endif::[]
-
-.Uploading JAR Artifact to VS Code
-
-You can upload the work item handler JAR to the VS Code Maven repository using VS Code admin settings.
-
-.Procedure
-. In VS Code, select the *Admin* icon in the top-right corner of the screen and select *Artifacts*.
-. Click *Upload*.
-. In the *Artifact Upload* window, click the *Choose File* icon.
-. Navigate to the location of the work item handler JAR, select the file and click *Open*.
-. In the pop-up dialog, click the *Upload* icon.
-+
-The artifact is uploaded and can now be viewed on the *Artifacts* page and referenced.
-
-.Manually copying work item definitions to VS Code Maven repository
-
-VS Code automatically creates or reuses the Maven repository folder. By default the location is based on the location of the user launched {EAP}. For example, the full default path would be `<startup location>/repositories/kie/global`. It is possible to replicate a standard Maven repository folder layout of `<groupId>/<artifactId>/<versionId>/` in this folder and copy work item handler JAR files to this location. For example:
-[source,xml]
-----
-<startup location>/repositories/kie/global/com/redhat/myworkitem/1.0.0-SNAPSHOT/myworkitems-1.0.0-SNAPSHOT.jar
-----
-
-Any artifacts copied in this fashion are available to {PRODUCT_SHORT} without a server restart. Viewing the artifact in the VS Code *Artifacts* page requires clicking *Refresh*.
-
+For information, see xref:{URL_DEVELOPING_PROCESS_SERVICES}/custom-tasks-deploying-custom-tasks-proc.html[Deploying custom tasks].
 
 == Registering custom tasks
 
-{PRODUCT} must know how to associate a custom task work item with the code executed by the work item handler. The work item definition file links the custom task with the work item handler by name and Java class. The work item handler’s Java class has to be registered as usable in {PRODUCT_SHORT}.
-
-NOTE: Service repositories contain domain-specific services that provide integration of your processes with different types of systems. Registering a custom task is not necessary when using a service repository because the import process registers the custom task.
-
-{PRODUCT_SHORT} creates a WID file by default for projects that contain at least one business process. You can create a WID file when registering a work item handler or edit the default WID file.
-ifdef::DM,PAM[]
-For more information about WID file locations or formatting, see xref:work-item-definitions[Work item definitions].
-
-For non-service repository deployments, work item handlers can be registered in two ways:
-
-* Registering using the deployment descriptor.
-* Registering using the spring component registration.
-
-.Registering custom tasks using the deployment descriptor inside VS Code
-
-You can register a custom task work item with the work item handler using the deployment descriptor in VS Code.
-
-.Procedure
-. In VS Code, go to *Menu* -> *Design* -> *Projects* and select the project name.
-. In the project pane, select *Settings* -> *Deployments* -> *Work Item Handlers*.
-. Click *Add Work Item Handler*.
-. In the *Name* field, enter the display name for the custom task.
-. From the *Resolver* list, select *MVEL*, *Reflection* or *Spring*.
-. In the *Value* field, enter the value based on the resolver type:
-+
-[NOTE]
-====
-The value fields may be filled automatically.
-====
-* For MVEL, use the format `new <full Java package>.<Java work item handler class name>()`
-+
-Example: `new com.redhat.MyWorkItemWorkItemHandler()`
-* For Reflection, use the format `<full Java package>.<Java work item handler class name>`
-+
-Example: `com.redhat.MyWorkItemWorkItemHandler`
-* For Spring, use the format `<Spring bean identifier>`
-+
-Example: `workItemSpringBean`
-
-. Click *Save* to save your changes
-
-.Registering custom tasks using the deployment descriptor outside VS Code
-
-You can register a custom task work item with the work item handler using the deployment descriptor outside VS Code.
-
-.Procedure
-. In your Git project directory, open the file `src/main/resources/META-INF/kie-deployment-descriptor.xml`.
-. Add the following content based on the resolver type under `<work-item-handlers>`:
-* For MVEL, add the following:
-+
-[source,xml]
-----
-<work-item-handler>
-  <resolver>mvel</resolver>
-  <identifier>new com.redhat.MyWorkItemWorkItemHandler()</identifier>
-  <parameters/>
-  <name>MyWorkItem</name>
-</work-item-handler>
-----
-* For Reflections, add the following:
-+
-[source,xml]
-----
-<work-item-handler>
-  <resolver>reflection</resolver>
-  <identifier>com.redhat.MyWorkItemWorkItemHandler</identifier>
-  <parameters/>
-  <name>MyWorkItem</name>
-</work-item-handler>
-----
-* For Spring, add the following and ensure the identifier is the identifier of a Spring bean:
-+
-[source,xml]
-----
-<work-item-handler>
-  <resolver>spring</resolver>
-  <identifier>beanIdentifier</identifier>
-  <parameters/>
-  <name>MyWorkItem</name>
-</work-item-handler>
-----
-+
-[NOTE]
-====
-If you are using Spring to discover and configure Spring beans, it is possible to use an annotation of the `org.springframework.stereotype.Component` class to automatically register work item handlers.
-
-Within a work item handler, add the annotation `@Component("<Name>")` before the declaration of the work item handler class. For example: `@Component("MyWorkItem") public class MyWorkItemWorkItemHandler extends AbstractLogOrThrowWorkItemHandler {`
-====
-
-
+For information, see xref:{URL_DEVELOPING_PROCESS_SERVICES}/custom-tasks-registering-custom-tasks-proc.html[Registering custom tasks].
+For information about deploying custom tasks, see xref:
