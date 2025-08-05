@@ -234,6 +234,7 @@ mkdir workitem-home
 . Check the Maven settings.xml file and ensure that the Red Hat Maven repository is included in the repository list.
 For example, to add the online Red Hat Maven repository to your Maven settings.xml file:
 +
+
 [source,xml]
 ----
 <settings>
@@ -345,11 +346,11 @@ src/
       com/
         ibm/
 pom.xml
------
+----
 
-.Add any Maven dependencies required by the work item handler class to the pom.xml file.
+. Add any Maven dependencies required by the work item handler class to the pom.xml file.
 
-.To create a deployable JAR for this project, in the parent project folder where the pom.xml file is located, execute the following command:
+. To create a deployable JAR for this project, in the parent project folder where the pom.xml file is located, execute the following command:
 +
 
 [source,xml]
@@ -360,14 +361,15 @@ $ mvn clean package
 Several files are created in the target/ directory which include the following two main files:
 
 * myworkitems-<version>.jar: Used for direct deployment to Red Hat Process Automation Manager.
-* myworkitems-<version>.zip: Used for deployment using a service repository.
 
+* myworkitems-<version>.zip: Used for deployment using a service repository.
 
 == Work item handler project customization
 
 You can customize the code of a work item handler project. There are two Java methods required by a work item handler, executeWorkItem and abortWorkItem.
 
 * executeWorkItem(WorkItem workItem, WorkItemManager manager): Executed by default when the work item handler is run.
+
 * abortWorkItem(WorkItem workItem, WorkItemManager manager): Executed when the work item is aborted.
 
 In both methods, the WorkItem parameter contains any of the parameters entered into the custom task through a GUI or API call, and the WorkItemManager parameter is responsible for tracking the state of the custom task.
@@ -390,12 +392,12 @@ RequiredParameterValidator.validate(this.getClass(), workItem);
     } catch(Throwable cause) {
       handleException(cause);
     }
-	}
+  }
 
-	@Override
-	public void abortWorkItem(WorkItem workItem, WorkItemManager manager) {
+  @Override
+  public void abortWorkItem(WorkItem workItem, WorkItemManager manager) {
     // similar
-	}
+  }
 }
 ----
 
@@ -424,4 +426,135 @@ RequiredParameterValidator.validate(this.getClass(), workItem);
 
 |===
 
-== Deploying Custom Tasks
+=== Deploying custom tasks
+
+Work item handlers, as custom code, are created outside of {PRODUCT}. To use the code in your custom task, the code must be deployed to the server. Work item handler projects must be Java JAR files that can be placed into a Maven repository.
+
+In {PRODUCT} you can deploy custom tasks using two methods:
+
+* Within a VS Code custom task repository.
+ifdef::DM,PAM[]
+For more information, see {URL_DEVELOPING_PROCESS_SERVICES}/assembly-managing-and-monitoring-business-processes.html[_{MANAGING_PROCESSES}_].
+endif::[]
+* Outside of VS Code, you can manually copy the JAR files into the Maven repository.
+
+== Using a VS Code custom task repository
+
+You can enable, disable, and deploy custom tasks within a VS Code custom task repository.
+ifdef::DM,PAM[]
+For more information, see {URL_DEVELOPING_PROCESS_SERVICES}/assembly-custom-tasks-and-work-item-handlers.html[_Managing custom tasks in {CENTRAL}_].
+endif::[]
+
+== Uploading JAR Artifact to VS Code
+
+You can upload the work item handler JAR to the VS Code Maven repository using VS Code admin settings.
+
+.Procedure
+. In VS Code, select the *Admin* icon in the top-right corner of the screen and select *Artifacts*.
+. Click *Upload*.
+. In the *Artifact Upload* window, click the *Choose File* icon.
+. Navigate to the location of the work item handler JAR, select the file and click *Open*.
+. In the pop-up dialog, click the *Upload* icon.
++
+The artifact is uploaded and can now be viewed on the *Artifacts* page and referenced.
+
+== Manually copying work item definitions to VS Code Maven repository
+
+VS Code automatically creates or reuses the Maven repository folder. By default the location is based on the location of the user launched {EAP}. For example, the full default path would be `<startup location>/repositories/kie/global`. It is possible to replicate a standard Maven repository folder layout of `<groupId>/<artifactId>/<versionId>/` in this folder and copy work item handler JAR files to this location. For example:
+----
+<startup location>/repositories/kie/global/com/redhat/myworkitem/1.0.0-SNAPSHOT/myworkitems-1.0.0-SNAPSHOT.jar
+----
+
+Any artifacts copied in this fashion are available to {PRODUCT} without a server restart. Viewing the artifact in the VS Code *Artifacts* page requires clicking *Refresh*.
+
+
+=== Registering custom tasks
+
+{PRODUCT} must know how to associate a custom task work item with the code executed by the work item handler. The work item definition file links the custom task with the work item handler by name and Java class. The work item handler’s Java class has to be registered as usable in {PRODUCT}.
+
+NOTE: Service repositories contain domain-specific services that provide integration of your processes with different types of systems. Registering a custom task is not necessary when using a service repository because the import process registers the custom task.
+
+{PRODUCT} creates a WID file by default for projects that contain at least one business process. You can create a WID file when registering a work item handler or edit the default WID file.
+ifdef::DM,PAM[]
+For more information about WID file locations or formatting, see xref:custom-tasks-work-item-definitions-con-{context}[].
+endif::[]
+
+For non-service repository deployments, work item handlers can be registered in two ways:
+
+* Registering using the deployment descriptor.
+* Registering using the spring component registration.
+
+==== Registering custom tasks using the deployment descriptor inside VS Code
+
+You can register a custom task work item with the work item handler using the deployment descriptor in VS Code.
+
+.Procedure
+. In VS Code, go to *Menu* -> *Design* -> *Projects* and select the project name.
+. In the project pane, select *Settings* -> *Deployments* -> *Work Item Handlers*.
+. Click *Add Work Item Handler*.
+. In the *Name* field, enter the display name for the custom task.
+. From the *Resolver* list, select *MVEL*, *Reflection* or *Spring*.
+. In the *Value* field, enter the value based on the resolver type:
++
+[NOTE]
+====
+The value fields may be filled automatically.
+====
+* For MVEL, use the format `new <full Java package>.<Java work item handler class name>()`
++
+Example: `new com.redhat.MyWorkItemWorkItemHandler()`
+* For Reflection, use the format `<full Java package>.<Java work item handler class name>`
++
+Example: `com.redhat.MyWorkItemWorkItemHandler`
+* For Spring, use the format `<Spring bean identifier>`
++
+Example: `workItemSpringBean`
+
+. Click *Save* to save your changes
+
+==== Registering custom tasks using the deployment descriptor outside VS Code
+
+You can register a custom task work item with the work item handler using the deployment descriptor outside VS Code.
+
+.Procedure
+. In your Git project directory, open the file `src/main/resources/META-INF/kie-deployment-descriptor.xml`.
+. Add the following content based on the resolver type under `<work-item-handlers>`:
+* For MVEL, add the following:
++
+----
+<work-item-handler>
+  <resolver>mvel</resolver>
+  <identifier>new com.redhat.MyWorkItemWorkItemHandler()</identifier>
+  <parameters/>
+  <name>MyWorkItem</name>
+</work-item-handler>
+----
+* For Reflections, add the following:
++
+----
+<work-item-handler>
+  <resolver>reflection</resolver>
+  <identifier>com.redhat.MyWorkItemWorkItemHandler</identifier>
+  <parameters/>
+  <name>MyWorkItem</name>
+</work-item-handler>
+----
+* For Spring, add the following and ensure the identifier is the identifier of a Spring bean:
++
+----
+<work-item-handler>
+  <resolver>spring</resolver>
+  <identifier>beanIdentifier</identifier>
+  <parameters/>
+  <name>MyWorkItem</name>
+</work-item-handler>
+----
++
+[NOTE]
+====
+If you are using Spring to discover and configure Spring beans, it is possible to use an annotation of the `org.springframework.stereotype.Component` class to automatically register work item handlers.
+
+Within a work item handler, add the annotation `@Component("<Name>")` before the declaration of the work item handler class. For example: `@Component("MyWorkItem") public class MyWorkItemWorkItemHandler extends AbstractLogOrThrowWorkItemHandler {`
+====
+
+
