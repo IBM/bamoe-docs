@@ -46,19 +46,15 @@ endif::[]
 +
 In the following command, replace `<USERNAME>` and  `<PASSWORD>` with the user name and password of your choice:
 +
+
 ifdef::PAM[]
 [source,bash]
 ----
 $ ./bin/jboss-cli.sh --commands="embed-server --std-out=echo,/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>),/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>, clear={password=<PASSWORD>}),/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[admin,rest-all,kie-server])"
 ----
 endif::[]
-ifdef::DM[]
-[source,bash]
-----
-$ ./bin/jboss-cli.sh --commands="embed-server --std-out=echo,/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>),/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>, clear={password='<PASSWORD>'}),/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[admin,rest-all,kie-server])"
-----
-endif::[]
 +
+
 [NOTE]
 ====
 Make sure that the specified user name is not the same as an existing user, role, or group. For example, do not create a user with the user name `admin`.
@@ -67,18 +63,14 @@ The password must have at least eight characters and must contain at least one n
 ====
 . Create a user with the `kie-server` role that you will use to log in to {KIE_SERVER}.
 +
+
 ifdef::PAM[]
 [source,bash]
 ----
 $ ./bin/jboss-cli.sh --commands="embed-server --std-out=echo,/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>),/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>, clear={password='<PASSWORD>'}),/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[kie-server])"
 ----
 endif::[]
-ifdef::DM[]
-[source,bash]
-----
-$ ./bin/jboss-cli.sh --commands="embed-server --std-out=echo,/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>),/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>, clear={password='<PASSWORD>'}),/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[kie-server])"
-----
-endif::[]
+
 . Make a note of your user names and passwords.
 
 . Optional:
