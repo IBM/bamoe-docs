@@ -1,0 +1,168 @@
+[id='custom-tasks-work-item-definitions-vscode']
+= Work item definitions
+
+{PRODUCT_SHORT} requires a work item definition (WID) file to identify the data fields to show in VS Code and accept API calls. The WID file is a mapping between user interactions with {PRODUCT_SHORT} and the data that is passed to the work item handler. The WID file also handles the UI details such as the name of the custom task, the category it is displayed as on the palette in VS Code, the icon used to designate the custom task, and the work item handler the custom task will map to.
+
+.wid file
+
+The `.wid` file (short for Work Item Definition) is an XML-like configuration file used in {PRODUCT_SHORT} to define custom tasks that can be used in business processes. It provides metadata about the task, such as its name, parameters, results, icons, and the Java class that implements its behavior.
+The .wid file acts as a bridge between the process designer (like Business Central or VS Code with BPMN plugins) and the underlying Java implementation of the custom task. It allows the task to appear in the process palette and be configured visually.
+
+.wid example
+[source,xml]
+
+----
+[
+    [
+        "name" : "MyDecisionTask",
+        "displayName" : "MyDecision Task",
+        "category" : "jbpm-workitems-bpmn2",
+        "description" : "",
+        "defaultHandler" : "mvel: new org.jbpm.process.workitem.bpmn2.DecisionTaskHandler()",
+        "documentation" : "jbpm-workitems-bpmn2/index.html",
+        "icon" : "defaultdecisiontaskicon.png",
+
+        "parameters" : [
+            "Model" : new StringDataType(),
+            "Namespace" : new StringDataType(),
+            "Decision" : new StringDataType()
+        ]
+    ]
+]
+----
+
+.wid file parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
+|===
+|Parameter
+|Description
+|`name`
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT_SHORT}.
+|`displayName`
+|Displayed name of the custom task. This name is displayed in the palette in VS Code.
+|`category`
+|Name of a category within the VS Code palette under which this custom task is displayed.
+|`description`
+|Description of the custom task.
+|`defaultHandler`
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT_SHORT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|`documentation`
+|Path to an HTML file in the current project that contains a description of the custom task.
+|`icon`
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|`parameters`
+|Specifies the values to be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. Parameters use the `<key> : <DataType>` format. Accepted data types are `Model`, `Namespace`, and `Decision`. More than one parameter can be specified.
+|===
+
+.@Wid Annotation
+The `@Wid` annotation is automatically created when you generate a work item handler project using the Maven archetype. You can also add the annotation manually.
+
+.@Wid Example
+[source,options="nowrap"]
+----
+@Wid(widfile="MyWorkItemDefinitions.wid",
+    name="MyWorkItemDefinitions",
+    displayName="MyWorkItemDefinitions",
+    icon="",
+    defaultHandler="mvel: new com.redhat.MyWorkItemWorkItemHandler()",
+    documentation = "myworkitem/index.html",
+    parameters={
+      @WidParameter(name="SampleParam", required = true),
+      @WidParameter(name="SampleParamTwo", required = true)
+    },
+    results={
+      @WidResult(name="SampleResult")
+    },
+    mavenDepends={
+      @WidMavenDepends(group="com.redhat",
+      artifact="myworkitem",
+      version="7.52.0.Final-example-00007")
+    },
+    serviceInfo={
+      @WidService(category = "myworkitem",
+      description = "${description}",
+      keywords = "",
+      action = @WidAction(title = "Sample Title"),
+      authinfo = @WidAuth(required = true,
+      params = {"SampleParam", "SampleParamTwo"},
+      paramsdescription = {"SampleParam", "SampleParamTwo"},
+      referencesite = "referenceSiteURL"))
+    }
+)
+----
+
+.@Wid parameter descriptions
+[cols="30%,70%a", frame="all", options="header"]
+|===
+|Parameter
+|Description
+|`@Wid`
+|Top-level annotation to auto-generate WID files.
+|`widfile`
+|Name of the file that is automatically created for the custom task when it is deployed in {PRODUCT_SHORT}.
+|`name`
+|Name of the custom task, used internally. This name must be unique to custom tasks deployed in {PRODUCT_SHORT}.
+|`displayName`
+|Displayed name of the custom task. This name is displayed in the palette in VS Code.
+|`icon`
+|Path from `src/main/resources/` to an icon located in the current project. The icon is displayed in the palette in VS Code. The icon, if specified, must be a PNG or GIF file and 16x16 pixels. This value can be left blank to use a default “Service Task” icon.
+|`description`
+|Description of the custom task.
+|`defaultHandler`
+|The work item handler Java class that is linked to the custom task. This entry is in the format `<language> : <class>`. {PRODUCT_SHORT} recommends using `mvel` as the language value for this attribute but `java` can also be used. For more information about mvel, see http://mvel.documentnode.com/[MVEL Documentation].
+|`documentation`
+|Path to an HTML file in the current project that contains a description of the custom task.
+|`@WidParameter`
+|Child annotation of `@Wid`. Specifies values that will be populated in the VS Code GUI or expected by API calls as data inputs for the custom task. More than one parameter can be specified:
+
+`name` - A name for the parameter.
+
+NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
+
+`required` - Boolean value indicating whether the parameter is required for the custom task to execute.
+
+|`@WidResult`
+|Child annotation of `@Wid`. Specifies values that will be populated in the VS Code GUI or expected by API calls as data outputs for the custom task. You can specify more than one result:
+
+`name` - A name for the result.
+
+NOTE: Due to the possibility of this name being used in API calls over transfer methods such as REST or SOAP, this name should not contain spaces or special characters.
+
+|`@WidMavenDepends`
+|Child annotation of `@Wid`. Specifies Maven dependencies that will be required for the correct functioning of the work item handler. You can specify more than one dependency:
+
+`group` - Maven group ID of the dependency.
+
+`artifact` - Maven artifact ID of the dependency.
+
+`version` - Maven version number of the dependency.
+
+|`@WidService`
+|Child annotation of `@Wid`. Specifies values that will be populated in the service repository.
+
+`category` - The UI palette category that the handler will be placed. This value should match the `category` field of the `@Wid` annotation.
+
+`description` - Description of the handler that will be displayed in the service repository.
+
+`keywords` - Comma-separated list of keywords that apply to the handler. Note: Currently not used by the VS Code service repository.
+
+`action` - The `@WidAction` object.
+
+`authinfo` - The `@WidAuth` object. Optional.
+|`@WidAction`
+|Object of `@WidService`.
+
+`title` - The title for the handler action.
+
+`description` - The description for the handler action.
+|`@WidAuth`
+|Object of `@WidService`.
+
+`required` - The boolean value that determines whether authentication is required.
+
+`params` - The array containing the authentication parameters required.
+
+`paramsdescription` - The array containing the descriptions for each authentication parameter.
+
+`referencesite` - The URL to where the handler documentation can be found. Note: Currently not used by the VS Code service repository.
+|===
