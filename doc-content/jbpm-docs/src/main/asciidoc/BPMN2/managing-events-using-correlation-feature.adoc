@@ -1,31 +1,41 @@
 [id='managing-events-using-correlation-feature-{context}']
 = Using correlation to manage messaging with multiple process instances
 
-The Correlation feature in BAMOE enables users to define a correlation key for managing events in their workflow. This feature is based on the `EventTypeFilter` and adds a new level of filtering based on the content of the message. You can work correlation subscriptions in two ways: 
+
+you can use the Correlation feature, when multiple process instances are running concurrently and only one specific instance needs to be notified. The Correlation feature allows you to target individual process instances using the correlation properties.
+You can define a correlation key for managing events in the workflow. The Correlation feature is based on the `EventTypeFilter` which adds a new level of filtering based on the content of the message.
+
+You can configure Correlation in the following ways: 
 
 * Static: using a `MessageStartEvent`, or 
 
 * Dynamic: using a `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`.
 
-For more information about how correlation key entities are managed within the KIE Server, see xref:../doc-content/enterprice-only/admin-and-config/correlationkey-entities-ref.adoc[].
+To configure and use correlation properties use the VS Code IDE with the BPMN plugin, as correlation properties settings are not available in the {central} web designer.
+
+For more information about how correlation key entities aremonitored within the KIE Server, see xref:../doc-content/enterprice-only/admin-and-config/correlationkey-entities-ref.adoc[Correlation key entities].
 
 
 == Prerequisites
 
 * Configure the KIE Server to send and receive Kafka messages from the process. For more information, see xref:kieserver-kafka-proc_{context}[]. 
-* Use VS Code IDE with the BPMN plugin, as correlation properties are not available in the {central} web designer.
 
 == Using Static Correlation in MessageStartEvent
 
 To use static correlation in `MessageStartEvent`:
 
-. Define the Kafka channel name by navigating to the *Implementation/Execution* section and setting the value in the *Message property* field.
+. Navigating to *Implementation/Execution* -> *Message property* field and define the Kafka channel name.
 
-. Define the process correlation by navigating to the *Process properties* -> *Collaboration* -> *Correlations*.
+. Navigating to *Process properties* -> *Collaboration* -> *Correlations* and define a Correlation for the process by entering the value for ID, Name, property ID, Property Name, and Property Type fields.
++
 
-. Create a process with `MessageStartEvent` and define the following correlation fields:
+.Correlation window
+image::BPMN2/correlation-window.png[Correlation window]
++
 
-* Property: Select the correlation created in the earlier step.
+. Create a process with `MessageStartEvent` and enter the values for the following correlation fields:
+
+* Property: Select the correlation that you have already created.
 
 * Message Expression: Define the variable name that will be available in the generated event.
 
@@ -35,39 +45,74 @@ To use static correlation in `MessageStartEvent`:
 
 * Data Expression Type: Select the appropriate expression type (for example, String, Long, Object).
 
-After configuring the correlation, the system uses the defined correlation key to evaluate incoming messages. For each message, it computes a correlation key instance based on the message content. For example, it extract the payment value and populate the status property of the correlation key, resulting in a structure like `CorrelationKeyName {status = OK}`.
 
-If the computed key matches an existing subscription, the system initiates a new process instance using that message. If no match is found, the message is rejected and the process does not start.
+.Correlation fields
+image::BPMN2/correlation-fields.png[Correlation fields]
 
-To test or trigger the process, you can send a message to the configured correlation topic using any messaging tool. Apache Kafka provides a simple command-line utility for this purpose. The following command can be executed inside the running Docker container to publish a message:
 
+After configuring the correlation, the system uses the defined correlation key (for example, `CorrelationKeyName`) to evaluate incoming messages. For each message, the system computes a correlation key instance based on the message content. For example, the system extract the payment value and populate the status property of the correlation key, with the following response:
+
+[source,xml]
+----
+ `CorrelationKeyName {status = OK}`.
+----
+
+If the computed key matches an existing subscription, the system initiates a new process instance using the message. If no match is found, the message is rejected and the process does not start.
+
+To start the process, you can send a message to the configured correlation using any messaging tool. Apache Kafka provides a simple command-line utility for this purpose. The following command can be executed inside the running Docker container to send the message:
+
+
+Sample input message:
 [source,xml]
 ----
 docker exec -it loan-kafka /opt/kafka/bin/kafka-console-producer.sh \
 --broker-list localhost:9092 \
 --topic correlation
+----
+
+Sample response message:
+[source,xml]
+----
 {"data": { "status" : "OK" }}
 ----
 
-
 == Using Dynamic Correlation in MessageIntermediateCatchEvent or MessageBoundaryEvent
 
-To use dynamic correlation in `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`:
+Defining the dynamic correlation key is similar to static correlations. To use dynamic correlation in `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`:
 
-. Create a BPMN process with `MessageIntermediateCatchEvent` or `MessageBoundaryEvent` and create a process variable (For example, `ProcessVarOrderId` of type String) that can be used to trigger these nodes.
-. Define the Kafka channel name under *Implementation/Execution* -> *Message property* for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`.
-. Define a correlation for the process from *Process properties*-> *Collaboration*-> *Correlations*.
-. In the BPMN process for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`, define the correlation fields that use the process variable defined in the earlier step.
+. Create a BPMN process with `MessageIntermediateCatchEvent` or `MessageBoundaryEvent` and create a process variable (For example, `ProcessVarOrderId` of type String) that can be used to trigger the nodes.
+. Navigate to *Implementation/Execution* -> *Message property* and define the Kafka channel namefor `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`.
+. Navigate to *Process properties*-> *Collaboration*-> *Correlations* and define a Correlation for the process by entering the value for ID, Name, property ID, Property Name, and Property Type fields.
++
+.Correlation window
+image::BPMN2/correlation-window.png[Correlation window]
++
 
-The jbpm engine will put the correlation subscription based on the dynamic expression based on process variables.
+. Create a BPMN process for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`, enter the values for the following correlation fields:
++
+* Property: Select the correlation that you have already created.
 
-In dynamic correlation, the jBPM engine registers the correlation subscription using an expression that evaluates process variables at runtime. For example, if the process variable `ProcessVarOrderId` holds the value 1 at the time of evaluation, the engine fills the correlation key as `CorrelationKey {ProcessVarOrderId = 1}`.
+* Message Expression: Define the variable name that will be available in the generated event.
 
-When a process instance is started with `{ProcessVarOrderId = 1}`, it enters a waiting state at either an `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`. The process resumes execution only when a message is received that matches the correlation key. For example, a valid message for this scenario would look like:
+* Message Expression Type: Select the appropriate expression type (for example, String, Long, Object).
+
+* Data Expression: Define the expected values to trigger the process from the generated event.
+
+* Data Expression Type: Select the appropriate expression type (for example, String, Long, Object).
+
+.Correlation fields
+image::BPMN2/correlation-fields-dynamic.png[Correlation fields]
+
+
+The jbpm engine will compute the correlation subscription based on the dynamic expression which uses the process variables (for example, `ProcessVarOderId`).
+
+In dynamic correlation, the jBPM engine registers the correlation subscription using an expression that evaluates process variables at runtime. For example, if the process variable `ProcessVarOrderId` holds the value 1 at the time of evaluation, the engine sets the correlation key as `CorrelationKey {ProcessVarOrderId = 1}`.
+
+When a process instance is started with `{ProcessVarOrderId = 1}`, it enters a waiting state at either an `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`. The process resumes execution only when a message is received that matches the correlation key, for example:
 
 [source,xml]
 ----
 {"data": { "ProcessVarOrderId" : "1" }}
 ----
 
-The engine resumes the process only if the value in the incoming message matches the value of the process variable used in the correlation key. If there is no match, the message is ignored and the process remains in the waiting state.
+The engine resumes the execution of the process only if the value in the incoming message matches the value of the process variable used in the correlation key. If there is no match, the message is ignored and the process remains in the waiting state.
