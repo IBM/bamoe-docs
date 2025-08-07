@@ -13,7 +13,7 @@ You can configure Correlation in the following ways:
 
 To configure and use correlation properties use the VS Code IDE with the BPMN plugin, as correlation properties settings are not available in the {central} web designer.
 
-For information about correlation key assigned to the process instance, see xref:doc-content/enterprice-only/admin-and-config/correlationkey-entities-ref.adoc[Correlation key entities].
+For information about correlation key assigned to the process instance, see xref:{enterprise-dir}/admin-and-config/correlationkey-entities-ref.adoc[Correlation key entities].
 
 
 == Prerequisites
@@ -22,14 +22,14 @@ For information about correlation key assigned to the process instance, see xref
 
 == Using Static Correlation in MessageStartEvent
 
-To use static correlation in `MessageStartEvent`:
+To use static correlation in `MessageStartEvent` follow the subsequent steps:
 
 . Navigating to *Implementation/Execution* -> *Message property* field and define the Kafka channel name.
 
-. Navigating to *Process properties* -> *Collaboration* -> *Correlations* and define a Correlation for the process by entering the value for ID, Name, property ID, Property Name, and Property Type fields.
+. Navigating to *Process properties* -> *Collaboration* -> *Correlations* and define a Correlation for the process by entering the value for ID, Name, Property ID, Property Name, and Property Type fields.
 +
 
-.Correlation window
+.Correlations window
 image::BPMN2/correlation-window.png[Correlation window]
 +
 
@@ -54,7 +54,7 @@ After configuring the correlation, the system uses the defined correlation key (
 
 [source,xml]
 ----
- `CorrelationKeyName {status = OK}`.
+ CorrelationKeyName {status = OK}.
 ----
 
 If the computed key matches an existing subscription, the system initiates a new process instance using the message. If no match is found, the message is rejected and the process does not start.
@@ -76,19 +76,20 @@ Sample response message:
 {"data": { "status" : "OK" }}
 ----
 
+
 == Using Dynamic Correlation in MessageIntermediateCatchEvent or MessageBoundaryEvent
 
-Defining the dynamic correlation key is similar to static correlations. To use dynamic correlation in `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`:
+Defining the dynamic correlation key is similar to static correlations. To use dynamic correlation in `MessageIntermediateCatchEvent` or `MessageBoundaryEvent` follow the subsequent steps:
 
 . Create a BPMN process with `MessageIntermediateCatchEvent` or `MessageBoundaryEvent` and create a process variable (For example, `ProcessVarOrderId` of type String) that can be used to trigger the nodes.
-. Navigate to *Implementation/Execution* -> *Message property* and define the Kafka channel namefor `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`.
-. Navigate to *Process properties*-> *Collaboration*-> *Correlations* and define a Correlation for the process by entering the value for ID, Name, property ID, Property Name, and Property Type fields.
+. Navigate to *Implementation/Execution* -> *Message property* and define the Kafka channel name for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`.
+. Navigate to *Process properties*-> *Collaboration*-> *Correlations* and define a Correlation for the process by entering the value for ID, Name, Property ID, Property Name, and Property Type fields.
 +
-.Correlation window
+.Correlations window
 image::BPMN2/correlation-window.png[Correlation window]
 +
 
-. Create a BPMN process for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`, enter the values for the following correlation fields:
+. Create a BPMN process for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`, and enter the values for the following correlation fields:
 +
 * Property: Select the correlation that you have already created.
 
