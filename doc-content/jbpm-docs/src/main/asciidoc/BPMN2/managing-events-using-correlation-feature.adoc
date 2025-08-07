@@ -7,20 +7,19 @@ The Correlation feature in BAMOE enables users to define a correlation key for m
 
 * Dynamic: using a `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`.
 
-For more information about how correlation key entities are managed within the KIE Server, see xref:correlationkey-entities-ref[Correlation key entities].
+For more information about how correlation key entities are managed within the KIE Server, see xref:../doc-content/enterprice-only/admin-and-config/correlationkey-entities-ref.adoc[].
 
-xref:{enterprise-dir}/admin-and-config/correlationkey-entities-ref.adoc[Correlation key entities]
 
 == Prerequisites
 
-* Configure the KIE Server to send and receive Kafka messages from the process. For more information, see xref:kieserver-kafka-proc_{context}[Configuring KIE Server to send and receive Kafka messages from the process]. 
+* Configure the KIE Server to send and receive Kafka messages from the process. For more information, see xref:kieserver-kafka-proc_{context}[]. 
 * Use VS Code IDE with the BPMN plugin, as correlation properties are not available in the {central} web designer.
 
 == Using Static Correlation in MessageStartEvent
 
-To use static correlation in Message StartEvent:
+To use static correlation in `MessageStartEvent`:
 
-. Define the Kafka channel name by navigating to the *Implementation/Execution* section and setting the value in the *Message property field*.
+. Define the Kafka channel name by navigating to the *Implementation/Execution* section and setting the value in the *Message property* field.
 
 . Define the process correlation by navigating to the *Process properties* -> *Collaboration* -> *Correlations*.
 
@@ -51,20 +50,20 @@ docker exec -it loan-kafka /opt/kafka/bin/kafka-console-producer.sh \
 ----
 
 
-== Using Dynamic Correlation in Message IntermediateCatchEvent or Message BoundaryEvent
+== Using Dynamic Correlation in MessageIntermediateCatchEvent or MessageBoundaryEvent
 
-To use dynamic correlation in Message `IntermediateCatchEvent` or `BoundaryEvent`:
+To use dynamic correlation in `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`:
 
-. Create a BPMN process with `IntermediateCatchEvent` or `BoundaryEvent` and create a process variable (For example, 'ProcessVarOrderId' of type String) that can be used to trigger these nodes.
-. Define the Kafka channel name under *Implementation/Execution* -> *Message property* for `IntermediateCatchEvent` or `BoundaryEvent`.
+. Create a BPMN process with `MessageIntermediateCatchEvent` or `MessageBoundaryEvent` and create a process variable (For example, `ProcessVarOrderId` of type String) that can be used to trigger these nodes.
+. Define the Kafka channel name under *Implementation/Execution* -> *Message property* for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`.
 . Define a correlation for the process from *Process properties*-> *Collaboration*-> *Correlations*.
-. In the BPMN process for `IntermediateCatchEvent` or `BoundaryEvent`, define the correlation fields that use the process variable defined in the earlier step.
+. In the BPMN process for `MessageIntermediateCatchEvent` or `MessageBoundaryEvent`, define the correlation fields that use the process variable defined in the earlier step.
 
 The jbpm engine will put the correlation subscription based on the dynamic expression based on process variables.
 
 In dynamic correlation, the jBPM engine registers the correlation subscription using an expression that evaluates process variables at runtime. For example, if the process variable `ProcessVarOrderId` holds the value 1 at the time of evaluation, the engine fills the correlation key as `CorrelationKey {ProcessVarOrderId = 1}`.
 
-When a process instance is started with `{ProcessVarOrderId = 1}`, it enters a waiting state at either an `IntermediateCatchEvent` or a `BoundaryEvent`. The process resumes execution only when a message is received that matches the correlation key. For example, a valid message for this scenario would look like:
+When a process instance is started with `{ProcessVarOrderId = 1}`, it enters a waiting state at either an `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`. The process resumes execution only when a message is received that matches the correlation key. For example, a valid message for this scenario would look like:
 
 [source,xml]
 ----
