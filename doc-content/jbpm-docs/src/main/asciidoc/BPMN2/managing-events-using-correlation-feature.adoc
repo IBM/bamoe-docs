@@ -53,7 +53,7 @@ image::BPMN2/correlation-fields.png[Correlation fields]
 
 After configuring the correlation, the system uses the defined correlation key (for example, `CorrelationKeyName`) to evaluate incoming messages. For each message, the system computes a correlation key instance based on the message content. For example, the system extracts the payment value and populates the status property of the correlation key, with the following response:
 
-[source,xml]
+[source,shell]
 ----
  CorrelationKeyName {status = OK}.
 ----
@@ -70,11 +70,11 @@ docker exec -it loan-kafka /opt/kafka/bin/kafka-console-producer.sh \
 ----
 
 Sample response message:
+
 [source,shell]
 ----
 {"data": { "status" : "OK" }}
 ----
-
 
 
 == Using Dynamic correlation in MessageIntermediateCatchEvent or MessageBoundaryEvent
@@ -113,7 +113,7 @@ In dynamic correlation, the jBPM engine registers the correlation subscription u
 
 When a process instance is started with `{ProcessVarOrderId = 1}`, it enters a waiting state at either an `MessageIntermediateCatchEvent` or a `MessageBoundaryEvent`. The process resumes execution only when a message is received that matches the correlation key, for example:
 
-[source,xml]
+[source,shell]
 ----
 {"data": { "ProcessVarOrderId" : "1" }}
 ----
