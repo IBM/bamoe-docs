@@ -10,9 +10,9 @@ Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/3.23?top
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
 == Tracking BAMOE License
-After installing {CANVAS} and its dependencies following the installation tutorial, run the following commands depending on where {CANVAS} was installed.
+After installing {CANVAS} and its dependencies following the installation tutorial, run the following commands for IBM Decision Manager Open Edition(DMOE) and IBM Process Automation Manager Open Edition(PAMOE), depending on where {CANVAS} was installed.
 
-* OpenShift
+* OpenShift - DMOE
 +
 [source,shell]
 ----
@@ -21,19 +21,37 @@ oc patch deployment <bamoe-canvas_deployment_name> -p \
 ----
   
 
-* Kubernetes
+* Kubernetes - DMOE
 +
 [source,shell]
 ----
 kubectl patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
+
+* OpenShift - PAMOE
++
+[source,shell]
+----
+oc patch deployment <bamoe-canvas_deployment_name> -p \
+  '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
+----
+  
+
+* Kubernetes - PAMOE
++
+[source,shell]
+----
+kubectl patch deployment <bamoe-canvas_deployment_name> -p \
+  '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
+----
+
 Where `bamoe-canvas_deployment_name` is the name of the Deployment resource created when you installed {CANVAS}.
 
 
 * Alternative
 +
-If you have installed {CANVAS} by using `yaml` resources, the deployment resource must be edited to add the following lines in case of IBM Decision Manager Open Edition:
+If you have installed {CANVAS} by using `yaml` resources, the deployment resource must be edited to add the following lines for DMOE:
 +
 [source,yaml]
 ----
@@ -47,9 +65,8 @@ spec:
         productMetric: "VIRTUAL_PROCESSOR_CORE"
         productChargedContainers: "All"
 ----
-
-And add the following lines in case of IBM Process Automation Manager Open Edition:
-
+And add the following lines in case of PAMOE:
++
 [source,yaml]
 ----
 spec:
