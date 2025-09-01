@@ -319,6 +319,40 @@ $ ./apply-updates.sh ~EAP_HOME/standalone/deployments/controller.war bamoe-contr
 
 + 
 The update script creates a backup folder in the extracted `bamoe-$VERSION-update` folder with a copy of the specified distribution, and then proceeds with the update.
++
+
+You can run the `./apply-updates.sh --help` script see the usage information, as shown in the following example:
++
+
+[source,xml]
+----
+bamoe-8.0.8-update % ./apply-updates.sh --help
+Using Java binary found at /Users/java/11.0.23-custom/bin/java
+09:35:01.365 [main] ERROR - Incorrect arguments specified! The program expects two mandatory parameters: <path-to-distribution> and <type-of-distribution>!
+Usage: apply-updates.[sh|bat] <path-to-distribution-root> <type-of-distribution>
+Description: The IBM Business Automation Manager Open Editions client update tool used to apply patch updates and minor release upgrades to existing installations.
+IMPORTANT: Do not apply the updates while the applications are running. Shut down KIE Server first.
+Supported distribution types:
+    - bamoe-business-central-eap7-deployable: Updates Business Central (`business-central.war`)
+    - bamoe-kie-server-ee8: Updates KIE Server (`kie-server.war`)
+    - bamoe-controller-ee7: Updates the headless Process Automation Manager controller (`controller.war`)
+    - bamoe-kie-server-jws: Updates KIE Server on Red Hat JBoss Web Server (`kie-server.war`)
+    - bamoe-controller-jws: Updates the headless Process Automation Manager controller on Red Hat JBoss Web Server (`controller.war`)
+
+Examples:
+    - Update to Business Central and KIE Server for a full IBM Business Automation Manager Open Editions distribution on Red Hat JBoss EAP:
+        ./apply-updates.sh ~EAP_HOME/standalone/deployments/business-central.war bamoe-business-central-eap7-deployable
+        ./apply-updates.sh ~EAP_HOME/standalone/deployments/kie-server.war bamoe-kie-server-ee8
+    - Update to headless IBM Business Automation Manager Open Editions controller, if used:
+        ./apply-updates.sh ~EAP_HOME/standalone/deployments/controller.war bamoe-controller-ee7
+Notes:
+    - Working dir needs to be the directory of this script!
+    - Java is recommended to be JDK and version 8 or later
+    - The environment variable JAVA_HOME should be set to the JDK installation directory
+        Example for Linux: export JAVA_HOME=/usr/lib/jvm/java-1.8.0
+        Example for Mac: export JAVA_HOME=/Library/Java/Home
+----
++
 
 . After the update tool completes, return to the {PRODUCT_SUPPORT_PAGE}[IBM Support] page where you have downloaded the update tool and install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
 
