@@ -1,4 +1,4 @@
-= Tracking license use in Kubernetes
+= Tracking license use in Kubernetes and OpenShift
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
@@ -9,11 +9,11 @@ Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/3.23?top
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
-== Tracking BAMOE License
-After installing each of the {PRODUCT_SHORT} containers for example, {CANVAS}, Management console, etc and its dependencies following the installation tutorial, run the following commands for IBM Decision Manager Open Edition(DMOE) or IBM Process Automation Manager Open Edition(PAMOE), depending on where the containers are installed.
+== Tracking {PRODUCT_SHORT} License
+To set up the license tracking for {PRODUCT_DM}, after installing {CANVAS}, and its dependencies, run the following command from where the containers are installed:
 
 |=== 
-|Platform |DMOE Command
+|Platform |Command for {PRODUCT_DM} 
 
 |OpenShift 
 |`oc patch deployment <bamoe-canvas_deployment_name> -p \
@@ -24,9 +24,10 @@ After installing each of the {PRODUCT_SHORT} containers for example, {CANVAS}, M
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }`
 |===
   
+To set up the license tracking for {PRODUCT_PAM}, after installing {CANVAS}, its dependencies, and the Management Console, run the following command from where the containers are installed:
   
 |===
-|Platform |PAMOE Command
+|Platform |Command for {PRODUCT_PAM}
 
 |OpenShift 
 |`oc patch deployment <bamoe-canvas_deployment_name> -p \
@@ -36,7 +37,7 @@ After installing each of the {PRODUCT_SHORT} containers for example, {CANVAS}, M
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }`
 |===
  
-Where `bamoe-canvas_deployment_name` is the name of the Deployment resource created when you installed {CANVAS}.
+Where `bamoe-canvas_deployment_name` is the name of the deployment resource created when you installed {CANVAS}.
 
 
 * Alternative
