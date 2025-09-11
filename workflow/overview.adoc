@@ -47,7 +47,7 @@ Jobs Service:: See below.
 
 User Tasks:: See below.
 
-Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database like PostgreSQL.
+Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database such as PostgreSQL.
 
 [#data-index]
 == The Data-Index subsystem
@@ -56,71 +56,20 @@ The Data-Index subsystem is used to store a snapshot of the latest state of the 
 .Graphical view of the Data-Index subsystem
 image::data-index.png[]
 
-Data-Index support queries through GraphQL (basic.schema.graphqls). For using the endpoint you just need to access the `/graphql-ui/` path. E.g., http://localhost:8080/graphql-ui/ for a _Business Service_ running locally.
+Data-Index support queries through GraphQL (`basic.schema.graphqls`). To use the endpoint, access the `/graphql-ui/` path, e.g., http://localhost:8080/graphql-ui/ for a _Business Service_ running locally.
 
 See the associated xref:data-index-graphql-api.html[Data-Index GraphQL API]
-
-=== Using the Data-Index add-on
-
-The following dependency is used to configure the Data-Index subsystem with persistency simultaneously.
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
 
 [#data-audit]
 == The Data-Audit subsystem
 
-Allows the inspection of what happened during process execution. It should be able to replay the process. The system stores all diff event data coming from events. The Data-Audit subsystem listens to events issued by the following components and persists them in the configured storage:
+The Data Audit subsystem enables you to inspect what happened during process execution. The system stores all diff event data coming from events, and can replay the process. The Data-Audit subsystem listens to events issued by the following components and persists them in the configured storage:
 
 * Workflow Engine
 * User Tasks
 * Jobs Service
 
 See the associated xref:data-audit-api.html[Data-Audit API]
-
-
-=== Using the Data-Audit add-on
-
-You need to add two different dependencies to your _Business Service_ project:
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-data-audit</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-data-audit-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
 
 [#jobs-service]
 == The Jobs Service subsystem
@@ -129,39 +78,6 @@ Jobs Service takes care of scheduling jobs, in particular timers such as those f
 .Graphical view of the Jobs Service subsystem
 image::jobs-service-overview.png[]
 
-=== Using the Jobs Service add-on
-
-To use the Jobs Service add-on in your project you must include the following dependencies:
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs</artifactId>
-</dependency>
-
-<!-- Required for exposing Job Resources API -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>jobs-service-storage-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
 
 [#user-tasks]
 == The User Tasks subsystem
@@ -202,32 +118,6 @@ User Tasks in *Ready* or *Reserved* state, are can also be reassigned (`Reassign
 Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, that will make the task terminate in a *Error* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
 
 NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
-
-=== Persisting User Tasks data
-
-The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database.
-
-To enable this functionality, the following dependency needs to be added to the application `pom.xml` file:
-
-[source,xml]
-----
-<dependency> 
-  <groupId>org.jbpm</groupId> 
-  <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
-
----
 
 == Getting started
 
