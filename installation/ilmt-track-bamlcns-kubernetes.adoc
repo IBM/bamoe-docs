@@ -1,4 +1,4 @@
-= Tracking license use in Kubernetes
+= Tracking license use in Kubernetes and OpenShift
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
@@ -49,10 +49,10 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
 Where `bamoe-canvas_deployment_name` is the name of the Deployment resource created when you installed {CANVAS}.
 
 
-* Alternative
-+
+=== Alternative method via YAML resources
+
 If you have installed {CANVAS} by using `yaml` resources, the deployment resource must be edited to add the following lines for DMOE:
-+
+
 [source,yaml]
 ----
 spec:
@@ -65,8 +65,9 @@ spec:
         productMetric: "VIRTUAL_PROCESSOR_CORE"
         productChargedContainers: "All"
 ----
+
 And add the following lines in case of PAMOE:
-+
+
 [source,yaml]
 ----
 spec:
@@ -78,4 +79,26 @@ spec:
         productName: "IBM Process Automation Manager Open Edition"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
         productChargedContainers: "All"
+----
+
+=== Tracking _Business Service_ license usage
+Once you have created your _Business Service_ using {PRODUCT_SHORT} you must also ensure that license tracking is enabled before deployment. You can do this by updating the `src/main/resources/application.properties` file by adding the following properties for {PRODUCT_DM}:
+
+[source,properties]
+----
+# OpenShift - License Service Annotations
+openshift.quarkus.openshift.annotations.productID="46b14c7f2f894218a7879b3f6416024f"
+openshift.quarkus.openshift.annotations.productName="IBM Decision Manager Open Edition"
+openshift.quarkus.openshift.annotations.productMetric="VIRTUAL_PROCESSOR_CORE"
+openshift.quarkus.openshift.annotations.productChargedContainers="All"
+----
+Or the following properties for {PRODUCT_PAM}, see xref:installation/licensing.adoc [Licensing Overview]:
+
+[source,properties]
+----
+# OpenShift - License Service Annotations
+openshift.quarkus.openshift.annotations.productID="72984f114b54496a8a44be139154a988"
+openshift.quarkus.openshift.annotations.productName="IBM Process Automation Manager Open Edition"
+openshift.quarkus.openshift.annotations.productMetric="VIRTUAL_PROCESSOR_CORE"
+openshift.quarkus.openshift.annotations.productChargedContainers="All"
 ----
