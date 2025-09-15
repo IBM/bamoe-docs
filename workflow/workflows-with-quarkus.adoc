@@ -1,6 +1,6 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
-== Workflows services with Quarkus
+== Workflow services with Quarkus
 
 You can create a _Business Service_ using the Workflow engines with the Quarkus framework support.
 
@@ -10,7 +10,7 @@ For each model, REST endpoints are generated, that are specific to the model and
 
 You can add custom classes to the _Business Service_ project to provide additional functionality, which will be built with the automatically generated code as in normal Java applications.
 
-== Dependencies
+=== Dependencies
 
 Use the BAMOE BOM for easily managing the version of all BAMOE libraries.
 
@@ -29,31 +29,21 @@ Use the BAMOE BOM for easily managing the version of all BAMOE libraries.
 </dependencyManagement>
 ----
 
-The dependencies required for a Workflow _Business Service_ project with Quarkus are:
+The dependencies required for a workflow _Business Service_ project with Quarkus are:
 
 [source,xml]
 ----
 <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-quarkus-decisions</artifactId>
+      <groupId>org.jbpm</groupId>
+      <artifactId>jbpm-quarkus</artifactId>
 </dependency>
 ----
 
-Hot-reload is enabled out-of-the-box during development, using
-
-[source,shell]
-----
-mvn clean compile quarkus:dev
-----
-
-To enable Test Scenario support, use
-
 [source,xml]
 ----
 <dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-scenario-simulation</artifactId>
-  <scope>test</scope>
+      <groupId>org.jbpm</groupId>
+      <artifactId>jbpm-with-drools-quarkus</artifactId>
 </dependency>
 ----
 
@@ -186,9 +176,7 @@ Configuring persistence for the User Tasks subsystem will require a JDBC Driver 
 
 == Testing
 
-== Compilation
-
-== Execution in dev mode
+== Execution in dev mode to test workflow execution
 The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes locally.
 
 image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
@@ -236,7 +224,7 @@ mvn clean quarkus:dev
 This command should install the dependencies and run your Quarkus application in Dev mode locally (usually at `http://localhost:8080`).
 
 
-== Using the {QUARKUS_DEV_UI} interface to manage processes
+=== Using the {QUARKUS_DEV_UI} interface to manage processes
 
 To access the {QUARKUS_DEV_UI}, open a browser and navigate to `http://localhost:8080/q/dev-ui/`. This is the Quarkus Dev UI, where the {QUARKUS_DEV_UI} is listed.
 
@@ -244,7 +232,7 @@ image::workflow/dev-ui-extension.gif[Accessing the {QUARKUS_DEV_UI} from the Qua
 
 Scroll down until to the `BAMOE Quarkus Dev UI` box and click on any item in the list (Process Instances, Tasks, Jobs, or Forms) to open the {QUARKUS_DEV_UI} web app.
 
-=== Process Instances
+==== Process Instances
 
 image::workflow/dev-ui-process-instances.png[Process Instances page]
 
@@ -252,7 +240,7 @@ The Process Instances page will display all the running processes and their exec
 
 image::workflow/dev-ui-process-details.png[Process Details page]
 
-==== Starting a new process instance
+===== Starting a new process instance
 
 To start a new process instance, go to the **Process Definitions** tab. There, all the Process Definitions are listed, one for each Workflow in your resources directory.
 
@@ -267,7 +255,7 @@ Fill the form with relevant data for you Workflow and click on Start.
 [NOTE]
 The Process Defitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
 
-=== Jobs
+==== Jobs
 
 image::workflow/dev-ui-jobs.png[Jobs page]
 
@@ -275,7 +263,7 @@ The Jobs page will display all the scheduled jobs and their execution status. Cl
 
 image::workflow/dev-ui-job-details.png[Job details page,540]
 
-=== Tasks
+==== Tasks
 
 image::workflow/dev-ui-tasks.png[Tasks page]
 
@@ -290,7 +278,7 @@ image::workflow/dev-ui-task-form-details.png[Task details panel]
 [NOTE]
 The Task forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
 
-=== Forms
+==== Forms
 
 image::workflow/dev-ui-forms.png[Forms page]
 
@@ -298,7 +286,7 @@ The Forms page will display all the available forms in the project. It initially
 
 To add custom forms (for the `hiring` Process Definition or `HR Interview` User Task for example), follow the steps in xref:../tools/form-generation.adoc[Form code generation functionality] and then place the generated forms in the `src/main/resources/custom-forms-dev` folder.
 
-== Using the Swagger UI
+=== Using the Swagger UI
 
 Not directly related to the {QUARKUS_DEV_UI}, but also a useful tool to explore the REST and GraphQL API endpoints of your Workflow.
 
@@ -309,5 +297,9 @@ The Swagger UI lists all endpoints generated for your Workflow as well as the ex
 To use the API, select any endpoint and click on *Try it out* to test it.
 
 image::workflow/dev-ui-swagger-ui-try-out.gif[Swagger UI try it out page]
+
+
 == Hot-reload in dev mode
+
+
 == Debugging
