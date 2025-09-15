@@ -1,0 +1,172 @@
+= Upgrading from 9.2.1
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section describes the steps you will need to take to upgrade _Business Services_ projets developed with {PRODUCT_SHORT} versions {VERSION_921}. See the following docs if you are upgrading from a version prior to this:
+
+* xref:upgrading-91x-92x.adoc[Upgrading from {VERSION_91X}]
+* xref:upgrading-920-921.adoc[Upgrading from {VERSION_920}]
+
+This guide will walk you through upgrading your:
+
+* {PRODUCT_SHORT} development environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+
+* _Business Service(s)_ project(s)
+
+* {PRODUCT_SHORT} production environment with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
+
+== Step 1: Download product archives
+
+Start by downloading the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. 
+
+== Step 2: Upgrade your {PRODUCT_SHORT} development environment
+
+When you upgrade your {PRODUCT_SHORT} development environment, you must upgrade {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}. 
+
+=== Upgrade {MVN_REPO}
+
+It is recommended using the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_930}.
+
+If you are using the {MVN_REPO} `.zip` instead of {MVN_REPO} container images, simply extract the contents of {MVN_REPO} `.zip` version {VERSION_930} to your local Maven repository.
+
+In case you have installed {MVN_REPO} in a Maven Repository Manager such as Artifactory or Nexus, follow the steps in xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}] to install the new {MVN_REPO} version {VERSION_930}.
+
+=== Upgrade {CANVAS}
+
+The {VERSION_930} version of {CANVAS} is a drop in replacement for the {VERSION_921} version (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+
+If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+
+[NOTE]
+====
+If you have customized your previous {CANVAS} installation, remember to apply the same Environment Variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+====
+
+=== Upgrade {DEV_TOOLS}
+
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded.
+
+See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
+
+== Step 3: Upgrade your _Business Service(s)_ project(s)
+
+_Business Service(s)_ project(s) can be upgraded by changing its Maven dependencies and configuration files.  
+
+The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION_930}:
+
+- https://openjdk.org[JDK 21] is installed.
+- https://maven.apache.org[Apache Maven 3.9.6] is installed.
+- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
+- Upgraded {PRODUCT_SHORT} development environment with {MVN_REPO} @ {IMAGE_VERSION}
+
+Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_920} to {PRODUCT_SHORT} version {VERSION_930}.
+
+The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
+
+[start=1]
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.20`:
+
+[start=2]
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION}:
++
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+----
+
+[start=3]
+. If you're upgrading a Business Service project containing stateful Workflows, update the following dependencies to use the new embedded Job Service add-on.
++
+[source,diff,subs="+attributes"]
+----
+-<dependency>
+-    <groupId>org.kie</groupId>
+-    <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
+-</dependency>
+
+-<dependency>
+-    <groupId>org.kie</groupId>
+-    <artifactId>kogito-addons-quarkus-jobs</artifactId>
+-</dependency>
+-<dependency>
+-    <groupId>org.kie.kogito</groupId>
+-    <artifactId>jobs-service-storage-jpa</artifactId>
+-</dependency>
+
++<dependency>
++    <groupId>org.kie</groupId>
++    <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
++</dependency>
++<dependency>
++    <groupId>org.kie</groupId>
++    <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
++</dependency>
+----
+
+[NOTE]
+====
+Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.20[Quarkus 3.20 LTS migration guide] for any other change related to Quarkus.
+====
+
+== Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
+. To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
++
+[source,console]
+----
+mvn clean package
+----
++
+You might get Maven streaming text once again, and at the end of it you must have:
++
+[source,console]
+----
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.023 s
+[INFO] Finished at: 2025-09-30T17:09:00-03:00
+[INFO] ------------------------------------------------------------------------
+----
++
+Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION_930}.
+
+== Step 5: Upgrade your {PRODUCT_SHORT} production environment
+
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade {MANAGEMENT_CONSOLE} and your stateful Workflows database before deploying a new version of the upgraded _Business Services_.
+
+It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_930} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION_930}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+
+If you are getting started with stateful Workflows, follow xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE} for the first time in your production environment.
+
+Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION_930}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../runtime-services-modeling/services-build.adoc[Building Business Services executables] and xref:../runtime-services-modeling/services-deployment.adoc[Deploying Business Services]).
+
+[#migrate-stateful-workflow-db]
+=== Upgrading your stateful Workflow database(s)
+
+You can upgrade your database(s) used by _Business Services_ that run stateful workflows in {PRODUCT_SHORT} to {VERSION_930}. Perform the upgrade using the database migration scripts included in the `bamoe-{VERSION_930}-db-utils.zip` archive.
+
+The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture. These subsystems are Data-Index, Data-Audit, Jobs Service, User Tasks, and Runtime Persistence.
+
+Before you begin, make sure you upgrade your _Business Services_ and your database(s) together. 
+
+To upgrade safely:
+
+* Back up your database
+
+* Test the migration in a staging environment
+
+* Apply the scripts sequentially for each subsystem 
+
+* Schedule downtime for production
+
+* Verify that all services function correctly after the upgrade
+
+Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
+
+For more information, see xref:../runtime-services-modeling/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].

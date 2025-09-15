@@ -350,38 +350,6 @@ This sink is used to configure the "sink" property in the generated Knative Sink
 |===
 ////
 
-==== Job-related
-
-[cols="7,4,^,^"]
-|===
-^h|Property Name
-^h|Description
-h|Type
-h|Default
-
-a|kogito.job.recipient.sink.timeout-in-millis
-a|Default timeout to execute HTTP requests for the SinkRecipient when the Job's timeout is not configured.
-|long
-a|5000
-
-a|kogito.job.recipient.sink.max-timeout-in-millis
-a|Max accepted timeout to execute HTTP requests for the SinkRecipient when the Job's timeout is configured.
-Attempts to surpass this value will result in a validation error at Job creation time.
-|long
-a|6000
-
-a|kogito.job.recipient.http.timeout-in-millis
-a|Default timeout to execute HTTP requests for the HttpRecipient when the Job's timeout is not configured.
-|long
-a|180000
-
-a|kogito.job.recipient.http.max-timeout-in-millis
-a|Max accepted timeout to execute HTTP requests for the HttpRecipient when the Job's timeout is configured.
-Attempts to surpass this value will result in a validation error at Job creation time.
-|long
-a|300000
-|===
-
 ////
 // GRPC Is currently not supported (December 2024) in BAMOE
 ==== GRPC
@@ -639,49 +607,24 @@ h|Default
 
 a|kogito.jobs-service.schedulerChunkInMinutes
 a|The current chunk size in minutes the scheduler handles.
-Used to keep a limited number of jobs scheduled in the in-memory scheduler.
+Used to keep a limited number of jobs scheduled in the in-memory scheduler. This property also controls the time interval used by the job service to synchronize in-memory jobs from the persistent store.
 |long
 a|10
 
-a|kogito.jobs-service.loadJobIntervalInMinutes
-a|The interval the jobs loading method runs to fetch the persisted jobs from the repository.
-|long
-a|10
-
-a|kogito.jobs-service.loadJobFromCurrentTimeIntervalInMinutes
-a|The interval used to determine when the next run to fetch jobs.
-|long
-a|60
-
-a|kogito.jobs-service.maxIntervalLimitToRetryMillis
-a|Maximum amount of time (in milliseconds) the jobs service will be retrying a job.
-|long
-a|6000
-
-a|kogito.jobs-service.backoffRetryMillis
+a|kogito.jobs-service.retryMillis
 a|Delay, in milliseconds, between retries when a job execution fails and must be retried.
 |long
-a|1000
+a|100
 
-a|kogito.jobs-service.forceExecuteExpiredJobs
-a|Toggle used to allow and force a job with expirationTime in the past to be executed immediately.
-|boolean
-a|true
-
-a|kogito.jobs-service.forceExecuteExpiredJobsOnServiceStart
-a|Toggle used to allow jobs that where timed-out when the jobs service was down to be fired immediately at the jobs service next startup.
-|boolean
-a|true
-
-a|kogito.jobs-service.loadJobRetries
-a|Number of retries configured for the periodic jobs loading procedure.
+a|kogito.jobs-service.maxNumberOfRetries
+a|Maximum number of retries configured for the periodic jobs loading procedure.
 Every time the procedure is started this value is considered.
 |int
 a|3
 
-a|kogito.jobs-service.loadJobErrorStrategy
-a|Error strategy to apply when the periodic jobs loading procedure has exceeded the jobLoadReties.
-|string
-a|NONE
+a|kogito.jobs-service.numberOfWorkerThreads
+a|Maximum number of worker threads available to execute jobs.
+|int
+a|10
 
 |===

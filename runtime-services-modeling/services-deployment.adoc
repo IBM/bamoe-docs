@@ -56,26 +56,38 @@ There is no limit for how many different "versions" of a Workflow you can deploy
 
 [#multi-pod]
 == Implementing multi-Pod Business Services containing stateful Workflows with a single database
-When running multiple instances of a process service on multiple Pods in the Compact Architecture, you must assign a unique Jobs Service Management ID to each instance. This can be specified at application startup using the following configuration option:
+When running multiple instances of a process service on multiple Pods in the Compact Architecture, make sure to use the embedded Job Service add-on available from {PRODUCT_SHORT} {VERSION_93X}:
+
+[source,properties]
+----
+<dependency>
+    <groupId>org.kie</groupId>
+    <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.kie</groupId>
+    <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
+</dependency>
+----
+
+This add-on is capable of running in a multi-pod setup without further configuration settings. The add-on runs a periodic task to synchronize the jobs loaded in-memory from the persistent store. If not specified, the interval is 10 minutes, which can be configured using the following property:
+
+[source,properties]
+----
+kogito.jobs-service.schedulerChunkInMinutes=10
+----
+
+If a pod terminates unexpectedly, other pods will run any jobs created by this instance once the job data has been synchronized from the persistent store.
+
+[NOTE]
+====
+If you use the embedded job service there is no need for further configuration. However if you have not yet upgraded your {VERSION_92X} job service to use the embedded job service, you will need to set the following configuration option.
 
 [source,properties]
 ----
 kogito.jobs-service.management.heartbeat.management-id=<id_string>
 ----
-
-Where `<id-string>` does not need to follow any pattern or order and only needs to be unique for each Pod in the deployment. If you do not specify a string it defaults to `kogito-jobs-service-leader`.
-
-This is to avoid multiple instances attempting to assume leadership over the Jobs Service and connection to the shared database and utimately the failure of the service.
-
-NOTE: Jobs will only execute on the Pod where they were originally scheduled.
-
-The configuration option can be set in a number of ways including:
-
-. Environment variable (recommended) (preferrably via Kubernetes' `ConfigMap`, that manages environment variables for a Pod)
-. System property
-. META-INF/application.properties
-
-NOTE: We do not document tools and best practices for testing a deployment configuration or recovery in a multi-Pod setup, however we recommend thorough testing of scenarios such as Pod failure, load balancing, and database replication prior to deploying in a multiple Pod configuration.  
+====
 
 // [#migration-PIM]
 // == Migrating active process instances using the Process Instance Migration API
