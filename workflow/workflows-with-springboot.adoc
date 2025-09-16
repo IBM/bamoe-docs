@@ -111,56 +111,63 @@ Which enable the colocation of the Jobs Service inside the workflow runtime.
 == Code
 == Testing
 == Compilation
-== Execution in dev mode
+== Testing execution in dev mode
 The {SPRING_WEB_CONSOLE} is a web app that attaches to the Spring Boot and allows developers to interact and manage running processes locally.
 
-image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
+image::workflow/spring-console-pi.png[{SPRING_WEB_CONSOLE} Process Instances page]
 
 
-You will need to create a _Business Service_ with the Quarkus framework support. Once you have done this you can add the {QUARKUS_DEV_UI} dependency to your `pom.xml` file:
+You will need to create a _Business Service_ with the Spring Boot framework support. Once you have done this you can add the {SPRING_WEB_CONSOLE} dependency to your POM file:
 
 [source,xml]
 ----
 <dependency>
   <groupId>com.ibm.bamoe</groupId>
-  <artifactId>bamoe-quarkus-devui</artifactId>
+  <artifactId>bamoe-spring-boot-web-console</artifactId>
 </dependency>
 ----
 
 Then setup the `application.properties` file to add users and user groups in the format:
 
-`bamoe.devui.users.<username>.groups=<comma separated list of groups>`
+`bamoe.web-console.users.<username>.groups=<comma separated list of groups>`
 
 For example:
 
 [source,properties]
 ----
-bamoe.devui.users.jdoe.groups=admin,HR,IT
-bamoe.devui.users.alice.groups=HR,IT
-bamoe.devui.users.admin.groups=admin
+bamoe.web-console.users.jdoe.groups=admin,HR,IT
+bamoe.web-console.users.alice.groups=HR,IT
+bamoe.web-console.users.admin.groups=admin
 ----
 
-To include the Swagger UI with the Open API specifications for you Workflow, add the following properties:
+The {SPRING_WEB_CONSOLE} also needs to be enabled in your application.properties file:
 
 [source,properties]
 ----
-quarkus.swagger-ui.always-include=true
-quarkus.smallrye-openapi.path=docs/openapi.json
+bamoe.web-console.enabled=true
+----
+
+To include the Swagger UI with the Open API specifications for your Workflow, add the following properties:
+
+[source,properties]
+----
+.swagger-ui.always-include=true
+.smallrye-openapi.path=docs/openapi.json
 ----
 
 To execute the project in the local development environment, open a new terminal and execute:
 
 [source,bash]
 ----
-mvn clean quarkus:dev
+mvn clean spring-boot:run -Pdevelopment
 ----
 
-This command should install the dependencies and run your Quarkus application in Dev mode locally (usually at `http://localhost:8080`).
+This command should install the dependencies and run your Spring Boot application in Dev mode locally (usually at `http://localhost:8080`).
 
 
-== Using the {QUARKUS_DEV_UI} interface to manage processes
+== Using the {SPRING_WEB_CONSOLE} interface to manage processes
 
-To access the {QUARKUS_DEV_UI}, open a browser and navigate to `http://localhost:8080/q/dev-ui/`. This is the Quarkus Dev UI, where the {QUARKUS_DEV_UI} is listed.
+To access the {SPRING_WEB_CONSOLE}, open a browser and navigate to `http://localhost:8080/dev/bamoe-web-console/`. 
 
 image::workflow/dev-ui-extension.gif[Accessing the {QUARKUS_DEV_UI} from the Quarkus Dev UI]
 
