@@ -72,62 +72,12 @@ The Data Audit subsystem enables you to inspect what happened during process exe
 See the associated xref:data-audit-api.html[Data-Audit API]
 
 [#jobs-service]
-== The Jobs Service subsystem
-Jobs Service takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers. It is also used for User Tasks notifications.
+== The embedded Jobs Service subsystem
+The embedded Jobs Service subsystem takes care of scheduling jobs, in particular timers such as those from boundary events, SLA, or throw events relevant to timers. It is also used for User Tasks notifications.
 
-.Graphical view of the Jobs Service subsystem
+.Graphical view of the embedded Jobs Service subsystem
 image::jobs-service-overview.png[]
 
-=== Using the embedded Jobs Service add-on
-
-To use the embedded Jobs Service add-on in your project you must include the following dependencies:
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
-
-[NOTE]
-====
-With the introduction of the new embedded job service add-on in {PRODUCT_SHORT} {VERSION_930}, the following dependencies of the previously available implementation are deprecated and should be removed:
-----
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs</artifactId>
-</dependency>
-
-<!-- Required for exposing Job Resources API -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>jobs-service-storage-jpa</artifactId>
-</dependency>
-----
-====
 
 [#user-tasks]
 == The User Tasks subsystem
