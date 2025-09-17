@@ -57,10 +57,6 @@ Finally, the following Maven plugin is required to correctly build and package t
 </plugin>
 ----
 
-
-// Update for workflow - See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/decisions/pom.xml[complete pom.xml for Decisions] for a _Business Servics_ with Decisions on Quarkus, or {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/rules/pom.xml[complete pom.xml for Rules] for a _Business Service_ with Rules on Quarkus.
-
-
 === The Data-Index add-on
 
 The following dependency is used to configure the Data-Index subsystem with persistency simultaneously.
@@ -72,6 +68,14 @@ The following dependency is used to configure the Data-Index subsystem with pers
   <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
 </dependency>
 ----
+
+// Find the appropriae POM for workflow and put in docs repo
+
+See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Quarkus.
+
+Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Quarkus or BAMOE specific properties (for example, `server.address`).
+
+=== Configuration
 
 Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
 
@@ -524,7 +528,7 @@ For production environemnts, see xref:../runtime-services-modeling/services-depl
 
 == Testing
 
-== Execution in dev mode to test workflow execution
+== Testing workflow execution
 The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes locally.
 
 image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
@@ -569,7 +573,7 @@ To execute the project in the local development environment, open a new terminal
 mvn clean quarkus:dev
 ----
 
-This command should install the dependencies and run your Quarkus application in Dev mode locally (usually at `http://localhost:8080`).
+This command should install the dependencies and run your Quarkus application in Dev mode locally.
 
 
 === Using the {QUARKUS_DEV_UI} interface to manage processes
@@ -590,7 +594,7 @@ image::workflow/dev-ui-process-details.png[Process Details page]
 
 ===== Starting a new process instance
 
-To start a new process instance, go to the **Process Definitions** tab. There, all the Process Definitions are listed, one for each Workflow in your resources directory.
+To start a new process instance, go to the **Process Definitions** tab. You will see a list of all the Process Definitions, one for each Workflow in your resources directory.
 
 image::workflow/dev-ui-process-definitions.png[Process Definitions page]
 
@@ -598,10 +602,10 @@ Click on any Process Definition to open its respective initialization form.
 
 image::workflow/dev-ui-process-form.png[Process Definition form page]
 
-Fill the form with relevant data for you Workflow and click on Start.
+Fill the form with relevant data for your Workflow and click on Start.
 
 [NOTE]
-The Process Defitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
+The Process Definitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
 
 ==== Jobs
 
@@ -636,7 +640,7 @@ To add custom forms (for the `hiring` Process Definition or `HR Interview` User 
 
 === Using the Swagger UI
 
-Not directly related to the {QUARKUS_DEV_UI}, but also a useful tool to explore the REST and GraphQL API endpoints of your Workflow.
+Although the Swagger UI is not directly related to the {QUARKUS_DEV_UI}, it is a useful tool to explore the REST and GraphQL API endpoints of your Workflow.
 
 image::workflow/dev-ui-swagger-ui.png[Swagger UI page]
 
@@ -645,7 +649,6 @@ The Swagger UI lists all endpoints generated for your Workflow as well as the ex
 To use the API, select any endpoint and click on *Try it out* to test it.
 
 image::workflow/dev-ui-swagger-ui-try-out.gif[Swagger UI try it out page]
-
 
 == Hot-reload in dev mode
 
