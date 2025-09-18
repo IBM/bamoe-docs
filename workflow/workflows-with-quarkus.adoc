@@ -524,9 +524,99 @@ For production environemnts, see xref:../runtime-services-modeling/services-depl
 
 == Structure
 
+A Workflow service with Quarkus typically contains the following:
+
+- `src/main/java`: Java classes implementing domain models and business services
+- `src/main/resources`:
+- `application.properties` for Quarkus and BAMOE configuration
+- one or more BPMN process definitions (for example, `*.bpmn` or `*.bpmn2`)
+- additional configuration files such as calendars or custom properties
+- `src/test/java`: JUnit test classes to validate workflow execution
+
 == Code
 
+The main elements of a Workflow service with Quarkus include:
+
+* **Java domain models that represent process data** – These classes define the structure of process variables (for example, `CandidateData`, `Offer`, or `CreditCardDetails`) that are passed between workflow steps.
+
+* **Workflow definitions (`.bpmn` files)** – BPMN process models placed under `src/main/resources`. They describe the workflow logic, tasks, and transitions.
+
+* **Optional business services** – Implemented as Java classes invoked by Service Tasks in workflows.
+
+* **application.properties** – Used to configure persistence, job service, data index, and other runtime features.
+
+
 == Testing
+
+Workflow services can be tested manually or with automated JUnit tests.
+
+Manual testing instructions:
+
+. Start the application (see *Running* in README).
+. Trigger a workflow instance via REST (for example, using `curl` or `Swagger UI`)
++
+[source,bash]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" \
+  -X POST http://localhost:8080/hiring \
+  -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}'
+----
+. Complete user tasks by querying and posting to the appropriate endpoints, as described in the README.
+
+Automated testing with JUnit:
+
+Workflow services can also be tested using JUnit and the `@QuarkusTest` annotation. This allows validation of process execution, business logic, and features.
+
+[source,java]
+----
+@QuarkusTest
+public class CreditCardProcessIT {
+
+    private static final String PROCESS_ID = "BusinessCalendarCreditBill";
+    private static final String CARD_NUMBER = "434354343";
+
+    @jakarta.inject.Inject
+    ProcessConfig processConfig;
+
+    @Test
+    public void testCardPaymentInWorkingDay() throws Exception {
+        String id = given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/" + PROCESS_ID)
+                .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("creditCardDetails.cardNumber", is(CARD_NUMBER))
+                .body("creditCardDetails.status", is("Bill Due"))
+                .extract()
+                .path("id");
+
+        Thread.sleep(2000);
+        BusinessCalendar businessCalendar = processConfig.getBusinessCalendar();
+        assertThat(businessCalendar).isNotNull();
+        long timeDuration = businessCalendar.calculateBusinessTimeAsDuration("15s");
+        if (timeDuration > 1000L) {
+            given()
+                    .when()
+                    .get("/" + PROCESS_ID + "/" + id)
+                    .then()
+                    .statusCode(200)
+                    .body("id", is(id))
+                    .body("creditCardDetails.cardNumber", is(CARD_NUMBER))
+                    .body("creditCardDetails.status", is("Bill Due"));
+        } else {
+            given()
+                    .when()
+                    .get("/" + PROCESS_ID)
+                    .then()
+                    .statusCode(200)
+                    .body(equalTo("[]"));
+        }
+    }
+}
+----
 
 == Testing workflow execution
 The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes locally.
@@ -668,5 +758,33 @@ NOTE: *GraphQL* UI is enabled by default when running in Quarkus Development mod
 
 == Hot-reload in dev mode
 
+For medium to large sized Workflow services, recompiling and restarting the application upon code changes could be cumbersome and time-consuming.
+To simplify development, Quarkus offers an embedded hot-reload feature.
+
+To trigger it, there are two steps:
+
+. Modify any source file (such as a BPMN definition, Java class, or configuration file).
+. Reload any page of the running application to see the changes applied immediately.
+
+This allows you to iteratively develop workflows without restarting the application.
 
 == Debugging
+
+Debugging a Workflow service in Quarkus follows the standard Java remote debugging setup:
+
+. Create a remote debug configuration in your IDE on port `5005` (steps vary by IDE).
+. Start the application in dev mode:
++
+[source,bash]
+----
+mvn clean compile quarkus:dev
+----
+. Put a breakpoint in one of the generated or custom classes.
+. Connect your IDE debugger to port `5005`.
+
+It is also possible to block the compilation until a debugger is connected, using:
+
+[source,bash]
+----
+mvn clean compile quarkus:dev -Dsuspend
+----
