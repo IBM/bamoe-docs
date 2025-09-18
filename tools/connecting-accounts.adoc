@@ -20,3 +20,180 @@ image::tools/image17.png[width=480]
 The figure shows two connected accounts: one from from GitHub and another from a Kubernetes cluster, respectively.
 
 A **Re-authenticate** button will appear next to sessions that become invalid, allowing you to renew credentials without re-entering all configuration details manually and without having to update references in existing projects.
+
+== Connecting to Gitlab
+GitLab is a Git provider and a complete DevOps platform that supports source code management, CI/CD, and collaboration. This topic provides information on how to connect with GitLab in BAMOE Canvas.
+
+.Procedure
+
+. Configure the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in the Docker Compose file.
+. Add the GitLab details to the authentication provider’s array using the following code JSON example:
++
+[source,json]
+----
+{
+
+  "id": "unique identifier",
+
+  "domain": "base URL of your GitLab instance",
+
+  "supportedGitRemoteDomains": ["list of Git remote domains"],
+
+  "type": "gitlab",
+
+  "name": "readable name for displaying in the BAMOE UI",
+
+  "enabled": true,
+
+  "group": "git",
+
+  "disableEncoding": true
+
+}
+----
++
+
+.Attribute details
+[%autowidth]
+|===
+|Variable |Description
+
+|id |A unique identifier for this authentication provider configuration
+|domain |The base URL of your GitLab instance
+|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with
+|type |Specifies the provider type — here it’s “gitlab”
+|name |A readable name for displaying in the BAMOE UI
+|enabled |Boolean flag to enables or disables this provider for authentication usage
+|group |Categorizes the provider (here it’s, “git”) for grouping similar services
+|disableEncoding |If true, adds Accept-Encoding: identity to force the proxy/server to skip compression
+|===
++
+
+. In BAMOE Canvas goto *profile* → *Connect to an Account*.
+. Select GitLab from the list of providers.
+. Provide the *Personal Access Token* to link your GitLab account to BAMOE Canvas.
+
+NOTE: When connecting to a Git repository, users must authenticate using credentials or a personal access token associated with their Git provider (e.g., GitHub, GitLab, or Bitbucket). This is done through the Accounts modal in the Canvas settings, where users can manage their authentication sessions.
+
+.Integration Features
+The following integration features are supported:
+
+* Repository Cloning: Clone entire repositories hosted on GitLab into the BAMOE workspace.
+* Import Files from Repos/Branches: Import a specific file from a repository or a specific branch.
+* Create Repository from BAMOE Workspace: Create a new repository from the BAMOE workspace.
+* Push & Pull Changes: Make changes in the workspace and push them to the remote repository, or pull updates from the remote repository.
+* Code Snippets: Create and manage code snippets, including personal snippets and project snippets.
+
+
+.URL Patterns
+
+* Repository Cloning: https://<domain>/<group-or-subgroups>/<project>.git or https://<domain>/<group-or-subgroups>/<project>
+* Import Files from Repos/Branches: https://<domain>/<group-or-subgroups>/<project>/blob/<branch-name>/<path-to-file>
+* Personal Snippet: https://<domain>/snippets/<snippet-id>
+* Project Snippet: https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>
+* Importing a specific file from a snippet: https://<domain>/snippets/<snippet-id>/raw/<branch>/<file-name> or https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>/raw/<branch>/<file-name>
+
+
+
+
+== Connecting to Bitbucket Data Center
+
+Bitbucket Data Center is a self-managed solution of Bitbucket built for enterprise-grade Git repository management. This document provides a step-by-step guide on how to connect to Bitbucket Data Center from BAMOE Canvas.
+
+.Prerequisites
+Bitbucket Data Center instance with a valid domain BAMOE Canvas with the necessary permissions
+
+.Procedure
+
+. Configure the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in the Docker Compose file. 
+. Add the Bitbucket Data Center details to the authentication provider’s array.
+Example JSON Configuration
+
+[source,json]
+----
+{
+
+  "id": "unique-id",
+
+  "domain": "https://your-bitbucket-domain.com",
+
+  "supportedGitRemoteDomains": ["your-bitbucket-domain.com"],
+
+  "type": "bitbucketDataCenter",
+
+  "name": "Bitbucket Data Center",
+
+  "enabled": true,
+
+  "group": "git",
+
+  "insecurelyDisableTlsCertificateValidation": false
+
+}
+----
+
+.Attribute details
+[%autowidth]
+|===
+|Variable |Description
+
+|id |A unique identifier for this authentication provider configuration.
+|domain |The base URL of your Bitbucket Data Center instance.
+|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with.
+|type |Specifies the provider type — here it’s “bitbucketDataCenter”.
+|name |A readable name for displaying in the BAMOE UI.
+|enabled |Boolean flag to enables or disables this provider for authentication usage.
+|group |Categorizes the provider (here it’s, “git”) for grouping similar services.
+|insecurelyDisableTlsCertificateValidation |If true, skips TLS certificate validation (for testing/self-signed certs).
+|===
+ 
+.Authentication Method
+
+The authentication method used is Username + HTTP Access Token. The access token must be generated from a Bitbucket Data Center user account with the necessary permissions.
+
+    Project admin: Full control over the project, including creating repositories and managing project/repository settings and permissions.
+    Repository admin: Full control over a specific repository, including managing settings and permissions.
+
+HTTP Access Token Permissions
+
+Generate the token via Manage Account → HTTP Access Token. Refer to the HTTP Access Token Docs for more information.
+Integration Features
+Repository Cloning
+
+Clone entire repositories hosted on Bitbucket Data Center into the BAMOE workspace. Supports two types of clone URLs patterns:
+
+    https://<domain>/projects/<project-key>/repos/<repo>/browse
+    https://<domain>/scm/<project-key>/<repo-name>.git
+
+Also supports cloning repositories on a specific branch:
+
+    https://<domain>/projects/<project-key>/repos/<repo>/browse?at=refs/heads/<branch-name>
+
+Import Files from Repos/Branches
+
+Import a specific file from a repository or a specific branch. Supports two URL patterns:
+
+    https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>
+    https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>?at=refs/heads/<branch-name>
+
+Create Repository from BAMOE Workspace
+
+    Click Share → Create Repository
+    Select the authentication provider
+    Choose a project (only permitted projects shown which the current authenticated user can create a repo under)
+    Creates the repo (Private by default)
+
+Note: If no project is available or permission is missing, a warning will be shown.
+Push & Pull Changes
+
+Users can make changes in the workspace and push them to the remote repository after cloning or creating it. They can also pull updates from the remote repository to keep their local copy up to date.
+Code Snippets
+
+Currently, Bitbucket Data Center does not offer native support for Code Snippets. Therefore, the option to create or import them won’t be available in BAMOE Canvas.
+Bitbucket Data Center Trial Availability
+
+A free trial license is available for Bitbucket Data Center. The trial includes full access to core features, including repository management, authentication, and access tokens. You can generate a trial license directly from Atlassian’s website: https://my.atlassian.com. The trial is typically available for 30 days.
+
+Follow-up questions or suggestions:
+
+Would you like me to add any troubleshooting sections or FAQs to this document?
