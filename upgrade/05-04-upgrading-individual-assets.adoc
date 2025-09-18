@@ -132,7 +132,7 @@ These changes ensure that your BPMN processes and DRL rules remain compatible an
 
 == Decisions (DMN) [[dmn]]
 
-In BAMOE v8, decision models were created using the Classic DMN Editor. While this editor is still available in BAMOE v9, it has been deprecated and is no longer recommended for use. BAMOE v9 introduces the DMN Editor as the default, which supports models up to DMN version 1.5. When a model is saved using the DMN Editor, it is automatically upgraded to version 1.5.
+In BAMOE v8, decision models were created using the Classic DMN Editor. While this editor is still available in BAMOE v9, it has been deprecated and is no longer recommended for use. BAMOE v9 introduces the DMN Editor as the default, which supports models up to DMN version 1.5. When a model is saved using the DMN Editor, it is automatically upgraded to version 1.6.
 
 To upgrade a DMN model in BAMOE Canvas, simply opening the model does not trigger the upgrade. You must make a trivial change, such as renaming a node or editing a label, for the upgrade to take effect. These changes are saved automatically. In the BAMOE Developer Tools for VS Code, changes are saved either manually or automatically if the autosave feature is enabled. Regardless of the save method, you should still make a trivial change to ensure the model is properly upgraded.
 
@@ -178,7 +178,7 @@ In BAMOE v8, the development environment provided tooling for both DRL-based and
 
 Only the BAMOE Developer Tools for VS Code can be used to edit Test Scenarios in v9. BAMOE Canvas does not support Test Scenario editing. To upgrade a Test Scenario from v8, it is sufficient to open and save the file using the v9 tooling. There is no need to change the file's location within the Business Service project structure.
 
-Additionally, BAMOE v9 introduces a new Test Scenario Editor compatible with DMN 1.5. The classic Test Scenario editor is still available, but with support limited to DMN 1.2.
+Additionally, BAMOE v9 introduces a new Test Scenario Editor compatible with DMN 1.6. The classic Test Scenario editor is still available, but with support limited to DMN 1.2.
 
 NOTE: Running DRL- and DMN-based Test Scenarios in the same Business Service project is not yet supported.
 
@@ -186,7 +186,7 @@ NOTE: Running DRL- and DMN-based Test Scenarios in the same Business Service pro
 
 The JUnit activator is typically located at `src/test/java/testscenario/ScenarioJunitActivatorTest.java`.
 
-In BAMOE v8, Test Scenarios were executed using the `ScenarioJunitActivator` class. BAMOE v9 introduces a new activator, `KogitoJunitActivator`, which is required for DMN-based Test Scenarios. These two activators behave differently and are not interchangeable. Specifically, `ScenarioJunitActivator` supports only DRL-based scenarios, while `KogitoJunitActivator` supports only DMN-based ones.
+In BAMOE version {VERSION_80X}, Test Scenarios were executed using the `ScenarioJunitActivator` class. BAMOE v9 introduces a new activator, which is `TestScenarioActivator`. These two activators behave differently and are not interchangeable. Specifically, `ScenarioJunitActivator` is based on version {VERSION_80X} API and JUnit 4, while  TestScenarioActivator` is based on version {VERSION_90X} API and JUnit 5.
 
 You must update your test activator class based on the type of Test Scenario you are running. For DMN-based scenarios in BAMOE v9, replace the following line in your test class:
 
@@ -199,10 +199,19 @@ Replace:
 With:
 
 ----
-`@org.junit.runner.RunWith(org.kogito.scenariosimulation.runner.KogitoJunitActivator.class)`
+`@org.drools.scenariosimulation.backend.runner.TestScenarioActivator`
 ----
 
-After updating the test activator, you may also need to adjust your `pom.xml` file to ensure the correct dependencies are included. The required changes depend on whether your project follows a standalone or client-server architecture. For detailed guidance, refer to the appropriate migration guide:
+After updating the test activator, you may also need to adjust your `pom.xml` file to ensure that the correct dependencies are included. In detail, the new dependency required to enable the new `TestScenarioActivator` is:
+----
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-scenario-simulation</artifactId>
+  <scope>test</scope>
+</dependency>
+----
+
+The required changes depend on whether your project follows a standalone or client-server architecture. For detailed guidance, refer to the appropriate migration guide:
 
 * *standalone* xref:05-03-upgrading-standalone-projects.adoc[migration guide].
 * *client-server* xref:05-02-upgrading-client-server-projects.adoc[migration guide].
