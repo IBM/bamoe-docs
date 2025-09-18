@@ -23,7 +23,11 @@ of Materials (BOM) POMs guide].
 <dependency>
   <groupId>com.ibm.bamoe</groupId>
   <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
 </dependency>
+
 ----
 
 Gives your _Business Service_ project access to fully supported libraries.
@@ -92,7 +96,7 @@ More at xref:../editing/authoring-scesim.adoc[Authoring unit tests with Test Sce
 </dependency>
 ----
 
-== Decisions, Rules, and Decision Tables (Add-ons)
+== Decisions, Rules, and Decision Tables (Add-ons Quarkus)
 
 [source,xml]
 ----
@@ -109,6 +113,8 @@ More at xref:../editing/authoring-scesim.adoc[Authoring unit tests with Test Sce
   <artifactId>drools-addons-quarkus-events-rules</artifactId>
 </dependency>
 ----
+
+== Decisions, Rules, and Decision Tables (Add-ons Spring Boot)
 
 [source,xml]
 ----
@@ -149,9 +155,24 @@ Mandatory dependencies for enabling Workflows in your _Business Services_ with Q
 
 == Workflows (Spring Boot)
 
-_Business Services_ containing Workflows cannot be built with Spring Boot at the present moment.
+Mandatory dependencies for enabling Workflows in your _Business Services_ with Spring Boot.
 
-== Workflows (Add-ons and extra features)
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-with-drools-spring-boot-starter</artifactId>
+</dependency>
+----
+
+== Workflows (Add-ons and extra features, Quarkus)
+For the Workflow _Business Services_ built with Quarkus. 
+
 [source,xml]
 ----
 <dependency>
@@ -200,7 +221,59 @@ _Business Services_ containing Workflows cannot be built with Spring Boot at the
 </dependency>
 ----
 
-== Workflows (Dev + testing)
+== Workflows (Add-ons and extra features, Spring Boot)
+For the Workflow _Business Services_ built with Spring Boot. 
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-process-management</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-events-process</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+      <groupId>org.kie.kogito</groupId>
+      <artifactId>kogito-addons-springboot-messaging</artifactId>
+</dependency>
+----
+
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-knative-eventing</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-springboot-mail</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-rest-workitem</artifactId>
+</dependency>
+----
+
+== Workflows (Dev + testing, Quarkus)
 // More at xref:../workflow/workflows-with-quarkus.adoc[Workflows services with Quarkus].
 [source,xml]
 ----
@@ -226,15 +299,50 @@ _Business Services_ containing Workflows cannot be built with Spring Boot at the
 </dependency>
 ----
 
-== Workflows (Stateful) persistence
+== Workflows (Dev + testing, Spring Boot)
+// More at xref:../workflow/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-spring-boot-web-console</artifactId>
+</dependency>
+----
 
-More at xref:../workflow/configuring-persistence-for-stateful-workflows.adoc[Configuring persistence for stateful Workflows].
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-process-svg</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-source-files</artifactId>
+</dependency>
+----
+
+== Workflows Stateful persistence (Quarkus)
+
+More at xref:../workflow/workflows-with-quarkus.adoc[Workflows with Quarkus].
 
 [source,xml]
 ----
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-persistence-jdbc</artifactId>
 </dependency>
 ----
 
@@ -266,6 +374,14 @@ More at xref:../workflow/overview.adoc#data-index[The Data-Index subsystem].
 </dependency>
 ----
 
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-index-jpa</artifactId>
+</dependency>
+----
+
 == Workflows (Stateful) subsystem :: Data-Audit
 
 More at xref:../workflow/overview.adoc#data-audit[The Data-Audit subsystem].
@@ -283,6 +399,22 @@ More at xref:../workflow/overview.adoc#data-audit[The Data-Audit subsystem].
 <dependency>
   <groupId>org.kie</groupId>
   <artifactId>kogito-addons-quarkus-data-audit-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-audit</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-audit-jpa</artifactId>
 </dependency>
 ----
 
@@ -306,6 +438,23 @@ More at xref:../workflow/overview.adoc#jobs-service[The Jobs Service subsystem].
 </dependency>
 ----
 
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-embedded-jobs</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-embedded-jobs-jpa</artifactId>
+</dependency>
+----
+
+
 == Workflows (Stateful) subsystem :: User Tasks
 
 More at xref:../workflow/overview.adoc#user-tasks[The User Tasks subsystem].
@@ -315,6 +464,14 @@ More at xref:../workflow/overview.adoc#user-tasks[The User Tasks subsystem].
 <dependency>
   <groupId>org.jbpm</groupId>
   <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-springboot-usertask-storage-jpa</artifactId>
 </dependency>
 ----
 
