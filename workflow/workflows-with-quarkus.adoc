@@ -57,10 +57,7 @@ Finally, the following Maven plugin is required to correctly build and package t
 </plugin>
 ----
 
-
-// Update for workflow - See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/decisions/pom.xml[complete pom.xml for Decisions] for a _Business Servics_ with Decisions on Quarkus, or {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/rules/pom.xml[complete pom.xml for Rules] for a _Business Service_ with Rules on Quarkus.
-
-
+=== The Data-Index add-on
 
 The following dependency is used to configure the Data-Index subsystem with persistency simultaneously.
 
@@ -71,6 +68,14 @@ The following dependency is used to configure the Data-Index subsystem with pers
   <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
 </dependency>
 ----
+
+// Find the appropriae POM for workflow and put in docs repo
+
+See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Quarkus.
+
+Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Quarkus or BAMOE specific properties (for example, `server.address`).
+
+=== Configuration
 
 Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
 
@@ -110,11 +115,39 @@ Configuring persistence for the Data-Audit subsystem will require a JDBC Driver 
 </dependency>
 ----
 
-=== The Jobs Service add-on
+=== The embedded Jobs Service add-on
 
-To use the Jobs Service add-on in your project you must include the following dependencies:
+=== Using the embedded Jobs Service add-on
+
+To use the embedded Jobs Service add-on in your project you must include the following dependencies:
 
 [source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
+</dependency>
+
+<!-- Required for persistence -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
+</dependency>
+----
+
+Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
+</dependency>
+----
+
+[NOTE]
+====
+With the introduction of the new embedded job service add-on in {PRODUCT_SHORT} {VERSION_930}, the following dependencies of the previously available implementation are deprecated and should be removed:
 ----
 <dependency>
   <groupId>org.kie</groupId>
@@ -133,16 +166,7 @@ To use the Jobs Service add-on in your project you must include the following de
   <artifactId>jobs-service-storage-jpa</artifactId>
 </dependency>
 ----
-
-Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
+====
 
 === Persisting User Tasks data
 
@@ -169,14 +193,432 @@ Configuring persistence for the User Tasks subsystem will require a JDBC Driver 
 ----
 
 == Configuration
+The main configuration step required for stateful workflow _Business Services_ is the configuration of the database used to persist workflow data. 
+
+[#jdbc-persistence]
+== Enabling persistence for stateful Workflows
+
+{PRODUCT_SHORT} process service and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
+
+All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the connection with
+the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
+guidelines.
+
+Configuring persistence for {PRODUCT_SHORT} requires a minimal  set of dependencies and configurations in your application. The
+minimal set of dependencies are:
+
+* Quarkus Agroal: Quarkus DataSource Connection Pool with Security and Transaction support
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+----
+
+* Database Specific Quarkus JDBC Driver
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-{{your-database-type}}</artifactId>
+</dependency>
+----
+
+* KIE JDBC Persistence Add-on for Quarkus: Enables persistence for the Workflow Engine with JDBC.
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+NOTE: For full information about how to configure DataSources in Quarkus, check the
+https://quarkus.io/version/3.20/guides/datasource[Configure data sources in Quarkus] guide.
+
+
+=== Configuring persistence for PostgreSQL
+
+To configure PostgreSQL persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-postgresql</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - PostgreSQL
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/bamoe-db}
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+
+=== Configuring persistence for Microsoft SQL Server
+
+To configure Microsoft SQL Server persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-mssql</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Microsoft SQL Server
+quarkus.datasource.db-kind=mssql
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0.0:1433;DatabaseName=bamoe-db;encrypt=true;trustServerCertificate=true;}
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services, ensure to read the https://quarkus.io/version/3.20/guides/databases-dev-services[Dev Services for Databases] guide and apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.20/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
+
+
+==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
+
+Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. This module includes the necessary Hibernate ORM mappings to help remapping some of the JPA entities used in both components. The mappings contained are:
+
+* META-INF/bamoe-data-index-orm.xml: This file remaps some entities from the data-index component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-mssql-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+==== Transaction isolation settings for Microsoft SQL Server
+
+In order to ensure {PRODUCT_SHORT} is working properly when configured with a Microsoft SQL Server database, the following settings need to be applied at the database level:
+[source,properties]
+----
+    ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
+    ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
+----
+
+These settings are required to prevent database deadlocks when resources in {PRODUCT_SHORT} are accessed concurrently.
+
+=== Configuring persistence for Oracle
+
+To configure Oracle persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-oracle</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Oracle
+quarkus.datasource.db-kind=oracle
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+==== {PRODUCT_SHORT} mappings for Oracle
+
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+
+* META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-oracle-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+
+=== Configuring persistence for Oracle
+
+To configure Oracle persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-oracle</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - Oracle
+quarkus.datasource.db-kind=oracle
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+==== {PRODUCT_SHORT} mappings for Oracle
+
+Additionally, if the _Business Service_ includes User Tasks or Job Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+
+* META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
+* META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
+
+Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
+added only if the associated component is present in the application dependencies.
+
+To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-oracle-mappings</artifactId>
+</dependency>
+----
+
+And in the `application.properties`:
+[source,properties]
+----
+quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
+----
+
+
+=== Configuring persistence for H2 (Development only)
+
+In development environments, you can use H2 persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-agroal</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-jdbc-h2</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+Configuration required in your `application.properties`:
+[source,properties]
+----
+# Application default Datasource - H2
+quarkus.datasource.db-kind=h2
+datasource.devservices.properties.NON_KEYWORDS=VALUE,KEY
+
+# Enabling jdbc persistence
+kogito.persistence.type=jdbc
+----
+
+
+=== Setting up the database for stateful Workflows in development
+
+All stateful Workflows subsystems brought by {PRODUCT_SHORT} into your _Business Service_ project come with `KIE Flyway` migrations, a sandboxed Flyway-based mechanism that automatically creates the database schema for you during startup. *This is convenient in development environments and is not suitable for production database instances*
+
+To enable this feature, the `kie.flyway.enabled` property should be added in your project `application.properties` file, which is found in `src/main/resources` as follows:
+
+[source,properties]
+----
+kie.flyway.enabled=false # for production
+%dev.kie.flyway.enabled=true
+----
+
+Your development database schema will be automatically created for you.
+
+[NOTE]
+====
+For production environemnts, see xref:../runtime-services-modeling/services-deployment.adoc##production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
+====
+
 
 == Structure
 
+A Workflow service with Quarkus typically contains the following:
+
+- `src/main/java`: Java classes implementing domain models and business services
+- `src/main/resources`:
+- `application.properties` for Quarkus and BAMOE configuration
+- one or more BPMN process definitions (for example, `*.bpmn` or `*.bpmn2`)
+- additional configuration files such as calendars or custom properties
+- `src/test/java`: JUnit test classes to validate workflow execution
+
 == Code
+
+The main elements of a Workflow service with Quarkus include:
+
+* **Java domain models that represent process data** – These classes define the structure of process variables (for example, `CandidateData`, `Offer`, or `CreditCardDetails`) that are passed between workflow steps.
+
+* **Workflow definitions (`.bpmn` files)** – BPMN process models placed under `src/main/resources`. They describe the workflow logic, tasks, and transitions.
+
+* **Optional business services** – Implemented as Java classes invoked by Service Tasks in workflows.
+
+* **application.properties** – Used to configure persistence, job service, data index, and other runtime features.
+
 
 == Testing
 
-== Execution in dev mode to test workflow execution
+Workflow services can be tested manually or with automated JUnit tests.
+
+Manual testing instructions:
+
+. Start the application (see *Running* in README).
+. Trigger a workflow instance via REST (for example, using `curl` or `Swagger UI`)
++
+[source,bash]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" \
+  -X POST http://localhost:8080/hiring \
+  -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}'
+----
+. Complete user tasks by querying and posting to the appropriate endpoints, as described in the README.
+
+Automated testing with JUnit:
+
+Workflow services can also be tested using JUnit and the `@QuarkusTest` annotation. This allows validation of process execution, business logic, and features.
+
+[source,java]
+----
+@QuarkusTest
+public class CreditCardProcessIT {
+
+    private static final String PROCESS_ID = "BusinessCalendarCreditBill";
+    private static final String CARD_NUMBER = "434354343";
+
+    @jakarta.inject.Inject
+    ProcessConfig processConfig;
+
+    @Test
+    public void testCardPaymentInWorkingDay() throws Exception {
+        String id = given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/" + PROCESS_ID)
+                .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("creditCardDetails.cardNumber", is(CARD_NUMBER))
+                .body("creditCardDetails.status", is("Bill Due"))
+                .extract()
+                .path("id");
+
+        Thread.sleep(2000);
+        BusinessCalendar businessCalendar = processConfig.getBusinessCalendar();
+        assertThat(businessCalendar).isNotNull();
+        long timeDuration = businessCalendar.calculateBusinessTimeAsDuration("15s");
+        if (timeDuration > 1000L) {
+            given()
+                    .when()
+                    .get("/" + PROCESS_ID + "/" + id)
+                    .then()
+                    .statusCode(200)
+                    .body("id", is(id))
+                    .body("creditCardDetails.cardNumber", is(CARD_NUMBER))
+                    .body("creditCardDetails.status", is("Bill Due"));
+        } else {
+            given()
+                    .when()
+                    .get("/" + PROCESS_ID)
+                    .then()
+                    .statusCode(200)
+                    .body(equalTo("[]"));
+        }
+    }
+}
+----
+
+== Testing workflow execution
 The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes locally.
 
 image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
@@ -221,7 +663,7 @@ To execute the project in the local development environment, open a new terminal
 mvn clean quarkus:dev
 ----
 
-This command should install the dependencies and run your Quarkus application in Dev mode locally (usually at `http://localhost:8080`).
+This command should install the dependencies and run your Quarkus application in Dev mode locally.
 
 
 === Using the {QUARKUS_DEV_UI} interface to manage processes
@@ -242,7 +684,7 @@ image::workflow/dev-ui-process-details.png[Process Details page]
 
 ===== Starting a new process instance
 
-To start a new process instance, go to the **Process Definitions** tab. There, all the Process Definitions are listed, one for each Workflow in your resources directory.
+To start a new process instance, go to the **Process Definitions** tab. You will see a list of all the Process Definitions, one for each Workflow in your resources directory.
 
 image::workflow/dev-ui-process-definitions.png[Process Definitions page]
 
@@ -250,10 +692,10 @@ Click on any Process Definition to open its respective initialization form.
 
 image::workflow/dev-ui-process-form.png[Process Definition form page]
 
-Fill the form with relevant data for you Workflow and click on Start.
+Fill the form with relevant data for your Workflow and click on Start.
 
 [NOTE]
-The Process Defitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
+The Process Definitions forms are auto generated, but can be customized in the Forms page. See more in the Forms section.
 
 ==== Jobs
 
@@ -288,7 +730,7 @@ To add custom forms (for the `hiring` Process Definition or `HR Interview` User 
 
 === Using the Swagger UI
 
-Not directly related to the {QUARKUS_DEV_UI}, but also a useful tool to explore the REST and GraphQL API endpoints of your Workflow.
+Although the Swagger UI is not directly related to the {QUARKUS_DEV_UI}, it is a useful tool to explore the REST and GraphQL API endpoints of your Workflow.
 
 image::workflow/dev-ui-swagger-ui.png[Swagger UI page]
 
@@ -298,8 +740,51 @@ To use the API, select any endpoint and click on *Try it out* to test it.
 
 image::workflow/dev-ui-swagger-ui-try-out.gif[Swagger UI try it out page]
 
+=== Using the Data-Index Graphql UI
+
+Data-Index provides a *GraphiQL UI* that provides a graphic interface to run and test GraphQL queries against the Data-Index GraphQL API in your Business Service.
+
+image::workflow/data-index-graphiql-ui.png[Data-Index GraphiQL UI]
+
+To enable the *GraphiQL UI*, add the following property in your `application.properties` file:
+[source,properties]
+----
+quarkus.kogito.data-index.graphql.ui.always-include=true
+----
+
+When enabled, to access the *GraphiQL UI*, in your browser navigate to `http://localhost:8080/q/graphql-ui`.
+
+NOTE: *GraphQL* UI is enabled by default when running in Quarkus Development mode.
 
 == Hot-reload in dev mode
 
+For medium to large sized Workflow services, recompiling and restarting the application upon code changes could be cumbersome and time-consuming.
+To simplify development, Quarkus offers an embedded hot-reload feature.
+
+To trigger it, there are two steps:
+
+. Modify any source file (such as a BPMN definition, Java class, or configuration file).
+. Reload any page of the running application to see the changes applied immediately.
+
+This allows you to iteratively develop workflows without restarting the application.
 
 == Debugging
+
+Debugging a Workflow service in Quarkus follows the standard Java remote debugging setup:
+
+. Create a remote debug configuration in your IDE on port `5005` (steps vary by IDE).
+. Start the application in dev mode:
++
+[source,bash]
+----
+mvn clean compile quarkus:dev
+----
+. Put a breakpoint in one of the generated or custom classes.
+. Connect your IDE debugger to port `5005`.
+
+It is also possible to block the compilation until a debugger is connected, using:
+
+[source,bash]
+----
+mvn clean compile quarkus:dev -Dsuspend
+----
