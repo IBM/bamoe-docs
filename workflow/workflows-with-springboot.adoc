@@ -68,7 +68,7 @@ To configure persistence in Spring Boot add the following dependencies:
 
 === The Data-Index add-on
 
-To configure the Compact Architecture for stateful workflow in Spring Boot you will need to use the following add-on to enable the workflow runtime to persist data directly into the Data-Index database:
+The following dependency is used to enable the workflow runtime to persist data directly in the Data-Index database:
 
 [source,xml]
 ----
@@ -79,7 +79,7 @@ To configure the Compact Architecture for stateful workflow in Spring Boot you w
 ----
 
 === The Data-Audit add-on
-The following add-on enables Data-Audit integration within the _Business Service_.
+The following add-on enables Data-Audit integration with your _Business Service_.
 
 [source,xml]
 ----
@@ -93,9 +93,11 @@ The following add-on enables Data-Audit integration within the _Business Service
 </dependency>
 ----
 
+Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
+
 === The embedded Jobs Service add-on
 
-The following add-on enable the colocation of the Jobs Service inside the workflow runtime.
+The following add-on enables the colocation of the Jobs Service within the workflow runtime.
 
 
 [source, xml]
@@ -104,13 +106,33 @@ The following add-on enable the colocation of the Jobs Service inside the workfl
     <groupId>org.kie</groupId>
     <artifactId>kogito-addons-springboot-embedded-jobs</artifactId>
 </dependency>
+
+<!-- Required for persistence -->
 <dependency>
     <groupId>org.kie</groupId>
     <artifactId>kogito-addons-springboot-embedded-jobs-jpa</artifactId>
 </dependency>
 ----
 
-// Find the appropriae POM for workflow and put in docs repo
+Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. See the xref:./#jdbc-configuration[Configuration section].
+
+// Find the appropriate POM for workflow and put in docs repo
+=== The User Tasks add-on
+
+The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database.
+
+To enable this functionality, the following dependency needs to be added:
+[source,xml]
+----
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-addons-springboot-usertask-storage-jpa</artifactId>
+</dependency>
+----
+
+Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
+
+// Find the appropriate POM for workflow and put in docs repo
 
 See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/springboot/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Quarkus.
 

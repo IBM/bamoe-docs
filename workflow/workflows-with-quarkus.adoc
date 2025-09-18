@@ -37,10 +37,7 @@ The dependencies required for a workflow _Business Service_ project with Quarkus
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-quarkus</artifactId>
 </dependency>
-----
 
-[source,xml]
-----
 <dependency>
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-with-drools-quarkus</artifactId>
@@ -59,7 +56,7 @@ Finally, the following Maven plugin is required to correctly build and package t
 
 === The Data-Index add-on
 
-The following dependency is used to configure the Data-Index subsystem with persistency simultaneously.
+The following dependency is used to configure the Data-Index subsystem simultaneously together with persistence.
 
 [source,xml]
 ----
@@ -69,27 +66,9 @@ The following dependency is used to configure the Data-Index subsystem with pers
 </dependency>
 ----
 
-// Find the appropriae POM for workflow and put in docs repo
-
-See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Quarkus.
-
-Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Quarkus or BAMOE specific properties (for example, `server.address`).
-
-=== Configuration
-
-Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
-
 === The Data-Audit add-on
 
-You need to add two different dependencies to your _Business Service_ project:
+The following add-ons enable Data-Audit integration with your _Business Service_ project:
 
 [source,xml]
 ----
@@ -105,21 +84,11 @@ You need to add two different dependencies to your _Business Service_ project:
 </dependency>
 ----
 
-Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
+Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
 
 === The embedded Jobs Service add-on
 
-=== Using the embedded Jobs Service add-on
-
-To use the embedded Jobs Service add-on in your project you must include the following dependencies:
+The following add-on enables the colocation of the Jobs Service within the workflow runtime:
 
 [source,xml]
 ----
@@ -135,15 +104,7 @@ To use the embedded Jobs Service add-on in your project you must include the fol
 </dependency>
 ----
 
-Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
-
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
+Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. See the xref:./#jdbc-configuration[Configuration section]. 
 
 [NOTE]
 ====
@@ -168,11 +129,11 @@ With the introduction of the new embedded job service add-on in {PRODUCT_SHORT} 
 ----
 ====
 
-=== Persisting User Tasks data
+=== The User Tasks add-on
 
 The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database.
 
-To enable this functionality, the following dependency needs to be added to the application `pom.xml` file:
+To enable this functionality, the following dependency needs to be added:
 
 [source,xml]
 ----
@@ -182,26 +143,26 @@ To enable this functionality, the following dependency needs to be added to the 
 </dependency>
 ----
 
-Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured as well. For development you can use H2. E.g.,
+Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
 
-[source,xml]
-----
-<dependency>
-  <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-jdbc-h2</artifactId>
-</dependency>
-----
+// Find the appropriate POM for workflow and put in docs repo
 
+See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Quarkus.
+
+Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Quarkus or BAMOE specific properties (for example, `server.address`).
+
+[#jdbc-configuration]
 == Configuration
-The main configuration step required for stateful workflow _Business Services_ is the configuration of the database used to persist workflow data. 
+
+The main configuration step required for stateful workflow _Business Services_ is the configuration of the database used to persist workflow data. Configuring persistence for the Data-Index subsystem will require a JDBC Driver to be configured as well. 
 
 [#jdbc-persistence]
-== Enabling persistence for stateful Workflows
+=== Enabling persistence for stateful Workflows
 
 {PRODUCT_SHORT} process service and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
 
 All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the connection with
-the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
+the Database, so it is mandatory that the applications has a DataSource correctly configured following the platform (Quarkus)
 guidelines.
 
 Configuring persistence for {PRODUCT_SHORT} requires a minimal  set of dependencies and configurations in your application. The
@@ -467,8 +428,6 @@ And in the `application.properties`:
 ----
 quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
 ----
-
-
 === Configuring persistence for H2 (Development only)
 
 In development environments, you can use H2 persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
@@ -500,7 +459,6 @@ datasource.devservices.properties.NON_KEYWORDS=VALUE,KEY
 # Enabling jdbc persistence
 kogito.persistence.type=jdbc
 ----
-
 
 === Setting up the database for stateful Workflows in development
 
@@ -622,8 +580,6 @@ public class CreditCardProcessIT {
 The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows developers to interact and manage running processes locally.
 
 image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
-
-// After reading xref:../workflow/workflows-with-quarkus.html[Workflows services with Quarkus] and getting your project ready, it is time to add the {QUARKUS_DEV_UI} to your project.
 
 You will need to create a _Business Service_ with the Quarkus framework support. Once you have done this you can add the {QUARKUS_DEV_UI} dependency to your `pom.xml` file:
 
