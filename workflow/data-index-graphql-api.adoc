@@ -845,11 +845,130 @@ The following snippet shows an example for the `data` parameter in JSON format:
     data: "{\"expirationTime\" : \"2025-12-31T20:00:00.000Z\"}"
 ----
 
-// TODO: test/verify and document the following mutations:
-// UserTaskInstanceUpdate
-// UserTaskInstanceAttachmentCreate
-// UserTaskInstanceAttachmentUpdate
-// UserTaskInstanceAttachmentDelete
-// UserTaskInstanceCommentCreate
-// UserTaskInstanceCommentUpdate
-// UserTaskInstanceCommentDelete
+== Unsupported Mutation Capabilities:
+
+The below mentioned mutations are also present in the GraphQL schema, but not supported by the data-index-addon.
+
+=== Update a user task instance
+
+The mutation `UserTaskInstanceUpdate` provides the capability to update the data of a particular user task instance using the provided `taskId` and input parameters.This operation only affects the parameters explicitly passed in the request. It supports the inclusion of user and groups parameters, even when they are mandatory. 
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceUpdate (
+        (taskId: String, 
+         user: String, 
+         groups: [String], 
+         description: String, 
+         priority: String,
+         actualOwner: String, 
+         adminGroups: [String!], 
+         adminUsers: [String!], 
+         excludedUsers: [String!],
+         potentialGroups: [String!], 
+         potentialUsers: [String!], 
+         inputParams: String
+         ) 
+}
+----
+
+=== Add a comment to a user task instance
+
+The mutation `UserTaskInstanceCommentCreate` provides the provision to  adds a new comment to a user task instance using the specified `taskId` and the details provided in the comment parameter.This operation only affects the comment data passed in the request. It supports the inclusion of user and groups parameters, even when they are mandatory.
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceCommentCreate
+    ( taskId: String, 
+      user: String, 
+      groups: [String], 
+      comment: String
+    )  
+}
+----
+
+=== Update a comment in a user task instance
+
+The mutation `UserTaskInstanceCommentUpdate` updates an existing comment in a user task instance using the specified `commentId` and the details provided in the comment parameter.This operation only modifies the comment data passed in the request. It supports the inclusion of user and groups parameters, even when they are mandatory.
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceCommentUpdate
+    ( user:String, 
+      groups:[String],
+      commentId: String, 
+      comment: String
+    )  
+}  
+----
+
+=== Delete a comment in a user task instance
+
+The mutation `UserTaskInstanceCommentDelete` deletes a comment from a user task instance using the specified `commentId`.This operation removes only the targeted comment. It supports the inclusion of user and groups parameters, even when they are mandatory. 
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceCommentDelete
+    (
+      user:String, 
+      groups:[String],
+      commentId: String
+    ) 
+}  
+----
+
+=== Add an attachment to a user task instance
+
+The mutation `UserTaskInstanceAttachmentCreate` provisions the user to add a new attachment to a user task instance using the specified `taskId`, along with the details provided in the name and uri parameters.It supports the inclusion of user and groups parameters, even when they are mandatory.
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceAttachmentCreate
+    (
+      taskId: String, 
+      user: String, 
+      groups: [String], 
+      name: String, 
+      uri: String
+    )
+}  
+----
+
+=== Update an attachment in a user task instance
+
+The mutation `UserTaskInstanceAttachmentUpdate` provides the capability to update or modify an existing attachment in a user task instance using the specified `attachmentId`, along with the updated values provided in the name and uri parameters.This operation only modifies the attachment data passed in the request. It supports the inclusion of user and groups parameters, even when they are mandatory.
+
+[source,json]
+----
+  mutation{
+     UserTaskInstanceAttachmentUpdate
+    (
+      user:String, 
+      groups:[String],
+      attachmentId: String,  
+      name: String, 
+      uri: String
+     )
+}  
+----
+
+=== Delete an attachment in a user task instance
+
+The mutation `UserTaskInstanceAttachmentDelete` allows user can delete an existing attachment from a user task instance using the specified `attachmentId`.This operation removes only the targeted attachment. It supports the inclusion of user and groups parameters, even when they are mandatory.
+
+[source,json]
+----
+  mutation{
+    UserTaskInstanceAttachmentDelete
+    (
+      user:String, 
+      groups:[String], 
+      attachmentId: String
+    )
+}  
+----
