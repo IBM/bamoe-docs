@@ -186,7 +186,7 @@ NOTE: Running DRL- and DMN-based Test Scenarios in the same Business Service pro
 
 The JUnit activator is typically located at `src/test/java/testscenario/ScenarioJunitActivatorTest.java`.
 
-In BAMOE version {VERSION_80X}, Test Scenarios were executed using the `ScenarioJunitActivator` class. BAMOE v9 introduces a new activator, which is `TestScenarioActivator`. These two activators behave differently and are not interchangeable. Specifically, `ScenarioJunitActivator` is based on version {VERSION_80X} API and JUnit 4, while  TestScenarioActivator` is based on 9.x API and JUnit 5.
+In BAMOE version {VERSION_80X}, Test Scenarios were executed using the `ScenarioJunitActivator` class. BAMOE version {VERSION_90X} introduces a new activator, which is `TestScenarioActivator`. These two activators behave differently and are not interchangeable. Specifically, `ScenarioJunitActivator` is based on version {VERSION_80X} API and JUnit 4, while  `TestScenarioActivator` is based on 9.x API and JUnit 5.
 
 You must update your test activator class based on the type of Test Scenario you are running. For DMN-based scenarios in BAMOE v9, replace the following line in your test class:
 
@@ -203,6 +203,8 @@ With:
 ----
 
 After updating the test activator, you may also need to adjust your `pom.xml` file to ensure that the correct dependencies are included. In detail, the new dependency required to enable the new `TestScenarioActivator` is:
+
+[source,xml]
 ----
 <dependency>
   <groupId>org.kie.kogito</groupId>
@@ -210,6 +212,7 @@ After updating the test activator, you may also need to adjust your `pom.xml` fi
   <scope>test</scope>
 </dependency>
 ----
+
 
 The required changes depend on whether your project follows a standalone or client-server architecture. For detailed guidance, refer to the appropriate migration guide:
 
