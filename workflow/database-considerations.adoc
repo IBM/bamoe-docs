@@ -1,8 +1,8 @@
-= Database architecture
+= Database considerations
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section provides more detail on the deployment of a _Business Service_ containing stateful worklow(s) and interactions with the production database. 
+This section describes data access topics that you may need to take into accout and configure during development of your _Business Service_.
 
 [#transactions]
 == Transactional operations on Compact Architecture
@@ -27,7 +27,8 @@ It is possible to disable the default behavior and make the operation no longer 
 [#multithreading]
 == Multi-threaded access to a _Business Service_
 In an environment with multi-threaded access to a _Business Service_ the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
-Use optimistic locking to ensure that concurrent access of the same database entity (E.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
+
+Use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
 
 [source,properties]
 ----
@@ -35,5 +36,10 @@ Use optimistic locking to ensure that concurrent access of the same database ent
 kogito.persistence.optimistic.lock=true
 ----
 
-- With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime. For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance.
+NOTE: This property has no impact if you have deactivated transactions by setting `kogito.transactionEnabled` to `false`. 
+
+- With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime.
++
+For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance[the SmallRye Fault Tolerance for Quarkus] or https://resilience4j.readme.io/docs/getting-started-3[resilience4j for Spring Boot].
++
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
