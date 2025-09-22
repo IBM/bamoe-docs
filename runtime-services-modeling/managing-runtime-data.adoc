@@ -1,0 +1,21 @@
+= Managing Historical _Business Services_ Data in Workflow Runtime
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+BAMOE stores runtime data as well as historical data within its subsystems. Runtime data involves data related to all the live process instances. This data is cleaned up automatically once the process instance completes its execution. However historical data is deliberately kept indefinitely within the data-index and data-audi subsystems. As the volume of data grows over time, it presents several challenges such as: 
+
+* Performance Degradation: Accumulating data can lead to slower query responses and reduced system responsiveness.
+
+* Increased Storage Costs: Unmanaged data growth can result in higher storage expenses and potential capacity issues.
+
+* Operational Inefficiencies: Manual data management processes are time consuming and error prone.
+
+The Data Cleanup Tool enables you to manage this historical data. Users are recommended to run the tool daily or weekly in order to keep the database size manageable and to prevent unlimited growth.
+
+BAMOE Data Cleanup Tool is a command line application that is delivered as an image that can be configured via Environment variables to delete historical data from a database containing the stateful Workflow subsystem table. It runs, deletes data and then terminates.
+
+The Workflow subsystems that will be included for cleanup are data-index and data-audit
+
+All data related to the process instances that are either COMPLETED or ABORTED are eligible for cleanup
+
+List of tables
