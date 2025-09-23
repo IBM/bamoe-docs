@@ -14,13 +14,15 @@ The following lists the main elements of the BPMN Editor:
 .Editor page for a Workflow with highlighted elements of the BPMN Editor
 image::workflow/bpmn-editor-main-page.png[]
 
-. *Variables* → to edit process variables in a dedicated panel.
+. *Process Variables* → to edit process variables in a dedicated panel.
 . *Correlations* → to manage the correlations used to bind Process instances to messages.
 . *Properties Management* → to manage custom BPMN properties in a single panel
-. *Node palette* → to select and drag node types into your workflow (variations can be selected after dragging a node type onto the Canvas).
-. *Data Object* and *Keyboard Shortcuts* → to drag and create a new data object and you can view the keyboard shortcuts by clicking the keyboard button. 
+. *Node palette* → to select and drag node types into your workflow including the *Data Object* button. Note that variations on the base elements can be selected after dragging a node type onto the Canvas.
+. *Group* and *Text annotations* buttons enable you to group and annotate elements of your BPMN.  
+. *Custom Tasks* (*Keyboard Shortcuts*) → to display custom tasks that have been integrated into the editor (e.g., AI and flexible process tasks as well as your custom work item handler tasks). The Keyboard button toggles a dialog containing the keyboard shortcuts. 
+. *Overlays* → to set graphical preferences and visual overlay elements that are not part of the BPMN file.
 . *Properties* → to manage the properties of the currently selected workflow element.
-. The *Zoom* *Fit view* and *toggle interactivity* buttons enable you to manage the BPMN diagram. 
+. The *Zoom* *Fit view* and *toggle interactivity* buttons enable you to size the BPMN diagram and lock the diagram to inhibit changes. 
 
 Developing Workflows through BPMN files is a complex subject and has many intricacies that are beyond the scope of this document.
 For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/2.0.2/PDF[Business Process Model And Notation (BPMN) specification].
@@ -30,60 +32,73 @@ For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/
 A common use case for a Workflow is to invoke Decisions as part of its logic.
 On your Workflow, create a new "Task" node and once on in the editor, change its type to Business Rule task.
 
-.Node palette open for Task nodes inside the BPMN Editor (classic)
+.Node palette open for Task nodes inside the BPMN Editor
 image::workflow/decision-task.png[width=360]
 
-In the “Properties” panel under the section Implementation you can choose between DRL or DMN. Select the file you want and the Decision inside it.
-Here is an example:
+In the “Properties” panel under the section Implementation you can choose between DRL or DMN. Select the file you that contains the required Decision DMN and the model name space and name are automatically completed, as shown in this example:
 
 .Properties panel for a Business Rule Task inside a Workflow
-image::workflow/decision-in-workflow.png[width=360]
+image::workflow/decision-in-workflow-props.png[width=360]
 
 When your Workflow executes, this Decision will be invoked with the input parameters you specified, passed to the Business Rule task.
 The result of the Decision will be the output of the Business Rule task.
 
-== Creating Process Variables
+== Process Properties
 
-. Click anywhere in the diagram area and then click on the properties tab to access the properties panel.
-+
-.BPMN Editor (classic) properties
-image::wf-tutorial/canvas-wf-1.png[BPMN Editor (classic) Global Properties]
+. Click anywhere in the diagram area and then click on the properties panel button to access the properties panel.
+
+.BPMN Editor properties
+image::workflow/bpmn-process-props-panel.png[width=360]
 
 . Set the following properties:
- * *Name*: Provide a label for the process.
- * *ID*: Specify an identifier that will be used for endpoints.
- * *Description*: Write a detailed description of the process.
-. To add input variables:
- * Click the plus button to add a new variable.
- * Set the variable name and data type. 
- ** _Name_ is the ID and name of the variable which can be referenced via scripts or the input/output of activities. 
- ** Data type refers to a Java type. If you click Select Custom, the field turns into the fully qualified name of the class. 
+ * *Name*: Provide a label for your process.
+ * *Documentation* Provide a detailed description of the process.
+ * *ID & Namespace* Specify an identifier that will be used for endpoints.
+ * *Ad-hoc*: Specify if your process is ad-hoc (see xref:#case-management[Case Management])
+ * *SLA Due Date* Provide a date within which the process must be completed, and which takes into account a business calendar of work time (see xref:#business-calendars[Business calendars]).
 
-.Process properties
-image::wf-tutorial/input-data-2.png[Process properties]
+== Property and variable management
+You can manage all custom properties for your BPMN workflow using the Global Properties Management dialog. 
 
+.Properties management dialog
+image::workflow/bpmn-props-mngmnt.png[width=360]
 
-=== Define Workflow Elements
+You can create and manage Process Variables for your BPMN workflow using the Properties Variables  dialog. 
 
-Use the following elements to define your workflow:
+.Process variables dialog
+image::workflow/bpmn-process-vars.png[width=360]
+
+When you create a new variable:
+
+_Name_:: is the ID and name of the variable which can be referenced via scripts or the input/output of activities. 
+
+_Data type_:: refers to a Java type.
+
+== Define Workflow elements
+
+The following top level elements can be dragged out of the Node palette to define your workflow:
 
 * *Start Event*: Green circle indicating the starting point of the workflow.
-* *Intermediate Events*: Yellow circle for events that occur between the start and end points.
+* *Intermediate Catch & Throw Events*: Yellow and Green circles to create catch and throw events that occur between the start and end points.
 * *End Events*: Red circle marking the end of the workflow.
-* *Activities*: Empty rectangle representing tasks or activities in the workflow.
-* *Subprocess*: Rectangle with a square for subprocesses.
+* *Tasks*: Empty rectangle representing any of the tasks or activities in the workflow (e.g., user task, gen AI task, milestone, ...).
+* *Call activity* Rectangle with embedded square representing a call to an activity that is external to the process definition, and could be a reusable element.  
+* *Subprocess*: Rectangle with a square to create subprocesses that remain part of the current process definition.
 * *Gateways*: Diamond shape for decision points.
 * *Lanes*: Checklist icon to organize tasks by roles or departments.
-* *Non-executable Items*: 3D cube for items not executed within the workflow.
-* *Miscellaneous*: Engine icon for other workflow components.
+* *Data Objects*: Document icon to specify the flow of data in your workflow.
+
+Each top level element you can create from the toolbar has variants that you can select using the menu accessed via the button on the bottom left corner of each element.
+
+.Element menu
+image::workflow/task-element-menu.png[width=360]
 
 For the conformance level of BPMN elements, see xref:../reference-guide/bpmn.adoc[Reference → Business Process Model and Notation (BPMN)]
 
-
+////
 === Adjust Properties and Add Process Variables
 
 . Create a start node with a script to initialize variables:
-// where does the script need to go - in UI or javascript called via UI?
 +
 [source,java]
 ----
@@ -126,6 +141,7 @@ System.out.println("###################################");
 System.out.println("Candidate " + candidateData.getFullName() + " doesn't meet the requirements for the position but we'll keep it on records for the future!");
 System.out.println("###################################");
 ----
+////
 
 [#business-calendars]
 == Using Business Calendars
@@ -391,8 +407,6 @@ A REST API request can serve as a signal event to trigger Milestones or to creat
 
 An example application `flexible-process-quarkus` can be found in xref:../getting-started/examples.adoc[Example Business Service projects]. This example shows the use of flexible processes to implement a Case Management scneario using Ad-hoc subprocesses, Milestones, and a DMN Business Rule Task. 
 
-== Configuring a Custom Work Item Handler
-
 == Correlating message events to a Message Event
 Correlations are used when multiple process instances are running concurrently and only one specific instance needs to be notified. Using a correlation you can bind process instances to messages that contain specific property values. 
 
@@ -400,3 +414,241 @@ A dedicated dialog can be displayed through the Correlations toggle button (see 
 
 .Correlation dialog
 image::workflow/correlations-bmpn-dialog.png[width=360]
+
+[#custom-wih]
+== Creating a custom WorkItemHandler
+
+A Work Item represents a task or activity in a workflow that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing you to plug in custom code to meet specific business requirements not covered by built-in functionality.
+
+Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
+
+This section provides a step-by-step guide for implementing a custom WorkItemHandler in {PRODUCT_SHORT}, handler definition, and integration with a BPMN process.
+
+In a _Business Service_ project created using xref:../getting-started/project-setup.adoc[Accelerators], add the following dependency to your project POM to enable the necessary APIs:
+
+[,xml]
+----
+<dependency>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-api</artifactId>
+</dependency>
+----
+
+=== Creating WID files and icons
+
+Work Item Definitions must be provided as `.wid` files. These files can be placed in:
+
+* The top-level `global/` directory, or
+* The same directory as the BPMN file (`src/main/resources/`), optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
+
+Icons for custom tasks can be placed in the same directory as the `.wid` file.
+
+Example `.wid` content:
+
+[,json]
+----
+[
+    [
+        "name" : "MyConcatDefinitions",
+        "displayName" : "MyConcatDefinitions",
+        "category" : "myconcatworkitem",
+        "description" : "",
+        "defaultHandler": "mvel: new com.ibm.MyConcatWorkItemHandler()",
+        "parameters" : [
+            "FirstName" : new StringDataType(),
+            "LastName" : new StringDataType()
+        ],
+        "results" : [
+            "FullName" : new StringDataType()
+        ],
+        "icon" : "MyConcatDefinitions.png"
+    ]
+]
+----
+
+NOTE: In some cases, {CANVAS} may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run `git add customtask.wid` to ensure the file is tracked. If the issue persists, try reopening the BAMOE project in a new VS Code workspace.
+
+=== Using the custom Work Item in a BPMN process
+
+Once your `.wid` file and handler class are in place, you can  integrate the Custom Task into a BPMN process using the BPMN Editor.
+
+Once the , drag and drop your Custom Task (`MyConcatDefinitions`) onto the BPMN editor canvas.
+
+image::upgrade/05-05-upgrading-custom-work-item-handlers-devtoolview.png[width=250]
+
+==== Process model
+
+After adding the Custom Task, your process definition should resemble the following:
+
+image::upgrade/05-05-upgrading-custom-work-item-handlers-process_new.png[width=500]
+
+==== Define process variables
+
+Create process variables to accept input values when starting the process instance. These variables will be mapped to the parameters defined in your `.wid` file.
+
+image::upgrade/05-05-upgrading-custom-work-item-handlers-processdata.png[width=250]
+
+==== Configure data assignments
+
+Define the DataInput and DataOutput assignments for the custom Work Item. This ensures that the input values are passed to the handler and the output is captured in the process.
+
+image::upgrade/05-05-upgrading-custom-work-item-handlers-properties.png[width=90%]
+
+=== Implement the custom WorkItemHandler
+
+To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.
+
+[,java]
+----
+import org.kie.kogito.internal.process.workitem.KogitoWorkItem;
+import org.kie.kogito.internal.process.workitem.KogitoWorkItemHandler;
+import org.kie.kogito.internal.process.workitem.KogitoWorkItemManager;
+import org.kie.kogito.internal.process.workitem.WorkItemTransition;
+import org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler;
+import org.slf4j.LoggerFactory;
+
+public class MyConcatWorkItemHandler extends DefaultKogitoWorkItemHandler {
+
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MyConcatWorkItemHandler.class);
+
+    @Override
+    public Optional<WorkItemTransition> activateWorkItemHandler(KogitoWorkItemManager manager, KogitoWorkItemHandler handler, KogitoWorkItem workItem, WorkItemTransition transition) {
+
+        for (String parameter : workItem.getParameters().keySet()) {
+            LOG.info(parameter + " = " + workItem.getParameters().get(parameter));
+ }
+
+        Map<String, Object> results = new HashMap<String, Object>();
+
+        String firstName = (String) workItem.getParameter("FirstName");
+        String lastName = (String) workItem.getParameter("LastName");
+        String fullName = firstName + " " + lastName;
+
+        results.put("FullName", fullName);
+
+        return Optional.of(handler.completeTransition(workItem.getPhaseStatus(), results));
+
+ }
+    @Override
+    public Optional<WorkItemTransition> abortWorkItemHandler(KogitoWorkItemManager manager, KogitoWorkItemHandler handler, KogitoWorkItem workItem, WorkItemTransition transition) {
+        LOG.info("Aborting work item " + workItem);
+        return Optional.of(this.workItemLifeCycle.newTransition("abort", workItem.getPhaseStatus(), workItem.getResults()));
+ }
+}
+----
+
+==== Registering the custom WorkItemHandler
+
+To use a custom WorkItemHandler in a process instance, it must be registered before the process starts. This registration informs the engine which handler to invoke for a given task.
+
+Register your handler by extending `DefaultWorkItemHandlerConfig`:
+
+[,java]
+----
+import org.kie.kogito.process.impl.DefaultWorkItemHandlerConfig;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
+
+    {
+        register("MyConcatDefinitions", new MyConcatWorkItemHandler());
+    }
+}
+----
+
+=== Build and run
+
+==== Compile and run in local dev mode
+
+Use Quarkus dev mode to run the application with hot reload support:
+
+[,sh]
+----
+mvn clean compile quarkus:dev
+----
+
+NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
+
+==== Package and run in JVM mode
+
+[,sh]
+----
+mvn clean package
+java -jar target/quarkus-app/quarkus-run.jar
+----
+
+On windows
+
+[,sh]
+----
+mvn clean package
+java -jar target\quarkus-app\quarkus-run.jar
+----
+
+==== Package and run using local native image
+
+To compile a native executable, first add the following property to `application.properties`:
+
+----
+quarkus.native.auto-service-loader-registration=true
+----
+
+Then build the native image:
+
+[,sh]
+----
+mvn clean package -Pnative
+----
+
+Run the generated executable:
+
+[,sh]
+----
+./target/process-service-rest-call-quarkus-runner
+----
+
+=== Submit a request
+
+To invoke the process, send a POST request to `+http://localhost:8080/CustomTaskDemo+` with the following payload:
+
+[,json]
+----
+{
+  "FirstName": "Alex",
+  "LastName": "Tom"
+
+}
+----
+
+Example using `curl`:
+
+[,sh]
+----
+curl -X 'POST' \
+ 'http://localhost:8080/CustomTaskDemo' \
+  -H 'accept: */*' \
+ -H 'Content-Type: application/json' \
+  -d '{
+ "FirstName": "Alex",
+ "LastName": "Tom"
+
+}'
+----
+
+=== Expected output
+
+After submitting the request, you should see log output similar to the following:
+
+[,text]
+----
+2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) FirstName = Alex
+2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) LastName = Tom
+2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) TaskName = MyConcatDefinitions
+2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) NodeName = MyConcatDefinitions
+2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) UNIQUE_TASK_ID = _E2D196C3-0F09-490A-9E26-F4F4BA04BD8C
+Full name:Alex Tom
+----
+
+
+
