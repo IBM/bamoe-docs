@@ -328,6 +328,92 @@ Once you have done this {CANVAS} users have access to the functionality availabl
 
 * xref:../tools/working-with-git.adoc[Canvas -> Working with Git]
 
+=== Configuring the authentication provider
+. Set the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in your Docker Compose file.
+. Add GitLab configuration details to the authentication provider array using the following JSON structure:
+
+[source,json]
+----
+{
+
+  "id": "unique identifier",
+
+  "domain": "base URL of your GitLab instance",
+
+  "supportedGitRemoteDomains": ["list of Git remote domains"],
+
+  "type": "gitlab",
+
+  "name": "readable name for displaying in the BAMOE UI",
+
+  "enabled": true,
+
+  "group": "git",
+
+  "disableEncoding": true
+
+}
+----
+
+.Variable details
+[%autowidth]
+|===
+|Variable |Description
+
+|id |A unique identifier for this authentication provider configuration.
+|domain |The base URL of your GitLab instance.
+|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with.
+|type |Specifies the provider type — in this case, gitlab.
+|name |A readable name displayed in the BAMOE UI.
+|enabled |A boolean flag that enables or disables this provider.
+|group |Categorizes the provider (e.g., git) for grouping similar services.
+|disableEncoding |If set to true, adds Accept-Encoding: identity to force the proxy/server to skip compression.
+|===
+
+
+=== Configuring the Authentication Provider
+
+. Set the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in the Docker Compose file. 
+.     Add the Bitbucket Data Center configuration to the authentication provider array using the following JSON structure:
+
+[source,json]
+----
+{
+
+  "id": "unique-id",
+
+  "domain": "https://your-bitbucket-domain.com",
+
+  "supportedGitRemoteDomains": ["your-bitbucket-domain.com"],
+
+  "type": "bitbucketDataCenter",
+
+  "name": "Bitbucket Data Center",
+
+  "enabled": true,
+
+  "group": "git",
+
+  "insecurelyDisableTlsCertificateValidation": false
+
+}
+----
+
+.Variable details
+[%autowidth]
+|===
+|Variable |Description
+
+|id |A unique identifier for this authentication provider configuration.
+|domain |The base URL of your Bitbucket Data Center instance.
+|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with.
+|type |Specifies the provider type — in this case, bitbucketDataCenter.
+|name |A readable name displayed in the BAMOE UI.
+|enabled |A boolean flag that enables or disables this provider.
+|group |Categorizes the provider (e.g., git) for grouping similar services.
+|insecurelyDisableTlsCertificateValidation |If set to true, skips TLS certificate validation (useful for testing or self-signed certificates).
+|===
+
 
 [#helm-chart-config-ref]
 == Configuration reference for {CANVAS} Helm Chart
