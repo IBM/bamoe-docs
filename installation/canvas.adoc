@@ -1,30 +1,35 @@
-= Installing BAMOE Canvas
 include::../partials/attributes.adoc[]
+= Installing {CANVAS}
+
 include::../styles/images.adoc[]
 
 
 //tag::canvas-description[]
-{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and manage Decisions and Workflows, through editors and service integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your _Business Services_ in development mode via the Dev Deployments feature.
+{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and, manage Decisions and Workflows through editors and service integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your _Business Services_ in development mode via the Dev Deployments feature.
 //end::canvas-description[]
 
 {CANVAS} depends on two backend applications to provide full functionality:
 
 * {EXT_SERVICES}: powers features like the DMN Runner and static validation of DMN, and BPMN models.
-* {CORS_PROXY}: allows {CANVAS} web app to communicate with Git and Cloud providers.
+* {CORS_PROXY}: allows {CANVAS} Web application to communicate with Git and Cloud providers.
 
 {CANVAS} and its two backend applications are available as container images.
 
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* {CANVAS} → https://quay.io/repository/bamoe/canvas[https://quay.io/repository/bamoe/canvas] @ {IMAGE_VERSION}
-* {EXT_SERVICES} → https://quay.io/repository/bamoe/extended-services[https://quay.io/repository/bamoe/extended-services] @ {IMAGE_VERSION}
-* {CORS_PROXY} → https://quay.io/repository/bamoe/cors-proxy[https://quay.io/repository/bamoe/cors-proxy] @ {IMAGE_VERSION}
+* {CANVAS} → https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas@{IMAGE_VERSION}]
+* {EXT_SERVICES} → https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services@{IMAGE_VERSION}]
+* {CORS_PROXY} → https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy@{IMAGE_VERSION}]
 
-NOTE: All three image versions must be the same for deployment to work.
+NOTE: All the three image versions must be the same for a deployment to work.
 
-== Deploying to Kubernetes or OpenShift with the Helm Chart (recommended)
+You can install/deploy {CANVAS} by using Helm chart, the OpenShift CLI, or run it locally using Docker and Docker Compose.
 
-{CANVAS} Helm Chart is a Helm chart based on the open-source Apache KIE Sandbox and it is a technology that can enable you to install multi-container services with a single command: Helm, See https://helm.sh/[https://helm.sh] for more information.
+== Option 1: Install by using Helm chart (recommended)
+
+The Helm chart provides a configurable way to deploy {CANVAS} in Kubernetes, OpenShift, and Minikube.
+
+For more information and instructions on how to install the tool, see https://helm.sh/[Helm].
 
 ===  Installing the Chart
 
@@ -46,13 +51,19 @@ oc get ingresses.config cluster --output jsonpath={.spec.domain}
 
 If you do not have access rights to this configuration, try creating a dummy Route resource and checking its domain.
 
+Then, install the Helm chart with the following commands:
+
 [source,shell]
 ----
 helm pull oci://quay.io/bamoe/canvas-helm-chart --version={VERSION} --untar
 helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
-=== Kubernetes install
+=== Generic Kubernetes install
+
+If you want to install {CANVAS} directly on a Kubernetes cluster, you may need to get the default Kubernetes cluster domain for your Ingress. This can vary depending on your cluster configuration.
+
+You can then run the following helm commands:
 
 [source,shell]
 ----
@@ -61,6 +72,13 @@ helm install my-bamoe-canvas ./canvas-helm-chart --values ./canvas-helm-chart/va
 ----
 
 === Minikube install
+
+To install {CANVAS} Helm chart on a Minikube cluster, you will need:
+
+- https://minikube.sigs.k8s.io/docs/start/[A local Minikube cluster up and runnning]
+- https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/[The Nginx Ingress installed]
+
+Use the following commands to do a Minikube specific install:
 
 [source,shell]
 ----
@@ -79,16 +97,16 @@ helm uninstall my-bamoe-canvas
 
 === Passing environmental variables
 
-This Chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[{CANVAS} Helm Chart configuration reference] for all options.
+This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[{CANVAS} Helm Chart configuration reference] for all options.
  
 [source,shell]
 ----
 helm install my-bamoe-canvas ./src --set image.repository=quay.io
 ----
 
-== Deploying {CANVAS} to OpenShift via CLI
+== Option 2: Deploy directly on OpenShift (using `oc` CLI)
 
-If you have an OpenShift cluster and are logged in via the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
+If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -123,7 +141,7 @@ oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
 ----
-. Finally, deploy the {CANVAS} image, setting the environment variables required to connect it to the {EXT_SERVICES} and {CORS_PROXY} backends.
+. Finally, deploy the {CANVAS} image and set the environment variables required to connect it to the {EXT_SERVICES} and {CORS_PROXY} backends.
 +
 [source,shell,subs="attributes+"]
 ----
@@ -140,19 +158,19 @@ oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
 .The OpenShift topology after {CANVAS} deployment
 image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
 
-Your {CANVAS} instance should be up and accessible via the route created in this last step. To get it, run this command:
+Your {CANVAS} instance is now up and accessible through the route created in this last step. To get it, run the following command:
 [source,shell,subs="attributes+"]
 ----
 oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
-NOTE: All services will be available via `https`, which means that if you are deploying them to a local OpenShift instance (i.e. via CRC), the {CANVAS} web app, the {EXT_SERVICES} and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 == Running locally with Docker Compose
 
-{CANVAS} and its related services can be run locally using Docker Compose.
+{CANVAS} and its related services can be run locally by using Docker Compose.
 
-See https://docs.docker.com/get-docker/[Docker Installation] and https://docs.docker.com/compose/install/[Compose Plugin Installation] for more information.
+For more information, see https://docs.docker.com/get-docker/[Docker Installation], and https://docs.docker.com/compose/install/[Compose Plugin Installation].
 
 The `bamoe-{VERSION}-docker-compose.zip` can only be downloaded from IBM Passport Advantage, and you can find information on the https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document].
 
@@ -162,7 +180,7 @@ To Run {CANVAS} with Docker Compose follow these steps:
 
 . Extract the downloaded `bamoe-{VERSION}-docker-compose.zip`.
 . In a terminal, navigate to the extracted folder: `bamoe-{VERSION}-canvas-docker-compose`.
-. Run the command:
+. Run the following command:
 +
 [source,shell]
 ----
@@ -171,7 +189,7 @@ docker compose up
 
 {CANVAS} will be available at http://localhost:9090.
 
-== Running locally with Docker
+== Option 3: Running locally with Docker
 
 === Configuring {EXT_SERVICES}
 
@@ -180,7 +198,7 @@ docker compose up
 docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{IMAGE_VERSION}
 # Add the -d flag to run in detached mode.
 ----
-Access the API through port 21345, no additional configuration is necessary.
+Access the API through the port 21345. No additional configuration is necessary.
 
 
 === Configuring {CORS_PROXY}
@@ -190,7 +208,7 @@ Access the API through port 21345, no additional configuration is necessary.
 docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
 # Add the -d flag to run in detached mode.
 ----
-The API is accessible via port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
+The API is accessible through the port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
 
 === Configuring {CANVAS}
 
@@ -200,7 +218,7 @@ This image must be run with two environment variables that will allow it to comm
 
 `KIE_SANDBOX_CORS_PROXY_URL`:: E.g., https://cors-proxy.bamoe.company.com[https://cors-proxy.bamoe.my-company.com]
 
-If you are running locally, following the previous steps, use this command to start your {CANVAS} instance with the backend services:
+If you are running locally, by following the previous steps, use the following command to start your {CANVAS} instance with the backend services:
 [source,shell,subs="attributes+"]
 ----
 docker run -p 8080:8080 -it \
@@ -209,16 +227,16 @@ docker run -p 8080:8080 -it \
   quay.io/bamoe/canvas:{IMAGE_VERSION}
 # Add the -d flag to run in detached mode.
 ----
-The HTTP server is accessed via port 8080.
+The HTTP server is accessed through the port 8080.
 
-Several customization options are available. For more information on the configurations available via environment variables see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
+Several customization options are available. For more information on the configurations available by using the environment variables, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
 
 [NOTE]
 ====
-Those addresses need to be accessible from the users' machines, as {CANVAS} will make requests to them directly from the user's browser.
-Using internal IP/DNS services will not work.
-Requests are made directly from the user's browser to both URLs configured above.
+The addresses need to be accessible from the users' machines, as {CANVAS} will make requests to them directly from the user's browser.
+Using the internal IP/DNS services will not work.
+Requests are made directly from the user's browser to both URLs configured.
 ====
 
 Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
@@ -228,7 +246,7 @@ By default, {CANVAS} is configured to fetch this image from https://quay.io/bamo
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
 For example, imagine a user is creating Dev Deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
-This local Kubernetes instance needs to be able to download the image configured in `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
+This local Kubernetes instance must be able to download the image configured in `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
 The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev Deployments for Decisions.
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
@@ -243,7 +261,7 @@ It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} i
 
 Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. In addition they can be used to store configurations that are common to all new _Business Service_ projects within an organization, making them available in {CANVAS} for all users in your organization.
 
-Your custom Accelerator should be a public Git repository. After creating it, you need to write a specific JSON configuration that is used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
+Your custom Accelerator must be a public Git repository. After creating it, you need to write a specific JSON configuration that is used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
 
 [source,json,subs="attributes+"]
 ----
@@ -258,17 +276,17 @@ Your custom Accelerator should be a public Git repository. After creating it, yo
 }
 ----
 
-* **name**: This is how the Accelerator will be known inside BAMOE Canvas.
-* **iconUrl**: An optional parameter to add an image/logo alongside you Accelerator name.
-* **gitRepositoryUrl**: This is where your Accelerator is hosted. Should be an URL that can be used with git clone.
-* **gitRepositoryGitRef**: Where in your repository is this Accelerator located. Could be a branch, commit, tag, anything that can be used with git checkout.
-* **dmnDestinationFolder**: Where your DMN and PMML files will be moved to after applying the Accelerator (relative to the project root).
-* **bpmnDestinationFolder**: Where your BPMN files will be moved to after applying the Accelerator (relative to the project root).
-* **otherFilesDestinationFolder**: Where other files will be moved to after applying the Accelerator (relative to the project root).
+* **name**: This is how the Accelerator is known inside BAMOE Canvas.
+* **iconUrl**: An optional parameter to add an image/logo along with your Accelerator name.
+* **gitRepositoryUrl**: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
+* **gitRepositoryGitRef**: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
+* **dmnDestinationFolder**: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
+* **bpmnDestinationFolder**: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
+* **otherFilesDestinationFolder**: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
 
 === Configuring the `KIE_SANDBOX_ACCELERATORS` environment variable
 
-This environment variable accepts an array of Accelerators configurations in the format described above.
+This environment variable accepts an array of Accelerators configurations in the format described.
 
 By default, it comes pre-configured with:
 
@@ -317,7 +335,7 @@ By default, it comes pre-configured with:
 ]
 ----
 
-This value can be overwritten to add your own custom Accelerators, replacing the default ones, or appending to them.
+This value can be overwritten to add your own custom Accelerators by replacing the default ones, or appending to them.
 
 [#canvas-gitrepo-config]
 == Configuring GitHub Enterprise Server, GitLab, or BitBucket Data Center

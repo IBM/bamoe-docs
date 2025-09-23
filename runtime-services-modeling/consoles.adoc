@@ -46,17 +46,14 @@ image::runtime-services-modeling/mgmt-console-home-no-connections.png[Image of {
 More settings are available in the **Advanced OpenID Connect settings** section:
 
 - **Client ID**: Overrides the Client ID used for this connection. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID` environment variable.
-- **Scope**: Overrides the scopes requested to the Identity Provider. Useful from some Identity Providers that, for example, will only grant a Refresh Token if the `offline_access` scope is included in the token request. Defaults to `openid email profile`.
-- **Audience**: This is the `audience` parameter in the Authorization request. Used to identify the service that the token is intended for. Empty by default.
+- **Scope**: Overrides the scopes requested to the Identity Provider. Useful from some Identity Providers that, for example, will only grant a Refresh Token if the `offline_access` scope is included in the token request. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES` environment variable.
+- **Audience**: This is the `audience` parameter in the Authorization request. Used to identify the service that the token is intended for. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE` environment variable.
 
 image::runtime-services-modeling/mgmt-console-home-add-connection-modal-filled.png[Image of {MANAGEMENT_CONSOLE} new connection modal]
 
-If your _Business Service_ uses OpenID Connect authentication, you should be redirected to the Identity Provider
-(IdP) login page or, if you’re already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your
-_Business Service_ is unsecured, it should connect directly.
+If your _Business Service_ uses OpenID Connect authentication, you should be redirected to the Identity Provider (IdP) login page or, if you’re already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your _Business Service_ is unsecured, it should connect directly.
 
-Once logged in, the management pages will be displayed in the side menu, listing Process Instances,
-Jobs, and Tasks.
+Once logged in, the management pages will be displayed in the side menu, listing Process Instances, Process Definitions, Jobs, and Tasks.
 
 image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.gif[Image of {MANAGEMENT_CONSOLE} new connection modal]
 
@@ -65,49 +62,13 @@ For information on how to secure your _Business Service_ and expose the Indentit
 
 // adding the pre-configured runtimes here but it needs more thought on how to integrate with above
 
-=== Pre-configured connected runtimes
+=== Pre-configured connected Business Services
 
-It is possible set up a pre-configured list of runtimes, defined via an environment variable, available via the `env.json` file. Selecting a different AuthSession updates the state and closes the drawer. This allow users to connect to pre-defined listed runtimes without having to manually configure each one.
+It is possible set up a pre-configured list of Business Services, defined via the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES` environment variable. This allow users to connect to pre-defined listed Business Services without having to manually configure each one. To learn how to set them up check the xref:../installation/management-console.adoc##pre-configured-business-services[installation guide].
 
-Example of a value for the environment variable:
+On the first load, the Management Console will create AuthSessions for each Business Service listed in the environment variable.
 
-[source,shell]
-----
-{
-    "BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES": [
-        {
-            "alias": "My Business Service 1",
-            "runtimeUrl": "http://localhost:8081",
-            "identityProviderUrl": "http://localhost:8181/realms/bamoe"
-        },
-        {
-            "alias": "My Business Service 2",
-            "runtimeUrl": "http://localhost:8082",
-            "identityProviderUrl": "http://localhost:8182/auth/realms/myrealm",
-            "clientId": "bamoe-management-console",
-            "scopes": "openid email profile offline_access",
-            "audience": "bamoe-service"
-        },
-        {
-            "alias": "My Business Service 3",
-            "runtimeUrl": "http://localhost:8083"
-        },
-        ...
-    ]
-} 
-----
-
-The only required properties are alias and `runtimeUrl`. The other properties are optional and can be used to configure the connection with an identity provider.
-
-If no `identityProviderUrl` is provided, the Management Console checks the quarkus-oidc-proxy endpoint to determine the Identity Provider URL (if the runtime is secured). 
-
-If no clientId, scopes or audience are provided, the Management Console uses default values. 
-
-If multiple runtimes share the same `indentityProviderUrl`, `clientId`, `scopes`, and `audience`, the Management Console should reuse the same token for all of them.
-
-On the first load, the Management Console will create AuthSessions for each runtime listed in the BAMOE_MANAGEMENT_CONSOLE_CONNECTED_RUNTIMES environment variable. Each runtime will then start authenticating. 
-
-If the runtime requires authentication, the Management Console will redirect to the login page, unless the user is already authenticated with the same Identity Provider (using the same clientId, scopes, and audience), in this case the same token can be used for all runtimes.
+If a Business Service requires authentication, the Management Console display an "Authenticate" button, which will redirect to the login page for the Identity Provider configured in the Business Service, unless the user is already authenticated with the same Identity Provider (using the same `clientId`, `scopes`, and `audience`), in this case the same token will be used for all matching Business Services.
 
 == Overview
 
