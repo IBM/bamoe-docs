@@ -279,7 +279,7 @@ By default, it comes pre-configured with:
     "name": "Quarkus (Full)",
     "iconUrl": "images/canvas_accelerator_logo_quarkus_full.png",
     "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
-    "gitRepositoryGitRef": "9.3.0-ibm-0001-quarkus-full",
+    "gitRepositoryGitRef": "{QUARKUS_VERSION_930}-quarkus-full",
     "dmnDestinationFolder": "src/main/resources",
     "bpmnDestinationFolder": "src/main/resources",
     "otherFilesDestinationFolder": "src/main/resources"
@@ -289,7 +289,7 @@ By default, it comes pre-configured with:
     "name": "Quarkus (DMN)",
     "iconUrl": "images/canvas_accelerator_logo_quarkus_dmn.png",
     "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
-    "gitRepositoryGitRef": "9.3.0-ibm-0001-quarkus-dmn",
+    "gitRepositoryGitRef": "{QUARKUS_VERSION_930}-quarkus-dmn",
     "dmnDestinationFolder": "src/main/resources",
     "bpmnDestinationFolder": "src/main/resources",
     "otherFilesDestinationFolder": "src/main/resources"
@@ -299,7 +299,7 @@ By default, it comes pre-configured with:
     "name": "Spring Boot (Full)",
     "iconUrl": "images/canvas_accelerator_logo_springboot_full.png",
     "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
-    "gitRepositoryGitRef": "9.3.0-ibm-0001-spring-boot-full",
+    "gitRepositoryGitRef": "{SPRING_VERSION_930}-spring-boot-full",
     "dmnDestinationFolder": "src/main/resources",
     "bpmnDestinationFolder": "src/main/resources",
     "otherFilesDestinationFolder": "src/main/resources"
@@ -309,7 +309,7 @@ By default, it comes pre-configured with:
     "name": "Quarkus (DMN)",
     "iconUrl": "images/canvas_accelerator_logo_springboot_full.png",
     "gitRepositoryUrl": "https://github.com/ibm/bamoe-canvas-quarkus-accelerator",
-    "gitRepositoryGitRef": "9.3.0-ibm-0001-spring-boot-full",
+    "gitRepositoryGitRef": "{SPRING_VERSION_930}-spring-boot-full",
     "dmnDestinationFolder": "src/main/resources",
     "bpmnDestinationFolder": "src/main/resources",
     "otherFilesDestinationFolder": "src/main/resources"
@@ -322,15 +322,14 @@ This value can be overwritten to add your own custom Accelerators, replacing the
 [#canvas-gitrepo-config]
 == Configuring GitHub Enterprise Server, GitLab, or BitBucket Data Center
 
-To allow users to connect to your organization's source code control instance, you will need to configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable on your {CANVAS} installation. For more information refer to the https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS} image description on Quay.io]. 
+To integrate the Authentication providers with GitHub Enterprise Server instances, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable on your {CANVAS} installation. For example, to configure GitHub Enterprise Server, add the following environment variable to your docker compose file:
 
-Once you have done this {CANVAS} users have access to the functionality available in the different integrations:
+[source,json]
+----
+docker run -t -p 9090:8080 -e KIE_SANDBOX_AUTH_PROVIDERS='[{ "id":"github_at_my_company", "domain":"github.my-company.com", "supportedGitRemoteDomains":["github.my-company.com","gist.github.my-company.com"], "type":"github", "name":"GitHub @ MyCompany", "enabled":true, "group":"git" }]' -i --rm quay.io/bamoe/canvas:9.2.1-ibm-0005
+----
 
-* xref:../tools/working-with-git.adoc[Canvas -> Working with Git]
-
-=== Configuring the authentication provider
-. Set the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in your Docker Compose file.
-. Add GitLab configuration details to the authentication provider array using the following JSON structure:
+To configure GitLab, add the following JSON object to the authentication provider array:
 
 [source,json]
 ----
@@ -370,11 +369,7 @@ Once you have done this {CANVAS} users have access to the functionality availabl
 |disableEncoding |If set to true, adds Accept-Encoding: identity to force the proxy/server to skip compression.
 |===
 
-
-=== Configuring the Authentication Provider
-
-. Set the environment variable `KIE_SANDBOX_AUTH_PROVIDERS` in the Docker Compose file. 
-.     Add the Bitbucket Data Center configuration to the authentication provider array using the following JSON structure:
+To configure Bitbucket Data Center, add the following JSON object to the authentication provider array:
 
 [source,json]
 ----
@@ -413,6 +408,8 @@ Once you have done this {CANVAS} users have access to the functionality availabl
 |group |Categorizes the provider (e.g., git) for grouping similar services.
 |insecurelyDisableTlsCertificateValidation |If set to true, skips TLS certificate validation (useful for testing or self-signed certificates).
 |===
+
+After completing these configurations, {CANVAS} users can access the features provided by each integration. For additional information, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
 
 [#helm-chart-config-ref]
