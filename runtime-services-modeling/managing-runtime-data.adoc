@@ -2,20 +2,169 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-BAMOE stores runtime data as well as historical data within its subsystems. Runtime data involves data related to all the live process instances. This data is cleaned up automatically once the process instance completes its execution. However historical data is deliberately kept indefinitely within the data-index and data-audi subsystems. As the volume of data grows over time, it presents several challenges such as: 
+{PRODUCT_SHORT} stores runtime data and historical data within its subsystems. Runtime data includes data related to all the live process instances. This data is cleaned up automatically once the process instance completes its execution. However historical data is deliberately kept indefinitely within the Data-Index and Data-Audit subsystems. As the volume of data grows over time, it can impact your system in the following ways: 
 
-* Performance Degradation: Accumulating data can lead to slower query responses and reduced system responsiveness.
+* *Degraded performance*: Accumulating data can lead to slower query responses and reduced system responsiveness.
 
-* Increased Storage Costs: Unmanaged data growth can result in higher storage expenses and potential capacity issues.
+* *Increased storage costs*: Unmanaged data growth can result in higher storage expenses and potential capacity issues.
 
-* Operational Inefficiencies: Manual data management processes are time consuming and error prone.
+* *Operational inefficiencies*: Manual data management processes are time consuming and error prone.
 
-The Data Cleanup Tool enables you to manage this historical data. Users are recommended to run the tool daily or weekly in order to keep the database size manageable and to prevent unlimited growth.
+The Data Cleanup Tool enables you to manage this historical data by running the tool daily or weekly to keep the database size manageable and to prevent unlimited growth.
 
-BAMOE Data Cleanup Tool is a command line application that is delivered as an image that can be configured via Environment variables to delete historical data from a database containing the stateful Workflow subsystem table. It runs, deletes data and then terminates.
+It is a command line application that is delivered as an image that can be configured via environment variables. The tool deletes historical data from a database containing the stateful Workflow subsystem table. It runs, deletes data and then terminates.
 
 The Workflow subsystems that will be included for cleanup are data-index and data-audit
 
 All data related to the process instances that are either COMPLETED or ABORTED are eligible for cleanup
 
-List of tables
+== Tables eligible for cleanup
+
+[%autowidth]
+|===
+|Subsystem |Parent table |Child table(s)
+
+|Data-Index
+|processes
+|processes_addons, processes_roles, milestones, nodes
+
+|
+|tasks 
+|tasks_admin_groups, tasks_admin_users, tasks_excluded_users, tasks_potential_groups, tasks_potential_users, attachments, comments
+
+|
+|jobs 
+|n/a
+
+|Data-Audit
+|job_execution_log 
+|n/a 
+
+|
+|process_instance_error_log
+|n/a
+
+|
+|process_instance_node_log
+|n/a
+
+|
+|process_instance_state_log
+|process_instance_state_roles_log
+
+|
+|process_instance_variable_log
+|n/a
+
+|
+|task_instance_assignment_log
+|task_instance_assignment_users_log
+
+|
+|task_instance_attachment_log
+|n/a
+
+|
+|task_instance_comment_log
+|n/a
+
+|
+|task_instance_deadline_log
+|task_instance_deadline_notification_log
+
+|
+|task_instance_state_log
+|n/a
+
+|
+|task_instance_variable_log
+|n/a
+|===
+
+== Configuring the data source and tool
+As the Data Cleanup Tool is available as an image, it can be run as a container in all the usual ways. You will need to configure the following environment variables according to your needs. 
+
+In a Kubernetes environment it can be run once via a Kubernetes Job or a CronJob if you want to automate the execution of the tool.
+
+NOTE: Since this tool is used to delete data from databases which can contain large amount of data, it is advised to use the tool during off peak work hours with an appropriate batch size. You may also want to backup your database before running the tool. 
+
+To configure the data source you can use the following properties that are required for the tool to run:
+
+[source,json]
+----
+QUARKUS_PROFILE:<postgresql | mssql | oracle>
+QUARKUS_DATASOURCE_USERNAME:<your username>
+QUARKUS_DATASOURCE_PASSWORD:<your password>
+QUARKUS_DATASOURCE_JDBC_URL:<jdbc url>
+----
+
+
+To configure the Data Cleanup Tool you can configure the following properties:
+
+[%autowidth]
+|===
+|Optional Property |Type |Possible Values
+
+|BAMOE_DATA_CLEANUP_TOOL_SUBSYSTEMS
+|List<String>
+|data-audit,data-index (default) or data-audit 
+
+|BAMOE_DATA_CLEANUP_TOOL_BATCH_SIZE
+|Integer
+|1000 (default) or any valid number > 0 
+
+|BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN_PERIOD
+|Integer
+|any valid number > 0 
+
+|BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN
+|Date
+|date format YYYY-MM-DD e.g. '2025-08-20'
+
+|BAMOE_DATA_CLEANUP_TOOL_PROCESSES
+|List<String>
+|any valid parent process id `,` separated, no extra spaces
+
+|BAMOE_DATA_CLEANUP_TOOL_LOG_LEVEL
+|String
+|INFO (default), DEBUG, WARN, ERROR, OFF
+
+|BAMOE_DATA_CLEANUP_TOOL_ACCEPT
+|Boolean
+|false (defaul) or true
+|===
+
+`BAMOE_DATA_CLEANUP_TOOL_SUBSYSTEMS` refers to the BAMOE subsystems that needs to be considered for cleanup. This could be either `data-audit` or `data-audit,data-index`. By default, both subsystems are eligible for cleanup unless specified otherwise using this property where user has the convenience of selecting the component(s) they want. If you specify both subsystems make sure there is no space between the items in the list. At the moment we do not support to clean `data-index` alone.
+
+`BAMOE_DATA_CLEANUP_TOOL_BATCH_SIZE` refers to the number of process instances that is considered per delete transaction. Keep this at an ideal value and do not make this a very large number which could affect the performance of the database.
+
+`BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN_PERIOD` is used to delete the processes older than the given number of days before current day.
+
+`BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN` is used to delete the processes older than the given date in the format `'YYYY-MM-DD'`
+
+
+NOTE: If both BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN_PERIOD and BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN is specified, then
+
+BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN_PERIOD takes precedence.
+
+If both are not specified all data irrespective of date will be considered for cleanup.
+
+`BAMOE_DATA_CLEANUP_TOOL_PROCESSES` is used to specify a list of parent process id's that needs to be considered for cleanup. If any of the process id mentioned is not a parent those will be skipped. Make sure not to include any extra spaces between process id's.
+
+NOTE: If none of the these properties are specified then all the process instance related data from all the BAMOE subsystems (data-audit and data-index) are cleaned up with the default batch size.
+
+`BAMOE_DATA_CLEANUP_TOOL_LOG_LEVEL` is used to set the log level for the tool specific logs. By default, it is set at `INFO` level.
+
+`BAMOE_DATA_CLEANUP_TOOL_ACCEPT` is used to provide your acceptance that you agree to delete the process instance related data matching the given criteria. By default, it is set to `false`. This gives you an option to verify your choices before actually deleting the data by setting the property to `true`.
+
+3. Quarkus
+
+properties
+
+`QUARKUS_LOG_LEVEL:<log_level>`
+
+
+This property allows users to set the overall log level which by default is set to `INFO`. This accepts all Quarkus supported log levels as mentioned [here](https://quarkus.io/guides/logging#use-log-levels).
+
+
+
