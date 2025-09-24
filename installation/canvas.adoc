@@ -172,7 +172,7 @@ NOTE: All services will be available through `https`, which means that if you ar
 
 For more information, see https://docs.docker.com/get-docker/[Docker Installation], and https://docs.docker.com/compose/install/[Compose Plugin Installation].
 
-The `bamoe-{VERSION}-docker-compose.zip` can only be downloaded from IBM Passport Advantage, and you can find information on the https://www.ibm.com/support/pages/node/7228834[BAMOE 9.2 Download Document].
+The `bamoe-{VERSION}-docker-compose.zip` can only be downloaded from IBM Passport Advantage, and you can find information on the https://www.ibm.com/support/pages/node/7244587[BAMOE 9.3 Download Document].
 
 === Run
 
@@ -241,7 +241,7 @@ Requests are made directly from the user's browser to both URLs configured.
 
 Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
 
-By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION_920}].
+By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
@@ -272,7 +272,8 @@ Your custom Accelerator must be a public Git repository. After creating it, you 
     "gitRepositoryGitRef": "branchName",
     "dmnDestinationFolder": "path/to/place/dmn/files",
     "bpmnDestinationFolder": "path/to/place/bpmn/files",
-    "otherFilesDestinationFolder": "path/to/place/other/files"
+    "otherFilesDestinationFolder": "path/to/place/other/files",
+    "scesimDestinationFolder": "path/to/place/scesim/files"
 }
 ----
 
@@ -283,6 +284,8 @@ Your custom Accelerator must be a public Git repository. After creating it, you 
 * **dmnDestinationFolder**: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
 * **bpmnDestinationFolder**: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
 * **otherFilesDestinationFolder**: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
+* **scesimDestinationFolder**:
+Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
 
 === Configuring the `KIE_SANDBOX_ACCELERATORS` environment variable
 
@@ -344,7 +347,7 @@ To integrate the Authentication providers with GitHub Enterprise Server instance
 
 [source,json]
 ----
-docker run -t -p 9090:8080 -e KIE_SANDBOX_AUTH_PROVIDERS='[{ "id":"github_at_my_company", "domain":"github.my-company.com", "supportedGitRemoteDomains":["github.my-company.com","gist.github.my-company.com"], "type":"github", "name":"GitHub @ MyCompany", "enabled":true, "group":"git" }]' -i --rm quay.io/bamoe/canvas:9.2.1-ibm-0005
+docker run -t -p 9090:8080 -e KIE_SANDBOX_AUTH_PROVIDERS='[{ "id":"github_at_my_company", "domain":"github.my-company.com", "supportedGitRemoteDomains":["github.my-company.com","gist.github.my-company.com"], "type":"github", "name":"GitHub @ MyCompany", "enabled":true, "group":"git" }]' -i --rm quay.io/bamoe/canvas:9.3.0-ibm-0007
 ----
 
 To configure GitLab, include the following JSON object in the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable:
