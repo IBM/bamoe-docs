@@ -347,92 +347,39 @@ This value can be overwritten to add your own custom Accelerators by replacing t
 [#canvas-gitrepo-config]
 == Configuring GitHub Enterprise Server, GitLab, or BitBucket Data Center
 
-To integrate the Authentication providers with GitHub Enterprise Server instances, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable on your {CANVAS} installation. For example, to configure GitHub Enterprise Server, add the following environment variable to your docker compose file:
+To integrate GitHub Enterprise Server, GitLab, or Bitbucket Data Center with BAMOE Canvas, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable.
 
-[source,shell,subs="attributes+"]
-----
-docker run -t -p 9090:8080 -e KIE_SANDBOX_AUTH_PROVIDERS='[{ "id":"github_at_my_company", "domain":"github.my-company.com", "supportedGitRemoteDomains":["github.my-company.com","gist.github.my-company.com"], "type":"github", "name":"GitHub @ MyCompany", "enabled":true, "group":"git" }]' -i --rm quay.io/bamoe/canvas:{IMAGE_VERSION}
-----
+NOTE: You can add environment variable configuration to your docker-compose.yml file or pass it directly via a docker run command. For more information, see https://quay.io/repository/bamoe/canvas.
 
-To configure GitLab, include the following JSON object in the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable:
+Example JSON configuration:
 
 [source,json]
 ----
-{
-
-  "id": "unique identifier",
-
-  "domain": "base URL of your GitLab instance",
-
-  "supportedGitRemoteDomains": ["list of Git remote domains"],
-
-  "type": "gitlab",
-
-  "name": "readable name for displaying in the BAMOE UI",
-
-  "enabled": true,
-
-  "group": "git",
-
-  "disableEncoding": true
-
-}
+[
+  {
+    "id": "unique identifier",
+    "domain": "https://your-git-provider.com",
+    "supportedGitRemoteDomains": ["your-git-provider.com"],
+    "type": "gitlab | githubEnterprise | bitbucketDataCenter",
+    "name": "readable name for displaying in the BAMOE UI",
+    "enabled": true,
+    "group": "git",
+    "disableEncoding": true,
+    "insecurelyDisableTlsCertificateValidation": false
+  }
+]
 ----
 
-.GitLab variable details
-[%autowidth]
-|===
-|Variable |Description
-
-|id |A unique identifier for this authentication provider configuration.
-|domain |The base URL of your GitLab instance.
-|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with.
-|type |Specifies the provider type — in this case, gitlab.
-|name |A readable name displayed in the BAMOE UI.
-|enabled |A boolean flag that enables or disables this provider.
-|group |Categorizes the provider (e.g., git) for grouping similar services.
-|disableEncoding |If set to true, adds Accept-Encoding: identity to force the proxy/server to skip compression.
-|===
-
-To configure Bitbucket Data Center, include the following JSON object in the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable:
-
-[source,json]
-----
-{
-
-  "id": "unique-id",
-
-  "domain": "https://your-bitbucket-domain.com",
-
-  "supportedGitRemoteDomains": ["your-bitbucket-domain.com"],
-
-  "type": "bitbucketDataCenter",
-
-  "name": "Bitbucket Data Center",
-
-  "enabled": true,
-
-  "group": "git",
-
-  "insecurelyDisableTlsCertificateValidation": false
-
-}
-----
-
-.Bitbucket variable details
-[%autowidth]
-|===
-|Variable |Description
-
-|id |A unique identifier for this authentication provider configuration.
-|domain |The base URL of your Bitbucket Data Center instance.
-|supportedGitRemoteDomains |A list of Git remote domains that this provider can authenticate with.
-|type |Specifies the provider type — in this case, bitbucketDataCenter.
-|name |A readable name displayed in the BAMOE UI.
-|enabled |A boolean flag that enables or disables this provider.
-|group |Categorizes the provider (e.g., git) for grouping similar services.
-|insecurelyDisableTlsCertificateValidation |If set to true, skips TLS certificate validation (useful for testing or self-signed certificates).
-|===
+* id: A unique identifier for this authentication provider configuration.
+* domain: The base URL of your GitLab instance.
+* supportedGitRemoteDomains: A list of Git remote domains that this provider can authenticate with.
+* type: Specifies the provider type — in this case, gitlab.
+* name: A readable name displayed in the BAMOE UI.
+* enabled: A boolean flag that enables or disables this provider.
+* group: Categorizes the provider (e.g., git) for grouping similar services.
+* disableEncoding: If set to true, adds Accept-Encoding: identity to force the proxy/server to skip compression.
+* enabled: A boolean flag that enables or disables this provider.
+* insecurelyDisableTlsCertificateValidation: If set to true, skips TLS certificate validation (useful for testing or self-signed certificates).
 
 After completing these configurations, you can access the features provided by each integration. For additional information, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
