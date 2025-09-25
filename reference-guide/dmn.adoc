@@ -504,8 +504,154 @@ In order to make the language easier to use and avoid common errors due to space
 The keyword `in`::
 The keyword `in` is the only keyword in the language that cannot be used as part of a variable name. Although the specifications allow the use of keywords in the middle of variable names, the use of `in` in variable names conflicts with the grammar definition of `for`, `every` and `some` expression constructs.
 
+== Rule expressions in B-FEEL
+
+The Business Friendly Enough Expression Language (B-FEEL)is a variant of FEEL that retains its grammar but modifies its semantics to improve usability. B-FEEL eliminates ambiguity by using null solely to represent missing data, whereas FEEL uses null for both missing data and execution errors. B-FEEL redefines the behavior of operations and built-in functions that would return null in FEEL due to errors, ensuring they return non-null values instead.
+
+To activate B-FEEL in a DMN model, modelers must set the expression language to \https://www.omg.org/spec/DMN/20240513/B-FEEL/.
+
+Modelers can configure the expression language either globally or at the expression-specific level (for example, within a `literalExpression`). By default, the language is set to FEEL. When both global and expression-specific configurations exist, the engine prioritizes the expression-specific setting during evaluation.
+
+The semantic enhancements in B-FEEL are as follows:
+
+.Boolean logic
+
+B-FEEL enforces a two-value logic system (true and false) by removing null from boolean results. Boolean operators such as =, <=, <, >, >=, not(), and, or, in, and between always return true or false, even when the expression involves incompatible types. In such cases, B-FEEL treats the result as false, except for !=, which returns true.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+
+|decimal("a", 0)	|null	|0
+|round up("5.5", 0)	|null	|0
+|string length(22)	|null	|0
+|day of year("a")	|null	|0
+|count([1,null,3])	|3	|3
+|sum([1, null, 3])	|null	|4
+|sum([1, "1", 3])	|null	|4
+|sum([])	|null	|0
+|mean(["a"])	|null	|0
+|mean([1, "a", 3])	|null	|2
+
+|===
+
+.String functions
+
+B-FEEL ensures string-returning functions produce an empty string ("") instead of null.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+
+|lower case(12)	|null	|""
+|string(null)	|null	|""
+|day of week("a")	|null	|""
+|substring("a", "z")	|null |""
+|===
+
+
+.Date and Time functions
+
+B-FEEL replaces null with default epoch values for date and time functions.
+
+
+[cols="30%,70%" options="header"]
+|===
+|Type|Default Value
+|Date and time	|date and time("1970-01-01T00:00:00+00:00")
+|Date	|date("1970-01-01")
+|Time	|time("00:00:00+00:00")
+|===
+
+[cols="250%,25%,50%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|time("a")	|null	|time("00:00:00+00:00")
+|date(null)	|null	|date("1970-01-01")
+|date and time(true)	|null	|date and time("1970-01-01T00:00:00+00:00")
+|===
+
+.Duration Functions
+
+B-FEEL returns zero durations instead of null.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|duration("a")	|null	|duration("P0M")
+|years and months duration(null, null)	|null	|duration("P0M")
+|===
+
+.Collection Functions
+
+B-FEEL modifies collection-returning functions to return empty collections. The mode() function ignores non-numeric values.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|split("abc", 22)	|null	|[]
+|mode([null,null,null, 1, 1,2])	|null	|[1]
+|===
+
+.Range Functions
+
+B-FEEL returns an empty range (0..0) instead of null.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|range("x")	|null	|range("(0..0)")
+|===
+
+.Arithmetic Semantics
+
+B-FEEL modifies addition and subtraction behavior when operand types differ. It converts the non-matching type using appropriate B-FEEL functions.
+
+[cols="30%,70%" options="header"]
+|===
+|Type|Behavior
+|String	|Converts non-string to string; subtraction returns ""
+|Number	|Converts non-number to number
+|Date/Time	|Converts non-date/time to duration
+|Duration	|Converts non-duration to duration
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|"Today is " + today()	|null	|"Today is 2020-01-01"
+|"The result is: " + 1	|null	|"The result is: 1"
+|5 + " minutes"	|null	|5 + " minutes"
+|"This is " + null	|null	|"This is "
+|1 + null	|null	|1
+|null - 6	|null	|-6
+|date("2021-01-01") + 7	|null	|7
+|"abc" - 2	|null	|""
+|===
+
+.Multiplication and Division Semantics
+
+B-FEEL converts mismatched types to numbers before applying multiplication or division.
+
+[cols="50%,25%,25%" options="header"]
+|===
+|Expression|FEEL|B-FEEL
+|22 * "a"	|null	|0
+|null / 22	|null	|0
+|duration("P1Y") * null |null	|duration("P0M")
+|===
+
+.Exponentiation
+
+B-FEEL uses FEEL semantics for exponentiation but ensures both operands are converted to numbers using the B-FEEL number() function.
+
+
+
+
+
+
+
 [id="con-dmn-1.5"]
-== DMN 1.5
+== DMN 1.5 features
 
 BAMOE version {VERSION_91X} introduce support for DMN 1.5.
 
@@ -631,3 +777,134 @@ Note, that the `allowedValues` tag has been deprecated in the 1.5 DMN version.
 '''
 
 For official DMN specifications, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification].
+
+
+[id=dmn-1.6]
+== DMN 1.6 features
+The DMN Editor and execution engine support the following DMN 1.6 features:
+
+=== B-FEEL supported as an expression language 
+The Decision Engine now supports B-FEEL (Business Friendly Enough Expression Language) as an expression language. B-FEEL shares the same grammar as FEEL but alters the semantics to be friendlier. For more information, see the xref:
+
+=== Simplified `InputData` assignment across nested imports.
+The DMN 1.6 enhancement simplifies how `InputData` values are assigned across models with nested or transitive imports. When an `InputData` element is reused across multiple models through different import paths, the engine now assigns its value only once. All models referencing the same `InputData` share the same value consistently, regardless of how deeply nested or imported the reference is.
+
+Previously, each import path required a separate, fully qualified assignment. For example, consider the following import structure:
+
+`Model B.Model A.Person name = "value"`
+
+`Model C.Model A.Person name = "value"`
+
+With DMN 1.6, this process is streamlined. You can now assign the value once using the namespace:
+
+`Person name = "value"`
+
+The engine automatically propagates this value across all import paths. This change promotes cleaner model definitions and reduces redundancy in complex import hierarchies. Instead of specifying values separately for each import path, modelers only need to define the value once, and the system ensures consistent assignment across all references.
+
+Users can continue assigning values using fully qualified paths if needed. This ensures that existing models remain functional without modification and gives users the flexibility to choose the assignment style that best fits their use case.
+
+=== Improve consistency and usability of boxed filter and boxed iterator expressions.
+The consistency and usability of boxed filter and boxed iterator expressions are improved in DMN 1.6. These updates ensure that expressions not explicitly returning collections are still processed correctly through implicit coercion into singleton lists.
+
+In boxed filters, the expression in the top part must evaluate to a collection. If the expression returns a single value—such as a number or string—the engine implicitly converts it into a list containing that value. 
+Similarly, in boxed iterators, the expression in the in row must also evaluate to a collection, and singleton values are automatically wrapped into lists.
+
+=== Updated Collect hit policy behavior for DMN decision tables.
+
+The DMN 1.6 clarifies the behavior of the Collect hit policy in decision tables. When this policy is used, the engine either returns all matched rule outputs in arbitrary order or applies a simple aggregation function to them, depending on the presence of an operator.
+
+If no operator is specified, the engine returns a list containing the output entries of all matched rules. If an operator is present, the engine applies the corresponding function to the list and returns a single aggregated value.
+
+The supported operators and their behaviors are:
+* + (sum): returns the sum of all matched outputs
+* < (min): returns the smallest value among the outputs
+* > (max): returns the largest value among the outputs
+* # (count): returns the number of matched outputs
+
+This update also allows implicit conversion of single values into singleton lists, ensuring consistent behavior even when only one rule matches.
+
+=== Deprecation of IANA Time Zone identifiers in time literals
+
+In DMN 1.6 the use of IANA Time Zone identifiers in time-only literals is deprecated to improve consistency and reduce ambiguity in time representations. The format "HH:mm:ss@Zone" (for example, 14:30:00@Asia/Kolkata) is no longer recommended for use in time literals.
+
+This change does not affect date and time literals that use IANA zones. The recommended approach is to use the FEEL function date and time(date, time, timezone) instead of relying on implicit parsing of time strings with zones.
+When deprecated time literals are used, the engine logs a warning.
+
+This feature encourages migration to FEEL-compliant expressions and ensures more predictable and standards-aligned behavior in decision models.
+
+=== Support single parameter invoke() method
+
+The `NumberFunction` class now supports a single parameter invoke() method that dynamically handles both String and Number formats.
+This improves the FEEL compliance and robustness, aligning with the OMG DMN RTF specification.
+
+The engine returns the input unchanged if it is already a Number. If the input is a String, it attempts to parse it into a numeric value. For example, the engine converts "1.1" to a BigDecimal. If the string is invalid, such as "test" or "1 2 3", it returns null and triggers an error.
+
+This enhancement simplifies decision logic by allowing flexible input handling while maintaining strict validation for non-numeric strings.
+
+=== Single parameter versions of all rounding functions in FEEL 
+
+The DMN 1.6 introduces single-parameter versions of all rounding functions in FEEL. These variants simplify usage by assuming a default scale of 0, which aligns with intuitive expectations for whole-number rounding and streamlines decision logic for modelers.
+
+.Support functions with a single numeric argument
+|===
+|Function name |Example input |Example output
+|round up(x)|round up(5.5)|6
+|round down(x)|round down(5.5)|5
+|round half up(x)|round half up(5.5)|6
+|round half down(x)|round half down(5.5)|5
+|===
+
+DMN 1.6 delivers more intuitive and predictable rounding behavior. By reducing the need for explicit scale parameters, it makes FEEL functions easier to use and better aligned with real-world expectations.
+
+=== Support type conversion from decimal to integer
+ 
+The DMN 1.6 conversion rule automatically converts decimal numbers to integers in contexts where integer values are required. This rule ensures consistent behavior across decision models by aligning input types with expected output formats. The conversion truncates the decimal portion without rounding, preserving only the integer part of the number.
+
+The engine converts the input to an integer if it is an instance of Number. If the input is not a Number, it returns the value unchanged. It discards the decimal part without applying rounding. This conversion applies automatically in all scenarios where an integer is expected, including integer-valued expressions, type-constrained variables, and FEEL function parameters that require integers.
+
+For example, the engine converts 42.50, 42.009, and 42.99999 to 42 by discarding the decimal portion. It returns 42 and 423L unchanged, as they are already integers. It does not apply conversion to "123" because the input is a string, and it ignores null values without producing a result.
+
+The engine truncates numeric inputs to integers when required and safely bypasses non-numeric and null inputs, ensuring robust and predictable behavior in decision models.
+
+
+=== Flexible referencing styles within a single DMN file
+
+The DMN 1.6 permits two distinct styles for referencing decisions within a single DMN file, allowing modelers to structure decision logic modularly and reuse decision definitions across different contexts or files. The engine supports both external and local referencing styles. 
+When referencing a decision within the same DMN file, modelers can use a local reference without a namespace URI, employing a fragment identifier (prefixed with #) to point to the decision by its ID. 
+Alternatively, when referencing a decision defined in a separate DMN file, modelers can use an external reference with a namespace URI, including the full URI of the external file along with the decision’s ID fragment. 
+The engine supports both referencing styles, ensuring flexibility and consistency in model authoring and referencing.
+
+=== Support new version of date and time conversion function
+
+DMN 1.6 includes a new conversion function: *date and time(date, time, timezone)*. This function constructs a full date-time value by combining the provided date and time and applying the specified timezone.
+
+=== Configurable Error Handling Modes
+
+The DMN 1.6introduces two distinct modes for managing errors during decision model evaluation: lenient and strict. The error handling mode is configured during the initiation of the decision model evaluation, with lenient being the default mode. The default error handling mode is lenient.
+In lenient error mode, the engine collects errors and continues execution, accumulating errors detected in child DRG Elements for the parent element. In contrast, strict error mode halts model evaluation upon detecting the first error, reports the error, and returns null. This configured error handling mode also applies to the handling of errors during the evaluation of literal expressions, such as FEEL expressions, where built-in functions encountering input outside their defined domain report diagnostic information and return null.
+
+=== New value property defined for variable types:
+
+In DMN 1.6, a new value property is defined in the following variable types: 
+* date: Converts a calendar date into a date-time value where the time is set to UTC midnight. For example, `date(2025, 7, 3).value` returns `BigDecimal.valueOf(1751500800)`.
+* Time: Converts a specific time of day into the total number of seconds since midnight. For example, `time("01:01:01").value` returns `BigDecimal.valueOf(3661)`.
+* Date and time: Converts a full date and time in UTC format into the number of seconds since the epoch, which is a fixed reference point in time. This representation is commonly used for timestamping and time arithmetic.
+For example, `date and time("2025-07-03T01:01:01Z").value` returns `BigDecimal.valueOf(1751536861)`.
+* days and time duration: Converts a duration expressed in days and time into its equivalent number of seconds. For example, `duration("P1DT1H").value` returns `BigDecimal.valueOf(90000)`.
+* Years and months duration: Converts a duration expressed in years and months into its equivalent number of months. For example, `duration("P1Y1M").value` returns `BigDecimal.valueOf(13).`
+This property allows for the conversion of these types to a numeric value. 
+
+=== New Descendant Operator
+The DMN 1.6 descendant operator to enhance the expressiveness of FEEL when working with nested contexts. This operator allows for the repetitive access of all values associated with a given property name, regardless of how deeply nested they are within a context structure.
+For example, given the following context: 
+
+----
+{ a: { b: { b: 1 } } }
+----
+
+Using the descendant operator to access all values associated with the property name `b` returns the following expression:
+
+----
+[ { b: 1 }, 1 ]
+----
+The descendant operator collects all instances of the key `b` found at any level of nesting and returns them as a list.
