@@ -5,45 +5,38 @@ include::../styles/images.adoc[]
 Before you use {PRODUCT_LONG}, see the known limitations. When possible, workarounds will be included with the limitations.
 
 Table 1. Known limitations
-[%header,cols=2]
+[%header,cols=3]
 [%autowidth]
 |===
-
-|Limitation | Description
+|Limitation |Description |Workaround
 
 |The event subsystem in the {PRODUCT_SHORT} workflow engine does not have transactional support.
 |Using transactions that emit events through an emitter like Kafka or CloudEvents in _Business Services_ with Compact Architecture with at least runtime persistence may throw a transaction error with message 'enlisted connection used without active transaction' after starting a process instance.
+|
 
 |In a _Business Service_, Workflows subsystem event related messages are sent even if the process execution fails due to a DB error.
 |In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
+|Further investigate event related messages
 
 |Native compilation support for workflow projects.
-
-|Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
-
-* Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_93X} and earlier versions.
+|Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_93X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
+|Do not use native compilation if your _Business Services_ include stateful workflow.
 
 |OpenAPI spec auto-generation when using the _io.quarkus:quarkus-oidc_ extension.
-
-|The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated.
-
-* This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
-
-* As a workaround, add the following to your *application.properties* file:
+|The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated. This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
+|Add the following to your *application.properties* file:
 `quarkus.smallrye-openapi.auto-add-bad-request-response=false`
 
-* This property will make it so that the "400 Bad Request" outputs are not added to the auto-generated OpenAPI specifications.
+* This property ensures that "400 Bad Request" outputs are not added to the auto-generated OpenAPI specifications.
 
 |Apply an Accelerator in Developer Tools for VS Code fails in Windows.
 |In the Developer Tools for VS Code, when user tries to apply an Accelerator using Windows, it fails with the message:
 
 _Error: ENOENT: no such file or directory, unlink '[workspace-root]\.kie-sandbox\accelerator.yaml'._
 
-Workaround: User can manually create the folder `.kie-sandbox` in the VS Code workspace folder root with an empty file called `accelerator.yaml`. Then, when the Accelerator is applied, the `accelerator.yaml` will be filled with the proper content.
-
-|Case Management
-|Full Case Management capabilities are not available and Adhoc (Flexible) Processes provide an alternative.
+|You can manually create the folder `.kie-sandbox` in the VS Code workspace folder root with an empty file called `accelerator.yaml`. Then, when the Accelerator is applied, the `accelerator.yaml` will be filled with the proper content.
 
 |Workflow persistence
 |When running Business Services using workflow functionality configured with a MS SQL Server or Oracle instance, database deadlocks may occur.
+|Use a different database
 |===
