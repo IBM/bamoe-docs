@@ -349,7 +349,7 @@ This value can be overwritten to add your own custom Accelerators by replacing t
 
 To integrate GitHub Enterprise Server, GitLab, or Bitbucket Data Center with BAMOE Canvas, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable.
 
-NOTE: You can add environment variable configuration to your docker-compose.yml file or pass it directly via a docker run command. For more information, see https://quay.io/repository/bamoe/canvas.
+NOTE: You can add environment variable configuration to your docker-compose.yml file or pass it directly via a docker run command. For more information, see https://quay.io/repository/bamoe/canvas[BAMOE Canvas image description on Quay.io] .
 
 Example JSON configuration:
 
@@ -365,21 +365,19 @@ Example JSON configuration:
     "enabled": true,
     "group": "git",
     "disableEncoding": true,
-    "insecurelyDisableTlsCertificateValidation": false
   }
 ]
 ----
 
 * id: A unique identifier for this authentication provider configuration.
-* domain: The base URL of your GitLab instance.
+* domain: The base URL of your Git provider instance.
 * supportedGitRemoteDomains: A list of Git remote domains that this provider can authenticate with.
-* type: Specifies the provider type — in this case, gitlab.
+* type: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
 * name: A readable name displayed in the BAMOE UI.
 * enabled: A boolean flag that enables or disables this provider.
-* group: Categorizes the provider (e.g., git) for grouping similar services.
-* disableEncoding: If set to true, adds Accept-Encoding: identity to force the proxy/server to skip compression.
-* enabled: A boolean flag that enables or disables this provider.
-* insecurelyDisableTlsCertificateValidation: If set to true, skips TLS certificate validation (useful for testing or self-signed certificates).
+* group: Categorizes the provider for grouping similar services.
+* disableEncoding: If set to true, adds Accept-Encoding (specific for GitLab).
+* insecurelyDisableTlsCertificateValidation: If set to true, skips TLS certificate validation (specific for BitBucket Data Center).
 
 After completing these configurations, you can access the features provided by each integration. For additional information, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 

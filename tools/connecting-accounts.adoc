@@ -1,35 +1,81 @@
-= Connecting to Git and Cloud providers
+= Connecting to AI, Git, and Cloud Providers
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-As mentioned previously, {CANVAS} does not feature its own authentication mechanism.
-Instead, {CANVAS} allows the linking of existing accounts from Git and Cloud providers.
-These accounts are utilized for Git operations such as Pull and Push, and for creating Dev Deployments, respectively.
+{CANVAS} does not feature its own authentication mechanism. Instead, {CANVAS} allows the linking of existing accounts from AI, Git,and Cloud providers. These accounts are utilized for Git operations such as Pull and Push, for creating Dev Deployments, and for accessing AI-powered services, respectively.
 
-All connected accounts are visible in the Accounts dialog, which is accessible through the person icon in the top-right corner.
-This dialog displays the number of repositories and deployments being used by those accounts.
-Clicking on the arrow provides further information about the accounts, including the date they were linked to {CANVAS}.
- s
-Accounts can be removed from {CANVAS} through the Accounts dialog.
-Removing an account will result in repositories linked to Git provider accounts losing the ability to Push and Pull.
-The account linked to a repository can be changed at any time using the dropdown available on the Editor page of any file in the repository.
+All connected accounts are visible in the Accounts dialog, which is accessible through the person icon in the top-right corner. This dialog displays the number of repositories, deployments, and AI services being used by those accounts. Clicking on the arrow provides further information about the accounts, including the date they were linked to BAMOE {CANVAS}.
+
+Accounts can be removed from {CANVAS} through the Accounts dialog. Removing an account will result in repositories linked to Git provider accounts losing the ability to Push and Pull. The account linked to a repository can be changed at any time using the dropdown available on the Editor page of any file in the repository.
 
 .Accounts dialog on {CANVAS}
 image::tools/image17.png[width=480]
 
-The figure shows two connected accounts: one from from GitHub and another from a Kubernetes cluster, respectively.
+The figure shows two connected accounts: one from GitHub and another from a Kubernetes cluster. AI provider accounts, when connected, appear in the same dialog and follow the same interaction patterns.
 
 A **Re-authenticate** button will appear next to sessions that become invalid, allowing you to renew credentials without re-entering all configuration details manually and without having to update references in existing projects.
 
 == Connecting to Git Providers
 
-BAMOE Canvas supports integration with the following Git providers:
+BAMOE Canvas supports integration with three Git providers: GitHub Enterprise Server, GitLab, and Bitbucket Data Center. This integration enables users to connect their Git accounts to perform repository operations such as cloning, importing files, pushing and pulling changes, and creating repositories directly from the BAMOE workspace.
 
-* GitHub Enterprise Server
-* GitLab
-* Bitbucket Data Center
+.Procedure
 
-Procedure
+To connect a Git account in BAMOE Canvas, navigate to Profile → Connect to an Account. From the list of available Git providers, select the one you wish to integrate. Authentication is required to establish the connection.
+
+    For GitHub Enterprise Server and GitLab, use a Personal Access Token.
+    For Bitbucket Data Center, use a Username and Personal Access Token.
+
+Authentication sessions can be managed through the Accounts dialog in Canvas settings. If a session becomes invalid, users can re-authenticate without needing to reconfigure or update existing project references.
+
+=== Integration Features
+
+Once connected, BAMOE Canvas supports the following Git operations across providers:
+
+* Repository Cloning: Clone entire repositories into the BAMOE workspace using supported URL patterns:
+        GitLab:
+            https://<domain>/<group-or-subgroups>/<project>.git
+            https://<domain>/<group-or-subgroups>/<project>
+            Specific branch:
+            https://<domain>/<group-or-subgroups>/<project>/tree/<branch-name>
+        Bitbucket Data Center:
+            https://<domain>/projects/<project-key>/repos/<repo>/browse
+            https://<domain>/scm/<project-key>/<repo-name>.git
+            Specific branch:
+            https://<domain>/projects/<project-key>/repos/<repo>/browse?at=refs/heads/<branch-name>
+
+* Import Files from Repositories or Branches: Import specific files using direct URLs:
+        GitLab:
+            https://<domain>/<group-or-subgroups>/<project>/blob/<branch-name>/<path-to-file>
+        Bitbucket Data Center:
+            https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>
+            https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>?at=refs/heads/<branch-name>
+
+    Create Repository from BAMOE Workspace
+    Create new repositories directly from the workspace:
+        Click Share → Create Repository
+        Select the authentication provider
+        Choose the target (user, group, or project depending on provider)
+        Visibility settings are inherited from the parent entity
+
+    Push & Pull Changes
+    After cloning or creating a repository, users can:
+        Push changes made in the workspace to the remote repository
+        Pull updates from the remote repository to keep the local copy in sync
+
+    Code Snippets
+        GitLab supports:
+            Personal Snippets:
+                https://<domain>/snippets/<snippet-id>
+                Raw file: https://<domain>/snippets/<snippet-id>/raw/<branch>/<file-name>
+            Project Snippets:
+                https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>
+                Raw file: https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>/raw/<branch>/<file-name>
+        Bitbucket Data Center does not support native code snippets, so snippet-related features are not available.
+
+
+
+
 
 . Navigate to Profile → Connect to an Account in BAMOE Canvas.
 . Select your Git provider from the list.
@@ -49,3 +95,7 @@ BAMOE Canvas supports the following Git integration features:
     Push and Pull Changes: Sync changes between BAMOE workspace and remote repositories
     Create Repository: Create new repositories from within BAMOE Canvas
     Code Snippets: Manage personal and project-level code snippets
+
+
+
+
