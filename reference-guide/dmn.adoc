@@ -516,7 +516,7 @@ The keyword `in` is the only keyword in the language that cannot be used as part
 
 The Business Friendly Enough Expression Language (B-FEEL)is a variant of FEEL that retains its grammar but modifies its semantics to improve usability. B-FEEL eliminates ambiguity by using null solely to represent missing data, whereas FEEL uses null for both missing data and execution errors. B-FEEL redefines the behavior of operations and built-in functions that would return null in FEEL due to errors, ensuring they return non-null values instead.
 
-To activate B-FEEL in a DMN model, modelers must set the expression language to \https://www.omg.org/spec/DMN/20240513/B-FEEL/.
+To activate B-FEEL in a DMN model, modelers must set the expression language to `\https://www.omg.org/spec/DMN/20240513/B-FEEL/`.
 
 NOTE: Modelers can configure the expression language either globally or at the expression-specific level (for example, within a `literalExpression`). By default, the language is set to FEEL. When both global and expression-specific configurations exist, the engine prioritizes the expression-specific setting during evaluation.
 
@@ -526,7 +526,7 @@ The B-FEEL expression language differ from the FEEL by the following semantics:
 
 B-FEEL simplifies boolean logic by removing null as a possible result from operators and built-in functions. It enforces a two-value logic system—true and false—instead of the three-value logic used in FEEL (true, false, and null).
 
-Boolean operators such as =, <=, <, >, >=, not(), and, or, in, and between always return either true or false, even when the expression involves incompatible types. In these cases, B-FEEL treats the result as false, except for the != operator, which returns true.
+Boolean operators such as `=, <=, <, >, >=, not(), and, or, in`, and between always return either true or false, even when the expression involves incompatible types. In these cases, B-FEEL treats the result as false, except for the != operator, which returns true.
 
 The following examples demonstrate how B-FEEL evaluates boolean expressions:
 
@@ -598,7 +598,7 @@ The following examples show how B-FEEL handles string expressions compared to FE
 
 .Built-in functions returning a date and time
 
-B-FEEL modifies the behavior of functions that return date, time, or date and time values. Instead of returning null when encountering errors or invalid input, these functions now return a default value based on the type. B-FEEL uses January 1st, 1970 as the standard fallback (epoch).
+B-FEEL modifies the behavior of functions that return `date, time, or, date and time values`. Instead of returning a 'null' when encountering errors or invalid input, these functions now return a default value based on the type. B-FEEL uses January 1st, 1970 as the standard fallback (epoch).
 
 The engine applies the following default values:
 
@@ -647,7 +647,7 @@ The following examples demonstrate how B-FEEL handles collection expressions com
 |===
 |Expression|FEEL|B-FEEL
 |split("abc", 22)	|null	|[]
-|mode([null,null,null, 1, 1,2])	|null	|[1]
+|mode([null, null, null, 1, 1, 2])	|null	|[1]
 |===
 
 .Built-in functions returning a range
@@ -701,7 +701,7 @@ In B-FEEL, the semantics of multiplication and division are modified when the ty
 B-FEEL applies these rules based on the type of either operand:
 [cols="20%,80%" options="header"]
 |===
-|Type (e1 or e2)|Expression (e1 + e2 / e1 - e2)
+|Type (e1 or e2)|Expression (e1 * e2 and e1 / e2)
 |Number	|Converts the non-number value to a number using the number B-FEEL function. Applies general semantics.	
 |Years and Months Duration	|Converts the non-duration value to a number using the number B-FEEL function. Applies general semantics.	
 |Days and Time Duration	|Converts the non-duration value to a number using the number B-FEEL function. Applies general semantics.
@@ -947,8 +947,16 @@ The engine supports both referencing styles, ensuring flexibility and consistenc
 DMN 1.6 includes a new conversion function- *date and time(date, time, timezone)*. This function constructs a full date-time value by combining the provided date and time and applying the specified timezone.
 
 === Configurable error handling modes
-The DMN 1.6 introduces two distinct modes for managing errors during decision model evaluation: lenient and strict. The error handling mode is configured during the initiation of the decision model evaluation, with lenient being the default mode. The default error handling mode is lenient.
-In lenient error mode, the engine collects errors and continues execution, accumulating errors detected in child DRG Elements for the parent element. In contrast, strict error mode halts model evaluation upon detecting the first error, reports the error, and returns null. This configured error handling mode also applies to the handling of errors during the evaluation of literal expressions, such as FEEL expressions, where built-in functions encountering input outside their defined domain report diagnostic information and return null.
+The DMN 1.6 introduces the following two distinct modes for managing errors during decision model evaluation: 
+
+* lenient 
+* strict
+
+The error handling mode is configured during the initiation of the decision model evaluation, with lenient being the default mode. The default error handling mode is lenient.
+
+In lenient error mode, the engine collects errors and continues execution, accumulating errors detected in child DRG Elements for the parent element. 
+
+In contrast, strict error mode halts model evaluation upon detecting the first error, reports the error, and returns null. This configured error handling mode also applies to the handling of errors during the evaluation of literal expressions, such as FEEL expressions, where built-in functions encountering input outside their defined domain report diagnostic information and return null.
 
 === New value property defined for variable types
 In DMN 1.6, a new value property is defined in the following variable types: 
