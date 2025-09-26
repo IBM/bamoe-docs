@@ -24,17 +24,29 @@ Use the {PRODUCT_SHORT} BOM combined with the Spring Boot BOM to facilitate mana
       <type>pom</type>
       <scope>import</scope>
     </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${version.org.springframework.boot}</version>
+        <type>pom</type>
+        <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+----
+
+////
+Not sure if this dependency 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
       <version>{SPRING_BOOT_VERSION_BOM}</version>
       <optional>true</optional>
     </dependency>
-  </dependencies>
-</dependencyManagement>
-----
+////
 
-The dependencies required for a workflow _Business Service_ project with Spring Boot are:
+The dependencies required for a workflow _Business Service_ project built with Spring Boot are:
 
 [source,xml]
 ----
@@ -42,35 +54,33 @@ The dependencies required for a workflow _Business Service_ project with Spring 
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
+
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-with-drools-spring-boot-starter</artifactId>
 </dependency>
 ----
 
-To configure persistence in Spring Boot add the following dependencies:
+Finally, the following Maven plugins are required to correctly build and package the application:
 
 [source,xml]
 ----
-<dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kie-addons-springboot-persistence-jdbc</artifactId>
-</dependency>
 
-<dependency>
-    <groupId>org.jbpm</groupId>
-    <artifactId>jbpm-addons-springboot-usertask-storage-jpa</artifactId>
-</dependency>
-
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-jdbc</artifactId>
-</dependency>
+<plugin>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-maven-plugin</artifactId>
+</plugin>
+ 
+ <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+</plugins>
 ----
 
 === The Data-Index add-on
 
-To configure the Compact Architecture for stateful workflow in Spring Boot you will need to use the following add-on to enable the workflow runtime to persist data directly into the Data-Index database:
+The following dependencey is used to enable the workflow runtime to persist data directly into the Data-Index database:
 
 [source,xml]
 ----
@@ -81,7 +91,7 @@ To configure the Compact Architecture for stateful workflow in Spring Boot you w
 ----
 
 === The Data-Audit add-on
-The following add-on enables Data-Audit integration within the _Business Service_.
+The following dependencies enables Data-Audit integration with the _Business Service_:
 
 [source,xml]
 ----
@@ -99,8 +109,7 @@ Configuring persistence for the Data-Audit subsystem will require a JDBC Driver 
 
 === The embedded Jobs Service add-on
 
-The following add-on enable the colocation of the Jobs Service inside the workflow runtime.
-
+The following dependencies enable the colocation of the Jobs Service within the workflow runtime.
 
 [source, xml]
 ----
@@ -109,62 +118,15 @@ The following add-on enable the colocation of the Jobs Service inside the workfl
     <artifactId>kogito-addons-springboot-embedded-jobs</artifactId>
 </dependency>
 
+<!-- Required for persistence -->
 <dependency>
     <groupId>org.kie</groupId>
     <artifactId>kogito-addons-springboot-embedded-jobs-jpa</artifactId>
 </dependency>
 ----
-Configuring persistence for the Jobs Service subsystem will require a JDBC Driver to be configured as well. See the xref:./#jdbc-configuration[Configuration section].
+Configuring persistence for the Jobs Service subsystem will also require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section].
 
-// Find the appropriae POM for workflow and put in docs repo
-
-See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/springboot/workflows/pom.xml[complete pom.xml for workflows] for a _Business Servics_ with stateful workflow on Spring boot.
-
-Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Spring boot or BAMOE specific properties (for example, `server.address`).
-
-=== The Data-Audit add-on
-You need to add two different dependencies to your _Business Service_ project:
-
-[source,xml]
-----
-<dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kogito-addons-springboot-data-audit</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-
-<dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kogito-addons-springboot-data-audit-jpa</artifactId>
-</dependency>
-----
-
-Configuring persistence for the Data-Audit subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
-
-
-=== The embedded Jobs Service add-on
-
-=== Using the embedded Jobs Service add-on
-
-To use the embedded Jobs Service add-on in your project you must include the following dependencies:
-
-[source,xml]
-----
-<dependency>
-   <groupId>org.kie</groupId>
-   <artifactId>kogito-addons-springboot-embedded-jobs</artifactId>
-</dependency>
-
-<!-- Required for persistence -->
-
-<dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kogito-addons-springboot-embedded-jobs-jpa</artifactId>
-</dependency>
-----
-
-=== Persisting User Tasks data
+=== Persisting User Tasks Data
 
 The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database.
 
@@ -178,28 +140,22 @@ To enable this functionality, the following dependency needs to be added to the 
 </dependency>
 ----
 
-Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Configuration section]. 
+Configuring persistence for the User Tasks subsystem will require a JDBC Driver to be configured. See the xref:./#jdbc-configuration[Enabling persistence] section. 
 
-== Configuration
+See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/springboot/workflows/pom.xml[complete pom.xml for workflows with Spring Boot] for a _Business Servics_ with stateful workflow on Spring Boot.
 
-The main configuration step required for stateful workflow _Business Services_ is the configuration of the database used to persist workflow data.
+Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Spring boot or BAMOE specific properties (for example, `server.address`).
 
 [#jdbc-persistence]
-
 == Enabling persistence for stateful Workflows
 
 {PRODUCT_SHORT} process service and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
 
-All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the connection with
-the Data Base, so it is mandatory that the applications has a DataSource correctly configured following the platform (Spring boot)
-guidelines.
+All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the Database. Therefore it is important that the applications has a DataSource correctly configured according to the Spring Boot platform guidelines.
 
-Configuring persistence for {PRODUCT_SHORT} requires a minimal  set of dependencies and configurations in your application. 
+Configuring persistence for {PRODUCT_SHORT} requires a minimal set of dependencies and configurations in your application. 
 
-The minimal set of dependencies are:
-
-* Database Specific JDBC Driver
-* If flyway is used, have to include the right flyway dependency for the DB .Eg :
+* If flyway is used, have to include the right flyway dependency for the DB:
 
 [source,xml]
 ----
@@ -224,7 +180,7 @@ https://docs.spring.io/spring-boot/how-to/data-access.html guide.
 
 === Configuring persistence for PostgreSQL
 
-To configure PostgreSQL persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+To configure PostgreSQL persistence for your _Business Service_, in your POM file add the following dependencies:
 
 [source,xml]
 ----
@@ -239,7 +195,6 @@ To configure PostgreSQL persistence for your _Business Service_, in your `pom.xm
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-database-postgresql</artifactId>
   </dependency>
-
 ----
 
 Configuration required in your `application.properties`:
@@ -253,16 +208,14 @@ spring.datasource.password=kogito-pass
 
 # Enabling jdbc persistence
 kogito.persistence.type=jdbc
-
 ----
 
 === Configuring persistence for Microsoft SQL Server
 
-To configure Microsoft SQL Server persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+To configure Microsoft SQL Server persistence for your _Business Service_, in your POM file add the following dependencies:
 [source,xml]
 ----
-  
-  <dependency>
+    <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
   </dependency>
@@ -273,8 +226,8 @@ To configure Microsoft SQL Server persistence for your _Business Service_, in yo
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-sqlserver</artifactId>
   </dependency>
-  
 ----
+
 Configuration required in your `application.properties`:
 
 [source,properties]
@@ -282,25 +235,22 @@ Configuration required in your `application.properties`:
 spring.datasource.url=jdbc:sqlserver://mssql-host:1433;databaseName=bamoe-db;encrypt=true;trustServerCertificate=true
 spring.datasource.username=sa
 spring.datasource.password=Pass@123
-spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 # Enabling jdbc persistence
 kogito.persistence.type=jdbc
-
 ----
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
 
 Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
 
-This module includes the necessary Hibernate ORM mappings to help remapping some of the JPA entities used in both components. The mappings contained are:
+This module includes the necessary Hibernate ORM mappings to support remapping some JPA entities used in both components. The mappings contained are:
 
 * META-INF/bamoe-data-index-orm.xml: This file remaps some entities from the data-index component.
 * META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
-
 * `bamoe-mssql-mappings` → required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations.
 
-To correctly configure the Hibernate mappings, in your application `pom.xml` add:
+To correctly configure the Hibernate mappings, in your application POM add:
 
 [source,xml]
 ----
@@ -314,9 +264,7 @@ And in the `application.properties`:
 
 [source,properties]
 ----
-
 spring.jpa.mapping-resources=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
-
 ----
 
 ==== Transaction isolation settings for Microsoft SQL Server
@@ -333,7 +281,7 @@ These settings are required to prevent database deadlocks when resources in {PRO
 
 === Configuring persistence for Oracle
 
-To configure Oracle persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+To configure Oracle persistence for your _Business Service_, in your POM add the following dependencies:
 
 [source,xml]
 ----
@@ -354,10 +302,9 @@ Configuration required in your `application.properties`:
 
 [source,properties]
 ----
-spring.datasource.url=jdbc:sqlserver://mssql-host:1433;databaseName=bamoe;encrypt=true;trustServerCertificate=true
-spring.datasource.username=sa
-spring.datasource.password=Pass@123
-spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.datasource.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+spring.datasource.username=system
+spring.datasource.password=Password123456
 
 # Enabling jdbc persistence
 kogito.persistence.type=jdbc
@@ -365,9 +312,7 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Oracle
 
-Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour.
-
- The mappings contained are:
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
 
 * META-INF/bamoe-user-task-orm.xml: This file remaps some entities from the jbpm-usertask-storage-jpa component.
 * META-INF/bamoe-job-service-orm.xml: This file remaps some entities from the job-service component.
@@ -394,7 +339,7 @@ spring.jpa.mapping-resources=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-jo
 
 === Configuring persistence for H2 (Development only)
 
-In development environments, you can use H2 persistence for your _Business Service_, in your `pom.xml` add the following dependencies:
+In development environments, you can use H2 persistence for your _Business Service_, in your POM add the following dependencies:
 
 * Flyway dependency not required for H2.
 
@@ -411,37 +356,35 @@ Configuration required in your `application.properties`:
 
 [source,properties]
 ----
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.url=jdbc:h2:mem:kogito;NON_KEYWORDS=VALUE,KEY
-spring.datasource.username=kogito
-spring.datasource.password=kogito
+spring.datasource.url=jdbc:h2:mem:bamoe;NON_KEYWORDS=VALUE,KEY
+spring.datasource.username=bamoe
+spring.datasource.password=bamoe
 ----
 
 == Structure
 
 A Workflow service with Springboot typically contains the following:
 
-  - `src/main/java`: Java classes implementing domain models and business services
-  - `src/main/resources`:
-  - `application.properties` for SpringBoot and BAMOE configuration
-  - one or more BPMN process definitions (for example, `*.bpmn` or `*.bpmn2`)
-  - additional configuration files such as calendars or custom properties
-  - `src/test/java`: JUnit test classes to validate workflow execution
+  * `src/main/java`: Java classes implementing domain models and business services
+  * `src/main/resources`:
+  ** `application.properties` for SpringBoot and BAMOE configuration
+  ** one or more BPMN process definitions (for example, `*.bpmn` or `*.bpmn2`)
+  ** additional configuration files such as calendars or custom properties
+  * `src/test/java`: JUnit test classes to validate workflow execution
 
 == Code
 
 The main elements of a Workflow service with Spring boot include:
 
   * **Java domain models that represent process data** – These classes define the structure of process variables (for example, `CandidateData`, `Offer`, or `CreditCardDetails`) that are passed between workflow steps.
+
   * **Workflow definitions (`.bpmn` files)** – BPMN process models placed under `src/main/resources`. They describe the workflow logic, tasks, and transitions.
+
   * **Optional business services** – Implemented as Java classes invoked by Service Tasks in workflows.
-  * **application.properties** – Used to configure persistence, job service, data index, and other runtime features.
 
-== Hot-reload in dev mode
+  * **application.properties** – Used to configure persistence, embedded Job Service, Data-Index, and other runtime features.
 
-== Debugging
-
-== Testing workflow execution
+== Testing workflow execution with {SPRING_WEB_CONSOLE}
 
 The {SPRING_WEB_CONSOLE} is a web app that attaches to the Spring Boot and allows developers to interact and manage running processes locally.
 
@@ -559,16 +502,16 @@ image::workflow/spring-swagger-ui.png[Swagger UI page]
 
 image::workflow/dev-ui-swagger-ui-try-out.gif[Swagger UI try it out page]
 
-=== Using the Data-Index Graphql UI
+==== Using the Data-Index Graphql UI
 
 Data-Index provides a *GraphiQL UI* that provides a graphic interface to run and test GraphQL queries against the Data-Index GraphQL API in your Business Service.
 
 image::workflow/data-index-graphiql-ui.png[Data-Index GraphiQL UI]
 
-In Spring-Boot the *GraphQL UI* can be configured with the following properties:
+In Spring-Boot the *GraphiQL UI* can be configured with the following properties:
 
-- `spring.graphql.graphiql.enabled`: (true|false) Enables the *Graphql UI*
-- `spring.graphql.graphiql.path`: (text) Sets the path to access the *GraphQL UI*. Defaults to `/graphiql`
+- `spring.graphql.graphiql.enabled`: (true|false) Enables the *GraphiQL UI*
+- `spring.graphql.graphiql.path`: (text) Sets the path to access the *GraphiQL UI*. Defaults to `/graphiql`
 
 To enable the *GraphiQL UI*, add the following property in your `application.properties` file:
 [source,properties]
