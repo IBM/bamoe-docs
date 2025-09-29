@@ -3,4 +3,49 @@ include::../partials/attributes.adoc[]
 
 include::../styles/images.adoc[]
 
-TBD
+Overview
+
+The BAMOE MCP server acts as a dedicated and isolated server layer that exposes Business Services, such as rule evaluation, decision models, and process orchestration, through a standardized interface tailored for agentic workflows. This empowers AI agents to reason, decide, and act with precision. The exposed Business Services include decision model execution, rule model execution, and process API, which enables creating new process instances, retrieving process information, modifying process instances, and deleting process instances.
+
+Prerequisites and Setup
+
+To expose BAMOE capabilities to AI agents, you need a BAMOE instance with an exposed Business Service instance running on Quarkus, with OpenAPI v3 endpoints enabled. The endpoint should be reachable at http://<host>:<port>/q/openapi/. Additionally, the Business services should have meaningful models, fields, and nodes names to improve the effectiveness of iteration with AI agents.
+
+Rule models require the @Schema annotation to be added to all implemented DataStore<> classes. For example, in the case of DataStore<Person>, the annotation should be added as:
+
+auto
+
+@Schema(implementation = Person.class)
+
+private DataStore<Person> persons;
+
+Plain DRLs should define and create model endpoints.
+
+Running the MCP Server
+
+The “bamoe/mcp-server” image is available in your Container Orchestration Platform, and the only mandatory parameter is the BAMOE OpenAPI v3 endpoint. To run the MCP Server image in a Docker environment, use the command:
+
+auto
+
+docker run -it --rm -p 8080:8080 --name mcp-server -e MCP_SERVER_OPENAPI_URLS="http://host.docker.internal:8080/q/openapi" quay.io/bamoe/mcp-server:main
+
+Execution and Lifecycle Management
+
+Once the setup is complete, the MCP server is ready to run and serve requests from MCP clients and AI agents. The internal state of the MCP Server is immutable, meaning that any changes made to the underlying Business Services are not automatically reflected. To apply updates or modifications, a new MCP Server bootstrap is required.
+
+A suggested solution to manage the MCP server lifecycle is to set up a reverse proxy to internally manage the image immutability status.
+
+Configuring MCP Clients
+
+Any MCP-compatible client that supports the MCP protocol can consume the BAMOE MCP Server. Examples include Goose, 5ire, LM Studio, and Claude Desktop. To configure the MCP Client, an extension section should be available, where you can set up the connection with the MCP Server by providing the following data:
+
+    Extension name: Any meaningful name
+    Type: HTTP streamable
+    Endpoint: http://<host>:<port>/mcp (The MCP Server endpoint)
+    SSE type is supported but deprecated. STDIO (Standard IO) is not supported.
+
+Integrating with AI Agents
+
+The exposed MCP Tools can be integrated with AI agents, such as large language models, to dynamically invoke decision models, rule engines, and process APIs. This enables BAMOE’s automation capabilities to be brought directly into agentic workflows.
+
+Examples of DMN model execution and BPMN model life-cycle management via LLM chat interaction demonstrate the potential of this integration. For instance, a DMN model execution via LLM chat interaction can process a traffic violation scenario using the TrafficViolation decision model (dmn-quarkus-example). Similarly, a BPMN model life-cycle management via LLM chat interaction can start, update, and remove a process instance based on the Order.bpmn model (process-quarkus-example).
