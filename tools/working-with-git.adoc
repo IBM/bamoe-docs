@@ -36,12 +36,38 @@ Instead, it allows users to switch to a new branch temporarily, ignore the confl
 To resolve conflicts externally, users can employ their preferred method and tool, Push the changes, and then return to {CANVAS} and Pull.
 Work can then be resumed from the previous state.
 
-[id=creating-repositories]
-== Creating repository from {PRODUCT_SHORT} workspace
 
-You can create new repositories directly from the workspace after connecting with a Git provider. 
+== Integration Features of GIT Providers with {CANVAS}
 
-.Procedure
+Once connected, {CANVAS} supports the following Git operations across providers:
+
+.Repository Cloning
+You can clone entire repositories into the {PRODUCT_SHORT} workspace. The supported URL patterns are:
+
+* For GitLab
+** `\https://<domain>/<group-or-subgroups>/<project>.git`
+** `\https://<domain>/<group-or-subgroups>/<project>`
+* For Bitbucket Data Center:
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse`
+** `\https://<domain>/scm/<project-key>/<repo-name>.git`
+
+You can also clone the repository  on a specific branch:
+
+* For GitLab: `\https://<domain>/<group-or-subgroups>/<project>/tree/<branch-name>`
+
+* For Bitbucket Data Center: `\https://<domain>/projects/<project-key>/repos/<repo>/browse?at=refs/heads/<branch-name>`
+
+.Import Files from Repositories or Branches
+You can import specific files from a repository or a specific branch. The supported URL patterns are:
+
+* For GitLab: `\https://<domain>/<group-or-subgroups>/<project>/blob/<branch-name>/<path-to-file>`
+* For Bitbucket Data Center:
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>`
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>?at=refs/heads/<branch-name>`
+
+.Creating repository from {PRODUCT_SHORT} workspace
+
+You can create new repositories directly from the workspace after connecting with a Git provider. To create a new repository:
 
 . Navigate to *Share* → *Authentication Source*.
 . Select the authentication provider from the dropdown.
@@ -53,4 +79,34 @@ NOTE: You can create the repository under a user, group, or subgroup. Visibility
 . Enter the repository name and select Private or Public.
 . Click *Create* to generate a new repository. After successful creation, BAMOE displays a success message with the repository URL.
 
+.Push and Pull Changes
 
+After cloning or creating a repository, you can:
+
+* Push changes made in the workspace to the remote repository.
+* Pull updates from the remote repository to keep the local copy in sync.
+
+.Code Snippets
+You can create Personal Snippets (belong to a user) and Project Snippets (associated with a project types of snippets) in GitLab. You can choose to create these snippets under their own account or under a specific project. The visibility settings for these snippets are inherited from the project they belong to. Additionally, since snippets are not full Git repositories, they do not support branching like projects do.
+The supported URL patterns are:
+
+* Personal Snippets: `\https://<domain>/snippets/<snippet-id>`
+
+* Project Snippets: `\https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>`
+
+You can also import a specific file from a snippet using the following URL patterns:
+
+* Personal Snippets: `\https://<domain>/snippets/<snippet-id>/raw/<branch>/<file-name>`
+* Project Snippets: `\https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>/raw/<branch>/<file-name>`
+        
+NOTE: Bitbucket Data Center does not support native code snippets. snippet-related features are not available for Bitbucket Data Center.
+
+.Variables used in URL patterns
+[options="header"]
+|===
+|Variable |Description
+|<Groups> |Top-level containers to organize related projects and users
+|<Subgroups> |Nested groups for deeper organization within a group
+|<Projects> |Repositories containing code, issues, pipelines, and more
+|<Snippets> |Small pieces of code or text that can be shared and reused
+|===
