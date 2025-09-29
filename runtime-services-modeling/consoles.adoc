@@ -4,10 +4,7 @@ include::../styles/images.adoc[]
 
 {MANAGEMENT_CONSOLE} is a web application for viewing the state of all available _Business Services_ and managing and interacting with process instances:
 
-.{MANAGEMENT_CONSOLE}
-image::runtime-services-modeling/mgmt-console-process-instances.png[Image of {MANAGEMENT_CONSOLE}]
-
-You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, complete User Tasks and manage scheduled Jobs.
+You can use {MANAGEMENT_CONSOLE} to manage and interact with process instances, complete User Tasks, and manage scheduled Jobs.
 
 In order to be compatible with {MANAGEMENT_CONSOLE} your _Business Services_ must include the following {PRODUCT_SHORT} subsystems:
 
@@ -24,55 +21,50 @@ If this add-on is not enabled for your _Business Service_, the {MANAGEMENT_CONSO
 
 {MANAGEMENT_CONSOLE} consists of the following pages that allow you to interact with your process instances and data:
 
-* *Process Instances*: List process and subprocess instances and filter them by Process Definition ID/name, Process Instance ID, business key, or status.
+* *Process Definitions*: List process definitions available and automatically generate forms for creating the respective process instances.
 
-* *Jobs*: List available jobs, filter them by Process Instance ID, Task ID, Process Definition ID/name, status, and perform actions for any individual one, such as view details, reschedule, or cancel.
+* *Process Instances*: List process and subprocess instances and filter them by process definition ID/name, process instance ID, business key, or status.
 
-* *Tasks*: List User Tasks from Processes, filter them by Process Instance ID, Task ID, Process Definition ID/name, status or name, and submit forms to fulfill tasks.
+* *Jobs*: List available jobs, filter them by process instance ID, task ID, process definition ID/name, status, and perform actions for any individual one, such as view details, reschedule, or cancel.
+
+* *Tasks*: List User Tasks from active process instances, filter them by process instance ID, task ID, process definition ID/name, status, or name, and submit forms to fulfill tasks.
 
 But before you can use these pages, you need to connect your _Business Service_ to the {MANAGEMENT_CONSOLE}.
 
 == Connecting to a _Business Service_
 
-You will be connected to a  _Business Service_ by clicking the **+ Connect to a runtime…** button and filling the required information on the
-modal:
+You will be connected to a  _Business Service_ by clicking the **+ Connect to a Business Service...** button and filling in the required information on the modal:
 
 - **Alias**: The name to give your connected _Business Service_ instance (can be anything that helps you identify it).
 - **URL**: The _Business Service_ root URL (E.g., http://localhost:8080).
-- **Force login prompt (for secured runtimes only)**: Check this if you are already logged in your Identity Provider but would like to log in again (maybe with a different user).
-
-image::runtime-services-modeling/mgmt-console-home-no-connections.png[Image of {MANAGEMENT_CONSOLE} home page without connections]
+- **Force login prompt (for secured runtimes only)**: Check this if you are already logged in to your Identity Provider but would like to log in again (maybe with a different user).
 
 More settings are available in the **Advanced OpenID Connect settings** section:
 
 - **Client ID**: Overrides the Client ID used for this connection. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID` environment variable.
-- **Scope**: Overrides the scopes requested to the Identity Provider. Useful from some Identity Providers that, for example, will only grant a Refresh Token if the `offline_access` scope is included in the token request. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES` environment variable.
+- **Scope**: Overrides the scopes requested from the Identity Provider. Useful from some Identity Providers that, for example, will only grant a Refresh Token if the `offline_access` scope is included in the token request. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES` environment variable.
 - **Audience**: This is the `audience` parameter in the Authorization request. Used to identify the service that the token is intended for. Defaults to the value of the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE` environment variable.
 
-image::runtime-services-modeling/mgmt-console-home-add-connection-modal-filled.png[Image of {MANAGEMENT_CONSOLE} new connection modal]
-
-If your _Business Service_ uses OpenID Connect authentication, you should be redirected to the Identity Provider (IdP) login page or, if you’re already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your _Business Service_ is unsecured, it should connect directly.
+If your _Business Service_ uses OpenID Connect authentication, you should be redirected to the Identity Provider (IdP) login page or, if you're already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your _Business Service_ is unsecured, it should connect directly.
 
 Once logged in, the management pages will be displayed in the side menu, listing Process Instances, Process Definitions, Jobs, and Tasks.
 
 image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.gif[Image of {MANAGEMENT_CONSOLE} new connection modal]
 
 [NOTE]
-For information on how to secure your _Business Service_ and expose the Indentity Provider URL to the {MANAGEMENT_CONSOLE} check xref:./security.adoc[Securing Business Service API endpoints]
-
-// adding the pre-configured runtimes here but it needs more thought on how to integrate with above
+For information on how to secure your _Business Service_ and expose the Identity Provider URL to the {MANAGEMENT_CONSOLE}, check xref:./security.adoc[Securing Business Service API endpoints]
 
 === Pre-configured connected Business Services
 
-It is possible set up a pre-configured list of Business Services, defined via the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES` environment variable. This allow users to connect to pre-defined listed Business Services without having to manually configure each one. To learn how to set them up check the xref:../installation/management-console.adoc##pre-configured-business-services[installation guide].
+It is possible to set up a pre-configured list of Business Services, defined via the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES` environment variable. This allows users to connect to a pre-defined list of Business Services without having to configure each one manually. To learn how to set them up, check the xref:../installation/management-console.adoc##pre-configured-business-services[installation guide].
 
-On the first load, the Management Console will create AuthSessions for each Business Service listed in the environment variable.
+On the first load, the Management Console creates authentication sessions for each Business Service listed in the environment variable.
 
-If a Business Service requires authentication, the Management Console display an "Authenticate" button, which will redirect to the login page for the Identity Provider configured in the Business Service, unless the user is already authenticated with the same Identity Provider (using the same `clientId`, `scopes`, and `audience`), in this case the same token will be used for all matching Business Services.
+If a Business Service requires authentication, the Management Console display an "Authenticate" button, which will redirect to the login page for the Identity Provider configured in the Business Service, unless the user is already authenticated with the same Identity Provider (using the same `clientId`, `scopes`, and `audience`), in this case the same token is used for all matching Business Services.
 
 == Overview
 
-The Overview page displays a summary of all Process Instances, grouped by Process Definition ID. This includes basic information such as the name of the Process Definition, number of running instances, completed instances, and failed instances, represented by a bar graph. At the top there should be an aggregated bar graph for all Process Instances.
+The Overview page displays a summary of all process instances, grouped by process definition ID. This includes basic information such as the name of the process definition, the number of running instances, completed and failed instances, represented by a bar graph. At the top, there should be an aggregated bar graph for all process instances.
 
 image::runtime-services-modeling/mgmt-console-overview.png[Image of {MANAGEMENT_CONSOLE} overview]
 
@@ -83,21 +75,19 @@ The Process Instances page shows the list of process instances available. They a
 .Process Instances page
 image::runtime-services-modeling/mgmt-console-process-instances.png[Image of Process Instance list section]
 
-Each row in the list contains the information about the process instance, including details like _name_, _status_, _endpoint_ etc. The list also provides many ways to filter out the process instances and perform management operations.
-
-.Process Details page
-image::runtime-services-modeling/mgmt-console-process-instances-details.png[Image of Process Instance details in {MANAGEMENT_CONSOLE}]
+Each row in the list contains the information about the process instance, including details like _name_, _status_, _endpoint_, etc. The list also provides many ways to filter out the process instances and perform management operations.
 
 The *Process Details* page consists of the following panels:
 
-* Process Diagram panel
-* Details panel
-* Process Variables panel
-* Timeline panel
-* Node Trigger panel
-* Milestones panel
-* Jobs panel
+* Process Diagram
+* Details
+* Process Variables
+* Timeline
+* Node Trigger
+* Jobs
 
+.Process Details page
+image::runtime-services-modeling/mgmt-console-process-instances-details.png[Image of Process Instance details in {MANAGEMENT_CONSOLE}]
 
 === Process Diagram panel
 --
@@ -107,16 +97,13 @@ The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` r
 .Process Diagram panel
 image::runtime-services-modeling/mgmt-console-process-diagram-panel.png[Image of Process instance diagram panel]
 
-This panel includes different controls to view the Process diagram, such as *Selection*, *Pan*, *Zoom in*, *Zoom out*, and *Fit to viewer*.
+This panel includes various controls to view the Process diagram, such as *Selection*, *Pan*, *Zoom in*, *Zoom out*, and *Fit to viewer*.
 --
 
 === Details panel
 --
 This panel displays the basic Process instance information and provides links to the related Process runtime UI.
 If the Process instance is related to other Process instances, then links to the parent and subprocess instances are also available in the *Details* panel.
-
-.Details panel
-image::runtime-services-modeling/mgmt-console-details-panel.png[Image of Process instance details panel]
 
 The Details panel consists of the following fields:
 
@@ -125,13 +112,10 @@ The Details panel consists of the following fields:
 * *State*: The state of the Process instance. The state of a Process instance can be pending, active, completed, aborted, suspended, or error.
 * *Id*: The unique identifier of the Process instance.
 * *Endpoint*: The endpoint of the Process instance. You can click the displayed endpoint to view the Process or application UI that triggered the Process instance.
-+
-.Process instance details endpoint
-image::runtime-services-modeling/mgmt-console-process-details-endpoint.png[Image of Process instance details endpoint in {MANAGEMENT_CONSOLE}]
-
-* *Start*: Time reference indicating when the Process instance is started.
+* *Started*: Time reference indicating when the Process instance is started.
 * *Last Updated*: Time reference indicating when the Process instance is updated.
 * *End*: Time reference indicating when the Process instance is completed.
+* *SLA due date*: Time reference for the SLA defined in the Process instance, if available.
 * *Parent Process*: Parent Process instance of the instance (if linked). You can click and navigate to the parent Process instance.
 * *Sub Processes*: Subprocess of the instance (if linked). You can click and navigate to the subprocess instances.
 --
@@ -139,7 +123,7 @@ image::runtime-services-modeling/mgmt-console-process-details-endpoint.png[Image
 === Process Variables panel
 --
 The *Process Variables* panel displays the Process instance domain data in a tree structure.
-When you hover the mouse on different elements, the available actions are displayed.
+When you hover the mouse over different elements, the available actions are displayed.
 
 .Process Variables panel
 image::runtime-services-modeling/mgmt-console-process-variable-panel.png[Image of Process variables panel  in {MANAGEMENT_CONSOLE}]
@@ -147,7 +131,7 @@ image::runtime-services-modeling/mgmt-console-process-variable-panel.png[Image o
 .Actions in Process Variables panel
 image::runtime-services-modeling/mgmt-console-process-variable-actions.png[Image of Process variables panel available actions in {MANAGEMENT_CONSOLE}]
 
-The process variables in the *Process Variables* panel consists of the following actions:
+The process variables in the *Process Variables* panel consist of the following actions:
 
 * Expand or collapse: Enables you to expand or collapse an element.
 * Add item: Enables you to add a new key. When you add a new key, it contains null values, which you can edit if required.
@@ -155,11 +139,11 @@ The process variables in the *Process Variables* panel consists of the following
 .Add new key
 image::runtime-services-modeling/mgmt-console-process-variable-add.png[Steps to add a new variable to a Process instance in {MANAGEMENT_CONSOLE}]
 
-* Copy: Enables you to copy the selected value in clipboard.
+* Copy: Enables you to copy the selected value to the clipboard.
 * Edit: Enables you to edit the selected element value.
 * Remove: Enables you to remove the selected element.
 
-If there are pending changes to be saved, the panel displays *Changes are not saved yet* message.
+If there are pending changes to be saved, the panel displays the *Changes are not saved yet* message.
 To save the changes that you made to the process variable, click *Save*, or click *Abort* to abort the changes.
 If you want to revert the changes, click the refresh icon.
 --
@@ -167,53 +151,39 @@ If you want to revert the changes, click the refresh icon.
 === Timeline panel
 --
 The *Timeline* panel displays the list of node instances related to the Process instance sorted by the start time.
-Each node consists of an icon, indicating the state of the node, such as active, completed, or error.
+Each node consists of an icon indicating the state of the node, such as active, completed, or error.
 
-.Timeline panel
-image::runtime-services-modeling/mgmt-console-process-timeline-panel.png[Image of Timeline panel showing the related node instances]
-
-The actions that are available for an active node include retriggering and canceling a node.
+The actions that are available for an active node include retriggering and canceling the node.
 Whereas the actions for an error node include retrying and skipping the node.
 The node actions in the *Timeline* panel are connected with the _Business Service_ to perform the requested action.
 
-If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*.
+If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*. The same functionality is available for nodes with associated SLA timers.
 --
 
 === Node Trigger panel
 --
 The *Node Trigger* panel displays the list of all Process Definition nodes in a drop-down.
 When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*.
-Click the *Trigger* button, to trigger the selected node.
-
-.Node Trigger panel
-image::runtime-services-modeling/mgmt-console-node-trigger-panel.png[Image of node trigger panel in {MANAGEMENT_CONSOLE}]
---
-
-=== Milestones panel
---
-The *Milestones* panel displays a list of the milestones for the Process instance, if applicable.
-
-.Milestones panel
-image::runtime-services-modeling/mgmt-console-milestones-panel.png[Image of milestones panel in {MANAGEMENT_CONSOLE}]
+Click the *Trigger* button to trigger the selected node.
 --
 
 === Jobs panel
 --
 The *Jobs* panel displays the list of available jobs that are related to the Process instance.
 
-.Jobs panel
-image::runtime-services-modeling/mgmt-console-jobs-panel.png[Image of jobs panel in {MANAGEMENT_CONSOLE}]
-
-.Job details
-image::runtime-services-modeling/mgmt-console-jobs-panel-details.png[Image of jobs panel details in {MANAGEMENT_CONSOLE}]
-
-You can reschedule or cancel a job that is in scheduled or error state.
+You can reschedule or cancel a job that is in a scheduled or error state.
 You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
 --
 
 == Process Definitions
 
-The Process Definitions list page shows the list of process definitions available. They are displayed in an expandable list, which shows all the child process instances of the particular process definition when expanded.
+The Process Definitions list page shows the list of process definitions available.
+
+image::runtime-services-modeling/mgmt-console-process-definitions-multi-runtime.png[Image of the Process Definitions page with multiple connected Businesss Services]
+
+=== Process definition form
+
+Clicking on a process definition will load an automatically generated form, which, when filled out and submitted, creates a process instance with the specified parameters.
 
 image::runtime-services-modeling/mgmt-console-process-definition-page.png[Image of Process Definition page in {MANAGEMENT_CONSOLE}]
 
@@ -224,7 +194,7 @@ The *Jobs* page displays the list of existing jobs, which you can filter and per
 .Jobs page
 image::runtime-services-modeling/mgmt-console-jobs-list.png[Image of Jobs List page in {MANAGEMENT_CONSOLE}]
 
-Clicking on the actions menu for each actions shows a list of available actions: *Details*, *Reschedule*, and *Cancel*.
+Clicking on the actions menu for each item shows a list of available actions: *Details*, *Reschedule*, and *Cancel*.
 
 .Job actions menu
 image::runtime-services-modeling/mgmt-console-job-menu.png[Image of Jobs List page in {MANAGEMENT_CONSOLE},300]
@@ -244,42 +214,46 @@ image::runtime-services-modeling/mgmt-console-job-reschedule.png[Image of Jobs r
 .Job cancel success modal
 image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel modal,400]
 
-You can also cancel the multiple jobs at the same time by selecting the jobs to be canceled and clicking the *Cancel Selected* button.
-
-.Jobs batch cancel
-image::runtime-services-modeling/mgmt-console-job-batch-cancel.png[Image of Jobs cancel modal]
+You can also cancel multiple jobs at the same time by selecting the jobs to be canceled and clicking the *Cancel Selected* button.
 
 == Tasks
 
-The tasks panel shows a list of User Tasks which are available for a process. Each column contains detailed information about the user task which are - _Name_, _Process_, _Priority_, _Status_, _Started_ and _Last update_. The columns are sortable.
+The tasks panel shows a list of User Tasks that are available for a process. Each column contains detailed information about the user task, including _Name_, _Process_, _Priority_, _Status_, _Started_, and _Last Update_. The columns are sortable.
 
 === Tasks List
 
 .Tasks list
 image::runtime-services-modeling/mgmt-console-task-list.png[Image of Task List page in {MANAGEMENT_CONSOLE}]
 
-Tasks can be filtered by the status and task name, and clicking on the name of the user task will navigate to Task Details page, with the Task Form and Task Details panel.
+Tasks can be filtered by status and task name, and clicking on the name of the user task will navigate to the Task Details page, with the Task Form and Task Details panel.
 
 === Tasks Details
 
 .Task details
 image::runtime-services-modeling/mgmt-console-task-form.png[Image of Task Form page in {MANAGEMENT_CONSOLE}]
 
-Clicking on the **View Details** button opens a side panel with more details regarding the current task, including the parent process, possible assigned users/groups, id, name, and state.
+Clicking the **View Details** button opens a side panel with more details about the current task, including the parent process, possible assigned users/groups, ID, name, and state.
 
-The form is autogenerated based on the User Task defined in the parent Process Definition and filling and submitting it will progress the task to the next phase of the task lifecycle.
+The form is auto-generated based on the User Task defined in the parent Process Definition. Filling and submitting it will progress the task to the next phase of the task lifecycle.
+
 [#impersonation]
 === Impersonation
 
-User Tasks can be assigned to a specific user or user group, and submitting them is limited to that assigned user. But when using a unsecured _Business Service_ or authenticated as a user with impersonation powers, you can submit the task as the assigned user by impersonating them.
+User Tasks can be assigned to a specific user or user group, and submitting them is limited to the assigned user. But when using an unsecured _Business Service_ or authenticated as a user with impersonation powers, you can submit the task as the assigned user by impersonating them.
 
 image::runtime-services-modeling/mgmt-console-task-impersonation.png[Image of the Impersonation form]
 
 Fill the **User** and/or **Group** fields in the Impersonation form and click ** Apply** to start impersonating a specific user or user group.
 
-To stop impersonation, click the **Reset** button.
+To stop impersonating, click the **Reset** button.
 
 [NOTE]
 When viewing User Tasks from a secured _Business Service_ with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
 
+=== Managing all connected Business Services at the same time
 
+On the home page, clicking on the *All Business Services* option will make it so that every page that lists resources (such as process instances, definitions, tasks, overview, etc) will fetch data from all connected Business Services at the same time.
+
+image::runtime-services-modeling/mgmt-console-home-all-business-services.png[Image of the Home page with the All Business Services button, 400]
+
+This means that from a single Management Console instance, it's possible to manage multiple Business Services and obtain an aggregated view of all running process instances, as the Overview page groups process instances from matching process definitions, even if they are from different Business Services.
