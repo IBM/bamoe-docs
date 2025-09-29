@@ -8,30 +8,37 @@ This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VE
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
 
-* Java - 21 
+* Java - 21 (in addition to 17)
 * OpenShift Container Platform 4.18 (in addition to 4.16)
-* DMN - 1.6
+* DMN - 1.6 (in addition 1.1,...1.5)
 * Kafka - 4.0 (in addition to 3.9)
-
-=== Java 21 support
-Java 21 is now the default version supported by {PRODUCT_SHORT}. Java 17 remains a supported version and you will find specific packages for the Dev Deployment if you wish to continue using this version.
 
 More information in xref:supported-environments.adoc[Supported Environments].
 
+=== Java 21 support
+Java 21 is now the default version supported by {PRODUCT_SHORT}. Java 17 remains a supported version and you will find specific images for {CANVAS} Dev Deployments if you wish to continue using this version. 
+
+== New AI integrations
+{PRODUCT_SHORT} now enables you to create Business Services containing Workflows that are able to send prompts and query LLMs for generated textual-content as part of the business process. This is possible using a new Gen AI Task in the BPMN Editor. 
+
+BAMOE capabilities can now be exposed through {PRODUCT_SHORT} MCP Server and consumed by any Agentic AI framework (such as watsonX Orchestrate). Using this functionality you can create your own AI Agents. This feature is available as a tech preview in this release. xref:../integrating-ai/intro-ai-integration.adoc[Learn more...]
+
 == New BPMN Editor 
-The new BPMN Editor which was available in {VERSION_921} as a technology preview is now the default editor and comes with a number of new features in {VERSION}. 
+The new BPMN Editor which was available in {VERSION_921} as a tech preview is now the default editor in both {CANVAS} and {DEV_TOOLS}. It comes with a number of new features in {VERSION}. 
+
+* New Gen AI Task for integrating with LLM models during Workflow execution. 
 
 * Correlation Properties and Keys can now be edited on a dedicated new Panel
 
 * Process Variables can now be edited on a dedicated Panel
 
-* Morphing a node into another variant (e.g., Task → User Task) can now be done with consistent keyboard shortcuts;
+* Morphing a node into another variant (e.g., Task → User Task) can now be done with consistent keyboard shortcuts
 
-* Grid snapping is now available, similarly to DMN Editor;
+* Grid snapping is now available, similarly to DMN Editor
 
-* A live preview of a new node will be rendered when dragging from the Palette;
+* A live preview of a new node will be rendered when dragging from the Palette
 
-* The Group node is now available to visualize enclose nodes that share similar context;
+* The Group node is now available to visualize enclose nodes that share similar context
 
 * Assignments (Data I/O) is now under Data Mapping.
 
@@ -39,26 +46,21 @@ xref:../workflow/authoring-workflows.adoc[Learn more...]
 
 === Custom Task nodes for Work Item Handlers (WIHs)
 
-You can now create a Custom task directly in your BPMN model that binds to a custom Work Item Handler (WIH). A Custom WIH is a user-defined Java class that implements the logic for executing the task. It extends the capabilities of standard BPMN tasks (such as, Service Tasks). Using this functionality you can taylor your workflows with domain specific logic, by plugging in custom code to meet business requirements not covered by built-in functionality.
+You can now create a Custom Task directly in your BPMN model that binds to a custom Work Item Handler (WIH). A Custom WIH is a user-defined Java class that implements the logic for executing a task. It extends the capabilities of standard BPMN tasks (such as, Service Tasks). Using this functionality you can taylor your Workflows with domain specific logic, by plugging in custom code to meet business requirements not covered by built-in functionality.
 
-Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility. xref:../workflow/authoring-workflows.adoc#custom-wih[Learn more...]
+Custom Tasks can also define visual attributes and bind to runtime properties through Work Item Definition (WID) files, enhancing both modeling and execution flexibility. xref:../workflow/authoring-workflows.adoc#custom-wih[Learn more...]
 
-== New AI integrations
-{PRODUCT_SHORT} now enables you to create Business Services containing Workflows that are able to send prompts and query LLMs for generated textual-content as part of the business process. This is possible using a new Gen AI Task in the BPMN Editor. 
+== New Spring Boot 3 support for _Business Services_ containing stateful Workflows
+You can now develop your _Business Services_ containing stateful Workflows  using Spring Boot 3. A new Spring Boot accelerator is available in {CANVAS} and {DEV_TOOLS} enabling you to automatically generate a _Business Service_ project from your models. xref:../tools/applying-accelerators.adoc[Learn more...]
 
-A technology preview enables you to leverage specific BAMOE capabilities are now exposed through an MCP Server and can be consumed by any Agentic AI framework (such as watsonX Orchestrate). Using this functionality you can create your own AI Agents. xref:../integrating-ai/intro-ai-integration.adoc[Learn more...]
-
-== New Spring boot support for stateful workflow _Business Services_
-You can now develop your stateful workflow _Business Services_ using Spring Boot. A new Spring Boot accelerator is available in {CANVAS} and {DEV_TOOLS} enabling you to automatically generate a _Business Service_ project from BPMN. xref:../tools/applying-accelerators.adoc[Learn more...]
-
-Once you have used the acceletor to transform your process model into a _Business Service_ project, a new Spring Boot Web application provides you with an integrated developer experience that is similar to the Quarkus Dev UI. It enables you to run and interact with your Workflows during development, create Process Instances and manage Jobs and Tasks. This replaces the Swagger UI that you will have been using in previous releases to run your __Business Service__ projects in development mode.
+Once you have used the acceletor to transform your models into a _Business Service_ project, the new {SPRING_WEB_CONSOLE} provides you with an integrated developer experience that is similar to the {QUARKUS_DEV_UI}. It enables you to run and interact with your Workflows during development, create Process Instances and manage Jobs and Tasks. This complements the Swagger UI that you were using in previous releases to run your __Business Service__ projects in development mode.
 
 xref:../workflow/workflows-with-springboot.adoc[Learn more...]
 
-== New embedded job service for workflow applications
-A new embedded job service is available for integration with Quarkus and Spring Boot based workflow applications following the compact architecture model. This new job service add-on replaces the {VERSION_92X} Job Service and is fully backwards compatible, using the same database schema for persistence. In a multi-pod setup, this add-on works without specific configuration settings. xref:../workflow/overview.adoc#jobs-service[Learn more]
+== New embedded Jobs Service for _Business Services_ containing Workflows
+A new embedded Jobs Service is available for integration with Quarkus and Spring Boot based _Business Services_ projects following the Compact Architecture model. This new Jobs Service add-on replaces the {VERSION_92X} Jobs Service and is fully backwards compatible, using the same database schema for persistence. In a multi-Pod setup, this add-on removes the need for specific configuration settings. xref:../workflow/overview.adoc#jobs-service[Learn more]
 
-== Open API files delivered for all BAMOE APIs
+== OpenAPI files delivered for all _Business Services_ APIs
 A new deliverable is included in the distribution that includes the API specifications:
 
 * OpenAPI specs
@@ -66,13 +68,11 @@ A new deliverable is included in the distribution that includes the API specific
 
 Using this deliverable you will have immediate access to standardized, up-to-date API documentation for integration and reference. xref:../installation/installation.adoc[Learn more...]
 
-== Data Cleanup tool for Workflow subsystems
-The volume of data generated by stateful workflow _Business Services_ grows exponentially over time. Large volumes of unwanted or old data can potentially slow down queries, search operations, and all other interactions with the production database. 
+== {DATA_CLEANUP} for Workflow subsystems
+The volume of data generated by _Business Services_ containing stateful workflows, grows over time. Large volumes of unwanted or old data can potentially slow down queries, search operations, and all other interactions with the production database. To resolve this issue a new {DATA_CLEANUP} is now available to remove data that is obsolete, preventing performance degradation. xref:../runtime-services-modeling/services-deployment.adoc[Learn more...]
 
-A new data cleanup tool database tool is now available to remove data that is obsolete. xref:../runtime-services-modeling/services-deployment.adoc[Learn more...]
-
-== DMN 1.6 new feature support
-The DMN 1.6 key features enhance the decision modeling experience, improve consistency, and reduce ambiguity.
+== DMN 1.6 support
+The DMN 1.6 key features enhance the decision modeling experience, improve consistency, and reduce ambiguity. One of the highlights of this support is the new B-FEEL expression language. 
 xref:../editing/authoring-decisions.adoc[Learn more...]
 
 == General bug fixes and enhancements
