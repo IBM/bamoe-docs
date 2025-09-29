@@ -20,7 +20,7 @@ Conformance level 3::
 A DMN conformance level 3 implementation includes the requirements in conformance levels 1 and 2, and supports Friendly Enough Expression Language (FEEL) and The Business Friendly Enough Expression Language (B-FEEL) expressions, the full set of boxed expressions, and fully executable decision models.
 
 {PRODUCT} provides runtime support for DMN 1.1, 1.2, 1.3, 1.4, 1.5 and 1.6 models at conformance level 3 and design support for DMN 1.2 with DMN Editor (classic), and 1.6 with the DMN Editor at conformance level 3.
-You can design your DMN models with {CANVAS} or import existing DMN models into your _Business Service_ projects for deployment and execution.
+You can design your DMN models with {CANVAS} or {PRODUCT_SHORT} Developer Tools for VS Code, or import existing DMN models into your _Business Service_ projects for deployment and execution.
 Any DMN models that you import and open in the DMN Editor, are converted to DMN 1.2 or 1.6 models.
 
 The following table summarizes the design and runtime support for each DMN version in {PRODUCT}:
@@ -526,7 +526,7 @@ The B-FEEL expression language differ from the FEEL by the following semantics:
 
 B-FEEL simplifies boolean logic by removing null as a possible result from operators and built-in functions. It enforces a two-value logic system—true and false—instead of the three-value logic used in FEEL (true, false, and null).
 
-Boolean operators such as `=, <=, <, >, >=, not(), and, or, in`, and between always return either true or false, even when the expression involves incompatible types. In these cases, B-FEEL treats the result as false, except for the != operator, which returns true.
+Boolean operators such as `=`, `<=`, `<`, `>`, `>=`, `not()`, `and`, `or`, `in`, and `between` always return either true or false, even when the expression involves incompatible types. In these cases, B-FEEL treats the result as false, except for the `!=` operator, which returns true.
 
 The following examples demonstrate how B-FEEL evaluates boolean expressions:
 
@@ -598,7 +598,7 @@ The following examples show how B-FEEL handles string expressions compared to FE
 
 .Built-in functions returning a date and time
 
-B-FEEL modifies the behavior of functions that return `date, time, or, date and time values`. Instead of returning a 'null' when encountering errors or invalid input, these functions now return a default value based on the type. B-FEEL uses January 1st, 1970 as the standard fallback (epoch).
+B-FEEL modifies the behavior of functions that return `date`, `time`, or, `date and time values`. Instead of returning a 'null' when encountering errors or invalid input, these functions now return a default value based on the type. B-FEEL uses January 1st, 1970 as the standard fallback (epoch).
 
 The engine applies the following default values:
 
@@ -881,6 +881,12 @@ The consistency and usability of boxed filter and boxed iterator expressions are
 In boxed filters, the expression in the top part must evaluate to a collection. If the expression returns a single value—such as a number or string—the engine implicitly converts it into a list containing that value. 
 Similarly, in boxed iterators, the expression in the in row must also evaluate to a collection, and singleton values are automatically wrapped into lists.
 
+.Boxed filter function
+image::reference-guide/boxed-filter.png[width=480]
+
+.Boxed iterator function
+image::reference-guide/boxed-iterator.png[width=480]
+
 === Updated Collect hit policy behavior for DMN decision tables
 The DMN 1.6 clarifies the behavior of the Collect hit policy in decision tables. When this policy is used, the engine either returns all matched rule outputs in arbitrary order or applies a simple aggregation function to them, depending on the presence of an operator.
 
@@ -888,10 +894,10 @@ If no operator is specified, the engine returns a list containing the output ent
 
 The supported operators and their behaviors are:
 
-* + (sum): returns the sum of all matched outputs
-* < (min): returns the smallest value among the outputs
-* > (max): returns the largest value among the outputs
-* # (count): returns the number of matched outputs
+* `+` (sum): returns the sum of all matched outputs
+* `<` (min): returns the smallest value among the outputs
+* `>` (max): returns the largest value among the outputs
+* `#` (count): returns the number of matched outputs
 
 This update also allows implicit conversion of single values into singleton lists, ensuring consistent behavior even when only one rule matches.
 
@@ -911,10 +917,14 @@ The engine returns the input unchanged if it is already a Number. If the input i
 
 This enhancement simplifies decision logic by allowing flexible input handling while maintaining strict validation for non-numeric strings.
 
+.Number function
+image::reference-guide/number-function.png[width=480]
+
+
 === Single parameter versions of all rounding functions in FEEL 
 The DMN 1.6 introduces single-parameter versions of all rounding functions in FEEL. These variants simplify usage by assuming a default scale of 0, which aligns with intuitive expectations for whole-number rounding and streamlines decision logic for modelers.
 
-=== Support functions with a single numeric argument
+The following functions are now supported with a single numeric argument:
 
 [cols="40%,30%,30%" options="header"]
 |===
@@ -924,8 +934,6 @@ The DMN 1.6 introduces single-parameter versions of all rounding functions in FE
 |round half up(x)|round half up(5.5)|6
 |round half down(x)|round half down(5.5)|5
 |===
-
-DMN 1.6 delivers more intuitive and predictable rounding behavior. By reducing the need for explicit scale parameters, it makes FEEL functions easier to use and better aligned with real-world expectations.
 
 === Support type conversion from decimal to integer
 The DMN 1.6 conversion rule automatically converts decimal numbers to integers in contexts where integer values are required. This rule ensures consistent behavior across decision models by aligning input types with expected output formats. The conversion truncates the decimal portion without rounding, preserving only the integer part of the number.
@@ -945,6 +953,16 @@ The engine supports both referencing styles, ensuring flexibility and consistenc
 
 === Support new version of date and time conversion function
 DMN 1.6 includes a new conversion function- *date and time(date, time, timezone)*. This function constructs a full date-time value by combining the provided date and time and applying the specified timezone.
+
+[cols="50%,50%" options="header"]
+|===
+|Input |Output
+|date and time(date("2024-12-24"), time("23:59:00"), "Z")|2024-12-24T23:59:00Z
+|date and time(date("2024-12-24"), time("23:59:00"), "America/Costa_Rica")|2024-12-24T23:59:00@America/Costa_Rica
+|===
+
+.Date and time conversion function
+image::reference-guide/valuepropdate-and-time-conversion-function.png[width=480]
 
 === Configurable error handling modes
 The DMN 1.6 introduces the following two distinct modes for managing errors during decision model evaluation: 
@@ -969,6 +987,13 @@ For example, `date and time("2025-07-03T01:01:01Z").value` returns `BigDecimal.v
 * Years and months duration: Converts a duration expressed in years and months into its equivalent number of months. For example, `duration("P1Y1M").value` returns `BigDecimal.valueOf(13).`
 This property allows for the conversion of these types to a numeric value. 
 
+
+.Value Property page on {CANVAS}
+image::reference-guide/valuepropertypage.png[width=480]
+
+.Input and Output
+image::reference-guide/input-output.png[width=480]
+
 === New Descendant Operator
 The DMN 1.6 descendant operator to enhance the expressiveness of FEEL when working with nested contexts. This operator allows for the repetitive access of all values associated with a given property name, regardless of how deeply nested they are within a context structure.
 For example, given the following context: 
@@ -982,7 +1007,7 @@ Using the descendant operator to access `b`:
 { a: { b: { b: 1 } } }...b
 ----
 
-All values associated with the property name `b` returns the following expression:
+Returns the following expression:
 
 ----
 [ { b: 1 }, 1 ]
