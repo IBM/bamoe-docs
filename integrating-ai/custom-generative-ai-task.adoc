@@ -1,12 +1,158 @@
-= Integrating a custom generative AI task in BPMN 
+= Using a Gen AI task in BPMN 
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-{PRODUCT_SHORT} enables you to create Business Services that contain Workflows able to send prompts that can query LLMs for generated textual-content as part of the business process. The workflow engine is extended via Work Item Handlers to enable this functionality. 
+{PRODUCT_SHORT} enables you to create Business Services that contain Workflows able to send prompts that can query LLMs for generated textual-content as part of the business process. 
 
-You will need to connect and authenticate to one of the AI providers available in this integration: watsonx, Ollama or Open AI. This authentication applies to your work in {CANVAS} and {DEV_TOOLS}. This is done using the 
+Using the Gen AI Task you can seamlessly integrate Large Language Models (LLMs) into your process automation, enabling intelligent text processing, content generation and decision making within your workflow. 
 
-Authenticating to AI Providers will work differently between the frontend (BAMOE Canvas and BPMN Editor VSCode extension) and backend (Business Service). In BAMOE Canvas we can leverage our implementations of AuthProviders/[AuthSessions|https://github.ibm.com/dba/bamoe/blob/main/packages-bamoe/canvas/src/authSessions/AuthSessionApi.ts], while in the BPMN Editor VSCode Extension we can leverage the VSCode’s APIs to securily store tokens and API keys. In the Business Service we will rely on evironment variables that can be defined in the application.properties, which in turn can be set during runtime.
+The Gen AI Task enables you to:
 
-To access 
+* Integrate AI into Workflows by dragging a Gen AI task directly into your BPMN process models, in the same way as other task components.
+
+* Choose from various AI providers including:
+** IBM watsonx.ai
+** Ollama   
+** OpenAI 
+
+* Design and test AI prompts directly within your {CANVAS} or from {DEV_TOOLS} to create your custom prompt that is tailored to your business needs.
+
+* Work with your existing process variables and data, using the AI making intelligent decisions or generating content based on real business information.
+
+* Test your AI prompts and preview results before deploying your process, ensuring the AI behavior meets your expectations.
+
+In order to create and test the GenAI task in {CANVAS} and {DEV_TOOLS} you will need to connect and authenticate to one of the AI providers available in this integration: watsonx, Ollama or Open AI. An AI Provider is a service that offers access to AI models for tasks such as, text generation and answering questions.These providers typically offer pre-trained models, APIs, and software development kits (SDKs) to help developers integrate AI into their applications.
+
+[#connect-ai-canvas]
+== Connecting to an AI provider in {CANVAS}
+To connect to an AI provider from {CANVAS} follow these steps:
+
+. Navigate to Profile → Connect to an Account.
+
+. From the list of available AI providers (WatsonX, Ollama, OpenAI), select the provider you wish to integrate.
++
+.Selecting an AI provider
+image::workflow/genai-connect.png[width=360]
+
+. Enter a Display Name (e.g., My XXX Account)
++ 
+.Connecting to WatsonX
+image::workflow/genai-authenticate-watsonx.png[width=360]
+
+. Depending on the selected AI Provider enter the following information
+
+.. WatsonX - enter your AP Key, Project ID and Service URL (obtained from your WatsonX account)
+
+.. OpenAI - enter your API Key and Service URL (obtained from the OpenAI website)
+
+.. Ollama - enter your service URL (obtained as a result of launching the server)
+
+. Click Connect
+
+== Connecting to an AI provider in {DEV_TOOLS}
+To connect to an AI provider from {DEV_TOOLS} follow these steps:
+
+. Navigate to the Profile menu in the bottom left corner.
+
+. From the list of available AI providers (WatsonX, Ollama, OpenAI), select the provider you wish to integrate.
++
+.Selecting an AI provider
+image::workflow/genai-connect-vscode.png[width=360]
+
+. For more information on the different fields to complete to connect to each AI provider see xref:#connect-ai-canvas[Connecting with Canvas]
+
+== Creating a Gen AI task in your workflow
+To create a Gen AI task in your workflow follow this process:
+
+. Click the Custom Task icon at the bottom of the left pane.
+. From the dialog that is displayed click and drag a Gen AI Task from the palette. 
++
+.Creating a Gen AI Task
+image::workflow/genai-task-create.png[width=360]
+
+. Once the Gen AI Task is created you can connect it to other nodes in the BPMN workflow and select and edit its properties in the usual way. 
++
+.Gen AI Task Properties Panel
+image::workflow/genai-task-props.png[width=360]
+
+== Input and Output Data Mapping
+Input and output data mappings are defined though the Properties panel as for other task types. 
+
+.Gen AI Task Data Mapping
+image::workflow/genai-data-mapping.png[width=360]
+
+Configure which process variables to send to the AI, and set up where the AI's response should be stored in your process.
+
+NOTE: The input variables mapped in this dialog can be referenced later in the prompt input. 
+
+== Create your Prompt
+
+In your Gen AI Task Properties panel:
+
+. Select the AI Provider you previously connected to (if you select an unauthenticated AI Provider you will need to xref:#connect-ai-canvas[Connect to an AI Provider]). 
+
+. Select a model from the list provided by the selected AI Provider. An AI model is a trained system that processes input and generates responses based on patterns it has learned from data.  
++
+.Gen AI task model
+image::workflow/genai-model-select.png[width=360]
+
+.. If the model you require is not available you may need to install it and enter the model name manually.
+
+. You can adjust the *Temperature* hyperparameter (a decimal between 0 and 2) to adjust how createive or predictable the model responses are. 
+.. A lower temperature (e.g., 0.2) results in more predictable and conservative responses.
+.. A higher temperature (e.g., 1.5) results in more creative and varied responses.
+
+. Set the *Token Limit* to determine the maximum number of tokens (unit of text - word or character) that the model can generate in a single response. 
+.. Increasing the token limit will enable longer and more detailed responses, but may increase the computational cost and latency of the model. 
+.. The maximum tokens allowed may vary according to your plan with the AI Provider or the model selected. 
+
+. Craft your prompt in the *Prompt* field following the usual guidelines to ensure an effective prompt. The prompt you enter is prefixed by the default System prompt configured by the Gen AI Task WorkItemHandler and which instructs the LLM to perform variable interpolation and is aligned with IBM’s prompt injection prevention guidelines (https://www.ibm.com/think/insights/prevent-prompt-injection).
+.. You can make a prompt dynamic by using Process Variables. To reference a variable include the variable name in double nested curly brackets, e.g., `{{<myVariableName}}`. The editor will highlight these variables in blue, and supports auto-suggest functionality. If you type '{{}}' with your cursor between the brackets, and press Ctrl + Space, a dropdown list displays the Data Input Mapping variables you have already set up. 
++
+.Prompt with Process variable auto-suggest
+image::workflow/genai-prompt.png[width=360]
+
+. Using the *Preview* feature you can test the results of your prompt, using the *Preview Table* to provide temporary values for data input variables. 
++
+.Testing a Prompt
+image::workflow/genai-example-task-config.png[width=360]
++
+Which displays the following result:
++
+.Testing a Prompt
+image::workflow/genai-example-prompt-result.png[width=360]
+
+. Depending on the result you may want to adjust your prompt. 
+
+This completes the process to create a Gen AI Task in your Workflow. 
+
+== Deploying a _Business Service_ that contains a Gen AI task
+In a _Business Service_ containing stateful Workflows that include a Gen AI task, you will need to configure evironment variables in the `application.properties` file, to enable connection to an AI provider at runtime.
+
+The following example shows the default properties to enable a connection to IBM Watsonx, the user should provide their AI provider credentials, such as API keys and project IDs. 
+[source,properties]
+----
+bamoe.workflow.gen-ai-task.provider.watsonx.base-url=https://us-south.ml.cloud.ibm.com
+bamoe.workflow.gen-ai-task.provider.watsonx.api-key=<api-key>
+bamoe.workflow.gen-ai-task.provider.watsonx.project-id=<project-id>
+bamoe.workflow.gen-ai-task.provider.watsonx.log-requests=true
+bamoe.workflow.gen-ai-task.provider.watsonx.log-responses=true
+----
+For OpenAI, the API key is required:
+
+[source, properties]
+----
+bamoe.workflow.gen-ai-task.provider.openai.base-url=https://api.openai.com/v1/
+bamoe.workflow.gen-ai-task.provider.openai.api-key=<api-key>
+bamoe.workflow.gen-ai-task.provider.openai.log-requests=true
+bamoe.workflow.gen-ai-task.provider.openai.log-responses=true
+----
+
+For OLLAMA, only the base URL is needed:
+[source, properties]
+----
+bamoe.workflow.gen-ai-task.provider.ollama.base-url=http://localhost:11434
+bamoe.workflow.gen-ai-task.provider.ollama.log-requests=true
+bamoe.workflow.gen-ai-task.provider.ollama.log-responses=true
+----
 
