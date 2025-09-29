@@ -533,17 +533,17 @@ The following examples demonstrate how B-FEEL evaluates boolean expressions:
 [cols="50%,25%,25%" options="header"]
 |===
 |Expression|FEEL|B-FEEL
-
-|decimal("a", 0)	|null	|0
-|round up("5.5", 0)	|null	|0
-|string length(22)	|null	|0
-|day of year("a")	|null	|0
-|count([1,null,3])	|3	|3
-|sum([1, null, 3])	|null	|4
-|sum([1, "1", 3])	|null	|4
-|sum([])	|null	|0
-|mean(["a"])	|null	|0
-|mean([1, "a", 3])	|null	|2
+|"a" = 1 |null |false
+|"a" < 1 |null |false
+|"a" <= null |null |false
+|"a" > 1 |null |false
+|null >= 1 |null |false
+|not("a") |null |false
+|true and "x" |null |false
+|false or "x" |null |false
+|"a" in [1..100] |null |false
+|null between 1 and 100 |null |false
+|"a" != 1 |null |true
 |===
 
 B-FEEL also modifies the behavior of boolean-returning built-in functions. Instead of returning null when encountering errors or incompatible types, these functions return false.
@@ -961,10 +961,10 @@ In contrast, strict error mode halts model evaluation upon detecting the first e
 === New value property defined for variable types
 In DMN 1.6, a new value property is defined in the following variable types: 
 
-* date: Converts a calendar date into a date-time value where the time is set to UTC midnight. For example, `date(2025, 7, 3).value` returns `BigDecimal.valueOf(1751500800)`.
+* date: Converts a calendar date into a date-time value where the time is set to UTC midnight. For example, `date(2025, 7, 3).value` returns `BigDecimal.valueOf(1719028057)`.
 * Time: Converts a specific time of day into the total number of seconds since midnight. For example, `time("01:01:01").value` returns `BigDecimal.valueOf(3661)`.
 * Date and time: Converts a full date and time in UTC format into the number of seconds since the epoch, which is a fixed reference point in time. This representation is commonly used for timestamping and time arithmetic.
-For example, `date and time("2025-07-03T01:01:01Z").value` returns `BigDecimal.valueOf(1751536861)`.
+For example, `date and time("2025-07-03T01:01:01Z").value` returns `BigDecimal.valueOf(1759449661)`.
 * days and time duration: Converts a duration expressed in days and time into its equivalent number of seconds. For example, `duration("P1DT1H").value` returns `BigDecimal.valueOf(90000)`.
 * Years and months duration: Converts a duration expressed in years and months into its equivalent number of months. For example, `duration("P1Y1M").value` returns `BigDecimal.valueOf(13).`
 This property allows for the conversion of these types to a numeric value. 
@@ -977,7 +977,12 @@ For example, given the following context:
 { a: { b: { b: 1 } } }
 ----
 
-Using the descendant operator to access all values associated with the property name `b` returns the following expression:
+Using the descendant operator to access `b`:
+----
+{ a: { b: { b: 1 } } }...b
+----
+
+All values associated with the property name `b` returns the following expression:
 
 ----
 [ { b: 1 }, 1 ]
