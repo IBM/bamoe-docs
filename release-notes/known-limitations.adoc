@@ -33,71 +33,36 @@ Table 1. Known limitations
 |When running Business Services using workflow functionality configured with a MS SQL Server instance, database deadlocks may occur.
 |
 
-|BAMOE Tools does not support DMN 1.6 Simplified InputData Assignment Across Nested Imports
-|Users who rely heavily on imported DMN models may encounter issues when their model depends on transitively imported Input Data nodes which means, Input Data defined in a model that is imported indirectly through another model.
-
-Although DMN 1.6 supports simplified value assignment of such Input Data across nested imports, BAMOE Tools do not currently support this feature. As a result, models using transitive Input Data cannot be:
+|DMN Editor: does not support DMN 1.6 Simplified `InputData` Assignment Across Nested Imports
+|Users who rely heavily on imported DMN models to build modular DMN models with layered imports, may encounter issues when their model depends on transitively imported Input Data nodes. This refers to Input Data defined in a model that is imported indirectly through another model. As a result, models using transitive Input Data cannot be:
 
 * Evaluated using DMN Runner
 
 * Tested using Scenario and Simulation files
 
-This limitation affects users attempting to build modular DMN models with layered imports, where Input Data is reused across multiple levels.
-|There is currently no workaround for users who wish to use transitive Input Data nodes in BAMOE Tools. To avoid this issue, users must restructure their models to avoid relying on nested imports for Input Data.
+|To avoid this issue, users must restructure their models to avoid relying on nested imports for Input Data.
 
-|DMN Editor: Copy and paste of data type property creates non unique copy
-|When users attempt to speed up the creation of custom structures by copying and pasting structure properties (for example, Price from Car to House), will encounter a limitation where the pasted property is not treated as a unique instance.
+|DMN Editor: Copy and paste of data type property creates non-unique copy
+|When users attempt to speed up the creation of custom structures by copying and pasting structure properties, will encounter a limitation where the pasted property is not treated as a unique instance.
 
-Although it is valid to have multiple structures with properties of the same name (for example, Car.Price and House.Price), the editor links the copied property to its original. As a result, any modification made to the pasted property (for example, House.Price) will also affect the original (Car.Price), and vice versa.
+Although it is valid to have multiple structures with properties of the same name (for example, `Car.Price` and `House.Price`), the editor links the copied property to its original. As a result, any modification made to the pasted property (for example, `House.Price`) will also affect the original (`Car.Price`), and vice versa.
 
-This behavior prevents users from independently customizing the pasted property, which defeats the purpose of copy and paste feature.
-|To avoid this issue, users should manually create the new structure property instead of copying it. This involves:
+|To avoid this issue, users should manually create the new structure property instead of copying it. 
 
-* Adding a new property to the target structure
+|DMN Editor: Does not autocomplete decision name when required decision uses namespace in `href`
+|In DMN models, when a required decision is referenced by using a full namespace in the `href` attribute (e.g., <requiredDecision href="http://www.example.org/Definitions01.xml#prebureauriskDec01"/>), the expression editor fails to offer autocompletion for that decision. (eg. `prebureauriskDec01` is not in theautocompletion suggestions). This issue only affects references within the same DMN model. 
 
-* Renaming it appropriately
+|To ensure autocompletion works as expected, do not use namespaces in `href` attributes when referencing decisions within the same DMN model. Use relative references (for example, `href="#decisionName"`) instead.
 
-* Setting its data type
+|DMN Editor: Copy of a Decision Service cause visually confusing diagram.
+|When users copy and paste a group of nodes that are either connected to, or contained within a Decision Service, the pasted result may behave unexpectedly.
+|To avoid this issue, do not copy Decision Service nodes together with other connected nodes in a single operation. Instead you should copy and paste the nodes outside the Decision Service, and separately back into the Decision Service, before copy and pasting the Decision Service nodes. This split approach helps preserve correct edge behavior and avoids visual inconsistencies in the diagram.
 
-* Defining any necessary constraints
-
-|DMN Editor: Does not autocomplete decision name when required decision uses namespace in 'href'
-|In DMN models, when a required decision is referenced by using a full namespace in the href attribute, the expression editor fails to offer autocompletion for that decision.
-
-For example, if you are using:
-eg. <requiredDecision href="http://www.example.org/Definitions01.xml#prebureauriskDec01"/>
-
-will prevent prebureauriskDec01 from appearing in autocompletion suggestions.
-
-However, if the same decision is referenced without a namespace:
-eg. <requiredDecision href="#prebureauriskDec01"/>
-
-then autocompletion works correctly.
-
-This issue only affects references within the same DMN model. When users include a namespace in the 'href' to reference a decision inside the same file, the editor does not recognize it for autocompletion.
-|To ensure autocompletion works as expected, do not use namespaces in 'href' attributes when referencing decisions within the same DMN model. Use relative references (for example, href="#decisionName") instead.
-
-|DMN Editor: Copy of a Decision Service causes trouble to edges where target or source node is in the Decision Service.
-|When users copy and paste a group of nodes that are either connected to or contained within a Decision Service, the pasted result may behave unexpectedly.
-
-After pasting, attempting to move the group of nodes can cause the diagram to display incorrect or unexpected edges, making the model visually confusing and harder to maintain.
-|To avoid this issue, do not copy Decision Service nodes together with other connected nodes in a single operation. Instead:
-
-* First, copy and paste the nodes outside the Decision Service.
-
-* Then, separately copy and paste the nodes inside the Decision Service.
-
-* Then, separately copy and paste the Decision Service nodes.
-
-This split approach helps preserve correct edge behavior and avoids visual inconsistencies in the diagram.
-
-|DMN Runner: Interpreting split("abc", 22) result wrongly in B-FEEL
-|There are B-FEEL expressions, like split("abc", 22) that are somehow invalid but comparing B-FEEL with FEEL, defines non null result for them. Here it is an empty collection []. The problem is DMN Runner does not display such results.
+|DMN Runner: Interpreting `split("abc", 22)` results incorrectly in B-FEEL
+|There are B-FEEL expressions, like `split("abc", 22)` that are invalid but comparing B-FEEL with FEEL, defines non-null result for them. Here it is an empty collection [] and DMN Runner does not display these results.
 |There is no workaround for affected expressions. DMN Runner will show inappropriate values when using B-FEEL.
 
 |DMN Runner: Time input is always marked as error
-|In the DMN Runner panel, `time` input fields are consistently flagged as erroneous, even when the input is valid and no actual error occurs during evaluation.
-
-This misleading error indication can confuse users, making it appear as though their input is incorrect or causing evaluation issues, when in fact the logic executes correctly.
-|Currently, there is no workaround available. Users must ignore the error indication unless it is confirmed to be affecting the evaluation results.
+|In the DMN Runner panel, `time` input fields are consistently flagged as erroneous, even when the input is valid and no actual error occurs during evaluation. You may believe your input is incorrect or causing evaluation issues, when the logic executes correctly.
+|Ignore the error indication unless it is confirmed to be affecting the evaluation results.
 |===
