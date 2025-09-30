@@ -2,7 +2,7 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-{PRODUCT_SHORT} enables you to create Business Services that contain Workflows able to send prompts that can query LLMs for generated textual-content as part of the business process. 
+{PRODUCT_SHORT} enables you to create Business Services that contain Workflows able to send prompts, that can query LLMs for generated textual-content as part of the business process. 
 
 Using the Gen AI Task you can seamlessly integrate Large Language Models (LLMs) into your process automation, enabling intelligent text processing, content generation and decision making within your workflow. 
 
@@ -17,7 +17,7 @@ The Gen AI Task enables you to:
 
 * Design and test AI prompts directly within your {CANVAS} or from {DEV_TOOLS} to create your custom prompt that is tailored to your business needs.
 
-* Work with your existing process variables and data, using the AI making intelligent decisions or generating content based on real business information.
+* Work with your existing process variables and data. The AI is used to make intelligent decisions or generate content based on real business information.
 
 * Test your AI prompts and preview results before deploying your process, ensuring the AI behavior meets your expectations.
 
@@ -89,9 +89,9 @@ NOTE: The input variables mapped in this dialog can be referenced later in the p
 
 In your Gen AI Task Properties panel:
 
-. Select the AI Provider you previously connected to (if you select an unauthenticated AI Provider you will need to xref:#connect-ai-canvas[Connect to an AI Provider]). 
+. Select the AI Provider you want to use. If you haven't configured a connection to this provider you will not be able to test it in the editor (see xref:#connect-ai-canvas[Connect to an AI Provider]). 
 
-. Select a model from the list provided by the selected AI Provider. An AI model is a trained system that processes input and generates responses based on patterns it has learned from data.  
+. Select a model from the list provided by the selected AI Provider, or type the model name if you haven't yet connected to an AI Provider. An AI model is a trained system that processes input and generates responses based on patterns it has learned from data.  
 +
 .Gen AI task model
 image::workflow/genai-model-select.png[width=360]
@@ -129,14 +129,14 @@ This completes the process to create a Gen AI Task in your Workflow.
 == Deploying a _Business Service_ that contains a Gen AI task
 In a _Business Service_ containing stateful Workflows that include a Gen AI task, you will need to configure evironment variables in the `application.properties` file, to enable connection to an AI provider at runtime.
 
-The following example shows the default properties to enable a connection to IBM Watsonx, the user should provide their AI provider credentials, such as API keys and project IDs. 
+The following example shows the default properties to enable a connection to IBM Watsonx, the user should provide their AI provider credentials, such as API keys and project IDs. By default `log-request` and `log-responses` are set to `false`. 
 [source,properties]
 ----
 bamoe.workflow.gen-ai-task.provider.watsonx.base-url=https://us-south.ml.cloud.ibm.com
 bamoe.workflow.gen-ai-task.provider.watsonx.api-key=<api-key>
 bamoe.workflow.gen-ai-task.provider.watsonx.project-id=<project-id>
-bamoe.workflow.gen-ai-task.provider.watsonx.log-requests=true
-bamoe.workflow.gen-ai-task.provider.watsonx.log-responses=true
+bamoe.workflow.gen-ai-task.provider.watsonx.log-requests=<false | true>
+bamoe.workflow.gen-ai-task.provider.watsonx.log-responses=<false | true>
 ----
 For OpenAI, the API key is required:
 
@@ -144,15 +144,16 @@ For OpenAI, the API key is required:
 ----
 bamoe.workflow.gen-ai-task.provider.openai.base-url=https://api.openai.com/v1/
 bamoe.workflow.gen-ai-task.provider.openai.api-key=<api-key>
-bamoe.workflow.gen-ai-task.provider.openai.log-requests=true
-bamoe.workflow.gen-ai-task.provider.openai.log-responses=true
+bamoe.workflow.gen-ai-task.provider.openai.log-requests=<false | true>
+bamoe.workflow.gen-ai-task.provider.openai.log-responses=<false | true>
 ----
 
 For OLLAMA, only the base URL is needed:
 [source, properties]
 ----
 bamoe.workflow.gen-ai-task.provider.ollama.base-url=http://localhost:11434
-bamoe.workflow.gen-ai-task.provider.ollama.log-requests=true
-bamoe.workflow.gen-ai-task.provider.ollama.log-responses=true
+bamoe.workflow.gen-ai-task.provider.ollama.log-requests=<false | true>
+bamoe.workflow.gen-ai-task.provider.ollama.log-responses=<false | true>
 ----
 
+In addition there is a configuration that enables you to override the default System message prompt: `bamoe.workflow.gen-ai-task.system-message`. You can use this property to set a string value that replaces the default System message.
