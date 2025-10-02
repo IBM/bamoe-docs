@@ -12,7 +12,7 @@ The Gen AI Task enables you to:
 
 * Choose from various AI providers including:
 ** IBM watsonx.ai
-** Ollama   
+** Ollama (some configuration is required, see xref:#installing-ollama[Installing and configuring Ollama])  
 ** OpenAI 
 
 * Design and test AI prompts directly within your {CANVAS} or from {DEV_TOOLS} to create your custom prompt that is tailored to your business needs.
@@ -157,3 +157,48 @@ bamoe.workflow.gen-ai-task.provider.ollama.log-responses=<false | true>
 ----
 
 In addition there is a configuration that enables you to override the default System message prompt: `bamoe.workflow.gen-ai-task.system-message`. You can use this property to set a string value that replaces the default System message.
+
+[#installing-ollama]
+== Installing and configuring Ollama
+
+Ollama is a lightweight runtime for running large language models locally. You can install it and configure its API server with custom networking options, such as binding to a specific host or enabling CORS for browser clients.
+
+=== 1. Download and install from the official site
+
+- https://ollama.com/download[Ollama Download Page]
+
+=== 2. Verify Installation
+
+Check that the `ollama` CLI is available:
+
+[source,bash]
+----
+ollama --version
+----
+
+=== 3. Start Ollama with Host and CORS Options
+
+By default, Ollama listens only on `localhost:11434`.  
+You can override this using environment variables:
+
+* `OLLAMA_HOST` → Define which host/port the API should bind to  
+* `OLLAMA_ORIGINS` → Define allowed CORS origins (comma-separated)
+
+==== Bind to all interfaces and allow requests from {CANVAS}
+
+[source,bash]
+----
+OLLAMA_HOST=0.0.0.0:11434 OLLAMA_ORIGINS=<bamoe-canvas-url> ollama serve
+----
+
+This will:
+
+* Make Ollama accessible on *all network interfaces* (not just localhost).
+* Enable *CORS* for the allowed frontend origins ({CANVAS} in this case).
+
+Setting `OLLAMA_ORIGINS="*"` will allow any origin. More information in the https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama%3F[Ollama FAQ page].
+
+=== 4. Pull models
+
+- Find available models from the https://ollama.com/search[Ollama library].
+- Pull the model using `ollama pull <model_id>`.
