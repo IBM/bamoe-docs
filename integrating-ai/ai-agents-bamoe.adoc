@@ -4,9 +4,9 @@ include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 
-The {PRODUCT_SHORT} MCP server provides a dedicated and isolated layer that actively exposes _Business Services_, including rule evaluation, decision models, and process orchestration, through a standardized interface optimized for agentic workflows. You can use it to build intelligent assistants, autonomous systems, or orchestrate complex business logic. The server enables agents to reason, decide, and act with precision.
+The {MCP_SERVER} provides a dedicated and isolated layer that actively exposes _Business Services_, including rule evaluation, decision models, and process orchestration, through a standardized interface optimized for agentic workflows. You can use it to build intelligent assistants, autonomous systems, or orchestrate complex business logic. The enables agents to reason, decide, and act with precision.
 
-The server exposes the following Business Services: 
+The {MCP_SERVER} exposes the following capabilities of _Business Services_: 
 
 * Decision model execution (DMN)
 * Rule model execution
@@ -23,7 +23,9 @@ The server exposes the following Business Services:
 quarkus.swagger-ui.always-include=true
 ----
 +
-** Ensure the OpenAPI endpoint is at `\http://<host>:<port>/q/openapi/`. This is the only mandatory configuration required to activate the MCP server.
+NOTE: If you want to expose both the OpenAPI and Swagger endpoints you can also use the `quarkus.swagger-ui.always-include=true` instead. 
++
+** Ensure the OpenAPI endpoint is at `\http://<host>:<port>/q/openapi/`. This is the only mandatory configuration required to activate the {MCP_SERVER}.
 ** Define meaningful names for models, fields, and nodes in _Business Services_ to improve the effectiveness of AI agent interactions.
 ** Configure rule models appropriately:
 *** For RuleUnit based models, annotate each implemented `DataStore<>` class with `@Schema`, specifying the implementation class.
@@ -42,12 +44,12 @@ private DataStore<Person> persons;
 
 === Execution and lifecycle management
 
-To run the MCP server, complete the setup and launch the MCP Server image in a Docker environment using the following command:
+To run the {MCP_SERVER}, complete the setup and launch the server image in a Docker environment using the following command:
 
 [source,shell]
 ----
 docker run -it --rm \
-  -p 8080:8080 \
+  -p 8081:8080 \
   --name mcp-server \
   -e MCP_SERVER_OPENAPI_URLS="http://host.docker.internal:8080/q/openapi" \
   quay.io/bamoe/mcp-server:main
