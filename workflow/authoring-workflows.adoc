@@ -332,11 +332,61 @@ public class BusinessCalendarProducer {
 }
 ----
 
+[#user-task-assignment]
 == Configuring User Task assignment strategies
 
-User Tasks can be assigned to a single User based on a defined logic, which is active by default. The algorithm will automatically assign ANY User Tasks in `ACTIVATE` status for the resulting person that is part of the “Potential Users” group associated to that User Task and the same person is NOT part of the “Excluded Users” group associated to the same User Task. In other words, the algorithm performs a Set Difference between the Potential Users and the Excluded User of a given User Task. If that difference results in a single user, the User Task is automatically assigned to that user and moved to “CLAIM” status. In all other cases, the User Tasks is not assigned and no changes are applied on it.
+User Tasks can be assigned to a single User based on a defined logic. The default logic is defined in the `BasicUserTaskAssignmentStrategy` class. The default algorithm will automatically assign ANY User Tasks in `ACTIVATE` status to the resulting person that is part of the “Potential Users” group associated to that User Task and that is NOT part of the “Excluded Users” group associated to the same User Task. In other words, the algorithm performs a Set Difference between the Potential Users and the Excluded User of a given User Task. If that difference results in a single user, the User Task is automatically assigned to that user and moved to “CLAIM” status. In all other cases, the User Tasks is not assigned and no changes are applied on it.
 
-This default logic covers the basic use case. To implement your specific business logic to automatically assign User Tasks create a new Java Class that extends the `BasicUserTaskAssignmentStrategy` class. This class represents the Java class that holds the default logic previously described. The logic should be wrapped into the inherited computeAssignment method. The effect of this action is to replace the default logic with your own custom logic. An example of a custom UserTaskAssignmentStrategy is shown below:
+You can implement your specific business logic to automatically assign User Tasks by creating a class that implements the `UserTaskAssignmentStrategy` interface. The interface defines a single method, `computeAssignment`, which returns an optional user ID to whom the task should be assigned:
+
+[source,java]
+----
+public interface UserTaskAssignmentStrategy {
+    static final String DEFAULT_NAME = "default";
+
+    default String getName() {
+        return getClass().getName();
+    }
+
+    Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider);
+}
+----
+
+The logic inside `computeAssignment` can use task metadata, user roles, or any other contextual information. The following example demonstrates a simple role-based assignment strategy based on the task name. 
+
+[source,java]
+----
+import org.kie.kogito.process.workitem.UserTaskAssignmentStrategy;
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class CustomUserTaskAssignmentStrategy implements UserTaskAssignmentStrategy {
+    @Override
+    public Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider) {
+        System.out.println("Computing assignment using custom User Task assignment strategy.");
+        // Your custom logic goes here. For example:
+        if ("hr_interview".equals(userTaskInstance.getTaskName())) {
+            return Optional.of("recruiter");
+        } else if ("it_interview".equals(userTaskInstance.getTaskName())) {
+            return Optional.of("developer");
+        } else {
+            return Optional.empty();
+        }
+    }
+}
+----
+
+One use case may be to assign a specific person as a default when there are multiple potential users for a user task. You can do this by overriding the `getName()` method in the following way:
+
+[source, java]
+----
+public String getName()
+{         return DEFAULT_NAME;     } 
+----
+
+If you need more flexibility in your customization you can create a new Java Class that extends the `BasicUserTaskAssignmentStrategy` class. The custom assignment logic is wrapped in the inherited `computeAssignment` method, which replaces the default assignment strategy.
+
+For example:
 
 [source,java]
 ----

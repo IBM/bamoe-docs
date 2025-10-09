@@ -8,10 +8,10 @@ In BAMOE v8, the `UserGroupCallback` interface served the purpose of an identity
 
 Key implementations included:
 
-* JAASUserGroupCallbackImpl: Integrated with the application server's security context to fetch user and group information.
-* DBUserGroupCallbackImpl: Retrieved user and group details from a database.
-* LDAPUserGroupCallbackImpl: Accessed user and group information from an LDAP directory.
-* PropsUserGroupCallbackImpl: Defined users and groups via a properties file.
+* `JAASUserGroupCallbackImpl`: Integrated with the application server's security context to fetch user and group information.
+* `DBUserGroupCallbackImpl`: Retrieved user and group details from a database.
+* `LDAPUserGroupCallbackImpl`: Accessed user and group information from an LDAP directory.
+* `PropsUserGroupCallbackImpl`: Defined users and groups via a properties file.
 * Custom Implementations: Allowed for bespoke integrations with other identity systems.
 
 BAMOE v9 replaces the `UserGroupCallback` mechanism with the `IdentityProvider` interface, aligning with modern security practices. Authentication and authorization are now delegated to the runtime environment (Quarkus or Spring Boot), which integrates with external identity providers using OpenID Connect (OIDC) and OAuth 2.0.
@@ -22,7 +22,7 @@ The IdentityProvider interface provides methods such as `getIdentity()`, `getNam
 
 For applications without OIDC enabled, user and group information can be passed directly via query parameters when interacting with user task endpoints. For example:
 
-[,java]
+[source,java]
 ----
 POST /usertasks/instances/{id}/transition?user=admin&group=Manager&group=IT
 ----
@@ -34,7 +34,7 @@ This behavior is only allowed when:
 * Authentication is disabled (`kogito.security.auth.enabled=false`), or
 * The authenticated user is allowed to impersonate others via the `kogito.security.auth.impersonation.allowed-for-roles` property.
 
-[,properties]
+[source,properties]
 ----
 kogito.security.auth.enabled=false
 kogito.security.auth.impersonation.allowed-for-roles=managers
@@ -102,35 +102,7 @@ public interface UserTaskAssignmentStrategy {
 }
 ----
 
-==== Implementing a custom strategy
-
-To implement a custom assignment strategy, create a class that implements the `UserTaskAssignmentStrategy` interface. The logic inside `computeAssignment` can use task metadata, user roles, or any other contextual information.
-
-Example:
-
-[,java]
-----
-import org.kie.kogito.process.workitem.UserTaskAssignmentStrategy;
-import javax.enterprise.context.ApplicationScoped;
-
-@ApplicationScoped
-public class CustomUserTaskAssignmentStrategy implements UserTaskAssignmentStrategy {
-    @Override
-    public Optional<String> computeAssignment(UserTaskInstance userTaskInstance, IdentityProvider identityProvider) {
-        System.out.println("Computing assignment using custom User Task assignment strategy.");
-        // Your custom logic goes here. For example:
-        if ("hr_interview".equals(userTaskInstance.getTaskName())) {
-            return Optional.of("recruiter");
-        } else if ("it_interview".equals(userTaskInstance.getTaskName())) {
-            return Optional.of("developer");
-        } else {
-            return Optional.empty();
-        }
-    }
-}
-----
-
-This example demonstrates a simple role-based assignment strategy based on the task name.
+For more information on customizing the user task assignment strategy see xref:../workflow/authoring-workflows.adoc##user-task-assignment[Authoring Workflows with BPMN → Configuring User Task assignment strategies]
 
 === Integration with Identity Providers
 

@@ -727,17 +727,17 @@ B-FEEL uses FEEL semantics for exponentiation but ensures both operands are conv
 
 BAMOE version {VERSION_91X} introduce support for DMN 1.5.
 
-The following are the new features.
+The following are the new features:
 
 
-Add support for negation of duration::
+.Add support for negation of duration
 
 Before this version, it was not possible to use the following declaration:
 ----
 -duration("PT1H")
 ----
 
-Add a new "list replace" function::
+.Add a new "list replace" function
 
 Implemented the following specification:
 
@@ -760,23 +760,23 @@ list replace(_list_, _match_, _newItem_)
 list replace ( [2, 4, 7, 8], function(item, newItem) item < newItem, 5) = [5, 5, 7, 8]
 |===
 
-Add support for iteration of date ranges::
+.Add support for iteration of date ranges
 
-Implemented the following specification:
+An iteration context can either be an expression that returns a list of elements, or two expressions that return  integers connected by "..".
 
-__An iteration context may either be an expression that returns a list of elements, or two expressions that return  integers connected by "..". __
+Example of valid iteration contexts is:
 
-Examples of valid iteration contexts are:
-
+[source,xml]
 ----
 […]
 
 @”2021-01-01”..@”2022-01-01”
 ----
 
-Allow importing into the default namespace::
+.Allow importing into the default namespace
 
-Before this modification, it was not possible to import a DMN file into another DMN file, specifying an empty string in the name attribute for the import. With this feature, the following snippet become valid
+Before this modification, it was not possible to import a DMN file into another DMN file, specifying an empty string in the name attribute for the import. With this feature, the following snippet become valid:
+
 [source,xml]
 ----
 <semantic:import xmlns:drools="http://www.drools.org/kie/dmn/1.1"
@@ -788,19 +788,17 @@ Before this modification, it was not possible to import a DMN file into another 
 
 and all the definitions from the imported model get registered as belonging to the importing model.
 
-Add implicit type conversion of date to date and time when necessary::
+.Add implicit type conversion of date to date and time when necessary
 
-Implemented the following specification:
+In implicit type conversions, the data type is converted automatically without loss of information. There are several
+possible implicit type conversions:
 
-_In implicit type conversions, the data type is converted automatically without loss of information. There are several
-possible implicit type conversions:_
-
-* _[…]_
-* _from date to date and time: When the type of the expression is date and the target type is date and time, the expression is converted to a date time value in which the time of day is UTC midnight (00:00:00)_
+* `[…]`
+* From date to date and time: When the type of the expression is date and the target type is date and time, the expression is converted to a date time value in which the time of day is UTC midnight (00:00:00).
 
 
 
-Option to use alternative image for InputData::
+.Option to use alternative image for InputData
 
 Implemented the following specification:
 
@@ -813,7 +811,7 @@ Implemented the following specification:
 |===
 
 
-Support new attribute typeConstraint in ItemDefinition::
+.Support new attribute typeConstraint in ItemDefinition
 
 Implemented the following specification:
 
@@ -844,9 +842,7 @@ Example
 </dmn:itemDefinition>
 ----
 
-Note, that the `allowedValues` tag has been deprecated in the 1.5 DMN version.
-
-'''
+NOTE: The `allowedValues` tag has been deprecated in the 1.5 DMN version.
 
 For official DMN specifications, see the OMG https://www.omg.org/spec/DMN[Decision Model and Notation (DMN) specification].
 
