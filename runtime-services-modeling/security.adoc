@@ -27,7 +27,6 @@ quarkus.oidc.tenant-enabled=true
 quarkus.oidc.auth-server-url=http://localhost:8280/auth/realms/kogito
 quarkus.oidc.client-id=kogito-service
 quarkus.oidc.credentials.secret=secret
-quarkus.oidc.application-type=hybrid
 ----
 
 The following table describes in detail the properties suggested in the example, but it is only a subset of https://quarkus.io/version/3.20/guides/security-oidc-configuration-properties-reference[all properties available here].
@@ -53,14 +52,6 @@ Connect (OIDC) server
 client_secret_basic
 authentication method
  | string  | -
-|quarkus.oidc.application-type  | The application type, which can
-be one of the following values:
-web-app, service, hybrid.
-To enable the compatibility
-with Managment Console, this
-property should be set as
-“hybrid”
- | string  | service
 
 |===
 
@@ -150,11 +141,13 @@ Used to specify a list of roles or groups, authorized for identity impersonation
 [#mgmt-console-oidc-proxy]
 == Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_
 
-For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available.
+For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available. Different solutions exist for Quarkus and Spring Boot.
 
-To solve this, you need to use the `quarkus-oidc-proxy` extension, as it creates new endpoints in the _Business Service_ where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
+=== Quarkus
 
-To add the `quarkus-oidc-proxy` extension, you need to add the following code to the list of dependencies in the `pom.xml` file:
+You need to use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` extension, as it creates new endpoints in the _Business Service_ where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
+
+To add the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` extension, add the following code to the list of dependencies in the `pom.xml` file:
 
 [source,xml]
 ----
@@ -165,4 +158,59 @@ To add the `quarkus-oidc-proxy` extension, you need to add the following code to
 </dependency>
 ----
 
-NOTE: Version 0.2.2 of `quarkus-oidc-proxy` is compatible with Quarkus 3.20 (LTS). Do not use versions 0.1.x or 0.3.x.
+NOTE: Version 0.2.2 of `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` is compatible with Quarkus 3.20 (LTS). Do not use versions 0.1.x or 0.3.x.
+
+=== Spring Boot
+
+You need to use the `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on. It creates a `/q/oidc/.well-known/openid-configuration` endpoint, which provides the Identity Provider URL (the same URL that is defined in the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property).
+
+To add the `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on, add the following code to the list of dependencies in the `pom.xml` file:
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-spring-boot-idp-discovery</artifactId>
+</dependency>
+----
+
+Then add the endpoint as an exception to you web security configuration, for example:
+
+[source,java]
+----
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+// This configuration is only loaded if the "spring.security.oauth2.resourceserver.jwt.issuer-uri" property is set.
+// That means that this WebSecurityConfig is only used when Spring Boot is configured to use and Identity Provider.
+
+// The "/q/oidc/.well-known/openid-configuration" path is added as an exception to make sure that the BAMOE Management Console
+// can access it when adding this application as a connected Business Service.
+
+@Configuration
+@EnableWebSecurity
+@ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.issuer-uri")
+class BamoeSpringBootWebSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> {
+            }) // enables CORS with default settings
+            .csrf(csrf -> csrf.disable()) // disable CSRF
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/q/oidc/.well-known/openid-configuration").permitAll()
+                    .anyRequest().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
+            }));
+
+        return http.build();
+    }
+}
+----
+
+Finally, make sure that the `spring.autoconfigure.exclude` property is **unset**.
