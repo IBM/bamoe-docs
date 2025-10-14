@@ -488,12 +488,14 @@ In a _Business Service_ project created using xref:../getting-started/project-se
 
 === Creating WID files and icons
 
-Work Item Definitions must be provided as `.wid` files. These files can be placed in:
+Work Item Definitions must be provided as `.wid` files. In order for the custom task definition `.wid` file to be loaded by the BPMN Editor it can be placed in one of two locations in your project:
 
-* The top-level `global/` directory, or
-* The same directory as the BPMN file (`src/main/resources/`), optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
+. The root `global/` directory (e.g., `[myProject]/global/sharedCustomTasks.wid`),
+. The same directory as the BPMN file (e.g., `[myProject]/src/main/resources/bpmn/tasks.wid`)), which could be in a Java package structure (e.g., `src/main/resources/com/ibm/`).
 
 Icons for custom tasks can be placed in the same directory as the `.wid` file.
+
+If the BPMN Editor detects *.wid files in both locations (/global and directory of the opened BPMN file), the contents of the two files are merged and displayed together in Custom Tasks palette.
 
 Example `.wid` content:
 
@@ -548,7 +550,10 @@ image::upgrade/05-05-upgrading-custom-work-item-handlers-properties.png[width=90
 
 === Implement the custom WorkItemHandler
 
-To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.
+To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the following lifecycle methods to define the behavior of your Custom Task:
+
+* `+activateWorkItemHandler(...)+` -- the implementation logic for executing the custom task. 
+* `+abortWorkItemHandler(...)+` -- the logic for handling abort scenarios of the custom task, such as cleanup. 
 
 [,java]
 ----

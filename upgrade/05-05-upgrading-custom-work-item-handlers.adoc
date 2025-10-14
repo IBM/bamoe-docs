@@ -3,11 +3,11 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This guide explains how to migrate custom WorkItemHandlers from BAMOE v8 to BAMOE v9. It outlines the key differences in APIs, registration mechanisms, and execution models. For more information on creating a custom work item handler in {PRODUCT_SHORT}{VERSION} see xref:../workflow/authoring-workflows.adoc#custom-wih[Developing stateful Workflows → Authoring Workflows with BPMN].
+This guide explains how to migrate custom WorkItemHandlers from {PRODUCT_SHORT} v8 to BAMOE v9. It outlines the key differences in APIs, registration mechanisms, and execution models. For more information on creating a custom work item handler in {PRODUCT_SHORT} {VERSION} see xref:../workflow/authoring-workflows.adoc#custom-wih[Developing stateful Workflows → Authoring Workflows with BPMN].
 
-== What is a custom Work Item in BAMOE?
+== What is a custom Work Item in {PRODUCT_SHORT}?
 
-In BAMOE, a Work Item represents a task or activity in a process that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing developers to plug in custom code to meet specific business requirements not covered by built-in functionality.
+In {PRODUCT_SHORT}, a Work Item represents a task or activity in a process that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing developers to plug in custom code to meet specific business requirements not covered by built-in functionality.
 
 Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
 
@@ -17,10 +17,7 @@ Custom Tasks can also define visual and runtime properties for the node on the p
 
 In BAMOE v8, custom WorkItemHandlers implemented the interface `org.kie.api.runtime.process.WorkItemHandler` and used the methods `+executeWorkItem(...)+` and `+abortWorkItem(...)+`.
 
-In BAMOE v9, these methods are no longer supported. Instead, handlers must extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override:
-
-* `+activateWorkItemHandler(...)+` -- for executing the task
-* `+abortWorkItemHandler(...)+` -- for handling abort scenarios
+In BAMOE v9, these methods are no longer supported. Instead, handlers must extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.:
 
 The new model is based on phases and transitions, which provide more flexibility and better integration with the Kogito runtime.
 
@@ -44,8 +41,4 @@ public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
 
 === Annotation support
 
-The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as .wid files and placed in either:
-
-* the top-level `global/` directory, or
-* the `src/main/resources/` directory, optionally within a Java package structure (e.g., `src/main/resources/com/ibm/`).
-
+The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as `.wid` files and placed in the root directory of your project or in the same folder as your BPMN file, see xref:../workflow/authoring-workflows.adoc#custom-wih[Authoring Workflows with BPMN → Creating a custom Work Item Handler]
