@@ -6,30 +6,30 @@ The transition from {PRODUCT_SHORT} version {VERSION_80X} to version {VERSION_93
 
 This section introduces the new development experience in {PRODUCT_SHORT} version {VERSION_930}, highlighting the tools and architectural changes that support a more flexible and scalable workflow.
 
-== Installation and architecture overview
+Business Central {VERSION_80x} is replaced by two distinct User interfaces in {VERSION}: {CANVAS} and {DEV_TOOLS} targeting the two different user profiles that the product is designed for. 
 
-=== {PRODUCT_SHORT} version {VERSION_80X}
+== Business Central in version {VERSION_80X}
 
 image::upgrade/04-development-environment-bamoe-business-central.png[Business Central]
 
-To use as a comparison basis, the diagram above shows an overview of {PRODUCT_SHORT} version {VERSION_80X} development environment.
-Business Central was deployed alongside a KIE Server for developing and production execution, where the KJAR was uploaded, both running on JBoss EAP or WildFly. Business Central also hosted an internal Git repository (`.niogit`) and a Maven repository, making it the single point of control for source code, builds, and deployments.
+The figure above shows an overview of the {PRODUCT_SHORT} version {VERSION_80X} development environment. 
+Business Central was deployed alongside a KIE Server both for development and production execution. Executable KJARs were uploaded, running on JBoss EAP or WildFly. Business Central also hosted an internal Git repository (`.niogit`) and a Maven repository, making it the single point of control for source code, builds, and deployments.
 
-In {PRODUCT_SHORT} version {VERSION_80X}, development was tightly coupled to Business Central, which served as the central UI for authoring, testing, and deploying business assets. Building the project resulted into a KJAR (KIE JAR, a specialized JAR for KIE projects).
+In {PRODUCT_SHORT} version {VERSION_80X}, development was managed in Business Central, which served as the central UI for authoring, testing, and deploying business assets. Building the project resulted in a KJAR (KIE JAR, a specialized JAR for KIE projects).
 
-=== {CANVAS} {VERSION_930} 
+== {CANVAS} in {VERSION_930} 
 
 image::upgrade/04-development-environment-bamoe-canvas.png[{CANVAS}]
 
-{CANVAS} is a web-based modeling environment designed for business users and analysts. Unlike Business Central, which bundles all functionality into a single interface, {CANVAS} offers a clean and focused space for authoring and reviewing business assets. It currently supports both BPMN and DMN modeling, providing a streamlined experience for non-technical users.
+{PRODUCT_SHORT} {CANVAS} is a web-based modeling environment designed for business users and analysts. Unlike Business Central, which bundles all functionality into a single interface, {CANVAS} offers a clean and focused interface for authoring and reviewing business assets. It supports both BPMN and DMN modeling, and provides a streamlined experience for non-technical users.
 
 {CANVAS} includes in-browser Git and file system capabilities, removing the need for an internal storage layer and enabling seamless integration with standard Git workflows. To support communication with external Git providers such as GitHub, GitLab, and Bitbucket, {CANVAS} uses the {PRODUCT_SHORT} CORS Proxy. Users can also deploy development versions of their projects to Kubernetes or OpenShift environments using the {CANVAS} Dev Deployments feature.
 
-In addition, {CANVAS} includes BAMOE Extended Services, which enables the DMN Runner--a live feedback tool that allows users to evaluate DMN models directly within the browser.
+{CANVAS} also includes BAMOE Extended Services, which enables the DMN Runner, a live feedback tool that allows you to evaluate DMN models directly within the browser.
 
 For detailed setup instructions, refer to the xref:../installation/canvas.adoc[Installing {CANVAS}].
 
-=== {DEV_TOOLS} {VERSION_930}
+== {DEV_TOOLS} {VERSION_930}
 
 image::upgrade/04-development-environment-bamoe-developer-tools.png[{DEV_TOOLS}]
 
@@ -39,59 +39,45 @@ Because it runs within VS Code, the extension stores files locally on your file 
 
 To get started with the {DEV_TOOLS}, follow the setup instructions in the xref:../installation/developer-tools-for-vscode.adoc[Installing {DEV_TOOLS}]. For information on configuring the Maven repository, refer to the xref:../installation/configure-maven.adoc[Installing {PRODUCT_SHORT} Maven Repository].
 
-=== Creating projects
+== Creating projects
 
-Unlike Business Central, BAMOE version {VERSION_930} does not use the concept of Spaces. Projects are now organized using Git repositories and follow standard Maven structures. A project can be implemented using Kogito with Quarkus, Spring Boot, or plain Java with Drools or jBPM.
+Unlike Business Central, BAMOE version {VERSION} does not use the concept of Spaces. Projects are now organized using Git repositories and follow standard Maven structures. A {PRODUCT_SHORT} project can be implemented with Quarkus, Spring Boot, or plain Java with Drools or jBPM.
 
-==== {CANVAS}
+In the {CANVAS} welcome screen, you can initialize a new workspace by creating a new file, trying a sample, or cloning a repository. A workspace is a lightweight environment where users can immediately begin modeling assets. If you just start working on DMN or BPMN artifacts, you can apply an Accelerator to expand your workspace into a full Maven project structure. {PRODUCT_SHORT} Accelerators are project templates that include the necessary folder structure, configuration files, and dependencies, see xref:../tools/applying-accelerators.adoc[{CANVAS} → Using Accelerators].
 
-In {CANVAS}, creating a new file, trying a sample, or cloning a repository from the welcome screen will initialize a new workspace. A workspace is a lightweight environment where users can begin modeling assets immediately. If the workspace is not already a Maven project, users can apply a xref:../tools/applying-accelerators.adoc[{CANVAS} → Using Accelerators] to expand it into a full project structure.
+For developers using the {DEV_TOOLS}, Accelerators are also the recommended way to start a new project. They provide a ready-to-use project structure with all required dependencies and configurations for building and testing _Business Service_ projects. 
 
-{PRODUCT_SHORT} Accelerators are project templates that include the necessary folder structure, configuration files, and dependencies. Users can choose between the Full {PRODUCT_SHORT} Accelerator, which supports both Workflows and Decisions, or the DMN {PRODUCT_SHORT} Accelerator, which is focused on decision services.
-
-==== {DEV_TOOLS}
-
-For developers using the {DEV_TOOLS}, the recommended way to start a new project is to use a {PRODUCT_SHORT} Accelerator which is available as a command in {DEV_TOOLS} (see xref:../getting-started/project-setup.adoc#starting-project-vscode[Getting Started → Initial project setup]). This provides a ready-to-use project structure with all required dependencies and configurations for building and testing Business Service projects.
-
-Alternatively, developers can manually create the folder structure and configure the project using standard Maven conventions. While this approach offers more flexibility, it requires familiarity with the necessary dependencies and project layout.
+You can also manually create the folder structure and configure the project using standard Maven conventions, see xref:../getting-started/project-setup.adoc#starting-project-vscode[Getting Started → Initial project setup]. 
 
 In both cases, the project is managed as a standard Maven project, with all assets stored as plain text files. This makes it easy to integrate with Git for version control and to use Maven for building, testing, and packaging.
 
-=== Authoring business automation assets
+== Authoring business automation assets
 
-==== {CANVAS}
+{CANVAS} offers a streamlined, browser-based environment for modeling and reviewing business assets. It supports both BPMN and DMN modeling through intuitive graphical editors. You can start your workflow or decision model from scratch, import an existing file, or explore sample projects from the {CANVAS} welcome screen, for more information see xref:../tools/creating-models.adoc[BAMOE Canvas → Creating Models]
 
-{CANVAS} offers a streamlined, browser-based environment for modeling and reviewing business assets. It supports both BPMN and DMN modeling through intuitive graphical editors. Users can start from scratch, import existing files, or explore sample projects directly from the {CANVAS} welcome screen.
-
-The Problems tab offers real-time validation, and the DMN Runner enables users to test decision models directly in the browser using sample input data, making it easy to iterate and validate logic.
-
-==== {DEV_TOOLS}
+The Problems tab offers real-time validation, and the DMN Runner enables users to test decision models directly in the browser using sample input data, making it easy to iterate and validate logic. 
 
 The {DEV_TOOLS} offer a full-featured environment for developers to author and manage BPMN, DMN, and SCESIM assets. The extension leverages the built-in VS Code `Problems` tab to provide real-time validation. It also supports generating user task forms and integrates with Maven for validation, testing, and packaging. This setup gives developers full control over the development lifecycle using familiar IDE workflows.
 
-=== Working with Git repositories
+== Working with Git repositories
 
 In {PRODUCT_SHORT} version {VERSION_80X}, Business Central managed source code through an internal Git server. Projects were stored in a hidden `.niogit` directory on the server's file system, and access was limited to the Business Central interface.
 
-In {PRODUCT_SHORT} version {VERSION_930}, Git integration is a core part of the development workflow, but the approach differs between {CANVAS} and the {DEV_TOOLS}.
-
-==== {CANVAS}
-
-{CANVAS} includes built-in Git capabilities directly in the browser. Users can initialize a Git repository from a workspace, clone existing repositories from platforms like GitHub, GitLab, or Bitbucket, and perform common Git operations such as commit, push, and pull--all without leaving the {CANVAS} interface.
-
-To enable communication with external Git providers, {CANVAS} uses the {PRODUCT_SHORT} CORS Proxy, which must be configured in the {CANVAS} settings. Users also need to provide Git credentials or personal access tokens to authenticate with their chosen Git provider. Once configured, business users can collaborate on shared repositories without needing to understand Git internals or use a command-line interface.
-
-This approach allows business users to contribute directly to the same codebase as developers, using a visual interface that abstracts away the complexity of Git.
-
-==== {DEV_TOOLS}
-
-In contrast, the {DEV_TOOLS} rely on the developer's local Git installation. Git operations are performed using the built-in Git support in VS Code or through the command line, offering full control and flexibility for experienced users.
-
-This setup is ideal for developers who are already familiar with Git workflows and want to integrate version control into their broader development process. It also allows for advanced Git features such as branching strategies, submodules, and integration with CI/CD pipelines.
+In {PRODUCT_SHORT} version {VERSION_930}, integration with Git is a core part of the development workflow, but the approach is different. 
 
 While {CANVAS} simplifies Git for business users, the {DEV_TOOLS} provide a more powerful and customizable Git experience for developers working in a traditional IDE environment.
 
-=== Working with Maven and {MVN_REPO}
+{CANVAS} includes built-in Git capabilities in the browser. Users can initialize a Git repository from a workspace, clone existing repositories from platforms such as GitHub, GitLab, or Bitbucket, and perform common Git operations such as commit, push, and pull. 
+
+{CANVAS} uses the {PRODUCT_SHORT} CORS Proxy to enable communication with external Git providers, and it must be configured in the {CANVAS} settings. Users also need to provide Git credentials or personal access tokens to authenticate with their chosen Git provider. Once configured, business users can collaborate on shared repositories with developers, without needing to understand Git internals or use a command-line interface.
+
+{DEV_TOOLS} rely on your local Git installation. Git operations are performed using the built-in Git support in VS Code or through the command line, offering full control and flexibility for experienced users.
+
+This setup also allows for advanced Git features such as branching strategies, submodules, and integration with CI/CD pipelines.
+
+For more information on connecting {CANVAS} to your git provider see xref:../installation/canvas.adoc[Installing Canvas] and xref:../tools/connecting-accounts.adoc[Canvas → Connecting to AI, Git, and Cloud Providers]
+
+== Working with Maven and {MVN_REPO}
 
 In {PRODUCT_SHORT} version {VERSION_80X}, Maven builds were triggered internally by Business Central. When a project was built through the UI, Business Central used an embedded Maven engine to compile the assets into a KJAR (KIE JAR), which was then deployed to a KIE Server. The internal Maven repository was also managed by Business Central, and users had limited visibility or control over the build process.
 
@@ -101,41 +87,29 @@ In {PRODUCT_SHORT} version {VERSION_930}, projects are built using standard Mave
 
 For developers using the {DEV_TOOLS}, the {MVN_REPO} is a core part of the development workflow. Projects are built and tested locally using Maven, and the repository ensures that all required libraries are available during the build process. This setup supports full automation and integration with CI/CD tools, making it suitable for enterprise-grade development.
 
-For installation and configuration instructions, refer to the xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}].
+For more information see xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}].
 
-=== Managing users and authentication
+== Managing users and authentication
 
 In {PRODUCT_SHORT} version {VERSION_80X}, user authentication was handled through a centralized login screen provided by Business Central. Authentication and user management were typically delegated to the application server, such as JBoss EAP or WildFly, using standard Java EE security mechanisms. This setup was tightly coupled to the deployment environment and often required administrative configuration on the server side.
 
-In {PRODUCT_SHORT} version {VERSION_930}, authentication is decentralized and aligned with modern cloud-native practices. Each tool--{CANVAS} and the {DEV_TOOLS}--handles authentication differently, based on its integration with Git.
+In {PRODUCT_SHORT} version {VERSION_930}, authentication is decentralized and aligned with modern cloud-native practices. {CANVAS} and the {DEV_TOOLS}handle authentication differently, based on their integration with Git.
 
-==== {CANVAS}
+In {CANVAS}, authentication is handled externally by the Git repository, which means that {CANVAS} does not maintain its own user directory. When connecting to a Git repository, users must authenticate using credentials or a personal access token associated with their Git provider (e.g., GitHub, GitLab, or Bitbucket). For more information see xref:../tools/connecting-accounts.adoc[Canvas → Connecting to AI, Git, and Cloud Providers].
 
-In {CANVAS}, authentication is configured per Git. When connecting to a Git repository, users must authenticate using credentials or a personal access token associated with their Git provider (e.g., GitHub, GitLab, or Bitbucket). This is done through the Accounts modal in the Canvas settings, where users can manage their authentication sessions.
-
-User management is handled externally by the Git, meaning that {CANVAS} does not maintain its own user directory. This simplifies administration and allows organizations to leverage existing identity and access management systems.
-
-==== {DEV_TOOLS}
-
-The {DEV_TOOLS} rely on the developer's local Git configuration for authentication. When interacting with remote repositories, authentication is handled by the Git client, which may prompt for credentials, use SSH keys, or access stored tokens depending on the user's setup.
-
-This approach gives developers full control over how they authenticate and manage access to repositories, and it integrates seamlessly with enterprise Git workflows and credential managers.
+The {DEV_TOOLS} rely on your local Git configuration for authentication. When interacting with remote repositories, authentication is handled by the Git client, which may prompt for credentials, use SSH keys, or access stored tokens depending on your setup. This approach gives developers full control over how they authenticate and manage access to repositories, integrating with enterprise Git workflows and credential managers.
 
 By shifting authentication to Git, {PRODUCT_SHORT} version {VERSION_930} eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
 
-=== Building and deploying in development mode
+== Building and deploying in development mode
 
-In {PRODUCT_SHORT} version {VERSION_80X}, builds were often triggered through the Business Central UI, which provided a tightly integrated authoring and deployment experience to a connected KIE Server. However, alternative approaches were also supported, such as building with Maven and deploying through CI/CD pipelines, depending on the project setup and environment.
+In {PRODUCT_SHORT} version {VERSION_80X}, builds were often triggered through the Business Central UI, which provided an integrated authoring and deployment experience with a connected KIE Server. However, alternative approaches were also supported, such as building with Maven and deploying through CI/CD pipelines, depending on the project setup and environment.
 
 {PRODUCT_SHORT} version {VERSION_930} adopts a more open and developer-friendly model. Projects are structured as standard Maven applications, allowing developers to build using the Maven CLI, integrate with IDEs, and automate deployments through CI/CD pipelines. Deployment targets include Kubernetes-native solutions.
 
-==== {CANVAS}
-
-While {CANVAS} itself does not perform builds, it supports development deployments through the Dev Deployments feature. This allows users to deploy their models to a Kubernetes or OpenShift cluster for testing purposes. The deployment process is configured through the {CANVAS} settings, where users can define the target cluster and credentials.
+While {CANVAS} itself does not perform builds, it supports development deployments through the Dev Deployments feature. This allows business users to validate their models by deploying to a live Kubernetes or OpenShift environment, see xref:../tools/dev-deployments.adoc[BAMOE Canvas Dev Deployments]
 
 This feature is especially useful for business users who want to validate their models in a live environment without needing to understand the full build and deployment pipeline. It bridges the gap between modeling and runtime testing, enabling faster feedback loops.
-
-==== {DEV_TOOLS}
 
 For developers, the {DEV_TOOLS} provide full control over the build and deployment process. Projects can be built using standard Maven commands, and the resulting artifacts can be deployed to any supported runtime, including Kubernetes, or OpenShift.
 
