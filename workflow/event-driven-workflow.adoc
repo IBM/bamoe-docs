@@ -1,0 +1,145 @@
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+== Using Events in Workflows
+Messaging and event-driven capabilities are provided through a modular and flexible approach using add-ons to enable these capabilities in your Quarkus or Spring Boot based projects. Events are published in the CloudEvents format, making them easily consumable by external systems.
+
+Events are categorized as follows:
+
+Messaging Events:: are related to BPMN message elements enabling a process to register an event listener.
+
+Process/Runtime Events:: are related to process instances, tasks, and variables
+
+== Messaging add-on
+
+The Messaging add-on enables integration between BPMN message elements and external event sources or listeners, depending on the message type. To configure messaging capabilities for your _Business Services_ in Quarkus add the following dependency: 
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-messaging</artifactId>
+</dependency>
+----
+
+As the Quarkus add-on is vendor independent you will need to add the following dependency to be able to use Kafka as the message broker:
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-messaging-kafka</artifactId>
+</dependency>
+----
+
+You can see an example application of an event driven process (`process-event-driven`) developed with Quarkus in the {PRODUCT_SHORT} samples, see xref:../getting-started/examples.adoc[Example _Business Service_ projects].
+
+The Spring Boot add-on is Kafka-specific therefore you will only need to add the following dependency to enable messaging:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-messaging</artifactId>
+</dependency>
+----
+
+== Process event add-on
+
+{PRODUCT_SHORT} provides the Process event add-on, used to send processes, tasks, and variable events to an external event listener when execution of an operation modifies the state of a process. These events are known as runtime events, and can include any of the following:
+
+* the creation of a process instance
+* transitioning a task through different phases of its lifecycle
+* modifying a variable 
+
+Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka topics. The data field contains a JSON representation of one of the following types:
+
+[cols="1,1,1"]
+|===
+|*Event Type* |*Kafka Topic* |*When*
+
+|`ProcessInstanceEvent` 
+|`kogito-processinstances-events`
+|Published when a process instance is created, modified, or completed.
+
+|`UserTaskInstanceEvent` 
+|`kogito-usertaskinstances-events`
+|Published when a change to a user task occurs.
+
+|`VariableInstanceEvent`
+|`kogito-variables-events`
+|Published when a variable is created, modified, or removed.
+|===
+
+The Process event add-on can also be used to build a historical representation of all process instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
+
+In Quarkus, you configure process event capabilities for your _Business Services_ by adding the process event add-on using the following dependency:
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-process</artifactId>
+</dependency>
+----
+
+In Spring Boot, you configure process event capabilities for your _Business Services_ by adding the following dependency:
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  	<groupId>org.kie</groupId>
+  	<artifactId>kie-addons-springboot-events-process-kafka</artifactId>
+</dependency>
+----
+
+The Process event add-on for Spring Boot is specific to Kafka. Therefore, you do not need to add additional dependencies to use an event broker.
+
+For Quarkus, the {PRODUCT_SHORT} process event add-on implementation is based on Smallrye Messaging library, which provides a set of connectors for event brokers, such as JMS, AMQP, and Kafka. The Smallrye connector dependency is part of the `quarkus-messaging-kafka` dependencey.
+
+Smallrye defines an abstraction named channel to enable multi-broker support. For every channel that you define in your _Business service_ application, you can specify the connector to use for that channel using the following form:
+
+[source,console,subs="+attributes"]
+----
+mp.messaging.[incoming|outgoing].<channel name>.connector = <connector name>
+----
+
+Optionally, for Kafka connector, you can define the Kafka topic to be used for that channel using the following form:
+
+[source,console,subs="+attributes"]
+----
+mp.messaging.[incoming|outgoing].<channel name>.topic = <topic name>
+----
+
+You can also set up a channel property using the following form:
+
+[source,console,subs="+attributes"]
+----
+mp.messaging.[incoming|outgoing].<channel name>.<property name>= <property value>
+----
+
+If the defined property is not found, then the topic name is considered to be the same as Kafka name.
+
+The process event add-on defines a channel for each event type, such as `kogito-processinstances-events`, `kogito-usertaskinstances-events`, and `kogito-variables-events`. Therefore, when the process event add-on is enabled, you must add the event types to your `application.properties` file using the following properties:
+
+[source,props,subs="+attributes"]
+----
+mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
+mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
+mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
+mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+Additionally, you can disable the publishing on any channel by setting the related property to false as shown in the following example:
+
+[source,props,subs="+attributes"]
+----
+kogito.events.usertasks.enabled=false
+kogito.events.variables.enabled=false
+----
