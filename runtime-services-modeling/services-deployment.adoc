@@ -89,61 +89,66 @@ kogito.jobs-service.management.heartbeat.management-id=<id_string>
 ----
 ====
 
-// [#migration-PIM]
-// == Migrating active process instances using the Process Instance Migration API
+[#migration-PIM]
+== Migrating active process instances using the Process Instance Migration API
+effectively updating themselves to newer versions of its PDs, or even entirely different PDs. By mapping the original PD nodes to newer PD nodes, PIs can transition to the new sequence flow and stop being attached to its originating PD.
 
-// The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
+This visual support is essential for ensuring accurate and efficient migrations.
 
-// The advantage of using this utility is that it:
+With the introduction of the BAMOE PIM Add-on, it becomes possible to integrate a new UI directly into the BAMOE Management Console. This UI will offer the same core capabilities as the BAMOE v8 PIM Tool, with one key difference: migration scheduling will no longer be required, as the new two-step migration strategy eliminates the performance bottleneck present in v8.
 
-// * _Preserves state_: During migration, process or task variables remain unchanged.
+The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
-// * _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
+The advantage of using this utility is that it:
 
-// * _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
+* _Preserves state_: During migration, process or task variables remain unchanged.
 
-// * _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
+* _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
 
-// Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
+* _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
 
-// Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
+* _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
 
-// `POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
+Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
 
-// `POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
+Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
 
-// === Starting and stopping processes
-// You can use the following `curl` command to start a process:
+`POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
 
-// [source,shell]
-// ----
-// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
-// ----
+`POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
 
-// You can use the following `curl` command to stop a process:
+=== Starting and stopping processes
+You can use the following `curl` command to start a process:
 
-// [source,shell]
-// ----
-// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
-// ----
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
+----
 
-// === Example
-// Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
+You can use the following `curl` command to stop a process:
 
-// [source,shell]
-// ----
-// curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
-// {
-//   "targetProcessId": <targetProcessId>
-//   "targetProcessVersion": <targetProcessVersion>
-// }    
-// ----
-// Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
+----
 
-// [source,shell]
-// ----
-// {
-//    "message":"All instances migrated",
-//    "numberOfProcessInstanceMigrated":1
-// }
-// ----
+=== Example
+Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
+
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
+{
+  "targetProcessId": <targetProcessId>
+  "targetProcessVersion": <targetProcessVersion>
+}    
+----
+Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
+
+[source,shell]
+----
+{
+   "message":"All instances migrated",
+   "numberOfProcessInstanceMigrated":1
+}
+----
