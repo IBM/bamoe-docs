@@ -1,6 +1,14 @@
+= Using Events in Workflows
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
-== Using Events in Workflows
+
+The combination of events and business processes is a way to unlock powerful capabilities in automation solutions developed in {PRODUCT_SHORT}. Here are some examples of the use cases:
+
+* Process monitoring: by emitting events at various stages of a process it is possible to monitor process execution and create real-time dashboards.
+* Auditability: use detailed event logs to record significant process changes and provide a complete audit trail for compliance.
+* Event-based integration: enable loosely coupled, scalable microservices through actions triggered by events. 
+* Optimize processes: use events to enable external consumption of process changes and identify bottlenecks. 
+
 Messaging and event-driven capabilities are provided through a modular and flexible approach using add-ons to enable these capabilities in your Quarkus or Spring Boot based projects. Events are published in the CloudEvents format, making them easily consumable by external systems.
 
 Events are categorized as follows:
@@ -47,16 +55,17 @@ The Spring Boot add-on is Kafka-specific therefore you will only need to add the
 
 {PRODUCT_SHORT} provides the Process event add-on, used to send processes, tasks, and variable events to an external event listener when execution of an operation modifies the state of a process. These events are known as runtime events, and can include any of the following:
 
-* the creation of a process instance
+* the creation, modification or completion of a process instance
 * transitioning a task through different phases of its lifecycle
-* modifying a variable 
+* the creation, modification or deletion of a variable 
+* existing process definitions at application start and any subsequent update to metadata or structure. 
 
-Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka topics. The data field contains a JSON representation of one of the following types:
+
+Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka Topics. The data field contains a JSON representation of one of the following types:
 
 [cols="1,1,1"]
 |===
-|*Event Type* |*Kafka Topic* |*When*
-
+|*Event Type* |*Kafka Topics* |*When*
 |`ProcessInstanceEvent` 
 |`kogito-processinstances-events`
 |Published when a process instance is created, modified, or completed.
@@ -68,6 +77,11 @@ Each modifying operation is executed within an abstraction called a unit of work
 |`VariableInstanceEvent`
 |`kogito-variables-events`
 |Published when a variable is created, modified, or removed.
+
+
+|`ProcessDefinitionEvent` 
+|`kogito-processdefinitions-events`
+|Published when process definitions change (metadata and node structures). Used to capture and track the definition and version of processes.
 |===
 
 The Process event add-on can also be used to build a historical representation of all process instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
@@ -123,17 +137,28 @@ The process event add-on defines a channel for each event type, such as `kogito-
 
 [source,props,subs="+attributes"]
 ----
+# Kafka broker URL
+kafka.bootstrap.servers=localhost:9092
+
+# Process instance events
 mp.messaging.outgoing.kogito-processinstances-events.connector=smallrye-kafka
 mp.messaging.outgoing.kogito-processinstances-events.topic=kogito-processinstances-events
 mp.messaging.outgoing.kogito-processinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 
+# User task events
 mp.messaging.outgoing.kogito-usertaskinstances-events.connector=smallrye-kafka
 mp.messaging.outgoing.kogito-usertaskinstances-events.topic=kogito-usertaskinstances-events
 mp.messaging.outgoing.kogito-usertaskinstances-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 
+# Variable events
 mp.messaging.outgoing.kogito-variables-events.connector=smallrye-kafka
 mp.messaging.outgoing.kogito-variables-events.topic=kogito-variables-events
 mp.messaging.outgoing.kogito-variables-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+# Process definition events
+mp.messaging.outgoing.kogito-processdefinitions-events.connector=smallrye-kafka
+mp.messaging.outgoing.kogito-processdefinitions-events.topic=kogito-processdefinitions-events
+mp.messaging.outgoing.kogito-processdefinitions-events.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ----
 
 Additionally, you can disable the publishing on any channel by setting the related property to false as shown in the following example:
@@ -143,3 +168,13 @@ Additionally, you can disable the publishing on any channel by setting the relat
 kogito.events.usertasks.enabled=false
 kogito.events.variables.enabled=false
 ----
+
+== Managing Event Data
+
+When designing _Business Services_ with event-driven capabilities it is important to evaluate and define how event data is handled:
+
+Security and privacy:: If your events and messages transmit sensitive data review recommended methods to secure data and integration with your events platform.
+
+High volume of events:: Be prepared to manage high volumes of events in particular for frequently executed processes. to do this you will need to put in place scaling and event buffering mechanisms in the Kafka environment. 
+
+Event retention policy:: Storing events for long periods of time requires more storage resources which directly impacts the final cost of your system. You can mitigate this by adjusting event retention policies. 
