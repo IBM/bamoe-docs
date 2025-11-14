@@ -6,18 +6,18 @@ include::../styles/images.adoc[]
 {CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and, manage Decisions and Workflows through editors and service integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your _Business Services_ in development mode via the Dev Deployments feature.
 //end::canvas-description[]
 
-{CANVAS} depends on two backend applications to provide full functionality:
+{CANVAS} depends on the following two backend applications to provide full functionality:
 
-* {EXT_SERVICES}: powers features like the DMN Runner and static validation of DMN, and BPMN models.
-* {CORS_PROXY}: allows {CANVAS} Web application to communicate with Git and Cloud providers.
+{EXT_SERVICES}:: Powers features like the DMN Runner and static validation of DMN, and BPMN models.
+{CORS_PROXY}:: Allows {CANVAS} Web application to communicate with Git and Cloud providers.
 
 {CANVAS} and its two backend applications are available as container images.
 
 These images are published to Quay.io and can be used to run containers locally or with any cloud provider.
 
-* {CANVAS} → https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas@{IMAGE_VERSION}]
-* {EXT_SERVICES} → https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services@{IMAGE_VERSION}]
-* {CORS_PROXY} → https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy@{IMAGE_VERSION}]
+{CANVAS}:: https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas@{IMAGE_VERSION}]
+{EXT_SERVICES}:: https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services@{IMAGE_VERSION}]
+{CORS_PROXY}:: https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy@{IMAGE_VERSION}]
 
 NOTE: All the three image versions must be the same for a deployment to work.
 
@@ -108,7 +108,7 @@ If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, f
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
-. Define some variables that will be useful to name and label the resources created.
+. Define variables that will be useful to name and label the resources created.
 +
 [source,shell,subs="attributes+"]
 ----
@@ -237,7 +237,7 @@ Using the internal IP/DNS services will not work.
 Requests are made directly from the user's browser to both URLs configured.
 ====
 
-Another very important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
+Another important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
@@ -251,7 +251,7 @@ For other customization options of {CANVAS}, see https://quay.io/repository/bamo
 
 == Securing your installation
 
-It is recommended to have a secure protocol (HTTPS) available for the {CANVAS} installation as well as all services that {CANVAS} has access to, such as remote git repositories, or container orchestration like OpenShift. To enable that, follow your Kubernetes distribution documentation on how to enable a secure protocol.
+You should have a secure protocol (HTTPS) available for the {CANVAS} installation, as well as all services that {CANVAS} has access to. For example, remote git repositories or container orchestration like OpenShift. To enable a secure protocol, follow your Kubernetes distribution documentation.
 
 [#canvas-gitrepo-config]
 == Configuring GitHub, GitHub Enterprise Server, GitLab, or BitBucket Data Center
@@ -278,15 +278,15 @@ Example JSON configuration:
 ]
 ----
 
-* *id*: A unique identifier for this authentication provider configuration.
-* *domain*: The base URL of your Git provider instance.
-* *supportedGitRemoteDomains*: A list of Git remote domains that this provider can authenticate with.
-* *type*: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
-* *name*: A readable name displayed in the {PRODUCT_SHORT} UI.
-* *enabled*: A boolean flag that enables or disables this provider.
-* *group*: Categorizes the provider for grouping similar services.
-* *disableEncoding* (GitLab only): If set to true, adds Accept-Encoding.
-* *insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only): If set to true, skips TLS certificate validation.
+*id*:: A unique identifier for this authentication provider configuration.
+*domain*:: The base URL of your Git provider instance.
+*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
+*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
+*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
+*enabled*:: A boolean flag that enables or disables this provider.
+*group*:: Categorizes the provider for grouping similar services.
+*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
+*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
 
 After completing the configuration, you can access the features provided by each integration. For more information, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
@@ -314,15 +314,14 @@ Your custom Accelerator must be a public Git repository. After creating it, you 
 }
 ----
 
-* **name**: This is how the Accelerator is known inside {CANVAS}.
-* **iconUrl**: An optional parameter to add an image/logo along with your Accelerator name.
-* **gitRepositoryUrl**: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
-* **gitRepositoryGitRef**: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
-* **dmnDestinationFolder**: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
-* **bpmnDestinationFolder**: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
-* **otherFilesDestinationFolder**: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
-* **scesimDestinationFolder**:
-Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
+**name**:: This is how the Accelerator is known inside {CANVAS}.
+**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
+**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
+**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
+**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
+**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
+**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
+**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
 
 === Configuring the KIE_SANDBOX_ACCELERATORS environment variable
 

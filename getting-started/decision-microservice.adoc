@@ -2,26 +2,28 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This lab introduces you to the deployment of an existing Decision Model and Notation (DMN) and the validation of its decisions.
+You can learn about the deployment of an existing Decision Model and Notation (DMN) and the validation of its decisions, described in the following sections:
 
-- Explore an existing DMN file
-- Test the DMN file
-- Deploy the existing DMN project using {CANVAS}
-- Test the deployed DMN
+- Examine an existing DMN file.
+- Import the DMN file.
+- Deploy the existing DMN project using {CANVAS}.
 
 == Prerequisites
+
+Before you start, make sure the following requirements are met:
+
 * xref:../installation/configure-maven.adoc[BAMOE Maven repository installed]
 * xref:../installation/canvas.adoc[{CANVAS} installed]
 
 == Examine the existing DMN Diagram
 
-The following example describes an *insurance* price calculator based on an applicant's age and accident history. You can check the DMN model at {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/dmn/insurance-pricing.dmn[insurance-pricing.dmn].
+The following example describes an insurance price calculator based on an applicant's age and accident history. You can check the DMN model at {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/dmn/insurance-pricing.dmn[insurance-pricing.dmn].
 
 This example consists of a simple DMN model, which is represented by the following diagram:
 
 image::insurance-price-drd.png[Insurance Pricing Requirements Diagram, 400]
 
-In this decision diagram, the applicant's age and accident history are the required inputs for the decision node "Insurance Total Price". This node has a simple Decision Table that can be checked below:
+In this decision diagram, the applicant's age and accident history are the required inputs for the decision node *Insurance Total Price*. This node has a following Decision Table:
 
 .DMN Decision Table
 image::insurance-price-dt.png[Completed Decision Table,600]
@@ -32,9 +34,10 @@ The conditions for the `Age` input are defined using the Friendly Enough Express
 
 == Import the DMN file into {CANVAS}
 
-In this section, you will import the GitHub repository to {CANVAS} directly.
+To import the GitHub repository directly to {CANVAS}, follow these steps:
 
-. Under **Import </> From URL** copy and paste the following link and click **Import**:
+. In the ** </> From URL** section of **Import** panel, copy and paste the following link, then click **Import**.
+
 +
 [source,console,subs="+attributes"]
 ----
@@ -42,50 +45,70 @@ https://github.com/IBM/bamoe-docs/blob/9.3.x/_code/docs/dmn/insurance-pricing.dm
 ----
 
 +
-image::github-import.png[Import DMN]
+After importing the project, you can see the DMN Editor with the **insurance-pricing** DMN model displayed. If, instead of pointing to a particular DMN, you pointed to an entire project, any DMN/BPMN models associated with it would be able to be viewed/edited within {CANVAS}.
 
-. Once the project is imported, you will see the DMN Editor with the **insurance-pricing** DMN model displayed. If, instead of pointing to a particular DMN, you pointed to an entire project, any DMN/BPMN models associated with it would be able to be viewed/edited within {CANVAS}.
+. To get the DMN running within the browser session itself, click **Run**.
+
++
+This will have a section of the browser turn into a form you can modify. You can also change the view to a table by clicking **table** icon in the form.
+
+. Modify the checkbox based on the boolean of `had previous incidents` and set an `Age` based on the data type being a number.
+
+. To add a new input, click **plus** icon in the form.
+
++ 
+If you use table view, to add the next input, click a **plus** icon below the last row of your table.
+
+
+////
++
+image::github-import.png[Import DMN]
 +
 image::insurance-pricing-dmn.png[Sandbox Model]
-
-. You can then click the **Run** button to get this DMN running within the browser session itself.
 +
 image::insurance-pricing-run.png[Run DMN]
-
-. This will have a section of the browser turn into a form, and you can run the model right there by modifying the checkbox based on the boolean of `had previous incidents` and setting an `Age` based on the data type being a number.
 +
 image::insurance-pricing-dmn-runner.png[Form inputs]
+////
 
 == Deploy
 
-In this section, you will use {CANVAS} to deploy your DMN model to a Kubernetes cluster.
+To use {CANVAS} to deploy your DMN model to a Kubernetes cluster, do the following steps:
 
-=== Setup your credentials
+. Connect to your Kubernetes cluster.
 
-. The first step is to connect to your Kubernetes cluster. To do it, click on (*1*) to open the "Connected accounts" modal, and click on "Connect to an account" (*2*) to setup a new account.
+.. Click **user** icon in the page header to open the **Connected accounts** panel.
+.. Click **Connect to an account** to setup a new account.
+
+. Select a provider. For this example, use a local Kubernetes cluster. In production use your own internal Kubernetes. To continue, click **Kubernetes**.
+
+. Add your Kubernetes cluster information.
+
+.. (Optional) If you want to create a local cluster, click *Configure a new local Kubernetes cluster through the guided wizard* and follow the instructions.
+
+. Click **Connect**.
+
+. After you have setup your credentials click **Deploy** and select the DMN model.
+
++ 
+Your new deployment will appear in the **Dev Deployments** dropdown. It will take about 30 seconds to be ready, and a green check will appear. 
+
+. Select on your deployment.
+
++ 
+A new window appears with the equivalent form of your DMN. You can share the deployed URL with everyone who has access to your cluster.
+
+////
 +
 image::bamoe-canvas-connected-accounts.png[Connect to an accounts]
-
-. To deploy a DMN model, {CANVAS} gives you the option to connect to a Kubernetes cluster or to OpenShift, which is a hybrid cloud platform offered by Red Hat. For this example, we will use a local Kubernetes cluster, but in production, you may want to use your own internal Kubernetes. To continue, click on "Kubernetes" (*1*).
 +
 image::bamoe-canvas-kubernetes-login.png[Kubernetes Login]
-
-
-. In the "Connect to Kubernetes" modal, add your Kubernetes cluster information. If you want to create a local cluster, you can click on "Configure a new local Kubernetes cluster through the guided wizard" (*1*) and follow the instructions. To continue, click on "Connect" (*2*).
 +
 image::bamoe-canvas-kubernetes-infos.png[Kubernetes Informations]
-
-
-=== Deploy your DMN model
-
-. After you have setup your credentials click on "Deploy" (*1*) and click on the DMN model name (*2*).
 +
 image::bamoe-canvas-deploy.png[Deploy]
-
-. Your new deployment will appear in the "Dev Deployments" (*1*) dropdown. It will take about 30 seconds to be ready, and a green check will appear. Click on your deployment (*2*).
 +
 image::bamoe-canvas-deployments.png[Deployments]
-
-. A new window will appear with the equivalent form of your DMN. You can share the deployed URL with everyone who has access to your cluster.
 +
 image::bamoe-canvas-deployed.png[Deployed]
+////
