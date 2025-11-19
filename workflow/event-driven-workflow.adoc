@@ -22,7 +22,25 @@ Process/Runtime Events:: are related to process instances, tasks, and variables
 
 == Messaging add-on
 
-The Messaging add-on enables integration between BPMN message elements and external event sources or listeners, depending on the message type. To configure messaging capabilities for your _Business Services_ in Quarkus add the following dependency: 
+The Messaging add-on enables integration between BPMN message elements and external event sources or listeners, depending on the message type:
+
+* Start message node
+* Intermediate Message 
+* Throw/Catch nodes
+* End message node
+
+The following table shows more detail on message events and the corresponding Kafka topics used as channels to publish message events. 
+
+[cols="1,1,1"]
+|===
+|*Event Type* |*Published when* |*Kafka Topics* 
+
+|===
+
+// Correlation feature (although this is advanced and could also be linking to the process-event-driven example itself)
+
+To configure messaging capabilities for your _Business Services_ in Quarkus add the following dependency: 
+
 
 [source,xml]
 ----
@@ -58,36 +76,42 @@ The Spring Boot add-on is Kafka-specific therefore you will only need to add the
 
 {PRODUCT_SHORT} provides the Process event add-on, used to send processes, tasks, and variable events to an external event listener when execution of an operation modifies the state of a process. These events are known as runtime events, and can include any of the following:
 
-* the creation, modification or completion of a process instance
-* transitioning a task through different phases of its lifecycle
-* the creation, modification or deletion of a variable 
-* existing process definitions at application start and any subsequent update to metadata or structure. 
+* Any change in the state of a process instance, including execution and violation of SLA
+* Any change of state of a task or its metadata, including violation of an SLA 
+* any change in existing process definitions at application start including updates to metadata or structure. Used to capture and track the definition and version of processes. 
 
+The Process event add-on can also be used to build a historical representation of all process instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
 
-Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka Topics. The data field contains a JSON representation of one of the following types:
+Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka Topics. See table below for more details on the publication of the three supported event types. 
 
 [cols="1,1,1"]
 |===
-|*Event Type* |*Kafka Topics* |*When*
+|*Event Type* |*Published when* |*Kafka Topics* 
+
 |`ProcessInstanceEvent` 
+a| * the process instance changes state (started, ended - completed/aborted, migrated to a different version, updated - when a change in the internal state happens e.g., retriggering the SLA)
+* there is an error in the process execution
+* each time a node is executed
+* there is a change in variables
+* an SLA is violated
 |`kogito-processinstances-events`
-|Published when a process instance is created, modified, or completed.
+
 
 |`UserTaskInstanceEvent` 
+a|* the task state changes (transitions between states)
+* the task assignments change (the owner or actor of the task)
+* the task deadlines aren't met
+* there are variable changes (inputs or outputs)
+* there are changes in the task attachments (added, modified, deleted)
+* there are changes in the task comments (added, modified, deleted)
 |`kogito-usertaskinstances-events`
-|Published when a change to a user task occurs.
-
-|`VariableInstanceEvent`
-|`kogito-variables-events`
-|Published when a variable is created, modified, or removed.
-
 
 |`ProcessDefinitionEvent` 
-|`kogito-processdefinitions-events`
-|Published when process definitions change (metadata and node structures). Used to capture and track the definition and version of processes.
-|===
+a|* when process definitions change (metadata and node structures). 
 
-The Process event add-on can also be used to build a historical representation of all process instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
+|`kogito-processdefinitions-events`
+
+|===
 
 In Quarkus, you configure process event capabilities for your _Business Services_ by adding the process event add-on using the following dependency:
 
