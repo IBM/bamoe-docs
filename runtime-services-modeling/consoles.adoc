@@ -257,3 +257,121 @@ On the home page, clicking on the *All Business Services* option will make it so
 image::runtime-services-modeling/mgmt-console-home-all-business-services.png[Image of the Home page with the All Business Services button, 400]
 
 This means that from a single Management Console instance, it's possible to manage multiple Business Services and obtain an aggregated view of all running process instances, as the Overview page groups process instances from matching process definitions, even if they are from different Business Services.
+
+[#process-instance-migration-ui]
+== Process Instance Migration
+
+Process Instance Migration (PIM) is a feature that allows migrating process instances from a source process definition to a target process definition. BAMOE provides a dedicated UI built on top of the BAMOE Management Console to simplify the migration process.
+
+Before proceeding, avoid having your system exposed to consumers when using the PIM feature, and only restore access once the migration finish executing. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Keep a database backup before migrating your Process Instances.
+
+To use this feature, the following requirements must be met:
+
+* The Business Service must include the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on] dependency in its `pom.xml`. If this dependency is missing, an error message will appear when attempting to use the PIM UI.
+
+image::runtime-services-modeling/mgmt-console-pim-add-on-missing.png[Image of the PIM UI error without the BAMOE PIM Add-on, 600]
+
+* The PIM UI does not support multi-Business Service visualization. If you attempt to use PIM with multiple Business Services, the view will redirect you to select a specific Business Service.
+
+Once these requirements are satisfied, you can access the PIM UI under Advanced in the BAMOE Management Console.
+
+image::runtime-services-modeling/mgmt-console-pim-nav.png[Image of the PIM nav item, 300]
+
+=== PIM Plan List
+
+Clicking on the PIM item opens the PIM Plans page. Initially, this page will not contain any PIM Plans because they need to be created. PIM Plans are required to perform a Process Instance Migration. For more details on the PIM workflow, refer to the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
+The image below shows a table with two already created PIM Plans.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-list.png[Image of the PIM plan list page, 600]
+
+The highlighted fields are:
+
+. Filter PIM Plans by the source or target process ID.
+. Create a new PIM Plan. Clicking this will redirect you to the Create Plan page.
+. Delete selected PIM Plan. This button is enabled only if at least one PIM Plan is selected. If the PIM Plan is being used in a migration, it cannot be deleted.
+. Select the PIM plan.
+. Expand the PIM plan. Expansion is only possible if the PIM Plan contains a node mapping.
+. Execute the respective PIM plan. Clicking this will redirect you to the Execute PIM Plan page
+. Open addtional operations.
+
+=== PIM Plan Creation
+
+A PIM Plan defines the mapping between the source and target process definitions, which is required to perform a migration.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-create-empty.png[Image of the PIM create plan page, 600]
+
+The highlighted fields are:
+
+. Process Mapping: Select the source and target process definitions that will be used in the PIM Plan
+. Node Mapping: Select nodes from the source and target process definitions that should be mapped. Validation will display warning messages if the source and target process definitions have different node IDs and they are not mapped. It is not strictly required to map all nodes, but warning messages will appear. User Tasks must have different node IDs, or an error will occur. For more details, refer to the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
+. Source Process Definition SVG: Provides a visual representation of the source and process definitions.
+. Target Process Definition SVG: Provides a visual representation of the target process definitions.
+. The Create PIM Plan butto, by clicking on it a Summary dialog will be opened.
+
+When you select the source and target process definitions, the corresponding node lists and SVG diagrams will be updated (if available in the Business Service). Selecting a node highlights it in the SVG diagram.
+
+NOTE: Highlighting works only with SVGs generated using the new BPMN Editor.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-create-filled.gif[GIF of the PIM create plan being filled, 600]
+
+After configuring the PIM Plan, click *Create PIM Plan*. A dialog will display a summary of the PIM Plan.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-create-summary.png[Image of the PIM create plan summary, 600]
+
+Click *Confirm* to proceed with the plan creation.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-create-success.png[Image of the PIM creation plan success with warning, 600]
+
+The PIM Plan will be validated, and any errors or warnings [1] will be listed in the dialog. If validation succeeds, the PIM Plan is created and the *Go to PIM Plan* [2] button becomes available. Clicking *Go to PIM Plan* takes you to the execution page for the PIM Plan you have just created. Clicking *Create another PIM Plan* will leave you on the Create PIM Plan page.
+
+=== Plan Execution
+
+The images below show the PIM Plan execution page.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-execute-1.png[Image of the PIM execution page 1, 600]
+
+image::runtime-services-modeling/mgmt-console-pim-plan-execute-2.png[Image of the PIM execution page 2, 600]
+
+image::runtime-services-modeling/mgmt-console-pim-plan-execute-3.png[Image of the PIM execution page 3, 600]
+
+The highlighted sections are:
+
+. Filter: Select the type high level migration filter: **All Process Instances** or **Select Process Instances**.
+. A table listing all Process Instances that match the PIM Plan and filter.
+. The current number of Process Instances that match the PIM Plan and filter. This number may differ from the number of instances that will actually be migrated.
+. A refresh button to update the Process Instances table. The table must be manually refreshed to display newly created instances.
+. PIM Plan summary
+.. The PIM Plan's process mapping.
+.. The PIM Plan's node mapping.
+.. The source and target process definition SVGs.
+. The Execute PIM Plan button.
+. Filter Process Instances: Available only if **Select Process Instances** is chosen. Changing the filter does not immediately update the Process Instances table.
+.. Filter by Process Instance ID.
+.. Filter by Start Date.
+.. Filter by Last Updated Date.
+.. Filter by SLA Due Date.
+.. Apply the filter to update the Process Instances table.
+.. Reset the filter.
+.. Select all Process Instances that match the filter.
+
+To execute the PIM Plan we have two high-level filters:
+
+* **All Process Instances**: No limit; migrates all instances matching the PIM Plan.
+* **Select Process Instances**: Limited by your database and BAMOE Management Console configuration. By default, it can migrate up to 1,000 process instances per migration and a maximum of 50 migrations, totaling 50,000 process instances. To change these defaults, refer to xref:../installation/management-console.adoc#available-environment-variables[{MANAGEMENT_CONSOLE} Console Environment Variables].
+
+Clicking *Execute PIM Plan* opens the execution summary.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-execute-summary.png[Image of the PIM execution summary, 600]
+
+The summary includes:
+
+. The process and node mappings from the PIM Plan.
+. The chosen configuration.
+. The current number of Process Instances matching the PIM Plan.
+. Critical warning remembering about possible side effects: Avoid having your system exposed to consumers when executing a PIM Plan, and only restore access once the PIM Plan is finished executing. Executing a PIM Plan on a live system could result in errors, and even data corruption. Keep a database backup before executing a PIM Plan. For details, see xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
+. The *Execute PIM Plan* execution button.
+
+Clicking *Execute PIM Plan* starts the migration. Duration depends on the number of instances. After completion, a success message displays the total number of migrated instances.
+
+image::runtime-services-modeling/mgmt-console-pim-plan-execute-success.png[Image of the PIM execution success, 600]
+
