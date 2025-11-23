@@ -14,27 +14,34 @@ This version upgrades foundational technologies and brings support for new ones:
 More information in xref:supported-environments.adoc[Supported Environments].
 
 == AI integration - {MCP_SERVER} security and hardening (Tech Preview)
-MCP Server updates
+The {MCP_Server} was released in {VERSION_930} as a technology preview. {PRODUCT_SHORT} {VERSION} contains a new version of the tech preview that is not compatible with the previous version. It contains the following updates: 
+
+• Implementation of a default port (80 for HTTP or 443 for HTTPS), used if you do not specify one. 
+• The ability to declare a richer description. If the related Business Service model has a description it will be added in the MCP Tool description.
+• Spring Boot based _Business Services_ are now supported.
+• BAMOE Tools bound to models with complex data (Input with nested objects and collections) in _Business Services_ are now better covered.
+• A new security layer in the {MCP_SERVER} to secure MCP endpoints (disabled by default).
+
+xref:../integrating-ai/ai-agents-bamoe.adoc[Learn more...]
 
 == AI integration - AI Agent Task for BPMN (Tech Preview)
-{PRODUCT_SHORT} provides a new AI Agent Task in BPMN Editor powered by and integration with Langflow. 
-Customers authenticate with their Langflow instance (service URL + API key) via the new Langflow auth provider, now available in {CANVAS} and {DEV_TOOLS}
+{PRODUCT_SHORT} provides a new AI Agent Task in BPMN Editor powered by an integration with Langflow. 
+Customers authenticate with their Langflow instance (service URL and API key) via the new Langflow Auth Provider, available in {CANVAS} and {DEV_TOOLS}
 
-The Property panel enables you to select flows/agents from their Langflow instance.
-Flow execution can be tested directly in the property panel with user inputs. 
+The Property panel enables you to select flows/agents from their Langflow instance. Flow execution can be tested directly in the property panel with user inputs. 
 You can design AI flows in the Langflow visual editor and integrate them seamlessly into {PRODUCT_SHORT} workflows. 
 
-== Developing _Business Services_ for Z platform
+== Developing and deploying _Business Services_ for Z platform
 
-In {PRODUCT_SHORT} {VERSION} you can now deploy {PRODUCT_SHORT} components on z/OS platforms as well a build container images to be run on IBM z/OS platforms running on Openshift on Linux (s390x). Using these container images you can install adapted {PRODUCT_SHORT} components and use them to build s390x based images that run on an IBM z/OS cluster running Openshift. xref:../runtime-services-modeling/z-services-deployment.adoc[Learn more...]
+In {PRODUCT_SHORT} {VERSION} you are able to install and use {CANVAS}, {MVN_REPO}, {QUARKUS_DEV_UI}, {MCP_SERVER}, {MANAGEMENT_CONSOLE}, {MCP_SERVER}, {DATA_CLEANUP} on OpenShift running on Linux s390x on IBM z/OS. You can use these components to build deploy and manage _Business Services_ that run on OpenShift on Linux s390x on IBM z/OS. 
 
-== New Add-on and Tools to migrate in-flight Process Instances
+xref:../runtime-services-modeling/services-deployment.adoc[Learn more...]
 
-The {MANAGEMENT_CONSOLE} now integrates a new Process Instance Migration (PIM) Tool. 
+== New Process Instance Migration (PIM) Add-on and Tooling to migrate in-flight processes
 
-When you deploy Business Services with specific Process Definitions in a Cloud environment, client applications or {MANAGEMENT_CONSOLE} users can create multiple Process Instances that follow the sequence flow defined in the original Process Definition. When a Process Instance is running over days, weeks or months with waiting states, such as Timers or User Tasks, it is possible to deploy new versions of the original Process Definition to _Business Services_, which can cause existing Process Instances in waiting states to follow an obsolete Process Definition.
+The Process Instance Migration (PIM) integration with {MANAGEMENT_CONSOLE} enables you to manage the migration of Process Instances to new Process Definitions, providing full visualization of process definitions, facilitating tasks such as node mapping and migration scheduling. 
 
-The Process Instance Migration (PIM) now enables you to manage the migration of Process Instances to new Process Definitions, providing full visualization of process definitions, facilitating tasks such as node mapping and migration scheduling. 
+When you deploy Business Services with specific Process Definitions in a Cloud environment, client applications or {MANAGEMENT_CONSOLE} users can create multiple Process Instances that follow the sequence flow defined in the original Process Definition. When a Process Instance is running over days, weeks or months with waiting states, such as Timers or User Tasks, it is possible to deploy new versions of the original Process Definition to _Business Services_, which can cause existing Process Instances in waiting states to follow an obsolete Process Definition. The new PIM tool provides a solution. 
 
 xref:../runtime-services-modeling/services-deployment.adoc#migration-PIM[Learn more...]
 
@@ -54,15 +61,17 @@ All user interfaces and user messages generated by {PRODUCT_SHORT} are now avail
 xref:../installation/installation.adoc[Learn more...]
 
 == Using sub-processes from a different _Business Service_ project
+In {PRODUCT_SHORT} {VERSION_80X} and earlier releases, the engine supported the execution of subprocess from different project. Now in {VERSION} a new documented process using standard Maven procedure is available to implement this in {PRODUCT_SHORT} {VERSION}
+
+xref:../workflow/[Learn more...]
 
 == User task lifecycle 
 {PRODUCT_SHORT} provides a new Human Task Lifecyle that you can select to replace the default User Task lifecycle based on Kogito. The Human Task lifecycle enables more precise management of Human task behavior and state transitions. You can also integrate your custom User Task lifecycle. The default remains the Kogito based User Task lifecycle. 
 
 xref:../workflow/overview.adoc#user-tasks[Learn more...]
 
-
 == DMN Editor - Unified PDF documentation for multiple models
 
 The DMN Editor in {PRODUCT_SHORT} now includes a document generation feature that supports multiple DRDs and provides a rich documentation workflow to manage your DMN artifacts. This feature brings the {VERSION} DMN editor into feature parity with the capabilities of the {PRODUCT_SHORT} {VERSION_80X} DMN editor (Classic) from BAMOE v8.
 
-The new Document Generation option is available in the DMN Editor from Share dropdown. You can then choose the DMN artifacts in available in your project. xref:../editing/authoring-decisions.adoc[Learn more...]
+The new Document Generation option is available in the DMN Editor in both {CANVAS} and {DEV_TOOLS}. You can then select the DMN artifacts available in your project to be included in the PDF. xref:../editing/authoring-decisions.adoc[Learn more...]

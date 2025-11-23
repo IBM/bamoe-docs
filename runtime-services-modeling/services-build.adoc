@@ -2,17 +2,17 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-Building an executable application is the first step in deploying _Business Services_ to your production environment. There are several types of executables you can create, and trade-offs vary depending on your requirements. This section covers building with the two supported frameworks: Quarkus and Spring Boot.
+Building an executable application is the first step in deploying _Business Services_ to your production environment. There are several types of executable you can create, and trade-offs will vary depending on your requirements. This section covers building with the two supported frameworks: Quarkus and Spring Boot.
 
-While both frameworks offer convenient ways for building Container images and/or other types of excecutables directly from your _Business Services_ projects, you are not constrainted by them. You are free to use any other build method, technique, tool or workflow you find suitable for your team and organization.
+While both frameworks offer convenient ways for building Container images and/or other types of executables directly from your _Business Services_ projects, you are not constrained by them. You are free to use any other build method, technique, tool or workflow you find suitable for your team and organization.
 
 == Quarkus
 
-When you build your _Business Service_ with Quarkus, there are a few different strategies you can choose to build executables. Since you are in control of your _Business Service_ project on {PRODUCT_SHORT}, you can choose which strategy better suits your envisoned architecture.
+When you build your _Business Service_ with Quarkus, there are different strategies you can choose to build executables. You fully control your _Business Service_ project on {PRODUCT_SHORT} and can choose which strategy better suits your planned architecture.
 
-Following the official Quarkus guides will help you choose which strategy is a better match for you.
+The official Quarkus guides will help you choose the strategy that is the best match for you.
 
-* *a. Container image (recommended)*: _Business Services_ on {PRODUCT_SHORT} usually get deployed to a hybrid-cloud environment, like OpenShift or Kubernetes. To build your _Business Service_ project as an executable Container image, follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/container-image[Container Images].
+* *a. Container image (recommended)*: _Business Services_ on {PRODUCT_SHORT} usually get deployed to a hybrid-cloud environment  (OpenShift or Kubernetes). To build your _Business Service_ project as an executable Container image, follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/container-image[Container Images].
 +
 For standard use-cases, run the following command:
 +
@@ -21,14 +21,14 @@ For standard use-cases, run the following command:
 mvn clean install -Dquarkus.container-image.build=true
 ----
 +
-A Container image will be now installed to your local Container image registry. You can see it with:
+A Container image will be installed to your local Container image registry. You can see it using the following command:
 +
 [source,shell]
 ----
 docker image ls
 ----
 +
-Container images created with Quarkus can be both JVM- or Native Executable-based.
+Container images created with Quarkus can be both JVM - or Native Executable - based.
 +
 * *b. Native Executable*: Follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/building-native-image[Building a Native Executable].
 +
@@ -78,3 +78,21 @@ mvn clean package
 ----
 java -jar ./target/(name_of_the_application).jar
 ----
+
+== Building Containers that run on OpenShift on Linux on z/OS
+You can build your _Business Services_ to run on Openshift running on an IBM z/OS cluster supporting s390x. A set of deliverables are included in the {PRODUCT_SHORT} distribution to enable you to install {PRODUCT_SHORT} components and develop your _Business Services_ that will run on the IBM z/OS s390x Linux platform. 
+
+To facilitate development specific s390x images (named `...-s390x.tar.gz`) are provided for the following packages:
+
+* {CANVAS}
+* {EXT_SERVICES}
+* {CORS_PROXY}
+* {MANAGEMENT_CONSOLE}
+* {MVN_REPO}
+* {QUARKUS_DEV_UI}
+* {DATA_CLEANUP}
+* {MCP_SERVER}
+
+The host machine architecture is automatically resolved when you pull the {PRODUCT_SHORT} container images.
+
+If you want to pull a specific platform image you can use the `—platform` flag in your `docker pull` command. 
