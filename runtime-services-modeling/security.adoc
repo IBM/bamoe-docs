@@ -9,7 +9,7 @@ After configuring your _Business Service_ correctly to integrate its security la
 
 {MANAGEMENT_CONSOLE} can connect to secured _Business Services_ provided they expose enough information about their configured Identity Provider. See xref:#mgmt-console-oidc-proxy[Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_] for more details.
 
-
+[#authentication-quarkus]
 == Authentication (Quarkus)
 
 Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You will know how the authorization layer works in Quarkus with this useful https://quarkus.io/version/3.20/guides/security-oidc-bearer-token-authentication[guide] that explains how to do the set up correctly.
@@ -54,6 +54,34 @@ authentication method
  | string  | -
 
 |===
+
+[#authentication-spring-boot]
+== Authentication (Spring Boot)
+
+Spring Boot supports protecting endpoints by using OAuth 2.0 Bearer tokens, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can find more information about the Spring Boot OAuth 2.0 Resource Server in the https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Documentation].
+
+In order to use this functionality in a _Business Services_ on {PRODUCT_SHORT}, the first step is to add the required dependencies to the application's pom.xml file:
+
+[source,xml]
+----
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+    </dependency>
+----
+
+In addition, it is required to configure Spring Security to secure the application with OAuth2. To enable support for bearer tokens based on JSON Web Token (JWT) format, add the following configuration property to your application:
+
+[source]
+----
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://127.0.0.1:8180/realms/kie
+----
+
+Additional configuration settings can be applied through the Spring Boot `SecurityFilterChain` bean.
 
 [#authorization-quarkus]
 == Authorization (Quarkus)
@@ -121,6 +149,22 @@ based policies can be
 defined, and extensions
  | String | -
 |===
+
+[#authorization-spring-boot]
+== Authorization (Spring Boot)
+
+With Spring Security enabled, you have fine-grained control over the authorization rules using the `AuthorizationFilter` of the Spring Security Filter Chain. 
+
+The following code snippet shows a sample `AuthorizationFilter` configuration. It enforces authentication for all endpoints, except the `/q/oidc/.well-known/openid-configuration` endpoint which can be accessed unauthenticated. In this sample setup, no specific roles are required to enforce authorization.
+
+[source,java]
+----
+      .authorizeHttpRequests(auth -> auth
+              .requestMatchers("/q/oidc/.well-known/openid-configuration").permitAll()
+              .anyRequest().authenticated())
+----
+
+You can find more information on this topic and available configuration options in the https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Documentation].
 
 
 == Authentication in User Task API endpoints
