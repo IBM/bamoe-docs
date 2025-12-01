@@ -10,14 +10,6 @@ Table 1. Known limitations
 |===
 |Limitation |Description |Workaround
 
-|The event subsystem in the {PRODUCT_SHORT} workflow engine does not have transactional support.
-|Using transactions that emit events through an emitter like Kafka or CloudEvents in _Business Services_ with Compact Architecture with at least runtime persistence may throw a transaction error with message 'enlisted connection used without active transaction' after starting a process instance.
-|
-
-|In a _Business Service_, Workflows subsystem event related messages are sent even if the process execution fails due to a DB error.
-|In a process containing a node that sends out a message (for example, Intermediate Message Throw Event), the sending of the message happens when this node is executed. If the execution then encounters an error (for example, coming from the database) and the transaction is rolled back, the message has already been sent.
-|Further investigate event related messages
-
 |Native compilation support for workflow projects.
 |Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_93X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
 |Do not use native compilation if your _Business Services_ include stateful workflow.
@@ -58,11 +50,4 @@ Although it is valid to have multiple structures with properties of the same nam
 |When users copy and paste a group of nodes that are either connected to, or contained within a Decision Service, the pasted result may behave unexpectedly.
 |To avoid this issue, do not copy Decision Service nodes together with other connected nodes in a single operation. Instead you should copy and paste the nodes outside the Decision Service, and separately back into the Decision Service, before copy and pasting the Decision Service nodes. This split approach helps preserve correct edge behavior and avoids visual inconsistencies in the diagram.
 
-|DMN Runner: Interpreting `split("abc", 22)` results incorrectly in B-FEEL
-|There are B-FEEL expressions, like `split("abc", 22)` that are invalid but comparing B-FEEL with FEEL, defines non-null result for them. Here it is an empty collection [] and DMN Runner does not display these results.
-|There is no workaround for affected expressions. DMN Runner will show inappropriate values when using B-FEEL.
-
-|DMN Runner: Time input is always marked as error
-|In the DMN Runner panel, `time` input fields are consistently flagged as erroneous, even when the input is valid and no actual error occurs during evaluation. You may believe your input is incorrect or causing evaluation issues, when the logic executes correctly.
-|Ignore the error indication unless it is confirmed to be affecting the evaluation results.
 |===
