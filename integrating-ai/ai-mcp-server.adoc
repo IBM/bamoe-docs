@@ -5,6 +5,8 @@ include::../styles/images.adoc[]
 
 The {MCP_SERVER} technology preview provides a dedicated and isolated layer that actively exposes _Business Services_, including rule evaluation, decision models, and process orchestration, through a standardized interface optimized for agentic workflows. It is provided as a Docker image to facilitate deployment in the environment it is being used in. 
 
+== Introducing {MCP_SERVER} tech preview
+
 You can use it to build intelligent assistants, autonomous systems, or orchestrate complex business logic. It enables agents to reason, decide, and act with precision. By default, the {MCP_SERVER} runs without authentication, but from {VERSION} you can choose to enable security by configuring a set of environment variables that connect the server to a Keycloak realm (see xref:#configure-security[Configuring MCP Server Security]).
 
 The {MCP_SERVER} exposes the following capabilities of _Business Services_: 
@@ -13,11 +15,13 @@ The {MCP_SERVER} exposes the following capabilities of _Business Services_:
 * Rule model execution
 * A Process API that allows agents to create, retrieve, modify, and delete process instances.
 
+== Preparing _Business Services_ to be exposed to {MCP_SERVER}
+
 In order for this feature to work you will need the following four components:
 
 * _Business Service_ that defines the REST endpoints that will be exposed through the {MCP_SERVER}.
 * The deployed docker image of {MCP_SERVER}.
-* If you require security, an authentication server that is shared by the _Business Service_ and the {MCP_SERVER} (default is the Keycloak server).
+* If you require security, an authentication server that is shared by the _Business Service_ and the {MCP_SERVER} (default is the Keycloak server), see xref:#mcp-server-security[Configuring {PRODUCT_SHORT} security].
 * An MCP Client that may interact with the {MCP_SERVER}.
 
 The MCP Server parses information retrieved from the retrieved from the target _Business Service_  to discover and translate into _MCP Tools_. It uses the OpenAPI information exposed by the _Business Service_. 
@@ -25,17 +29,17 @@ The MCP Server parses information retrieved from the retrieved from the target _
 To prepare the {PRODUCT_SHORT} capabilities to be exposed to the {MCP_SERVER}:
 
 . Run a _Business Service_ instance using Quarkus or Spring Boot (not supported in {VERSION_930}) with the following setup.
-
-. For Quarkus based Business Services, the OpenAPI v3 spec is exposed via this URI `http://<yourhost>:<port>/q/openapi` by default. which can be overridden with the property `quarkus.smallrye-openapi.path`.
-
-. For Spring-boot based Business Services, the OpenAPI v3 spec is exposed in this URI `http://<yourhost>:<port>/v3/api-docs` by default. 
++
+* For Quarkus based Business Services, the OpenAPI v3 spec is exposed via this URI `http://<yourhost>:<port>/q/openapi` by default. which can be overridden with the property `quarkus.smallrye-openapi.path`.
++
+* For Spring-boot based Business Services, the OpenAPI v3 spec is exposed in this URI `http://<yourhost>:<port>/v3/api-docs` by default. 
 
 . Define meaningful names for models, fields, and nodes in _Business Services_ to improve the effectiveness of AI agent interactions. If there is a description in the _Business Service_ model it will be added to the MCP Tool description. 
 
 . Configure rule models appropriately: 
-
 //remove the RuleUnit based models? Why aren't we referring to DMN?
-** For RuleUnit based models, annotate each implemented `DataStore<>` class with `@Schema`, specifying the implementation class.
++
+* For RuleUnit based models, annotate each implemented `DataStore<>` class with `@Schema`, specifying the implementation class.
 +
 For example, in case of `DataStore<Person>` the annotation should be added as:
 +
@@ -45,7 +49,7 @@ For example, in case of `DataStore<Person>` the annotation should be added as:
 private DataStore<Person> persons;
 ----
 +
-** For plain DRLs without RuleUnits, manually define and expose model endpoints, as they are not generated automatically.
+* For plain DRLs without RuleUnits, manually define and expose model endpoints, as they are not generated automatically.
 
 . Use the `bamoe / mcp-server` image available in your container orchestration platform.
 
@@ -107,7 +111,7 @@ If the _Business Service_ is also secured, it is essential to integrate the secu
 
 Once the Business Services endpoints and the MCP server are secured under the same security layer, sharing the same credentials, you can configure realm and credentials for the integration. This section outlines how to secure your MCP Server endpoints using an OpenID Connect (OIDC) Provider, such us as Keycloak. 
 
-.Setting up Keycloak
+=== Setting up Keycloak
 
 * Keycloak must be accessible at a known domain.
 * Realm must be configured with:
@@ -116,7 +120,7 @@ Once the Business Services endpoints and the MCP server are secured under the sa
 ** Token settings (expiration, scopes, etc.).
 ** Other requirements specific to Keycloack (e.g. database used for persistence) are not covered here. 
 
-.Import Realm Configuration
+=== Importing Realm Configuration
 If a realm configuration already exists, it may be imported in Keycloak at startup.
 
 The following shows an example on how to launch a Keycloak instance in a docker environment.
@@ -215,7 +219,6 @@ The token must be issued by the Keycloak realm specified in the `MCP_SERVER_SECU
 |`http://<yourhost>:<port>/q/openapi` for Quarkus based services, or `http://<yourhost>:<port>/v3/api-docs` for Spring Boot based services
 |===
 
-
 NOTE:: The `<keycloak-domain>` used must be the same across the complete stack, i.e., the {MCP_SERVER}, the _Business Service_ and the MCP Client. 
 
 A sample is shown below:
@@ -242,8 +245,8 @@ When started as images, the different components are visible to each other using
 
 * Since the MCP Client must use the same keycloak_domain as MCP Server and _Business Service_, you will need a DNS entry (“/etc/hosts”) in the running machine to map that domain to the IP under which Keycloak could be accessed. In the above example, the keycloak server is available at 127.0.0.1 and the keycloak_domain is set to “keycloak”; so, the /etc/hosts entry should be `127.0.0.1 keycloak`. 
 
-=== Docker-compose example configuration
-The following is an example of a docker compose file that starts all the three required services (Keycloak, {MCP_SERVER}, _Business Service_):
+=== Docker Compose example configuration
+The following is an example of a Docker compose file that starts all the three required services (Keycloak, {MCP_SERVER}, _Business Service_):
 
 [source, xml]
 ----
@@ -325,7 +328,7 @@ services:
       MCP_SERVER_DEBUG_LEVEL: INFO      
 ----
 
-With the above file in place and the images and paths set up correctly, the whole system could be started with the following command:
+With the above file in place and the images and paths set up correctly, the whole system can be started with the following command:
 
 [source, shell]
 ----
