@@ -3,69 +3,69 @@ include::../partials/attributes.adoc[]
 
 include::../styles/images.adoc[]
 
+The AI Agent task allows you to integrate AI agents into your workflows, making them smarter and more efficient. This feature is powered by Langflow, an open-source tool that simplifies building AI applications through a visual interface. By using AI Agent tasks, you can automate processes, create intelligent flows, and connect with leading AI models.
+For more details on Langflow and its capabilities, see xref:https://www.langflow.org.
 
-= AI Agent Task Integration in BPMN Editor
 
-== Introduction
-The AI Agent task in the BPMN Editor, powered by Langflow, enables you to integrate AI agents into BPMN workflows. Langflow is an open-source tool that provides a visual interface for building AI applications. It allows you to design AI workflows, reuse them across BPMN processes, and integrate with major AI models such as Ollama, OpenAI, and Anthropic. By using Langflow with the BPMN Editor, you can automate tasks and improve workflow efficiency.
+== Integrate AI Agents into your workflows
+ You set up the AI Agent Task at Design Time or Runtime.
 
-For more details on Langflow, visit https://www.langflow.org.
+To set up the AI Agent Task at Design Time:
 
-== Prerequisites
-* Access to the BPMN Editor.
-* A Langflow account with a valid Service URL and API Key.
-* Installed Work Item Handler (WIH) dependency for your runtime environment:
-** Spring Boot: `bamoe-ai-agent-task-work-item-handler-spring-boot`
-** Quarkus: `bamoe-ai-agent-task-work-item-handler-quarkus`
-* Updated `application.properties` file with Langflow details:
+. Drag and drop the AI Agent node onto the canvas in the BPMN editor.
+. Select Langflow as the AI provider and choose an agent from your instance.
+. Provide input to the node either from the previous node or as custom input.
+. Test the agent in the property panel to view the results.
+. The AI agent processes the input and returns the result to the next node.
+￼
+To set up the AI Agent Task at Runtime:
+
+. Add the appropriate Work Item Handler (WIH) dependency to your project for Quarkus or Spring Boot:
++
+* bamoe-ai-agent-task-work-item-handler-spring-boot
+*    • *bamoe-ai-agent-task-work-item-handler-quarkus
++
+. Configure the application.properties file and update the required properties with your actual Langflow details.
+
+[source, xml]
 ----
 bamoe.workflow.ai-agent-task.provider.langflow.base-url=<your-langflow-host>
 bamoe.workflow.ai-agent-task.provider.langflow.api-key=<api-key>
 ----
 
-== Procedure
 
-=== 1. Configure Langflow as AI Provider
-You can configure Langflow through Canvas or the VS Code extension.
+== Configuring AI Agent Tasks
 
-==== Canvas Configuration
+To use an AI Agent task, you need to configure an AI provider. Currently, Langflow is the supported provider. You can set up Langflow through either Canvas or the VS Code extension, and the following sections outline the steps for each method.
+
+.Configuring Langflow through Canvas:
 . Click the profile icon in the top-right corner of Canvas.
 . Select *Connected accounts* from the menu.
 . Choose *Langflow* from the list of AI providers.
-. Enter a display name for your Langflow account.
-. Provide the Service URL and API Key.
+. Enter a display name, Service URL and API Key for your Langflow account (e.g., My Langflow Account).
 . Click *Connect* to establish the connection.
 
-==== VS Code Extension Configuration
+.Configure Langflow Through VS Code Extension
 . Click the profile menu in the bottom-left corner of VS Code.
-. Select *Langflow* as the AI provider.
-. Enter the Service URL and API Key.
-. Save the configuration.
+. From the available options, select Langflow as your preferred AI provider.
+. Enter the required details:
+* Service URL
+* API Key
 
-=== 2. Add AI Agent Task in BPMN Editor
-. Drag and drop the AI Agent node onto the BPMN canvas.
-. In the property panel, select the connected Langflow account.
-. Choose the desired Agent or Flow from the dropdown or enter the Agent ID.
-. Review the displayed Agent details, including ID, description, MCP status, and tags.
+After connecting your Langflow account through Canvas or the VS Code extension, go to the property panel of the AI Agent task. In the property panel, you can select the previously connected Langflow account to use for the task.
 
-=== 3. Provide Agent Input
-* Use the default variable `aiAgentInput` to pass data from previous nodes.
-* Customize input text and include process variables using the format `{{variable-name}}`.
-* Enable Advanced Mode for syntax highlighting and autosuggest:
-** Type `{{` and press Ctrl + Space (or Cmd + Space on Mac) to view available variables.
+After selecting your connected Langflow account, choose the Agent or Flow you want to use. You can either pick an Agent or Flow from the dropdown list linked to your Langflow account or enter the Agent ID directly in the input field. Once selected, the property panel displays basic details about the Agent, including its ID, description, MCP status, and the tag category.
 
-=== 4. Configure Input and Output Data Mapping
-* By default:
-** `aiAgentInput` represents the Agent’s input.
-** `aiAgentOutput` represents the Agent’s output.
-* Add additional variables as needed for custom mapping.
+Use the aiAgentInput variable to provide input to the AI agent. This variable is attached to the input by default and allows the agent to receive data from previously connected nodes, making the input dynamic. You can customize the input text and include process variables using the {{<variable-name>}} format.
+The input field also includes an Advanced Mode, accessible by clicking the expand icon next to it. This opens an advanced editor with syntax highlighting for {{<variable-name>}} and offers autosuggest for process variables.
+To use autosuggest, start typing inside double curly braces and press Ctrl + Space (or Cmd + Space on Mac). A dropdown list of data input mapping variables will appear, showing the variables defined under Data Mapping Properties. As you update these variables, the suggestion list automatically refreshes to include new ones.
 
-=== 5. Test the Agent
-* Use the Preview Table to provide temporary values for process variables.
-* Click *Test Agent* to execute the agent and view real-time responses.
-* Refine input parameters based on the output until the desired result is achieved.
 
-== Runtime Execution
-* Ensure the correct WIH dependency is added to your project.
-* Configure Langflow properties in `application.properties`.
-* At runtime, the AI Agent task processes input and returns output to the next node in the workflow.
+.Input and Output Data Mapping
+Input and output data mapping works the same way as other task types. By default, aiAgentInput and aiAgentOutput represent the agent’s input and output data. You can add additional variables as needed to customize the mapping and meet your specific requirements.
+
+.Preview Table
+The Preview Table lets you test process variables used in the input by assigning temporary values. These values replace the variables during testing, allowing you to verify that the formatting is correct and that the agent will receive the expected data when executed.
+
+.Test Your Agent
+Use the Test Agent feature to verify the agent’s functionality. This feature executes the agent and displays its real-time response, allowing you to adjust input parameters based on the output until you achieve the desired result.
