@@ -26,25 +26,7 @@ The following sections describe the Process Management API in detail.
 
 ===  /management/processes
 
-[cols="1,1a"]
-|===
-|*Type* |GET
-
-|*Description* | This endpoint returns the list of Process Definition names that are deployed in the runtime.
-
-|*Inputs* |
-
-|*Output* a| A JSON list of Process Definition names that are deployed in the runtime.
-
-* processName: String
-
-|*Example* |
-
-  curl -X 'GET' \
-  'http://localhost:8080/management/processes' \
-  -H 'accept: */*'
-
-|===
+|*Table* |*Description*
 
 ===  /management/processes/{processId}
 
@@ -133,6 +115,8 @@ The following sections describe the Process Management API in detail.
 
 
 ===  /management/processes/{processId}/instances/{processInstanceId}/migrate
+
+NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by the PIM Add-on in {VERSION} see xref:#process-instance-migration-addon[Process Instance Migration APIs]
 
 [cols="1,1a"]
 |===
@@ -484,6 +468,8 @@ The following sections describe the Process Management API in detail.
 
 ===  /management/processes/{processId}/migrate
 
+NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by the PIM Add-on in {VERSION} see xref:#process-instance-migration-addon[Process Instance Migration APIs]
+
 [cols="1,1a"]
 |===
 |*Type* |POST
@@ -750,5 +736,219 @@ In {PRODUCT_SHORT}, the Process Svg Resource API endpoints can be used to obtain
    curl -X 'GET' \
   'http://localhost:8080/svg/processes/{processId}/instances/{processInstanceId}' \
   -H 'accept: */*'
+
+|===
+
+[#process-instance-migration-addon]
+== Process Instance Migration (PIM) APIs
+
+NOTE: This feature is available from version {VERSION_931}.
+
+The Process Instance (PIM) Add-on exposes a set of REST endpoints that enable you to:
+
+* manage the different migration plans uploaded to PIM
+* run process instance migrations with a given plan
+
+image::runtime-services-modeling/pim-swagger.png[Swagger UI showing {PRODUCT_SHORT} PIM Add-on, 300]
+
+
+===  /pim/plan
+
+[cols="1,1a"]
+|===
+|*Type* |POST
+
+|*Description* |Used to create a new migration plan to define how to migrate process instances from one process definition version (source) to another process definition version (target)
+
+|*Inputs* a|
+* sourceProcessId: String (ID of the process whose instances will be migrated)
+* sourceProcessVersion: String (version of the process whose instances will be migrated)
+* targetProcessId: String (ID of the process which the instances will be migrated to)
+* targetProcessVersion: String (version of the process which the instances will be migrated to)
+* nodeMapping: List (contains the mapping of nodes between both processes. Each mapping should contain a “sourceId” and “targetId” defining the node ID in the process BPMN definition respectively.)
+
+|*Output* a| Returns a summary with the results of the operation, including:
+
+* status: http status code of the response
+* message: message confirming plan creation or not
+* data: JSON object containing the detailed information about the plan creation. Fields it can contain:
+** plan: field containing the details of the created migration plan, only be present if the operation was successfully. Among other information related to the plan (source process, target process, mappings…) it contains important information like
+*** id: unique identifier of the plan, this id should be used when triggering a migration
+*** updatedAt: date when it was created
+** validation: contains the detail of the plan validation
+*** result: PASSED / FAILED
+*** errors: Collection of errors in the node mappings that caused the validation to fail
+*** warnings: Collection of warnings in the node mappings to make the user aware that, although the plan is functional, there are unusual situations in the mappings (nodes missing in target process, wrong mappings…). 
+
+|*Example* a|
+
+curl -X 'POST' \
+  'http://localhost:8080/pim/plan' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "sourceProcessId": "hiring",
+  "sourceProcessVersion": "1.0",
+  "targetProcessId": "hiring2",
+  "targetProcessVersion": "2.0",
+  "nodeMapping": [
+    {"sourceId": "_B8C4F63C-81AD-4291-9C1B-84967277EEF6", "targetId": "_CBB6BF5D-21DA-43D2-A20B-C361694AF7AE"},
+    {"sourceId": "_B4BB21C5-7BCA-47DA-A688-2F37BC6B76A7", "targetId": "_C7DBD2B3-1744-4844-8B3D-D23CAF9D2436"}
+  ]
+}'
+|===
+
+===  /pim/plan/{planID}
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |Obtain information about a specific migration plan.
+
+|*Inputs* a|
+* planId: String (Path parameter containing the plan ID)
+
+|*Output* a| Returns a JSON with the plan details, including:
+
+* sourceProcessId: String
+* sourceProcessVersion: String
+* targetProcessId: String
+* targetProcessVersion: String
+* nodeMapping: List
+
+|*Example* a|
+
+curl -X 'GET' \
+  'http://localhost:8080/pim/plan/edf634fb-0437-4f08-ab79-078efe6f5eaa' \
+  -H 'accept: */*'
+
+|===
+
+===  /pim/plan/{planID}
+
+[cols="1,1a"]
+|===
+|*Type* |DELETE
+
+|*Description* |Delete migration plans that are not being used in any migration.
+
+|*Inputs* a|
+* planId: String (Path parameter containing the plan ID)
+
+|*Output* a| Returns a JSON confirming the deletion of the plan:
+
+* timestamp: String
+* status: int
+* message: String (confirming successful deletion of plan)
+* data: String (showing ID of deleted plan)
+
+|*Example* a|
+
+curl -X 'DELETE' \
+  'http://localhost:8080/pim/plan/edf634fb-0437-4f08-ab79-078efe6f5eaa' \
+  -H 'accept: */*'
+
+|===
+
+===  /pim/plans
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |Obtain a list of migration plans available in the PIM Add-on (can be filtered by source and target processes).
+
+|*Inputs* a|
+* sourceProcessID: String (optional, sets the filter using a specific source Process ID)
+* targetProcessID: String (optional, sets the filter using a specific target Process ID)
+
+|*Output* a| Returns a JSON listing the migration plans in the PIM Add-on that match filters:
+
+* timestamp: String
+* status: int
+* message: String (confirming retrieval)
+* data: JSON object containing the detailed information on the plans that match the filters.
+
+|*Example* a|
+
+curl -X 'GET' \
+  'http://localhost:8080/pim/plans?sourceProcessId=hiring' \
+  -H 'accept: */*'
+
+|===
+
+===  /pim/migration
+
+This endpoint will execute the migration of the active Process Instances of a source process to a target process using the specified migration plan.  This endpoint also enables you to do a full migration (migrate all Process Instances) or migrate only a limited set of Process Instances (bulk migrate) by passing the process instances IDs in the request.
+
+To avoid issues on the database when performing a migration of a set of instances PIM limits the number of IDs that can be sent to the `POST /pim/migration` depending on the Database vendor. The limits are:
+
+* H2 → 50000 ids
+* PostgreSQL → 50000 ids
+* Oracle → 1000 ids
+* MS SQL Server → 2000 ids
+
+NOTE: This endpoint may require a varying amount of time to execute depending on the amount of processes instances to migrate, active tasks, jobs, and also the subsystems installed in the _Business Service_ (Data-Index, User Tasks, Storage). It is important to configure the application accordingly to avoid timeouts or issues during execution.
+
+[cols="1,1a"]
+|===
+|*Type* |POST
+
+|*Description* |Executes the migration of the active Process Instances of a source process to a target process using the specified migration plan..
+
+|*Inputs* a|
+The payload should be a JSON object containing the following fields:
+
+* planId: String (ID of the plan to use, the plan defines the source / target process to migrate and the node mapping between processes)
+* processInstanceIds: List (optional list containing the IDs of process instances to be migrated, if not provided all active process instances will be migrated) 
+
+|*Output* a| Returns a JSON object listing details of the execution of the migration plan, including:
+
+* migrationId: String (unique ID for the migration)
+* planId: String (ID of the plan used on the migration)
+* migratedProcessInstancesCount: int (number of Process Instances migrated)
+* skippedProcessInstanceIds: int (number of Process Instances that were not migrated, because the IDs provided in the processInstanceIds request payload did not exist or were not an instance of the source process)
+
+|*Example* a|
+
+curl -X 'POST' \
+  'http://localhost:8080/pim/migration' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "planId": "7c9b7673-d5da-4ad3-aab9-214ca9e72823"
+}'
+
+|===
+
+===  /pim/migration/process/{processInstanceId}
+
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* |This endpoint is a utility that returns the list of migrations associated with a given Process Instance
+
+|*Inputs* a|
+
+* processInstanceId: String (Path parameter with the instance of the Process Instance to be checked)
+
+|*Output* a| Returns a JSON object containing the list of migrations associated to the specified Process Instance. Each migration contains:
+
+* migrationId: String (ID of the migration in PIM)
+* processInstanceId: String (ID of migrated Process Instance)
+* createdAt: String (timestamp when the migration was initiated)
+* appliedAt: String (optional timestamp showing when the migration was applied by the runtime. Timestamps may slightly differ due to a two step process.
+
+|*Example* a|
+
+curl -X 'POST' \
+  'http://localhost:8080/pim/migration' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "planId": "7c9b7673-d5da-4ad3-aab9-214ca9e72823"
+}'
 
 |===

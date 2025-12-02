@@ -264,25 +264,23 @@ This means that from a single Management Console instance, it's possible to mana
 [#process-instance-migration-ui]
 == Process Instance Migration
 
-Process Instance Migration (PIM) is a feature that allows migrating process instances from a source process definition to a target process definition. BAMOE provides a dedicated UI built on top of the BAMOE Management Console to simplify the migration process.
+You can use the Process Instance Migration (PIM) functionality to  migrate Process Instances from a source process definition to a target process definition. To simplify the migration process, {PRODUCT_SHORT} includes a dedicated user interface, integrated in the {MANAGEMENT_CONSOLE}.
 
-Before proceeding, avoid having your system exposed to consumers when using the PIM feature, and only restore access once the migration finish executing. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Keep a database backup before migrating your Process Instances.
+It is recommended to carry out the migration of Process Instances on a duplicate of your production system to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Keep a database backup before migrating your Process Instances and only restore access once the migration has finished executing. 
 
-To use this feature, the following requirements must be met:
+To use this feature, you must:
 
-* The Business Service must include the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on] dependency in its `pom.xml`. If this dependency is missing, an error message will appear when attempting to use the PIM UI.
+* Include the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on] dependency in the `pom.xml` of your _Business Service_. If you try to open the PIM UI, you will see an error message stating that "{PRODUCT_SHORT} PIM Add on is missing".
 
-image::runtime-services-modeling/mgmt-console-pim-add-on-missing.png[Image of the PIM UI error without the BAMOE PIM Add-on, 600]
+* Select a specific _Business Service_ to be migrated as the PIM UI does not support multi-Business Service visualization. If you attempt to use PIM with multiple Business Services, you will be asked to select a specific _Business Service_.
 
-* The PIM UI does not support multi-Business Service visualization. If you attempt to use PIM with multiple Business Services, the view will redirect you to select a specific Business Service.
-
-Once these requirements are satisfied, you can access the PIM UI under Advanced in the BAMOE Management Console.
+Once these requirements are satisfied, you can access the PIM UI under `Advanced` in the {MANAGEMENT_CONSOLE}.
 
 image::runtime-services-modeling/mgmt-console-pim-nav.png[Image of the PIM nav item, 300]
 
 === PIM Plan List
 
-Clicking on the PIM item opens the PIM Plans page. Initially, this page will not contain any PIM Plans because they need to be created. PIM Plans are required to perform a Process Instance Migration. For more details on the PIM workflow, refer to the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
+Clicking `Process Instance Migration (PIM)` opens the `PIM Plans` page. Initially, this page is empty until you have created a PIM Plan. PIM Plans are required to perform a Process Instance Migration. For more details on the PIM workflow, refer to the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
 The image below shows a table with two already created PIM Plans.
 
 image::runtime-services-modeling/mgmt-console-pim-plan-list.png[Image of the PIM plan list page, 600]
@@ -295,7 +293,7 @@ The highlighted fields are:
 . Select the PIM plan.
 . Expand the PIM plan. Expansion is only possible if the PIM Plan contains a node mapping.
 . Execute the respective PIM plan. Clicking this will redirect you to the Execute PIM Plan page
-. Open addtional operations.
+. Open additional operations.
 
 === PIM Plan Creation
 
@@ -309,13 +307,13 @@ The highlighted fields are:
 . Node Mapping: Select nodes from the source and target process definitions that should be mapped. Validation will display warning messages if the source and target process definitions have different node IDs and they are not mapped. It is not strictly required to map all nodes, but warning messages will appear. User Tasks must have different node IDs, or an error will occur. For more details, refer to the xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
 . Source Process Definition SVG: Provides a visual representation of the source and process definitions.
 . Target Process Definition SVG: Provides a visual representation of the target process definitions.
-. The Create PIM Plan butto, by clicking on it a Summary dialog will be opened.
+. Create PIM Plan button: Clicking on this opens a Summary dialog.
 
-When you select the source and target process definitions, the corresponding node lists and SVG diagrams will be updated (if available in the Business Service). Selecting a node highlights it in the SVG diagram.
+When you select the source and target process definitions, the corresponding node lists and SVG diagrams will be updated (if available in the _Business Service_). Selecting a node highlights it in the SVG diagram.
 
 NOTE: Highlighting works only with SVGs generated using the new BPMN Editor.
 
-image::runtime-services-modeling/mgmt-console-pim-plan-create-filled.gif[GIF of the PIM create plan being filled, 600]
+image::runtime-services-modeling/mgmt-console-pim-plan-create-filled.gif[PIM Create Plan being filled, 600]
 
 After configuring the PIM Plan, click *Create PIM Plan*. A dialog will display a summary of the PIM Plan.
 
@@ -360,7 +358,7 @@ The highlighted sections are:
 To execute the PIM Plan we have two high-level filters:
 
 * **All Process Instances**: No limit; migrates all instances matching the PIM Plan.
-* **Select Process Instances**: Limited by your database and BAMOE Management Console configuration. By default, it can migrate up to 1,000 process instances per migration and a maximum of 50 migrations, totaling 50,000 process instances. To change these defaults, refer to xref:../installation/management-console.adoc#available-environment-variables[{MANAGEMENT_CONSOLE} Console Environment Variables].
+* **Select Process Instances**: Limited by your database and (MANAGEMENT_CONSOLE) configuration. By default, it can migrate up to 1,000 process instances per migration and a maximum of 50 migrations, totaling 50,000 process instances. To change these defaults, refer to xref:../installation/management-console.adoc#available-environment-variables[{MANAGEMENT_CONSOLE} Console Environment Variables].
 
 Clicking *Execute PIM Plan* opens the execution summary.
 
@@ -371,7 +369,7 @@ The summary includes:
 . The process and node mappings from the PIM Plan.
 . The chosen configuration.
 . The current number of Process Instances matching the PIM Plan.
-. Critical warning remembering about possible side effects: Avoid having your system exposed to consumers when executing a PIM Plan, and only restore access once the PIM Plan is finished executing. Executing a PIM Plan on a live system could result in errors, and even data corruption. Keep a database backup before executing a PIM Plan. For details, see xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
+. Critical warning reminding you of possible side effects: Avoid having your system exposed to consumers when executing a PIM Plan, and only restore access once the PIM Plan is finished executing. Executing a PIM Plan on a live system could result in errors, and data corruption. Keep a database backup before executing a PIM Plan. For details, see xref:../workflow/process-instance-migration-addon.adoc[BAMOE PIM Add-on].
 . The *Execute PIM Plan* execution button.
 
 Clicking *Execute PIM Plan* starts the migration. Duration depends on the number of instances. After completion, a success message displays the total number of migrated instances.
