@@ -62,7 +62,7 @@ To run the {MCP_SERVER}, complete the setup and launch the server image in a Doc
 docker run -it --rm \
   -p 8081:8080 \
   --name mcp-server \
-  -e MCP_SERVER_OPENAPI_URLS=<your-business=services-OpenAPIv3_path> \
+  -e MCP_SERVER_OPENAPI_URLS=<your_business_services_OpenAPIv3_path> \
   quay.io/bamoe/mcp-server:{IMAGE_VERSION}
 ----
 
@@ -70,7 +70,7 @@ At startup, the MCP Server parses all exposed {PRODUCT_SHORT} Business Services 
 
 Once running, the MCP Server begins serving requests from AI agents. Its internal state remains immutable, so any changes to the underlying _Business Services_ are not automatically reflected. To apply updates, you must restart the MCP Server. A recommended approach is to use a reverse proxy to manage the lifecycle and handle image immutability internally.
 
-Any MCP client can consume the {MCP_SERVER}, for example Goose, 5ire, LM Studio, and Claude Desktop, see xref:https://modelcontextprotocol.io/clients[List of applications that support MCP Servers] for more information on your particular MCP client. 
+Any MCP client can consume the {MCP_SERVER}, for example Goose, 5ire, LM Studio, and Claude Desktop, see xref:https://modelcontextprotocol.io/clients[List of possible MCP Clients] for more information on your particular MCP client. 
 
 The client configuration depends on the chosen MCP client, but typically the MCP Server is treated as an extension. To connect, provide the following details in the extension section of the MCP client:
 
@@ -86,7 +86,7 @@ One of the most useful aspects of the MCP Tools is their integration with AI age
 
 For example, an LLM can execute a DMN model to process a traffic violation scenario using the `TrafficViolation` decision model (`dmn-quarkus-example`). For example interactions, see the following figures:
 
-NOTE: Results may vary depending on the MCP client and LLM used, as different agents may interpret inputs or invoke tools differently. Any LLM that supports MCP Tools should produce similar results, though not all LLMs currently support them.
+NOTE: This example uses the Open Source version of Granite: granite4:latest LLM and Goose as the MCP-compatible client. Results may vary depending on the MCP client and LLM used, as different agents may interpret inputs or invoke tools differently. Open Source models may not fully support MCP specifications therefore we recommend using the latest versions of commercial LLMs in your production environment. 
 
 image::integrating-ai/traffic-violation-1.png[width=600]
 
@@ -94,7 +94,6 @@ image::integrating-ai/traffic-violation-2.png[width=600]
 
 The following example demonstrates BPMN model lifecycle management through LLM chat interaction. In this scenario, an agent starts, updates, and deletes a process instance based on the `Order.bpmn` model (`process-quarkus-example`). 
 
-NOTE: The setup uses Goose as the MCP-compatible client and Ollama with the `Granite-4.0-preview:tiny` model as the LLM.
 
 image::integrating-ai/lifecycle-management-through-LLM-1.png[width=600]
 
@@ -336,7 +335,7 @@ docker compose up
 ----
 
 == Consuming a secured {MCP_SERVER}
-After configuring the {MCP_SERVER}, your _Business Service_ with a Security layer, the following examples shows how the `MCP Inspector` (a NodeJS application that is an MCP-compatible client) provides a web application used to test, debug and consume the {MCP_SERVER}. Other MCP clients will support a process that may slightly differ from the one documented.
+After configuring the {MCP_SERVER}, your _Business Service_ with a Security layer, the following examples shows how the `MCP Inspector` (a NodeJS application that is an MCP client) provides a web application used to test, debug and consume the {MCP_SERVER}. Other MCP clients will support a process that may slightly differ from the one documented.
 
 . Launch your MCP client (`MCP Inspector`) by running the following command in your terminal:
 +
