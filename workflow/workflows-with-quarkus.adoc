@@ -304,15 +304,27 @@ quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/b
 
 ==== Transaction isolation settings for Microsoft SQL Server
 
-In order to ensure {PRODUCT_SHORT} is working properly when configured with a Microsoft SQL Server database, the following settings need to be applied at the database level:
+To ensure {PRODUCT_SHORT} works properly when configured with a Microsoft SQL Server database and to prevent deadlocks under load, you must enable snapshot isolation at both the database and application levels.
 
-[source,properties]
+.Database Setup
+Run the following SQL commands to enable snapshot isolation and row versioning:
+
+[source,sql]
 ----
     ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
     ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
 ----
 
-These settings are required to prevent database deadlocks when resources in {PRODUCT_SHORT} are accessed concurrently.
+.Application Configuration
+Configure the transaction isolation level at the connection level by adding the following property:
+
+[source,properties]
+----
+    quarkus.datasource.jdbc.new-connection-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+----
+
+NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
+
 
 === Configuring persistence for Oracle
 
