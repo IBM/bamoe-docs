@@ -35,6 +35,26 @@ The following table shows more detail on message events and the corresponding Ka
 |===
 |*Event Type* |*Published when* |*Kafka Topics* 
 
+|Start Message Event
+|When message is received on incoming channel to start Process Instance
+|Channel name configured in `mp.messaging.incoming.<channel-name>` (e.g., travelers)
+
+|Intermediate Message Throw Event
+|During process execution when the throw event node is reached
+|Channel name configured in `mp.messaging.outgoing.<channel-name>` (e.g., correlation)
+
+|Intermediate Message Catch Event
+|Process waits at this node until message is received on incoming channel
+|Channel name configured in `mp.messaging.incoming.<channel-name>` (e.g., customers)
+
+|End Message Event
+|When process instance completes and sends final message
+|Channel name configured in `mp.messaging.outgoing.<channel-name>` (e.g., processedtravelers)
+
+|Boundary Message Event
+|When message is received while attached task is active
+|Channel name configured in `mp.messaging.incoming.<channel-name>`
+
 |===
 
 // Correlation feature (although this is advanced and could also be linking to the process-event-driven example itself)

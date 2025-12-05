@@ -30,7 +30,7 @@ docker image ls
 +
 Container images created with Quarkus can be both JVM - or Native Executable - based.
 +
-* *b. Native Executable*: Follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/building-native-image[Building a Native Executable].
+*b. Native Executable*: Follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/building-native-image[Building a Native Executable].
 +
 For standard use-cases, run the following command:
 +
@@ -64,6 +64,15 @@ Your executable JAR will be on the `target/` directory and you can execute it wi
 java -jar target/quarkus-app/quarkus-run.jar
 ----
 
+=== Building containers for Linux s390x on IBM Z platform
+If you are building container versions destined to be run on Linux s390x running on IBM Z you will need to specify the type of build-platform to use. This varies depending on the underlying Container Image extension that is being used:
+
+Jlib:: set `quarkus.jib.platforms=linux/s390x`
+
+Docker:: set `quarkus.docker.buildx.platform=linux/s390x`
+
+Podman:: set `quarkus.podman.platform=linux/s390x`
+
 == Spring Boot
 
 Standard Maven or Java commands are required to package and start the generated application:
@@ -79,20 +88,3 @@ mvn clean package
 java -jar ./target/(name_of_the_application).jar
 ----
 
-== Building Containers that run on OpenShift on Linux on z/OS
-You can build your _Business Services_ to run on Openshift running on an IBM z/OS cluster supporting s390x. A set of deliverables are included in the {PRODUCT_SHORT} distribution to enable you to install {PRODUCT_SHORT} components and develop your _Business Services_ that will run on the IBM z/OS s390x Linux platform. 
-
-To facilitate development specific s390x images (named `...-s390x.tar.gz`) are provided for the following packages:
-
-* {CANVAS}
-* {EXT_SERVICES}
-* {CORS_PROXY}
-* {MANAGEMENT_CONSOLE}
-* {MVN_REPO}
-* {QUARKUS_DEV_UI}
-* {DATA_CLEANUP}
-* {MCP_SERVER}
-
-The host machine architecture is automatically resolved when you pull the {PRODUCT_SHORT} container images.
-
-If you want to pull a specific platform image you can use the `—platform` flag in your `docker pull` command. 

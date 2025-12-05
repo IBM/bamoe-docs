@@ -21,7 +21,7 @@ Use the following methods to deploy the  business application on OpenShift:
 
 === Build and Deploy on OpenShift
 
-The application use a UBI OpenJDK base image from Red Hat, usually `registry.access.redhat.com/ubi9/openjdk-17`, and add the compiled files from the Quarkus project to it before creating a Deployment.
+The application uses a UBI OpenJDK base image from Red Hat, usually `registry.access.redhat.com/ubi9/openjdk-17`, and add the compiled files from the Quarkus project to it before creating a Deployment.
 
 To build and deploy the application directly on OpenShift, follow these steps:
 
@@ -59,6 +59,14 @@ For information on {PRODUCT_SHORT} licensing requirements see xref:../installati
 ----
 mvn install -Dquarkus.openshift.deploy=true
 ----
+
+[#openshift-on-z]
+==== Building and Deploying on Open Shift on IBM Z platform
+If you are working on Linux s390x on the IBM Z platform, you will have to override the `quarkus.docker.buildx.platform`` property, setting it to `linux/s390x`.
+
+In addition `quarkus-openshift` extension uses a default image `groundnuty/k8s-wait-for:no-root-v1.7` that can be overridden with `env` property `quarkus.openshift.init-task-defaults.wait-for-container.image`. This image does not have `s390x` based images published into http://quay.io. 
+
+To use this extension, you need to use a custom wait-for container image that is built for s390x architecture, see https://quarkus.io/guides/init-tasks#using-a-custom-wait-for-container-image[Quarkus Guides → Using a custom wait-for container image].
 
 === Build Locally with Docker and Automatically Deploy on OpenShift
 
