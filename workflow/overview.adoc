@@ -1,4 +1,4 @@
-= Overview of stateful Workflows with Compact Architecture
+= Stateful Workflows with Compact Architecture
 
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
@@ -7,7 +7,7 @@ You can use {PRODUCT_SHORT} to develop stateful Workflow services using Business
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
 
-The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on BAMOE. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
+The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on {PRODUCT_SHORT}. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
 == Components of Compact Architecture
 The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful Workflows.
@@ -75,7 +75,6 @@ image::jobs-service-overview.png[]
 
 [#user-tasks]
 == The User Tasks subsystem
-
 In Workflows built with BPMN, `User Task` is a special type of activity that cannot be automatically executed by the workflow engine, requiring the
 manual intervention of a user. When a process instance reaches a `User Task` node, a new User Task is created and the process
 instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
@@ -89,17 +88,35 @@ The User Tasks subsystem provides the following features:
 * Generic set of REST API endpoints to interact with it, enabling users to transition User Tasks between the different lifecycle phases,
 modify User Task data (inputs and outputs), add comments and attachments to User Tasks.
 * Customizable *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase.
-* Customizable User Task life cycle
+* Customizable User Task lifecycle
+
+You can choose between the three options for the User Task lifecycle inside your process:
+
+* The default User Task lifecycle (Kogito), see xref:#kogito-task-lifecycle[The Kogito User Task Lifecycle]
+* The Human Task lifecycle (WS-Human Task Standard), see xref:#human-task-lifecycle[The Human Task Lifecycle]
+* A custom lifecycle, see xref:xxxxx
+ 
+You can override the default lifecycle using the following property to select the User Task Lifecycle implementation you require:
+
+[source,properties]
+----
+kogito.usertasks.lifecycle=ws-human-task
+----
+
+If a custom User Task lifecycle implementation is provided in your _Business Service_, it takes precedence over the property and will be automatically selected as the default User Task life cycle irrespective of the property.
+
+If no custom lifecycle implementation is provided and the property is `kogito` or `ws-human-task`, then the corresponding lifecycle will be selected.
 
 See the associated xref:user-tasks.html[User Tasks API]
 
-=== The User Task life cycle
+[#kogito-task-lifecycle]
+=== The Default User Task life cycle
 
 The User Tasks subsystem defines a Default life cycle that enables users to transition a task through different phases that will change
 the task state until it reaches a `Completion` state, allowing the associated process instance to continue executing.
 
 .Default User Task life cycle
-image::../images/wf-usertaks-lifecycle.png[]
+image::wf-usertaks-lifecycle.png[]
 
 With the Default life cycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment, it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users that are allowed to work with it.
 
@@ -107,11 +124,44 @@ The task will then remain in *Ready* state until a user claims it, which will ma
 
 With the task *Reserved*, the owner will be able to complete the task (`Complete` phase) that will finally move the task to a *Completed* that will successfully finalize the task allowing the process instance to continue.
 
-User Tasks in *Ready* or *Reserved* state, are can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
+User Tasks in *Ready* or *Reserved* state, can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
 
-Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, that will make the task terminate in a *Error* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
+Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, which causes the task to terminate in a *Error* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
 
 NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
+
+[#human-task-lifecycle]
+=== The Human Task Lifecycle
+An alternative User Task lifecycle is available in {PRODUCT_SHORT}, that adheres to the xref:https://docs.oasis-open.org/bpel4people/ws-humantask-1.1-spec-cs-01.html[WS-HumanTask standard] section 4.10 "Human Task Behavior and State Transitions".
+
+.The Human Task life cycle
+image::workflow/ws-humantask-lifecycle.png[]
+
+NOTE: The Human Task adheres to the WS-HumanTask standard with the exception of the `suspendUntil` event. 
+
+With the Human Task life cycle, a Task is initiated in a *Created* state. 
+
+Task creation succeeds irrespective of whether the people assignment returns a set of values or an empty set. 
+
+If potential owners were not assigned automatically during task creation then they MUST be assigned explicitly using nomination, which is performed by the business administrator of the task. The result of evaluating potential owners removes the excluded owners from results. The task remains in the state *Created* until it is activated and has potential owners.
+
+When the task has a single potential owner, it transitions into the *Reserved* state, indicating that it is assigned to a single actual owner. If the task has multiple potential owners, it transitions into the *Ready* state, indicating that it can be claimed by one of its potential owners. Once a potential owner claims the task, it transitions into the *Reserved* state, and the potential owner becomes the actual owner.
+
+Once work is started on a task that is in state *Ready* or *Reserved*, it goes into the *InProgress* state, indicating that it is being worked on – if the transition is directly from *Ready*, the user starting the work becomes the actual owner of the task.
+
+On successful completion of the work, the task transitions into the *Completed* final state. On unsuccessful completion of the work, the task transitions into the *Failed* final state.
+
+The current actual owner of a human task can release a task to make it available again for all potential owners. A task can be released from active states that have an actual owner (*Reserved*, *InProgress*), transitioning it into the *Ready* state. Business data associated with the task (intermediate result data, ad-hoc attachments and comments) is kept.
+
+A task that is currently *InProgress* can be stopped by the actual owner, transitioning it into state *Reserved*. Business data associated with the task as well as its actual owner is kept.
+
+A potential owner, actual owner or business administrator can delegate a task to another user, making that user the actual owner of the task, and also adding them to the list of potential owners if they are not in the list. A task can be delegated when it is in an active state (*Ready*, *Reserved*, *InProgress*), and transitions the task into the *Reserved* state. Business data associated with the task is kept.
+
+Similarly, the potential owners, actual owner or business administrator of a task can forward an active task to another person or set of people, replacing themselves by the people in the list of potential owners. Potential owners can only forward tasks that are in the *Ready* state. Forwarding is only possible if the task has a set of individually assigned potential owners. It is not possible when the potential owners of the task are assigned using one or many groups. 
+
+If the task is in the *Reserved* or *InProgress* state then the task is implicitly released first, that is, the task is transitioned into the *Ready* state. Business data associated with the task is kept. The user performing the forward is removed from the set of potential owners of the task, and the person who the task is forwarded to, is added to the set of potential owners.
+
+A task can be skipped, if it is marked as skippable and it moves to *Obsolete* final state. A task can also be moved to *Error* or *Exited* final states as required.
 
 == Getting started
 
