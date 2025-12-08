@@ -19,3 +19,65 @@ User Tasks complete their entire lifecycle with the lifecycle implementation the
 When migrating from kogito to ws-human-task lifecycle, the active usertasks will continue to complete their lifecycle with kogito, provided there is no custom lifecycle and the new ones would start using ws-human-task. 
 
 When migrating from a custom usertask lifecycle to kogito or ws-human-task lifecycles, the active tasks can continue with the custom lifecycle as long as they are present in the business service application and the new ones would start with the selected lifecycle.
+
+[#migration-PIM]
+== Migrating active process instances using the Process Instance Migration API
+Use this tool to enable process instances to migrate to newer versions of its PDs, or even entirely different PDs. By mapping the original PD nodes to newer PD nodes, PIs can transition to the new sequence flow and stop being attached to its originating PD.
+
+BAMOE PIM Add-on underpins the UI available in the BAMOE Management Console. 
+
+The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
+
+The advantage of using this utility is that it:
+
+* _Preserves state_: During migration, process or task variables remain unchanged.
+
+* _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
+
+* _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
+
+* _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
+
+Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
+
+Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
+
+`POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
+
+`POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
+
+=== Starting and stopping processes
+You can use the following `curl` command to start a process:
+
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
+----
+
+You can use the following `curl` command to stop a process:
+
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
+----
+
+=== Example
+Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
+
+[source,shell]
+----
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
+{
+  "targetProcessId": <targetProcessId>
+  "targetProcessVersion": <targetProcessVersion>
+}    
+----
+Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
+
+[source,shell]
+----
+{
+   "message":"All instances migrated",
+   "numberOfProcessInstanceMigrated":1
+}
+----
