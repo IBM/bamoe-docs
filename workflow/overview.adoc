@@ -5,7 +5,7 @@ include::../styles/images.adoc[]
 
 You can use {PRODUCT_SHORT} to develop stateful Workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Service projects for deployment and execution. 
 
-Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN workflows that you implement.  
+Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN Workflows that you implement.  
 
 The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on {PRODUCT_SHORT}. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
@@ -45,7 +45,7 @@ For more information on the subsystems: *Data-Index*, *Data-Audit*, *Jobs Servic
 
 [#data-index]
 == The Data-Index subsystem
-The Data-Index subsystem is used to store a snapshot of the latest state of the process instance and allows it to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
+The Data-Index subsystem is used to store a snapshot of the latest state of the Process Instance and allows it to be queried. The Workflow Engine sends diff events and Data-Index computes the last state by merging current data with the diff event data.
 
 .Graphical view of the Data-Index subsystem
 image::data-index.png[]
@@ -76,8 +76,7 @@ image::jobs-service-overview.png[]
 [#user-tasks]
 == The User Tasks subsystem
 In Workflows built with BPMN, `User Task` is a special type of activity that cannot be automatically executed by the workflow engine, requiring the
-manual intervention of a user. When a process instance reaches a `User Task` node, a new User Task is created and the process
-instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
+manual intervention of a user. When a Process Instance reaches a `User Task` node, a new User Task is created and the Process Instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
 
 The User Tasks subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
 tasks through the different phases of their life cycle until they reach a **Completed** state.
@@ -87,33 +86,32 @@ The User Tasks subsystem provides the following features:
 * Runs as a collocated service in the Workflow Engine with no extra configuration required in the application.
 * Generic set of REST API endpoints to interact with it, enabling users to transition User Tasks between the different lifecycle phases,
 modify User Task data (inputs and outputs), add comments and attachments to User Tasks.
-* Customizable *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase.
-* Customizable User Task lifecycle
 
-You can choose between the three options for the User Task lifecycle inside your process:
+You can choose between the two options for the User Task lifecycle inside your process:
 
 * The default User Task lifecycle (Kogito), see xref:#kogito-task-lifecycle[The Kogito User Task Lifecycle]
 * The Human Task lifecycle (WS-Human Task Standard), see xref:#human-task-lifecycle[The Human Task Lifecycle]
-* A custom lifecycle, see xref:xxxxx
  
-You can override the default lifecycle using the following property to select the User Task Lifecycle implementation you require:
+You can override the default lifecycle using the following property to select the Human Task Lifecycle implementation if required:
 
 [source,properties]
 ----
 kogito.usertasks.lifecycle=ws-human-task
 ----
 
+////
+Custom User Task lifecycles are not supported in this version. 
 If a custom User Task lifecycle implementation is provided in your _Business Service_, it takes precedence over the property and will be automatically selected as the default User Task life cycle irrespective of the property.
-
 If no custom lifecycle implementation is provided and the property is `kogito` or `ws-human-task`, then the corresponding lifecycle will be selected.
+////
 
 See the associated xref:user-tasks.html[User Tasks API]
 
 [#kogito-task-lifecycle]
-=== The Default User Task life cycle
+=== The Default Kogito User Task life cycle
 
 The User Tasks subsystem defines a Default life cycle that enables users to transition a task through different phases that will change
-the task state until it reaches a `Completion` state, allowing the associated process instance to continue executing.
+the task state until it reaches a `Completion` state, allowing the associated Process Instance to continue executing. The Default lifecycle also enables you to customize the *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase (see xref:authoring-workflows.adoc#user-task-assignment[Configuring User Task assignment strategies]).
 
 .Default User Task life cycle
 image::wf-usertaks-lifecycle.png[]
@@ -122,7 +120,7 @@ With the Default life cycle, when a User Task is initiated in the User Task Subs
 
 The task will then remain in *Ready* state until a user claims it, which will make the task pass through the `Claim` phase making the move into a *Reserved* state and the user will become the owner of the task.
 
-With the task *Reserved*, the owner will be able to complete the task (`Complete` phase) that will finally move the task to a *Completed* that will successfully finalize the task allowing the process instance to continue.
+With the task *Reserved*, the owner will be able to complete the task (`Complete` phase) that will finally move the task to a *Completed* that will successfully finalize the task allowing the Process Instance to continue.
 
 User Tasks in *Ready* or *Reserved* state, can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
 
@@ -131,19 +129,19 @@ Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fai
 NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
 
 [#human-task-lifecycle]
-=== The Human Task Lifecycle
+=== The WS-Human Task Lifecycle
 An alternative User Task lifecycle is available in {PRODUCT_SHORT}, that adheres to the xref:https://docs.oasis-open.org/bpel4people/ws-humantask-1.1-spec-cs-01.html[WS-HumanTask standard] section 4.10 "Human Task Behavior and State Transitions".
 
-.The Human Task life cycle
+.The WS-Human Task life cycle
 image::workflow/ws-humantask-lifecycle.png[]
 
-NOTE: The Human Task adheres to the WS-HumanTask standard with the exception of the `suspendUntil` event. 
+NOTE: The Human Task life cycle adheres to the WS-HumanTask standard with the exception of the `suspendUntil` event which is not supported. 
 
 With the Human Task life cycle, a Task is initiated in a *Created* state. 
 
 Task creation succeeds irrespective of whether the people assignment returns a set of values or an empty set. 
 
-If potential owners were not assigned automatically during task creation then they MUST be assigned explicitly using nomination, which is performed by the business administrator of the task. The result of evaluating potential owners removes the excluded owners from results. The task remains in the state *Created* until it is activated and has potential owners.
+If potential owners were not assigned automatically during task creation then they must be assigned explicitly using nomination, which is performed by the business administrator of the task. The result of evaluating potential owners removes the excluded owners from results. The task remains in the state *Created* until it is activated and has potential owners.
 
 When the task has a single potential owner, it transitions into the *Reserved* state, indicating that it is assigned to a single actual owner. If the task has multiple potential owners, it transitions into the *Ready* state, indicating that it can be claimed by one of its potential owners. Once a potential owner claims the task, it transitions into the *Reserved* state, and the potential owner becomes the actual owner.
 
@@ -162,6 +160,12 @@ Similarly, the potential owners, actual owner or business administrator of a tas
 If the task is in the *Reserved* or *InProgress* state then the task is implicitly released first, that is, the task is transitioned into the *Ready* state. Business data associated with the task is kept. The user performing the forward is removed from the set of potential owners of the task, and the person who the task is forwarded to, is added to the set of potential owners.
 
 A task can be skipped, if it is marked as skippable and it moves to *Obsolete* final state. A task can also be moved to *Error* or *Exited* final states as required.
+
+=== Switching your _Business Service_ to a different User Task Lifecycle
+
+A User Task completes its entire lifecycle with the implementation they were started with. It is not possible to migrate a Process Instance to an alternative User Task Lifecycle while it is running. 
+
+If you make changes in the configuration of your _Business Service_ with workflow(s) to use WS-Human Task lifecycle, all active User Tasks will continue to complete their lifecycle with the default Kogito User Task lifecycle. Only user tasks created with the updated _Business Service_ would start using WS-Human task lifecycle.  
 
 == Getting started
 
