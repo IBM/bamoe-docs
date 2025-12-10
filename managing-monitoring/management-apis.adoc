@@ -1,10 +1,11 @@
 = The Management APIs
 include::../partials/attributes.adoc[]
 
-In {PRODUCT_SHORT}, Management APIs are provided to interact with business Process Definitions and active Process Instances. These APIs enable you to obtain metadata information about Process Definitions, as well as provide management endpoints for active Process Instances.
+In {PRODUCT_SHORT}, Management APIs are provided to interact with Process Definitions and active Process and Task Instances. These APIs enable you to obtain metadata information about Process Definitions, as well as provide management endpoints for active Process or Task Instances.
+
 [#management-api]
 == Process Management API
-The `kie-addons-quarkus-process-management` is an extension for {PRODUCT_SHORT} that enables process management features for business workflows in a Quarkus-based microservice architecture.
+The `kie-addons-quarkus-process-management` is an extension for {PRODUCT_SHORT} that enables Process Management features for _Business Services_ with workflow(s) in a Quarkus-based microservice architecture.
 
 [source,xml]
 ----
@@ -14,7 +15,7 @@ The `kie-addons-quarkus-process-management` is an extension for {PRODUCT_SHORT} 
 </dependency>
 ----
 
-With the Process Management API endpoints, it’s possible to operate with the following Entities:
+With the Process Management API endpoints, you can operate with the following Entities:
 
 * Processes (GET, POST, DELETE)
 * ProcessInstance (GET)
@@ -26,7 +27,26 @@ The following sections describe the Process Management API in detail.
 
 ===  /management/processes
 
-|*Table* |*Description*
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* | This endpoint returns the list of Process Definition names that are deployed in the runtime.
+
+|*Inputs* |
+
+|*Output* a| A JSON list of Process Definition names that are deployed in the runtime.
+
+* processName: String
+
+|*Example* |
+
+  curl -X 'GET' \
+  'http://localhost:8080/management/processes' \
+  -H 'accept: */*'
+
+|===
+
 
 ===  /management/processes/{processId}
 
@@ -178,8 +198,6 @@ NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by 
 * results :  Map++<++String, Object++>++
 * workItemHandlerName : String
 * externalReferenceId : String
-
-
 * A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
 * A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
 
@@ -210,7 +228,6 @@ NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by 
 * A _NodeInstanceNotFoundException_ is returned if the mentioned node instance id is not found.
 * A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
 * A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
-
 
 |*Example* |
 
@@ -301,7 +318,6 @@ NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by 
 * nodeInstanceId : String
 * timerId: String
 * description : String
-
 
 * A _BAD REQUEST_ error is returned if nodeInstanceId, processId or processInstanceId is missing in the request.
 * A _NOT FOUND_ error is returned if nodeInstanceId, processId or processInstanceId is not found.
@@ -454,7 +470,6 @@ NOTE: This API only applies in {PRODUCT_SHORT} {VERSION_930}. It is replaced by 
 * timerId: String
 * description : String
 
-
 * A _BAD REQUEST_ error is returned if processId or processInstanceId is missing in the request.
 * A _NOT FOUND_ error is returned if processId or processInstanceId is not found.
 
@@ -532,6 +547,197 @@ Below details will be included.
 'http://localhost:8080/management/processes/{processId}/nodes' \
 -H 'accept: */*'
 
+|===
+
+[#task-management-api]
+== Task Management API
+The `jbpm-addons-quarkus-task-management` and `jbpm-addons-springboot-task-management` are extensions for {PRODUCT_SHORT} that enable Task Management features for _Business Services_ with workflows in a Quarkus-based or Spring Boot based microservice architecture respectively (see )
+
+To enable the Task Management API in Quarkus-based services include this dependency:
+
+[source, xml]
+----
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-addons-quarkus-task-management</artifactId>
+</dependency>
+----
+
+To enable the Task Management API in Spring Boot-based services include this dependency:
+
+[source, xml]
+----
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-addons-springboot-task-management</artifactId>
+</dependency>
+----
+
+With the Task Management API endpoint, it’s possible to operate with the following Entity:
+
+UserTask(GET, POST, PATCH)
+
+The following sections describe the Task Management API in detail.
+
+
+===  /management/usertasks/{taskId}
+[cols="1,1a"]
+|===
+|*Type* |GET
+
+|*Description* | This endpoint returns specified a view of User Task instance with basic information
+
+|*Inputs* a| 
+* taskId : String (PathParameter)
+* group : List<String> (QuerryParameter)
+* user : String (QuerryParameter) 
+
+|*Output* a| Information about requested Task represented by TaskInfo. It includes following details:
+
+TaskInfo
+
+* description : String
+* priority : String
+* potentialUsers : List<String>
+* potentialGroups : List<String>
+* excludedUsers : List<String>
+* adminUsers : List<String>
+* adminGroups : List<String>
+* inputParams : Map<String, Object>
+* A _BAD REQUEST_ error is returned if taskId is missing in the request.
+* A _NOT FOUND_ error is returned if taskId is not found.
+
+|*Example* |
+
+ curl -X 'GET' \
+  'http://localhost:8080/management/usertasks/{taskId}?group={group[1]}&group{group[2]}&user={user}' \
+  -H 'accept: application/json'
+
+|===
+
+===  /management/usertasks/{taskId}
+[cols="1,1a"]
+|===
+|*Type* |PUT
+
+|*Description* | This endpoint updates specified User Task instance with new values (all values will be overwritten)
+
+|*Inputs* a| 
+* taskId : String (PathParameter)
+* group : List<String> (QuerryParameter)
+* user : String (QuerryParameter) 
+* taskInfo: a JSON object that contains:
+** description : String
+** priority : String
+** potentialUsers : List<String>
+** potentialGroups : List<String>
+** excludedUsers : List<String>
+** adminUsers : List<String>
+** adminGroups : List<String>
+** inputParams : Map<String, Object>
+
+|*Output* a| 
+* An _OK_ is returned if update was successful
+* A _BAD REQUEST_ error is returned if taskId is missing in the request.
+* A _NOT FOUND_ error is returned if taskId is not found.
+* A _FORBIDDEN_ error is returned if user  doesn’t have necessary permission (must be owner of the task, admin, or a member of an admin group)
+
+|*Example* a|
+ curl -X 'PUT' \
+  'http://localhost:8080/management/usertasks/{taskId}?group={group[1]}&group{group[2]}&user={user}' \
+  -H 'accept: application/json'  -H 'Content-Type: application/json' \
+  -d '{
+  "description": "string",
+  "priority": "string",
+  "potentialUsers": [
+    "string"
+  ],
+  "potentialGroups": [
+    "string"
+  ],
+  "excludedUsers": [
+    "string"
+  ],
+  "adminUsers": [
+    "string"
+  ],
+  "adminGroups": [
+    "string"
+  ],
+  "inputParams": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  }
+
+}'
+|===
+
+===  /management/usertasks/{taskId}
+[cols="1,1a"]
+|===
+|*Type* |PATCH
+
+|*Description* | This endpoint partially updates specified User Task instance with new values
+
+|*Inputs* a| 
+* taskId : String (PathParameter)
+* group : List<String> (QueryParameter)
+* user : String (QueryParameter) 
+* taskInfo : a JSON object that contains:
+** description : String
+** priority : String
+** potentialUsers : List<String>
+** potentialGroups : List<String>
+** excludedUsers : List<String>
+** adminUsers : List<String>
+** adminGroups : List<String>
+** inputParams : Map<String, Object>
+
+|*Output* a| Information about requested Task represented by taskInfo. It includes following details:
+
+TaskInfo
+
+* description : String
+* priority : String
+* potentialUsers : List<String>
+* potentialGroups : List<String>
+* excludedUsers : List<String>
+* adminUsers : List<String>
+* adminGroups : List<String>
+* inputParams : Map<String, Object>
+* A _BAD REQUEST_ error is returned if taskId is missing in the request.
+* A _NOT FOUND_ error is returned if taskId is not found.
+* A _FORBIDDEN_ error is returned if user  doesn’t have necessary permission (must be owner of the task, admin, or a member of an admin group)
+
+|*Example* a|
+ curl -X 'PATCH' \
+  'http://localhost:8080/management/usertasks/{taskId}?group={group[1]}&group{group[2]}&user={user}' \
+  -H 'accept: application/json'  -H 'Content-Type: application/json' \
+  -d '{
+  "description": "string",
+  "priority": "string",
+  "potentialUsers": [
+    "string"
+  ],
+  "potentialGroups": [
+    "string"
+  ],
+  "excludedUsers": [
+    "string"
+  ],
+  "adminUsers": [
+    "string"
+  ],
+  "adminGroups": [
+    "string"
+  ],
+  "inputParams": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  }
+}'
 |===
 
 == Callback Jobs Service Management API
