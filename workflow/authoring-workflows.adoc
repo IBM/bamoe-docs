@@ -420,6 +420,77 @@ A dedicated dialog can be displayed through the Correlations toggle button. See 
 .Correlation dialog
 image::workflow/correlations-bmpn-dialog.png[width=360]
 
+Correlation ensures messages are routed only to process instances that match specific criteria based on message content.
+
+=== How Correlation Works at Runtime
+
+Correlation uses three BPMN components to route messages to the correct process instance:
+
+. *Correlation Property* - Defines which field to extract from the message
++
+Example: `<bpmn2:messagePath>id</bpmn2:messagePath>` extracts the `id` field
+
+. *Correlation Key* - Groups correlation properties as a unique identifier
++
+Example: `<bpmn2:correlationKey id="CorrelationKeyId">` references the property above
+
+. *Correlation Subscription* - Defines the expected value for matching
++
+Example: `<bpmn2:dataPath>"1"</bpmn2:dataPath>` means only match if `id = "1"`
+
+*Runtime Behavior*: When a message arrives, the engine:
+
+* Extracts the correlation property value (e.g., `id` field from message)
+* Checks if any process instance expects that specific value
+* Delivers the message only to matching instances
+* Discards messages with no match
+
+=== Complete BPMN Configuration
+
+See the full correlation configuration in `bamoe-examples/process-event-driven/hotels/src/main/resources/hotel.bpmn`:
+
+[source,xml]
+----
+<bpmn2:itemDefinition id="CorrelationPropertyId_Type" structureRef="String" />
+<bpmn2:correlationProperty id="CorrelationPropertyId" name="Correlation Property 1" type="CorrelationPropertyId_Type">
+  <bpmn2:correlationPropertyRetrievalExpression
+    id="_01E88DC7-3BDD-48E3-BCF9-39AD0772B2AB"
+    messageRef="_GlqmEIpdED2dBNv7eRNehQ"
+  >
+    <bpmn2:messagePath
+      id="_F1B5A911-766C-4E07-932E-A7C9BC825274"
+      evaluatesToTypeRef="_6404189C-98F1-471A-899F-4A66C9E9BB0E"
+      language="java"
+    >id</bpmn2:messagePath>
+  </bpmn2:correlationPropertyRetrievalExpression>
+</bpmn2:correlationProperty>
+
+<bpmn2:correlationKey id="CorrelationKeyId" name="Correlation Key Name">
+  <bpmn2:correlationPropertyRef>CorrelationPropertyId</bpmn2:correlationPropertyRef>
+</bpmn2:correlationKey>
+----
+
+=== Configuration in application.properties
+
+The following properties are required to configure messaging channels for correlation:
+
+[source,properties]
+----
+# Kafka broker URL
+kafka.bootstrap.servers=localhost:9092
+
+# Incoming channel (for Start/Catch/Boundary events)
+mp.messaging.incoming.<channel-name>.connector=smallrye-kafka
+mp.messaging.incoming.<channel-name>.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+mp.messaging.incoming.<channel-name>.auto.offset.reset=earliest
+
+# Outgoing channel (for Throw/End events)
+mp.messaging.outgoing.<channel-name>.connector=smallrye-kafka
+mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+
+
 [#custom-wih]
 == Creating a custom WorkItemHandler
 A Work Item represents a task or activity in a workflow that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing you to plug in custom code to meet specific business requirements not covered by built-in functionality.
