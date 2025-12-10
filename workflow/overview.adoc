@@ -89,10 +89,10 @@ modify User Task data (inputs and outputs), add comments and attachments to User
 
 You can choose between the two options for the User Task lifecycle inside your process:
 
-* The default User Task lifecycle (Kogito), see xref:#kogito-task-lifecycle[The Kogito User Task Lifecycle]
-* The Human Task lifecycle (WS-Human Task Standard), see xref:#human-task-lifecycle[The Human Task Lifecycle]
+* xref:#kogito-task-lifecycle[The Kogito User Task Lifecycle (default)]
+* xref:#human-task-lifecycle[The WS-Human Task Standard Lifecycle]
  
-You can override the default lifecycle using the following property to select the Human Task Lifecycle implementation if required:
+You can override the default lifecycle using the following property to select the WS-Human Task Lifecycle implementation if required:
 
 [source,properties]
 ----
@@ -155,9 +155,9 @@ A task that is currently *InProgress* can be stopped by the actual owner, transi
 
 A potential owner, actual owner or business administrator can delegate a task to another user, making that user the actual owner of the task, and also adding them to the list of potential owners if they are not in the list. A task can be delegated when it is in an active state (*Ready*, *Reserved*, *InProgress*), and transitions the task into the *Reserved* state. Business data associated with the task is kept.
 
-Similarly, the potential owners, actual owner or business administrator of a task can forward an active task to another person or set of people, replacing themselves by the people in the list of potential owners. Potential owners can only forward tasks that are in the *Ready* state. Forwarding is only possible if the task has a set of individually assigned potential owners. It is not possible when the potential owners of the task are assigned using one or many groups. 
+Similarly, the potential owners, actual owner or business administrator of a task can forward an active task to another person or set of people, replacing themselves by the people in the list of potential owners. Potential owners can only forward tasks that are in the *Ready* state. Forwarding is only possible if the task has a set of individually assigned potential owners. It is not possible when the potential owners of the task are assigned using one or many groups. If the task is in the *Reserved* or *InProgress* state then the task is implicitly released first, that is, the task is transitioned into the *Ready* state. Business data associated with the task is kept. The user performing the forward is removed from the set of potential owners of the task, and the person who the task is forwarded to, is added to the set of potential owners.
 
-If the task is in the *Reserved* or *InProgress* state then the task is implicitly released first, that is, the task is transitioned into the *Ready* state. Business data associated with the task is kept. The user performing the forward is removed from the set of potential owners of the task, and the person who the task is forwarded to, is added to the set of potential owners.
+A task can be temporarily suspended transitioning into a *Suspended* state where the task cannot be acted upon. The task can continue its lifecycle only when the task is resumed from the *Suspended* state back to its previous state. Suspend and Resume transitions are allowed for tasks in states *Ready*, *Reserved* or *InProgress*.
 
 A task can be skipped, if it is marked as skippable and it moves to *Obsolete* final state. A task can also be moved to *Error* or *Exited* final states as required.
 
@@ -165,7 +165,7 @@ A task can be skipped, if it is marked as skippable and it moves to *Obsolete* f
 
 A User Task completes its entire lifecycle with the implementation they were started with. It is not possible to migrate a Process Instance to an alternative User Task Lifecycle while it is running. 
 
-If you make changes in the configuration of your _Business Service_ with workflow(s) to use WS-Human Task lifecycle, all active User Tasks will continue to complete their lifecycle with the default Kogito User Task lifecycle. Only user tasks created with the updated _Business Service_ would start using WS-Human task lifecycle.  
+If you change the configuration of your _Business Service_to use the WS-Human Task lifecycle, all active User Tasks will complete their lifecycle with the default Kogito User Task lifecycle. New tasks would start using WS-Human Task lifecycle.
 
 == Getting started
 
