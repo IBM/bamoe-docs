@@ -81,7 +81,7 @@ Below table compares the differences between BAMOE v8 KIE Server and BAMOE v9 cl
 
 == Management interfaces
 
-Both BAMOE v8 and v9 provide tools to manage and monitor process instances, user tasks, and jobs running within Business Services. In BAMOE v8, these capabilities are integrated into Business Central, offering a unified interface for both authoring and runtime management. In contrast, BAMOE v9 separates these concerns, providing runtime management through the xref:../runtime-services-modeling/consoles.adoc[BAMOE Management Console], a lightweight web interface designed to interact with backend services such as the Data-Index, Jobs Service, and User Tasks.
+Both BAMOE v8 and v9 provide tools to manage and monitor process instances, user tasks, and jobs running within Business Services. In BAMOE v8, these capabilities are integrated into Business Central, offering a unified interface for both authoring and runtime management. In contrast, BAMOE v9 separates these concerns, providing runtime management through the xref:../managing-monitoring/consoles.adoc[BAMOE Management Console], a lightweight web interface designed to interact with backend services such as the Data-Index, Jobs Service, and User Tasks.
 
 The table below compares the key management features available in each version, highlighting how functionality has evolved or shifted between the two architectures.
 
@@ -173,7 +173,7 @@ By default, users can view tasks for all users and processes. User can operate w
 | Claim Tasks +
 Business Central enables users to claim a task if tasks is assigned to multiple users or user group to which the user belongs.
 | Claim Tasks +
-Users can directly submit a task if it is assigned to the current user or user group. They can also use xref:../workflow/user-tasks.adoc#taskid-transition2[BAMOE User Task API] to claim specific task. If authenticated as a user with xref:../runtime-services-modeling/consoles.adoc#impersonation[impersonation] powers they can also submit on behalf of other users.
+Users can directly submit a task if it is assigned to the current user or user group. They can also use xref:../workflow/user-tasks.adoc#taskid-transition2[BAMOE User Task API] to claim specific task. If authenticated as a user with xref:../rmanaging-monitoring/consoles.adoc#impersonation[impersonation] powers they can also submit on behalf of other users.
 
 
 |
@@ -250,11 +250,11 @@ Users can select multiple jobs from jobs page and perform "`Cancel Selected`" ac
 
 | *Process Reports*
 | Business Central provides feature to view process reports in dashboard and table format.
-| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See xref:../runtime-services-modeling/monitoring-services.adoc[Monitoring Business Services]. You can also use xref:../workflow/data-index-graphql-api.adoc#process-instances[BAMOE Data-Index GraphQL API] to query data for your own monitoring systems.
+| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See xref:../managing-monitoring/monitoring-services.adoc[Monitoring Business Services]. You can also use xref:../workflow/data-index-graphql-api.adoc#process-instances[BAMOE Data-Index GraphQL API] to query data for your own monitoring systems.
 
 | *Tasks Reports*
 | Business Central provides feature to view Task reports in dashboard or table format.
-| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See xref:../runtime-services-modeling/monitoring-services.adoc[Monitoring Business Services]. You can also use xref:../workflow/data-index-graphql-api.adoc#user-tasks[BAMOE Data-Index GraphQL API] to query data for your own monitoring systems.
+| BAMOE Management Console does not have the capability. BAMOE v9 provides monitoring add-ons that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. See xref:../managing-monitoring/monitoring-services.adoc[Monitoring Business Services]. You can also use xref:../workflow/data-index-graphql-api.adoc#user-tasks[BAMOE Data-Index GraphQL API] to query data for your own monitoring systems.
 
 | *Custom queries*
 | Can be done using the `ExecuteSQLQueryCommand` executor command. Check the https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=services-managing-monitoring-business-processes-in-business-central#custom-query-proc_managing-and-monitoring-processes[Running a custom query] section.
@@ -276,11 +276,11 @@ The table below outlines the key differences in API structure, authentication, d
 
 | *Authentication*
 | API's are authenticated by security provider configured on the platform for example, Wildfly elytron, Wildfly keycloak or LDAP .
-| BAMOE v9 rely on Quarkus or Spring Boot security for authentication and authorization. see xref:../runtime-services-modeling/security.adoc[Securing Business Service API] endpoints.
+| BAMOE v9 rely on Quarkus or Spring Boot security for authentication and authorization. see xref:../building-deploying/security.adoc[Securing Business Service API] endpoints.
 
 | *Authorization*
 | Users roles/groups can be configured in the security provider. Only users with "`kie-server`" roles are able to access KIE APIs.
-| Users can use Quarkus or Spring Boot API authorization mechanisms to allow only users with specific roles to access specific endpoints. See xref:../runtime-services-modeling/security.adoc##authorization-quarkus[Authorization]
+| Users can use Quarkus or Spring Boot API authorization mechanisms to allow only users with specific roles to access specific endpoints. See xref:../building-deploying/security.adoc##authorization-quarkus[Authorization]
 
 
 | *API Documentation*
@@ -336,7 +336,7 @@ The table below outlines the key differences between BAMOE v8 and BAMOE v9.3 in 
 
 | *Enable/Disable metrics*
 | Prometheus extension can be enabled by setting `org.kie.prometheus.server.ext.disabled` to false when starting process server. If using BAMOE v8 on Spring Boot, use `kieserver.prometheus.enabled=true` to enable prometheus.
-| BAMOE v9 provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. Users can disable specific metrics from being exported by using properties `kogito.monitoring.rule.useDefault=false, kogito.monitoring.process.useDefault=false, kogito.monitoring.interceptor.useDefault=false` See xref:../runtime-services-modeling/monitoring-services.adoc#enabling-prometheus[Enabling Prometheus metrics monitoring in IBM BAMOE].
+| BAMOE v9 provides monitoring add-ons for both Quarkus and Spring Boot that enable Prometheus metrics for monitoring your Business Services and to generate Grafana dashboards. Users can disable specific metrics from being exported by using properties `kogito.monitoring.rule.useDefault=false, kogito.monitoring.process.useDefault=false, kogito.monitoring.interceptor.useDefault=false` See xref:../managing-monitoring/monitoring-services.adoc#enabling-prometheus[Enabling Prometheus metrics monitoring in IBM BAMOE].
 
 | *REST Endpoint*
 | Process server publish the metrics to REST API endpoint `+http://<host:port>/kie-server/services/rest/metrics+`
@@ -344,12 +344,12 @@ The table below outlines the key differences between BAMOE v8 and BAMOE v9.3 in 
 
 | *Graphana Integration*
 | Supports default and custom Graphana dashboard
-| Supports default and custom Graphana dashboard. See xref:../runtime-services-modeling/monitoring-services.adoc#grafana[Custom Grafana dashboards in IBM BAMOE].
+| Supports default and custom Graphana dashboard. See xref:../managing-monitoring/monitoring-services.adoc#grafana[Custom Grafana dashboards in IBM BAMOE].
 
 
 | *Red hat Openshift support*
 | Users can configure Prometheus metrics monitoring for Process Server on Red Hat OpenShift Container Platform. See https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=settings-managing-monitoring-kie-server[Managing and monitoring KIE Server]
-| Follow the same steps as BAMOE v8 openshift deployment but with changes in application properties to enable/disable metrics and changes in the endpoints. See xref:../runtime-services-modeling/monitoring-services.adoc#config-prometheus[Configuring Prometheus].
+| Follow the same steps as BAMOE v8 openshift deployment but with changes in application properties to enable/disable metrics and changes in the endpoints. See xref:../managing-monitoring/monitoring-services.adoc#config-prometheus[Configuring Prometheus].
 |===
 
 == Standard Operating Environment differences
