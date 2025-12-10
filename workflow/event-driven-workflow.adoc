@@ -225,3 +225,12 @@ Security and privacy:: If your events and messages transmit sensitive data revie
 High volume of events:: Be prepared to manage high volumes of events in particular for frequently executed processes. to do this you will need to put in place scaling and event buffering mechanisms in the Kafka environment. 
 
 Event retention policy:: Storing events for long periods of time requires more storage resources which directly impacts the final cost of your system. You can mitigate this by adjusting event retention policies. 
+
+Failure strategy:: Message consumption can fail for different reasons, such as failure to parse the message payload. Such failures are handled by the Kafka integration code, and can be implemented through different strategies. For Spring Boot, the default failure strategy is `retry`. For Quarkus, the default failure strategy is `fail-fast`, which is configurable through the following property:
+
+[source,props,subs="+attributes"]
+----
+mp.messaging.incoming.<channel name>.failure-strategy=fail-fast|ignore|dead-letter-queue
+----
+
+NOTE: As the `fail-fast` strategy results in the application stopping to consume further messages, it is recommended to configure one of the other available strategies when using Event Data in a Quarkus application.
