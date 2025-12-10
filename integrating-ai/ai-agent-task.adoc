@@ -3,47 +3,85 @@ include::../partials/attributes.adoc[]
 
 include::../styles/images.adoc[]
 
-The AI Agent task allows you to integrate AI agents into your BPMN workflows, making them smarter and more efficient. This feature is powered by Langflow, an open-source tool that simplifies building AI applications through a visual interface. By using AI Agent tasks, you can automate processes, create intelligent flows, and connect with leading AI models. The AI agent processes the input and returns the result to the next node. 
-For more details on Langflow and its capabilities, see https://www.langflow.org.
+The AI Agent task (technology preview) in the BPMN Editor, powered by Langflow, lets you add AI agents to your BPMN workflows. Langflow is a open-source tool that helps you build AI applications using a visual interface. With Langflow, you can create and manage AI workflows, reuse them across different BPMN workflows, and integrate with popular AI models and tools.
 
-== Configuring AI provider
+The Langflow enables you to:
 
-To use an AI Agent task, you must configure an AI provider with {CANVAS} or {DEV_TOOLS} extension. Langflow is the only supported provider. You can set up Langflow through {CANVAS} or {DEV_TOOLS} extension as follows:
+* Design AI workflows visually.
+* Use pre-built components to simplify your work.
+* Create complex agents or flows.
+* Reuse your agents or flows in different BPMN workflows.
 
-.Configuring Langflow through {CANVAS}:
-. Click the profile icon in the top-right corner.
-. Select *Connected accounts* from the menu.
-. Choose Langflow from the list of AI providers.
+Langflow supports major AI models, including Ollama, OpenAI and Anthropic, and allows you to manage the state of your workflows. By using Langflow with the BPMN Editor, you can automate tasks and make your workflow more efficient. For more information about Langflow and its capabilities, see https://www.langflow.org.
+
+
+== Connecting to an AI provider in {CANVAS}
+
+To connect to an AI provider from BAMOE {CANVAS} follow these steps:
+
+. Navigate to Profile → Connect to an Account.
+. From the list of available AI providers, select Langflow.
++
+.Selecting an AI provider
+image::workflow/langflow-connect.png[width=360]
++
 . Enter a display name, Service URL and API Key for your Langflow account.
-. Click *Connect* to establish the connection.
+. Click Connect.
 
-.Configure Langflow Through {DEV_TOOLS} Extension:
-. Click the profile menu in the bottom-left corner.
-. From the available options, select Langflow as your preferred AI provider.
+.Connecting to Langflow
+image::workflow/authenticate-langflow.png[width=360]
+
+== Connecting to an AI provider in {DEV_TOOLS}
+To connect to an AI provider from {DEV_TOOLS} follow these steps:
+
+. Navigate to the Profile menu in the bottom left corner.
+
+. From the list of available AI providers, select the Langflow.
++
+.Selecting an AI provider
+image::workflow/langflow-connect-vscode.png[width=360]
+
 . Enter the Service URL and API Key to establish the connection.
 
-After connecting your Langflow account, from the the property panel you can select the Langflow account which you want to use for the task.
 
-== Integrating AI Agents in development environment
-To Integrate AI Agents into your BPMN workflow:
+== Creating a AI Agent task in your workflow
 
-. Drag and drop the AI Agent node to the {CANVAS} or {DEV_TOOLS} extension.
-. Select Langflow as the AI provider and choose an Agent from your instance.
+To create a AI Agent task in your workflow follow this process:
+
+. Drag and drop the AI Agent node from the palette. 
+. Navigate to the property panel of the AI Agent task and select the Langflow account you previously connected.
++
+.Selecting the Connected Account
+image::workflow/langflow-task-props.png[width=360]
++
+. Choose an Agent you wish to use.
 +
 You can either pick an Agent from the dropdown list linked to your Langflow account or enter the Agent ID directly in the input field. Once selected, the property panel displays basic details about the Agent, including its ID, description, MCP status, and the tag category.
 +
-
+.Selecting an Agent
+image::workflow/selecting-agent.png[width=360]
++
 . Provide input to the node either from the previous node or as custom input.
 +
 You can use the `aiAgentInput` variable to provide input to the AI agent. This variable is attached to the input by default and allows the agent to receive data from previously connected nodes, making the input dynamic. You can customize the input text and include process variables using the `{{<variable-name>}}` format.
++
+.Input Field
+image::workflow/aiAgentInput.png[width=360]
++
 The input field also includes an Advanced Mode, accessible by clicking the expand icon next to it. This opens an advanced editor with syntax highlighting for `{{<variable-name>}}` and offers autosuggest for process variables.
 To use autosuggest, type inside double curly braces and press Ctrl + Space (or Cmd + Space on Mac). A dropdown list of data input mapping variables is displayed, showing the variables defined under Data Mapping Properties. Once you update these variables, the suggestion list automatically refreshes to include new ones.
 +
+.Edit Input Field
+image::workflow/edit-input-field.png[width=360]
++
+
 . Add additional variables as needed to customize the mapping according to your specific requirements using Data mapping.
 +
 Input and output data mapping works the same way as other task types. By default, `aiAgentInput` and `aiAgentOutput` represent the agent’s input and output data. You can add additional variables as needed to customize the mapping and meet your specific requirements.
 +
-
+.Input and Output Data Mapping
+image::workflow/langflow-data-mapping.png[width=360]
++
 . Test data process variables used in the input by providing temporary values in the Preview table.
 +
 The Preview Table lets you test process variables used in the input by assigning temporary values. These values replace the variables during testing, allowing you to verify the formate and the agent will receive the expected data when executed.
@@ -51,19 +89,20 @@ The Preview Table lets you test process variables used in the input by assigning
 . Test the agent in the property panel to view the results.
 +
 Use the Test Agent feature to verify the agent’s functionality. This feature executes the agent and displays its real-time response, allowing you to adjust input parameters based on the output until you achieve the desired result.
-
-== Integrating AI Agents in runtime environment
-To Integrate AI Agents into your BPMN workflow:
-
-. Add the appropriate Work Item Handler (WIH) dependency to your project for Quarkus or Spring Boot:
 +
-* `bamoe-ai-agent-task-work-item-handler-spring-boot`
-* `bamoe-ai-agent-task-work-item-handler-quarkus`
-+
-. Configure the `application.properties` file and update the following properties with your actual Langflow details.
+.Test the Agent
+image::workflow/test-the-agent.png[width=360]
+
+== Deploying a Business Service with workflows containing AI Agents
+
+In a Business Service containing stateful Workflows that include a AI Agent task, you will need to configure evironment variables in the `application.properties` file, to enable connection to an AI provider at runtime.
+
+The following example shows the default properties to enable a connection:
 
 [source, properties]
 ----
 bamoe.workflow.ai-agent-task.provider.langflow.base-url=<your-langflow-host>
 bamoe.workflow.ai-agent-task.provider.langflow.api-key=<api-key>
 ----
+
+
