@@ -2,74 +2,78 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-When Process Definitions (PDs) are deployed as Business Services in a Cloud environment, client applications or Management Console users can create Process Instances (PIs) that follow the sequence flow defined in its originating PD. When PIs are on long-running (e.g., days/months/weeks) waiting states, such as Timers or User Tasks, new versions of its originating PDs can be deployed to Business Services, making existing PIs on waiting states follow obsolete PDs.
+When Process Definitions are deployed as _Business Services_ in a Cloud environment, client applications or {MANAGEMENT_CONSOLE} users can create Process Instances that follow the sequence flow defined in the Process Definition. For Process Instances that run for weeks or months and be in waiting states, due to Timers or User Tasks, you may wish to deploy a new Process Definition version to running _Business Services_, which can cause Process Instances in waiting states to follow obsolete Process Definitions. 
 
-To solve this problem, Process Instance Migration (PIM) is introduced, allowing PIs to migrate to new PDs, effectively updating themselves to newer versions of its PDs, or even entirely different PDs. By mapping the original PD nodes to newer PD nodes, PIs can transition to the new sequence flow and stop being attached to its originating PD.
+The {PIM_ADDON} and its integration with {MANAGEMENT_CONSOLE} enables you to manage the migration of in-flight Process Instances to a new Process Definition version or completely different Process Definition. By mapping the original Process Definitions nodes to updated Process Definition nodes, Process Instances can transition to the new sequence flow and adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
+////
 Process Instances (PIs) contain information about the entities that are necessary to walk through the Workflow’s execution path. Such entities are passed from node to node as Process Variables, and this input/output relationship between nodes is defined via I/O Assignments in BPMN Editor (classic), and Data Mapping in the new BPMN Editor.
+
+////
+
+It is important to be able to update Process Definitions for the following reasons:
+
+* Keep long running processes aligned with evolving business rules and business needs
+* Reduce operational risk through evolution of obsolete workflows
+* Maintain flexibility to adapt your processes with restarting Process Instances. 
 
 For more information on using the {MANAGEMENT_CONSOLE} to migrate Process Instances see xref:consoles.adoc#process-instance-migration-ui[Management Console → Process Instance Migration]
 
 For more information on using the Process Add-on API to migrate Process Instances to a new Process Definition see xref:management-apis.adoc#process-instance-migration-addon[Management APIs Process → Process Instance Migration APIs]
 
-[#migration-PIM]
-== Migrating active process instances using the Process Instance Migration API
-Use this tool to enable process instances to migrate to newer versions of its PDs, or even entirely different PDs. By mapping the original PD nodes to newer PD nodes, PIs can transition to the new sequence flow and stop being attached to its originating PD.
-
-BAMOE PIM Add-on underpins the UI available in the BAMOE Management Console. 
-
-The Process Instance Migration Service enables you to migrate active process instances from one deployment version to another. This ensures that long-running business processes can adapt to changes in their definitions over time without losing their current state or requiring a restart.
-
+////
 The advantage of using this utility is that it:
 
 * _Preserves state_: During migration, process or task variables remain unchanged.
 
-* _Supports evolving processes_: Enables seamless upgrades to new process definitions as business needs evolve.
 
 * _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
 
 * _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
 
 Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
+////
 
-Using the xref:../workflow/management-apis.adoc[Process Management API], the following two endpoints are used to migrate active process instances:
+== PIM Guidelines
+You should carry out the migration of Process Instances on a duplicate of your production system to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Keep a database backup before migrating your Process Instances and only restore access once the migration has finished executing. 
 
-`POST /management/processes/{processId}/migrate`:: Endpoint to migrate all active process instances of a given processId to a new target process. 
+PIM does not migrate data. The new version of the Process Definition must be compatible with the previous version. If this is not the case you may have errors during the next interaction with Process Instances that have been migrated and will need to use PIM to migrate Process Instances again to a compatible data model. 
 
-`POST /management/processes/{processId}/instances/{processInstanceId}/migrate`:: It migrates the process instance specified by the processID and processInstanceID to the target process and process instance. 
+. Include the xref:../reference-guide/maven-repository-libraries.adoc#PIM-addon-dependency[{PIM_ADDON_SHORT}] dependency in your _Business Service_ POM.
 
-=== Starting and stopping processes
-You can use the following `curl` command to start a process:
+. If you are upgrading from {VERSION_930} ensure you have run the database migration scripts (see xref:../upgrade/upgrading-930-931.adoc#migrate-stateful-workflow-db[Upgrading your stateful Workflow database]) to add required PIM tables (see xref:../reference-guide/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables])
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId> -d
-----
+. Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}.
 
-You can use the following `curl` command to stop a process:
+. Ensure you are working on an isolated production system that is backed up.
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/<processId>/<processInstanceId>/continue -d '{}'
-----
+. Execute your PIM plan to migrate Process Instances that match the defined criteria, to the new Process Definitions.
++ You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
 
-=== Example
-Migrate all active process instances of a specified processId to a new target process definition using the following `curl` command:
+== What happens during migration?
 
-[source,shell]
-----
-curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:8080/management/processes/<sourceProcessId>/migrate -d 
-{
-  "targetProcessId": <targetProcessId>
-  "targetProcessVersion": <targetProcessVersion>
-}    
-----
-Where `sourceProcessId` is a path parameter in the URL and the `targetProcessId` and `targetProcessVersion` are included as query parameters depending on the API design. If the migration is successful you will receive the following output. 
+PIM does more than just switch process definitions, it ensures consistency across subsystems:
 
-[source,shell]
-----
-{
-   "message":"All instances migrated",
-   "numberOfProcessInstanceMigrated":1
-}
-----
+Subsystem adaptation: Migrates process nodes and updates associated elements in subsystems like data-index and user tasks. Jobs do not require adaptation. After migration, the Business Service remains fully functional through both REST APIs and UIs.
+
+Active elements only: PIM migrates only active elements (active node instances, active user tasks, etc.). Nodes that are not longer active will not be migrated.
+
+Data handling: PIM does not migrate data stored in process variables or task variables. If your new Process Definition contains additional variables, they will be initialized with an empty value. If your data model changes, you must ensure backward compatibility. Otherwise, PIM cannot properly migrate process instances, and you’ll need to use alternative strategies, such as draining out existing instances.
+
+== Mapping rules and limitations
+
+To maintain process integrity after migration, PIM has some strict mapping rules. For node mappings PIM has implicit or explicit node mappings.
+
+Implicit node mapping: All nodes that can be on a waiting state in the source process definition must exist in the target process definition with their original node ID.
+
+Explicit node mapping: When implicit mapping is not satisfied you need to provide explicit node mappings, and it has some rules:
+
+Nodes type: Only nodes that can put the process instance in a waiting state (catch events, user tasks, work items, call activities/subprocesses) should be included in the explicit mapping list, since only active elements are migrated.
+
+Same family mapping: Nodes must map to nodes of the same type. For example, a user task cannot be mapped to an event.
+
+Removed nodes: If a node is removed in the target process definition, the source node must be explicitly mapped to a node of the same family in the target process definition.
+
+User Task limitation: Tasks in BPMN are immutable in the user task subsystem. To modify task details during migration, define a new task with a different ID and node ID in the target process definition and map accordingly.
+
+

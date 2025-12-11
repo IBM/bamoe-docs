@@ -630,24 +630,23 @@ Create process variables to accept input values when starting the process instan
 image::upgrade/05-05-upgrading-custom-work-item-handlers-processdata.png[width=250]
 
 ==== Configure data assignments
-
 Define the Data Input and Data Output Assignments for the custom Work Item. This ensures that the input values are passed to the handler and the output is captured in the process.
 
 image::upgrade/05-05-upgrading-custom-work-item-handlers-properties.png[width=90%]
 
-=== Build and run
-Once you have implemented your custom WorkItemHandler and integrated your Custom Task in a workflow, you can compile and run your _Business Service_. 
+=== Build and run in local Dev mode
+Once you have implemented your custom WorkItemHandler and integrated your Custom Task in a Workflow, you can compile and run your _Business Service_ in Quarkus Dev mode to test its functionality using hot reload. 
 
-==== Compile and run in local dev mode
-
-Use Quarkus dev mode to run the application with hot reload support:
-
-[,sh]
+[source,sh]
 ----
 mvn clean compile quarkus:dev
 ----
 
 NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
+
+////
+
+Not necessary here as this is documented in building-deploying/services-build.adoc. Consider removing after fuller review.
 
 ==== Package and run in JVM mode
 
@@ -664,10 +663,7 @@ On windows
 mvn clean package
 java -jar target\quarkus-app\quarkus-run.jar
 ----
-
-==== Package and run using local native image
-
-Running Business Services using Stateful Workflow capabilities in native mode is currently not supported.
+////
 
 // To compile a native executable, first add the following property to `application.properties`:
 
@@ -732,15 +728,15 @@ Full name:Alex Tom
 ----
 
 [#subprocess-project]
-== Using sub-processes from a different _Business Services_ project
-You can use Maven dependent modules to be able to reference a sub-process defined in a different _Business Services_ project. Code generation in {PRODUCT_SHORT} happens during the _Business Services_ build, and using Maven you can ensure that the models are available inside the Class Loader as each model is discovered. To do this:
+== Using sub-processes from a different project
+You can use Maven dependent modules to be able to reference a sub-process defined in a different project. Code generation in {PRODUCT_SHORT} happens during the _Business Services_ build, and using Maven you can ensure that the models are available inside the Class Loader as each model is discovered. To do this:
 
 . Create a "subprocess-project" that contains the BPMN model(s) to be referenced, in the usual project structure. 
 +
 .subprocess-project source
 image::workflow/dependent-models-src.png[subprocess-project source]
 +
-. Include the minimal Maven dependencies in the project POM to avoid generating classes that could clash with the ones generated in the _Business Services_ project, e.g.,
+. Include the minimal Maven dependencies in the project POM to avoid generating classes that could clash with the ones generated in the _Business Services_ project that will reference "subprocess-project", e.g.,
 + 
 [source, xml]
 ----
@@ -762,7 +758,7 @@ image::workflow/dependent-models-src.png[subprocess-project source]
 </project>
 ----
 
-. Build "subprocess-project" in the standard way: xref:../building-deploying/services-build.adoc[Building Business Service executables].
+. Build "subprocess-project" as a standard Jar, in order to be used as a Maven dependency.
 
 . Create a "my-business-service" _Business Services_ project that references the Workflows contained in "subprocess-project", by:
 +
@@ -828,11 +824,11 @@ image::workflow/dependent-models-src.png[subprocess-project source]
 </project>
 ----
 +
-. Build the "my-business-service" project ensuring that the built "subprocess-project" is available for Maven in the usual way. 
+. Build the "my-business-service" project (see xref:../building-deploying/services-build.adoc[Building Business Service executables]) ensuring that the built "subprocess-project" is available for Maven in the usual way. 
 + 
-* During the build Maven will retrieve the "subprocess-project" artifact.
+* At the start of the build Maven will retrieve the "subprocess-project" artifact during the resolution phase.
 * During the `generate-resources` phase Maven will unpack the artifact and extract all the `*.bpmn` files under the `target/generated-resources` folder.
-* {PRODUCT_SHORT} will discover the models in both the `src/main/resources` and `target/generated-resources` folders, and the Workflow Engine will execute code-generation for models present in both resources directories
+* {PRODUCT_SHORT} will discover the models in both the `src/main/resources` and `target/generated-resources` folders, and the Workflow Engine will execute code-generation for models present in both resource directories
 
 Using this process, at runtime, the code generated for processes defined in the "my-business-service", will be able to find the code generated for the processes imported from the “subprocess-project” artifact.
 
