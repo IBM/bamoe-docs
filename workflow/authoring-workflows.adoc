@@ -420,6 +420,77 @@ A dedicated dialog can be displayed through the Correlations toggle button. See 
 .Correlation dialog
 image::workflow/correlations-bmpn-dialog.png[width=360]
 
+Correlation ensures messages are routed only to process instances that match specific criteria based on message content.
+
+=== How Correlation Works at Runtime
+
+Correlation uses three BPMN components to route messages to the correct process instance:
+
+. *Correlation Property* - Defines which field to extract from the message
++
+Example: `<bpmn2:messagePath>id</bpmn2:messagePath>` extracts the `id` field
+
+. *Correlation Key* - Groups correlation properties as a unique identifier
++
+Example: `<bpmn2:correlationKey id="CorrelationKeyId">` references the property above
+
+. *Correlation Subscription* - Defines the expected value for matching
++
+Example: `<bpmn2:dataPath>"1"</bpmn2:dataPath>` means only match if `id = "1"`
+
+*Runtime Behavior*: When a message arrives, the engine:
+
+* Extracts the correlation property value (e.g., `id` field from message)
+* Checks if any process instance expects that specific value
+* Delivers the message only to matching instances
+* Discards messages with no match
+
+=== Complete BPMN Configuration
+
+See the full correlation configuration in `bamoe-examples/process-event-driven/hotels/src/main/resources/hotel.bpmn`:
+
+[source,xml]
+----
+<bpmn2:itemDefinition id="CorrelationPropertyId_Type" structureRef="String" />
+<bpmn2:correlationProperty id="CorrelationPropertyId" name="Correlation Property 1" type="CorrelationPropertyId_Type">
+  <bpmn2:correlationPropertyRetrievalExpression
+    id="_01E88DC7-3BDD-48E3-BCF9-39AD0772B2AB"
+    messageRef="_GlqmEIpdED2dBNv7eRNehQ"
+  >
+    <bpmn2:messagePath
+      id="_F1B5A911-766C-4E07-932E-A7C9BC825274"
+      evaluatesToTypeRef="_6404189C-98F1-471A-899F-4A66C9E9BB0E"
+      language="java"
+    >id</bpmn2:messagePath>
+  </bpmn2:correlationPropertyRetrievalExpression>
+</bpmn2:correlationProperty>
+
+<bpmn2:correlationKey id="CorrelationKeyId" name="Correlation Key Name">
+  <bpmn2:correlationPropertyRef>CorrelationPropertyId</bpmn2:correlationPropertyRef>
+</bpmn2:correlationKey>
+----
+
+=== Configuration in application.properties
+
+The following properties are required to configure messaging channels for correlation:
+
+[source,properties]
+----
+# Kafka broker URL
+kafka.bootstrap.servers=localhost:9092
+
+# Incoming channel (for Start/Catch/Boundary events)
+mp.messaging.incoming.<channel-name>.connector=smallrye-kafka
+mp.messaging.incoming.<channel-name>.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+mp.messaging.incoming.<channel-name>.auto.offset.reset=earliest
+
+# Outgoing channel (for Throw/End events)
+mp.messaging.outgoing.<channel-name>.connector=smallrye-kafka
+mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+
+
 [#custom-wih]
 == Creating a custom WorkItemHandler
 A Work Item represents a task or activity in a workflow that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing you to plug in custom code to meet specific business requirements not covered by built-in functionality.
@@ -659,6 +730,112 @@ After submitting the request, you should see log output similar to the following
 2025-06-13 13:18:15,826  INFO  [com.sample.MyConcatWorkItemHandler:22] (executor-thread-1) UNIQUE_TASK_ID = _E2D196C3-0F09-490A-9E26-F4F4BA04BD8C
 Full name:Alex Tom
 ----
+
+[#subprocess-project]
+== Using sub-processes from a different _Business Services_ project
+You can use Maven dependent modules to be able to reference a sub-process defined in a different _Business Services_ project. Code generation in {PRODUCT_SHORT} happens during the _Business Services_ build, and using Maven you can ensure that the models are available inside the Class Loader as each model is discovered. To do this:
+
+. Create a "subprocess-project" that contains the BPMN model(s) to be referenced, in the usual project structure. 
++
+.subprocess-project source
+image::workflow/dependent-models-src.png[subprocess-project source]
++
+. Include the minimal Maven dependencies in the project POM to avoid generating classes that could clash with the ones generated in the _Business Services_ project, e.g.,
++ 
+[source, xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ibm.bamoe</groupId>
+    <artifactId>subprocess-project</artifactId>
+    <version>...</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>
+----
+
+. Build "subprocess-project" in the standard way: xref:../building-deploying/services-build.adoc[Building Business Service executables].
+
+. Create a "my-business-service" _Business Services_ project that references the Workflows contained in "subprocess-project", by:
++
+* Adding the `subprocess-project` as a dependency.
+* Adding the `target/generated-resource` as resource folder in the build configuration.
+* Introducing and configuring the `maven-dependency-plugin` so that it extracts the model(s) in the `target/generated-resources` folder during the `generate-resources` phase, as shown in the following POM file:
++
+[source, xml]
+----
+<dependencies>
+        <!-- add the “subprocess” module as dependency -->
+        <dependency>
+            <groupId>com.ibm.bamoe</groupId>
+            <artifactId>subprocess-project</artifactId>
+        </dependency>
+     ...
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- add the target/generated-resources as folder resource directory in the 
+            build configuration -->
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            ...
+            <!-- configure the maven-dependency-plugin so that it extracts the model(s) in the 
+            target/generated-resources folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.ibm.bamoe</groupId>
+                                    <artifactId>subprocess-project</artifactId>
+                                    <version>...</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+                                    <includes>**/*.bpmn</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
++
+. Build the "my-business-service" project ensuring that the built "subprocess-project" is available for Maven in the usual way. 
++ 
+* During the build Maven will retrieve the "subprocess-project" artifact.
+* During the `generate-resources` phase Maven will unpack the artifact and extract all the `*.bpmn` files under the `target/generated-resources` folder.
+* {PRODUCT_SHORT} will discover the models in both the `src/main/resources` and `target/generated-resources` folders, and the Workflow Engine will execute code-generation for models present in both resources directories
+
+Using this process, at runtime, the code generated for processes defined in the "my-business-service", will be able to find the code generated for the processes imported from the “subprocess-project” artifact.
+
 
 
 
