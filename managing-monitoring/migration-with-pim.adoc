@@ -4,6 +4,8 @@ include::../styles/images.adoc[]
 
 When Process Definitions are deployed as _Business Services_ in a Cloud environment, client applications or {MANAGEMENT_CONSOLE} users can create Process Instances that follow the sequence flow defined in the Process Definition. For Process Instances that run for weeks or months and be in waiting states, due to Timers or User Tasks, you may wish to deploy a new Process Definition version to running _Business Services_, which can cause Process Instances in waiting states to follow obsolete Process Definitions. 
 
+== Intro {PIM_ADDON}
+
 The {PIM_ADDON} and its integration with {MANAGEMENT_CONSOLE} enables you to manage the migration of in-flight Process Instances to a new Process Definition version or completely different Process Definition. By mapping the original Process Definitions nodes to updated Process Definition nodes, Process Instances can transition to the new sequence flow and adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
 ////
@@ -34,7 +36,7 @@ The advantage of using this utility is that it:
 Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
 ////
 
-== PIM Guidelines
+== Guidelines and Process
 You should carry out the migration of Process Instances on a duplicate of your production system to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Keep a database backup before migrating your Process Instances and only restore access once the migration has finished executing. 
 
 PIM does not migrate data. The new version of the Process Definition must be compatible with the previous version. If this is not the case you may have errors during the next interaction with Process Instances that have been migrated and will need to use PIM to migrate Process Instances again to a compatible data model. 
@@ -50,9 +52,9 @@ PIM does not migrate data. The new version of the Process Definition must be com
 . Execute your PIM plan to migrate Process Instances that match the defined criteria, to the new Process Definitions.
 + You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
 
-== What happens during migration?
+=== What happens during migration?
 
-PIM does more than just switch process definitions, it ensures consistency across subsystems:
+PIM does more than just switch process definitions, it ensures consistency across the stateful process subsystems.
 
 Subsystem adaptation: Migrates process nodes and updates associated elements in subsystems like data-index and user tasks. Jobs do not require adaptation. After migration, the Business Service remains fully functional through both REST APIs and UIs.
 
@@ -60,20 +62,39 @@ Active elements only: PIM migrates only active elements (active node instances, 
 
 Data handling: PIM does not migrate data stored in process variables or task variables. If your new Process Definition contains additional variables, they will be initialized with an empty value. If your data model changes, you must ensure backward compatibility. Otherwise, PIM cannot properly migrate process instances, and you’ll need to use alternative strategies, such as draining out existing instances.
 
-== Mapping rules and limitations
+=== Mapping rules and limitations
 
 To maintain process integrity after migration, PIM has some strict mapping rules. For node mappings PIM has implicit or explicit node mappings.
 
-Implicit node mapping: All nodes that can be on a waiting state in the source process definition must exist in the target process definition with their original node ID.
+Implicit node mapping:: All nodes that can be on a waiting state in the source process definition must exist in the target process definition with their original node ID.
 
-Explicit node mapping: When implicit mapping is not satisfied you need to provide explicit node mappings, and it has some rules:
+Explicit node mapping:: When implicit mapping is not satisfied you need to provide explicit node mappings.
 
-Nodes type: Only nodes that can put the process instance in a waiting state (catch events, user tasks, work items, call activities/subprocesses) should be included in the explicit mapping list, since only active elements are migrated.
+The following are the rules for *Explicit Node mappings*:
 
-Same family mapping: Nodes must map to nodes of the same type. For example, a user task cannot be mapped to an event.
+Nodes type:: Only nodes that can put the process instance in a waiting state (catch events, user tasks, work items, call activities/subprocesses) should be included in the explicit mapping list, since only active elements are migrated.
 
-Removed nodes: If a node is removed in the target process definition, the source node must be explicitly mapped to a node of the same family in the target process definition.
+Same family mapping:: Nodes must map to nodes of the same type. For example, a user task cannot be mapped to an event.
 
-User Task limitation: Tasks in BPMN are immutable in the user task subsystem. To modify task details during migration, define a new task with a different ID and node ID in the target process definition and map accordingly.
+Removed nodes:: If a node is removed in the target process definition, the source node must be explicitly mapped to a node of the same family in the target process definition.
+
+User Task limitation:: Tasks in BPMN are immutable in the user task subsystem. To modify task details during migration, define a new task with a different ID and node ID in the target process definition and map accordingly.
+
+[NOTE] 
+====
+Migrations can take time due to heavy database updates. You can configure the following transaction timeout in application.properties:
+
+`bamoe.pim.transaction-timeout=<seconds>`
+====
+
+=== Database Limits for Bulk Migration
+
+Each database has a maximum number of parameters allowed in an update operation. This affects how many process instance IDs you can include in a bulk migration request. Below are the limits for each supported database:
+
+* H2 → 50,000 IDs
+* PostgreSQL → 50,000 IDs
+* Oracle → 1,000 IDs
+* MS SQL Server → 2,000 IDs
+
 
 
