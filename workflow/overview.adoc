@@ -3,11 +3,11 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-You can use {PRODUCT_SHORT} to develop stateful Workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your Business Service projects for deployment and execution. 
+You can use {PRODUCT_SHORT} to develop stateful Workflow services using Business Process Model and Notation (BPMN) models. BPMN process models are graphical representations of the steps required to achieve a business goal. You can design your BPMN processes with {CANVAS} or {DEV_TOOLS}. Alternatively you can import existing BPMN processes into your _Business Services_ project for deployment and execution. 
 
 Stateful Workflow capabilities enable you to use elements such as process variables, events, timers, User Tasks and asynchronous Tasks (Service Tasks, Business Rule Tasks, and Script Tasks) to go further with BPMN Workflows that you implement.  
 
-The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on {PRODUCT_SHORT}. In this architecture certain subsystems are colocated directly in your _Business Service_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
+The Compact Architecture is the reference architecture for _Business Services_ containing stateful Workflows on {PRODUCT_SHORT}. In this architecture certain subsystems are colocated directly in your _Business Services_, simplifying configuration and minimizing communication between components, which ensures that _Business Services_ are stable and robust.
 
 == Components of Compact Architecture
 The following table details the different components in Compact Architecture, indicating whether they are mandatory or not for stateful Workflows.
@@ -28,7 +28,7 @@ The following table details the different components in Compact Architecture, in
 |Storage | External system | Mandatory | N/A
 |===
 
-The following figure shows how they relate to each other in _Business Service_. 
+The following figure shows how they relate to each other in _Business Services_. 
 
 .The different components of Compact Architecture
 image::wf-compact-arch.png[]
@@ -37,7 +37,7 @@ Workflow models:: BPMN files containing a sequence flow. Workflow models are com
 
 Workflow Engine:: The jBPM-powered engine for executing Workflows and which can delegate certain capabilities to other subsystems, like User Tasks or Jobs.
 
-Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, escalability, authentication and authorization, DI (dependency injection) etc. Quarkus is the only supported Runtime at the moment.
+Runtime:: The Kogito-powered foundational framework providing basic services required for running Enterprise-grade _Business Services_: transactions, REST endpoints (JAX-RS), JDBC connection pools, thread pools, scalability, authentication and authorization, DI (dependency injection) etc. Quarkus and Spring Boot provide supported Runtimes.
 
 Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database such as PostgreSQL.
 
@@ -50,7 +50,7 @@ The Data-Index subsystem is used to store a snapshot of the latest state of the 
 .Graphical view of the Data-Index subsystem
 image::data-index.png[]
 
-The information stored on Data-Index can be consumed through its GraphQL API exposed in the `/graphql` endpoint, e.g., `http://localhost:8080/graphql` for a _Business Service_ running locally.
+The information stored on Data-Index can be consumed through its GraphQL API exposed in the `/graphql` endpoint, e.g., `http://localhost:8080/graphql` for _Business Services_ running locally.
 
 See the associated xref:data-index-graphql-api.html[Data-Index GraphQL API]
 
@@ -161,11 +161,11 @@ A task can be temporarily suspended transitioning into a *Suspended* state where
 
 A task can be skipped, if it is marked as skippable and it moves to *Obsolete* final state. A task can also be moved to *Error* or *Exited* final states as required.
 
-=== Switching your _Business Service_ to a different User Task Lifecycle
+=== Switching your _Business Services_ to a different User Task Lifecycle
 
 A User Task completes its entire lifecycle with the implementation they were started with. It is not possible to migrate a Process Instance to an alternative User Task Lifecycle while it is running. 
 
-If you change the configuration of your _Business Service_to use the WS-Human Task lifecycle, all active User Tasks will complete their lifecycle with the default Kogito User Task lifecycle. New tasks would start using WS-Human Task lifecycle.
+If you change the configuration of your _Business Services_ to use the WS-Human Task lifecycle, all active User Tasks will complete their lifecycle with the default Kogito User Task lifecycle. New tasks would start using WS-Human Task lifecycle.
 
 == Getting started
 

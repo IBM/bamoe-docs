@@ -3,52 +3,42 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This guide provides a step-by-step process for upgrading client-server projects from BAMOE v8 to v9, covering key changes in configuration, security, and deployment.
+This guide provides a step-by-step process for upgrading client-server projects from {PRODUCT_SHORT} v8 to v9, covering key changes in configuration, security, and deployment.
 While both versions use standard Maven project structures (e.g., `pom.xml`, `src/main/java`, `src/main/resources`), there are important differences that must be addressed to ensure a successful migration.
 
-== pom.xml
+== The POM file
 
-The pom.xml file used in BAMOE v8 is not compatible with BAMOE v9. To create a compatible pom.xml, you can either use a BAMOE Accelerator or manually configure it from scratch.
+The `pom.xml` file used in {PRODUCT_SHORT} v8 is not compatible with {PRODUCT_SHORT} v9. To create a compatible POM, you can either use a {PRODUCT_SHORT} Accelerator or manually configure it from scratch.
 
-=== Using BAMOE Accelerator
+=== Using {PRODUCT_SHORT} Accelerators
 
-BAMOE Accelerators are project templates with a ready-to-use structure designed to help you quickly get started with a __Business Service__ project. These templates include a preconfigured pom.xml tailored for BAMOE v9.
-BAMOE Accelerators are project templates with a ready-to-use structure designed to help you quickly get started with a __Business Service__ project. These templates include a preconfigured pom.xml tailored for BAMOE v9.
+{PRODUCT_SHORT} Accelerators are project templates with a ready-to-use structure designed to help you quickly get started with a __Business Service__ project. These templates include a pre-configured POM files tailored for {PRODUCT_SHORT} v9.
 
-The easiest way to upgrade your project is to replace your existing v8 pom.xml with the one provided in the BAMOE v9 Accelerator, available here:
+The easiest way to upgrade your project is to replace your existing v8 pom.xml with the one provided in the {PRODUCT_SHORT} v9 Accelerator, available here:
 
-* https://github.com/IBM/bamoe-canvas-quarkus-accelerator[BAMOE Canvas Quarkus Accelerator (GitHub)].
+* https://github.com/IBM/bamoe-canvas-quarkus-accelerator[{CANVAS} Quarkus Accelerator (GitHub)].
 
-*NOTE:* Use the `pom.xml` content from a branch corresponding to to your BAMOE v9 version.
+*NOTE:* Use the `pom.xml` content from a branch corresponding to to your {PRODUCT_SHORT} v9 version.
 
-BAMOE v9 offers two types of Accelerators, depending on the nature of your Business Service project:
+For more information on Accelerators see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Setting up a _Business Services_ project] and xref:../tools/applying-accelerators.adoc[{CANVAS} → Using Accelerators].
 
-* *DMN Accelerator* -- Focused on Decisions and Rules using DMN.
-* *Full Accelerator* -- Includes Workflows, Decisions and Rules, suitable for more complex automation scenarios.
-
-Choose one of the BAMOE Accelerator template that best matches your project requirements:
-
-* *BAMOE Canvas*, https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=canvas-using-accelerators[{CANVAS} → Using Accelerators].
-* *BAMOE Developer Tools for VS Code*, https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=started-initial-business-service-project-setup#_b_starting_on_bamoe_developer_tools_for_vs_code[Starting on BAMOE Developer Tools for VS Code].
-
-
-NOTE: You can not simply *Apply Accelerator* from the *BAMOE Canvas* to BAMOE v8 project. It would result into invalid project structure. Read more about this limitation xref:../upgrade/11-not-supported.adoc[here].
+NOTE: You can not simply *Apply Accelerator* from the *{CANVAS}* to {PRODUCT_SHORT} v8 project. It would result into invalid project structure. Read more about this limitation xref:../upgrade/11-not-supported.adoc[here].
 
 === Manual upgrade
 
-If you prefer more control over your Maven configuration, you can manually upgrade your pom.xml by selecting the appropriate dependencies from the official BAMOE Maven repository:
+If you prefer more control over your Maven configuration, you can manually upgrade your pom.xml by selecting the appropriate dependencies from the official {MVN_REPO}:
 
-* https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=reference-bamoe-maven-repository-libraries[BAMOE Maven Repository Libraries]
+* https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=reference-bamoe-maven-repository-libraries[{MVN_REPO} Libraries]
 
 This approach is for advanced users who want to fine-tune their project setup or integrate with existing enterprise build pipelines.
 
-== application.properties [[application-properties]]
+== The application properties file [[application-properties]]
 
-The `application.properties` content of BAMOE v8 is not compatible with BAMOE v9.
+The `application.properties` content of {PRODUCT_SHORT} v8 is not compatible with {PRODUCT_SHORT} v9.
 This table shows a summary of the properties specific to v8 and v9.
 
 |===
-| *Feature* | *BAMOE 8* | *BAMOE 9.2*
+| *Feature* | *{PRODUCT_SHORT} 8* | *{PRODUCT_SHORT} 9.2*
 
 | `kieserver.*` properties
 | ✅ Used
@@ -67,20 +57,17 @@ This table shows a summary of the properties specific to v8 and v9.
 | ✅ Introduced
 |===
 
-The BAMOE v9 `application.properties` content will depend on the technology being used.
+The {PRODUCT_SHORT} v9 `application.properties` content will depend on the technology being used.
 
-*NOTE:* Please review https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=notes-supported-environments[BAMOE Supported environments].
+*NOTE:* Please review xref:../release-notes/supported-environments.adoc[{PRODUCT_SHORT} Supported environments].
 
-There is no single page that list all possible configurations of BAMOE v9 `application.properties`.
-However, a good way to explore the configuration is to search for `application.properties` strings in the https://www.ibm.com/docs/en/ibamoe/9.2.x[BAMOE Documentation].
+It is not possible to list all possible configurations of {PRODUCT_SHORT} v9 `application.properties`, but you will find multiple examples based on different use cases throughout this documentation. You can search for them either by keyword or by property.
 
-Similarly to `pom.xml` you can also find `application.properties` in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[BAMOE Accelerators].
+Similarly to POM file you will also find `application.properties` in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[{PRODUCT_SHORT} Accelerators], making sure you select the correct version repository branch.
 
-*NOTE:* Use `application.properties` content from a branch corresponding to to your BAMOE v9 version.
+=== Example: `application.properties` {PRODUCT_SHORT} 9 (Quarkus-based)
 
-=== Example: `application.properties` BAMOE 9 (Quarkus-based)
-
-[,properties]
+[source,properties]
 ----
 # Server configuration
 quarkus.http.port=8080
@@ -120,9 +107,9 @@ kogito.addons.tracing.decision.enabled=true
 kogito.addons.monitoring.prometheus.enabled=true
 ----
 
-=== Example: `application.properties` BAMOE 9 (Spring Boot-based)
+=== Example: `application.properties` {PRODUCT_SHORT} 9 (Spring Boot-based)
 
-[,properties]
+[source,properties]
 ----
 # Server configuration
 server.port=8080
@@ -165,9 +152,9 @@ kogito.addons.monitoring.prometheus.enabled=true
 
 == Security configurations
 
-In BAMOE v8, security was typically configured using JBoss EAP SSO. These approaches, while functional, were tightly coupled to the application server.
+In {PRODUCT_SHORT} v8, security was typically configured using JBoss EAP SSO. These approaches, while functional, were tightly coupled to the application server.
 
-With BAMOE v9, security configuration has shifted to a modern, standards-based model using external Identity Providers (IdPs) that support OpenID Connect (OIDC). This change aligns with cloud-native best practices and enables more flexible, centralized authentication and authorization strategies.
+With {PRODUCT_SHORT} v9, security configuration has shifted to a modern, standards-based model using external Identity Providers (IdPs) that support OpenID Connect (OIDC). This change aligns with cloud-native best practices and enables more flexible, centralized authentication and authorization strategies.
 
 For detailed steps on how to migrate your existing security configurations, refer to the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading Authentication and Authorization] section.
 
@@ -182,27 +169,31 @@ Please, see the xref:06-production-environment-comparison.adoc#api-differences[P
 
 == How do you know it worked?
 
-To validate that the project upgrade was successful, the upgraded BAMOE v9 project must be built and run. The two options to do this are described below.
+To validate that the project upgrade was successful, the upgraded {PRODUCT_SHORT} v9 project must be built and run. The two options to do this are described below.
 
-=== The Quarkus dev:mode
+=== The Quarkus Dev mode
 
-The upgraded BAMOE v9 project is a Maven Quarkus project that we can build and start locally as `mvn clean package` `mvn clean quarkus:dev`.
-The procedure is described in getting started with business rule microservice https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=started-rule-service-in-15-minutes[Getting Started → Rule Service in 15 minutes].
+The upgraded {PRODUCT_SHORT} v9 project is a Maven Quarkus project that we can build and start locally as `mvn clean package` `mvn clean quarkus:dev`.
+The procedure is described in getting started with business rule microservice xref:../getting-started/business-rule-microservice.adoc[Getting Started → Rule Service in 15 minutes].
 
-Once the dev mode is up and running we should be able to see available Rest endpoints using the address: `+http://localhost:8080/q/swagger-ui/#/+`, however your `application.properties` needs to contain:
+Your `application.properties` must contain the following property:
 
 [,properties]
 ----
 quarkus.swagger-ui.always-include=true
 ----
+
+Once the Dev mode is up and running we should be able to see available Rest endpoints using the address: `+http://localhost:8080/q/swagger-ui/#/+`, 
 
 === Deployment to OpenShift
 
-Deploying a __Business Service__ to OpenShift is described in: https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=gs-deploying-your-first-business-service-openshift-using-quarkus[Getting Started → Deploying your first Business Service to OpenShift using Quarkus].
+Deploying a __Business Service__ to OpenShift is described in: xref:../getting started/deploying-to-openshift.adoc[Getting Started → Deploying your first Business Service to OpenShift using Quarkus].
 
-Once the OpenShift deployment is up and running you should be able to see available Rest endpoints using the address: `[OpenShift deployment endpoint]/q/swagger-ui/#/`, however your `application.properties` needs to contain:
+Your `application.properties` must contain the following property:
 
 [,properties]
 ----
 quarkus.swagger-ui.always-include=true
 ----
+
+Once the OpenShift deployment is up and running you should be able to see available Rest endpoints using the address: `[OpenShift deployment endpoint]/q/swagger-ui/#/`

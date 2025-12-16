@@ -14,7 +14,7 @@ include::../styles/images.adoc[]
 
 The {DATA_CLEANUP} enables you to manage this historical data by running the tool daily or weekly to keep the database size manageable and to prevent unlimited growth.
 
-It is a command line application that is delivered as an image that can be configured via environment variables. The tool deletes historical data from a database containing the stateful Workflow subsystem table. It runs, deletes data and then terminates.
+It is a command line application that is delivered as a container image that can be configured via environment variables. The tool deletes historical data from a database containing the stateful Workflow subsystem table. It runs, deletes data and then terminates.
 
 The Workflow subsystems that will be included for cleanup are Data-Index and Data-Audit
 
@@ -86,9 +86,14 @@ When you select the subsystems for clean-up (`data-audit,data-index` or `data-au
 |===
 
 == Configuring the Data Source and {DATA_CLEANUP}
-As the Data Cleanup Tool is available as an image, it can be run as a container in all the usual ways. In a Kubernetes environment it can be run once via a Kubernetes Job or a CronJob if you want to automate the execution of the tool.
+As the {DATA_CLEANUP} is available as a container image, it can be run as a container in all the usual ways. In a Kubernetes environment it can be run once via a Kubernetes Job or a CronJob if you want to automate the execution of the tool. 
 
-NOTE: Since this tool is used to delete data from databases which can contain large amount of data, it is advised to use the tool during off peak work hours with an appropriate batch size. You may also want to backup your database before running the tool. 
+You will find specific Linux versions of the {DATA_CLEANUP} container in the distribution, with the appropriate suffix `s390x` or `amd64`, see xref:../release-notes/whats-new-9.3.1.adoc#download-doc[Download Docs].
+
+The host machine architecture should be automatically resolved when you pull the {DATA_CLEANUP} container. If required, you can use the following command to specify a platform:
+`docker pull --platform linux/s390x quay.io/bamoe/XXXX:{IMAGE_VERSION}`
+
+NOTE: Since this tool is used to delete data from databases which can contain large amount of data, it is advised to use the tool during off-peak work hours with an appropriate batch size. You may also want to backup your database before running the tool. 
 
 To configure the Data source you will need to specify the mandatory and optional properties. The optional properties are listed in the table and described in the paragraphs following the table:
 

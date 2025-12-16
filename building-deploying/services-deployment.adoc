@@ -14,14 +14,14 @@ While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ t
 
 To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-\{version}-db-utils.zip` deliverable that can be manually applied by a database administrator.
 
-The Installation DDL scripts provided allow you to create from scratch the Database for the different {PRODUCT_SHORT} subsystems for PostgreSQL, Microsoft SQL Server, and since 9.2.1, Oracle.
+The Installation DDL scripts allow you to create from scratch the Database for the different {PRODUCT_SHORT} subsystems for PostgreSQL, Microsoft SQL Server, and Oracle.
 
-The provided scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
+The scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
 
-.Contents of bamoe-9.2.1-db-utils.zip
+.Contents of bamoe-{VERSION}-db-utils.zip
 image::wf-tutorial/db-utils-structure.jpg[Contents of bamoe-9.2.1-db-utils.zip,360]
 
-Make sure you have KIE Flyway disabled to guarantee your _Business Service_ containing stateful Workflows subsystems configured with persistence will not try to apply changes to your database schema in your production environment.
+If you are testing in a mirror environment, make sure you have KIE Flyway disabled to guarantee your _Business Service_ containing stateful Workflows subsystems configured with persistence will not try to apply changes to your database schema in your production environment.
 
 [source,properties]
 ----
@@ -65,11 +65,11 @@ The pseudo-timeline below shows the safest strategy for evolving your Workflow m
 
 There is no limit for how many different "versions" of a Workflow you can deploy in the same application. It may take some time for all Process Instances of an old version to be completed, and you can keep evolving your Workflow models by following this strategy.
 
-It may not always be possible to wait for all Process Instances to be completed before deleting a BPMN file. Certain Workflows may be active for a long period. In this case, {PRODUCT_SHORT} provides functionality to migrate Process Instances to newer versions, using the {PIM_ADDON}, see xref:../managing-monitoring/migration-with-pim.adoc[Managing and Monitoring _Business Services_ →  Migration Process Instances using PIM].
+It may not always be possible to wait for all Process Instances to be completed before deleting a BPMN file. Certain Workflows may be active for a long period. In this case, {PRODUCT_SHORT} provides functionality to migrate Process Instances to newer versions, using the {PIM_ADDON}, since version {VERSION} see xref:../managing-monitoring/migration-with-pim.adoc[Managing and Monitoring _Business Services_ →  Migration Process Instances using PIM].
 
 [#multi-pod]
 == Implementing multi-Pod Business Services containing stateful Workflows with a single database
-When running multiple instances of a process service on multiple Pods in the Compact Architecture, make sure to use the embedded Job Service add-on available from {PRODUCT_SHORT} {VERSION_93X}:
+When running multiple instances of _Business Services_ containing Workflows, on multiple Pods in the Compact Architecture, make sure you use the embedded Jobs Service add-on available from {PRODUCT_SHORT} {VERSION_930}:
 
 [source,properties]
 ----
