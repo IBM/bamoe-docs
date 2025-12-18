@@ -97,6 +97,52 @@ image::workflow/task-element-menu.png[width=360]
 
 For the conformance level of BPMN elements, see xref:../reference-guide/bpmn.adoc[Reference → Business Process Model and Notation (BPMN)]
 
+== Using Script Tasks
+
+Script tasks are automated activities in BPMN workflows that execute scripts written in different script languages. Currently, FEEL and Java are supported for script tasks. They allow you to perform custom logic, manipulate process variables, perform calculations, or execute any custom code within your workflow without requiring external services or user interaction.
+
+Script tasks can directly access process variables defined in your workflow. You can use script tasks for operations such as:
+
+* Logging information during process execution
+* Transforming or calculating values
+* Setting process variables based on business logic
+
+When you create a script task in the BPMN editor, you specify the script code that will be executed when the workflow reaches that task. In the properties panel, you can configure the task properties including Name, Documentation, ID, Script, Options (Async, Ad-hoc auto-start), and Metadata.
+
+Review the following list of suggestions before using a script task:
+
+* Avoid low-level implementation details in the process. Although you can use a script task to manipulate variables, consider using a service task when modeling more complex operations.
+* Ensure that the script is executed immediately. If the script is not intended to be executed immediately, consider using an asynchronous service task.
+* Avoid contacting external services through a script task. Use a service task to model communication with an external service.
+* Ensure scripts do not generate exceptions. Runtime exceptions should be caught and managed inside the script or transformed into signals or errors that can then be handled inside the process.
+
+=== Process Context (kcontext)
+
+The `kcontext` variable provides access to the process context within script tasks. It is a global context for the process that allows you to access and modify process variables. The `kcontext` variable is an instance of the `KogitoProcessContext` interface (`org.kie.kogito.internal.process.runtime.KogitoProcessContext`).
+
+You can access process variables in script tasks in two ways:
+
+* **Directly by name**: Process variables can be accessed directly by their variable name in the script. For example, if you have a process variable named `traveler`, you can access it directly as `traveler.getHotelId()`.
+* **Using `kcontext` methods**: You can also use the `kcontext` variable to access and modify process variables programmatically.
+
+You can use the following methods with `kcontext`:
+
+* `kcontext.getVariable("variableName")` - Reads the value of a process variable
+* `kcontext.setVariable("variableName", value)` - Sets or updates a process variable
+* `kcontext.getProcessInstance()` - Returns the process instance currently being executed
+* `kcontext.getNodeInstance()` - Returns the node instance currently being executed
+* `kcontext.getHeaders()` - Returns the headers associated with the process instance
+* `kcontext.getKogitoProcessRuntime()` - Returns the process runtime
+* `kcontext.getContextData()` - Returns context data as a map
+
+[source,java]
+----
+// Set a variable
+kcontext.setVariable("name", "John");
+
+// Update a variable
+kcontext.setVariable("fullName", firstName + " " + lastName);
+----
 
 [#business-calendars]
 == Using Business Calendars
@@ -489,7 +535,49 @@ mp.messaging.outgoing.<channel-name>.connector=smallrye-kafka
 mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ----
 
+== Message Routing with kogitoprocrefid
 
+For intermediate message workflows, `kogitoprocrefid` routes incoming messages to the correct waiting process instance. This field needs to come in on the intermediate message. The value should be the process instance ID of the process that is currently waiting. This is a necessary step for getting the incoming message assigned to the right process instance.
+
+**When is it needed?**
+
+Use `kogitoprocrefid` when you have multiple process instances waiting at the same intermediate catch event and need to route a message to a specific instance. Without `kogitoprocrefid`, the message will be delivered to any waiting process instance, which may not be the intended one.
+
+**How to include it in the message:**
+
+You can include `kogitoprocrefid` in two ways:
+
+* **As a CloudEvent HTTP header** (when sending via HTTP/REST):
+
+[source]
+----
+ce-type: myevent
+ce-source: /from/unit/test
+ce-specversion: 1.0
+ce-id: 21627e26-31eb-43e7-8343-92a696fd96b1
+ce-kogitoprocrefid: 12345
+Content-Type: application/json
+----
+
+* **As a field in the CloudEvent JSON payload** (when sending via Kafka or HTTP with JSON payload):
+
+[source,json]
+----
+{
+  "kogitoprocrefid": "12345",
+  "specversion": "0.3",
+  "id": "21627e26-31eb-43e7-8343-92a696fd96b1",
+  "source": "/process/instance/12345",
+  "type": "process.persons.travellers",
+  "time": "2019-10-01T12:02:23.812262+02:00",
+  "data": {
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@example.com",
+    "nationality": "Polish"
+  }
+}
+----
 
 [#custom-wih]
 == Creating a custom WorkItemHandler
