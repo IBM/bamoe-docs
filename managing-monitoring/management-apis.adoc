@@ -742,7 +742,7 @@ TaskInfo
 
 == Callback Jobs Service Management API
 
-In {PRODUCT_SHORT}, the Callback Jobs Service Management API endpoints are used to manage callbacks into the runtime engine from an external job service. These callbacks allow external systems, such as the job service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the following extension:
+In {PRODUCT_SHORT}, the Callback Jobs Service Management API endpoints are used to manage callbacks into the runtime engine from an external Jobs Service. These callbacks allow external systems, such as the Job Service, to trigger the execution of a TriggerJobCommand. If successful, the process instance linked to this command gets signalled and resumes its execution. This API is provided by the following extension:
 
 [source,xml]
 ----
@@ -985,14 +985,15 @@ For more guidelines on PIM see xref:migration-with-pim.adoc[Migrating your in-fl
 |===
 |*Type* |POST
 
-|*Description* |Used to create a new migration plan to define how to migrate process instances from one process definition version (source) to another process definition version (target)
+|*Description* |Used to create a new migration plan that defines how to migrate process instances from one Process Definition version (source) to another Process Definition version (target)
 
-|*Inputs* a|
-* sourceProcessId: String (ID of the process whose instances will be migrated)
-* sourceProcessVersion: String (version of the process whose instances will be migrated)
-* targetProcessId: String (ID of the process which the instances will be migrated to)
-* targetProcessVersion: String (version of the process which the instances will be migrated to)
-* nodeMapping: List (contains the mapping of nodes between both processes. Each mapping should contain a “sourceId” and “targetId” defining the node ID in the process BPMN definition respectively.)
+|*Inputs* a|The payload body should be a JSON file containing the following:
+
+* sourceProcessId: String (processId of the Process Definition whose instances will be migrated)
+* sourceProcessVersion: String (version of source Process Definition)
+* targetProcessId: String (processID of the target Process Definition to which the instances will be migrated)
+* targetProcessVersion: String (version of the target Process Definition) 
+* nodeMapping: List (contains the mapping of nodes between source and target Process Definitions (can be empty). Each mapping should contain a “sourceId” and “targetId” defining the node IDs in the source/target BPMN.)
 
 |*Output* a| Returns a summary with the results of the operation, including:
 

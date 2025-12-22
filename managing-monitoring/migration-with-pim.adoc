@@ -4,40 +4,26 @@ include::../styles/images.adoc[]
 
 When Process Definitions are deployed as _Business Services_ in a Cloud environment, client applications or {MANAGEMENT_CONSOLE} users can create Process Instances that follow the sequence flow defined in the Process Definition. For Process Instances that run for weeks or months and that are in waiting states, due to Timers or User Tasks, you may wish to deploy a new Process Definition version to running _Business Services_, which can cause Process Instances in waiting states to follow obsolete Process Definitions. 
 
-== Intro {PIM_ADDON}
+== Introduction to {PIM_ADDON}
 
-The {PIM_ADDON} and its integration with {MANAGEMENT_CONSOLE} enables you to manage the migration of in-flight Process Instances to a new Process Definition version or completely different Process Definition. By mapping the original Process Definition nodes to updated Process Definition nodes, Process Instances can transition to the new sequence flow and adapt to changes in their definitions over time without losing their current state or requiring a restart.
-
-////
-Process Instances (PIs) contain information about the entities that are necessary to walk through the Workflow’s execution path. Such entities are passed from node to node as Process Variables, and this input/output relationship between nodes is defined via I/O Assignments in BPMN Editor (classic), and Data Mapping in the new BPMN Editor.
-
-////
+The {PIM_ADDON} and its integration with {MANAGEMENT_CONSOLE} enables you to manage the migration of in-flight Process Instances to a new Process Definition version or a completely different Process Definition. By mapping the original Process Definition nodes to updated Process Definition nodes, Process Instances can transition to the new sequence flow and adapt to changes in their definitions over time without losing their current state or requiring a restart.
 
 It is important to be able to update Process Definitions for the following reasons:
 
-* Keep long running processes aligned with evolving business rules and business needs
-* Reduce operational risk through evolution of obsolete workflows
-* Maintain flexibility to adapt your processes with restarting Process Instances. 
+* To keep long running processes aligned with evolving business rules and business needs.
+* To reduce operational risk through evolution of obsolete workflows.
+* To maintain flexibility to adapt your processes without restarting Process Instances. 
 
-////
-The advantage of using this utility is that it:
+Process Instances contain information about the entities that are necessary to walk through the execution path of the Workflow. Such entities are passed from node to node as Process Variables, and this input/output relationship between nodes is defined via I/O Assignments in BPMN Editor (Classic), and Data Mapping in the new BPMN Editor. During migration, the state is preserved with process or task variables remaining unchanged. 
 
-* _Preserves state_: During migration, process or task variables remain unchanged.
-
-
-* _Handles subprocesses automatically_: When a process is migrated, all its subprocesses—including nested ones—are automatically migrated as well.
-
-* _Maintains parent dependencies_: Attempting to migrate a subprocess independently, without migrating its parent process, will result in migration failure.
-
-Process Instance Migration (PIM) using the Compact Architecture is based on simplified communication among the different __Business services__ without using events (Kafka/HTTP). 
-////
+The hierarchy between a Process and its subprocesses are preserved by the PIM Add-on. When a Process Instance is migrated all its subprocesses, including nested ones, are also automatically migrated. Alternatively, if you attempt to migrate a subprocess independently, without migrating its parent process, the migration will fail.
 
 == Guidelines and Process
-When your migration plans are ready you should test it on a mirror of your production system. Before doing the actual migration, do a database backup and plan downtime for your users to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption.  Only restore access once the migration has finished executing.
+When your migration plan is ready you should test it on a mirror of your production system. Before doing the actual migration, do a database backup and plan downtime for your users to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Only restore access once the migration has finished executing.
 
-PIM does not migrate data, e.g., Process and Task variables, Jobs schedules, and SLAs are not updated. The new version of the Process Definition must be compatible with the previous version. If this is not the case you may have errors during the next interaction with Process Instances that have been migrated. In this situation you will need to use PIM to migrate Process Instances again to a compatible data model. 
+PIM does not migrate data, e.g., Process and Task variables, Jobs schedules, and SLAs. The new version of the Process Definition must be compatible with the previous version. If this is not the case you may have errors during the next interaction with Process Instances that have been migrated. In this situation you will need to use PIM to migrate Process Instances again to a compatible data model. 
 
-The overall process to migrate Process Instances to new Process Definitions in your production system is the following: 
+The overall process to set up plan and migrate Process Instances to new Process Definitions in your production system is the following: 
 
 . Include the xref:../reference-guide/maven-repository-libraries.adoc#PIM-addon-dependency[{PIM_ADDON_SHORT}] dependency in your _Business Service_ POM.
 
@@ -47,14 +33,14 @@ The overall process to migrate Process Instances to new Process Definitions in y
 
 . Test your migration plan on a duplicate of your production system. 
 
-. When you are ready to migrate your production system, ensure you are have isolated the production system from user interactions and that it is backed up.
+. When you are ready to migrate your production system, ensure you have isolated it from user interactions and that it is backed up.
 
 . Execute your PIM plan to migrate the Process Instances that are in a wait state, that match the defined criteria, to the new Process Definitions.
 + You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
 
 For more information on using the {MANAGEMENT_CONSOLE} to migrate Process Instances see xref:consoles.adoc#process-instance-migration-ui[Management Console → Process Instance Migration]
 
-For more information on using the {PIM_ADDON_SHORT} API to migrate Process Instances to a new Process Definition see xref:management-apis.adoc#process-instance-migration-addon[Management APIs Process → Process Instance Migration APIs]
+For more information on using the {PIM_ADDON_SHORT} API to migrate Process Instances to a new Process Definition see xref:#pim-migration-rest[Process to migrate via REST API]
 
 === What happens during migration?
 
@@ -62,7 +48,7 @@ PIM does more than just switch process definitions, it ensures consistency acros
 
 Subsystem adaptation:: Migrates process nodes and updates associated elements in subsystems like Data-Index and User Tasks. Jobs do not require adaptation. After migration, the _Business Service_ remains fully functional through both REST APIs and UIs.
 
-Active elements only:: PIM migrates only active elements (active node instances, active user tasks, etc.). Nodes that are no longer active will not be migrated.
+Active elements only:: PIM migrates only active elements (active node instances, active User Tasks, etc.). Nodes that are no longer active will not be migrated.
 
 Data handling:: PIM does not migrate data stored in process variables or task variables. If your new Process Definition contains additional variables, they will be initialized with an empty value. If your data model changes, you must ensure backward compatibility. Otherwise, PIM cannot properly migrate process instances, and you will need to use alternative strategies, such as draining out existing instances.
 
@@ -95,14 +81,110 @@ If you are experiencing slowness during the PIM execution with PostgreSQL, make 
 `enable_nestloop=off`
 ====
 
-=== Database Limits for Bulk Migration
+[#pim-migration-rest]
+== Process Instance migration through the PIM REST API
+If you want to automate or integrate migration or integration rather than complete the migration using the UI, {PRODUCT_SHORT} exposes a REST API for Process Instance Migration, see xref:management-apis.adoc#process-instance-migration-addon[Management APIs Process → Process Instance Migration APIs]. 
 
+=== Managing migration plans
+You can use the following endpoints to create and manage migration plans with the PIM Add-on:
+
+. Create a new migration plan that defines how process instances move from a source process to a target process using `POST /pim/plan`, defining the following payload fields:
++
+* sourceProcessId (String) - ID of the source process.
+* sourceProcessVersion (String) - Version of the source process.
+* targetProcessId (String) - ID of the target process.
+* targetProcessVersion (String) - Version of the target process.
+* nodeMapping (List) - Optional list of node mappings (sourceId →
+targetId). 
++
+For example:
++
+[source,JSON]
+----
+ {
+   "sourceProcessId": "hiring",
+   "sourceProcessVersion": "1.0",
+   "targetProcessId": "hiring2",
+   "targetProcessVersion": "1.0",
+   "nodeMapping": [
+     {"sourceId": "_B8C4F63C-81AD-4291-9C1B-84967277EEF6", "targetId": "_CBB6BF5D-21DA-43D2-A20B-C361694AF7AE"},
+     {"sourceId": "_B4BB21C5-7BCA-47DA-A688-2F37BC6B76A7", "targetId": "_C7DBD2B3-1744-4844-8B3D-D23CAF9D2436"}
+]
+ }
+----
++
+The endpoint returns the plan details, validation status, and warnings/errors if any.
+
+. You can use `GET /pim/plan/{planId}` to obtain details of a specific migration plan, including mappings and validation results.
+
+. You can use `DELETE /pim/plan/{planId}` to remove a migration plan that is not currently in use. 
+
+. You can use `GET /pim/plans` to retrieve all migration plans, and optionally filter using the `sourceProcessId` and `targetProcessId` as query parameters. 
+
+=== Managing migrations 
+You can use the following endpoints to  execute and retrieve information on migrations with the PIM Add-on:
+
+You can use `POST /pim/migration` to execute the migration of active Process Instances from the source to the target Process Definition using the specified migration plan.
+
+* If you want full migration where all active Process Instances of the source process will be migrated, do not specify any Process Instance IDs
++
+* If you want bulk migration to migrate a subset of Process Instances, provide a list of Process Instance IDs to be included in the bulk migration. 
++
 Each database has a maximum number of parameters allowed in an update operation. This affects how many process instance IDs you can include in a bulk migration request. Below are the limits for each supported database:
 
-* H2 → 50,000 IDs
-* PostgreSQL → 50,000 IDs
-* Oracle → 1,000 IDs
-* MS SQL Server → 2,000 IDs
+** H2 → 50,000 IDs
+** PostgreSQL → 50,000 IDs
+** Oracle → 1,000 IDs
+** MS SQL Server → 2,000 IDs
+
+For example:
+
+[source,json]
+----
+ {
+   "planId": "<plan_id>",
+   "processInstanceIds": ["id1", "id2", "id3", ...]
+}
+----
+
+Which returns the following:
 
 
+[source,json]
+----
+ {
+   "status": 200,
+   "message": "Migration finished",
+   "data": {
+     "migrationId": "<migration_id>",
+     "planId": "<plan_id>",
+      "migratedProcessInstancesCount": 100000
+   }
+ }
+----
 
+Where:
+
+migrationId:: is the unique identifier for the migration.
+
+migratedProcessInstancesCount:: is the number of instances migrated.
+
+skippedProcessInstanceIds:: lists any IDs that were not migrated, if they exist.
+
+You can use `GET /pim/migration/processes/{processInstanceId}` to return the list of migrations associated with a given Process Instance, including timestamps for when the migration was created and applied.
+
+[source, json]
+----
+ {
+   "status": 200,
+   "message": "Retrieved migrated process instance",
+   "data": [
+     {
+       "migrationId": "<migration_id>",
+       "processInstanceId": "<process_instance_id>",
+       "planId": "<plan_id>",
+       "createdAt": "2025-11-20T00:00:00.000+00:00",
+       "appliedAt": "2025-11-20T15:23:58.910+00:00"
+} ]
+}
+----
