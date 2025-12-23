@@ -79,13 +79,14 @@ In Workflows built with BPMN, `User Task` is a special type of activity that can
 manual intervention of a user. When a Process Instance reaches a `User Task` node, a new User Task is created and the Process Instance is stopped waiting for the completion of the User Task. Once the User Task completes, the process can continue its execution normally.
 
 The User Tasks subsystem is responsible for the execution of User Tasks initiated by the workflow engine, enabling users to move
-tasks through the different phases of their life cycle until they reach a **Completed** state.
+tasks through the different phases of their lifecycle until they reach a **Completed** state.
 
 The User Tasks subsystem provides the following features:
 
 * Runs as a collocated service in the Workflow Engine with no extra configuration required in the application.
 * Generic set of REST API endpoints to interact with it, enabling users to transition User Tasks between the different lifecycle phases,
 modify User Task data (inputs and outputs), add comments and attachments to User Tasks.
+* Customization of *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase (see xref:authoring-workflows.adoc#user-task-assignment[Configuring User Task assignment strategies]).
 
 You can choose between the two options for the User Task lifecycle inside your process:
 
@@ -101,22 +102,22 @@ kogito.usertasks.lifecycle=ws-human-task
 
 ////
 Custom User Task lifecycles are not supported in this version. 
-If a custom User Task lifecycle implementation is provided in your _Business Service_, it takes precedence over the property and will be automatically selected as the default User Task life cycle irrespective of the property.
+If a custom User Task lifecycle implementation is provided in your _Business Service_, it takes precedence over the property and will be automatically selected as the default User Task lifecycle irrespective of the property.
 If no custom lifecycle implementation is provided and the property is `kogito` or `ws-human-task`, then the corresponding lifecycle will be selected.
 ////
 
 See the associated xref:user-tasks.html[User Tasks API]
 
 [#kogito-task-lifecycle]
-=== The Default Kogito User Task life cycle
+=== The Default Kogito User Task Lifecycle
 
-The User Tasks subsystem defines a Default life cycle that enables users to transition a task through different phases that will change
-the task state until it reaches a `Completion` state, allowing the associated Process Instance to continue executing. The Default lifecycle also enables you to customize the *User Task Assignment Strategy* to automatically assign User Tasks to users during the task `Activate` phase (see xref:authoring-workflows.adoc#user-task-assignment[Configuring User Task assignment strategies]).
+The User Tasks subsystem defines a Default lifecycle that enables users to transition a task through different phases that will change
+the task state until it reaches a `Completion` state, allowing the associated Process Instance to continue executing. 
 
-.Default User Task life cycle
+.Default User Task lifecycle
 image::wf-usertaks-lifecycle.png[]
 
-With the Default life cycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment, it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users that are allowed to work with it.
+With the Default lifecycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment, it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users that are allowed to work with it.
 
 The task will then remain in *Ready* state until a user claims it, which will make the task pass through the `Claim` phase making the move into a *Reserved* state and the user will become the owner of the task.
 
@@ -132,14 +133,12 @@ NOTE: During the `Activate` and `Reassign` phases, if the task has a single pote
 === The WS-Human Task Lifecycle
 An alternative User Task lifecycle is available in {PRODUCT_SHORT}, that adheres to the xref:https://docs.oasis-open.org/bpel4people/ws-humantask-1.1-spec-cs-01.html[WS-HumanTask standard] section 4.10 "Human Task Behavior and State Transitions".
 
-.The WS-Human Task life cycle
+.The WS-Human Task lifecycle
 image::workflow/ws-humantask-lifecycle.png[]
 
-NOTE: The Human Task life cycle adheres to the WS-HumanTask standard with the exception of the `suspendUntil` event which is not supported. 
+NOTE: The Human Task lifecycle adheres to the WS-HumanTask standard with the exception of the `suspendUntil` event which is not supported. 
 
-With the Human Task life cycle, a Task is initiated in a *Created* state. 
-
-Task creation succeeds irrespective of whether the people assignment returns a set of values or an empty set. 
+With the Human Task lifecycle, a Task is initiated in a *Created* state. Task creation will succeed whether the people assignment returns a set of values or an empty set. 
 
 If potential owners were not assigned automatically during task creation then they must be assigned explicitly using nomination, which is performed by the business administrator of the task. The result of evaluating potential owners removes the excluded owners from results. The task remains in the state *Created* until it is activated and has potential owners.
 
