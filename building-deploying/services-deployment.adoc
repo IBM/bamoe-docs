@@ -7,28 +7,27 @@ Container images, Native Executable, or standard JARs) you are ready to define y
 
 Follow industry-standard software development practices to version your _Business Services_ projects on Version Control Systems (VCS), and to automate the deployment process of your _Business Services_ using widely adopted services and tools.
 
-While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ to your production environment, there are a few important considerations you need to take into account, especially if you are using stateful Workflows.
+While {PRODUCT_SHORT} does not dictate how you deploy your _Business Services_ to your production environment, there are a few important considerations to be taken into account, in particular if you are using stateful Workflows.
 
 [#production-database-creation]
 == Creating your database schema for stateful Workflows using {DDLS}
 
-To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the `bamoe-\{version}-db-utils.zip` deliverable that can be manually applied by a database administrator.
+To initialize your application database, {PRODUCT_SHORT} provides a set of DDL (Data Definition Language) scripts in the bamoe-\{VERSION}-db-utils.zip deliverable that can be manually applied by a database administrator.
 
-The Installation DDL scripts allow you to create from scratch the Database for the different {PRODUCT_SHORT} subsystems for PostgreSQL, Microsoft SQL Server, and Oracle.
+The Installation DDL scripts (contained in the `ddl` directory) enable you to create the database for the different {PRODUCT_SHORT} subsystems for your chosen database: PostgreSQL, Microsoft SQL Server, and Oracle.
 
-The scripts can be executed in any order, and the required tables will be created in the database that will be used by the {PRODUCT_SHORT} Workflow engine.
+The scripts can be executed in any order. The required subsystem tables will be created in the database and used by the {PRODUCT_SHORT} Workflow engine.
 
-.Contents of bamoe-{VERSION}-db-utils.zip
-image::wf-tutorial/db-utils-structure.jpg[Contents of bamoe-9.2.1-db-utils.zip,360]
+If everything is correctly set, at the first project execution all the tables will be automatically added.
 
-If you are testing in a mirror environment, make sure you have KIE Flyway disabled to guarantee your _Business Service_ containing stateful Workflows subsystems configured with persistence will not try to apply changes to your database schema in your production environment.
+To guarantee that your _Business Service_ containing stateful Workflows subsystems, configured with persistence, will not try to apply changes to your database schema in your production environment, disable KIE Flyway by setting the following property: 
 
 [source,properties]
 ----
 kie.flyway.enabled=false
 ----
 
-If everything is correctly set, at the first project execution all the tables will be automatically added.
+// question about why we need the above paragraph
 
 [#evolving-deployed-workflows]
 == Evolving stateful Workflows across _Business Service_ deployments
