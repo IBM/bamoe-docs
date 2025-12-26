@@ -58,18 +58,23 @@ private DataStore<Person> persons;
 You will find specific Linux versions of the {MCP_SERVER} container in the distribution with the appropriate suffix `s390x` or `amd64`,see xref:../release-notes/whats-new-9.3.1.adoc#download-doc[Download Docs].
 
 The host machine architecture should be automatically resolved when you pull the {MCP_SERVER} container. If required, you can use the following command to specify a platform:
-`docker pull --platform linux/s390x quay.io/bamoe/XXXX:{IMAGE_VERSION}`.
+`docker pull --platform linux/s390x quay.io/bamoe/mcp-server:{IMAGE_VERSION}`.
 
 To run the {MCP_SERVER}, complete the setup and launch the server image in a Docker environment using the following command:
 
 [source,shell, subs="attributes+"]
 ----
 docker run -it --rm \
-  -p 8081:8080 \
+  -p 8084:8080 \
   --name mcp-server \
   -e MCP_SERVER_OPENAPI_URLS=<your_business_services_OpenAPIv3_path> \
   quay.io/bamoe/mcp-server:{IMAGE_VERSION}
 ----
+
+////
+This para is part of the README (https://github.com/IBM/bamoe/blob/main/bamoe-container-images/mcp-server/readmes/README-9.3.1-ibm-0006.md) and there is something to clarify on ports:
+BAMOE MCP Server (Tech Preview) will start on http://localhost:8084, automatically registering Business Services running on both http://localhost:8080 and http://localhost:8081. Connecting your AI agents to http://localhost:8084 via MCP allows your AI agent to trigger Processes and evaluate Decisions and Rules. 
+////
 
 At startup, the MCP Server parses all exposed {PRODUCT_SHORT} Business Services and translates their capabilities into MCP Tools. These tools become available to any MCP client or Agentic AI environment that supports the MCP protocol, allowing users to seamlessly integrate {PRODUCT_SHORT} automation features into AI-driven workflows.
 
