@@ -42,17 +42,83 @@ Although it is valid to have multiple structures with properties of the same nam
 
 |To ensure autocompletion works as expected, do not use namespaces in `href` attributes when referencing decisions within the same DMN model. Use relative references (for example, `href="#decisionName"`) instead.
 
-| BAMOE Management Console error logs on image startup
+| BAMOE Management Console environment variables not working
 
-| When starting the BAMOE Management Console image, error messages related to environment variable validation may appear. These messages do not affect the startup process.
+| When starting the BAMOE Management Console, error messages related to environment variable validation may appear in the logs. These errors do not prevent the BAMOE Management Console from starting, but any environment variables set will not take effect.
 
-| No action required. The BAMOE Management Console will work as expected.
+a| Overwrite the initial `env.json` file inside the BAMOE Management Console container by mounting a volume on top of its path with a fixed `env.json` file.
 
-| BAMOE Management Console Helm Charts has variables that can't be used
+Example (Docker Compose):
+[source,shell,subs="attributes+"]
+----
+services:
+  management-console:
+    container_name: bamoe-management-console
+    image: quay.io/bamoe/management-console:{IMAGE_VERSION}
+    platform: linux/amd64
+    ports:
+      - "8380:8080"
+    volumes:
+      - /path/to/local/env.json:/management-console/app/env.json
+    environment:
+      RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID: kie-management-console
+----
 
-| The Helm Charts for BAMOE Management Console include two variables that are not functional: `pimMaxBulkIterationsCount` and `pimMaxBulkSize`.
+Fixed initial `env.json` file:
+[source,json]
+----
+{
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME": "BAMOE Management Console",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID": "bamoe-management-console",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES": "openid email profile",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE": "",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES": [],
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH": ""
+}
+----
 
-| No action required. These variables can be ignored.
+| BAMOE Management Console Helm Chart variables not working
+
+| The Helm Chart for BAMOE Management Console includes two variables that are not functional: `pimMaxBulkIterationsCount` and `pimMaxBulkSize`. These variables should be avoided for now. The Management Console container will start, but other environment variables set via Helm Chart values will be ignored.
+
+a| Overwrite the initial `env.json` file inside the BAMOE Management Console container by creating a ConfigMap with a fixed `env.json` and patching the deployment, mounting a volume on top of the initial file.
+
+Create ConfigMap:
+[source,shell]
+----
+kubectl create configmap bamoe-management-console-env \
+  --from-literal=env.json='{
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME": "BAMOE Management Console",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID": "bamoe-management-console",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES": "openid email profile",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE": "",
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES": [],
+  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH": ""
+}'
+----
+
+Patch Deployment:
+[source,shell]
+----
+kubectl patch deployment bamoe-management-console-management-console \
+  --type='strategic' \
+  -p='
+spec:
+  template:
+    spec:
+      volumes:
+        - name: env-json-volume
+          configMap:
+            name: bamoe-management-console-env
+      containers:
+        - name: management-console
+          volumeMounts:
+            - name: env-json-volume
+              mountPath: /management-console/app/env.json
+              subPath: env.json
+'
+----
+
 
 | BAMOE Canvas: Misleading Dev Deployment status for Kind/Minikube deployments
 
