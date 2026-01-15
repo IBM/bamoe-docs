@@ -1,0 +1,104 @@
+[id='clustering-headless-controller-proc_{context}']
+= Clustering {KIE_SERVERS} with the {HEADLESS_CONTROLLER}
+
+Configure BAMOE Clustering with Four Nodes
+
+Node Setup
+
+BAMOE Node1: EAP 7 + headless controller (controller.war)
+
+BAMOE Node2: EAP 7 + headless controller (controller.war)
+
+BAMOE Node3: EAP 7 + process server (kie-server.war)
+
+BAMOE Node4: EAP 7 + process server (kie-server.war)
+
+Setup on Node1 and Node2
+
+In the EAP_HOME/standalone/configuration/standalone-full.xml file, add the following properties under the <system-properties> tag:
+
+<system-properties>
+   <property name="org.kie.server.user" value="<USERNAME>"/>
+   <property name="org.kie.server.pwd" value="<USER_PWD>"/>
+   <property name="org.kie.server.controller.templatefile.watcher.enabled" value="true"/>
+   <property name="org.kie.server.controller.templatefile" value="/NFS_STORAGE/path/template-storage.xml"/>
+</system-properties>
+
+Replace <USERNAME> and <USER_PWD> with actual credentials.
+
+Ensure the user has the kie-server role defined.
+
+Template File Behavior:
+
+Template files contain default configurations for deployment scenarios.
+
+If org.kie.server.controller.templatefile.watcher.enabled is set to true, a thread monitors changes every 30,000 ms (configurable with org.kie.server.controller.templatefile.watcher.interval).
+
+If set to false, changes are detected only after server restart.
+
+Setup on Node3 and Node4
+
+Deploy kie-server.war and configure the following properties in standalone-full.xml:
+
+<system-properties>
+   <property name="org.kie.server.controller.user" value="<CONTROLLER_USER>"/>
+   <property name="org.kie.server.controller.pwd" value="<CONTROLLER_PWD>"/>
+   <property name="org.kie.server.id" value="<KIE_SERVER_ID>"/>
+   <property name="org.kie.server.location" value="http://<HOST>:<PORT>/kie-server/services/rest/server"/>
+   <property name="org.kie.server.controller" value="http://20.20.20.20:8080/controller/rest/controller,http://10.10.10.10:8080/controller/rest/controller"/>
+</system-properties>
+
+Explanation of Properties:
+
+org.kie.server.controller.user: Username for the controller on Node1/Node2.
+
+org.kie.server.controller.pwd: Password for the controller.
+
+org.kie.server.id: Unique ID of the KIE server.
+
+org.kie.server.location: URL of the KIE server.
+
+org.kie.server.controller: Comma-separated list of controller URLs for HA.
+
+High Availability Setup:
+
+Define two controllers in org.kie.server.controller property.
+
+KIE server connects to secondary controller if primary fails.
+
+Important Considerations
+
+NFS Connectivity: Must remain stable. If NFS fails, controllers cannot access container details.
+
+Shared Database: Required for KIE server clustering to load sessions.
+
+KIE Server Node Clustering
+
+Include the following properties for clustering:
+
+<property name="org.kie.server.persistence.ds" value="java:jboss/MySqlXADS"/>
+<property name="org.kie.server.persistence.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+
+org.kie.server.persistence.ds: JNDI name of the data source.
+
+org.kie.server.persistence.dialect: Hibernate dialect (MySQL8Dialect).
+
+Elytron Realm Configuration
+
+Use JBoss CLI commands to create users in Elytron realm:
+
+/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>)
+/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>,clear={password="<PASSWORD>"})
+/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[kie-server])
+
+Replace <USERNAME> and <PASSWORD> with actual values.
+
+Testing High Availability
+
+Shutdown the primary controller at http://10.10.10.10:8080/controller/.
+
+Restart a KIE server node.
+
+Verify container details load from the secondary controller at http://20.20.20.20:8080/controller/.
+
+Result: This configuration ensures BAMOE clustering with high availability, fault tolerance, and secure authentication.
