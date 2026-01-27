@@ -13,45 +13,25 @@ You can create a _Business Service_ using the Decision and Rule engines with the
 
 == Dependencies
 
-Use the BAMOE BOM for easily managing the version of all BAMOE libraries.
+Use the {PRODUCT_SHORT} Bill Of Materials dependency with the Quarkus Bill Of Materials dependency to facilitate management of all {PRODUCT_SHORT} libraries. 
 
-[source,xml,subs="+attributes"]
-----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>com.ibm.bamoe</groupId>
-      <artifactId>bamoe-bom</artifactId>
-      <version>{BOM_VERSION}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-----
+For BOM dependencies, `bamoe-bom` and `quarkus-bom`, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE BOMs (Bill of Materials)].
+
+Add the dependencies in the `<dependencyManagement>`.
 
 For the dependencies required for a Decision or Rules application, see
 xref:../reference-guide/maven-repository-libraries.adoc#decisions-rules[Decisions, Rules, and Decision Tables (Quarkus)].
 
-Hot-reload is enabled out-of-the-box during development, using
+Use the following command to enable hot-reload out-of-the-box during development:
 
 [source,shell]
 ----
 mvn clean compile quarkus:dev
 ----
 
-To enable Test Scenario support, use
+To enable Test Scenario support, use `kogito-scenario-simulation` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
 
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-scenario-simulation</artifactId>
-  <scope>test</scope>
-</dependency>
-----
-
-Finally, the following Maven plugin is required to correctly build and package the application:
+To correctly build and package the application, use the following Maven plugin:
 
 [source,xml]
 ----
@@ -61,8 +41,8 @@ Finally, the following Maven plugin is required to correctly build and package t
 </plugin>
 ----
 
-
-See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for Decisions] for a _Business Servics_ with Decisions on Quarkus, or {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/rules-embedded-mode-example/pom.xml[complete pom.xml for Rules] for a _Business Service_ with Rules on Quarkus.
+For more information on a _Business Servics_ with Decisions on Quarkus, see the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for Decisions]. 
+For more information on a _Business Service_ with Rules on Quarkus, see {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/rules-embedded-mode-example/pom.xml[complete pom.xml for Rules].
 
 == Configuration
 

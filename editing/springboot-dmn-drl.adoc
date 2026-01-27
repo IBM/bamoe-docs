@@ -12,58 +12,39 @@ Developers can add custom classes to the _Business Service_ project to provide a
 
 == Dependencies
 
-Use the {PRODUCT_SHORT} BOM combined with the Spring Boot BOM to facilitate management of all {PRODUCT_SHORT} libraries.
+Use the {PRODUCT_SHORT} Bill Of Materials dependency with the Spring Boot Bill Of Materials dependency to facilitate management of all {PRODUCT_SHORT} libraries. 
 
-[source,xml,subs="+attributes"]
-----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>com.ibm.bamoe</groupId>
-      <artifactId>bamoe-bom</artifactId>
-      <version>{BOM_VERSION}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <version>{SPRING_BOOT_VERSION_BOM}</version>
-      <optional>true</optional>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-----
+For BOM dependencies, `bamoe-bom` and `spring-boot-devtools`, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE BOMs (Bill of Materials)].
 
-The dependencies required for a Decision or Rules application with Spring Boot are:
+Add the dependencies in the `<dependencyManagement>`.
+
+The following dependencies are required for a Decision or Rules application with Spring Boot:
+
+`spring-boot-starter-actuator`:: Use for a workflow _Business Service_ project built with Spring Boot. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot[Workflows (Spring Boot)].
+
+`drools-decisions-spring-boot-starter`:: Use for Decision application. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
+
+`drools-rules-spring-boot-starter`:: Use for Rules application. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
+
+To enable hot-reload during development, use `spring-boot-devtools` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_spring_boot_bom[Spring Boot BOM].
+
+To enable Test Scenario support, use `kogito-scenario-simulation` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
+
+To correctly build and package the application, use `kogito-maven-plugin` and the following Maven plugin:
 
 [source,xml]
 ----
-<dependency>
+<plugin>
   <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-
-<!-- and -->
-
-<!-- For Decisions -->
-<dependency>
-  <groupId>org.drools</groupId>
-  <artifactId>drools-decisions-spring-boot-starter</artifactId>
-</dependency>
-
-<!-- or -->
-
-<!-- For Rules -->
-<dependency>
-  <groupId>org.drools</groupId>
-  <artifactId>drools-rules-spring-boot-starter</artifactId>
-</dependency>
-
+  <artifactId>spring-boot-maven-plugin</artifactId>
+</plugin>
 ----
+For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
 
-To enable hot-reload during development, use
+For more information on a _Business Servics_ with Decisions on Spring Boot, see the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/decisions/pom.xml[complete pom.xml for Decisions]. 
+For more information on a _Business Service_ with Rules on Spring Boot, see {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/rules/pom.xml[complete pom.xml for Rules].
 
+////
 [source,xml]
 ----
 <dependency>
@@ -71,33 +52,7 @@ To enable hot-reload during development, use
   <artifactId>spring-boot-devtools</artifactId>
 </dependency>
 ----
-
-To enable Test Scenario support, use
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-scenario-simulation</artifactId>
-  <scope>test</scope>
-</dependency>
-----
-
-Finally, the following Maven plugins are required to correctly build and package the application:
-
-[source,xml]
-----
-<plugin>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-maven-plugin</artifactId>
-</plugin>
-<plugin>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-maven-plugin</artifactId>
-</plugin>
-----
-
-See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/decisions/pom.xml[complete pom.xml for Decisions] for a _Business Servics_ with Decisions on Spring Boot, or {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/rules/pom.xml[complete pom.xml for Rules] for a _Business Service_ with Rules on Spring Boot.
+////
 
 == Configuration
 
