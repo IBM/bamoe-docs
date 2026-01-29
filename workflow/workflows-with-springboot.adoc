@@ -16,7 +16,7 @@ Use the {PRODUCT_SHORT} Bill Of Materials dependency with the Spring Boot Bill O
 
 For BOM dependencies, `bamoe-bom` and `spring-boot-devtools`, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE BOMs (Bill of Materials)].
 
-The following dependencies are required for a Decision or Rules application with Spring Boot:
+The following dependencies are required for a workflow _Business Service_ project built with Spring Boot
 
 `spring-boot-starter-actuator`:: Use for a workflow _Business Service_ project built with Spring Boot. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot[Workflows (Spring Boot)].
 
@@ -31,7 +31,7 @@ To correctly build and package the application, use `kogito-maven-plugin` and th
   <artifactId>spring-boot-maven-plugin</artifactId>
 </plugin>
 ----
-For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
+For `kogito-maven-plugin` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
 
 === Workflow subsystem add-ons (Spring Boot)
 
@@ -192,7 +192,7 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
 
-Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
+Additionally, if the _Business Service_ includes Data-Index or Jobs Service, you must add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
 
 This module includes the necessary Hibernate ORM mappings to support remapping some JPA entities used in both components. The mappings contained are:
 
@@ -251,7 +251,7 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Oracle
 
-Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you must add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
 
 `META-INF/bamoe-user-task-orm.xml`:: File remaps several entities from the jbpm-usertask-storage-jpa component.
 `META-INF/bamoe-job-service-orm.xml`:: File remaps several entities from the job-service component.
@@ -270,7 +270,7 @@ spring.jpa.mapping-resources=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-jo
 
 === Configuring persistence for H2 (Development only)
 
-In development environments, you can use H2 persistence for your _Business Service_, in your POM add the `h2` dependency. Flyway dependency is not required for H2.
+To configure H2 persistence for your _Business Service_ in your POM file add the `h2` dependency. Flyway dependency is not required for H2.
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -283,7 +283,7 @@ spring.datasource.password=bamoe
 
 == Structure
 
-A Workflow service with Springboot typically contains the following:
+A Workflow service with Springboot typically contains the following elements:
 
 * `src/main/java`: Java classes implementing domain models and business services
 * `src/main/resources`:
@@ -356,7 +356,7 @@ To access the {SPRING_WEB_CONSOLE}, open a browser and navigate to `http://local
 
 === Process Instances
 
-The Process Instances page will display all the running processes and their execution status. Clicking on any process instance will open the Process Instance details page.
+The Process Instances page will display all the running processes and their execution status. Click on any process instance to open the Process Instance details page.
 
 image::workflow/spring-console-pi.png[{SPRING_WEB_CONSOLE} Process Instances page]
 
@@ -373,7 +373,7 @@ The Process Definitions forms are auto generated, but can be customized in the F
 
 === Jobs
 
-The Jobs page will display all the scheduled jobs and their execution status. Clicking on the actions menu on any job will show available options, including *Details*, which will open the job details modal.
+The Jobs page will display all the scheduled jobs and their execution status. Click on the actions menu on any job to show available options, including *Details*, which will open the job details modal.
 
 image::workflow/spring-console-jobs.png[Jobs page]
 
@@ -383,11 +383,11 @@ The Tasks page will display all the User Tasks and their priorities and status.
 
 image::workflow/spring-console-tasks.png[Tasks page]
 
-Clicking on the task name will open the User Task Form that can be filled and submitted to progress it to the next phase.
+Click on the task name to open the User Task Form that can be filled and submitted to progress it to the next phase.
 
 image::workflow/spring-console-task-form.png[Task Form page]
 
-Clicking on **View Details** will open a side panel with more details on the current task, e.g., the parent process (if it exists), assigned users/groups, id, name, and state.
+Click on **View Details** to open a side panel with more details on the current task, e.g., the parent process (if it exists), assigned users/groups, id, name, and state.
 
 image::workflow/spring-console-task-form-details.png[Task details panel]
 
@@ -396,7 +396,7 @@ The Task forms are auto generated, but can be customized in the Forms page. See 
 
 === Forms
 
-The Forms page will display all the available forms in the project. Initially it will be empty, since all forms (for User Tasks and Process Definitions) are auto generated.
+The Forms page display all the available forms in the project. Initially it will be empty, since all forms (for User Tasks and Process Definitions) are auto generated.
 
 To add custom forms (for example, in the `hiring` Process Definition or `HR Interview` User Task), follow the steps in xref:../tools/form-generation.adoc[Form code generation functionality] and then place the generated forms in the `src/main/resources/custom-forms-dev` folder.
 

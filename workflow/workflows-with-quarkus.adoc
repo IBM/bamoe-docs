@@ -28,7 +28,7 @@ To correctly build a workflow _Business Service_ project with Quarkus and packag
 </plugin>
 ----
 
-For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus[Workflows (Quarkus)].
+For the `jbpm-with-drools-quarkus` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus[Workflows (Quarkus)].
 
 === Workflow subsystem add-ons (Quarkus)
 
@@ -40,13 +40,13 @@ The following add-ons require JDBC driver configuration when persistence layers 
 
 `kogito-addons-quarkus-data-audit`:: Use to enable Data-Audit integration with the _Business Service_. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_audit[Workflows (Stateful) subsystem :: Data-Audit].
 
-`kkogito-addons-quarkus-data-audit-jpa`:: Use to enable Data-Audit integration with the _Business Service_. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_audit[Workflows (Stateful) subsystem :: Data-Audit].
+`kogito-addons-quarkus-data-audit-jpa`:: Use to enable Data-Audit integration with the _Business Service_. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_audit[Workflows (Stateful) subsystem :: Data-Audit].
 
-`ogito-addons-quarkus-embedded-jobs`:: Use to enable the colocation of the Jobs Service within the workflow runtime. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
+`kogito-addons-quarkus-embedded-jobs`:: Use to enable the colocation of the Jobs Service within the workflow runtime. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
 
 `kogito-addons-quarkus-embedded-jobs-jpa`:: Use to enable the colocation of the Jobs Service within the workflow runtime. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
 
-`jbpm-addons-quarkus-usertask-storage-jpa`:: The User Tasks subsystem by default uses an in-memory storage, but it can be configured to persist its data in a database. Use to enable this functionality. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_user_tasks[Workflows (Stateful) subsystem :: User Tasks].
+`jbpm-addons-quarkus-usertask-storage-jpa`:: Use database-backed storage to enable the User Tasks subsystem to persist its data instead of relying on the default in‑memory storage. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_user_tasks[Workflows (Stateful) subsystem :: User Tasks].
 
 With stateful Workflow you will often be combining events and messages in your Workflows, see xref:../reference-guide/maven-repository-libraries.adoc[Using Events in Workflows] for more details on implementing Events and Messaging within Workflows. 
 
@@ -186,7 +186,7 @@ Beside the `pom.xml`, the `application.properties` file is required to further c
 
 {PRODUCT_SHORT} _Business Services_ containing workflows and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
 
-All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the Database. Therefore it is important that the application has a DataSource correctly configured following the Quarkus platform guidelines.
+All {PRODUCT_SHORT} components rely on the default DataSource to establish the connection with the Database. You must correctly configure a DataSource in your application by following the Quarkus platform guidelines.
 
 Configuring persistence for {PRODUCT_SHORT} requires a following set of dependencies and configurations in your application:
 
@@ -378,7 +378,7 @@ For production environemnts, see xref:../building-deploying/services-deployment.
 ====
 
 == Structure
-A Workflow service with Quarkus typically contains the following:
+A Workflow service with Quarkus typically contains the following elements:
 
 * `src/main/java`: Java classes implementing domain models and business services
 * `src/main/resources`:
@@ -520,7 +520,7 @@ Scroll down until to the `BAMOE Quarkus Dev UI` box and click on any item in the
 
 image::workflow/dev-ui-process-instances.png[Process Instances page]
 
-The Process Instances page will display all the running processes and their execution status. Clicking on any process instance will open the Process Instance details page.
+The Process Instances page will display all the running processes and their execution status. Click on any process instance to open the Process Instance details page.
 
 image::workflow/dev-ui-process-details.png[Process Details page]
 
@@ -543,7 +543,7 @@ The Process Definitions forms are auto generated, but can be customized in the F
 
 image::workflow/dev-ui-jobs.png[Jobs page]
 
-The Jobs page will display all the scheduled jobs and their execution status. Clicking on the actions menu on any job will show available options, including *Details*, which will open the job details modal.
+The Jobs page will display all the scheduled jobs and their execution status. Click on the actions menu on any job to show available options, including *Details*, which will open the job details modal.
 
 image::workflow/dev-ui-job-details.png[Job details page,540]
 
@@ -551,11 +551,11 @@ image::workflow/dev-ui-job-details.png[Job details page,540]
 
 image::workflow/dev-ui-tasks.png[Tasks page]
 
-The Tasks page will display all the User Tasks and their priorities and status. Clicking on the task name will open the User Task Form that can be filled and submitted to progress it to the next phase.
+The Tasks page will display all the User Tasks and their priorities and status. Click on the task name to open the User Task Form that can be filled and submitted to progress it to the next phase.
 
 image::workflow/dev-ui-task-form.png[Task Form page]
 
-Clicking on **View Details** will open a side panel with more details regarding the current task, including the parent process, possible assigned users/groups, id, name, and state.
+Click on **View Details** to open a side panel with more details regarding the current task, including the parent process, possible assigned users/groups, id, name, and state.
 
 image::workflow/dev-ui-task-form-details.png[Task details panel]
 
@@ -566,7 +566,7 @@ The Task forms are auto generated, but can be customized in the Forms page. See 
 
 image::workflow/dev-ui-forms.png[Forms page]
 
-The Forms page will display all the available forms in the project. It initially will be empty, since all forms (for User Tasks and Process Definitions) are auto generated.
+The Forms page display all the available forms in the project. It initially will be empty, since all forms (for User Tasks and Process Definitions) are auto generated.
 
 To add custom forms (for the `hiring` Process Definition or `HR Interview` User Task for example), follow the steps in xref:../tools/form-generation.adoc[Form code generation functionality] and then place the generated forms in the `src/main/resources/custom-forms-dev` folder.
 

@@ -39,7 +39,7 @@ To correctly build and package the application, use `kogito-maven-plugin` and th
   <artifactId>spring-boot-maven-plugin</artifactId>
 </plugin>
 ----
-For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
+For `kogito-maven-plugin` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
 
 For more information on a _Business Servics_ with Decisions on Spring Boot, see the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/decisions/pom.xml[complete pom.xml for Decisions]. 
 For more information on a _Business Service_ with Rules on Spring Boot, see {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/rules/pom.xml[complete pom.xml for Rules].
@@ -56,7 +56,7 @@ For more information on a _Business Service_ with Rules on Spring Boot, see {BAM
 
 == Configuration
 
-Beside the `pom.xml`, the `application.properties` file is required to further customize the application with Spring Boot or BAMOE specific properties (for example, `server.address`).
+Beside the POM file, the `application.properties` file is required to further customize the application with Spring Boot or BAMOE specific properties (for example, `server.address`).
 
 Lastly, a `logback.xml` file should be provided to customize logging output.
 
@@ -252,8 +252,8 @@ During Maven’s compilation phase, `kogito-maven-plugin` scans the `src/main/re
 
 For each discovered file, the decision engine creates REST Resource classes, with endpoints specifically to:
 
-.	Retrieve the original model
-.	Execute the model
+. Retrieve the original model
+. Execute the model
 . Execute the model and retrieve “explanation” information
 
 The classes are generated in a package whose name reflects the namespace of the DMN files, while the name of the generated class and the endpoint root are derived from the name of the model itself. For Rules, the classes are generated in the package of the DRL file.
@@ -279,22 +279,22 @@ The condition is that the classpath has to be "manually" rebuilt to trigger the 
 
 Since _Business Services_ also relies on automatic code-generation driven by models and executed by the 'kogito-maven-plugin', the approach is to:
 
-.	Create a mvn clean compile command/button (details vary by IDE) to be fired on-demand.
-.	Start the application with `mvn clean compile spring-boot:run`.
-.	Execute the command at point 1 when it is required to reload changes.
+. Create a mvn clean compile command/button (details vary by IDE) to be fired on-demand.
+. Start the application with `mvn clean compile spring-boot:run`.
+. Execute the command at point 1 when it is required to reload changes.
 
 == Debugging
 
 The way to debug the application without using specific IDE tools or plug-ins, relies on the standard Java remote debug setup:
 
-.	Create a remote debug configuration on port 8000 (details vary by IDE).
-.	Start application in debug mode.
+. Create a remote debug configuration on port 8000 (details vary by IDE).
+. Start application in debug mode.
 +
 [source,shell]
 ----
 mvn clean compile spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 ----
 +
-.	Put a breakpoint in some of the code-generated sources.
+. Put a breakpoint in some of the code-generated sources.
 . Connect the remote debugger.
 
