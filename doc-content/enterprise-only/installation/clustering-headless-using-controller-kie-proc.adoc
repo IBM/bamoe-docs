@@ -1,122 +1,165 @@
 [id='clustering-headless-controller-proc_{context}']
 
-= Clustering BAMOE with Headless Controller and Multiple KIE Server Nodes
 
-This section describes how to configure a clustered {product-name} environment using a headless controller with two or more KIE server nodes. The configuration uses {app-server} as the application server, a shared NFS location for controller templates, and a shared database for KIE server state replication.
+== Configuring a clustered KIE Server environment with headless controllers
 
-A typical headless-controller cluster includes four nodes:
+This section describes how to configure a clustered IBM Business Automation Manager Open Editions (BAMOE) environment using headless controllers and multiple KIE Server nodes. The configuration uses four nodes, with two nodes hosting headless controllers and two nodes hosting KIE Server instances.
 
-* *Node 1:* EAP 7 + headless controller (`controller.war`)
-* *Node 2:* EAP 7 + headless controller (`controller.war`)
-* *Node 3:* EAP 7 + KIE server (`kie-server.war`)
-* *Node 4:* EAP 7 + KIE server (`kie-server.war`)
+In this setup, Node 1 and Node 2 run Red Hat JBoss EAP with the headless controller deployed, and Node 3 and Node 4 run Red Hat JBoss EAP with the `kie-server.war` deployed.
 
-Nodes 1 and 2 form the controller cluster. Nodes 3 and 4 form the KIE server cluster.
-Controller nodes share a template file on NFS.
-KIE server nodes share the same database to keep process state consistent.
+=== Deployment topology
 
-=== Configure headless controller nodes (Node 1 and Node 2)
+* Node 1: JBoss EAP 7 with headless controller (`controller.war`)
+* Node 2: JBoss EAP 7 with headless controller (`controller.war`)
+* Node 3: JBoss EAP 7 with KIE Server (`kie-server.war`)
+* Node 4: JBoss EAP 7 with KIE Server (`kie-server.war`)
 
-In EAP_HOME/standalone/configuration/standalone-full.xml modify the `standalone-full.xml` file.
+=== Configuring headless controller nodes
 
-Add the following under the `<system-properties>` tag:
+On Node 1 and Node 2, configure the headless controller by adding the following system properties to the `<system-properties>` section of the `$EAP_HOME/standalone/configuration/standalone-full.xml` file:
 
 [source,xml]
 ----
 <system-properties>
-    <property name="org.kie.server.user" value="<USERNAME>"/>
-    <property name="org.kie.server.pwd" value="<USER_PWD>"/>
-    <property name="org.kie.server.controller.templatefile.watcher.enabled" value="true"/>
-    <property name="org.kie.server.controller.templatefile" value="/NFS_STORAGE/path/template-storage.xml"/>
+  <property name="org.kie.server.user" value="<USERNAME>"/>
+  <property name="org.kie.server.pwd" value="<USER_PWD>"/>
+  <property name="org.kie.server.controller.templatefile.watcher.enabled" value="true"/>
+  <property name="org.kie.server.controller.templatefile" value="/NFS_STORAGE/path/template-storage.xml"/>
 </system-properties>
 ----
 
-Replace `<USERNAME>` and `<USER_PWD>` with valid credentials. Ensure the user has the `kie-server` role.
+Replace `<USERNAME>` and `<USER_PWD>` with valid credentials. The specified user must have the `kie-server` role assigned.
 
+Template files define default configurations for specific deployment scenarios. When the `org.kie.server.controller.templatefile.watcher.enabled` property is set to `true`, the controller starts a background thread that monitors the template file for changes. By default, the controller checks for updates every 30000 milliseconds. You can modify this interval by setting the `org.kie.server.controller.templatefile.watcher.interval` system property. If the watcher is disabled, the controller detects changes to the template file only during server startup.
 
-The headless controller loads default deployment configurations from the template file defined in `org.kie.server.controller.templatefile`.
+=== Configuring KIE Server nodes
 
-* When `org.kie.server.controller.templatefile.watcher.enabled=true`, the controller starts a background watcher thread.
-* The default scan interval is `30000` milliseconds.
-* You can set a custom interval:
-
-[source,xml]
-----
-<property name="org.kie.server.controller.templatefile.watcher.interval" value="<INTERVAL_MS>"/>
-----
-
-If the watcher is disabled, the controller applies template changes only after a server restart.
-
-[NOTE]
-====
-Maintain continuous access to the NFS mount that stores the template file. If NFS becomes unavailable, controller nodes cannot load or synchronize container information and the cluster may become inconsistent.
-====
-
-== Configure KIE server nodes (Node 3 and Node 4)
-
-Deploy `kie-server.war` on both nodes and configure each KIE server instance to connect to the headless controllers. Edit:
-
-
-EAP_HOME/standalone/configuration/standalone-full.xml
-
-Add the following under `<system-properties>`:
+On Node 3 and Node 4, deploy `kie-server.war` and configure each KIE Server instance to connect to the headless controllers. Add the following system properties to the `<system-properties>` section of the `$EAP_HOME/standalone/configuration/standalone-full.xml` file:
 
 [source,xml]
 ----
-<system-properties>
-    <property name="org.kie.server.controller.user" value="<CONTROLLER_USER>"/>
-    <property name="org.kie.server.controller.pwd" value="<CONTROLLER_PWD>"/>
-    <property name="org.kie.server.id" value="<KIE_SERVER_ID>"/>
-    <property name="org.kie.server.location" value="http://<HOST>:<PORT>/kie-server/services/rest/server"/>
-    <property name="org.kie.server.controller" value="http://10.10.10.10:8080/controller/rest/controller,http://20.20.20.20:8080/controller/rest/controller"/>
-</system-properties>
+<property name="org.kie.server.controller.user" value="<CONTROLLER_USER>"/>
+<property name="org.kie.server.controller.pwd" value="<CONTROLLER_PWD>"/>
+<property name="org.kie.server.id" value="<KIE_SERVER_ID>"/>
+<property name="org.kie.server.location" value="http://<HOST>:<PORT>/kie-server/services/rest/server"/>
+<property name="org.kie.server.controller"
+          value="http://20.20.20.20:8080/controller/rest/controller,
+                 http://10.10.10.10:8080/controller/rest/controller"/>
 ----
 
-=== Property reference
+The controller user and password correspond to the credentials configured on the headless controller nodes. The `org.kie.server.id` property uniquely identifies the KIE Server instance. The `org.kie.server.location` property specifies the REST endpoint of the KIE Server. The `org.kie.server.controller` property defines a comma-separated list of controller URLs.
 
-* `org.kie.server.controller.user` / `org.kie.server.controller.pwd`: Credentials that the KIE server uses to authenticate to the controllers.
-* `org.kie.server.id`: Logical identifier of the KIE server instance.
-* `org.kie.server.location`: Public URL where the controller can reach the KIE server.
-* `org.kie.server.controller`: Comma-separated list of controller URLs for high availability.
+=== Enabling high availability for headless controllers
 
-=== High availability behavior
+To enable high availability for the headless controller, configure multiple controller endpoints in the `org.kie.server.controller` system property. The KIE Server automatically attempts to connect to the next available controller if the primary controller becomes unavailable.
 
-When multiple controller URLs are configured, the KIE server automatically connects to the next available controller if the primary controller is unavailable. This behavior maintains uninterrupted operation during controller failure.
+For example:
 
-=== Cluster KIE server nodes with a shared database
+[source,xml]
+----
+<property name="org.kie.server.controller"
+          value="http://10.10.10.10:8080/controller/rest/controller,
+                 http://20.20.20.20:8080/controller/rest/controller"/>
+----
 
-Configure both KIE server nodes to use the same relational database for persistence:
+This configuration ensures that KIE Server instances continue to operate even if one controller node is stopped or becomes unreachable.
+
+Ensure that all controller nodes have uninterrupted access to the shared Network File System (NFS). If the NFS becomes unavailable, controllers cannot access KIE container metadata, which can disrupt the headless controller cluster.
+
+=== Configuring KIE Server node clustering
+
+To cluster KIE Server nodes, all nodes must share the same database so that process instances and KIE sessions can be loaded consistently across the cluster. Configure the following system properties on each KIE Server node:
 
 [source,xml]
 ----
 <property name="org.kie.server.persistence.ds" value="java:jboss/MySqlXADS"/>
-<property name="org.kie.server.persistence.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+<property name="org.kie.server.persistence.dialect"
+          value="org.hibernate.dialect.MySQL8Dialect"/>
 ----
 
-* `org.kie.server.persistence.ds`: JNDI name of the shared data source.
-* `org.kie.server.persistence.dialect`: Hibernate dialect (MySQL 8 in this example).
+The `org.kie.server.persistence.ds` property specifies the JNDI name of the data source used for persistence. The `org.kie.server.persistence.dialect` property defines the Hibernate dialect that matches the underlying database.
 
-A shared database enables nodes to load and resume KIE sessions and ensures consistent process state across the cluster.
+=== Configuring Elytron users for KIE Server access
 
-=== Configure Elytron for authentication
-
-Use the Elytron subsystem to create a user with the `kie-server` role on the EAP server:
+BAMOE uses the Elytron subsystem for authentication and authorization. Use the following JBoss CLI commands to create a user in the Elytron filesystem realm and assign the required role:
 
 [source,bash]
 ----
 /subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>)
 /subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>,clear={password="<PASSWORD>"})
-/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[kie-server])
+/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>,name=role,value=[kie-server])
 ----
 
-Replace `<USERNAME>` and `<PASSWORD>` with actual values.
+Replace `<USERNAME>` and `<PASSWORD>` with the appropriate values.
 
-=== Validate the high availability configuration
+=== Verifying high availability behavior
 
-. Stop the primary controller (for example, `http://10.10.10.10:8080/controller/`).
-. Restart any KIE server node.
-. Confirm that the restarted KIE server loads container configurations from the secondary controller (for example, `http://20.20.20.20:8080/controller/`).
+To verify that the high availability configuration works as expected, stop the controller on one node and restart a KIE Server instance. During startup, the KIE Server retrieves container information from the remaining available controller and continues operation without manual intervention.
 
-If the KIE server loads container details from the secondary controller, the HA configuration is functioning correctly.
+This behavior confirms that the KIE Server can fail over to a secondary headless controller when the primary controller is unavailable.
 
-Provide your feedback on BizChatAdd a diagram of the cluster setupInclude CLI commands for setupDrop your files here
+
+
+
+== Configuring a clustered KIE Server environment with headless controllers
+
+This section describes how to configure a clustered IBM Business Automation Manager Open Editions (BAMOE) environment using headless controllers and multiple KIE Server nodes. The configuration uses four nodes. Two nodes host the headless controller, and two nodes host KIE Server instances. All nodes run on Red Hat JBoss EAP.
+
+In this setup, Node 1 and Node 2 run JBoss EAP with the headless controller (`controller.war`) deployed. Node 3 and Node 4 run JBoss EAP with the KIE Server (`kie-server.war`) deployed.
+
+On Node 1 and Node 2, configure the headless controller by adding the following system properties to the `<system-properties>` section of the `$EAP_HOME/standalone/configuration/standalone-full.xml` file:
+
+[source,xml]
+----
+<system-properties>
+  <property name="org.kie.server.user" value="<USERNAME>"/>
+  <property name="org.kie.server.pwd" value="<USER_PWD>"/>
+  <property name="org.kie.server.controller.templatefile.watcher.enabled" value="true"/>
+  <property name="org.kie.server.controller.templatefile" value="/NFS_STORAGE/path/template-storage.xml"/>
+</system-properties>
+----
+
+Replace `<USERNAME>` and `<USER_PWD>` with valid credentials. The specified user must have the `kie-server` role assigned.
+
+Template files define default configurations for specific deployment scenarios. When the `org.kie.server.controller.templatefile.watcher.enabled` property is set to `true`, the controller starts a background thread that monitors the template file for changes. By default, the controller checks for updates every 30000 milliseconds. You can override this interval by setting the `org.kie.server.controller.templatefile.watcher.interval` system property. If the watcher is disabled, the controller detects changes to the template file only when the server restarts.
+
+On Node 3 and Node 4, deploy `kie-server.war` and configure each KIE Server instance to connect to the headless controllers. Add the following system properties to the `<system-properties>` section of the `$EAP_HOME/standalone/configuration/standalone-full.xml` file:
+
+[source,xml]
+----
+<property name="org.kie.server.controller.user" value="<CONTROLLER_USER>"/>
+<property name="org.kie.server.controller.pwd" value="<CONTROLLER_PWD>"/>
+<property name="org.kie.server.id" value="<KIE_SERVER_ID>"/>
+<property name="org.kie.server.location" value="http://<HOST>:<PORT>/kie-server/services/rest/server"/>
+<property name="org.kie.server.controller"
+          value="http://10.10.10.10:8080/controller/rest/controller,
+                 http://20.20.20.20:8080/controller/rest/controller"/>
+----
+
+The controller user and password must match the credentials configured on the headless controller nodes. The `org.kie.server.id` property uniquely identifies each KIE Server instance. The `org.kie.server.location` property specifies the REST endpoint of the KIE Server. The `org.kie.server.controller` property accepts a comma-separated list of controller endpoints.
+
+To enable high availability for the headless controller, define multiple controller URLs in the `org.kie.server.controller` system property. If one controller becomes unavailable, the KIE Server automatically connects to the next available controller. This behavior allows uninterrupted KIE Server operation in a headless controller cluster.
+
+All headless controller nodes must have uninterrupted access to the shared Network File System (NFS). If the NFS becomes unavailable, controllers cannot access KIE container metadata, which can disrupt the cluster.
+
+To cluster KIE Server nodes, all KIE Servers must share the same database so that process instances and KIE sessions remain consistent across the cluster. Configure the following system properties on each KIE Server node:
+
+[source,xml]
+----
+<property name="org.kie.server.persistence.ds" value="java:jboss/MySqlXADS"/>
+<property name="org.kie.server.persistence.dialect"
+          value="org.hibernate.dialect.MySQL8Dialect"/>
+----
+
+The `org.kie.server.persistence.ds` property specifies the JNDI name of the data source used for persistence. The `org.kie.server.persistence.dialect` property defines the Hibernate dialect used to access the database.
+
+BAMOE uses the Elytron subsystem for authentication and authorization. Use the following JBoss CLI commands to create a user in the Elytron filesystem realm and assign the required `kie-server` role:
+
+[source,bash]
+----
+/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity(identity=<USERNAME>)
+/subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>,clear={password="<PASSWORD>"})
+/subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>,name=role,value=[kie-server])
+----
+
+To verify high availability, stop one headless controller node and restart a KIE Server. During startup, the KIE Server retrieves container information from the remaining available controller and continues operating without manual intervention.
