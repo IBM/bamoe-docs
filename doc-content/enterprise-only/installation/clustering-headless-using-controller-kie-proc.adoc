@@ -98,7 +98,7 @@ To setup a kie-server node clusters, add the following system properties to the 
 These properties configure the database connection for KIE Server.
 
 .Architecture diagram
-image::install/multiple-kia-architecture.png[]
+image::../_images/KieServer/multiple-kia-architecture.png[]
 
 == Configuring users in the Elytron realm
 
@@ -112,15 +112,11 @@ Use the following JBoss CLI commands to create users in  Elytron realm in the JB
 /subsystem=elytron/filesystem-realm=ApplicationRealm:set-password(identity=<USERNAME>,clear={password=”<PASSWORD>”})
 /subsystem=elytron/filesystem-realm=ApplicationRealm:add-identity-attribute(identity=<USERNAME>, name=role, value=[kie-server])
 ----
-
 Replace `<USERNAME>` and `<PASSWORD>` with the actual username and password.
 
 *Testing High Availability (HA) Setup*
 
 To verify that your HA setup is working correctly:
-
 .Shutdown the primary controller at http://10.10.10.10:8080/controller/.
-
 .Restart the KIE server node.
-
 .After the restart, verify that the KIE Server retrieves container configuration from the secondary controller at http://20.20.20.20:8080/controller/.
