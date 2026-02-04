@@ -84,7 +84,7 @@ configuration data, which can affect cluster operation.
 
 KIE Server clustering requires all KIE Server nodes to share the same database.
 This shared database stores process instances, runtime state, and KIE sessions.
-To setup a kie-server node clusters, add the following system properties to the KIE Server configuration:
+To setup a kie-server node clusters, add the following system properties to the KIE Server configuration. These properties configure the database connection for KIE Server:
 
 [source,xml]
 ----
@@ -95,16 +95,13 @@ To setup a kie-server node clusters, add the following system properties to the 
 * `org.kie.server.persistence.ds`: Specifies the JNDI name of the data source (java:jboss/MySqlXADS).
 * `org.kie.server.persistence.dialect`: Specifies the Hibernate dialect to use for the database (MySQL8Dialect for MySQL  compatibility).
 
-These properties configure the database connection for KIE Server.
 
 .Architecture diagram
 image::../_images/KieServer/multiple-kia-architecture.png[]
 
 == Configuring users in the Elytron realm
 
-{PRODUCT_SHORT} uses the Elytron subsystem for authentication and authorization.
-
-Use the following JBoss CLI commands to create users in  Elytron realm in the JBoss EAP server:
+{PRODUCT_SHORT} uses the Elytron subsystem for authentication and authorization. Use the following JBoss CLI commands to create users in  Elytron realm in the JBoss EAP server:
 
 [source,bash]
 ----
@@ -117,6 +114,7 @@ Replace `<USERNAME>` and `<PASSWORD>` with the actual username and password.
 *Testing High Availability (HA) Setup*
 
 To verify that your HA setup is working correctly:
+
 .Shutdown the primary controller at http://10.10.10.10:8080/controller/.
 .Restart the KIE server node.
 .After the restart, verify that the KIE Server retrieves container configuration from the secondary controller at http://20.20.20.20:8080/controller/.
