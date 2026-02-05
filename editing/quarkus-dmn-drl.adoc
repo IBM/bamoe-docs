@@ -13,16 +13,12 @@ You can create a _Business Service_ using the Decision and Rule engines with the
 
 == Dependencies
 
-Use the {PRODUCT_SHORT} Bill Of Materials dependency with the Quarkus Bill Of Materials dependency to facilitate management of all {PRODUCT_SHORT} libraries. 
+Use the {PRODUCT_SHORT} BOM with the Quarkus BOM to facilitate management of all {PRODUCT_SHORT} libraries.
 
-For BOM dependencies, `bamoe-bom` and `quarkus-bom`, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE BOMs (Bill of Materials)].
+Add the `bamoe-bom` and `quarkus-bom` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
 
-Add the dependencies in the `<dependencyManagement>`.
-
-For the dependencies required for a Decision or Rules application, see
+For the dependencies required for a Decision or Rules application with Quarkus, see
 xref:../reference-guide/maven-repository-libraries.adoc#decisions-rules[Decisions, Rules, and Decision Tables (Quarkus)].
-
-Use the following command to enable hot-reload out-of-the-box during development:
 
 [source,shell]
 ----
@@ -41,28 +37,22 @@ To correctly build and package the application, use the following Maven plugin:
 </plugin>
 ----
 
-For more information on a _Business Servics_ with Decisions on Quarkus, see the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete pom.xml for Decisions]. 
-For more information on a _Business Service_ with Rules on Quarkus, see {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/rules-embedded-mode-example/pom.xml[complete pom.xml for Rules].
-
-== Configuration
-
-Beside the POM file, the `application.properties` file is required to further customize the application with Quarkus or BAMOE specific properties (for example, `server.address`).
-
-Lastly, a `logback.xml` file should be provided to customize logging output.
+For more information on _Business Services_ with Decisions on Quarkus, see the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/quarkus/workflows/pom.xml[complete POM for Decisions]. 
+For more information on _Business Services_ with Rules on Quarkus, see {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/rules-embedded-mode-example/pom.xml[complete POM for Rules].
 
 == Structure
 
-Decision _Business Service_ projects follows https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
+Beside the POM file, customize the application with Quarkus or BAMOE specific properties in the `application.properties` file. For more information about `application.properties` file, see xref:../reference-guide/application-properties.adoc[Application Properties Configuration reference].
 
-Decisions, `application.properties` and `logback.xml` files have to be written in the `src/main/resources`` directory.
+If you want to customize logging output, provide `logback.xml` file.
 
-To change the behavior during test execution, `application.properties` and `logback.xml` could also be written in `src/test/resources`.
+_Business Service_ projects containing Decisions follow https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard  directory layout].
 
-Generated code will be in `target/generated-sources/kogito`.
+You need to create Decisions (DMN), Rules (DRL), `application.properties` and `logback.xml` files in the `src/main/resources` directory.
 
-== Code
+If you want to change the behavior during test execution, you can also create `application.properties` and `logback.xml` files in the `src/test/resources` directory.
 
-Decisions (DMN) and Rules (DRL) files need to go in the `src/main/resources` directory.
+Your generated code is in `target/generated-sources/kogito` directory.
 
 == Testing
 
@@ -158,10 +148,8 @@ public class RestQueryTest {
 
 It is also possible to execute tests on native image. To do so:
 
-. extend a testing class annotated as `@QuarkusTest`
-. annotate that new class with `@QuarkusIntegrationTest`
-
-E.g.
+. Extend a testing class annotated as `@QuarkusTest`
+. Annotate that new class with `@QuarkusIntegrationTest`, e.g.,
 
 [source,java]
 ----
@@ -222,9 +210,9 @@ For each discovered file, the decision engine creates REST Resource classes, wit
 
 The classes are generated in a package whose name reflects the namespace of the DMN files, while the name of the generated class and the endpoint root are derived from the name of the model itself. For Rules, the classes are generated in the package of the DRL file.
 
-== Execution in dev mode
+== Execution in Dev mode
 
-The following Maven command will compile from scratch and start the Quarkus application in dev mode:
+The following Maven command compile from scratch and start the Quarkus application in Dev mode:
 
 [source,shell]
 ----
@@ -235,14 +223,14 @@ After a successful start, the application will be available at `\http://:0.0.0.0
 
 The Swagger UI page (`\http://0.0.0.0:8080/q/swagger-ui/`) shows all the generated endpoints, providing a way to quickly verify them.
 
-== Hot-reload in dev-mode
+== Hot-reload in Dev mode
 
 For medium to large sized applications, recompiling and restarting the application upon code changes could be cumbersome and time-consuming. To simplify that, the Quarkus framework offers an embedded hot-reload feature.
 
 To fire it, there are two steps required:
 
-. modify any source/resource
-. reload any page of the generated application
+. Modify any source/resource.
+. Reload any page of the generated application.
 
 
 == Debugging
@@ -250,7 +238,7 @@ To fire it, there are two steps required:
 The way to debug the application without using specific IDE tools or plug-ins, relies on the standard Java remote debug setup:
 
 . Create a remote debug configuration on port 5005 (details vary by IDE).
-. Start application in dev mode.
+. Start application in Dev mode.
 +
 [source,shell]
 ----
@@ -260,9 +248,12 @@ mvn clean compile quarkus:dev
 . Put a breakpoint in some of the code-generated sources.
 . Connect the remote debugger.
 
-It is also possible to block the compilation until a debugger is connected, using the following command:
+You can also block the compilation until a debugger is connected, using the following command:
++
+[source,shell]
 ----
 mvn clean compile quarkus:dev -Dsuspend
 ----
++
 
-This is useful to debug code generation.
+This command is useful to debug code generation.
