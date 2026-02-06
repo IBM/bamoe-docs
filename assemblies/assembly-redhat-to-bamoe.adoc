@@ -177,24 +177,8 @@ During the course of your Maven dependency update, if you encounter any dependen
 
 == Step 3: Update tooling & runtime
 
-Automated update tools are often provided with both patch updates and new minor versions of {PRODUCT_SHORT} to facilitate updating certain components such as Decision/Business Central, KIE Server, and the headless controller.
-Other {PRODUCT_SHORT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
-
-[NOTE]
-====
-You can deploy the latest version of {PRODUCT_SHORT} as either a new installation or as a patch update from one of the previous patch releases.
-====
-
-You can use the same automated update tool to apply both patch updates and minor release upgrades.
-Patch updates of {PRODUCT_SHORT} include the latest security updates and bug fixes.
-Minor release upgrades will include enhancements, security updates, and bug fixes.
-
-[NOTE]
-====
-Only updates are included in the {PRODUCT_SHORT} update tools.
-Updates to {EAP} must be applied using {EAP} patch distributions.
-For more information about Red Hat JBoss EAP patching, see the https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/patching_and_upgrading_guide/index[{EAP} Patching and Upgrading Guide].
-====
+Your project data and settings in Business Central (stored in the `.niogit` directory) can be migrated using the migration tooling (see xref: #niogit_directory). Install new versions of Business Central, KIE Server, and the headless controller in a duplicate environment following instructions in xref:installing-and-configuring.html[Installing and configuring].
+Other {PRODUCT_SHORT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update. You can use the same automated update tool to apply both patch updates and minor release upgrades.
 
 === Prerequisites
 
@@ -421,35 +405,8 @@ If you encounter errors or notice any missing data in Decision/Business Central,
 You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}.
 After restoring your previous distribution, you can try again to run the update.
 
-== Step 4: Update Persistence
-
-For applications based on {RH_PAM}, you may be required to update the runtime database.
-For upgrading the database, the easiest way is to do it in sequence, as most of the jobs are very small (re: 2-4 lines of SQL).
-They are all mapped by the version progression, so it will be fairly quick.
-So, for instance, if you are running a PostgreSQL database, you must do the following:
-
-. Connect to your database instance using your method of preference.
-. Apply the SQL scripts appropriate for the version you are upgrading from up to RHPAM 7.13.x.
-
-[source,shell,subs="attributes+"]
-----
-...
-$ psql -h $dbhost -U $user < rhpam-7.11-to-7.12.sql
-$ psql -h $dbhost -U $user < rhpam-7.12-to-7.13.sql
-$ psql -h $dbhost -U $user < rhpam-7.13-to-7.13.1.sql
-...
-----
-
-[NOTE]
-====
-{PRODUCT_SHORT} version {VERSION_80}'s database is compatible with {RH_PAM} 7.13.x, so all you need to do is to update the database to that level, and you will be set to migrate the rest of your application.
-====
-
-Once you have executed these SQL statements, your datasource is now up to date.
-If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice; the files should largely be the same.
-
-
-== Using the migration tool on a .niogit directory
+[id=#niogit_directory]
+== Step 4: Using migration tool to prepare Business Central .niogit directory for upgrade
 
 The `.niogit` directory of your Business Central distribution contains all Business Central data. You can use the Business Central migration tool on your `.niogit` directory to prepare project data and system configurations for migration to {PRODUCT_SHORT}. 
 
@@ -652,3 +609,32 @@ For the POMs migration option, if you want to include a path to an external `pom
 The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT} 8.0.x.
 +
 . Project directories are in separate repositories and all other related configurations have been migrated. You can navigate to the new `.niogit` directory to inspect the restructured contents. 
+
+
+== Step 5: Update Persistence
+
+For applications based on {RH_PAM}, you may be required to update the runtime database.
+For upgrading the database, the easiest way is to do it in sequence, as most of the jobs are very small (re: 2-4 lines of SQL).
+They are all mapped by the version progression, so it will be fairly quick.
+So, for instance, if you are running a PostgreSQL database, you must do the following:
+
+. Connect to your database instance using your method of preference.
+. Apply the SQL scripts appropriate for the version you are upgrading from up to RHPAM 7.13.x.
+
+[source,shell,subs="attributes+"]
+----
+...
+$ psql -h $dbhost -U $user < rhpam-7.11-to-7.12.sql
+$ psql -h $dbhost -U $user < rhpam-7.12-to-7.13.sql
+$ psql -h $dbhost -U $user < rhpam-7.13-to-7.13.1.sql
+...
+----
+
+[NOTE]
+====
+{PRODUCT_SHORT} version {VERSION_80}'s database is compatible with {RH_PAM} 7.13.x, so all you need to do is to update the database to that level, and you will be set to migrate the rest of your application.
+====
+
+Once you have executed these SQL statements, your datasource is now up to date.
+If you are running a different database than PostgreSQL, replace the `psql` command with your appropriate database and tooling of choice; the files should largely be the same.
+
