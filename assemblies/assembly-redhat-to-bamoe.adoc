@@ -178,6 +178,7 @@ During the course of your Maven dependency update, if you encounter any dependen
 == Step 3: Update tooling & runtime
 
 Your project data and settings in Business Central (stored in the `.niogit` directory) can be migrated using the migration tooling (see xref:#niogit_directory). 
+
 To install the new versions of Business Central, KIE Server, and the headless controller in a duplicate environment, follow the instructions in xref:../installing-and-configuring.html[Installing and configuring].
 Other {PRODUCT_SHORT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
 
@@ -504,7 +505,7 @@ Example `pom-migration.json` file:
 
   "repositories-update-urls":[
     {
-      "id":"guvnor-m2-repo", "url":"http://localhost:8080/business-central/maven3/"
+      "id":"guvnor-m2-repo", "url":"https://maven.repository.redhat.com/ga/"
     }
   ],
 
@@ -587,23 +588,14 @@ cd $INSTALL_DIR\BAMOE_8.0-migration-tool\bin
 migration-tool.bat -t $BAMOE_NIOGIT_DIR
 ----
 +
-In the command prompt that appears, the following options are displayed: 
-+
-* Project structure migration: Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
-* System configuration directory structure migration: Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x. This migration option requires the project structure migration to be executed first.
-* Forms migration: Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer. With this migration option, you must first complete the project structure migration and system configuration directory structure migration.
-* POMs migration: Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. This migration option requires the project structure migration, system configuration directory structure migration, and forms migration to be executed first.
-* All: Runs all migration options in sequence.
-* Exit: Exits the migration tool. 
-+
-
 . Select the *All* option to run migrations in sequence.
 +
-NOTE: If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the sequence. 
+. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option: 
 +
-. Enter `yes` each time you are prompted to run a specific migration option.
-+
-For the POMs migration option, if you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+.. Project structure migration: Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
+.. System configuration directory structure migration: Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x. 
+.. Forms migration: Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer. 
+.. POMs migration: Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
 +
 . After the tool finishes running, enter the option to Exit the migration tool.
 +
