@@ -14,11 +14,11 @@ You can add custom classes to the _Business Service_ project to provide addition
 
 Use the {PRODUCT_SHORT} BOM with the Spring Boot BOM to facilitate management of all {PRODUCT_SHORT} libraries.
 
-Add the `bamoe-bom` and `spring-boot-devtools` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
+Add the `com.ibm.bamoe:bamoe-bom` and `org.springframework.boot:spring-boot-devtools` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
 
-The `spring-boot-starter-actuator` and `jbpm-with-drools-spring-boot-starter` dependencies are required for a workflow _Business Service_ project built with Spring Boot. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot[Workflows (Spring Boot)].
+The `org.springframework.boot:spring-boot-starter-actuator` and `org.jbpm:jbpm-with-drools-spring-boot-starter` dependencies are required for a workflow _Business Service_ project built with Spring Boot. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot[Workflows (Spring Boot)].
 
-To correctly build and package the application, use `kogito-maven-plugin` and the following Maven plugin:
+To correctly build and package the application, use `org.kie.kogito:kogito-maven-plugin` and the following Maven plugin:
 
 [source,xml]
 ----
@@ -28,31 +28,31 @@ To correctly build and package the application, use `kogito-maven-plugin` and th
 </plugin>
 ----
 
-For `kogito-maven-plugin` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
+For `org.kie.kogito:kogito-maven-plugin` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_spring_boot[Decisions, Rules, and Decision Tables (Spring Boot)].
 
 === Workflow subsystem add-ons (Spring Boot)
 
 The following Spring Boot add-ons provide extensions for enabling persistence, embedded subsystem execution, and integration with workflow-related components such as Data Index, Data Audit, Jobs Service, and User Tasks.
 
-Data-Index add-on:: Use to enable the workflow runtime to persist data directly into the Data-Index subsystem. For more information, see xref:../reference-guide/maven-repository-libraries.adoc##_workflows_stateful_subsystem_data_index[Workflows (Stateful) subsystem :: Data-Index].
-* `kogito-addons-springboot-data-index-jpa`
+Data-Index add-on:: Use to enable the workflow runtime to persist data directly into the Data-Index subsystem. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_index[Workflows (Stateful) subsystem :: Data-Index].
+* `org.kie:kogito-addons-springboot-data-index-jpa`
 
-The following add-ons require JDBC driver configuration when persistence layers are involved. For more information, see xref:#jdbc-configuration[Configuration section].
+The following add-ons require JDBC driver configuration when persistence layers are involved. For more information, see  xref:#jdbc-configuration[Configuration section].
 
 Data-Audit add-ons:: Use to enable Data-Audit integration with the _Business Service_. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_audit[Workflows (Stateful) subsystem :: Data-Audit].
-* `kogito-addons-springboot-data-audit`
-* `kogito-addons-springboot-data-audit-jpa`
+* `org.kie:kogito-addons-springboot-data-audit`
+* `org.kie:kogito-addons-springboot-data-audit-jpa`
 
 Embedded Jobs Service add-ons:: Use to enable the colocation of the Jobs Service within the workflow runtime. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
-* `kogito-addons-springboot-embedded-jobs`
-* `kogito-addons-springboot-embedded-jobs-jpa`
+* `org.kie:kogito-addons-springboot-embedded-jobs`
+* `org.kie:kogito-addons-springboot-embedded-jobs-jpa`
 
 User Tasks add-on:: Use database-backed storage to enable the User Tasks subsystem to persist its data instead of relying on the default in‑memory storage. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_user_tasks[Workflows (Stateful) subsystem :: User Tasks].
-* `jbpm-addons-springboot-usertask-storage-jpa`
+* `org.jbpm:jbpm-addons-springboot-usertask-storage-jpa`
 
 With stateful Workflow you will often be combining events and messages in your Workflows, see xref:../reference-guide/maven-repository-libraries.adoc[Using Events in Workflows] for more details on implementing Events and Messaging within Workflows. 
 
-Depending on your _Business Services_ with workflow(s) use case many Add-ons are available to be configured as required, see xref:event-driven-workflow.adoc[Reference → {PRODUCT_SHORT} Maven repository libraries] for a complete list. 
+Depending on your _Business Services_ with workflow(s) use case many add-ons are available to be configured as required, see xref:event-driven-workflow.adoc[Reference → {PRODUCT_SHORT} Maven repository libraries] for a complete list. 
 
 See the {BAMOE_DOCS_EXAMPLES_DOCS_LINK}/spring-boot/workflows/pom.xml[complete POM for workflows with Spring Boot] for a _Business Service_ with stateful workflow on Spring Boot.
 
@@ -69,10 +69,10 @@ Configuring persistence for {PRODUCT_SHORT} requires a minimal set of dependenci
 
 * If you use flyway, include the PostgreSQL `flyway-database-postgresql` dependency for the DB.
 
-* To enable persistence for the Workflow Engine with JDBC, use `kie-addons-springboot-persistence-jdbc` KIE JDBC Persistence Add-on for Springboot. For the add-on, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+* To enable persistence for the Workflow Engine with JDBC, use `org.kie:kie-addons-springboot-persistence-jdbc` KIE JDBC Persistence Add-on for Springboot. For the add-on, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
-NOTE: For full information about how to configure DataSources in springboot, check the
-https://docs.spring.io/spring-boot/how-to/data-access.html guide.
+NOTE: For full information about how to configure DataSources in Spring Boot, check the
+https://docs.spring.io/spring-boot/how-to/data-access.html[Data Access] guide.
 
 === Configuring persistence for PostgreSQL
 
@@ -115,15 +115,15 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
 
-Additionally, if the _Business Service_ includes Data-Index or Jobs Service, you must add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
+Additionally, if the _Business Service_ includes Data-Index or Jobs Service, you must add the `com.ibm.bamoe:bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
 
 This module includes the necessary Hibernate ORM mappings to support remapping some JPA entities used in both components. The mappings contained are:
 
 `META-INF/bamoe-data-index-orm.xml`:: File remaps several entities from the data-index component.
 `META-INF/bamoe-job-service-orm.xml`:: File remaps several entities from the job-service component.
-`bamoe-mssql-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
+`com.ibm.bamoe:bamoe-mssql-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
 
-Add `bamoe-mssql-mappings` dependency in your application POM to correctly configure the Hibernate mappings. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+Add `com.ibm.bamoe:bamoe-mssql-mappings` dependency in your application POM to correctly configure the Hibernate mappings. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 
@@ -174,15 +174,13 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Oracle
 
-Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you must add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you must add the `com.ibm.bamoe:bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
 
 `META-INF/bamoe-user-task-orm.xml`:: File remaps several entities from the jbpm-usertask-storage-jpa component.
 `META-INF/bamoe-job-service-orm.xml`:: File remaps several entities from the job-service component.
-`bamoe-oracle-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations.
+`com.ibm.bamoe:bamoe-oracle-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations.
 
-Add `bamoe-oracle-mappings` dependency in your application POM to correctly configure the Hibernate mappings. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
-
-To correctly configure the Hibernate mappings, in your application POM file add:
+Add `com.ibm.bamoe:bamoe-oracle-mappings` dependency in your application POM to correctly configure the Hibernate mappings. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 
@@ -221,7 +219,7 @@ Testing resources:: Under `src/test/java`, JUnit test classes validate workflow 
 
 The {SPRING_WEB_CONSOLE} is a web app that attaches to the Spring Boot and allows developers to interact and manage running processes locally.
 
-After you create a _Business Service_ with the Spring Boot framework support, add the `bamoe-spring-boot-web-console` {SPRING_WEB_CONSOLE} dependency to your POM file. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot_dev_testing[Workflows (Spring Boot dev + testing)].
+After you create a _Business Service_ with the Spring Boot framework support, add the `com.ibm.bamoe:bamoe-spring-boot-web-console` {SPRING_WEB_CONSOLE} dependency to your POM file. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_spring_boot_dev_testing[Workflows (Spring Boot dev + testing)].
 
 Update the `application.properties` file to add users and user groups in the following format: 
 

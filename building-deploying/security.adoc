@@ -161,10 +161,12 @@ Used to specify a list of roles or groups, authorized for identity impersonation
 For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available. Different solutions exist for Quarkus and Spring Boot.
 
 === Quarkus
-You need to use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` extension, as it creates new endpoints in the _Business Service_ where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL (the same URL that is defined in the `quarkus.oidc.auth-server-url` property).
 
-To add the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` extension, add the following code to the list of dependencies in the `pom.xml` file:
+You need to use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` add-on, as it creates new endpoints in the _Business Service_ where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL. It is the same URL that is defined in the `quarkus.oidc.auth-server-url` property.
 
+To use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` add-on, add an entry with version `0.2.2` to the `<dependencies>` section of your POM file.
+
+////
 [source,xml]
 ----
 <dependency>
@@ -173,14 +175,16 @@ To add the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` extension, add the fol
   <version>0.2.2</version>
 </dependency>
 ----
-
+////
 NOTE: Version 0.2.2 of `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` is compatible with Quarkus 3.20 (LTS). Do not use versions 0.1.x or 0.3.x.
 
 === Spring Boot
+
 The `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on enables you to create an `/q/oidc/.well-known/openid-configuration` endpoint. It provides the Identity Provider URL which is the same URL that is defined in the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property.
 
-Add the following dependency to your `pom.xml` file:
+To use the `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on, add an entry to the `<dependencies>` section of your POM file.
 
+////
 [source,xml]
 ----
 <dependency>
@@ -188,6 +192,7 @@ Add the following dependency to your `pom.xml` file:
   <artifactId>bamoe-spring-boot-idp-discovery</artifactId>
 </dependency>
 ----
+////
 
 Then add the endpoint as an exception to your web security configuration, for example:
 

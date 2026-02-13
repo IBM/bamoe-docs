@@ -15,17 +15,19 @@ You can create a _Business Service_ using the Decision and Rule engines with the
 
 Use the {PRODUCT_SHORT} BOM with the Quarkus BOM to facilitate management of all {PRODUCT_SHORT} libraries.
 
-Add the `bamoe-bom` and `quarkus-bom` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
+Add the `com.ibm.bamoe:bamoe-bom` and `io.quarkus.platform:quarkus-bom` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
 
 For the dependencies required for a Decision or Rules application with Quarkus, see
 xref:../reference-guide/maven-repository-libraries.adoc#decisions-rules[Decisions, Rules, and Decision Tables (Quarkus)].
+
+To enable the default hot-reload during development, use the following command:
 
 [source,shell]
 ----
 mvn clean compile quarkus:dev
 ----
 
-To enable Test Scenario support, use `kogito-scenario-simulation` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
+To enable Test Scenario support, use `org.kie.kogito:kogito-scenario-simulation` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
 
 To correctly build and package the application, use the following Maven plugin:
 
@@ -200,7 +202,7 @@ The following table provides you the options to select the best choice between t
 
 == Compilation
 
-During Maven's compilation phase, `quarkus-maven-plugin` scans the `src/main/resources` directory to find any `.dmn` or `.drl` files.
+During Maven's compilation phase, `io.quarkus:quarkus-maven-plugin` scans the `src/main/resources` directory to find any `.dmn` or `.drl` files.
 
 For each discovered file, the decision engine creates REST Resource classes, with endpoints specifically to:
 

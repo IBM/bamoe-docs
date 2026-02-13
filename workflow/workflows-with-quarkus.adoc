@@ -14,9 +14,9 @@ You can add custom classes to the _Business Service_ project to provide addition
 
 Use the {PRODUCT_SHORT} BOM with the Quarkus BOM to facilitate management of all {PRODUCT_SHORT} libraries.
 
-Add the `bamoe-bom` and `quarkus-bom` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
+Add the `com.ibm.bamoe:bamoe-bom` and `io.quarkus.platform:quarkus-bom` dependencies to the `<dependencyManagement>` section of your project POM. You can then add the dependencies you require from those available in the BOM POMs using the `<dependency>` tags. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_boms_bill_of_materials[BAMOE Bill of Materials (BOM)].
 
-To correctly build a workflow _Business Service_ project with Quarkus and package the application, use `jbpm-with-drools-quarkus` dependency and the following Maven plugin:
+To correctly build a workflow _Business Service_ project with Quarkus and package the application, use `org.jbpm:jbpm-with-drools-quarkus` dependency and the following Maven plugin:
 
 [source,xml]
 ----
@@ -26,27 +26,27 @@ To correctly build a workflow _Business Service_ project with Quarkus and packag
 </plugin>
 ----
 
-For the `jbpm-with-drools-quarkus` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus[Workflows (Quarkus)].
+For the `org.jbpm:jbpm-with-drools-quarkus` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus[Workflows (Quarkus)].
 
 === Workflow subsystem add-ons (Quarkus)
 
 The following Quarkus add-ons provide extensions for enabling persistence, embedded subsystem execution, and integration with workflow-related components such as Data Index, Data Audit, Jobs Service, and User Tasks.
 
-Data-Index add-on:: Use to enable the workflow runtime to persist data directly into the Data-Index subsystem. For more information, see xref:../reference-guide/maven-repository-libraries.adoc##_workflows_stateful_subsystem_data_index[Workflows (Stateful) subsystem :: Data-Index].
-* `kogito-addons-quarkus-data-index-jpa`
+Data-Index add-on:: Use to enable the workflow runtime to persist data directly into the Data-Index subsystem. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_index[Workflows (Stateful) subsystem :: Data-Index].
+* `org.kie:kogito-addons-quarkus-data-index-jpa`
 
 The following add-ons require JDBC driver configuration when persistence layers are involved. For more information, see xref:#jdbc-configuration[Configuration section].
 
 Data-Audit add-ons:: Use to enable Data-Audit integration with the _Business Service_. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_data_audit[Workflows (Stateful) subsystem :: Data-Audit].
-* `kogito-addons-quarkus-data-audit`
-* `kogito-addons-quarkus-data-audit-jpa`
+* `org.kie:kogito-addons-quarkus-data-audit`
+* `org.kie:kogito-addons-quarkus-data-audit-jpa`
 
 Embedded Jobs Service add-ons:: Use to enable the colocation of the Jobs Service within the workflow runtime. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
-* `kogito-addons-quarkus-embedded-jobs`
-* `kogito-addons-quarkus-embedded-jobs-jpa`
+* `org.kie:kogito-addons-quarkus-embedded-jobs`
+* `org.kie:kogito-addons-quarkus-embedded-jobs-jpa`
 
 User Tasks add-on:: Use database-backed storage to enable the User Tasks subsystem to persist its data instead of relying on the default in‑memory storage. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_user_tasks[Workflows (Stateful) subsystem :: User Tasks].
-* `jbpm-addons-quarkus-usertask-storage-jpa`
+* `org.jbpm:jbpm-addons-quarkus-usertask-storage-jpa`
 
 With stateful Workflow you will often be combining events and messages in your Workflows, see xref:../reference-guide/maven-repository-libraries.adoc[Using Events in Workflows] for more details on implementing Events and Messaging within Workflows. 
 
@@ -60,9 +60,9 @@ Beside the POM file, the `application.properties` file is required to further cu
 ====
 With the introduction of the new embedded job service add-on in {PRODUCT_SHORT} {VERSION_930}, the following dependencies of the previously available implementation are deprecated and should be removed:
 
-- `kogito-addons-quarkus-jobs`
-- `kogito-addons-quarkus-jobs-management`, required for exposing Job Resources API
-- `jobs-service-storage-jpa`, required for persistence
+- `org.kie:kogito-addons-quarkus-jobs`
+- `org.kie:kogito-addons-quarkus-jobs-management`, required for exposing Job Resources API
+- `org.kie.kogito:jobs-service-storage-jpa`, required for persistence
 ====
 
 [#jdbc-configuration]
@@ -74,9 +74,9 @@ All {PRODUCT_SHORT} components rely on the default DataSource to establish the c
 
 Configuring persistence for {PRODUCT_SHORT} requires a following set of dependencies and configurations in your application:
 
-* `quarkus-agroal` for Quarkus DataSource Connection Pool with Security and Transaction support.
-* `quarkus-jdbc-{{your-database-type}}` for Database Specific Quarkus JDBC Driver.
-* `kie-addons-quarkus-persistence-jdbc` for KIE JDBC Persistence Add-on for Quarkus that enables persistence for the Workflow Engine with JDBC. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+`io.quarkus:quarkus-agroal`:: For Quarkus DataSource Connection Pool with Security and Transaction support.
+`io.quarkus:quarkus-jdbc-{{your-database-type}}`:: For Database Specific Quarkus JDBC Driver.
+`org.kie:kie-addons-quarkus-persistence-jdbc`:: For KIE JDBC Persistence Add-on for Quarkus that enables persistence for the Workflow Engine with JDBC. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 NOTE: For more information about full information about how to configure DataSources in Quarkus, see
 https://quarkus.io/version/3.20/guides/datasource[Configure data sources in Quarkus] guide.
@@ -85,11 +85,11 @@ https://quarkus.io/version/3.20/guides/datasource[Configure data sources in Quar
 
 To configure PostgreSQL persistence for your _Business Service_, in your POM file add the following dependencies:
 
-* `quarkus-agroal`
+* `io.quarkus:quarkus-agroal`
 * `quarkus-jdbc-postgresql`
-* `kie-addons-quarkus-persistence-jdbc`
+* `org.kie:kie-addons-quarkus-persistence-jdbc`
 
-For the `kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -109,11 +109,11 @@ kogito.persistence.type=jdbc
 
 To configure Microsoft SQL Server persistence for your _Business Service_, in your POM file add the following dependencies:
 
-* `quarkus-agroal`
-* `quarkus-jdbc-mssql`
-* `kie-addons-quarkus-persistence-jdbc`
+* `io.quarkus:quarkus-agroal`
+* `io.quarkus:quarkus-jdbc-mssql`
+* `org.kie:kie-addons-quarkus-persistence-jdbc`
 
-For the `kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -134,18 +134,18 @@ NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarku
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
 
-Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
+Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `com.ibm.bamoe:bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
 
 This module includes the necessary Hibernate ORM mappings to support remapping of some JPA entities used in both components. The mappings contained are:
 
 `META-INF/bamoe-data-index-orm.xml`:: This file remaps some entities from the data-index component.
 `META-INF/bamoe-job-service-orm.xml`:: This file remaps some entities from the job-service component.
-`bamoe-mssql-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
+`com.ibm.bamoe:bamoe-mssql-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
 
 Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
 added only if the associated component is present in the application dependencies.
 
-To correctly configure the Hibernate mappings, in your application POM add `bamoe-mssql-mappings` dependency. For the `bamoe-mssql-mappings` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+To correctly configure the Hibernate mappings, in your application POM add `com.ibm.bamoe:bamoe-mssql-mappings` dependency. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 
@@ -180,11 +180,11 @@ NOTE: This property requires the database schema to be set up manually with the 
 
 To configure Oracle persistence for your _Business Service_, in your POM add the following dependencies:
 
-* `quarkus-agroal`
-* `quarkus-jdbc-oracle`
-* `kie-addons-quarkus-persistence-jdbc`
+* `io.quarkus:quarkus-agroal`
+* `io.quarkus:quarkus-jdbc-oracle`
+* `org.kie:kie-addons-quarkus-persistence-jdbc`
 
-For the `kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -202,16 +202,16 @@ kogito.persistence.type=jdbc
 
 ==== {PRODUCT_SHORT} mappings for Oracle
 
-Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behaviour. The mappings contained are:
+Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you will need to add the `com.ibm.bamoe:bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behavior. The mappings contained are:
 
 `META-INF/bamoe-user-task-orm.xml`:: This file remaps some entities from the jbpm-usertask-storage-jpa component.
 `META-INF/bamoe-job-service-orm.xml`:: This file remaps some entities from the job-service component.
-`bamoe-oracle-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
+`com.ibm.bamoe:bamoe-oracle-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
 
 Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
 added only if the associated component is present in the application dependencies.
 
-To correctly configure the Hibernate mappings, in your application POM add `bamoe-oracle-mappings` dependency. For the `bamoe-oracle-mappings` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+To correctly configure the Hibernate mappings, in your application POM add `com.ibm.bamoe:bamoe-oracle-mappings` dependency. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 
@@ -224,11 +224,11 @@ quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/ba
 
 In development environments, you can use H2 persistence for your _Business Service_, in your POM add the following dependencies:
 
-* `quarkus-agroal`
-* `quarkus-jdbc-h2`
-* `kie-addons-quarkus-persistence-jdbc`
+* `io.quarkus:quarkus-agroal`
+* `io.quarkus:quarkus-jdbc-h2`
+* `org.kie:kie-addons-quarkus-persistence-jdbc`
 
-For the `kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 
@@ -258,7 +258,7 @@ Your development database schema will be automatically created for you.
 
 [NOTE]
 ====
-For production environemnts, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
+For production environments, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
 ====
 
 == Code structure
@@ -351,7 +351,7 @@ The {QUARKUS_DEV_UI} is a web app that attaches to the Quarkus Dev UI and allows
 
 image::workflow/dev-ui-process-instances.png[{QUARKUS_DEV_UI} Process Instances page]
 
-After you create a _Business Service_ with the Quarkus framework support, add the `bamoe-quarkus-devui` {QUARKUS_DEV_UI} dependency to your POM file. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus_dev_testing[Workflows (Quarkus dev + testing)].
+After you create a _Business Service_ with the Quarkus framework support, add the `com.ibm.bamoe:bamoe-quarkus-devui` {QUARKUS_DEV_UI} dependency to your POM file. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus_dev_testing[Workflows (Quarkus dev + testing)].
 
 Update the `application.properties` file to add users and user groups in the following format: 
 
