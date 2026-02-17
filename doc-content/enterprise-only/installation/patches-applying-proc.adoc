@@ -78,13 +78,10 @@ The following distribution types are supported in {PRODUCT} update tool:
 * `bamoe-business-central-eap7-deployable`: Updates Business Central (`business-central.war`)
 * `bamoe-kie-server-ee8`: Updates KIE Server (`kie-server.war`)
 +
-ifeval::["{context}" == "execution-server"]
 [NOTE]
 ====
 The update tool will update and replace {EAP} EE7 to {EAP} EE8. {EAP} EE7 is used for WebLogic and WebSphere, whereas version EE8 is used for {EAP}. Make sure that {KIE_SERVER} on WebLogic and WebSphere is not updated by the update tool.
 ====
-endif::[]
-ifdef::DM[]
 +
 * `{PRODUCT_INIT}-kie-server-jws`: Updates {KIE_SERVER} on {JWS} (`kie-server.war`)
 endif::DM[]
@@ -99,32 +96,25 @@ ifdef::PAM[]
 * `{PRODUCT_INIT}-controller-jws`: Updates the {HEADLESS_CONTROLLER} on {JWS} (`controller.war`)
 endif::PAM[]
 +
-
 Example update to {CENTRAL} and {KIE_SERVER} for a full {PRODUCT} distribution on {EAP}:
 +
-
 [source,subs="attributes+"]
 ----
 $./apply-updates.sh ~EAP_HOME/standalone/deployments/business-central.war bamoe-business-central-eap7-deployable 
 $./apply-updates.sh ~EAP_HOME/standalone/deployments/kie-server.war bamoe-kie-server-ee8
 ----
-
 +
 Example update to {HEADLESS_CONTROLLER}, if used:
 +
-
 [source,subs="attributes+"]
 ----
 $ ./apply-updates.sh ~EAP_HOME/standalone/deployments/controller.war {PRODUCT_INIT}-controller-ee7
 ----
 +
-
 The update script creates a `backup` folder in the extracted `{PRODUCT_INIT}-$VERSION-update` folder with a copy of the specified distribution, and then proceeds with the update.
 +
-
 You can run the `./apply-updates.sh --help` script see the usage information, as shown in the following example:
 +
-
 [source,xml]
 ----
 bamoe-8.0.8-update % ./apply-updates.sh --help
@@ -154,7 +144,6 @@ Notes:
         Example for Mac: export JAVA_HOME=/Library/Java/Home
 ----
 +
-
 . After the update tool completes, return to the IBM Support page where you downloaded the update tool and install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
 +
 For files that already exist in your {PRODUCT} distribution, such as `.jar` files for the {DECISION_ENGINE} or other add-ons, replace the existing version of the file with the new version from the IBM Support page.
@@ -394,6 +383,7 @@ migration-tool.bat -t $BAMOE_NIOGIT_DIR
 ----
 +
 In the command prompt that appears, the following options are displayed: 
++
 * Project structure migration
 * System configuration directory structure migration
 * Forms migration
@@ -410,10 +400,10 @@ In the command prompt that appears, the following options are displayed:
 |Migration options |Description
 
 |Project structure migration 
-|Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
+|Migrates the project repository structure to the new project-oriented structure used.
 
 |System configuration directory structure migration 
-|Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x.
+|Migrates the `system.git` repository structure to the new structure used in {PRODUCT_SHORT} 8.0.x.
 
 |Forms migration
 |Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer.
@@ -424,6 +414,6 @@ In the command prompt that appears, the following options are displayed:
 +
 . After the tool finishes running, enter the option to Exit the migration tool.
 +
-The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT} 8.0.x.
+The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT}.
 +
 . Project directories are in separate repositories and all other related configurations have been migrated. You can navigate to the new `.niogit` directory to inspect the restructured contents. 
