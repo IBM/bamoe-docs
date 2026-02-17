@@ -99,15 +99,17 @@ ifdef::PAM[]
 * `{PRODUCT_INIT}-controller-jws`: Updates the {HEADLESS_CONTROLLER} on {JWS} (`controller.war`)
 endif::PAM[]
 +
+
 Example update to {CENTRAL} and {KIE_SERVER} for a full {PRODUCT} distribution on {EAP}:
 +
+
 [source,subs="attributes+"]
 ----
 $./apply-updates.sh ~EAP_HOME/standalone/deployments/business-central.war bamoe-business-central-eap7-deployable 
 $./apply-updates.sh ~EAP_HOME/standalone/deployments/kie-server.war bamoe-kie-server-ee8
 ----
-+
 
++
 Example update to {HEADLESS_CONTROLLER}, if used:
 +
 
@@ -238,18 +240,24 @@ If you encounter errors or notice any missing data in {CENTRAL}, you can restore
 
 The `.niogit` directory of your Business Central distribution contains all Business Central data. You can use the Business Central migration tool on your `.niogit` directory to prepare project data and system configurations for patch updates and minor release upgrades. 
 
-.Prerequisites
+*Prerequisites*
 
 * New version of {PRODUCT_SHORT} is installed Business Central is not running.   
 +
 NOTE: Do not run {PRODUCT_SHORT} Business Central until you have completed the steps in this section. 
 +
 * JDK 8 is installed and is available on the path where the project migration tool will be installed. 
+* Download `bamoe-8.0.x-add-ons.zip` and extract the file to a temporary directory. 
+* Navigate to the Software Downloads page in the {PRODUCT} (login required), and select the product and version from the drop-down options:
++
+** Product: IBM Business Automation Manager Open Editions
+** Version: 8.0.x 
 
-.Procedure
+*Procedure*
 
+. In the extracted `bamoe-8.0.x-add-ons.zip` folder, extract the `bamoe-8.0.x-migration-tool.zip` sub-folder. The migration tool is in the bin directory.
 . Locate the `bin/.niogit` directory in your previous installation backup, and locate the equivalent directory for your new installation.
-. In your command terminal, copy the `.niogit` directory from your Business Central backup directory to the bin folder of your new installation.
+. Copy the `.niogit` directory from your Business Central backup directory to the bin folder of your new installation.
 +
 The copied `.niogit` folder is the directory that the migration tool will prepare for the new installation. The original `.niogit` folder remains in your old{PRODUCT_SHORT} installation and will not be modified by the migration tool in this procedure.
 +
@@ -364,17 +372,6 @@ Example `pom-migration.json` file with `dependencies` only:
 }
 ----
 + 
-
-. Navigate to the Software Downloads page in the {PRODUCT} (login required), and select the product and version from the drop-down options:
-+
-* Product: IBM Business Automation Manager Open Editions
-* Version: 8.0.x 
-+
-
-. Download `bamoe-8.0.7-add-ons.zip` and extract the file to a temporary directory. 
-
-. In the extracted `rhpam-7.13.5-add-ons` folder, extract the `bamoe-8.0.x-migration-tool.zip` sub-folder. The migration tool is in the bin directory. 
-
 . In your command terminal, navigate to the temporary directory where you extracted the `bamoe-8.0.x-migration-tool` folder and run the migration tool. The `$RHPAM_NIOGIT_DIR` portion is the path to the `.niogit` directory that you previously copied to the {PRODUCT_SHORT} 8.0.x installation. 
 
 +
@@ -396,14 +393,34 @@ cd $INSTALL_DIR\BAMOE_8.0-migration-tool\bin
 migration-tool.bat -t $BAMOE_NIOGIT_DIR
 ----
 +
-. Select the *All* option to run migrations in sequence.
+In the command prompt that appears, the following options are displayed: 
+* Project structure migration
+* System configuration directory structure migration
+* Forms migration
+* POMs migration
+* All
+* Exit
 +
-. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option: 
+. Select the *All* option to run migrations in sequence. 
 +
-.. Project structure migration: Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
-.. System configuration directory structure migration: Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x. 
-.. Forms migration: Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer. 
-.. POMs migration: Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option. Migration options described in following table:
++
+[cols="1,1"]
+|===
+|Migration options |Description
+
+|Project structure migration 
+|Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
+
+|System configuration directory structure migration 
+|Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x.
+
+|Forms migration
+|Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer.
+
+|POMs migration
+|Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+|===
 +
 . After the tool finishes running, enter the option to Exit the migration tool.
 +

@@ -41,60 +41,7 @@ The following steps are typically involved in upgrading from {RH_PAM} / {RH_DM} 
 The first step in upgrade is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_.
 Download the files _(replace with the most current version)_ based on your requirement.
 The following table shows the most common files but you can select other files according to your environment.
-
-
-.{PRODUCT_SHORT} Product Archives
-
-The following archives are typically used in upgrading to {PRODUCT_SHORT}:
-
-.Common Product Archives
-|===
-| Product Archive | Description
-
-| ILMT_for_IBAMOE_**{VERSION**}.zip   
-| This archive is used by IBM ILMT to measure the usage deployed in an environment of the product.
-
-| bamoe-installer-**{VERSION**}.jar 
-| This archive is an executable file that installs {PRODUCT_SHORT} version  {VERSION_80} in a preinstalled Red Hat JBoss EAP on all supported Linux and Windows environments.
-
-| bamoe-**{VERSION**}-add-ons.zip   
-| This archive contains things like the Database Migration Scripts (found at path /bamoe-**VERSION**-add-ons/process-migration/upgrade-scripts/**Database**)
-
-| bamoe-**{VERSION**}-business-central-eap7-deployable.zip   
-| This archive is required if you are running Business Central on your JBoss Enterprise Application Platform (EAP)
-
-| bamoe-**{VERSION**}-kie-server-ee7.zip   
-| This archive is required if you are running running KIE Server EE7 on JBoss EAP
-
-| bamoe-**{VERSION**}-kie-server-ee8.zip   
-| This archive is required if you are running KIE Server EE8 on JBoss EAP
-
-| bamoe-**{VERSION**}-maven-repository.zip   
-| This archive is required if you need to have a local copy of the product artifacts
-
-| bamoe-**{VERSION**}-offliner.zip   
-| This archive is required to help you to build the Maven mirror repository in an offline fashion, in situations where you need to have a disconnected loading of the Maven repository in your environment.
-
-| bamoe-**{VERSION**}-update.zip 
-| This archive includes all of the updates that get applied with the overall product set. 
-
-| bamoe-**{VERSION**}-kogito-offliner.zip   
-| This archive facilitates preparing a Maven mirror repository for offline use.
-
-| bamoe-**{VERSION**}-kogito-maven-repository.zip   
-| This archive is the Kogito Maven repository, which contains many of the requirements that Java developers typically use to build Kogito-based applications.
-
-| bamoe-**{VERSION**}-openshift-templates.zip
-| This archive facilitates building a custom KIE Server extension image for an external database.
-
-|===
-[NOTE]
-====
-
-In the displayed table, you must replace **VERSION** with the version of {PRODUCT_SHORT} you are upgrading to, such as {VERSION_8_LATEST}.
-====
-
-Now that you have the files, you can start the upgrade process.
+For all {PRODUCT_SHORT} Product Archives, see {PRODUCT_DOWNLOAD_LINK}[IBM Business Automation Manager Open Editions {ENTERPRISE_VERSION} downloads].
 
 == Step 2: Update Maven Configuration and settings
 
@@ -190,9 +137,6 @@ Do not apply updates while you are running an instance of Decision/Business Cent
 === Procedure
 
 . Navigate to the {PRODUCT_DOWNLOAD_PAGE}[{PRODUCT_LONG} version {VERSION_80} Downloads Page] and follow the instructions to download the {PRODUCT} **Update Tool**.
-
-+ 
-If you are upgrading to a new minor release, first apply the latest patch update to your current version of {PRODUCT} and then follow this procedure again to upgrade to the new minor release.
 
 . Extract the downloaded file to a temporary directory.
 
@@ -420,6 +364,11 @@ NOTE: Do not run {PRODUCT_SHORT} 8.0.x Business Central until you have completed
 +
 * Red Hat Process Automation Manager 7.13.5 is installed and Business Central is not running on Red Hat Process Automation Manager 7.13.5. 
 * JDK 8 is installed and is available on the path where the project migration tool will be installed. 
+* Download `bamoe-8.0.x-add-ons.zip` and extract the file to a temporary directory. 
+* Navigate to the Software Downloads page in the {PRODUCT} (login required), and select the product and version from the drop-down options:
++
+** Product: IBM Business Automation Manager Open Editions
+** Version: 8.0.x 
 
 .Procedure
 
@@ -499,7 +448,7 @@ Example `pom-migration.json` file:
 
   "repositories-remove":[
     {
-      "id":"productization-repository", "url":"http://download.lab.bos.redhat.com/brewroot/repos/jb-ip-6.1-build/latest/maven/"
+      "id":"productization-repository", "url":"https://maven.repository.redhat.com/ga/"
     }
   ],
 
@@ -588,20 +537,41 @@ cd $INSTALL_DIR\BAMOE_8.0-migration-tool\bin
 migration-tool.bat -t $BAMOE_NIOGIT_DIR
 ----
 +
-. Select the *All* option to run migrations in sequence.
+In the command prompt that appears, the following options are displayed: 
+* Project structure migration
+* System configuration directory structure migration
+* Forms migration
+* POMs migration
+* All
+* Exit
 +
-. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option: 
+. Select the *All* option to run migrations in sequence. 
 +
-.. Project structure migration: Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
-.. System configuration directory structure migration: Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x. 
-.. Forms migration: Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer. 
-.. POMs migration: Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option. Migration options described in following table:
++
+[cols="1,1"]
+|===
+|Migration options |Description
+
+|Project structure migration 
+|Migrates the Red Hat Process Automation Manager 7.13.5 project repository structure to the new project-oriented structure used in Red Hat Process Automation Manager 7.13.5.
+
+|System configuration directory structure migration 
+|Migrates the `system.git` repository structure used in Red Hat Process Automation Manager 7.13.5 to the new structure used in {PRODUCT_SHORT} 8.0.x.
+
+|Forms migration
+|Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer.
+
+|POMs migration
+|Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+|===
 +
 . After the tool finishes running, enter the option to Exit the migration tool.
 +
 The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT} 8.0.x.
 +
 . Project directories are in separate repositories and all other related configurations have been migrated. You can navigate to the new `.niogit` directory to inspect the restructured contents. 
+
 
 
 == Step 5: Update Persistence
