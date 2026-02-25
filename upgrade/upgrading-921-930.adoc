@@ -63,50 +63,13 @@ Once your {PRODUCT_SHORT} development environment is upgraded, it is straightfor
 The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
 [start=1]
-. Upgrade the Quarkus version in the project POM file to the currently supported version `3.20`:
+. Upgrade the Quarkus version in the project POM file to the currently supported version `3.20`.
 
 [start=2]
-. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION}:
-+
-[source,xml,subs="+attributes"]
-----
-<dependency>
-  <groupId>com.ibm.bamoe</groupId>
-  <artifactId>bamoe-bom</artifactId>
-  <version>{BOM_VERSION}</version>
-  <type>pom</type>
-  <scope>import</scope>
-</dependency>
-----
+. Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION} by using `com.ibm.bamoe:bamoe-bom` dependency. For more information, see xref:../reference-guide/maven-repository-libraries.adoc#_bamoe_bill_of_materials_bom[BAMOE Bill of Materials (BOM)].
 
 [start=3]
-. If you're upgrading a Business Service project containing stateful Workflows, update the following dependencies to use the new embedded Job Service add-on.
-+
-[source,diff,subs="+attributes"]
-----
--<dependency>
--    <groupId>org.kie</groupId>
--    <artifactId>kogito-addons-quarkus-jobs-management</artifactId>
--</dependency>
-
--<dependency>
--    <groupId>org.kie</groupId>
--    <artifactId>kogito-addons-quarkus-jobs</artifactId>
--</dependency>
--<dependency>
--    <groupId>org.kie.kogito</groupId>
--    <artifactId>jobs-service-storage-jpa</artifactId>
--</dependency>
-
-+<dependency>
-+    <groupId>org.kie</groupId>
-+    <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
-+</dependency>
-+<dependency>
-+    <groupId>org.kie</groupId>
-+    <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
-+</dependency>
-----
+. If you're upgrading a Business Service project containing stateful Workflows, exchange the `org.kie:kogito-addons-quarkus-jobs-management`, `org.kie:kogito-addons-quarkus-jobs` and `org.kie:jobs-service-storage-jpa` dependencies for the new embedded Job Service add-ons, `org.kie:kogito-addons-quarkus-embedded-jobs` and `org.kie:kogito-addons-quarkus-embedded-jobs-jpa`. For the dependencies, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_subsystem_jobs_service[Workflows (Stateful) subsystem :: Jobs Service].
 
 [NOTE]
 ====

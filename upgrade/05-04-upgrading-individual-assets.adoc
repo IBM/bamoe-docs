@@ -156,19 +156,11 @@ Additionally, {PRODUCT_SHORT} v9 supports Rule Units as an alternative way to or
 
 == Decision Tables (XLS or XLSX) [[decision-tables]]
 
-Spreadsheet-based decision tables in `.xls` or `.xlsx` format continue to be supported in {PRODUCT_SHORT} v9 Business Service projects. These assets can be used without modification, provided the appropriate dependency is declared in your project's pom.xml file.
+Spreadsheet-based decision tables in `.xls` or `.xlsx` format continue to be supported in {PRODUCT_SHORT} v9 Business Service projects. These assets can be used without modification, provided the appropriate dependency is declared in your project's POM file.
 
 Although {PRODUCT_SHORT} v9 does not include a built-in editor for decision tables, you can continue to author and maintain them using external spreadsheet tools. Once authored, the decision tables can be placed in the appropriate resource directory of your project and will be picked up by the engine at runtime.
 
-To enable support for decision tables, ensure your project includes the following Maven dependency:
-
-[,xml]
-----
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-decisiontables</artifactId>
-    </dependency>
-----
+To enable support for decision tables, ensure `org.drools:drools-decisiontables` dependency is added to the POM file of your _Business Service_ project. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_embedded_java_mode[Decisions, Rules, and Decision Tables (Embedded Java mode)].
 
 == Test Scenarios (SCESIM) [[scesim]]
 
@@ -204,16 +196,8 @@ With:
 `@org.drools.scenariosimulation.backend.runner.TestScenarioActivator`
 ----
 
-After updating the test activator, you may also need to adjust your `pom.xml` file to ensure that the correct dependencies are included. In detail, the new dependency required to enable the new `TestScenarioActivator` is:
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.kie.kogito</groupId>
-  <artifactId>kogito-scenario-simulation</artifactId>
-  <scope>test</scope>
-</dependency>
-----
+After updating the test activator, you need to ensure that the correct dependencies are included in your POM file. 
+To enable the new `TestScenarioActivator`, add the `org.kie.kogito:kogito-scenario-simulation` dependency to your project's POM file. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
 
 The required changes depend on whether your project follows a standalone or client-server architecture. For detailed guidance, refer to the appropriate migration guide:
 
