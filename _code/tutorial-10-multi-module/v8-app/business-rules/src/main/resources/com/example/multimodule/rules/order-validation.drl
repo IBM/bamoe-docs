@@ -1,0 +1,35 @@
+package com.example.multimodule.rules;
+
+import com.example.multimodule.model.Order;
+import java.math.BigDecimal;
+
+rule "High Value Order Approval"
+    ruleflow-group "order-validation"
+    when
+        $order : Order(totalAmount > 1000.00, status == "PENDING")
+    then
+        System.out.println("High value order detected: " + $order.getOrderNumber());
+        $order.setStatus("REQUIRES_APPROVAL");
+        update($order);
+end
+
+rule "Standard Order Auto-Approval"
+    ruleflow-group "order-validation"
+    when
+        $order : Order(totalAmount <= 1000.00, status == "PENDING")
+    then
+        System.out.println("Standard order auto-approved: " + $order.getOrderNumber());
+        $order.approve();
+        update($order);
+end
+
+rule "Reject Zero Amount Orders"
+    ruleflow-group "order-validation"
+    salience 100
+    when
+        $order : Order(totalAmount <= 0, status == "PENDING")
+    then
+        System.out.println("Rejecting zero/negative amount order: " + $order.getOrderNumber());
+        $order.reject();
+        update($order);
+end

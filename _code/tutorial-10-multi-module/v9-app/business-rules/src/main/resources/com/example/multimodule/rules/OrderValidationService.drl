@@ -1,0 +1,56 @@
+package com.example.multimodule.rules;
+
+import com.example.multimodule.model.Order;
+import java.math.BigDecimal;
+
+/**
+ * Rule: High Value Order Validation
+ * Description: Orders with total amount greater than $1000 require approval
+ */
+rule "High Value Order Requires Approval"
+    ruleflow-group "order-validation"
+    when
+        $order: Order(totalAmount.compareTo(new BigDecimal("1000.00")) > 0, status == "PENDING")
+    then
+        $order.setStatus("REQUIRES_APPROVAL");
+        update($order);
+end
+
+/**
+ * Rule: Low Value Order Auto-Approval
+ * Description: Orders with total amount less than or equal to $1000 are auto-approved
+ */
+rule "Low Value Order Auto Approval"
+    ruleflow-group "order-validation"
+    when
+        $order: Order(totalAmount.compareTo(new BigDecimal("1000.00")) <= 0, status == "PENDING")
+    then
+        $order.setStatus("APPROVED");
+        update($order);
+end
+
+/**
+ * Rule: Zero Amount Order Rejection
+ * Description: Orders with zero or negative amount are rejected
+ */
+rule "Zero Amount Order Rejection"
+    ruleflow-group "order-validation"
+    when
+        $order: Order(totalAmount.compareTo(BigDecimal.ZERO) <= 0, status == "PENDING")
+    then
+        $order.setStatus("REJECTED");
+        update($order);
+end
+
+/**
+ * Rule: Missing Customer Name Rejection
+ * Description: Orders without customer name are rejected
+ */
+rule "Missing Customer Name Rejection"
+    ruleflow-group "order-validation"
+    when
+        $order: Order(customerName == null || customerName.trim().isEmpty(), status == "PENDING")
+    then
+        $order.setStatus("REJECTED");
+        update($order);
+end
