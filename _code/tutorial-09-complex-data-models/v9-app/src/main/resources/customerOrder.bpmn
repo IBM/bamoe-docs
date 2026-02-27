@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="_customerOrderDef" exporter="jBPM Process Modeler" exporterVersion="2.0" targetNamespace="http://www.omg.org/bpmn20">
+  <bpmn2:itemDefinition id="_customerItem" structureRef="com.example.datamodels.Customer"/>
+  <bpmn2:itemDefinition id="_orderNumberItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="_isValidItem" structureRef="Boolean"/>
+  <bpmn2:process id="customerOrder" drools:packageName="com.example.datamodels" drools:version="1.0" drools:adHoc="false" name="Customer Order Process" isExecutable="true" processType="Public">
+    <bpmn2:property id="customer" itemSubjectRef="_customerItem" name="customer"/>
+    <bpmn2:property id="orderNumber" itemSubjectRef="_orderNumberItem" name="orderNumber"/>
+    <bpmn2:property id="isValid" itemSubjectRef="_isValidItem" name="isValid"/>
+    <bpmn2:sequenceFlow id="_validateToDecision" sourceRef="_validateCustomer" targetRef="_checkValidation"/>
+    <bpmn2:sequenceFlow id="_startToValidate" sourceRef="_startEvent" targetRef="_validateCustomer"/>
+    <bpmn2:sequenceFlow id="_validPath" name="Valid" sourceRef="_checkValidation" targetRef="_processOrder">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" language="http://www.java.com/java"><![CDATA[return isValid == true;]]></bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="_invalidPath" name="Invalid" sourceRef="_checkValidation" targetRef="_rejectOrder">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" language="http://www.java.com/java"><![CDATA[return isValid == false;]]></bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="_processToEnd" sourceRef="_processOrder" targetRef="_endEventSuccess"/>
+    <bpmn2:sequenceFlow id="_rejectToEnd" sourceRef="_rejectOrder" targetRef="_endEventReject"/>
+    <bpmn2:startEvent id="_startEvent" name="Start">
+      <bpmn2:outgoing>_startToValidate</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:scriptTask id="_validateCustomer" name="Validate Customer" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>_startToValidate</bpmn2:incoming>
+      <bpmn2:outgoing>_validateToDecision</bpmn2:outgoing>
+      <bpmn2:script><![CDATA[// Validate customer data
+boolean valid = true;
+
+if (customer == null) {
+    valid = false;
+    System.out.println("Customer is null");
+} else {
+    if (customer.getName() == null || customer.getName().length() < 2) {
+        valid = false;
+        System.out.println("Invalid customer name");
+    }
+    if (customer.getEmail() == null || !customer.getEmail().contains("@")) {
+        valid = false;
+        System.out.println("Invalid customer email");
+    }
+    if (customer.getAge() == null || customer.getAge() < 18) {
+        valid = false;
+        System.out.println("Customer must be at least 18 years old");
+    }
+}
+
+kcontext.setVariable("isValid", valid);
+System.out.println("Customer validation result: " + valid);]]></bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:exclusiveGateway id="_checkValidation" name="Is Valid?" gatewayDirection="Diverging">
+      <bpmn2:incoming>_validateToDecision</bpmn2:incoming>
+      <bpmn2:outgoing>_validPath</bpmn2:outgoing>
+      <bpmn2:outgoing>_invalidPath</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:scriptTask id="_processOrder" name="Process Order" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>_validPath</bpmn2:incoming>
+      <bpmn2:outgoing>_processToEnd</bpmn2:outgoing>
+      <bpmn2:script><![CDATA[System.out.println("Processing order " + orderNumber + " for customer: " + customer.getName());
+System.out.println("Customer email: " + customer.getEmail());
+System.out.println("Customer age: " + customer.getAge());]]></bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:scriptTask id="_rejectOrder" name="Reject Order" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>_invalidPath</bpmn2:incoming>
+      <bpmn2:outgoing>_rejectToEnd</bpmn2:outgoing>
+      <bpmn2:script><![CDATA[System.out.println("Order " + orderNumber + " rejected due to invalid customer data");]]></bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:endEvent id="_endEventSuccess" name="End (Success)">
+      <bpmn2:incoming>_processToEnd</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:endEvent id="_endEventReject" name="End (Rejected)">
+      <bpmn2:incoming>_rejectToEnd</bpmn2:incoming>
+    </bpmn2:endEvent>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="customerOrder">
+      <bpmndi:BPMNShape id="shape__endEventSuccess" bpmnElement="_endEventSuccess">
+        <dc:Bounds height="56" width="56" x="820" y="52"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__endEventReject" bpmnElement="_endEventReject">
+        <dc:Bounds height="56" width="56" x="820" y="212"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__rejectOrder" bpmnElement="_rejectOrder">
+        <dc:Bounds height="80" width="120" x="640" y="200"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__processOrder" bpmnElement="_processOrder">
+        <dc:Bounds height="80" width="120" x="640" y="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__checkValidation" bpmnElement="_checkValidation">
+        <dc:Bounds height="56" width="56" x="500" y="120"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__validateCustomer" bpmnElement="_validateCustomer">
+        <dc:Bounds height="80" width="120" x="300" y="108"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape__startEvent" bpmnElement="_startEvent">
+        <dc:Bounds height="56" width="56" x="180" y="120"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge_shape__rejectOrder_to_shape__endEventReject" bpmnElement="_rejectToEnd">
+        <di:waypoint x="760" y="240"/>
+        <di:waypoint x="820" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_shape__processOrder_to_shape__endEventSuccess" bpmnElement="_processToEnd">
+        <di:waypoint x="760" y="80"/>
+        <di:waypoint x="820" y="80"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_shape__checkValidation_to_shape__rejectOrder" bpmnElement="_invalidPath">
+        <di:waypoint x="528" y="176"/>
+        <di:waypoint x="640" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_shape__checkValidation_to_shape__processOrder" bpmnElement="_validPath">
+        <di:waypoint x="556" y="148"/>
+        <di:waypoint x="640" y="80"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_shape__startEvent_to_shape__validateCustomer" bpmnElement="_startToValidate">
+        <di:waypoint x="236" y="148"/>
+        <di:waypoint x="300" y="148"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_shape__validateCustomer_to_shape__checkValidation" bpmnElement="_validateToDecision">
+        <di:waypoint x="420" y="148"/>
+        <di:waypoint x="500" y="148"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
+
