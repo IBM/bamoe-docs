@@ -2,11 +2,11 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-Upgrading from {PRODUCT_SHORT} version {VERSION_80X} to version {VERSION_93X} involves more than just upgrading libraries. It represents a significant shift in the architecture, development model, and runtime behavior of your application. This section lists the most important differences to help you understand the changes and how they will impact your applications when you transition.
+Upgrading from {PRODUCT_SHORT} version {VERSION_80X} to version {VERSION} involves more than just upgrading libraries. It represents a significant shift in the architecture, development model, and runtime behavior of your application. This section lists the most important differences to help you understand the changes and how they will impact your applications when you transition.
 
 == Development environment - from monolith to cloud-native
 
-{PRODUCT_SHORT} version {VERSION_80X} had a centralized architecture with Business Central and KIE Server. {PRODUCT_SHORT} version {VERSION_93X} adopts a cloud-native approach, built on Kogito, where business logic is packaged as independent microservices or embedded into applications. Each unit of business logic is developed in a _Business Service_ project and packaged as a deployable runtime microservice (_Business Service_), see xref:../getting-started/project-setup.adoc[Getting Started → Setting up a _Business Service_ project]
+{PRODUCT_SHORT} version {VERSION_80X} had a centralized architecture with Business Central and KIE Server. {PRODUCT_SHORT} version {VERSION} adopts a cloud-native approach, built on Kogito, where business logic is packaged as independent microservices or embedded into applications. Each unit of business logic is developed in a _Business Service_ project and packaged as a deployable runtime microservice (_Business Service_), see xref:../getting-started/project-setup.adoc[Getting Started → Setting up a _Business Service_ project]
 
 === Business Central replaced by a new development stack
 
@@ -20,13 +20,13 @@ Learn more in the xref:04-development-environment-comparison.adoc[Development en
 
 === Authoring and execution split
 
-In version {VERSION_93X}, there is a clean separation between asset authoring (offline, in source control) and runtime execution (packaged into applications or services).
+In version {VERSION}, there is a clean separation between asset authoring (offline, in source control) and runtime execution (packaged into applications or services).
 
 === KIE Server with shared sessions replaced by microservices
 
 In {PRODUCT_SHORT} version {VERSION_80X}, KIE sessions (stateful/stateless) were managed centrally by the KIE Server which acted as a centralized runtime engine, following a client-server architecture. Applications interacted with it over REST or JMS to execute business processes, rules, and decisions. This allowed shared access to rule and process execution contexts.
 
-In {PRODUCT_SHORT} version {VERSION_93X}, this centralized model is replaced by a decentralized, cloud-native approach. KIE sessions still exist, embedded within each _Business Service_. They are no longer shared or exposed through a centralized runtime.
+In {PRODUCT_SHORT} version {VERSION}, this centralized model is replaced by a decentralized, cloud-native approach. KIE sessions still exist, embedded within each _Business Service_. They are no longer shared or exposed through a centralized runtime.
 
 * You now build and deploy business automation assets (processes, rules, and decisions) as independent microservices, using Kogito with Quarkus or Spring Boot. These services expose REST endpoints automatically. Learn more in xref:05-02-upgrading-client-server-projects.adoc[Upgrading client-server projects].
 
@@ -36,7 +36,7 @@ Because of this architectural change, it is no longer possible to access or mani
 
 == Runtime behavior and persistence
 
-Persistence is optional and explicitly configured when needed in both {PRODUCT_SHORT} version {VERSION_80X} and {VERSION_93X}. In this way application persistence is compatible across supported platforms. The following databases are supported in version {VERSION_93X}:
+Persistence is optional and explicitly configured when needed in both {PRODUCT_SHORT} version {VERSION_80X} and {VERSION}. In this way application persistence is compatible across supported platforms. The following databases are supported in version {VERSION}:
 
 * PostgreSQL
 * Microsoft SQL Server
@@ -46,7 +46,7 @@ For more information on the versions supported see xref:../release-notes/support
 
 === Event-driven architecture
 
-{PRODUCT_SHORT} {VERSION_93X} supports reactive, event-driven applications through integration with Apache Kafka. Quarkus provides the most complete support for BPMN and reactive messaging in this context.
+{PRODUCT_SHORT} {VERSION} supports reactive, event-driven applications through integration with Apache Kafka. Quarkus provides the most complete support for BPMN and reactive messaging in this context.
 
 Learn more in the xref:05-09-upgrading-event-streaming.adoc[Upgrading event streaming].
 
@@ -60,7 +60,7 @@ Each _Business Service_ project can be packaged and deployed as an independent m
 
 === SmartRouter
 
-SmartRouter is not available in {PRODUCT_SHORT} version {VERSION_93X}. Service discovery and orchestration are now handled through Kubernetes-native solutions.
+SmartRouter is not available in {PRODUCT_SHORT} version {VERSION}. Service discovery and orchestration are now handled through Kubernetes-native solutions.
 
 === Monitoring and management
 
@@ -94,13 +94,13 @@ The Test Scenario Editor in {PRODUCT_SHORT} {VERSION} supports DMN 1.6. DRL-base
 
 === Forms
 
-Version {VERSION_80X} Forms are not compatible with {PRODUCT_SHORT} version {VERSION_93X}. New forms must be created using {DEV_TOOLS}, see xref:05-04-upgrading-individual-assets.adoc#forms[Forms].
+Version {VERSION_80X} Forms are not compatible with {PRODUCT_SHORT} version {VERSION}. New forms must be created using {DEV_TOOLS}, see xref:05-04-upgrading-individual-assets.adoc#forms[Forms].
 
 == Security and governance
 
 === Authentication & authorization
 
-{PRODUCT_SHORT} version {VERSION_93X} integrates with external Identity Providers (IdPs) that support OpenID Connect (OIDC), using the security capabilities of the chosen runtime (Quarkus or Spring Boot). This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure, see xref:../building-deploying/security.adoc[Securing _Business Service_ API endpoints].
+{PRODUCT_SHORT} version {VERSION} integrates with external Identity Providers (IdPs) that support OpenID Connect (OIDC), using the security capabilities of the chosen runtime (Quarkus or Spring Boot). This enables secure, standardized authentication mechanisms and aligns with modern enterprise infrastructure, see xref:../building-deploying/security.adoc[Securing _Business Service_ API endpoints].
 
 === User and role management
 
@@ -116,7 +116,7 @@ Source control and collaboration are now managed using external Git platforms (e
 
 === Deployment targets
 
-{PRODUCT_SHORT} version {VERSION_93X} is optimized for Cloud-native solutions. _Business Services_ are packaged as container images and deployed using Kubernetes manifests or Helm charts.
+{PRODUCT_SHORT} version {VERSION} is optimized for Cloud-native solutions. _Business Services_ are packaged as container images and deployed using Kubernetes manifests or Helm charts.
 
 === CI/CD integration
 
@@ -126,5 +126,5 @@ All business assets are stored as plain text files in Git, making them ideal for
 
 In {PRODUCT_SHORT} version {VERSION_80X}, Business Central provided a graphical interface for authoring and executing tests, including support for Test Scenarios files.
 
-In {PRODUCT_SHORT} version {VERSION_93X}, testing is fully integrated into the developer workflow using Maven-based unit and integration tests.
+In {PRODUCT_SHORT} version {VERSION}, testing is fully integrated into the developer workflow using Maven-based unit and integration tests.
 Test Scenario files (`.scesim`) are still supported and can be executed using Maven. Graphical components for executing tests and viewing results are provided by {DEV_TOOLS}. Test outcomes are available in the console or build output. See xref:../editing/intro-editing-testing.adoc[Developing Decisions, Rules and Test Scenarios → Authoring unit tests with Test Scenarios]
