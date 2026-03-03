@@ -1,0 +1,808 @@
+= Decisions and Rules Services in Embedded Java mode
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Embedded mode refers to the possibility of executing the engines directly, through a public API, and without invoking REST endpoints. In previous versions this was also referred to as “drools-as-library” mode. In Embedded mode the application only contains the dependencies needed to compile the models and execute them. It does not contain any dependencies related to the generation of REST endpoints or the integration of external frameworks (Quarkus, Spring Boot).
+
+This mode is only supported by the Rules and Decisions engines and it is the fastest way for engine evaluation, because it completely bypasses all REST endpoints and http communication. It also offers fine-grained control over the engine execution.
+
+There are two slightly different versions of an embedded implementation:
+
+Fully embedded mode:: the application contains the models to be compiled/executed and the code that executes them.
+
+Dependant embedded mode:: the models are contained in different artifacts that are declared as a dependency in the executed application (referred to as a `kjar` in previous versions).
+
+At runtime, the code to execute an embedded implementation requires the same steps for both the Rules and Decisions engines, i.e.,
+
+. Instantiate a `KieServices` object which is the general “gateway” to retrieve all other kind of services exposed by the `kie` environment. 
+
+. Retrieve a `KieContainer` from the `KieServices` object. This is the container of all the Kie bases that are part of the application. Depending on the embedded mode you require, this can be done in different ways.
+
+. Instantiate the engine-specific runtime.
+
+. Execute the engine.
+
+Where a Kie base is a group of rules, decisions, processes that, are related in some way or that have mutual dependencies.
+
+== Fully embedded mode
+
+In fully embedded mode, the models are contained in the “resource” folder of the final, executed, application. You should consider fully embedded mode in the following cases:
+
+. The model design is done by Java developers, which is common for the rule engine. 
+
+. The lifecycle of the two components can be unified because there is a tight relationship between the version of the code and the version of the DMN definition. 
+
+. A very simple design is the priority. 
+
+The main disadvantage of this mode is that when a model changes, the whole application must be rebuilt. At build time, the engines compiles the models so that the related classes are in the same Jar as the executed application. The classes are directly available from the
+container classpath, and the instantiation of the KieContainer is:
+
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+The POM file of an application using Fully embedded mode sets the module packaging to `kjar`.
+
+[source, xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ibm.bamoe.decisions.embedded</groupId>
+  <artifactId>executed-module</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>kjar</packaging>
+  ...
+</build>
+----
+
+And declares the `org.kie:kie-maven-plugin` at compile time:
+
+[source, xml]
+----
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-maven-plugin</artifactId>
+      <version>...</version>
+      <extensions>true</extensions>
+    </plugin>
+  </plugins>
+    ...
+</build>
+----
+
+
+== Dependant Embedded mode
+In the dependant embedded mode (previously known as “kjar” usage) the models are contained in a separated module, that is compiled and then added as “dependency” in the executed one.
+
+You should consider Dependent Embedded mode in the following cases:
+
+. The design of models is delegated to a different team (e.g. Business Analysts) to the team responsible for the implementation of the java application.
+
+. The lifecycles of the model and application are different and you are able to update the models independently of the code. 
+
+. You are upgrading from version Version 8.0.x and you wish to retain the development paradigm promoted in the “Business central” architecture.  
+
+The advantage of this mode is that only the model-module artifact need to be rebuilt and installed, rather than the executable application. However, it may result in an architecture that is more cumbersome to maintain. 
+
+In this mode, the execution classes will be available from the dependencies, and the instantiation of the `KieContainer` will require the information to find them:
+
+[source, java]
+----
+KieServices kieServices = KieServices.Factory.get();
+ReleaseId releaseId = new ReleaseIdImpl("_GAV_OF_MODEL_MODULE_");
+KieContainer kieContainer = kieServices.newKieContainer(releaseId);
+----
+
+There will be a “model-module”, where the code generation and compilation of model-related classes happens, and the “executed module”, that will use the previous one as dependency.
+
+* model-module (contains drl, dmn files)
+* executed-module (declares the “model-module” as dependency).
+
+The model-module should contain:
+
+. The models to be compiled.
+. The backing/static classes that are required by the models.
+. Packaging to be set as kjar
+. To be declared as the kie-maven-plugin
+
+As shown in the example below:
+
+[source, xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ibm.bamoe.decisions.embedded>
+  <artifactId>model-module</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>kjar</packaging>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-maven-plugin</artifactId>
+      <version>...</version>
+      <extensions>true</extensions>
+    </plugin>
+  </plugins>
+....
+</build>
+----
+
+The executed module should:
+
+. contain the dependency on the model model
+. be packaged as standard jar
+. not contain the kie-maven-plugin declaration
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ibm.bamoe.decisions.embedded
+  <artifactId>executed-module</artifactId
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+....
+<dependencies>
+<dependency>
+<groupId>com.ibm.bamoe.decisions.embedded
+<artifactId>model-module</artifactId
+<version>1.0-SNAPSHOT</version
+</dependency>
+....
+----
+
+
+== pom.xml
+In your client application, add the following dependencies to the relevant classpath of your Java project:
+
+[source,xml]
+----
+<!-- Required for running DMN models in embedded Java mode -->
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-dmn-core</artifactId>
+</dependency>
+----
+
+To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
+Also a few KIE specific dependencies are needed.
+Ensure to update your `pom.xml` in the following way:
+
+[source,xml]
+----
+  <packaging>kjar</packaging>
+  
+  ...
+
+  <dependencies>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-model-compiler</artifactId>
+    </dependency>
+
+    <!-- For DebugRuleRuntimeEventListener.java -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-core</artifactId>
+    </dependency>
+
+    <!-- For DRL files -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-mvel</artifactId>
+    </dependency>
+
+    <!-- For kmodule.xml -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-xml-support</artifactId>
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.13</version>
+    </dependency>
+  </dependencies>
+
+  ...
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+----
+
+== kmodule.xml
+
+Building a DRL based project makes use of Apache Maven and aligns with standard Apache Maven practices.
+
+These projects or modules are simply an Apache Maven Java project or module; with an additional metadata: file `META-INF/kmodule.xml`.
+
+The `kmodule.xml` file is the descriptor that selects resources to knowledge bases and configures those bases and sessions.
+
+While standard Apache Maven can build and package these resources, it will not provide validation at build time.
+
+There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
+
+The plugin also generates many classes, making the runtime loading faster too.
+Since meaningful defaults have been provided for all configuration aspects, the simplest `kmodule.xml` file can contain just an empty kmodule tag like the following:
+
+.An empty kmodule.xml example
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns="http://www.drools.org/xsd/kmodule"/>
+----
+
+In this way the kmodule will contain one single default `KieBase`.
+All KIE assets stored under the resources folder, or any of its subfolders, will be compiled and added to it.
+To trigger the building of these artifacts it is enough to create a `KieContainer` for them.
+
+.Creating a KieContainer that reads the files to be built from the classpath
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+`KieServices` is the interface from where it is possible to access all the KIE building and runtime facilities.
+In the code above, all the Java sources and the KIE resources are compiled and deployed into the `KieContainer` which makes its contents available for use at runtime.
+
+The `kmodule.xml` allows to define and configure one or more `KieBase` s and for each `KieBase` all the different `KieSession` s that can be created from it, as showed by the {DROOLS_DOCS_LINK}#_thekmodulexmlfile[example].
+Then it is possible to simply retrieve the `KieBase` s and `KieSession` s from the `KieContainer` using their names.
+
+.Obtaining KieBase and KieSession using their names from kmodule.xml
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+
+KieBase kieBase1 = kieContainer.getKieBase("KBase1");
+KieSession kieSession1 = kieContainer.newKieSession("KSession2_1");
+StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2_2");
+----
+
+
+
+== KieContainer
+is local when the knowledge assets are either embedded directly into the calling program or are physically pulled in using Apache Maven dependencies for the KJAR.
+
+See https://github.com/apache/incubator-kie-drools/blob/main/kie-api/src/main/java/org/kie/api/runtime/KieContainer.java[`KieContainer`].
+
+//check whether we want to link to the apache kie api
+
+
+As the main entry point, `KieContainer` determines where to search for KIE assets that will be loaded into our application.
+
+In this example all assets from the `src/main/resources` will be loaded into our application.
+
+.Create a KieContainer from classpath
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+In this example all assets from the given dependency GAV will be loaded into our application.
+
+.Create a KieContainer from ReleaseId
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+
+ReleaseId releaseId = kieServices.newReleaseId("org.acme", "my-kjar", "1.0.0");
+KieContainer kieContainer = kieServices.newKieContainer(releaseId);
+----
+
+== KieBase
+The `KieBase` is a repository of all the application's knowledge definitions.
+It will contain rules, processes, functions, and type models.
+The `KieBase` itself does not contain data; instead, sessions are created from the `KieBase` into which data can be inserted and from which process instances may be started.
+The `KieBase` can be obtained from the `KieContainer` containing the `KieModule` where the `KieBase` has been defined.
+
+[source,java]
+----
+KieBase kieBase = kieContainer.getKieBase();
+----
+
+
+== KieSession
+The `KieSession` stores and executes on the runtime data.
+It is created from the `KieBase` and has two implementations.
+
+=== Stateful
+The first session {DROOLS_DOCS_LINK}#kie-sessions-stateful-con_rule-engine[stateful].
+It is obtained using the `newKieSession()` method.
+Stateful sessions can be worked with iteratively over time.
+
+[source,java]
+----
+KieSession kieSession = kieBase.newKieSession();
+----
+
+=== Stateless
+The session is {DROOLS_DOCS_LINK}#kie-sessions-stateless-con_rule-engine[stateless].
+It is obtained using `newStatelessKieSession()` method.
+Stateless is a one-off execution of a `KieRuntime` with a provided data set.
+It may return some results, with the session being disposed at the end, prohibiting further iterative interactions.
+You can think of stateless as treating an engine like a function call with optional return results.
+
+[source,java]
+----
+StatelessKieSession kieSession = kieBase.newStatelessKieSession();
+----
+
+
+== KieRuntime
+The `KieRuntime` provides methods that are applicable to both rules, decisions and processes, such as setting globals and registering channels.
+("Exit point" is an obsolete synonym for "channel".)
+
+==== Globals
+Globals are named objects that are made visible to the Drools rule engine, but in a way that is fundamentally different from the one for facts: changes in the object backing a global do not trigger reevaluation of rules.
+Still, globals are useful for providing static information, as an object offering services that are used in the RHS of a rule, or as a means to return objects from the Drools rule engine.
+When you use a global on the LHS of a rule, make sure it is immutable, or, at least, do not expect changes to have any effect on the behavior of your rules.
+
+A global must be declared in a rules file, then it needs to be backed up with a Java object.
+
+[source]
+----
+global java.util.List list
+----
+
+With the `KieBase` now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global\'s name and an object, for any session, to associate the object with the global.
+Failure to declare the global type and identifier in DRL code will result in an exception being thrown from this call.
+
+[source,java]
+----
+List<String> list = new ArrayList<>();
+kieSession.setGlobal("list", list);
+----
+
+Make sure to set any global before it is used in the evaluation of a rule.
+Otherwise a `NullPointerException` will be thrown.
+
+
+== Event Model
+The event package provides means to be notified of Drools rule engine events, including rules firing, objects being asserted, etc.
+This allows separation of logging and auditing activities from the main part of your application (and the rules).
+
+The `KieRuntimeEventManager` interface is implemented by the `KieRuntime` which provides two interfaces, `RuleRuntimeEventManager` and `ProcessEventManager`.
+We will only cover the `RuleRuntimeEventManager` here.
+
+The `RuleRuntimeEventManager` allows for listeners to be added and removed, so that events for the working memory and the agenda can be listened to.
+
+The following code snippet shows how a simple agenda listener is declared and attached to a session.
+It will print matches after they have fired.
+
+[source,java]
+----
+kieSession.addEventListener(new DefaultAgendaEventListener() {
+    public void afterMatchFired(AfterMatchFiredEvent event) {
+        super.afterMatchFired(event);
+        System.out.println(event);
+    }
+});
+----
+
+Drools also provides `DebugRuleRuntimeEventListener` and `DebugAgendaEventListener` which implement each method with a debug print statement.
+To print all Working Memory events, you add a listener like this:
+
+[source,java]
+----
+kieSession.addEventListener(new DebugRuleRuntimeEventListener());
+----
+
+All emitted events implement the `KieRuntimeEvent` interface which can be used to retrieve the actual `KnowlegeRuntime` the event originated from.
+
+NOTE: To see available events browse `org.kie.api.event.rule` https://github.com/apache/incubator-kie-drools/tree/main/kie-api/src/main/java/org/kie/api/event/rule[package].
+
+
+
+== KieRuntimeLogger
+The `KieRuntimeLogger` uses the comprehensive event system in Drools to create an audit log that can be used to log the execution of an application for later inspection.
+
+[source,java]
+----
+KieRuntimeLogger logger = KieServices.Factory.get().getLoggers().newFileLogger(kieSession, "logdir/mylogfile");
+// ... kieSession in action ...
+logger.close();
+----
+
+
+== Commands and the CommandExecutor
+Both the stateful and stateless session interfaces extend the `CommandExecutor` interface.
+The `CommandExecutor` allows for commands to be executed on those sessions, the only difference being that the `StatelessKieSession` executes `fireAllRules()` at the end before disposing the session.
+The commands can be created using the https://github.com/apache/incubator-kie-drools/blob/main/kie-internal/src/main/java/org/kie/internal/command/CommandFactory.java[`CommandFactory`].
+
+[source,java]
+----
+ExecutionResults executionResults = statelessKieSession.execute(
+    CommandFactory.newBatchExecution(Arrays.asList(
+        CommandFactory.newInsert(new Applicant("#0001", 20), "applicant"),
+        CommandFactory.newInsert(new LoanApplication("#0001"), "application"),
+        new SetActiveAgendaGroup("applicationGroup")           
+      )
+    )
+);
+
+executionResults.getResults().get("application");    
+----
+
+The previous example executes a single command.
+The `BatchExecution` represents a composite command, created from a list of commands.
+It will iterate over the list and execute each command in turn.
+This means you can insert some objects, start a process, call `fireAllRules` and execute a query, all in a single `execute(…​)` call, which is quite powerful.
+
+The `StatelessKieSession` will execute `fireAllRules()` automatically at the end.
+However the keen-eyed reader probably has already noticed the `FireAllRules` command and wondered how that works with a `StatelessKieSession`.
+The `FireAllRules` command is allowed, and using it will disable the automatic execution at the end; think of using it as a sort of manual override function.
+
+Any command, in the batch, that has an out identifier set will add its results to the returned `ExecutionResults` instance.
+See the `"applicant"` and `"application"` identifiers in our example.
+
+
+== Complete example
+Most of the mentioned concepts can be seen as https://github.com/IBM/bamoe-docs/tree/9.2.x/_code/docs/rules-embedded-mode-example[rules-embedded-mode-example].
+The example is based on the `loan application age limit` rule present xref:./authoring-rules.adoc[Authoring Rules with DRL] document.
+
+
+
+
+== DMNModel
+To execute a DMN Decision we need to know the DMN model namespace and model name.
+Both can be found in the properties panel of the DMN Editor.
+In this example we use namespace and model name from the <<_complete_example>>.
+
+.Obtain DMNRuntime from the KIE container and a reference to the DMN model to be evaluated, by using the model namespace and modelName
+[source,java]
+----
+DMNRuntime dmnRuntime = KieRuntimeFactory.of(kieContainer.getKieBase()).get(DMNRuntime.class);
+
+String namespace = "https://kie.org/dmn/_C83DFD16-A42A-46BE-A843-370444580E0F";
+String modelName = "loan-application-age-limit";
+
+DMNModel dmnModel = dmnRuntime.getModel(namespace, modelName);
+----
+
+
+== DMNContext
+`DMNContext` is a holder for the input values.
+It should contain a value for each corresponding `InputData` node of or DMN model.
+In this example, `"Applicant"` and `"Application"` are `InputData` nodes from the <<_complete_example>>.
+
+.Prepare data for the DMN Model execution
+[source,java]
+----
+DMNContext dmnContext = dmnRuntime.newContext();  
+dmnContext.set("Applicant", new Applicant("#0001", 20));  
+dmnContext.set("Application", new LoanApplication("#0001"));  
+----
+
+
+== DMNResult
+In the example below we execute the DMN model and consequently we iterate its results.
+We should be able to see results for all `Decision` nodes of the given DMN Model.
+
+.Execute the DMN Model
+[source,java]
+----
+DMNResult dmnResult = dmnRuntime.evaluateAll(dmnModel, dmnContext);  
+
+for (DMNDecisionResult dr : dmnResult.getDecisionResults()) {  
+    System.out.println(
+        "Decision: '" + dr.getDecisionName() + "', " +
+        "Result: " + dr.getResult());        
+}
+----
+
+For executing <<_complete_example>> model, we should see output like below.
+
+[source,bash]
+----
+Decision: 'Approvement', Result: {approved=false, explanation=Underage}
+----
+
+
+== Complete example
+Can be found at https://github.com/IBM/bamoe-docs/tree/9.2.x/_code/docs/decisions-embedded-mode-example[decisions-embedded-mode-example].
+
+
+
+= Executing Rules in embedded Java mode
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Building a DRL based project makes use of Apache Maven and aligns with standard Apache Maven practices.
+
+These projects or modules are simply an Apache Maven Java project or module; with an additional metadata: file `META-INF/kmodule.xml`.
+
+The `kmodule.xml` file is the descriptor that selects resources to knowledge bases and configures those bases and sessions.
+
+While standard Apache Maven can build and package these resources, it will not provide validation at build time.
+
+There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
+
+The plugin also generates many classes, making the runtime loading faster too.
+
+== kmodule.xml
+Since meaningful defaults have been provided for all configuration aspects, the simplest `kmodule.xml` file can contain just an empty kmodule tag like the following:
+
+.An empty kmodule.xml example
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns="http://www.drools.org/xsd/kmodule"/>
+----
+
+In this way the kmodule will contain one single default `KieBase`.
+All KIE assets stored under the resources folder, or any of its subfolders, will be compiled and added to it.
+To trigger the building of these artifacts it is enough to create a `KieContainer` for them.
+
+.Creating a KieContainer that reads the files to be built from the classpath
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+----
+
+`KieServices` is the interface from where it is possible to access all the KIE building and runtime facilities.
+In the code above, all the Java sources and the KIE resources are compiled and deployed into the `KieContainer` which makes its contents available for use at runtime.
+
+The `kmodule.xml` allows to define and configure one or more `KieBase` s and for each `KieBase` all the different `KieSession` s that can be created from it, as showed by the {DROOLS_DOCS_LINK}#_thekmodulexmlfile[example].
+Then it is possible to simply retrieve the `KieBase` s and `KieSession` s from the `KieContainer` using their names.
+
+.Obtaining KieBase and KieSession using their names from kmodule.xml
+[source,java]
+----
+KieServices kieServices = KieServices.Factory.get();
+KieContainer kieContainer = kieServices.getKieClasspathContainer();
+
+KieBase kieBase1 = kieContainer.getKieBase("KBase1");
+KieSession kieSession1 = kieContainer.newKieSession("KSession2_1");
+StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2_2");
+----
+
+
+== pom.xml
+To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
+Also a few KIE specific dependencies are needed.
+Ensure to update your `pom.xml` in the following way:
+
+[source,xml]
+----
+  <packaging>kjar</packaging>
+  
+  ...
+
+  <dependencies>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-model-compiler</artifactId>
+    </dependency>
+
+    <!-- For DebugRuleRuntimeEventListener.java -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-core</artifactId>
+    </dependency>
+
+    <!-- For DRL files -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-mvel</artifactId>
+    </dependency>
+
+    <!-- For kmodule.xml -->
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-xml-support</artifactId>
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.13</version>
+    </dependency>
+  </dependencies>
+
+  ...
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+----
+
+
+== KieBase
+The `KieBase` is a repository of all the application's knowledge definitions.
+It will contain rules, processes, functions, and type models.
+The `KieBase` itself does not contain data; instead, sessions are created from the `KieBase` into which data can be inserted and from which process instances may be started.
+The `KieBase` can be obtained from the `KieContainer` containing the `KieModule` where the `KieBase` has been defined.
+
+[source,java]
+----
+KieBase kieBase = kieContainer.getKieBase();
+----
+
+
+== KieSession
+The `KieSession` stores and executes on the runtime data.
+It is created from the `KieBase` and has two implementations.
+
+=== Stateful
+The first session {DROOLS_DOCS_LINK}#kie-sessions-stateful-con_rule-engine[stateful].
+It is obtained using the `newKieSession()` method.
+Stateful sessions can be worked with iteratively over time.
+
+[source,java]
+----
+KieSession kieSession = kieBase.newKieSession();
+----
+
+=== Stateless
+The session is {DROOLS_DOCS_LINK}#kie-sessions-stateless-con_rule-engine[stateless].
+It is obtained using `newStatelessKieSession()` method.
+Stateless is a one-off execution of a `KieRuntime` with a provided data set.
+It may return some results, with the session being disposed at the end, prohibiting further iterative interactions.
+You can think of stateless as treating an engine like a function call with optional return results.
+
+[source,java]
+----
+StatelessKieSession kieSession = kieBase.newStatelessKieSession();
+----
+
+
+== KieRuntime
+The `KieRuntime` provides methods that are applicable to both rules and processes, such as setting globals and registering channels.
+("Exit point" is an obsolete synonym for "channel".)
+
+==== Globals
+Globals are named objects that are made visible to the Drools rule engine, but in a way that is fundamentally different from the one for facts: changes in the object backing a global do not trigger reevaluation of rules.
+Still, globals are useful for providing static information, as an object offering services that are used in the RHS of a rule, or as a means to return objects from the Drools rule engine.
+When you use a global on the LHS of a rule, make sure it is immutable, or, at least, do not expect changes to have any effect on the behavior of your rules.
+
+A global must be declared in a rules file, then it needs to be backed up with a Java object.
+
+[source]
+----
+global java.util.List list
+----
+
+With the `KieBase` now aware of the global identifier and its type, it is now possible to call `ksession.setGlobal()` with the global\'s name and an object, for any session, to associate the object with the global.
+Failure to declare the global type and identifier in DRL code will result in an exception being thrown from this call.
+
+[source,java]
+----
+List<String> list = new ArrayList<>();
+kieSession.setGlobal("list", list);
+----
+
+Make sure to set any global before it is used in the evaluation of a rule.
+Otherwise a `NullPointerException` will be thrown.
+
+
+== Event Model
+The event package provides means to be notified of Drools rule engine events, including rules firing, objects being asserted, etc.
+This allows separation of logging and auditing activities from the main part of your application (and the rules).
+
+The `KieRuntimeEventManager` interface is implemented by the `KieRuntime` which provides two interfaces, `RuleRuntimeEventManager` and `ProcessEventManager`.
+We will only cover the `RuleRuntimeEventManager` here.
+
+The `RuleRuntimeEventManager` allows for listeners to be added and removed, so that events for the working memory and the agenda can be listened to.
+
+The following code snippet shows how a simple agenda listener is declared and attached to a session.
+It will print matches after they have fired.
+
+[source,java]
+----
+kieSession.addEventListener(new DefaultAgendaEventListener() {
+    public void afterMatchFired(AfterMatchFiredEvent event) {
+        super.afterMatchFired(event);
+        System.out.println(event);
+    }
+});
+----
+
+Drools also provides `DebugRuleRuntimeEventListener` and `DebugAgendaEventListener` which implement each method with a debug print statement.
+To print all Working Memory events, you add a listener like this:
+
+[source,java]
+----
+kieSession.addEventListener(new DebugRuleRuntimeEventListener());
+----
+
+All emitted events implement the `KieRuntimeEvent` interface which can be used to retrieve the actual `KnowlegeRuntime` the event originated from.
+
+NOTE: To see available events browse `org.kie.api.event.rule` https://github.com/apache/incubator-kie-drools/tree/main/kie-api/src/main/java/org/kie/api/event/rule[package].
+
+
+
+== KieRuntimeLogger
+The `KieRuntimeLogger` uses the comprehensive event system in Drools to create an audit log that can be used to log the execution of an application for later inspection.
+
+[source,java]
+----
+KieRuntimeLogger logger = KieServices.Factory.get().getLoggers().newFileLogger(kieSession, "logdir/mylogfile");
+// ... kieSession in action ...
+logger.close();
+----
+
+
+== Commands and the CommandExecutor
+Both the stateful and stateless session interfaces extend the `CommandExecutor` interface.
+The `CommandExecutor` allows for commands to be executed on those sessions, the only difference being that the `StatelessKieSession` executes `fireAllRules()` at the end before disposing the session.
+The commands can be created using the https://github.com/apache/incubator-kie-drools/blob/main/kie-internal/src/main/java/org/kie/internal/command/CommandFactory.java[`CommandFactory`].
+
+[source,java]
+----
+ExecutionResults executionResults = statelessKieSession.execute(
+    CommandFactory.newBatchExecution(Arrays.asList(
+        CommandFactory.newInsert(new Applicant("#0001", 20), "applicant"),
+        CommandFactory.newInsert(new LoanApplication("#0001"), "application"),
+        new SetActiveAgendaGroup("applicationGroup")           
+      )
+    )
+);
+
+executionResults.getResults().get("application");    
+----
+
+The previous example executes a single command.
+The `BatchExecution` represents a composite command, created from a list of commands.
+It will iterate over the list and execute each command in turn.
+This means you can insert some objects, start a process, call `fireAllRules` and execute a query, all in a single `execute(…​)` call, which is quite powerful.
+
+The `StatelessKieSession` will execute `fireAllRules()` automatically at the end.
+However the keen-eyed reader probably has already noticed the `FireAllRules` command and wondered how that works with a `StatelessKieSession`.
+The `FireAllRules` command is allowed, and using it will disable the automatic execution at the end; think of using it as a sort of manual override function.
+
+Any command, in the batch, that has an out identifier set will add its results to the returned `ExecutionResults` instance.
+See the `"applicant"` and `"application"` identifiers in our example.
+
+
+== Complete example
+Most of the mentioned concepts can be seen as https://github.com/IBM/bamoe-docs/tree/9.2.x/_code/docs/rules-embedded-mode-example[rules-embedded-mode-example].
+The example is based on the `loan application age limit` rule present xref:./authoring-rules.adoc[Authoring Rules with DRL] document.
+
