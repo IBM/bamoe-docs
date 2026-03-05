@@ -1,16 +1,13 @@
 :imagesdir: ../_images
 [id='clustering-headless-using-controller-kie-proc']
-= Clustering  using multiple headless controller and multiple KIE Servers
+= Clustering using multiple {HEADLESS_CONTROLLER} and multiple {KIE_SERVERS}
 
-You can configure {PRODUCT} to run in a clustered environment by using multiple headless controllers and multiple
-KIE Server. The headless controller provides centralized management and
-configuration, while multiple KIE Servers execute business processes in a clustered
-and highly available manner.
+You can configure {PRODUCT} to run in a clustered environment by using multiple {HEADLESS_CONTROLLER} and multiple {KIE_SERVERS}. The {HEADLESS_CONTROLLER} provides centralized management and configuration, while multiple {KIE_SERVERS} execute business processes in a clustered and highly available manner.
 
-*Configuring headless controller nodes*
+== Configuring {HEADLESS_CONTROLLER} nodes
 
 To configure the headless controller nodes, add the following
-properties under the `<system-properties>` element in the `EAP_HOME/standalone/configuration/standalone-full.xml` file
+properties under the `<system-properties>` element in the `EAP_HOME/standalone/configuration/standalone-full.xml` file:
 
 [source,xml]
 ----
@@ -22,22 +19,18 @@ properties under the `<system-properties>` element in the `EAP_HOME/standalone/c
   . ..
 </system-properties>
 ----
-
 Replace `<USERNAME>` and `<USER_PWD>` with the actual credentials. You must have the `kie-server` role defined.
 
 The template file stored on the shared NFS location contains default configuration
 information used by the controllers to manage KIE Server deployments.
 
-If the `org.kie.server.controller.templatefile.watcher.enabled` property is set to true,, the controller periodically checks the template
-file for changes. The default polling interval is 30000 milliseconds and can be modified
-by using the `org.kie.server.controller.templatefile.watcher.interval` system property.
-If the value of this property is set to false, changes take effect only after the controller restarts.
+If the `org.kie.server.controller.templatefile.watcher.enabled` property is set to true, the controller periodically checks the template file for changes. The default polling interval is 30000 milliseconds and can be modified by using the `org.kie.server.controller.templatefile.watcher.interval` system property.
+If the value of this property is set to false, changes take effect only after the controller restart.
 
-*Configuring KIE Server nodes*
+== Configuring {KIE_SERVERS} nodes
 
-To configure the KIE Server nodes, deploy `kie-server.war` on the node and update the
-`EAP_HOME/standalone/configuration/standalone-full.xml` file by adding the following
-properties under the `<system-properties>` element:
+To configure the {KIE_SERVERS} nodes, deploy `kie-server.war` on the node and update the
+`EAP_HOME/standalone/configuration/standalone-full.xml` file by adding the following properties under the `<system-properties>` element:
 
 [source,xml]
 ----
@@ -54,30 +47,27 @@ properties under the `<system-properties>` element:
 * `org.kie.server.location`: Specifies the REST endpoint of the KIE Server.
 * `org.kie.server.controller`: Defines a comma-separated list of controller URLs.
 
+== High availability with multiple {HEADLESS_CONTROLLER}
 
-== High availability with multiple headless controllers
-
-To enable high availability by using a headless controller, configure each KIE Server with more than one controller. 
-Specify the controller endpoints by providing a comma-separated list of controller URLs in the org.kie.server.controller system property. For example:
+To enable high availability by using a {HEADLESS_CONTROLLER}, configure each {KIE_SERVERS} with more than one controller. 
+Specify the controller endpoints by providing a comma-separated list of controller URLs in the `org.kie.server.controller` system property. For example:
 
 [source,xml]
 ----
 <property name="org.kie.server.controller" value="http://10.10.10.10:8080/controller/rest/controller,http://20.20.20.20:8080/controller/rest/controller"/>
 ----
 
-When multiple controllers are defined, the KIE Server automatically connects to an
-available controller. If the primary controller becomes unavailable,
-the KIE Server connects to another configured controller without manual intervention.
+When multiple controllers are defined, the KIE Server automatically connects to an available controller. If the primary controller becomes unavailable, the {KIE_SERVERS} connects to another configured controller without manual intervention.
 
 Ensure that connectivity to the shared NFS location remains uninterrupted. If the NFS
 location is unavailable, the controllers cannot access template and container
 configuration data, which can affect cluster operation.
 
-== Clustering KIE Server nodes
+== Clustering {KIE_SERVERS} nodes
 
-KIE Server clustering requires all KIE Server nodes to share the same database.
+the {KIE_SERVERS} clustering requires all KIE Server nodes to share the same database.
 This shared database stores process instances, runtime state, and KIE sessions.
-To setup a kie-server node clusters, add the following system properties to the KIE Server configuration. These properties configure the database connection for KIE Server:
+To setup a {KIE_SERVERS} node clusters, add the following system properties to the {KIE_SERVERS} configuration. These properties configure the database connection for {KIE_SERVERS}:
 
 [source,xml]
 ----
@@ -87,7 +77,6 @@ To setup a kie-server node clusters, add the following system properties to the 
 
 * `org.kie.server.persistence.ds`: Specifies the JNDI name of the data source (java:jboss/MySqlXADS).
 * `org.kie.server.persistence.dialect`: Specifies the Hibernate dialect to use for the database (MySQL8Dialect for MySQL  compatibility).
-
 
 .Architecture diagram
 image::../_images/KieServer/multiple-kia-architecture.png[]
@@ -104,10 +93,11 @@ image::../_images/KieServer/multiple-kia-architecture.png[]
 ----
 Replace `<USERNAME>` and `<PASSWORD>` with the actual username and password.
 
-== Testing High Availability (HA) Setup
+== Testing High Availability (HA) setup
+
 To verify that your HA setup is working correctly:
 
-.Shutdown the primary controller at http://10.10.10.10:8080/controller/.
-.Restart the KIE server node.
-.After the restart, verify that the KIE Server retrieves container configuration from the secondary controller at http://20.20.20.20:8080/controller/.
+. Shutdown the primary controller at http://10.10.10.10:8080/controller/.
+. Restart the KIE server node.
+. After the restart, verify that the KIE Server retrieves container configuration from the secondary controller at http://20.20.20.20:8080/controller/.
 
