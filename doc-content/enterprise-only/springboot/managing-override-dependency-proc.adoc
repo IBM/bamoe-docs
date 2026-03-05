@@ -1,3 +1,89 @@
 [id='managing-override-dependency-proc_{context}']
-= Managing and Overriding spring-boot Dependency Versions
+= Managing and overriding Spring Boot and Spring Framework dependency versions
 
+You can override Spring Boot and Spring Framework dependency versions in your {PRODUCT} Spring Boot business applications to address security vulnerabilities or use specific versions.
+
+== Managing and overriding Spring Boot dependency versions
+
+If your Spring Boot business application is created using the Maven archetype command, you can override the Spring Boot version by updating the `spring-boot-starter-parent` version in the parent tag in the `pom.xml` file:
+
+[source,xml]
+----
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.18</version>
+</parent>
+----
+
+If your project uses its own parent `pom.xml` file and the Spring Boot dependencies version is defined either directly in the `<dependencies>` or `<dependencyManagement>` section, to override the version of those dependencies, including transitively defined dependencies, use Maven's `<dependencyManagement>` section:
+
+[source,xml]
+----
+<dependencyManagement>
+    <dependencies>
+        <!-- Force alignment of Spring Boot versions -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>2.7.18</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+----
+
+== Managing and overriding Spring Framework dependency versions
+
+For managing and overriding Spring Framework dependency versions in Maven-based projects across all modules and transitive dependencies, consider the following approaches:
+
+=== Using Spring Framework BOM
+
+When a project uses multiple Spring Framework modules, use the Spring Framework BOM to define the Spring Framework version. To use an updated version of the Spring Framework JAR files, add the following entry to the `<dependencyManagement>` section of your project's `pom.xml` or parent POM:
+
+[source,xml]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-framework-bom</artifactId>
+            <version>5.3.41</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+----
+
+=== Overriding individual Spring dependencies
+
+If the Spring Framework BOM is not used and individual Spring dependencies are defined in your project `pom.xml` file, you can explicitly manage those dependencies by updating the version for each defined dependency:
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>5.3.41</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>5.3.41</version>
+    </dependency>
+</dependencies>
+----
+
+== Verifying dependency versions
+
+To confirm the effective Spring Boot and Spring Framework dependency versions, run the following command:
+
+[source,bash]
+----
+mvn dependency:tree | grep spring
+----
+
+This command ensures that all Spring and Spring Boot Framework artifacts resolve to the respective library version.
