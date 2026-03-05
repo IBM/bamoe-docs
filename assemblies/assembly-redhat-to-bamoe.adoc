@@ -8,7 +8,7 @@ ifdef::context[:parent-context: {context}]
 [id='assembly-redhat-to-bamoe']
 = Upgrading from Red Hat to IBM Business Automation Manager Open Editions
 
-This section provides guidance on upgrading from {RH_PAM} or {RH_DM} to {PRODUCT} {VERSION_80}. It is recommended to complete this upgrade path before moving to the next generation of the product in {PRODUCT_SHORT} 9.3.x.
+This section provides guidance on upgrading from {RH_PAM} or {RH_DM} to {PRODUCT} {VERSION_80}. It is recommended to complete this upgrade path before moving to the next generation of the product in {PRODUCT_SHORT} 9.4.x.
 
 If you have designed your jBPM application using KIE Server with Spring Boot and want to move from the latest community version to the enterprise-supported {PRODUCT_SHORT} 8.0.x, see https://community.ibm.com/community/user/automation/blogs/tim-wuthenow/2023/06/16/community-to-enterprise-bamoe[Moving from Community to Enterprise]. Both projects use Maven-based architectures, which simplifies the migration process.
 
@@ -126,13 +126,11 @@ During the course of your Maven dependency update, if you encounter any dependen
 
 Your project data and settings in Business Central (stored in the `.niogit` directory) can be migrated using the migration tooling (see xref:#niogit_directory[Using migration tool to prepare Business Central `.niogit` directory for upgrade]). 
 
-To install the new versions of Business Central, KIE Server, and the headless controller in a duplicate environment, follow the instructions in xref:../installing-and-configuring.html[Installing and configuring].
-Other {PRODUCT_SHORT} artifacts such as decision engine and standalone Decision/Business Central, are released as new artifacts with each minor release and you must reinstall them to apply the update.
+To install the new versions of decision engine, Business Central, KIE Server, and the headless controller in a duplicate environment, follow the instructions in xref:../installing-and-configuring.html[Installing and configuring].
 
 === Prerequisites
 
-Your Decision/Business Central and KIE Server instances are not running.
-Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
+Shut down any Business Central and Kie Server instances and back up your production environment if you are updating it directly.
 
 === Procedure
 
@@ -175,14 +173,7 @@ $ ls styles
 base.css base.css.removed
 ----
 
-. In your command terminal, navigate to the temporary directory where you extracted the `bamoe-$VERSION-update.zip` file and run the _apply-updates_ script in the following format:
-
-+
-[IMPORTANT]
-====
-Make sure that your Decision/Business Central and KIE Server instances are not running before you apply updates.
-Do not apply updates while you are running an instance of Decision/Business Central or KIE Server.
-====
+. In your command terminal, navigate to the temporary directory where you extracted the `bamoe-$VERSION-update.zip` file and run the _apply-updates_ script in the following format (Ensure  Decision/Business Central and KIE Server instances are not running):
 
 +
 On Linux or Unix-based systems:
@@ -251,10 +242,10 @@ $ ./apply-updates.sh ~EAP_HOME/standalone/deployments/controller.war bamoe-contr
 The update script creates a backup folder in the extracted `bamoe-$VERSION-update` folder with a copy of the specified distribution, and then proceeds with the update.
 +
 
-. After the update tool completes, return to the {PRODUCT_SUPPORT_PAGE}[IBM Support] page where you have downloaded the update tool and install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
+. After the update tool completes, return to the {PRODUCT_DOWNLOAD_LINK}[IBM Support] page where you have downloaded the update tool and install any other updates or new release artifacts that are relevant to your {PRODUCT} distribution.
 
 +
-For files that already exist in your {PRODUCT} distribution, such as .`jar` files for the decision engine or other add-ons, replace the existing version of the file with the new version from the {PRODUCT_SUPPORT_PAGE}[IBM Support] page.
+For files that already exist in your {PRODUCT} distribution, such as .`jar` files for the decision engine or other add-ons, replace the existing version of the file with the new version from the {PRODUCT_DOWNLOAD_LINK}[IBM Support] page.
 
 . If you use the standalone {PRODUCT_LONG} version {VERSION_80} - Maven Repository artifact (`bamoe-{VERSION_8_LATEST}-maven-repository.zip`), such as in air-gap environments, download {PRODUCT_LONG} version {VERSION_80} - Maven Repository and extract the downloaded `bamoe-{VERSION_8_LATEST}-maven-repository.zip` file to your existing `~/maven-repository` directory to update the relevant contents.
 
@@ -345,11 +336,6 @@ $ ./elytron/kie-fs-realm-patch.bat ~/$JBOSS_HOME/standalone/configuration/kie-fs
 . After you finish applying all relevant updates, start Decision/Business Central and KIE Server and login.
 . Verify that all the project data is present and accurate in Decision/Business Central, and in the top-right corner of the Decision/Business Central window, click your profile name and click About to verify the updated product version number.
 
-+
-
-If you encounter errors or notice any missing data in Decision/Business Central, you can restore the contents in the backup folder within the `bamoe-$VERSION-update` folder to revert the update tool changes.
-You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}.
-After restoring your previous distribution, you can try again to run the update.
 
 [id=#niogit_directory]
 == Step 4: Using migration tool to prepare Business Central .niogit directory for upgrade
@@ -393,6 +379,11 @@ The copied `.niogit` folder is the directory that the migration tool will prepar
 . In the {PRODUCT_SHORT} 8.0.x bin directory, delete the `.index` directory. You must delete this folder because {PRODUCT_SHORT} 8.0.x comes with certain updates that are not compatible with Red Hat Process Automation Manager 7.13.5. The bin directory will be re-indexed after the migration when you start {PRODUCT_SHORT} 8.0.x. 
 
 . Note the path to the copied `.niogit` directory for {PRODUCT_SHORT} 8.0.x. The path will be required when you run the migration tool. 
++
+If you encounter errors or notice any missing data in Decision/Business Central, you can restore the contents in the backup folder within the `bamoe-$VERSION-update` folder to revert the update tool changes.
+You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}.
+After restoring your previous distribution, you can try again to run the update.
++
 
 . If you have specific `dependencies`, `repositories`, or `pluginRepositories` that you want to add, remove, or update as part of the project migration, create a `pom-migration.json` file containing these elements. When you run the migration tool, the tool will prompt you if you want to include this file in the migration.
 +
