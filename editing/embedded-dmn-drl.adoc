@@ -55,7 +55,6 @@ The POM file of an application using Fully embedded mode sets the module packagi
   <version>1.0-SNAPSHOT</version>
   <packaging>kjar</packaging>
   ...
-</build>
 ----
 
 And declares the `org.kie:kie-maven-plugin` at compile time:
@@ -74,7 +73,6 @@ And declares the `org.kie:kie-maven-plugin` at compile time:
     ...
 </build>
 ----
-
 
 == Dependant Embedded mode
 In the dependant embedded mode (previously known as “kjar” usage) the models are contained in a separated module, that is compiled and then added as “dependency” in the executed one.
@@ -107,21 +105,21 @@ The model-module should contain:
 
 . The models to be compiled.
 . The backing/static classes that are required by the models.
-. Packaging to be set as kjar
-. To be declared as the kie-maven-plugin
+. Packaging to be set as `kjar`
+. To be declared as the `kie-maven-plugin`
 
 As shown in the example below:
 
 [source, xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.ibm.bamoe.decisions.embedded>
+  <groupId>com.ibm.bamoe.decisions.embedded</groupId>
   <artifactId>model-module</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>kjar</packaging>
-
+...
 <build>
   <plugins>
     <plugin>
@@ -137,25 +135,25 @@ As shown in the example below:
 
 The executed module should:
 
-. contain the dependency on the model model
-. be packaged as standard jar
-. not contain the kie-maven-plugin declaration
+. contain the dependency on the model module
+. be packaged as standard `jar`
+. not contain the `kie-maven-plugin` declaration
 
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.ibm.bamoe.decisions.embedded
-  <artifactId>executed-module</artifactId
+  <groupId>com.ibm.bamoe.decisions.embedded</groupId>
+  <artifactId>executed-module</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 ....
 <dependencies>
-<dependency>
-<groupId>com.ibm.bamoe.decisions.embedded
-<artifactId>model-module</artifactId
-<version>1.0-SNAPSHOT</version
+  <dependency>
+  <groupId>com.ibm.bamoe.decisions.embedded</groupId>
+<artifactId>model-module</artifactId>
+<version>1.0-SNAPSHOT</version>
 </dependency>
 ....
 ----
@@ -164,18 +162,14 @@ The executed module should:
 == pom.xml
 In your client application, add the following dependencies to the relevant classpath of your Java project:
 
-[source,xml]
-----
-<!-- Required for running DMN models in embedded Java mode -->
-<dependency>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-dmn-core</artifactId>
-</dependency>
-----
+`org.kie:kie-dmn-core`:: Required for running DMN models in embedded Java mode
 
-To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
-Also a few KIE specific dependencies are needed.
-Ensure to update your `pom.xml` in the following way:
+
+To run rules or decision services in embedded java mode, we will need to use `kie-maven-plugin` in our project.
+
+For the `org.kie:kie-maven-plugin` and other required dependencies, see xref:../reference-guide/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_embedded_java_mode[Decisions, Rules, and Decision Tables (Embedded Java mode)].
+
+Here is an example `pom.xml` showing the dependencies and plug-ins you will choose to add depending on your use case:
 
 [source,xml]
 ----
@@ -226,6 +220,7 @@ Ensure to update your `pom.xml` in the following way:
 
   ...
   
+  <!-- For build time validation -->
   <build>
     <plugins>
       <plugin>
@@ -239,15 +234,11 @@ Ensure to update your `pom.xml` in the following way:
 
 == kmodule.xml
 
-Building a DRL based project makes use of Apache Maven and aligns with standard Apache Maven practices.
+Building a DRL or a DMN based embedded Java mode uses Maven in the usual way and aligns with standard practices.
 
-These projects or modules are simply an Apache Maven Java project or module; with an additional metadata: file `META-INF/kmodule.xml`.
+DRL or a DMN based embedded Java projects or modules are simply an Apache Maven Java project or module, with an additional metadata file `META-INF/kmodule.xml`.
 
-The `kmodule.xml` file is the descriptor that selects resources to knowledge bases and configures those bases and sessions.
-
-While standard Apache Maven can build and package these resources, it will not provide validation at build time.
-
-There is an Apache Maven plugin (`kie-maven-plugin`) which is recommended to use to get build time validation.
+The `kmodule.xml` file is the descriptor that specifies resources to be knowledge bases and configures those bases and sessions.
 
 The plugin also generates many classes, making the runtime loading faster too.
 Since meaningful defaults have been provided for all configuration aspects, the simplest `kmodule.xml` file can contain just an empty kmodule tag like the following:
@@ -286,7 +277,6 @@ KieBase kieBase1 = kieContainer.getKieBase("KBase1");
 KieSession kieSession1 = kieContainer.newKieSession("KSession2_1");
 StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2_2");
 ----
-
 
 
 == KieContainer
@@ -589,70 +579,7 @@ StatelessKieSession kieSession2 = kieContainer.newStatelessKieSession("KSession2
 ----
 
 
-== pom.xml
-To run decision in embedded java mode, we will need to use `kie-maven-plugin` in our project.
-Also a few KIE specific dependencies are needed.
-Ensure to update your `pom.xml` in the following way:
 
-[source,xml]
-----
-  <packaging>kjar</packaging>
-  
-  ...
-
-  <dependencies>
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-compiler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-model-compiler</artifactId>
-    </dependency>
-
-    <!-- For DebugRuleRuntimeEventListener.java -->
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-core</artifactId>
-    </dependency>
-
-    <!-- For DRL files -->
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-mvel</artifactId>
-    </dependency>
-
-    <!-- For kmodule.xml -->
-    <dependency>
-      <groupId>org.drools</groupId>
-      <artifactId>drools-xml-support</artifactId>
-    </dependency>
-
-    <!-- Logging -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.13</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>2.0.13</version>
-    </dependency>
-  </dependencies>
-
-  ...
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.kie</groupId>
-        <artifactId>kie-maven-plugin</artifactId>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-  </build>
-----
 
 
 == KieBase

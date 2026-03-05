@@ -562,14 +562,6 @@ More at xref:../editing/embedded-dmn-drl.adoc[Decisions and Rules _Business Serv
 ----
 <dependency>
   <groupId>org.drools</groupId>
-  <artifactId>drools-core</artifactId>
-</dependency>
-----
-
-[source,xml]
-----
-<dependency>
-  <groupId>org.drools</groupId>
   <artifactId>drools-compiler</artifactId>
 </dependency>
 ----
@@ -582,21 +574,17 @@ More at xref:../editing/embedded-dmn-drl.adoc[Decisions and Rules _Business Serv
 </dependency>
 ----
 
-[source,xml]
-----
-<dependency>
-  <groupId>org.drools</groupId>
-  <artifactId>drools-mvel</artifactId>
-</dependency>
-----
+Add the following dependency for `DebugRuleRuntimeEventListener.java`:
 
 [source,xml]
 ----
 <dependency>
   <groupId>org.drools</groupId>
-  <artifactId>drools-decisiontables</artifactId>
+  <artifactId>drools-core</artifactId>
 </dependency>
 ----
+
+Add the following dependency for `kmodule.xml`:
 
 [source,xml]
 ----
@@ -606,6 +594,24 @@ More at xref:../editing/embedded-dmn-drl.adoc[Decisions and Rules _Business Serv
 </dependency>
 ----
 
+Add the following dependency for logging:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-api</artifactId>
+  <version>2.0.13</version>
+</dependency>
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-simple</artifactId>
+  <version>2.0.13</version>
+</dependency>
+----
+
+Add the following dependency for DMN models:
+
 [source,xml]
 ----
 <dependency>
@@ -614,12 +620,36 @@ More at xref:../editing/embedded-dmn-drl.adoc[Decisions and Rules _Business Serv
 </dependency>
 ----
 
+Add the following dependencies for DRL files:
+
 [source,xml]
 ----
-<plugin>
-  <groupId>org.kie</groupId>
-  <artifactId>kie-maven-plugin</artifactId>
-</plugin>
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-mvel</artifactId>
+</dependency>
+----
+
+Add the following dependencies for Decision Tables:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-decisiontables</artifactId>
+</dependency>
+----
+
+Add the following plugin in the `<build>` section of your `pom.xml` to obtain build time validation for embedded projects:
+
+[source,xml]
+----
+<build>
+  <plugin>
+    <groupId>org.kie</groupId>
+    <artifactId>kie-maven-plugin</artifactId>
+  </plugin>
+</build>
 ----
 
 [id="ai-integration"]
