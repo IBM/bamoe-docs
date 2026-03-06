@@ -1,0 +1,19 @@
+package com.myspace.mortgage_app;
+
+import com.myspace.mortgage_app.Application;
+import com.myspace.mortgage_app.ValidationErrorDO;
+
+/**
+ * Validates that down payment is not 0 and not >= property sale price
+ * v9 version using ruleflow-group (backward compatible approach)
+ */
+rule "Validate Down Payment"
+    ruleflow-group "validation"
+    when
+        $app: Application( downpayment == 0 || downpayment >= property.saleprice )
+    then
+        ValidationErrorDO error = new ValidationErrorDO();
+        error.setError("Down payment cannot be 0, greater than, or equal to the property sale price.");
+        System.out.println("Executed Rule: Validate Down Payment");
+        $app.setErrors(error);
+end

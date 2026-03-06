@@ -1,0 +1,33 @@
+package com.myspace.mortgage_app;
+
+import com.myspace.mortgage_app.Application;
+
+// Rule 1: Urban property with higher income
+rule "Mortgage Calculation - Urban High Income"
+    ruleflow-group "mortgagecalculation"
+    when
+        application: Application(
+            applicant.annualincome > 100000,
+            applicant.annualincome <= 200000,
+            property.saleprice < 300000,
+            property.age < 5,
+            property.locale == "Urban"
+        )
+    then
+        application.setMortgageamount(200000);
+end
+
+// Rule 2: Rural property with lower income
+rule "Mortgage Calculation - Rural Low Income"
+    ruleflow-group "mortgagecalculation"
+    when
+        application: Application(
+            applicant.annualincome > 50000,
+            applicant.annualincome <= 99999,
+            property.saleprice < 100000,
+            property.age < 10,
+            property.locale == "Rural"
+        )
+    then
+        application.setMortgageamount(100000);
+end
