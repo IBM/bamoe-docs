@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="Definitions_1" targetNamespace="http://www.omg.org/bpmn20">
+  <bpmn2:itemDefinition id="_userNameItem" structureRef="String" />
+  <bpmn2:itemDefinition id="_processInfoItem" structureRef="String" />
+  <bpmn2:itemDefinition id="_statusItem" structureRef="String" />
+  <bpmn2:process id="upgrade-demo-process" name="Upgrade Demo Process (v8)" isExecutable="true" drools:packageName="com.example.upgrade">
+    <bpmn2:documentation>
+      
+    </bpmn2:documentation>
+    <bpmn2:property id="userName" itemSubjectRef="_userNameItem" name="userName" />
+    <bpmn2:property id="processInfo" itemSubjectRef="_processInfoItem" name="processInfo" />
+    <bpmn2:property id="status" itemSubjectRef="_statusItem" name="status" />
+    <bpmn2:endEvent id="EndEvent_1" name="End">
+      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:scriptTask id="ScriptTask_1" name="Initialize Process " scriptFormat="java">
+      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
+      <bpmn2:script>
+
+// Access process instance information using kcontext
+String processInstanceId = kcontext.getProcessInstance().getId();
+String processName = kcontext.getProcessInstance().getProcessName();
+String nodeInstanceId = kcontext.getNodeInstance().getId();
+
+// Initialize variables
+kcontext.setVariable(&quot;status&quot;, &quot;initialized&quot;);
+kcontext.setVariable(&quot;processInfo&quot;, &quot;Process started at &quot; + new java.util.Date());
+      </bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:scriptTask id="ScriptTask_2" name="Process Data " scriptFormat="java">
+      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+      <bpmn2:script>
+
+String nodeName = kcontext.getNodeInstance().getNodeName();
+
+String user = (String) kcontext.getVariable(&quot;userName&quot;);
+if (user == null || user.isEmpty()) {
+    kcontext.setVariable(&quot;userName&quot;, &quot;DefaultUser&quot;);
+} else {
+    // Process user data
+    kcontext.setVariable(&quot;processInfo&quot;, &quot;Processing for user: &quot; + user);
+}
+
+kcontext.setVariable(&quot;status&quot;, &quot;processing&quot;);
+      </bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="ScriptTask_1" />
+    <bpmn2:sequenceFlow id="SequenceFlow_2" sourceRef="ScriptTask_1" targetRef="ScriptTask_2" />
+    <bpmn2:sequenceFlow id="SequenceFlow_3" sourceRef="ScriptTask_2" targetRef="EndEvent_1" />
+    <bpmn2:startEvent id="StartEvent_1" name="Start">
+      <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="upgrade-demo-process">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="100" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask_1_di" bpmnElement="ScriptTask_1">
+        <dc:Bounds x="200" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask_2_di" bpmnElement="ScriptTask_2">
+        <dc:Bounds x="350" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="500" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
+        <di:waypoint x="136" y="118" />
+        <di:waypoint x="200" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
+        <di:waypoint x="300" y="118" />
+        <di:waypoint x="350" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
+        <di:waypoint x="450" y="118" />
+        <di:waypoint x="500" y="118" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

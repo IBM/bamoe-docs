@@ -1,0 +1,54 @@
+package com.example.upgrade;
+
+unit OrderValidationUnit;
+
+import com.example.upgrade.Order;
+
+/**
+ * v9 Rule Unit Rules
+ *
+ * Changes from v8:
+ * - Added "unit OrderValidationUnit" declaration (replaces ruleflow-group)
+ * - Removed "ruleflow-group" attributes from all rules
+ * - Changed pattern syntax from "Order()" to "/order" (OOPath for SingletonStore)
+ * - Using modify() for better change tracking
+ *
+ * IMPORTANT: Use /order (singular) for SingletonStore, /orders[] for DataStore
+ */
+
+rule "Validate High Value Order"
+    salience 10
+when
+    $order : /order[amount > 1000, status == null]
+then
+    modify($order) {
+        setStatus("APPROVED"),
+        setValidated(true)
+    };
+    System.out.println("High value order approved: " + $order.getOrderId());
+end
+
+rule "Reject Low Credit Order"
+    salience 5
+when
+    $order : /order[creditScore < 600, status == null]
+then
+    modify($order) {
+        setStatus("REJECTED"),
+        setValidated(true),
+        setRejectionReason("Poor credit score")
+    };
+    System.out.println("Order rejected due to credit: " + $order.getOrderId());
+end
+
+rule "Approve Standard Order"
+    salience 1
+when
+    $order : /order[amount <= 1000, creditScore >= 600, status == null]
+then
+    modify($order) {
+        setStatus("APPROVED"),
+        setValidated(true)
+    };
+    System.out.println("Standard order approved: " + $order.getOrderId());
+end

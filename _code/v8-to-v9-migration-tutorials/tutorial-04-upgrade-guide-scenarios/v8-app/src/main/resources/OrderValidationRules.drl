@@ -1,0 +1,44 @@
+package com.example.upgrade;
+
+import com.example.upgrade.Order;
+
+/**
+ * v8 Legacy Rules with ruleflow-group
+ * 
+ * In v8, rules are organized using ruleflow-group attributes.
+ * The BPMN Business Rule Task references this group name.
+ */
+
+rule "Validate High Value Order"
+    ruleflow-group "order-validation"
+    salience 10
+when
+    $order : Order(amount > 1000, status == null)
+then
+    $order.setStatus("APPROVED");
+    $order.setValidated(true);
+    System.out.println("High value order approved: " + $order.getOrderId());
+end
+
+rule "Reject Low Credit Order"
+    ruleflow-group "order-validation"
+    salience 5
+when
+    $order : Order(creditScore < 600, status == null)
+then
+    $order.setStatus("REJECTED");
+    $order.setValidated(true);
+    $order.setRejectionReason("Poor credit score");
+    System.out.println("Order rejected due to credit: " + $order.getOrderId());
+end
+
+rule "Approve Standard Order"
+    ruleflow-group "order-validation"
+    salience 1
+when
+    $order : Order(amount <= 1000, creditScore >= 600, status == null)
+then
+    $order.setStatus("APPROVED");
+    $order.setValidated(true);
+    System.out.println("Standard order approved: " + $order.getOrderId());
+end
