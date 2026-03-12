@@ -69,12 +69,68 @@ javax.inject.*         → jakarta.inject.*
 javax.ws.rs.*          → jakarta.ws.rs.*
 javax.servlet.*        → jakarta.servlet.*
 javax.annotation.*     → jakarta.annotation.*
+javax.xml.bind.*       → jakarta.xml.bind.*
+javax.mail.*           → jakarta.mail.*
+javax.authorization.*  → jakarta.authorization.*
+javax.json.*           → jakarta.json.*
 ```
 
-**Quick Fix:**
+**Architectural Changes in v9:**
+
+v9 uses a fundamentally different architecture based on Kogito and Quarkus. The v8 service APIs (`org.jbpm.services.api.*`) are not available in v9.
+
+**In v9, use auto-generated REST endpoints** for process interaction (no custom service layer needed).
+
+**Common v8 APIs with v9 Alternatives:**
+
+```
+# Query and pagination
+org.kie.api.runtime.query.QueryContext               → Use pagination parameters in REST endpoints (page, size)
+
+# v8 Work Item Handlers → v9 Kogito Work Item Handlers
+org.kie.api.runtime.process.WorkItemHandler         → org.kie.kogito.internal.process.workitem.KogitoWorkItemHandler
+org.kie.api.runtime.process.WorkItemManager         → org.kie.kogito.internal.process.workitem.KogitoWorkItemManager
+org.kie.api.runtime.process.WorkItem                → org.kie.kogito.internal.process.workitem.KogitoWorkItem
+
+# v8 User Task APIs → v9 Kogito User Task APIs
+org.jbpm.services.task.commands.*                   → org.kie.kogito.usertask.UserTaskService
+org.kie.api.task.UserGroupCallback                  → org.kie.kogito.auth.IdentityProvider
+org.kie.api.task.model.Task                         → org.kie.kogito.usertask.UserTaskInstance
+org.kie.api.task.model.TaskSummary                  → org.kie.kogito.usertask.view.UserTaskView
+
+# v8 Event Listeners → v9 Kogito Event Listeners
+org.kie.api.event.process.ProcessEventListener      → org.kie.kogito.internal.process.event.DefaultKogitoProcessEventListener
+org.kie.api.event.rule.AgendaEventListener          → org.kie.api.event.rule.AgendaEventListener (unchanged)
+org.kie.api.event.rule.RuleRuntimeEventListener     → org.kie.api.event.rule.RuleRuntimeEventListener (unchanged)
+
+# v8 Rule Units → v9 Kogito Rule Units
+org.kie.api.runtime.rule.RuleUnit                   → org.kie.kogito.rules.RuleUnitData
+org.drools.core.command.runtime.rule.InsertObjectCommand → Use DataSource/DataStore in RuleUnitData
+```
+
+**Important Notes:**
+
+1. **REST Endpoints**: v8 KIE Server REST endpoints (`org.kie.server.remote.rest.*`) are not directly available in v9. Instead, create Quarkus REST endpoints using `jakarta.ws.rs.*` annotations and `jakarta.ws.rs.core.Response` for response building.
+
+2. **API Documentation**: Both v8 and v9 auto-generate API documentation (Swagger/OpenAPI), so no manual annotation migration is needed.
+
+3. **Work Item Handlers**: v8 work item handler interfaces are replaced with Kogito equivalents:
+   - `WorkItemHandler` → `KogitoWorkItemHandler`
+   - `WorkItemManager` → `KogitoWorkItemManager`
+   - `WorkItem` → `KogitoWorkItem`
+
+4. **User Tasks**: v8 task service APIs are replaced with `org.kie.kogito.usertask.UserTaskService` and related classes.
+
+5. **Security**: v8's `UserGroupCallback` is replaced with `org.kie.kogito.auth.IdentityProvider` for authentication and authorization.
+
+**Quick Fix for javax → jakarta:**
 ```bash
 find . -name "*.java" -exec sed -i 's/import javax\./import jakarta./g' {} \;
 ```
+
+**References:**
+- See **Tutorial 11: External Services Integration & Security** for REST endpoint migration examples
+- See **Tutorial 12: Database Integration** for service API migration patterns
 
 ---
 
@@ -889,16 +945,21 @@ end
 | Error Message | Issue # | Quick Fix |
 |---------------|---------|-----------|
 | `Invalid Java identifier` | #1 | Use camelCase for process IDs |
-| `package javax.persistence does not exist` | #2 | Replace javax with jakarta |
-| `Variable 'context' does not exist` | #3 | Use kcontext instead |
-| `Raw type 'List' is not allowed` | #4 | Add type parameter: List<Type> |
+| `package javax.persistence does not exist` | #1 | Replace javax with jakarta |
+| `package javax.ws.rs does not exist` | #1 | Replace javax.ws.rs with jakarta.ws.rs |
+| `package javax.xml.bind does not exist` | #1 | Replace javax.xml.bind with jakarta.xml.bind |
+| `package org.kie.server.remote.rest not found` | #1 | Use Quarkus REST with jakarta.ws.rs |
+| `package org.jbpm.services.api not found` | #1 | Use Kogito runtime APIs |
+| `package io.swagger.annotations not found` | #1 | Use org.eclipse.microprofile.openapi.annotations |
+| `Variable 'context' does not exist` | #2 | Use kcontext instead |
+| `Raw type 'List' is not allowed` | #3 | Add type parameter: List<Type> |
 | `Invalid schema name` | #6 | Remove dots from process ID |
-| `Hibernate validation failed` | #7 | Use DTO or configure JPA |
-| `Cannot mix legacy rules` | #9 | Convert all to rule units |
-| `null$` in output | #10 | Initialize with defaults |
-| `.frm files not found` | #12 | Use form generation |
-| `kmodule.xml not found` | #13 | Remove it, use application.properties |
-| Facts not visible to BPMN | #21 | Remove insert/delete, modify process variables |
+| `Hibernate validation failed` | #5 | Use DTO or configure JPA |
+| `Cannot mix legacy rules` | #7 | Convert all to rule units |
+| `null$` in output | #8 | Initialize with defaults |
+| `.frm files not found` | #10 | Use form generation |
+| `kmodule.xml not found` | #11 | Remove it, use application.properties |
+| Facts not visible to BPMN | #18 | Remove insert/delete, modify process variables |
 
 ---
 
@@ -1010,10 +1071,6 @@ public class EmbeddedProcessService {
     }
 }
 ```
-
-**References:**
-
-- Documentation: [`ibamoe/upgrade/05-03-upgrading-standalone-projects.adoc`](../../../ibamoe/upgrade/05-03-upgrading-standalone-projects.adoc)
 
 
 **Key Differences:**
