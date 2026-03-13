@@ -32,25 +32,104 @@ License Metric Tool automatically detects the following {PRODUCT} 8.0.x (for exa
 //The {PRODUCT} 8.0 license can be used for all the IBM Business Automation Manager access methods and application plug-ins available on the Automation Hub and its 8.0.x fix releases.
 //====
 
-Complete the following procedure to manually deploy dedicated software tags on each managed node and calculate VPC consumption:
+//Complete the following procedure to manually deploy dedicated software tags on each managed node and calculate VPC consumption:
 
-. Identify the remote nodes that are managed by each of your chargeable components. For example, the remote nodes that are managed by the application server that you are connecting to, with IBM Business Automation Manager plug-in for IBM InfoSphere DataStage.
-. Extract assigned software tags from the https://www.ibm.com/support/pages/system/files/inline-files/ILMT_for_IBAMOE_0.zip[`ILMT_for_IBAMOE_0.zip`].
-. Place the assigned software tag anywhere on the managed node.
-. Wait for the next software scan in License Metric Tool to have the chargeable software components reported.
-. It is recommended that you check whether License Metric Tool reporting matches with currently managed nodes before signing each License Metric Tool report.
+//. Identify the remote nodes that are managed by each of your chargeable components. For example, the remote nodes that are managed by the application server that you are connecting to, with IBM Business Automation Manager plug-in for IBM InfoSphere DataStage.
+//. Extract assigned software tags from the https://www.ibm.com/support/pages/system/files/inline-files/ILMT_for_IBAMOE_0.zip[`ILMT_for_IBAMOE_0.zip`].
+//. Place the assigned software tag anywhere on the managed node.
+//. Wait for the next software scan in License Metric Tool to have the chargeable software components reported.
+//. It is recommended that you check whether License Metric Tool reporting matches with currently managed nodes before signing each License Metric Tool report.
 
-The master domain manager centrally maintains the history of the plug-in jobs that you run in your environment. The history can be used:
+//The master domain manager centrally maintains the history of the plug-in jobs that you run in your environment. The history can be used:
 
-* During audits to verify which systems are managed by IBM Business Automation Manager.
-* To check periodically the result of your License Metric Tool reporting.
-* To verify your Virtual Processor Core license entitlement.
+//* During audits to verify which systems are managed by IBM Business Automation Manager.
+//* To check periodically the result of your License Metric Tool reporting.
+//* To verify your Virtual Processor Core license entitlement.
 
-include::_artifacts/snip-conscious-language.adoc[]
+//include::_artifacts/snip-conscious-language.adoc[]
 
-Assembly includes
+//Assembly includes
 
 
-Contact information
-include::_artifacts/author-group.adoc[]
+//Contact information
+//include::_artifacts/author-group.adoc[]
 
+To detect PAMOE or DMOE, you must manually deploy software tags according to the ILMT configuration. Complete the following procedure to manually deploy dedicated software tags on each managed node:
+
+.Prerequisites
+* ILMT Disconnected Scanner tool installed on your system
+* SWID tag files for {PRODUCT} 8.0.x obtained from the product release package or Jira ticket
+
+.Procedure
+. Identify the target system where you want to deploy the SWID tags.
++
+This should be a system where {PRODUCT} components (PAMOE or DMOE) are installed and need to be tracked by ILMT.
+
+. Obtain the appropriate SWID tag files:
++
+* `ibm.com_IBM_Process_Automation_Manager_Open_Edition-8.0.x.swidtag` for PAMOE
+* `ibm.com_IBM_Decision_Manager_Open_Edition-8.0.x.swidtag` for DMOE
++
+[NOTE]
+====
+SWID tag files are typically provided with the product release package or attached to the release Jira ticket. Ensure the version number in the filename matches your installed {PRODUCT} version.
+====
+
+. Place the SWID tag file in an appropriate directory on the managed node.
++
+The SWID tag file can be placed in any directory on the system. Common locations include:
++
+* `/opt/ibm/` (Linux)
+* A custom directory of your choice
++
+Example:
++
+[source,bash]
+----
+sudo cp ibm.com_IBM_Process_Automation_Manager_Open_Edition-8.0.8.swidtag /opt/ibm/
+----
+
+. Run the ILMT Disconnected Scanner to detect the deployed SWID tags:
++
+[source,bash]
+----
+cd /path/to/ilmt-scanner
+sudo ./run_sw_and_pack.sh
+----
++
+The scanner generates an output package in the `./output/` directory.
+
+. Verify the scan output:
++
+[source,bash]
+----
+ls ./output/ -ltr
+----
+
+. Upload the scan results to the ILMT portal:
++
+.. Navigate to the ILMT portal in your web browser.
+.. Go to *Management* → *Scan Results Upload*.
+.. Upload the package file generated in the `output` folder.
+
+. Import the scan data:
++
+.. In the ILMT portal, navigate to *Management* → *Data Imports*.
+.. Click *Import Now* to manually trigger the import, or wait for the automatic import (runs every 2 hours by default).
+
+. Verify the SWID tag detection:
++
+.. In the ILMT portal, navigate to *Reports* → *Infrastructure* → *Computers*.
+.. Locate your system in the list (identified by hostname or IP address).
+.. Click on the system entry and select *Software Installations* from the dropdown menu.
+.. Verify that the Component Version values for DMOE and/or PAMOE match your deployed {PRODUCT} version.
+
+.Result
+The SWID tags are now deployed and detected by ILMT. License Metric Tool will include these components in VPC consumption calculations and compliance reports.
+
+[IMPORTANT]
+====
+* Repeat this procedure for each managed node where {PRODUCT} components are installed.
+* After deploying SWID tags, verify that License Metric Tool reporting matches your currently managed nodes before signing each License Metric Tool report.
+* Maintain an inventory of systems with deployed SWID tags for audit purposes.
+====
