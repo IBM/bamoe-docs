@@ -1,10 +1,11 @@
-= Using Events in Workflows
+= Events and the Process Engine
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-The combination of events and business processes is a way to unlock powerful capabilities in automation solutions developed in {PRODUCT_SHORT}. 
+The Process Engine executes business processes. To define the processes, you create business assets, including process definitions and custom tasks. The combination of events and business processes is a way to unlock powerful capabilities in automation solutions developed in {PRODUCT_SHORT}. 
 
 == Combining events and Workflows
+
 Here are some examples of the use cases:
 
 * Process monitoring: by emitting events at various stages of a process it is possible to monitor process execution and create real-time dashboards.
@@ -18,7 +19,7 @@ Events are categorized as follows:
 
 Messaging Events:: are related to BPMN message elements enabling a process to register an event listener.
 
-Process/Runtime Events:: are related to process instances, tasks, and variables
+Process/Runtime Events:: are related to Process Instances, tasks, and variables
 
 == Messaging add-on
 
@@ -49,7 +50,7 @@ The following table shows more detail on message events and the corresponding Ka
 |Channel name configured in `mp.messaging.incoming.<channel-name>` (e.g., customers)
 
 |End Message Event
-|When process instance completes and sends final message
+|When Process Instance completes and sends final message
 |Channel name configured in `mp.messaging.outgoing.<channel-name>` (e.g., processedtravelers)
 
 |Boundary Message Event
@@ -68,15 +69,126 @@ You can see an example application of an event driven process (`process-event-dr
 
 The Spring Boot add-on is Kafka-specific therefore you will only need to add the `org.kie:kie-addons-springboot-messaging` dependency to enable messaging. For more information, see xref:https://central.sonatype.com/artifact/org.kie/kie-addons-springboot-messaging[`org.kie:kie-addons-springboot-messaging`] external documentation.
 
+== Correlating Messages to Engines at Runtime
+
+Correlation uses three BPMN components to route messages to the correct process instance:
+
+. *Correlation Property* - Defines which field to extract from the message
++
+Example: `<bpmn2:messagePath>id</bpmn2:messagePath>` extracts the `id` field
+
+. *Correlation Key* - Groups correlation properties as a unique identifier
++
+Example: `<bpmn2:correlationKey id="CorrelationKeyId">` references the property above
+
+. *Correlation Subscription* - Defines the expected value for matching
++
+Example: `<bpmn2:dataPath>"1"</bpmn2:dataPath>` means only match if `id = "1"`
+
+*Runtime Behavior*: When a message arrives, the engine:
+
+* Extracts the correlation property value (e.g., `id` field from message)
+* Checks if any process instance expects that specific value
+* Delivers the message only to matching instances
+* Discards messages with no match
+
+=== Complete BPMN Configuration
+
+See the full correlation configuration in `bamoe-examples/process-event-driven/hotels/src/main/resources/hotel.bpmn`:
+
+[source,xml]
+----
+<bpmn2:itemDefinition id="CorrelationPropertyId_Type" structureRef="String" />
+<bpmn2:correlationProperty id="CorrelationPropertyId" name="Correlation Property 1" type="CorrelationPropertyId_Type">
+  <bpmn2:correlationPropertyRetrievalExpression
+    id="_01E88DC7-3BDD-48E3-BCF9-39AD0772B2AB"
+    messageRef="_GlqmEIpdED2dBNv7eRNehQ"
+  >
+    <bpmn2:messagePath
+      id="_F1B5A911-766C-4E07-932E-A7C9BC825274"
+      evaluatesToTypeRef="_6404189C-98F1-471A-899F-4A66C9E9BB0E"
+      language="java"
+    >id</bpmn2:messagePath>
+  </bpmn2:correlationPropertyRetrievalExpression>
+</bpmn2:correlationProperty>
+
+<bpmn2:correlationKey id="CorrelationKeyId" name="Correlation Key Name">
+  <bpmn2:correlationPropertyRef>CorrelationPropertyId</bpmn2:correlationPropertyRef>
+</bpmn2:correlationKey>
+----
+
+=== Configuration in application.properties
+
+The following properties are required to configure messaging channels for correlation:
+
+[source,properties]
+----
+# Kafka broker URL
+kafka.bootstrap.servers=localhost:9092
+
+# Incoming channel (for Start/Catch/Boundary events)
+mp.messaging.incoming.<channel-name>.connector=smallrye-kafka
+mp.messaging.incoming.<channel-name>.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+mp.messaging.incoming.<channel-name>.auto.offset.reset=earliest
+
+# Outgoing channel (for Throw/End events)
+mp.messaging.outgoing.<channel-name>.connector=smallrye-kafka
+mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+----
+
+== Message Routing with kogitoprocrefid
+
+For intermediate message workflows, `kogitoprocrefid` routes incoming messages to the correct waiting process instance. This field needs to come in on the intermediate message. The value should be the process instance ID of the process that is currently waiting. This is a necessary step for getting the incoming message assigned to the right process instance.
+
+**When is it needed?**
+
+Use `kogitoprocrefid` when you have multiple process instances waiting at the same intermediate catch event and need to route a message to a specific instance. Without `kogitoprocrefid`, the message will be delivered to any waiting process instance, which may not be the intended one.
+
+**How to include it in the message:**
+
+You can include `kogitoprocrefid` in two ways:
+
+* **As a CloudEvent HTTP header** (when sending via HTTP/REST):
+
+[source]
+----
+ce-type: myevent
+ce-source: /from/unit/test
+ce-specversion: 1.0
+ce-id: 21627e26-31eb-43e7-8343-92a696fd96b1
+ce-kogitoprocrefid: 12345
+Content-Type: application/json
+----
+
+* **As a field in the CloudEvent JSON payload** (when sending via Kafka or HTTP with JSON payload):
+
+[source,json]
+----
+{
+  "kogitoprocrefid": "12345",
+  "specversion": "0.3",
+  "id": "21627e26-31eb-43e7-8343-92a696fd96b1",
+  "source": "/process/instance/12345",
+  "type": "process.persons.travellers",
+  "time": "2019-10-01T12:02:23.812262+02:00",
+  "data": {
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@example.com",
+    "nationality": "Polish"
+  }
+}
+----
+
 == Process event add-on
 
 {PRODUCT_SHORT} provides the Process event add-on, used to send processes, tasks, and variable events to an external event listener when execution of an operation modifies the state of a process. These events are known as runtime events, and can include any of the following:
 
-* Any change in the state of a process instance, including execution and violation of SLA
+* Any change in the state of a Process Instance, including execution and violation of SLA
 * Any change of state of a task or its metadata, including violation of an SLA 
 * any change in existing process definitions at application start including updates to metadata or structure. Used to capture and track the definition and version of processes. 
 
-The Process event add-on can also be used to build a historical representation of all process instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
+The Process event add-on can also be used to build a historical representation of all Process Instance executions. If you use this add-on with the Process REST API you can also build a custom graphical user interface to handle the user tasks.
 
 Each modifying operation is executed within an abstraction called a unit of work. A runtime event is published when a unit of work is completed. Events are published in the CloudEvents format to one of three Kafka Topics. See table below for more details on the publication of the three supported event types. 
 
@@ -85,7 +197,7 @@ Each modifying operation is executed within an abstraction called a unit of work
 |*Event Type* |*Published when* |*Kafka Topics* 
 
 |`ProcessInstanceEvent` 
-a| * the process instance changes state (started, ended - completed/aborted, migrated to a different version, updated - when a change in the internal state happens e.g., retriggering the SLA)
+a| * the Process Instance changes state (started, ended - completed/aborted, migrated to a different version, updated - when a change in the internal state happens e.g., retriggering the SLA)
 * there is an error in the process execution
 * each time a node is executed
 * there is a change in variables
@@ -194,3 +306,151 @@ mp.messaging.incoming.<channel name>.failure-strategy=fail-fast|ignore|dead-lett
 ----
 
 NOTE: As the `fail-fast` strategy results in the application stopping to consume further messages, it is recommended to configure one of the other available strategies when using Event Data in a Quarkus application.
+
+== Implementing an Event Listener Lifecycle in the Process Engine
+
+Every time a process or task changes to a different point in its lifecycle, the process engine generates an event. You can develop a class that receives and processes such events. This class is called an event listener.
+The Process Engine passes an event object to this class. The object provides access to related information. For example, if the event is related to a process node, the object provides access to the Process Instance and the node instance. The Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
+
+=== The Process Event Listener Interface
+You can develop a class that implements the `ProcessEventListener` interface. This class listens to process lifecycle events, such as starting or completing a process or entering and leaving a node or changing a variable. It is available in the `org.kie.api.event.process` package. The following code  shows the different methods of the `ProcessEventListener`:
+
+[source,java]
+----
+package org.kie.api.event.process;
+
+import java.util.EventListener;
+
+/**
+ * A listener for events related to Process Instance execution.
+ */
+public interface ProcessEventListener extends EventListener {
+
+    /**
+     * This listener method is invoked immediately before a Process Instance is being started.
+     * @param event
+     */
+    void beforeProcessStarted(ProcessStartedEvent event);
+
+    /**
+     * This listener method is invoked immediately after a Process Instance has been started.
+     * @param event
+     */
+    void afterProcessStarted(ProcessStartedEvent event);
+
+    /**
+     * This listener method is invoked immediately before a Process Instance is being completed (or aborted).
+     * @param event
+     */
+    void beforeProcessCompleted(ProcessCompletedEvent event);
+
+    /**
+     * This listener method is invoked immediately after a Process Instance has been completed (or aborted).
+     * @param event
+     */
+    void afterProcessCompleted(ProcessCompletedEvent event);
+
+    /**
+     * This listener method is invoked immediately before a node in a Process Instance is being triggered
+     * (which is when the node is being entered, for example when an incoming connection triggers it).
+     * @param event
+     */
+    void beforeNodeTriggered(ProcessNodeTriggeredEvent event);
+
+    /**
+     * This listener method is invoked immediately after a node in a Process Instance has been triggered
+     * (which is when the node was entered, for example when an incoming connection triggered it).
+     * @param event
+     */
+    void afterNodeTriggered(ProcessNodeTriggeredEvent event);
+
+    /**
+     * This listener method is invoked immediately before a node in a Process Instance is being left
+     * (which is when the node is completed, for example when it has performed the task it was
+     * designed for).
+     * @param event
+     */
+    void beforeNodeLeft(ProcessNodeLeftEvent event);
+
+    /**
+     * This listener method is invoked immediately after a node in a Process Instance has been left
+     * (which is when the node was completed, for example when it performed the task it was
+     * designed for).
+     * @param event
+     */
+    void afterNodeLeft(ProcessNodeLeftEvent event);
+
+    /**
+     * This listener method is invoked immediately before the value of a process variable is being changed.
+     * @param event
+     */
+    void beforeVariableChanged(ProcessVariableChangedEvent event);
+
+    /**
+     * This listener method is invoked immediately after the value of a process variable has been changed.
+     * @param event
+     */
+    void afterVariableChanged(ProcessVariableChangedEvent event);
+    
+    /**
+     * This listener method is invoked immediately before the SLA of a Process/node Instance has been violated.
+     * @param event
+     */
+    default void beforeSLAViolated(SLAViolatedEvent event) {}
+
+    /**
+     * This listener method is invoked immediately after the SLA of a Process/node Instance has been violated.
+     * @param event
+     */
+    default void afterSLAViolated(SLAViolatedEvent event) {}
+
+    /**
+     * This listener method is invoked when a signal is sent
+     * @param event
+     */
+    default void onSignal(SignalEvent event) {}
+
+    /**
+     * This listener is triggered when a migration occurs
+     * @param event
+     */
+    default void onMigration(ProcessMigrationEvent event) { }
+    
+    /**
+     * This listener method is invoked when a message is sent
+     * @param event
+     */
+    default void onMessage(MessageEvent event) {}
+    
+    /**
+     * This listener method is invoked when an error is captured
+     * @param event
+     */
+    default void onError (ErrorEvent event) {}
+
+    /**
+     * This listener method is invoked immediately after a Process Instance is modified.
+     * @param event
+     */
+    default void onProcessStateChanged(ProcessStateChangeEvent event) {}
+
+    /**
+     * This listener method is invoked immediately after a node in a Process Instance is modified.
+     * @param event
+     */
+    default void onNodeStateChanged(ProcessNodeStateChangeEvent event) {}
+}
+----
+
+You can implement any of these methods to process the corresponding event. You can use the methods of the event class to retrieve other classes that contain all information about the entities involved in the event.
+The following example is a part of a node-related event, such as `afterNodeLeft()`, and retrieves the Process Instance and node type.
+
+[source, java]
+----
+WorkflowProcessInstance processInstance = event.getNodeInstance().getProcessInstance();
+NodeType nodeType = event.getNodeInstance().getNode().getNodeType();
+----
+
+
+
+
