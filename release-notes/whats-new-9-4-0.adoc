@@ -7,18 +7,36 @@ This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VE
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
 
-* OCP 4.20_(in addition to xxx)_
-* Quarkus 3.27_(in addition to xxx)_
-* Spring Boot 3.5_(in addition to xxx)_
-* SQL Server support now includes Azure SQL Managed Instance
+* Red Hat OpenShift Container Platform (OCP) - 4.20_(in addition to 4.16, 4.18)
+* Quarkus - 3.27
+* Spring Boot - 3.5
+* SQL Server support includes Azure SQL Managed Instance support
+* Gradle - 9.2
+* GitHub Enterprise - 3.17.10
+* Hibernate ORM - 7.1.14
+* Kafka Client - 4.0.0
 
 More information in xref:supported-environments.adoc[Supported Environments].
 
-== Support for Quarkus 3.27 LTSR
-xref:../xx.adoc[Learn more...]
+== Support for Quarkus 3.27 LTS
+{PRODUCT_SHORT} now supports Quarkus 3.27 LTS, ensuring long-term stability, security, and compatibility with the latest Quarkus ecosystem. In this version of Quarkus the shift from @ConfigGroup to @ConfigMapping interfaces continues and you may need to update your Quarkus extensions xref:supported-environments.adoc[Learn more...]
 
-== Automation of license tracking and container annotation
-To facilitate the installation and license tracking {PRODUCT_SHORT} {VERSION} provides four new Helm charts that depend on the offering you have purchased a license for, {PRODUCT_DM} or {PRODUCT_PAM}.
+== New Gradle 9.2 Support
+{PRODUCT_SHORT} introduces support for you to use Gradle to build your Quarkus or Spring Boot based _Business Services_. It requires additional configuration of the {MVN_REPO} and Gradle commands can be used throughout the development lifecycle. 
+
+You can access new accelerators in {CANVAS} to bootstrap a Gradle-based _Business Services_ project:
+
+* Workflows (Quarkus + Gradle)
+* Workflows (Spring Boot + Gradle)
+* Decisions (Quarkus + Gradle)
+* Decisions (Spring Boot + Gradle)
+
+You can also view new examples of Gradle‑based projects in the `bamoe-{VERSION}-examples.zip` collection.
+
+xref:../xxx.adoc[Learn more...]
+
+== New Dev and Runtime Helm charts integrating licensing
+To facilitate the installation and license tracking {PRODUCT_SHORT} {VERSION} provides four new Helm charts that depend on the offering you have purchased a license for, namely {PRODUCT_DM} or {PRODUCT_PAM}.
 
 These Helm charts include the necessary licensing annotations and do not require any manual steps to add license annotations as was required with previous versions:
 
@@ -29,35 +47,21 @@ These Helm charts include the necessary licensing annotations and do not require
 
 xref:../installation/installation.adoc[Learn more...]
 
-== Migration tutorials from {PRODUCT_SHORT} {VERSION_80X}
-A number of Migration Tutorials are available Project code and Readmes within the bamoe-docs open source repository. They enable you to see worked examples of how to move your version 8 projects to version {VERSION}.
-xref:../upgrade/upgrading-80x-current.adoc[Learn more...]
+== New tutorials to facilitate upgrading from {PRODUCT_SHORT} {VERSION_80X}
+This release includes 13 comprehensive migration scenarios, provided to complement to the {PRODUCT_SHORT} v8 to v9 upgrade guide and delivered in the https://github.com/IBM/bamoe-docs/tree/main[BAMOE Documentation public repository]. These hands-on tutorials provide concrete examples and step-by-step instructions for common migration challenges as you move from {VERSION_80X} to {VERSION}.
 
-== Gradle 9.2 an alternative to Maven
-Gradle is now available as an alternative to Maven to build your _Business Services_. It requires additional configuration of the {MVN_REPO} and then MVN commands can be used throughout the development lifecycle. 
+A full list and the individual tutorial READMEs are accessible from the Upgrade from {VERSION_80X} section of the documentation. xref:../upgrade/upgrading-80x-current.adoc[Learn more...]
 
-You can access new accelerators in the BAMOE Canvas to bootstrap a Gradle-based _Business Services_ project:
 
-* Workflows (Quarkus + Gradle) Accelerator
-* Workflows (Spring Boot + Gradle) Accelerator
-* Decisions (Quarkus + Gradle) Accelerator
-* Decisions (Spring Boot + Gradle) Accelerator
+== Fully supported {PRODUCT_SHORT} Event Listener lifecyle compatible with {PRODUCT_SHORT} {VERSION_80X} 
+{PRODUCT_SHORT} {VERSION} includes full Task and Process lifecycle event support, including before/after hooks and payloads with both old and new data values. This feature ensures parity with the {PRODUCT_SHORT} {VERSION_80X} event listeners behavior, enabling smooth upgrades and preserving critical event-driven integrations for compliance, monitoring, and auditing. 
 
-You can also view new examples of Gradle‑based projects in the `bamoe-{VERSION}-examples.zip` collection.
+Two interfaces are provided: `UserTaskEventListener` and `ProcessEventListener` to align as much as possible with version {VERSION_80X} and facilitate upgrade and migration of your projects. xref:../workflow/event-driven-workflow.adoc[Learn more...]
 
-xref:../xxx.adoc[Learn more...]
+== Workflow Runtime support for suspendUntil in WS-HT lifecycle
+The ability to suspend a user task until a specified date when it automatically resumes is now supported as part of the full WS-HumanTask 1.1 lifecycle in {PRODUCT_SHORT} {VERSION}. The suspendUntil operation triggers timer-based task resumption. xref:../workflow/overview.adoc#human-task-lifecycle[Learn more...]
 
-== New {PRODUCT_SHORT} Event Listener Lifecyle compatible with {PRODUCT_SHORT} {VERSION_80X} 
-{PRODUCT_SHORT} {VERSION} includes full Task and Process Lifecycle event support, including before/after hooks and payloads with both old and new data values. This feature ensures parity with the {PRODUCT_SHORT} {VERSION_80X} event listeners behavior, enabling smooth upgrades and preserving critical event-driven integrations for compliance, monitoring, and auditing. Two new interfaces are provided: `UserTaskEventListener` and `ProcessEventListener` to align as much as possible with version {VERSION_80X} and facilitate upgrade and migration of your projects. 
-
-xref:../workflow/event-driven-workflow.adoc[Learn more...]
-
-== Workflow Runtime - `suspendUntil` supported in WS-HT lifecycle
-Missing construct in WS-HT lifecycle implementation in 9.3.1. 
-
-xref:../xxx.adoc[Learn more...]
-
-== {CANVAS} Dev Deployments via User defined YAML
+== Fully customizable {CANVAS} Dev Deployments
 You can now define custom Dev Deployment options using Kubernetes YAML manifests, JSON Patches and a descriptor file, giving you full control over how your applications are deployed. Dev Deployment options follow the specVersion spec enabling forwards compatibility. This features gives you full control over all aspects of your _Business Services_ deployment including:
 
 * Definition of custom Kubernetes resource manifests
@@ -70,8 +74,7 @@ For installation set-up xref:../installation/canvas.adoc[Learn more...]
 For configuration and usage options xref:../tools/canvas.adoc[Learn more...]
 
 == Additional Error log details in {MANAGEMENT_CONSOLE} 
-xref:../xxx.adoc[Learn more...]
-
+{MANAGEMENT_CONSOLE} now provides detailed error information when a job fails, enabling you to diagnose issues without having to access external logs. The error information includes logs, error messages and stack traces where available. xref:../managing-monitoring/consoles.adoc[Learn more...]
 
 
 [#download-doc]
