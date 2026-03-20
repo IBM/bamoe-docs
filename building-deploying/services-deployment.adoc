@@ -18,9 +18,7 @@ The Installation DDL scripts (contained in the `ddl` directory) enable you to cr
 
 The scripts can be executed in any order. The required subsystem tables will be created in the database and used by the {PRODUCT_SHORT} Workflow engine.
 
-If everything is correctly set, at the first project execution all the tables will be automatically added.
-
-To guarantee that your _Business Service_ containing stateful Workflows subsystems, configured with persistence, will not try to apply changes to your database schema in your production environment, disable KIE Flyway by setting the following property: 
+It is also possible to use KIE Flyway to automatically add the Database tables at the first project execution. However this option is not recommended in your Production environment so before deploying your _Business Service_ containing stateful Workflows subsystems, you should disable KIE Flyway by setting the following property: 
 
 [source,properties]
 ----
@@ -29,10 +27,8 @@ kie.flyway.enabled=false
 
 [NOTE]
 ====
-If using Microsoft SQL Server with a case-sensitive collation, some flyway migration scripts use different table name casing, which may cause failures on case-sensitive collations. You must set `kie.flyway.enabled=false` and use the DDL scripts to create the database schema manually.
+If you are using Microsoft SQL Server with a case-sensitive collation, some flyway migration scripts use different table name casing, which may cause failures on case-sensitive collations. You must set `kie.flyway.enabled=false` and use the DDL scripts to create the database schema manually.
 ====
-
-// question about why we need the above paragraph
 
 [#evolving-deployed-workflows]
 == Evolving stateful Workflows across _Business Service_ deployments

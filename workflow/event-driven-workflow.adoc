@@ -138,11 +138,11 @@ mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.se
 
 == Message Routing with kogitoprocrefid
 
-For intermediate message workflows, `kogitoprocrefid` routes incoming messages to the correct waiting process instance. This field needs to come in on the intermediate message. The value should be the process instance ID of the process that is currently waiting. This is a necessary step for getting the incoming message assigned to the right process instance.
+For intermediate message workflows, `kogitoprocrefid` routes incoming messages to the correct waiting process instance. This field needs to come in on the intermediate message. The value should be the Process Instance ID of the process that is currently waiting. This is a necessary step for getting the incoming message assigned to the right Process Instance.
 
 **When is it needed?**
 
-Use `kogitoprocrefid` when you have multiple process instances waiting at the same intermediate catch event and need to route a message to a specific instance. Without `kogitoprocrefid`, the message will be delivered to any waiting process instance, which may not be the intended one.
+Use `kogitoprocrefid` when you have multiple Process Instances waiting at the same intermediate catch event and need to route a message to a specific instance. Without `kogitoprocrefid`, the message will be delivered to any waiting Process Instance, which may not be the intended one.
 
 **How to include it in the message:**
 
@@ -313,7 +313,9 @@ Every time a process or task changes to a different point in its lifecycle, the 
 The Process Engine passes an event object to this class. The object provides access to related information. For example, if the event is related to a process node, the object provides access to the Process Instance and the node instance. The Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
 
 === The Process Event Listener Interface
-You can develop a class that implements the `ProcessEventListener` interface. This class listens to process lifecycle events, such as starting or completing a process or entering and leaving a node or changing a variable. It is available in the `org.kie.api.event.process` package. The following code  shows the different methods of the `ProcessEventListener`:
+You can develop a class that implements the `ProcessEventListener` interface. This class listens to process lifecycle events, such as starting or completing a process or entering and leaving a node or changing a variable. 
+
+The following code  shows the different methods of the `ProcessEventListener` which you can implement to process the corresponding event:
 
 [source,java]
 ----
@@ -327,7 +329,7 @@ import java.util.EventListener;
 public interface ProcessEventListener extends EventListener {
 
     /**
-     * This listener method is invoked immediately before a Process Instance is being started.
+     * This listener method is invoked immediately before a Process Instance is started.
      * @param event
      */
     void beforeProcessStarted(ProcessStartedEvent event);
@@ -339,7 +341,7 @@ public interface ProcessEventListener extends EventListener {
     void afterProcessStarted(ProcessStartedEvent event);
 
     /**
-     * This listener method is invoked immediately before a Process Instance is being completed (or aborted).
+     * This listener method is invoked immediately before a Process Instance is completed (or aborted).
      * @param event
      */
     void beforeProcessCompleted(ProcessCompletedEvent event);
@@ -351,8 +353,8 @@ public interface ProcessEventListener extends EventListener {
     void afterProcessCompleted(ProcessCompletedEvent event);
 
     /**
-     * This listener method is invoked immediately before a node in a Process Instance is being triggered
-     * (which is when the node is being entered, for example when an incoming connection triggers it).
+     * This listener method is invoked immediately before a node in a Process Instance is triggered
+     * (which is when the node is entered, for example when an incoming connection triggers it).
      * @param event
      */
     void beforeNodeTriggered(ProcessNodeTriggeredEvent event);
@@ -365,7 +367,7 @@ public interface ProcessEventListener extends EventListener {
     void afterNodeTriggered(ProcessNodeTriggeredEvent event);
 
     /**
-     * This listener method is invoked immediately before a node in a Process Instance is being left
+     * This listener method is invoked immediately before a node in a Process Instance is left
      * (which is when the node is completed, for example when it has performed the task it was
      * designed for).
      * @param event
@@ -381,7 +383,7 @@ public interface ProcessEventListener extends EventListener {
     void afterNodeLeft(ProcessNodeLeftEvent event);
 
     /**
-     * This listener method is invoked immediately before the value of a process variable is being changed.
+     * This listener method is invoked immediately before the value of a process variable is changed.
      * @param event
      */
     void beforeVariableChanged(ProcessVariableChangedEvent event);
@@ -393,7 +395,7 @@ public interface ProcessEventListener extends EventListener {
     void afterVariableChanged(ProcessVariableChangedEvent event);
     
     /**
-     * This listener method is invoked immediately before the SLA of a Process/node Instance has been violated.
+     * This listener method is invoked immediately before the SLA of a Process/node Instance is violated.
      * @param event
      */
     default void beforeSLAViolated(SLAViolatedEvent event) {}
@@ -442,7 +444,21 @@ public interface ProcessEventListener extends EventListener {
 }
 ----
 
-You can implement any of these methods to process the corresponding event. The methods of the event class can be used to retrieve other classes that contain all information about the entities involved in the event.
+All process events extend the base `ProcessEvent` interface:
+
+[source, java]
+----
+
+public interface ProcessEvent extends KieRuntimeEvent {
+    ProcessInstance getProcessInstance();       // The process instance this event relates to
+    Date getEventDate();                        // When the event was created
+    default String getEventIdentity() {         // Identity that performed the event
+        return null;
+    }
+}
+----
+
+The methods of the `event` class can be used to retrieve other classes that contain all information about the entities involved in the event.
 The following example is a part of a node-related event, such as `afterNodeLeft()`, and retrieves the Process Instance and node type.
 
 [source, java]
@@ -451,6 +467,419 @@ WorkflowProcessInstance processInstance = event.getNodeInstance().getProcessInst
 NodeType nodeType = event.getNodeInstance().getNode().getNodeType();
 ----
 
+When a process variable changes, both the old and new values are available in the `event` object. The following example shows how to access both values:
+
+[source, java]
+----
+@ApplicationScoped
+public class MyProcessEventListener implements ProcessEventListener {
+    
+    @Override
+    public void afterVariableChanged(ProcessVariableChangedEvent event) {
+        String variableId = event.getVariableId();
+        Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+        
+        System.out.println("Variable '" + variableId + "' changed from " 
+            + oldValue + " to " + newValue);
+    }
+    
+    // Implement other methods as needed or extend DefaultProcessEventListener
+}
+----
+
+==== Timing of calls to the Process Event Listener
+
+A number of event listener calls are before and after events, for example, `beforeNodeLeft()` and `afterNodeLeft()`.
+The before and after event calls typically act like a stack. If event A directly causes event B, the following sequence of calls happens:
+
+. Before A
+. Before B
+. After B
+. After A
+
+For example, if leaving node X triggers node Y, all event calls related to triggering node Y occur between the `beforeNodeLeft` and `afterNodeLeft` calls for node X.
+In the same way, if starting a process directly causes some nodes to start, all `nodeTriggered` and `nodeLeft` event calls occur between the `beforeProcessStarted` and `afterProcessStarted` calls.
+
+This approach reflects cause and effect relationships between events. However, the timing and order of after event calls are not always intuitive. For example, an `afterProcessStarted` call can happen after the `afterNodeLeft` calls for some nodes in the process.
+
+In general, to be notified when a particular event occurs, use the before call for the event. Use an after call only if you want to make sure that all processing related to this event has ended, for example, when you want to be notified when all steps associated with starting a particular Process Instance have been completed.
+
+Depending on the type of node, some nodes might only generate `nodeLeft` calls and others might only generate `nodeTriggered` calls. For example, catch intermediate event nodes do not generate `nodeTriggered` calls because they are not triggered by another process node. Similarly, throw intermediate event nodes do not generate `nodeLeft` calls because these nodes do not have an outgoing connection to another node.
 
 
+=== The User Task Event Listener Interface
+You can develop a class that implements the `UserTaskEventListener` interface. This class can listen to events related to the lifecycle of user tasks, such as assignment of an owner, completion of a task, or changes to task variables.
+User task event listeners use a single callback method pattern where the `event` object contains both the old and new states. This design provides access to both the previous state and the current state within a single event handler. 
 
+The following source code shows the different methods of the `UserTaskEventListener` interface which you can implement to process the corresponding event:
+
+[source, java]
+----
+package org.kie.kogito.usertask;
+
+import org.kie.kogito.usertask.events.UserTaskAssignmentEvent;
+import org.kie.kogito.usertask.events.UserTaskAttachmentEvent;
+import org.kie.kogito.usertask.events.UserTaskCommentEvent;
+import org.kie.kogito.usertask.events.UserTaskDeadlineEvent;
+import org.kie.kogito.usertask.events.UserTaskStateEvent;
+import org.kie.kogito.usertask.events.UserTaskVariableEvent;
+
+public interface UserTaskEventListener {
+
+    /**
+     * This listener method is invoked when a user task deadline event occurs.
+     * @param event
+     */
+    default void onUserTaskDeadline(UserTaskDeadlineEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a user task state changes.
+     * The event contains both the old status and new status.
+     * @param event
+     */
+    default void onUserTaskState(UserTaskStateEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a user task assignment changes.
+     * The event contains both the old users and new users.
+     * @param event
+     */
+    default void onUserTaskAssignment(UserTaskAssignmentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a user task input variable changes.
+     * The event contains both the old value and new value.
+     * @param event
+     */
+    default void onUserTaskInputVariable(UserTaskVariableEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a user task output variable changes.
+     * The event contains both the old value and new value.
+     * @param event
+     */
+    default void onUserTaskOutputVariable(UserTaskVariableEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when an attachment is added to a user task.
+     * @param event
+     */
+    default void onUserTaskAttachmentAdded(UserTaskAttachmentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when an attachment is deleted from a user task.
+     * @param event
+     */
+    default void onUserTaskAttachmentDeleted(UserTaskAttachmentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when an attachment is modified in a user task.
+     * @param event
+     */
+    default void onUserTaskAttachmentChange(UserTaskAttachmentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a comment is modified in a user task.
+     * @param event
+     */
+    default void onUserTaskCommentChange(UserTaskCommentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a comment is added to a user task.
+     * @param event
+     */
+    default void onUserTaskCommentAdded(UserTaskCommentEvent event) {
+        // nothing
+    }
+
+    /**
+     * This listener method is invoked when a comment is deleted from a user task.
+     * @param event
+     */
+    default void onUserTaskCommentDeleted(UserTaskCommentEvent event) {
+        // nothing
+    }
+}
+----
+
+The event objects passed to the listener methods provide access to both old and new values as as seen in the following code.  
+
+.`UserTaskStateEvent`
+[source, java]
+----
+public interface UserTaskStateEvent extends UserTaskEvent {
+    UserTaskState getNewStatus();  // Current state
+    UserTaskState getOldStatus();  // Previous state
+}
+
+----
+
+.`UserTaskAssignmentEvent`
+[source, java]
+----
+public interface UserTaskAssignmentEvent extends UserTaskEvent {
+    String getAssignmentType();
+    String[] getNewUsersId();  // New assigned users
+    String[] getOldUsersId();  // Previously assigned users
+}
+----
+
+.`UserTaskVariableEvent`
+[source, java]
+----
+public interface UserTaskVariableEvent extends UserTaskEvent {
+    enum VariableEventType {
+        INPUT,
+        OUTPUT
+    }
+    
+    String getVariableName();
+    Object getOldValue();  // Previous value
+    Object getNewValue();  // Current value
+    VariableEventType getVariableType();
+}
+----
+
+.`UserTaskEvent` (base interface)
+[source, java]
+----
+public interface UserTaskEvent {
+    UserTask getUserTask();
+    UserTaskInstance getUserTaskInstance();
+    Date getEventDate();
+    String getEventUser();
+}
+----
+
+The following shows how you can access old and new values in User Task events:
+
+[source, java]
+----
+@ApplicationScoped
+public class MyUserTaskEventListener implements UserTaskEventListener {
+    
+    @Override
+    public void onUserTaskState(UserTaskStateEvent event) {
+        String taskName = event.getUserTask().getTaskName();
+        UserTaskState oldStatus = event.getOldStatus();
+        UserTaskState newStatus = event.getNewStatus();
+        
+        System.out.println("Task '" + taskName + "' changed from " 
+            + (oldStatus != null ? oldStatus.getName() : "null") 
+            + " to " + newStatus.getName());
+    }
+    
+    @Override
+    public void onUserTaskInputVariable(UserTaskVariableEvent event) {
+        String variableName = event.getVariableName();
+        Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+        
+        System.out.println("Task input variable '" + variableName + "' changed from " 
+            + oldValue + " to " + newValue);
+    }
+    
+    @Override
+    public void onUserTaskAssignment(UserTaskAssignmentEvent event) {
+        String[] oldUsers = event.getOldUsersId();
+        String[] newUsers = event.getNewUsersId();
+        String taskName = event.getUserTask().getTaskName();
+        
+        System.out.println("Task '" + taskName + "' assignment changed from " 
+            + (oldUsers != null ? String.join(",", oldUsers) : "null") + " to " 
+            + (newUsers != null ? String.join(",", newUsers) : "null"));
+    }
+}
+
+----
+
+Because `UserTaskEventListener` uses single callback methods where the event object contains both old and new values there is no notion of timing of calls in this listener. 
+
+=== 1.3 Registration of event listeners
+
+Event listeners are registered using CDI. The runtime automatically discovers and registers any classes that implement the ProcessEventListener or UserTaskEventListener interfaces and are annotated with an appropriate CDI scope annotation.
+
+CDI-based registration
+
+To register an event listener, create a class that implements the desired listener interface and annotate it with @ApplicationScoped. The runtime automatically discovers and invokes your listener when events occur.
+
+Example of registering a ProcessEventListener:
+
+[source, java]
+----
+package org.acme;
+
+import org.kie.api.event.process.ProcessCompletedEvent;
+import org.kie.api.event.process.ProcessNodeLeftEvent;
+import org.kie.api.event.process.ProcessNodeTriggeredEvent;
+import org.kie.api.event.process.ProcessStartedEvent;
+import org.kie.api.event.process.ProcessVariableChangedEvent;
+import org.kie.kogito.internal.process.event.DefaultKogitoProcessEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class MyProcessEventListener extends DefaultKogitoProcessEventListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyProcessEventListener.class);
+
+    @Override
+    public void beforeProcessStarted(ProcessStartedEvent event) {
+        LOGGER.info("beforeProcessStarted: processId={}",
+                event.getProcessInstance().getProcessId());
+    }
+
+    @Override
+    public void afterProcessStarted(ProcessStartedEvent event) {
+        LOGGER.info("afterProcessStarted: processId={}, state={}",
+                event.getProcessInstance().getProcessId(),
+                event.getProcessInstance().getState());
+    }
+
+    @Override
+    public void beforeProcessCompleted(ProcessCompletedEvent event) {
+        LOGGER.info("beforeProcessCompleted: processId={}",
+                event.getProcessInstance().getProcessId());
+    }
+
+    @Override
+    public void afterProcessCompleted(ProcessCompletedEvent event) {
+        LOGGER.info("afterProcessCompleted: processId={}, state={}",
+                event.getProcessInstance().getProcessId(),
+                event.getProcessInstance().getState());
+    }
+
+    @Override
+    public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
+        LOGGER.info("beforeNodeTriggered: nodeName={}",
+                event.getNodeInstance().getNodeName());
+    }
+
+    @Override
+    public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
+        LOGGER.info("afterNodeTriggered: nodeName={}",
+                event.getNodeInstance().getNodeName());
+    }
+
+    @Override
+    public void beforeNodeLeft(ProcessNodeLeftEvent event) {
+        LOGGER.info("beforeNodeLeft: nodeName={}",
+                event.getNodeInstance().getNodeName());
+    }
+
+    @Override
+    public void afterNodeLeft(ProcessNodeLeftEvent event) {
+        LOGGER.info("afterNodeLeft: nodeName={}",
+                event.getNodeInstance().getNodeName());
+    }
+
+    @Override
+    public void beforeVariableChanged(ProcessVariableChangedEvent event) {
+        LOGGER.info("beforeVariableChanged: variableId={}, OLD_VALUE={}, NEW_VALUE={}",
+                event.getVariableId(),
+                event.getOldValue(),
+                event.getNewValue());
+    }
+
+    @Override
+    public void afterVariableChanged(ProcessVariableChangedEvent event) {
+        LOGGER.info("afterVariableChanged: variableId={}, OLD_VALUE={}, NEW_VALUE={}",
+                event.getVariableId(),
+                event.getOldValue(),
+                event.getNewValue());
+    }
+}
+----
+
+Extending `DefaultKogitoProcessEventListener` is recommended for `ProcessEventListener` implementations. This base class provides empty default implementations for all methods, allowing you to override only the methods you need.
+
+The following shows how to register an UserTaskEventListener:
+
+[source,java]
+----
+package org.acme;
+
+import org.kie.kogito.usertask.UserTaskEventListener;
+import org.kie.kogito.usertask.events.UserTaskAssignmentEvent;
+import org.kie.kogito.usertask.events.UserTaskStateEvent;
+import org.kie.kogito.usertask.events.UserTaskVariableEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class MyUserTaskEventListener implements UserTaskEventListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyUserTaskEventListener.class);
+
+    @Override
+    public void onUserTaskState(UserTaskStateEvent event) {
+        LOGGER.info("onUserTaskState: taskName={}, OLD_STATUS={}, NEW_STATUS={}",
+                event.getUserTaskInstance().getTaskName(),
+                event.getOldStatus(),
+                event.getNewStatus());
+    }
+
+    @Override
+    public void onUserTaskAssignment(UserTaskAssignmentEvent event) {
+        LOGGER.info("onUserTaskAssignment: taskName={}, OLD_USERS={}, NEW_USERS={}",
+                event.getUserTaskInstance().getTaskName(),
+                event.getOldUsersId() != null ? String.join(",", event.getOldUsersId()) : "null",
+                event.getNewUsersId() != null ? String.join(",", event.getNewUsersId()) : "null");
+    }
+
+    @Override
+    public void onUserTaskInputVariable(UserTaskVariableEvent event) {
+        LOGGER.info("onUserTaskInputVariable: variableName={}, OLD_VALUE={}, NEW_VALUE={}",
+                event.getVariableName(),
+                event.getOldValue(),
+                event.getNewValue());
+    }
+
+    @Override
+    public void onUserTaskOutputVariable(UserTaskVariableEvent event) {
+        LOGGER.info("onUserTaskOutputVariable: variableName={}, OLD_VALUE={}, NEW_VALUE={}",
+                event.getVariableName(),
+                event.getOldValue(),
+                event.getNewValue());
+    }
+}
+----
+
+Unlike `ProcessEventListener`, the `UserTaskEventListener` interface provides default empty implementations for all methods, so you can implement the interface directly without needing a base class.
+
+For registration remember the following:
+
+* Use @ApplicationScoped to ensure a single instance of your listener is shared across the application. This is the recommended scope for event listeners.
+* Automatic discovery: No additional configuration is required. The runtime automatically discovers all beans that implement the listener interfaces.
+* Quarkus and Spring Boot support: CDI-based registration works with both Quarkus and Spring Boot runtimes. For Spring Boot, ensure that your listener classes are within the component scan path.
+
+For a complete working example demonstrating event listener registration and usage, see the event-listeners-quarkus-example in the BAMOE examples repository xref:../getting-started/examples.adoc[Getting Started Example Business Service projects]. 
+
+This example includes:
+
+* TestProcessEventListener.java - A complete ProcessEventListener implementation
+* TestUserTaskEventListener.java - A complete UserTaskEventListener implementation
+* A sample Hiring process that demonstrates all lifecycle events
