@@ -1,4 +1,4 @@
-= Differences between Maven and Gradle
+= Building _Business Service_ project with Gradle vs Maven
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
@@ -7,7 +7,7 @@ You can use Gradle as the build system by following standard Gradle conventions 
 * Quarkus projects are built using the Quarkus plugin.
 * Spring Boot projects are built using the kogito-gradle-plugin.
 
-The supported version is Gradle 9.2. It is possible to use either a system-wide `gradle` executable or the project‑specific `gradlew` executable for both frameworks.
+The supported version is Gradle 9.2. It is possible to use either a system-wide `gradle` executable or the project-specific `gradlew` executable for both frameworks.
 
 == Structure
 
@@ -22,19 +22,19 @@ In comparison to Maven project, you can see the following files in your Gradle p
 
 == Profiles
 
-Gradle does not have a built‑in *profile* feature like Maven.
+Gradle does not have a built-in *profile* feature like Maven.
 
-To replicate Maven‑style profiles in a Quarkus project using Gradle, do the following steps:
+To replicate Maven-style profiles in a Quarkus project using Gradle, do the following steps:
 
 . Create separate Gradle files for each profile (e.g., `profile-dev.gradle`, `profile-prod.gradle`).
-. Put profile‑specific settings or properties inside the created files.
+. Put profile-specific settings or properties inside the created files.
 . Keep all shared configuration in the main `build.gradle` file.
 . At build time, include the correct profile file depending on the `buildProfile` environment variable.
 
-The following example shows how you can simulate Maven‑style profiles in a Quarkus project using Gradle. 
+The following example shows how you can simulate Maven-style profiles in a Quarkus project using Gradle. 
 Each profile has its own file that contains only the dependencies specific to that environment.
 
-In `profile-dev.gradle` you define required dependencies when building the application in development mode, such as using the in‑memory H2 database.
+In `profile-dev.gradle` you define required dependencies when building the application in development mode, such as using the in-memory H2 database.
 
 [source,xml]
 ----
@@ -386,7 +386,7 @@ compileTestJava {
 }
 ----
 
-Quarkus provides built‑in hot reload via the `quarkusDev` task. To build and start the project with hot reload enabled, run the following command:
+Quarkus provides built-in hot reload via the `quarkusDev` task. To build and start the project with hot reload enabled, run the following command:
 [source,xml]
 ----
 gradlew clean quarkusDev
