@@ -1,23 +1,141 @@
-= Not supported in 9.3.1
+= Not supported in 9.4.0
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 This section lists the features that are not supported in {PRODUCT_SHORT} v9, showing their replacement.
 
-* Business Central: Not available in {PRODUCT_SHORT} v9. Replaced by {CANVAS}, {DEV_TOOLS} and {MAVEN_REPO}.
-* KIE Server: Replaced by Quarkus/Spring Boot runtimes.
-* SmartRouter: Not available in {PRODUCT_SHORT} v9. Service discovery and orchestration are now handled through Kubernetes-native solutions.
-* Asset Authoring: {CANVAS} supports editing BPMN and DMN files. {DEV_TOOLS} also supports those files, along with Test Scenarios. Other asset types are currently not supported for authoring.
-* Legacy Form Modeler: The form modeler and its associated files from {PRODUCT_SHORT} v8 are not supported. Forms must be generated using xref:../tools/form-generation.adoc[Form code generation for User Tasks].
-* Custom Dashboards and Reports: {PRODUCT_SHORT} v9 does not include built-in monitoring or reporting tools. Instead, it relies on integration with Prometheus and Grafana.
-* Database Support: {PRODUCT_SHORT} v9 supports Microsoft SQL Server, PostgreSQL and Oracle. Other databases such as Sybase, and EDB are currently not supported. See xref:../release-notes/supported-environments.adoc[supported environments].
-* Case Management: Full Case Management capabilities are not available in {PRODUCT_SHORT} v9. Adhoc (Flexible) Processes are supported as a replacement. 
-* Build from UI: The capability to build projects from the UI in {PRODUCT_SHORT} v8 Business Central is not available in {CANVAS}. Projects are now built using Maven.
-* Predefined WorkItemHandlers: Connectors such as CamelCXFConnector, CamelFTPConnector, KafkaPublishMessages, and WebServiceTask are not available out of the box.
-* DRL-based Test Scenarios: Editing DRL-based Test Scenarios is currently not supported.
-* PMML: Is currently not available in {PRODUCT_SHORT} v9.
-* Pluggable variable persistence: Is currently not supported.
-* Using JavaScript as a scripting language is not supported in V9.
+[%header,cols="3"]
+|===
+^| Feature
+^| Status in {PRODUCT_SHORT} v9.
+^| Notes
 
+| **Business Central**
+| Not available in v9. Replaced by {CANVAS}, {DEV_TOOLS}, and {MVN_REPO}.
+a| * **{CANVAS}**: Web-based editor for BPMN and DMN.
+  * **{DEV_TOOLS}**: IDE extension for BPMN, DMN, and Test Scenarios.
+  * **{MVN_REPO}**: For dependency management.
 
+| **KIE Server**
+| Replaced by Quarkus/Spring Boot runtimes.
+| For more information, see xref:05-02-upgrading-client-server-projects.adoc[Upgrading client-server projects].
 
+| **SmartRouter**
+| Not available in v9. Replaced by Kubernetes-native service discovery and orchestration.
+| Use any cloud-compatible load balancing solution as an alternative.
+
+| **Asset Authoring Limitations**
+| Supports BPMN and DMN only. Other asset types are not supported.
+a| * **{CANVAS}**: BPMN/DMN. 
+* **{DEV_TOOLS}**: BPMN/DMN/Test Scenarios.
+
+| **Legacy Form Modeler**
+| Not supported in v9. All v8 `.frm` files need to be recreated using form code generation for User Tasks.
+| For more information, see xref:../tools/form-generation.adoc[Form code generation for User Tasks].
+
+| **Custom Dashboards and Reports**
+| Not available in v9. Use Prometheus and Grafana.
+| Use Management Console for basic process monitoring as an alternative.
+
+| **Database Support**
+a| * **Supported:** SQL Server, PostgreSQL, Oracle. 
+* **Not supported:** Sybase, EDB, others.
+| For more information, see xref:../release-notes/supported-environments.adoc[supported environments].
+
+| **Case Management**
+| Full CMMN is not available in v9. Replaced by Adhoc (Flexible) Processes.
+a| * **Supported Features:** Ad-hoc processes and subprocesses, milestones, dynamic tasks and processes, signal-based triggering.
+* **Not Supported:** case lifecycle operations (close, reopen, cancel, destroy), case ID generator, case-specific events and listeners, per-case runtime strategy
+* For more information, see xref:05-10-upgrading-case-management-project.adoc[Upgrading Case Management projects].
+
+| **Build from UI**
+| Not available in {CANVAS}. Projects must be built using Maven.
+| Use `mvn clean package` command.
+
+| **Predefined WorkItemHandlers**
+a| * **Available**: WorkItemHandlers or REST service calls.
+* **Not available:** CamelCXFConnector, CamelFTPConnector, KafkaPublishMessages, WebServiceTask. 
+| For more information, see xref:05-05-upgrading-custom-work-item-handlers.adoc[Upgrading custom work item handlers].
+
+| **DRL-based Test Scenarios**
+| Editing is not supported in v9 tooling, but still supported via Maven. Use JUnit tests for new test cases. 
+| DMN-based Test Scenarios are fully supported.
+
+| **PMML (Predictive Model Markup Language)**
+| Not available in v9. Replaced by external ML model integration or DMN.
+| 
+
+| **Pluggable Variable Persistence**
+| Not supported in v9. You cannot customize variable persistence strategy.
+| Use standard JPA persistence with custom entities as an alternative.
+
+| **JavaScript Scripting**
+| Not supported in v9. Replaced by Java.
+| 
+
+| **Guided Decision Tables (XLS/XLSX)**
+| Editor is not available, but execution is supported. Edit in external spreadsheet tool, add `org.drools:drools-decisiontables` dependency.
+| 
+
+| **Guided Rules**
+| Not supported in v9. Convert to DRL or DMN.
+a| **Example:**
+[source,java]
+----
+// Convert guided rule to DRL
+rule "Approval Rule"
+when
+    $order: Order(amount > 1000)
+then
+    $order.setApprovalRequired(true);
+end
+----
+
+| **Scorecards**
+| Not supported in v9. Convert to DMN decision tables
+| 
+
+| **Complex Event Processing (CEP)**
+| Not supported in v9. Replaced by Kafka Streams or external CEP engine.
+| Use event-driven architecture with Kafka as an alternative.
+
+| **Process ID restrictions**
+| Hyphens break code generation and dots cause schema failures. Use camelCase for process IDs
+|
+
+| **javax → jakarta package migration**
+| The v8 service APIs (`org.jbpm.services.api.*`) are not available in v9. Use the auto-generated REST endpoints for all process interactions.
+| 
+
+| **Variable `context` does not exist**
+| `context` variable is not available in v9. Replace it with `kcontext`.
+| The `kcontext` variable is also valid in v8 and ensures cross-version compatibility.
+
+| **Raw `List` type error**
+| Raw `List` types trigger Jandex errors. Always specify a type parameter: `List<Type>`.
+|
+
+| **Boolean getter method naming**
+| Boolean getters should use `is` prefix instead of `get`.
+| While `getApproved()` is syntactically correct and will compile, `isApproved()` is the preferred way according to JavaBeans naming conventions. 
+
+| **Hibernate rejects models with `@Entity`**
+| Using JPA entities as process variables may result in Hibernate errors. Prefer DTOs, or ensure JPA entities are fully and correctly configured.
+|
+
+| **NPE in error handling**
+| Accessing error details in catch blocks may cause null pointer issues.
+| Always perform null checks and apply null-safe patterns when handling error context variables.
+
+| **Legacy rules with rule units**
+| Legacy DRL rules cannot be combined with rule units. Convert all rules to rule units for compatibility.
+|
+
+| **`null$` values printed during execution**
+| Uninitialized variables may appear as `null$`. Initialize variables with default values instead of leaving them null.
+|
+
+| **Null on omitted values**
+| When optional variables are omitted, they may be stored as explicit `null` in the database. Assign default values to all optional fields.
+|
+|===
