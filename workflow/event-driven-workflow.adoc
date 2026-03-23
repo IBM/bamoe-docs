@@ -307,9 +307,10 @@ mp.messaging.incoming.<channel name>.failure-strategy=fail-fast|ignore|dead-lett
 
 NOTE: As the `fail-fast` strategy results in the application stopping to consume further messages, it is recommended to configure one of the other available strategies when using Event Data in a Quarkus application.
 
+[#event-listener-lifecycle]
 == Implementing an Event Listener Lifecycle in the Process Engine
 
-Every time a process or task changes to a different point in its lifecycle, the process engine generates an event. You can develop a class that receives and processes such events. This class is called an event listener.
+Every time a process or task changes to a different point in its lifecycle, the Process Engine generates an event. You can develop a class that receives and processes such events. This class is called an event listener.
 The Process Engine passes an event object to this class. The object provides access to related information. For example, if the event is related to a process node, the object provides access to the Process Instance and the node instance. The Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
 
 === The Process Event Listener Interface
@@ -714,15 +715,17 @@ public class MyUserTaskEventListener implements UserTaskEventListener {
 
 Because `UserTaskEventListener` uses single callback methods where the event object contains both old and new values there is no notion of timing of calls in this listener. 
 
-=== 1.3 Registration of event listeners
+=== Registration of event listeners
 
-Event listeners are registered using CDI. The runtime automatically discovers and registers any classes that implement the ProcessEventListener or UserTaskEventListener interfaces and are annotated with an appropriate CDI scope annotation.
+Event listeners are registered using the Quarkus Contexts and Dependency Injection (CDI). The runtime automatically discovers and registers any classes that implement the `ProcessEventListener` or `UserTaskEventListener` interfaces, and that are annotated with an appropriate CDI scope annotation. 
 
-CDI-based registration
+CDI-based registration works with both Quarkus and Spring Boot runtimes. For Spring Boot, ensure that your listener classes are within the component scan path.
 
-To register an event listener, create a class that implements the desired listener interface and annotate it with @ApplicationScoped. The runtime automatically discovers and invokes your listener when events occur.
+To register an event listener, create a class that implements the desired listener interface and annotate it with @ApplicationScoped to ensure a single instance of your listener is shared across the application. 
 
-Example of registering a ProcessEventListener:
+The runtime automatically discovers all beans that implement the listener interface, and your listener is invoked when events occur. No additional configuration is required.
+
+The following example shows how to register a `ProcessEventListener`:
 
 [source, java]
 ----
@@ -812,9 +815,9 @@ public class MyProcessEventListener extends DefaultKogitoProcessEventListener {
 }
 ----
 
-Extending `DefaultKogitoProcessEventListener` is recommended for `ProcessEventListener` implementations. This base class provides empty default implementations for all methods, allowing you to override only the methods you need.
+Extending `DefaultKogitoProcessEventListener` is recommended for `ProcessEventListener` implementations. This base class provides empty default implementations for all methods, enabling you to override only the methods you need.
 
-The following shows how to register an UserTaskEventListener:
+The following example shows how to register an `UserTaskEventListener`:
 
 [source,java]
 ----
@@ -870,12 +873,6 @@ public class MyUserTaskEventListener implements UserTaskEventListener {
 
 Unlike `ProcessEventListener`, the `UserTaskEventListener` interface provides default empty implementations for all methods, so you can implement the interface directly without needing a base class.
 
-For registration remember the following:
-
-* Use @ApplicationScoped to ensure a single instance of your listener is shared across the application. This is the recommended scope for event listeners.
-* Automatic discovery: No additional configuration is required. The runtime automatically discovers all beans that implement the listener interfaces.
-* Quarkus and Spring Boot support: CDI-based registration works with both Quarkus and Spring Boot runtimes. For Spring Boot, ensure that your listener classes are within the component scan path.
-
 For a complete working example demonstrating event listener registration and usage, see the event-listeners-quarkus-example in the BAMOE examples repository xref:../getting-started/examples.adoc[Getting Started Example Business Service projects]. 
 
 This example includes:
@@ -883,3 +880,201 @@ This example includes:
 * TestProcessEventListener.java - A complete ProcessEventListener implementation
 * TestUserTaskEventListener.java - A complete UserTaskEventListener implementation
 * A sample Hiring process that demonstrates all lifecycle events
+
+=== Accessing Complete Task Data via UserTaskInstance
+
+The `UserTaskInstance` object, accessible via `event.getUserTaskInstance()`, contains all task data in a single object. This makes it easy to integrate with external systems (e.g., Elasticsearch, Kafka) or build audit trails.
+
+The following example shows how to capture complete task data:
+
+[source, java]
+----
+@ApplicationScoped
+public class ExternalSystemUserTaskListener implements UserTaskEventListener {
+
+    @Override
+    public void onUserTaskState(UserTaskStateEvent event) {
+        UserTaskInstance task = event.getUserTaskInstance();
+
+        // All data available in one object:
+        task.getId();                // Task identifier
+        task.getTaskName();          // Task name
+        task.getStatus().getName();  // Current status
+        task.getActualOwner();       // Assigned user
+        task.getPotentialUsers();    // Potential owners (users)
+        task.getPotentialGroups();   // Potential owners (groups)
+        task.getExcludedUsers();     // Excluded users
+        task.getAdminUsers();        // Business administrators (users)
+        task.getAdminGroups();       // Business administrators (groups)
+        task.getInputs();            // Input variables (Map)
+        task.getOutputs();           // Output variables (Map)
+        task.getAttachments();       // Task attachments
+        task.getComments();          // Task comments
+        task.getMetadata();          // Task metadata
+        task.getSlaDueDate();        // SLA due date
+
+        // Process context
+        ProcessInfo info = task.getProcessInfo();
+        info.getProcessInstanceId();
+        info.getProcessId();
+        info.getProcessVersion();
+
+        // State transition info from event
+        event.getOldStatus();        // Previous state
+        event.getNewStatus();        // Current state
+        event.getEventDate();        // When it happened
+        event.getEventUser();        // Who triggered it
+    }
+}
+----
+
+Alternatively you can serialize the entire `UserTaskInstance` to JSON with `ObjectMapper`, to send to external systems as shown below:
+
+[source, java]
+----
+@ApplicationScoped
+public class JsonExportUserTaskListener implements UserTaskEventListener {
+
+    @Inject
+    ObjectMapper mapper;
+
+    @Override
+    public void onUserTaskState(UserTaskStateEvent event) {
+        try {
+            UserTaskInstance task = event.getUserTaskInstance();
+            String json = mapper.writeValueAsString(task);
+            LOGGER.info("Task JSON: {}", json);
+            // Send to Elasticsearch, Kafka, etc.
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Error serializing task", e);
+        }
+    }
+}
+
+----
+
+Which results in the following JSON output:
+[source, json]
+----
+{
+  {
+  "id": "71a23b77-98ee-4a57-ad6f-f532b39630c7",
+  "userTaskId": "_B8C4F63C-81AD-4291-9C1B-84967277EEF6",
+  "processInfo": {
+    "processInstanceId": "18fc537b-567a-4904-9a26-1094f4e29822",
+    "processId": "hiring",
+    "processVersion": "1.0"
+  },
+  "status": { "terminate": null, "name": "Ready" },
+  "actualOwner": "jdoe",
+  "taskName": "HRInterview",
+  "potentialUsers": ["jdoe"],
+  "potentialGroups": ["hr-manager"],
+  "adminUsers": [],
+  "adminGroups": [],
+  "excludedUsers": [],
+  "inputs": {
+    "offer": { "category": "Senior Software Engineer", "salary": 40450 },
+    "candidate": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"] },
+    "approve": false
+  },
+  "outputs": {},
+  "attachments": [],
+  "comments": [],
+  "metadata": { "ProcessType": "BPMN", "Lifecycle": "kogito", "Skippable": "false" }
+}  
+----
+
+The following table lists all the fields available in UserTaskInstance:
+
+[cols="1,1"]
+|===
+|*Category* |*Fields*
+
+|Task Identity
+|`id`, `taskName`, `taskDescription`, `taskPriority`
+
+|Assignments
+|`potentialUsers`, `potentialGroups`, `excludedUsers`, `adminUsers`, `adminGroups`, `actualOwner`
+
+|Data
+|`inputs` (Map), `outputs` (Map)
+
+|State 
+|`status` (name + terminate)
+
+|Process Context
+|`processInfo.processId`, `processInfo.processInstanceId`, `processInfo.processVersion`, `processInfo.rootProcessId`, `processInfo.rootProcessInstanceId`
+
+|Metadata
+|`metadata` (ProcessType, Lifecycle, Skippable, NodeInstanceId, ProcessInstanceState)
+
+|Timestamps
+|`slaDueDate`, `eventDate` (from event)
+
+|Social
+|`attachments`, `comments`
+
+|===
+
+=== Best Practices for EventListener Development
+The Process Engine calls event listeners during the processing of events or tasks. The calls happen within Process Engine transactions and block execution. The following guidelines will help you develop event listeners that are reliable and efficient:
+
+. Keep actions short 
++
+Event listeners execute synchronously within the transaction. Long-running operations block process execution.
+
+. Be transaction-aware 
++
+If the listener modifies a resource outside the scope of the listener method, ensure the resource is enlisted in the current transaction. If the transaction rolls back, un-enlisted resources will become inconsistent.
+
+. Do not rely on listener execution order
++
+Multiple listeners may be registered and their execution order is not guaranteed.
+
+. Avoid external calls (REST, messaging) inside listeners
++
+Use process nodes for such calls instead. An exception is logging, which should be kept as simple as possible.
+
+. You can modify process/task state. 
++
+A listener can change variables of the process or task involved in the event, or interact with the Process Engine (e.g., send signals).
+
+. Handle exceptions gracefully, always wrapping external calls in try-catch blocks
++
+NOTE: Event listeners execute within the same transaction as the task or process operation. If your listener throws an uncaught exception, it will roll back the entire transaction — including the user task completion or process state change.
+
+The following examples show how to handle exceptions in User Task event listeners:
+
+[source, java]
+----
+@Override
+public void onUserTaskState(UserTaskStateEvent event) {
+    try {
+        // External service call
+        externalService.notify(event.getUserTaskInstance());
+    } catch (Exception e) {
+        LOGGER.error("Error in listener: {}", e.getMessage(), e);
+        // Don't rethrow — allow the transaction to complete
+    }
+}
+----
+
+And in Process Event Listeners:
+
+[source, java]
+----
+@Override
+public void afterVariableChanged(ProcessVariableChangedEvent event) {
+    try {
+        auditService.recordChange(event);
+    } catch (Exception e) {
+        LOGGER.error("Error in listener: {}", e.getMessage(), e);
+    }
+}
+----
+
+
+
+
+

@@ -2,11 +2,11 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-IBM Business Automation Manager Open Editions (BAMOE) has evolved its event streaming capabilities between versions 8 and 9.
+IBM Business Automation Manager Open Editions ({PRODUCT_SHORT}) has evolved its event streaming capabilities between versions 8 and 9.
 
-BAMOE v8 allows users to configure the KIE Server to emit Kafka messages about every event when a process, case, or task is completed.
+{PRODUCT_SHORT} v8 allows users to configure the KIE Server to emit Kafka messages about every event when a process, case, or task is completed.
 
-BAMOE v9 introduces a more modular and flexible approach using add-ons to enable messaging and event-driven capabilities in Quarkus or Spring Boot projects. Events are published in the CloudEvents format, making them easily consumable by external systems.
+{PRODUCT_SHORT} v9 introduces a more modular and flexible approach using add-ons to enable messaging and event-driven capabilities in Quarkus or Spring Boot projects. Events are published in the CloudEvents format, making them easily consumable by external systems.
 
 Events are categorized into:
 
@@ -25,3 +25,91 @@ This add-on emits events when operations alter the state of a process. Such oper
 
 
 For more information see xref:../workflow/event-driven-workflow.adoc[Using Events in Workflows]
+
+== Migrating Event Listeners from {PRODUCT_SHORT} v8
+Every time a process or task changes to a different point in its lifecycle, the Process Engine generates an event. You can develop a class that receives and processes such events called an event listener.
+The {PRODUCT_SHORT} {VERSION} Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
+
+The main elements to consider when migrating your Event Listeners from {PRODUCT_SHORT} {VERSION} to {VERSION_80X} are:
+
+Event timing:: In {VERSION_80X}, you had separate before/after callbacks to distinguish when your code runs relative to the state change. In (VERSION), the single callback is invoked after the state change, and you have access to both the old and new states via the `event` object.
+Interface changes:: `TaskLifeCycleEventListener` is replaced by `UserTaskEventListener`.
+Event object changes:: Replace `TaskEvent` with the appropriate event type (`UserTaskStateEvent`, `UserTaskAssignmentEvent`, `UserTaskVariableEvent`, etc.).
+CDI registration:: In {VERSION} CDI is used for listener registration. There is no need for manual registration
+
+If you have implemented your own event listener in {VERSION_80X} the following sections provide more information to help you upgrade your code to work with {VERSION}.
+
+=== The Process Event Listener Interface
+The `ProcessEventListener` interface is mostly the same in {VERSION_80X} and {VERSION}. The main difference is that are few additional event methods in {VERSION}, namely:
+
+* onSignal
+* onMessage
+* onError
+* onMigration
+* onProcessStateChanged
+* onNodeStateChange
+
+=== The User Task Event Listener Interface
+The `TaskLifeCycleEventListener` interface in {VERSION_80X} has been replaced by `UserTaskEventListener` in {VERSION}. The main difference is that the `TaskLifeCycleEventListener` interface had separate `beforeTaskXXX()` and `afterTaskXXX()` methods. In {VERSION} a different pattern where a single callback method receives an event containing both the old and new states, as shown in the code below:
+
+[source,java]
+----
+// Single callback with old/new state in event
+onUserTaskState(UserTaskStateEvent event) {
+    UserTaskState oldStatus = event.getOldStatus();  // Previous state
+    UserTaskState newStatus = event.getNewStatus();  // Current state
+}
+----
+
+This architectural change means that a single event object contains all required information rather than before/after callbacks. This makes it easier to implement a listener that reacts to a single event.
+
+The example below shows {PRODUCT_SHORT} {VERSION_80X} code:
+
+[source,java]
+----
+public class MyTaskListener implements TaskLifeCycleEventListener {
+    
+    @Override
+    public void beforeTaskClaimed(TaskEvent event) {
+        // Validation logic before claim
+        String taskName = event.getTask().getName();
+        System.out.println("About to claim task: " + taskName);
+    }
+    
+    @Override
+    public void afterTaskClaimed(TaskEvent event) {
+        // Notification logic after claim
+        String owner = event.getTask().getActualOwner().getId();
+        System.out.println("Task claimed by: " + owner);
+    }
+}
+----
+
+And the equivalent code in {PRODUCT_SHORT} {VERSION} is:
+
+[source,java]
+----
+@ApplicationScoped
+public class MyTaskListener implements UserTaskEventListener {
+    
+    @Override
+    public void onUserTaskState(UserTaskStateEvent event) {
+        UserTaskState oldStatus = event.getOldStatus();
+        UserTaskState newStatus = event.getNewStatus();
+        
+        // Check if this is a claim transition (Ready → Reserved)
+        if (oldStatus != null && "Ready".equals(oldStatus.getName()) 
+            && "Reserved".equals(newStatus.getName())) {
+            
+            // Same logic as BAMOE 8 beforeTaskClaimed
+            String taskName = event.getUserTask().getTaskName();
+            System.out.println("About to claim task: " + taskName);
+            
+            // Note: actualOwner info available via getUserTaskInstance() if needed
+            System.out.println("Task claimed");
+        }
+    }
+}
+----
+
+For more information on the Event Listener Lifecycle in {VERSION} see xref:../workflow/event-driven-workflow.adoc#event-listener-lifecycle[Working with Events → Implementing an Event Listener Lifecycle in the Process Engine]
