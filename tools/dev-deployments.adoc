@@ -173,3 +173,746 @@ When you click `Deploy`, a lot has to happen behind the scenes so that a Dev Dep
 
 * All files within the project are included in a Dev Deployment.
  If an error exists in any of the files, the Dev Deployment will not succeed.
+
+= BAMOE Canvas Dev Deployments
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+{CANVAS} provides Dev Deployments to enable quick testing and validation of BPMN and DMN models in live Kubernetes or OpenShift environments. This feature allows developers to deploy models directly from the Canvas editor without requiring knowledge of complex build and deployment pipelines, accelerating feedback loops.
+
+Developers can now define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
+
+* Defining custom Kubernetes resource manifests (Deployments, Services, Routes, Ingresses, etc.)
+* Applying JSON Patches to modify manifests dynamically at deploy time
+* Configuring parameters for adjustment during deployment creation
+* Using token interpolation with recursive JSON Path expressions to reference dynamic values
+* Bundling Dev Deployment Options with Accelerators for project reuse
+
+== Connecting Cloud Providers
+
+Before deploying, connect {CANVAS} to a Kubernetes or OpenShift cluster. Access the Accounts dialog by clicking the profile icon in the top-right corner of the {CANVAS} interface, then select "Connected accounts."
+
+For detailed instructions, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+
+=== Connecting an OpenShift Cluster
+
+. Click the profile icon and select "Connected accounts"
+. Choose "OpenShift" from the provider list
+. Enter the required details:
+** *Namespace* — The OpenShift project/namespace for deployments
+** *Host* — The OpenShift API server URL
+** *Token* — A valid authentication token (obtain from the OpenShift web console under "Copy login command")
+** *Use CORS Proxy* — Enable when accessing the cluster from a browser requires a CORS proxy (typical for remote clusters)
+** *Insecurely disable TLS certificate validation* — Enable when the cluster uses self-signed certificates
+. Click "Connect" to establish the connection
+
+=== Connecting a Kubernetes Cluster (Cloud)
+
+. Click the profile icon and select "Connected accounts"
+. Choose "Kubernetes (Cloud)" from the provider list
+. Enter the required details:
+** *Namespace* — The target namespace for deployments
+** *API Server URL* — The Kubernetes API server URL
+** *Token* — A valid service account token
+** *Use CORS Proxy* — Enable when accessing the cluster from a browser requires a CORS proxy (typical for remote clusters)
+** *Insecurely disable TLS certificate validation* — Enable when the cluster uses self-signed certificates
+. Click "Connect" to establish the connection
+
+=== Connecting a Local Kubernetes Cluster (Kind/Minikube)
+
+. Click the profile icon and select "Connected accounts"
+. Choose "Kind/Minikube" from the provider list
+. Enter the required details:
+** *Namespace* — The target namespace
+** *API Server URL* — Typically the URL from `kubectl cluster-info`
+** *Token* — A valid service account token
+. Click "Connect" to establish the connection
+
+NOTE: Canvas provides guided wizards for each provider type. Look for the "Guided Wizard" option when connecting a provider for step-by-step guidance.
+
+== Creating a Dev Deployment
+
+After connecting a cluster, deploy your project by opening it in {CANVAS} and clicking the *Deploy* button in the toolbar.
+
+.Deploy dropdown for a project on {CANVAS}
+image::tools/devDeployments/kubernetes-deploy.png[width=400px]
+
+The system displays deployment options based on project structure:
+
+* *Workspace Options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, the system lists those options
+* *Default Options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, the system displays built-in default options
+
+The system filters displayed options based on the selected provider, showing only options whose `eligibleAuthProviderIds` includes the selected provider type. Options with no `eligibleAuthProviderIds` defined appear for all providers.
+
+== Default Deployment Options
+
+When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, Canvas provides built-in default deployment options.
+
+=== Quarkus Blank App
+
+.Quarkus Blank App deployment option
+image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
+
+This option provides the simplest deployment approach with the following requirements:
+
+* The project should contain only Decision (DMN) and Workflow (BPMN) files; the system ignores all other files
+* The deployment fails if any file contains errors
+
+This option uses a pre-defined Quarkus project template that includes all necessary dependencies to run Decisions or Workflows. The deployment runs on a container image with Java, Maven, and the Dev Deployment Upload Service (see xref:dev-deployment-upload-service.html[Dev Deployment Upload Service]).
+
+The system provides an optional parameter to "Include DMN Form Webapp." This parameter deploys a sidecar container containing a webapp that parses the backend service API and dynamically generates a form with all Decision inputs and outputs, enabling scenario testing.
+
+.Dev Deployment application for a Decision created from {CANVAS}
+image::tools/devDeployments/form.png[]
+
+Users can switch between different Decisions using the dropdown in the top-right corner and access the Swagger UI through the kebab menu.
+
+NOTE: The DMN Form Webapp works only for Decisions. Handle Workflows directly via the API or Dev UIs.
+
+*Container images:*
+
+* https://quay.io/repository/bamoe/canvas-dev-deployment-quarkus-blank-app[Canvas Dev Deployment Quarkus Blank App]: `quay.io/bamoe/canvas-dev-deployment-quarkus-blank-app:{IMAGE_VERSION}`
+* https://quay.io/repository/bamoe/canvas-dev-deployment-dmn-form-webapp[Canvas Dev Deployment DMN Form Webapp]: `quay.io/bamoe/canvas-dev-deployment-dmn-form-webapp:{IMAGE_VERSION}`
+
+=== Custom Image
+
+.Custom Image deployment option
+image::tools/devDeployments/deployment-option-custom-image.png[width=600]
+
+This option provides maximum configurability, allowing users to specify custom Docker images, container ports, and startup commands. Use this option for complete Java projects (Quarkus or Spring Boot).
+
+*Requirements:*
+
+* The deployed image must include an instance of the Dev Deployment Upload Service running on startup, with the service binary available in the `PATH` (The system executes the `Command` parameter after the Dev Deployment Upload Service finishes: `dev-deployment-upload-service && <CUSTOM_COMMAND>`)
+* The Dev Deployment Upload Service must run on the port defined by the `Container Port` parameter
+* The deployment should expose an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to verify deployment success (The deployment proceeds without this endpoint, but {CANVAS} cannot verify success)
+
+*Container image:*
+
+* https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
+
+NOTE: Users can change this default image to any available image. When using another image, base it on `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}` (see xref:create-custom-dev-deployment-image.html[Creating Custom Dev Deployment Images]).
+
+== Creating Custom Dev Deployment Options
+
+Custom Dev Deployment Options enable developers to create deployment configurations tailored to specific use cases and Kubernetes environments.
+
+=== Use Cases
+
+Create custom Dev Deployment Options to:
+
+* Deploy to Kubernetes environments not officially supported by default options
+* Use custom container images or deployment configurations
+* Define specific resource requirements, environment variables, or volume mounts
+* Support multiple deployment scenarios within the same project
+* Bundle deployment configurations with Accelerators for reuse
+
+=== Directory Structure
+
+Define Dev Deployment Options inside a Business Service project under the `.bamoe/dev-deployments/` directory. Each option consists of a subdirectory containing manifests, patches, and a descriptor file:
+
+[source]
+----
+Business Service Project
+└── .bamoe/dev-deployments/
+    └── <option-name>/
+        ├── manifests/
+        │   ├── Deployment.yaml
+        │   ├── Service.yaml
+        │   └── Route.yaml          (or Ingress.yaml for Kubernetes)
+        ├── patches/
+        │   ├── baseline-deployment.json
+        │   └── include-dmn-form-webapp.json
+        └── option.json
+----
+
+* *manifests/* — Contains standard Kubernetes resource YAML files. Each file must contain exactly one Kubernetes resource (the `---` separator is not supported)
+* *patches/* — Contains JSON Patch files (RFC 6902) that the system applies to manifests during processing. Patches can contain token interpolation expressions
+* *option.json* — The option descriptor that defines the deployment option, including manifests, patches, configurable parameters, and URL templates
+
+=== Option Descriptor (option.json)
+
+The `option.json` file serves as the central configuration for a Dev Deployment Option, specifying the deployment name, description, manifests, patches, parameters, and URL templates.
+
+==== Structure
+
+[cols="1,1,1,3"]
+|===
+|Field |Type |Required |Description
+
+|`specVersion`
+|string
+|Yes
+|The version of the Dev Deployment Option specification (currently "0.1")
+
+|`name`
+|string
+|Yes
+|Readable name displayed in the Deploy dropdown
+
+|`description`
+|string
+|Yes
+|Readable description of the deployment option
+
+|`baselineManifests`
+|string[]
+|Yes
+|List of manifest file paths (relative to the option.json directory) that the system always deploys
+
+|`baselinePatches`
+|object
+|No
+|Map of manifest filenames to arrays of patch file paths that the system always applies
+
+|`parameters`
+|object
+|No
+|Map of parameter IDs to parameter definitions (see Parameter Types)
+
+|`eligibleAuthProviderIds`
+|string[]
+|No
+|List of auth provider IDs for which this option is available. Valid values: `openshift`, `kind`, `minikube`, `kubernetes-cloud`. When omitted or empty, the option appears for all providers
+
+|`uploadServiceUrlTemplate`
+|string
+|No
+|URL template for the upload service endpoint, supporting token interpolation
+
+|`healthStatusUrlTemplate`
+|string
+|No
+|URL template for the health check endpoint, supporting token interpolation
+
+|`deploymentAccessUrlTemplate`
+|string
+|No
+|URL template for the user-facing application URL, supporting token interpolation
+|===
+
+==== Example
+
+[source,json]
+----
+{
+  "specVersion": "0.1",
+  "name": "Quarkus Blank App (OpenShift)",
+  "description": "Deploy a serverless Quarkus application with optional DMN Form Webapp for testing DMN models on OpenShift",
+  "eligibleAuthProviderIds": ["openshift"],
+  "baselineManifests": [
+    "manifests/Deployment.yaml",
+    "manifests/Service.yaml",
+    "manifests/Route.yaml"
+  ],
+  "baselinePatches": {
+    "manifests/Deployment.yaml": ["patches/baseline-deployment.json"]
+  },
+  "parameters": {
+    "includeDmnFormWebapp": {
+      "id": "includeDmnFormWebapp",
+      "name": "Include DMN Form Webapp",
+      "description": "Whether to deploy the DMN Form Webapp as a sidecar container",
+      "type": "choice",
+      "defaultValue": "disabled",
+      "maybeApplyPatches": {
+        "manifests/Deployment.yaml": ["patches/include-dmn-form-webapp.json"]
+      },
+      "maybeAddManifests": ["manifests/FormWebappService.yaml", "manifests/FormWebappRoute.yaml"]
+    }
+  },
+  "uploadServiceUrlTemplate": "https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}",
+  "healthStatusUrlTemplate": "https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/health",
+  "deploymentAccessUrlTemplate": "https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/swagger-ui/"
+}
+----
+
+=== Parameter Types
+
+Parameters enable users to customize deployments during creation. Canvas displays appropriate input controls for each parameter type in the deployment dialog.
+
+==== Text Parameter
+
+Provides free-form text input for values such as Docker image URLs or commands.
+
+[source,json]
+----
+{
+  "id": "dockerImage",
+  "name": "Docker Image",
+  "description": "The URL of the Docker Image to use for the container",
+  "type": "text",
+  "defaultValue": "${{ $.config.baseImageUrl }}",
+  "patches": {
+    "manifests/Deployment.yaml": ["patches/docker-image.json"]
+  }
+}
+----
+
+* `defaultValue` — The default text value. Can include token interpolation expressions
+* `patches` — Map of manifest filenames to patch file paths. The system applies these patches when using the parameter, and patches can reference the parameter value via `${{ $.parameters.<parameterId> }}`
+* `addManifests` — Optional list of additional manifest files to include when using this parameter
+
+==== Number Parameter
+
+Provides numeric input field.
+
+[source,json]
+----
+{
+  "id": "containerPort",
+  "name": "Container Port",
+  "description": "The port that the container exposes",
+  "type": "number",
+  "defaultValue": 8080,
+  "patches": {
+    "manifests/Deployment.yaml": ["patches/deployment-container-port.json"],
+    "manifests/Service.yaml": ["patches/service-target-port.json"]
+  }
+}
+----
+
+* `defaultValue` — The default numeric value
+* `patches` and `addManifests` work the same as text parameters
+
+==== Boolean Parameter
+
+Provides checkbox toggle.
+
+[source,json]
+----
+{
+  "id": "enableDebug",
+  "name": "Enable Debug",
+  "description": "Enable debug mode for the application",
+  "type": "boolean",
+  "defaultValue": false,
+  "patches": {
+    "manifests/Deployment.yaml": ["patches/enable-debug.json"]
+  }
+}
+----
+
+* `defaultValue` — `true` or `false`
+* When `true`, the system applies associated patches and includes additional manifests
+
+==== Choice Parameter
+
+Provides enable/disable toggle. When enabled, the system conditionally applies associated patches and includes additional manifests.
+
+[source,json]
+----
+{
+  "id": "includeDmnFormWebapp",
+  "name": "Include DMN Form Webapp",
+  "description": "Whether to deploy the DMN Form Webapp as a sidecar container",
+  "type": "choice",
+  "defaultValue": "disabled",
+  "maybeApplyPatches": {
+    "manifests/Deployment.yaml": ["patches/include-dmn-form-webapp.json"]
+  },
+  "maybeAddManifests": ["manifests/FormWebappService.yaml", "manifests/FormWebappRoute.yaml"]
+}
+----
+
+* `defaultValue` — `"enabled"` or `"disabled"`
+* `maybeApplyPatches` — Patches the system applies only when the choice is enabled
+* `maybeAddManifests` — Additional manifests the system includes only when the choice is enabled
+
+=== Manifests
+
+Manifest files are standard Kubernetes resource YAML files placed in the `manifests/` directory. Each file must contain exactly one Kubernetes resource (multi-document YAML with `---` separators is not supported).
+
+Manifests can include token interpolation expressions wrapped in `${{ }}` that the system replaces with actual values at deploy time. However, keep manifests free of tokens when possible and use JSON Patches to inject dynamic values instead. This approach allows the same manifests to work for standalone Kubernetes deployments outside of Canvas.
+
+==== Example Deployment Manifest
+
+[source,yaml]
+----
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ${{ $.devDeployment.uniqueName }}
+  namespace: ${{ $.devDeployment.kubernetes.namespace }}
+  labels:
+    app: ${{ $.devDeployment.uniqueName }}
+    app.kubernetes.io/component: ${{ $.devDeployment.uniqueName }}
+    app.kubernetes.io/instance: ${{ $.devDeployment.uniqueName }}
+    app.kubernetes.io/name: ${{ $.devDeployment.uniqueName }}
+    app.kubernetes.io/part-of: ${{ $.devDeployment.uniqueName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${{ $.devDeployment.uniqueName }}
+  template:
+    metadata:
+      labels:
+        app: ${{ $.devDeployment.uniqueName }}
+    spec:
+      volumes:
+        - name: app-volume
+          emptyDir: {}
+      containers:
+        - name: ${{ $.devDeployment.uniqueName }}
+          image: ${{ $.config.quarkusBlankAppImageUrl }}
+          imagePullPolicy: ${{ $.config.imagePullPolicy }}
+          resources:
+            limits:
+              memory: "4Gi"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: DEV_DEPLOYMENT__UPLOAD_SERVICE_API_KEY
+              value: ${{ $.devDeployment.uploadService.apiKey }}
+          volumeMounts:
+            - mountPath: /tmp/app
+              name: app-volume
+----
+
+=== JSON Patches
+
+JSON Patches follow the RFC 6902 specification and enable dynamic modification of manifests at deploy time. Use patches to inject dynamic values while keeping base manifests clean.
+
+Each patch file contains an array of JSON Patch operations. The `path` property uses JSON Pointers to specify where in the manifest the system applies the operation. Patch operations can include token interpolation expressions.
+
+==== Supported Operations
+
+* `add` — Adds a value at the specified path
+* `remove` — Removes the value at the specified path
+* `replace` — Replaces the value at the specified path
+* `test` — Tests that a value at the specified path matches (used as a filter — the system applies patches only to manifests that pass all test operations)
+
+==== Example: Baseline Deployment Patch
+
+This patch applies to all Deployment resources. The `test` operation ensures the system applies it only to Deployment manifests:
+
+[source,json]
+----
+[
+  {
+    "op": "test",
+    "path": "/kind",
+    "value": "Deployment"
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name": "ROOT_PATH",
+      "value": "/${{ $.devDeployment.uniqueName }}"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name": "DEV_DEPLOYMENT__UPLOAD_SERVICE_ROOT_PATH",
+      "value": "${{ $.devDeployment.uniqueName }}"
+    }
+  }
+]
+----
+
+==== Example: Adding a Sidecar Container
+
+This patch adds a DMN Form Webapp sidecar container to the Deployment:
+
+[source,json]
+----
+[
+  {
+    "op": "test",
+    "path": "/kind",
+    "value": "Deployment"
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/-",
+    "value": {
+      "name": "dmn-form-webapp",
+      "image": "${{ $.config.dmnFormWebappImageUrl }}",
+      "imagePullPolicy": "${{ $.config.imagePullPolicy }}",
+      "ports": [
+        {
+          "containerPort": 8081,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }
+]
+----
+
+=== Token Interpolation
+
+Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (RFC 9535) to reference values from a token map.
+
+==== Token Syntax
+
+`${{ <JSON Path expression> }}`
+
+==== Recursive Interpolation
+
+Tokens support nesting (recursive), meaning a JSON Path expression can itself contain tokens. The interpolation engine resolves tokens from the inside out, with a maximum recursion depth of 50 to prevent infinite loops.
+
+Example:
+[source]
+----
+${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
+----
+
+. The system resolves inner token `${{ $.devDeployment.uniqueName }}` to `dev-deployment-abc123`
+. The outer token becomes `${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }}`
+. The system resolves the outer token to `dev-deployment-abc123.apps.cluster.example.com`
+
+==== Available Tokens
+
+The following tokens are available in manifests and patches at deploy time:
+
+[cols="2,3"]
+|===
+|Token Path |Description
+
+|`$.devDeployment.uniqueName`
+|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
+
+|`$.devDeployment.workspace.id`
+|The ID of the current workspace
+
+|`$.devDeployment.workspace.name`
+|The name of the current workspace
+
+|`$.devDeployment.kubernetes.namespace`
+|The target Kubernetes namespace
+
+|`$.devDeployment.uploadService.apiKey`
+|The API key for the upload service
+
+|`$.devDeployment.labels.createdBy`
+|The label key for identifying resources created by Canvas (`tools.kie.org/created-by`)
+
+|`$.devDeployment.labels.partOf`
+|The label key for grouping related resources (`tools.kie.org/part-of`)
+
+|`$.devDeployment.annotations.workspaceId`
+|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
+
+|`$.devDeployment.annotations.workspaceName`
+|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
+
+|`$.config.baseImageUrl`
+|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
+
+|`$.config.quarkusBlankAppImageUrl`
+|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
+
+|`$.config.dmnFormWebappImageUrl`
+|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
+
+|`$.config.imagePullPolicy`
+|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
+
+|`$.parameters.<parameterId>`
+|The value of a user-configured parameter
+|===
+
+==== Additional Tokens in URL Templates
+
+URL templates (`uploadServiceUrlTemplate`, `healthStatusUrlTemplate`, `deploymentAccessUrlTemplate`) provide access to an additional token:
+
+[cols="2,3"]
+|===
+|Token Path |Description
+
+|`$.devDeployment.resources.<Kind>['<resourceName>']`
+|Access to Kubernetes resources created during deployment, indexed by resource kind and `metadata.name`. Provides access to the full resource object including `metadata`, `spec`, and `status`
+|===
+
+Examples:
+
+* Accessing the hostname from an OpenShift Route:
++
+[source]
+----
+${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
+----
+
+* Accessing the hostname from a Kubernetes Ingress:
++
+[source]
+----
+${{ $.devDeployment.resources.Ingress['${{ $.devDeployment.uniqueName }}'].status.loadBalancer.ingress[0].hostname }}
+----
+
+.Dev Deployment tokens list
+image::tools/devDeployments/tokens.png[width=720]
+
+=== URL Templates
+
+URL templates configure how Canvas connects to the deployed application for uploading assets, checking health, and providing access links.
+
+==== Upload Service URL Template
+
+Specifies the URL where Canvas uploads workspace assets (BPMN/DMN files) to the deployed application. The system uses this immediately after deployment to transfer files to the running container.
+
+Example (OpenShift):
+[source]
+----
+https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}
+----
+
+==== Health Status URL Template
+
+Specifies the URL that Canvas polls every 30 seconds to check the health of the deployed application. The endpoint should return HTTP 200 when the application is healthy.
+
+Example (OpenShift, Quarkus):
+[source]
+----
+https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/health
+----
+
+When this template is provided, Canvas uses it directly for health checks. When not provided, Canvas falls back to probing both Quarkus (`/q/health`) and Spring Boot (`/actuator/health`) endpoints.
+
+==== Deployment Access URL Template
+
+Specifies the URL displayed to the user as a clickable link to access the deployed application.
+
+Example (OpenShift, Quarkus with Swagger UI):
+[source]
+----
+https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/swagger-ui/
+----
+
+=== Deployment Resources Requirements
+
+Kubernetes/OpenShift resources created by a Dev Deployment must include specific labels and annotations to enable {CANVAS} to list and manage these resources.
+
+Canvas automatically adds required labels and annotations to all resources to identify and manage Dev Deployments:
+
+* *Labels:* `tools.kie.org/created-by` (value: "kie-tools"), `tools.kie.org/part-of` (value: deployment unique name)
+* *Annotations:* `tools.kie.org/workspace-id`, `tools.kie.org/workspace-name`, `tools.kie.org/deployment-option-name`, and optionally `tools.kie.org/health-status-url-template` and `tools.kie.org/deployment-access-url-template` (if defined in option.json)
+
+These labels and annotations enable Canvas to discover, list, and manage Dev Deployments in the cluster.
+
+For successful deployment, each resource requires this information:
+
+[source,yaml]
+----
+metadata:
+  name: ${{ $.devDeployment.uniqueName }}
+  namespace: ${{ $.devDeployment.kubernetes.namespace }}
+  labels:
+    ${{ $.devDeployment.labels.createdBy }}: kie-tools
+    ${{ $.devDeployment.labels.partOf }}: ${{ $.devDeployment.uniqueName }}
+  annotations:
+    ${{ $.devDeployment.annotations.workspaceId }}: ${{ $.devDeployment.workspace.id }}
+    ${{ $.devDeployment.annotations.workspaceName }}: ${{ $.devDeployment.workspace.name }}
+----
+
+* The `name` identifies the deployment across the board
+* The `namespace` specifies where the system creates the deployment in the cluster and must match the namespace configured in the connected account
+* The labels (`createdBy` and `partOf`) enable {CANVAS} to filter and map all resources related to a single deployment. **Important:** `createdBy` must always have the value `kie-tools`
+* The annotations (`workspaceId` and `workspaceName`) match a deployment to a workspace
+
+NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
+
+=== Validation
+
+Canvas validates `option.json` files against a JSON schema derived from TypeScript type definitions. The system displays validation errors in the Deploy dialog with specific error messages.
+
+Common validation errors include:
+
+* Missing required fields (`name`, `description`, `specVersion`, `baselineManifests`)
+* Invalid parameter types
+* Manifest files referenced in `option.json` not found in the `manifests/` directory
+* Patch files referenced in `option.json` not found in the `patches/` directory
+* Invalid JSON in patch files
+* Invalid YAML in manifest files
+
+NOTE: When some options load successfully and others fail, Canvas displays a warning indicating partial success and lists only the valid options.
+
+=== Creating a Custom Dev Deployment Option
+
+To create a custom Dev Deployment Option in a Business Service project:
+
+. Create the directory structure `.bamoe/dev-deployments/<option-name>/`
+. Add Kubernetes resource YAML manifests to the `manifests/` subdirectory (one resource per file)
+. Optionally, create JSON Patch files in the `patches/` subdirectory
+. Create the `option.json` descriptor file that references manifests, patches, and defines configurable parameters and URL templates
+. Commit the files to the project repository
+
+When opening the Deploy dialog in Canvas, the system displays custom options (filtered by the connected provider type).
+
+=== Dev Deployment Options with Accelerators
+
+Accelerators are Git repositories containing project templates. Bundle Dev Deployment Options with accelerators so that when a developer applies the accelerator, the deployment options automatically become available in the Deploy dialog.
+
+== Monitoring Deployments
+
+After deploying, the Dev Deployments dropdown displays all active deployments with status icons:
+
+* *Spinning icon* — Deployment in progress (resources being created, application starting up)
+* *Green checkmark* — Deployment is up and healthy
+* *Red circle* — Deployment encountered an error (health check failed)
+* *Warning triangle* — Deployment is down (no running replicas)
+
+.Dev Deployments dropdown demonstrating the deployment process
+image::tools/devDeployments/kubernetes-waiting-done.png[]
+
+Click on a deployment to open the deployed application in a new browser tab (using the `deploymentAccessUrlTemplate` URL).
+
+The system refreshes deployment status every 30 seconds automatically by polling the health endpoint.
+
+After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
+
+=== Deleting Deployments
+
+To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click "Delete all" at the bottom of the dropdown.
+
+NOTE: Dev Deployments are immutable. When an error occurs or a change is required, create a new Dev Deployment.
+
+== How Dev Deployments Work
+
+Dev Deployments depend on various components working together: {CANVAS}, the Kubernetes/OpenShift cluster, container images, and the upload service.
+
+Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, the system automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
+
+When clicking `Deploy`, the system executes the following steps:
+
+. {CANVAS} packages all workspace files into a zip file (ignoring .git directories)
+. The system loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
+** Applies required patches to set {CANVAS} labels, annotations, and resource names
+** Applies patches related to parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens)
+** Interpolates all tokens with their corresponding values, including parameters
+** Splits YAML files into multiple YAMLs, creating one per resource kind
+. Using the Kubernetes resource name and the list of saved API endpoints, the system makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference
+. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload
+** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending
+** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload
+** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and the system updates it with an error icon
+. After the Dev Deployment Upload Service reaches "READY" status, {CANVAS} uploads the zip file generated in Step 1 to the upload service
+. The Dev Deployment Upload Service receives the zip file and extracts it to the defined path (set using configured environment variables on the container). After extraction completes, the service ends with status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever the Custom Image option parameter defines)
+. A Quarkus application starts loading inside the container, while {CANVAS} polls the container to check Quarkus app readiness
+. When Quarkus finishes loading and polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
+** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter
+** The DMN Form Webapp when the checkbox for it was checked during deployment creation
+. Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon
+
+== Developer Notes
+
+When creating custom Dev Deployment Options, follow these guidelines:
+
+* Manifest files must contain exactly one Kubernetes resource each. Do not use the `---` YAML separator
+* JSON Patches follow RFC 6902. Use `test` operations to filter which manifests receive a patch (e.g., test for `kind: Deployment`)
+* Token interpolation uses JSON Path (RFC 9535) syntax. Tokens are recursive — the system resolves inner tokens first
+* URL templates provide access to deployed Kubernetes resources via `$.devDeployment.resources.<Kind>['<name>']`. The resource kind and name correspond to the `kind` and `metadata.name` fields from the Kubernetes resource
+* Set the `specVersion` field to `"0.1"` for the current specification version
+* Use `eligibleAuthProviderIds` to restrict a deployment option to specific provider types. For example, an option using OpenShift Routes should set `"eligibleAuthProviderIds": ["openshift"]`, while an option using Kubernetes Ingress should set `"eligibleAuthProviderIds": ["kind","minikube", "kubernetes-cloud"]`. When this field is omitted or left empty, the option appears for all connected providers. Valid values are `openshift`, `kind`, `minikube`, and `kubernetes-cloud`
+
+== Limitations
+
+* The system includes all files within the project in a Dev Deployment. When any file contains an error, the Dev Deployment fails
+* Dev Deployments are immutable. Changes require creating a new deployment
+* The maximum token interpolation recursion depth is 50 to prevent infinite loops
