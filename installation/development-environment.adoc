@@ -4,9 +4,9 @@ include::../styles/images.adoc[]
 
 This section describes how to install the tools needed to create and manage Workflows, Decisions, and Rules in your development environment:
 
-* {CANVAS} and its backend services {CORS_PROXY}, {EXT_SERVICES}, for browser-based authoring and testing of DMN, BPMN assets, 
-* {MVN_REPO} for accessing libraries to develop _Business Services_, 
-* {DEV_TOOLS} to enable efficient development and collaboration of _Business Services_ within an industry standard IDE.
+{CANVAS} and its backend services {CORS_PROXY}, {EXT_SERVICES}:: for browser-based authoring and testing of DMN, BPMN assets, 
+{MVN_REPO}:: for accessing libraries to develop _Business Services_, 
+{DEV_TOOLS}:: to enable efficient development and collaboration of _Business Services_ within an industry standard IDE.
  
 == The Dev Environment Helm chart
 The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for {PRODUCT_DM} or {PRODUCT_PAM}:
@@ -17,10 +17,11 @@ The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-
 These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each (PRODUCT_SHORT) offering.
 
 Each Dev Helm chart contains four sub-charts:
-• canvas: Main {CANVAS} application for modeling BPMN and DMN, available via https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
-• cors_proxy: {CORS_PROXY} service for cross-origin requests, that powers features like the DMN Runner and static validation of DMN, and BPMN models, available via https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
-• extended_services: {EXT_SERVICES} contains the DMN Runner and model validation services. It also enables {CANVAS} to communicate with Git and Cloud providers, available via https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
-• maven_repository: {MVN_REPO} contains the Maven artifact repository required to develop _Business Services_, available https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
+
+* canvas: Main {CANVAS} application for modeling BPMN and DMN, available via https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
+* cors_proxy: {CORS_PROXY} service for cross-origin requests, that powers features like the DMN Runner and static validation of DMN, and BPMN models, available via https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
+* extended_services: {EXT_SERVICES} contains the DMN Runner and model validation services. It also enables {CANVAS} to communicate with Git and Cloud providers, available via https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
+* maven_repository: {MVN_REPO} contains the Maven artifact repository required to develop _Business Services_, available https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
 
 The only difference between the PAMOE and DMOE Dev environment Helm chart is the License Service annotations which contain different `productID` and `productName`. All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
 ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
