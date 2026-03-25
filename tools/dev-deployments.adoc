@@ -17,91 +17,9 @@ image::tools/devDeployments/kubernetes-deploy.png[width=400px]
 
 After clicking Deploy, you will be presented with options for different types of deployment:
 
-== Quarkus Blank App
 
-.Quarkus Blank App deployment option
-image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
 
-This is the most "hands-off" Dev Deployment option, but it has a few requirements:
 
- - Your project should only have Decisions and Workflows; all other files will be ignored;
- - The deployment will fail if an error is found in any file.
-
-It is a pre-defined Quarkus project template that already includes all the dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service (xref:dev-deployment-upload-service.html[read more about it here]).
-
-A parameter is shown, giving the user the option to `Include DMN Form Webapp`. This is a sidecar container containing a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing the user to fill the inputs simulate different scenarios.
-
-.Dev Deployment application for a Decision created from {CANVAS}
-image::tools/devDeployments/form.png[]
-
-The current Decision can be changed using the dropdown in the top-right corner (if the deployment has more than one Decision). The Swagger UI can be opened via the kebab menu.
-
-NOTE: The DMN Form Webapp only works for Decisions. Workflows should be handled directly via the API or Dev UIs.
-
-Images used in this deployment:
-
-- https://quay.io/repository/bamoe/canvas-dev-deployment-quarkus-blank-app[Canvas Dev Deployment Quarkus Blank App]: `quay.io/bamoe/canvas-dev-deployment-quarkus-blank-app:{IMAGE_VERSION}`
-- https://quay.io/repository/bamoe/canvas-dev-deployment-dmn-form-webapp[Canvas Dev Deployment DMN Form Webapp]: `quay.io/bamoe/canvas-dev-deployment-dmn-form-webapp:{IMAGE_VERSION}`
-
-== Custom Image
-
-.Custom Image deployment option
-image::tools/devDeployments/deployment-option-custom-image.png[width=600]
-
-The Custom Image option is the most configurable one and should allow users to create all kinds of different deployments. The deployed image can be changed to whatever the user decides, alongside the container port and initial container command to be executed.
-
-This combination of parameters makes it a highly flexible option, but should be used with care and follow a few requirements still:
-
-- The deployed image must have an instance of the Dev Deployment Upload Service running on startup, and the service binary should be available in the `PATH` _(The `Command` parameter is executed after the Dev Deployment Upload Service finishes, in other words, the final command executed by the container will be something like: `dev-deployment-upload-service && <CUSTOM_COMMAND>`)_.
-- The Dev Deployment Upload Service must run on the same port defined by the `Container Port` parameter.
-- After {CANVAS} uploads the current project to the container it expects an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to make sure the deployment was successful _(Your deployment will be made even without this endpoint, but {CANVAS} will not be able to know if it was successful or not)_.
-
-Images used in this deployment:
-
-- https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
-
-NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`, xref:create-custom-dev-deployment-image.html[more information here])
-
-=== Deployment tokens
-
-.Dev Deployment tokens list
-image::tools/devDeployments/tokens.png[width=720]
-
-Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster (see the topic below). These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
-
-[source,javascript]
-----
-devDeployment: {
-  labels: {
-    createdBy: "tools.kie.org/created-by",
-    partOf: "tools.kie.org/part-of",
- },
-  annotations: {
-    workspaceId: "tools.kie.org/workspace-id",
-    workspaceName: "tools.kie.org/workspace-name",
- },
-  uniqueName: string,
-  uploadService: {
-    apiKey: string,
- },
-  workspace: {
-    id: string,
-    name: string,
- },
-  kubernetes: {
-    namespace: string,
- },
-},
-----
-
-NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
-
-These tokens are referenced in the YAML resources using the following notation: `${{ varPath.varName }}`. Here are some examples from the tokens above:
-
-- `${{ devDeployment.labels.createdBy }}`
-- `${{ devDeployment.annotations.workspaceId }}`
-- `${{ devDeployment.uniqueName }}`
-- `${{ devDeployment.kubernetes.namespace }}`
 
 === Deployment resources requirements
 
@@ -184,30 +102,21 @@ include::../styles/images.adoc[]
 
 {CANVAS} enables the validation and testing of models in a live environment (Kubernetes or OpenShift) through the Dev Deployments feature. Dev Deployments allow users to validate their models without needing to understand the full build and deployment pipeline, bridging the gap between modeling and runtime testing, and enabling faster feedback loops.
 
-You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
-
-* Defining custom Kubernetes resource manifests (Deployments, Services, Routes, Ingresses, etc.)
-* Applying JSON Patches to modify manifests dynamically at deploy time
-* Configuring parameters for adjustment during deployment creation
-* Using token interpolation with recursive JSON Path expressions to reference dynamic values
-* Bundling Dev Deployment Options with Accelerators for project reuse
-
 The deployment process (target cluster and credentials) are configured through the {CANVAS} settings. For instructions on connecting to cloud providers, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
-This connection enables the deployment of all Decisions, Workflows, and even complete Java projects for development purposes only.
+This connection enables the deployment of all Decisions, Workflows, and complete Java projects for development purposes only.
 Within any open project, select the connected account intended for the Dev Deployment and confirm the selection.
-
-== Creating a Dev Deployment
 
 After connecting a cluster, deploy your project by opening it in {CANVAS} and clicking the *Deploy* button in the toolbar.
 
 .Deploy dropdown for a project on {CANVAS}
 image::tools/devDeployments/kubernetes-deploy.png[width=400px]
 
-Deployment options based on project structure are displayed:
+Deployment options based on project structure are:
+
+* *Default Dev Deployment Options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, the system displays built-in default options
 
 * *Custom Dev Deployment Options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, the system lists those options.
-* *Default Dev Deployment Options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, the system displays built-in default options
 
 The system filters displayed options based on the selected provider, showing only options whose `eligibleAuthProviderIds` includes the selected provider type. Options with no `eligibleAuthProviderIds` defined appear for all providers.
 
@@ -261,24 +170,24 @@ Images used in this deployment:
 NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`, xref:create-custom-dev-deployment-image.html[more information here])
 
 
-
 == Creating Custom Dev Deployment Options
 
 Custom Dev Deployment Options enable you to create deployment configurations tailored to specific use cases and Kubernetes environments.
+You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
 
-=== Use Cases
-
-Create custom Dev Deployment Options to:
-
-* Deploy to Kubernetes environments not officially supported by default options
-* Use custom container images or deployment configurations
-* Define specific resource requirements, environment variables, or volume mounts
-* Support multiple deployment scenarios within the same project
-* Bundle deployment configurations with Accelerators for reuse
+* Defining custom Kubernetes resource manifests (Deployments, Services, Routes, Ingresses, etc.)
+* Applying JSON Patches to modify manifests dynamically at deploy time
+* Configuring parameters for adjustment during deployment creation
+* Using token interpolation with recursive JSON Path expressions to reference dynamic values
+* Deploying to Kubernetes environments not officially supported by default options
+* Using custom container images or deployment configurations
+* Defining specific resource requirements, environment variables, or volume mounts
+* Supporting multiple deployment scenarios within the same project
+* Bundling Dev Deployment Options with Accelerators for project reuse
 
 === Directory Structure
 
-Define Dev Deployment Options inside a Business Service project under the `.bamoe/dev-deployments/` directory. Each option consists of a subdirectory containing manifests, patches, and a descriptor file:
+Dev Deployment Options are defined inside a Business Service project under the .bamoe/dev-deployments/ directory. Each option consists of a subdirectory containing manifests, patches, and a descriptor file:
 
 [source]
 ----
@@ -295,9 +204,10 @@ Business Service Project
         └── option.json
 ----
 
-* *manifests/* — Contains standard Kubernetes resource YAML files. Each file must contain exactly one Kubernetes resource (the `---` separator is not supported)
-* *patches/* — Contains JSON Patch files (RFC 6902) that the system applies to manifests during processing. Patches can contain token interpolation expressions
-* *option.json* — The option descriptor that defines the deployment option, including manifests, patches, configurable parameters, and URL templates
+
+* *option.json*: The option descriptor that defines the deployment option, including manifests, patches, configurable parameters, and URL templates.
+* *manifests/*: Contains standard Kubernetes resource YAML files. Each file must contain exactly one Kubernetes resource (the `---` separator is not supported).
+* *patches/*: Contains JSON Patch files (RFC 6902) that the system applies to manifests during processing. Patches can contain token interpolation expressions.
 
 === Option Descriptor (option.json)
 
@@ -312,7 +222,7 @@ The `option.json` file serves as the central configuration for a Dev Deployment 
 |`specVersion`
 |string
 |Yes
-|The version of the Dev Deployment Option specification (currently "0.1")
+|The version of the Dev Deployment Option specification (currently `0.1`)
 
 |`name`
 |string
@@ -327,7 +237,7 @@ The `option.json` file serves as the central configuration for a Dev Deployment 
 |`baselineManifests`
 |string[]
 |Yes
-|List of manifest file paths (relative to the option.json directory) that the system always deploys
+|List of manifest file paths (relative to the `option.json` directory) that the system always deploys
 
 |`baselinePatches`
 |object
@@ -360,7 +270,7 @@ The `option.json` file serves as the central configuration for a Dev Deployment 
 |URL template for the user-facing application URL, supporting token interpolation
 |===
 
-==== Example
+For example, 
 
 [source,json]
 ----
@@ -418,9 +328,9 @@ Provides free-form text input for values such as Docker image URLs or commands.
 }
 ----
 
-* `defaultValue` — The default text value. Can include token interpolation expressions
-* `patches` — Map of manifest filenames to patch file paths. The system applies these patches when using the parameter, and patches can reference the parameter value via `${{ $.parameters.<parameterId> }}`
-* `addManifests` — Optional list of additional manifest files to include when using this parameter
+* `defaultValue`: The default text value. Can include token interpolation expressions
+* `patches`: Map of manifest filenames to patch file paths. The system applies these patches when using the parameter, and patches can reference the parameter value via `${{ $.parameters.<parameterId> }}`
+* `addManifests`: Optional list of additional manifest files to include when using this parameter
 
 ==== Number Parameter
 
@@ -441,7 +351,7 @@ Provides numeric input field.
 }
 ----
 
-* `defaultValue` — The default numeric value
+* `defaultValue`: The default numeric value
 * `patches` and `addManifests` work the same as text parameters
 
 ==== Boolean Parameter
@@ -546,14 +456,14 @@ JSON Patches follow the RFC 6902 specification and enable dynamic modification o
 
 Each patch file contains an array of JSON Patch operations. The `path` property uses JSON Pointers to specify where in the manifest the system applies the operation. Patch operations can include token interpolation expressions.
 
-==== Supported Operations
+The supported operations are:
 
-* `add` — Adds a value at the specified path
-* `remove` — Removes the value at the specified path
-* `replace` — Replaces the value at the specified path
-* `test` — Tests that a value at the specified path matches (used as a filter — the system applies patches only to manifests that pass all test operations)
+* `add`: Adds a value at the specified path
+* `remove`: Removes the value at the specified path
+* `replace`: Replaces the value at the specified path
+* `test`: Tests that a value at the specified path matches (used as a filter — the system applies patches only to manifests that pass all test operations)
 
-==== Example: Baseline Deployment Patch
+==== Baseline deployment patch example
 
 This patch applies to all Deployment resources. The `test` operation ensures the system applies it only to Deployment manifests:
 
@@ -584,7 +494,7 @@ This patch applies to all Deployment resources. The `test` operation ensures the
 ]
 ----
 
-==== Example: Adding a Sidecar Container
+==== Adding a sidecar container example
 
 This patch adds a DMN Form Webapp sidecar container to the Deployment:
 
@@ -613,6 +523,47 @@ This patch adds a DMN Form Webapp sidecar container to the Deployment:
   }
 ]
 ----
+
+=== Deployment tokens
+
+.Dev Deployment tokens list
+image::tools/devDeployments/tokens.png[width=720]
+
+Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster (see the topic below). These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
+
+[source,javascript]
+----
+devDeployment: {
+  labels: {
+    createdBy: "tools.kie.org/created-by",
+    partOf: "tools.kie.org/part-of",
+ },
+  annotations: {
+    workspaceId: "tools.kie.org/workspace-id",
+    workspaceName: "tools.kie.org/workspace-name",
+ },
+  uniqueName: string,
+  uploadService: {
+    apiKey: string,
+ },
+  workspace: {
+    id: string,
+    name: string,
+ },
+  kubernetes: {
+    namespace: string,
+ },
+},
+----
+
+NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
+
+These tokens are referenced in the YAML resources using the following notation: `${{ varPath.varName }}`. Here are some examples from the tokens above:
+
+- `${{ devDeployment.labels.createdBy }}`
+- `${{ devDeployment.annotations.workspaceId }}`
+- `${{ devDeployment.uniqueName }}`
+- `${{ devDeployment.kubernetes.namespace }}`
 
 === Token Interpolation
 
