@@ -10,7 +10,7 @@ include::../styles/images.adoc[]
 Deployment options based on project structure are:
 
 * *Custom Dev Deployment Options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} lists those options.
-* *Default Dev Deployment Options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} displays built-in default options
+* *Default Dev Deployment Options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} displays built-in default options.
 
 == Creating Custom Dev Deployment Options
 
@@ -379,7 +379,6 @@ Provides enable/disable toggle. When enabled, the system conditionally applies a
 
 
 
-
 === Deployment tokens
 
 .Dev Deployment tokens list
@@ -470,8 +469,7 @@ The following tokens are available in manifests and patches at deploy time:
 
 ==== Token Interpolation
 
-Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535] to reference values from a token map. For example, 
-`${{ <JSON Path expression> }}`
+Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) to reference values from a token map. For example, `${{ <JSON Path expression> }}`.
 
 Tokens support nesting (recursive), meaning a JSON Path expression can itself contain tokens. The interpolation engine resolves tokens from the inside out, with a maximum recursion depth of 50 to prevent infinite loops.
 
@@ -518,9 +516,6 @@ ${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.
 ${{ $.devDeployment.resources.Ingress['${{ $.devDeployment.uniqueName }}'].status.loadBalancer.ingress[0].hostname }}
 ----
 
-.Dev Deployment tokens list
-image::tools/devDeployments/tokens.png[width=720]
-
 ==== Upload Service URL Template
 
 Specifies the URL where Canvas uploads workspace assets (BPMN/DMN files) to the deployed application. The system uses this immediately after deployment to transfer files to the running container.
@@ -555,7 +550,7 @@ https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}']
 
 == Default Deployment Options
 
-When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} provides built-in default deployment options  vary based on the target platform:
+When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} provides built-in default deployment options that vary based on the target platform:
 
 OpenShift:
 
@@ -593,7 +588,7 @@ This option provides the simplest deployment approach with the following require
 * The project should contain only Decision (DMN) and Workflow (BPMN) files. {CANVAS} ignores all other files.
 * The deployment fails if any file contains errors.
 
-This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service (xref:dev-deployment-upload-service.html[read more about it here]).
+This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service. For more information, see (xref:dev-deployment-upload-service.html[Dev Deployment Upload Service]).
 
 {CANVAS} shows a parameter that gives you the option to Include DMN Form Webapp. This sidecar container contains a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing you to fill the inputs and simulate different scenarios.
 
@@ -626,7 +621,7 @@ Images used in the deployment:
 
 - https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
 
-NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`, xref:create-custom-dev-deployment-image.html[more information here])
+NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[reating a custom Dev Deployment image])
 
 
 == Connecting Cloud Providers
@@ -702,19 +697,6 @@ Common validation errors include:
 * Invalid YAML in manifest files
 
 NOTE: When some options load successfully and others fail, Canvas displays a warning indicating partial success and lists only the valid options.
-
-=== Post Deployment
-
-Upon confirmation of the Dev Deployment, the Dev Deployments dropdown will open, displaying all the previous and current deployments and an indicator showing their status.
-
-.Dev Deployments dropdown demonstrating the deployment process of a project named "bamoe-sample-project" on {CANVAS}
-image::tools/devDeployments/kubernetes-waiting-done.png[]
-
-After approximately 30 seconds, a green checkmark should appear next to the Dev Deployment.
-If the deployment was made with the `Include DMN Form Webapp` option checked, selecting an item in the **list of projects** dropdown will allow you to navigate to the webapp form for decisions. Otherwise, it will navigate to the Swagger UI for your application.
-
-NOTE: Dev Deployments are immutable; therefore, if an error occurs or a change is required, a new Dev Deployment must be created.
-They can easily be deleted from the Dev Deployments dropdown.
 
 
 == Dev Deployment Options with Accelerators
