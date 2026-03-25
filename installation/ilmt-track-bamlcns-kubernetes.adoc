@@ -9,10 +9,12 @@ Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.14.0?t
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. Use the Change Version menu in the docs to select the most recent version. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
-== Tracking BAMOE Component Licenses
-License tracking annotations must be manually added to each of the {PRODUCT_SHORT} containers following installation for example, {CANVAS} and its dependencies, {MANAGEMENT_CONSOLE}. To do this run the following commands for IBM Decision Manager Open Edition(DMOE) or IBM Process Automation Manager Open Edition(PAMOE), from where the containers are installed.
+== Tracking {PRODUCT_SHORT} Component Licenses
+When you install a component via the product specific Dev and Runtime Helm charts that correspond to your IBM license ({PRODUCT_DM} or {PRODUCT_PAM}). The chart includes preconfigured license annotations in the global values. These are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. The merge uses the Helm merge function and happens in each deployment template. The chargedProductAnnotations (containing License Manager metadata) are combined with podAnnotations (any custom annotations). The template expressions are evaluated using the `tpl` function, which replaces token references with actual values from the global configuration.
 
-* OpenShift - DMOE
+If you choose not to install via these Helm charts, the license tracking annotations must be manually added to each of the {PRODUCT_SHORT} containers after installation. To do this you can run the following commands from where the containers are installed and depending on your product and component container.
+
+* OpenShift - {PRODUCT_DM}
 +
 [source,shell]
 ----
@@ -21,7 +23,7 @@ oc patch deployment <bamoe-canvas_deployment_name> -p \
 ----
   
 
-* Kubernetes - DMOE
+* Kubernetes - {PRODUCT_DM}
 +
 [source,shell]
 ----
@@ -29,7 +31,7 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
 
-* OpenShift - PAMOE
+* OpenShift - {PRODUCT_PAM}
 +
 [source,shell]
 ----
@@ -38,7 +40,7 @@ oc patch deployment <bamoe-canvas_deployment_name> -p \
 ----
   
 
-* Kubernetes - PAMOE
+* Kubernetes - {PRODUCT_PAM}
 +
 [source,shell]
 ----
@@ -49,10 +51,8 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
 Where `bamoe-canvas_deployment_name` is the name of the Deployment resource created when you installed {CANVAS}.
 
 
-=== Alternative method via YAML resources
-
-If you have installed {CANVAS} by using `yaml` resources, the deployment resource must be edited to add the following lines for DMOE:
-
+* Deployment using `yaml` resources - {PRODUCT_DM}
++
 [source,yaml]
 ----
 spec:
@@ -66,8 +66,8 @@ spec:
         productChargedContainers: "All"
 ----
 
-And add the following lines in case of PAMOE:
-
+* Deployment using `yaml` resources - {PRODUCT_PAM}
++
 [source,yaml]
 ----
 spec:
@@ -92,6 +92,7 @@ openshift.quarkus.openshift.annotations.productName="IBM Decision Manager Open E
 openshift.quarkus.openshift.annotations.productMetric="VIRTUAL_PROCESSOR_CORE"
 openshift.quarkus.openshift.annotations.productChargedContainers="All"
 ----
+
 Or the following properties for {PRODUCT_PAM}, see xref:../installation/licensing.adoc[Licensing Overview]:
 
 [source,properties]

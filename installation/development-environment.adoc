@@ -4,16 +4,26 @@ include::../styles/images.adoc[]
 
 This section describes how to install the tools needed to create and manage Workflows, Decisions, and Rules in your development environment:
 
-* {MVN_REPO} for accessing libraries, 
-* {CANVAS} for browser-based authoring and testing of DMN, BPMN assets, 
+* {CANVAS} and its backend services {CORS_PROXY}, {EXT_SERVICES}, for browser-based authoring and testing of DMN, BPMN assets, 
+* {MVN_REPO} for accessing libraries to develop _Business Services_, 
 * {DEV_TOOLS} to enable efficient development and collaboration of _Business Services_ within an industry standard IDE.
  
+== The Dev Environment Helm chart
 The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for {PRODUCT_DM} or {PRODUCT_PAM}:
 
 * pamoe-9.4.0-dev-environment-helm-chart.tgz
 * dmoe-9.4.0-dev-environment-helm-chart.tgz
 
-These Helm charts include the necessary licensing annotations and do not require any manual configuration as was the case in previous releases. Required annotations are injected into all deployed containers. This ensures accurate license tracking from deployment, and simplifies the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each (PRODUCT_SHORT) offering.
+These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each (PRODUCT_SHORT) offering.
+
+Each Dev Helm chart contains four sub-charts:
+• canvas: Main {CANVAS} application for modeling BPMN and DMN, available via https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
+• cors_proxy: {CORS_PROXY} service for cross-origin requests, that powers features like the DMN Runner and static validation of DMN, and BPMN models, available via https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
+• extended_services: {EXT_SERVICES} contains the DMN Runner and model validation services. It also enables {CANVAS} to communicate with Git and Cloud providers, available via https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
+• maven_repository: {MVN_REPO} contains the Maven artifact repository required to develop _Business Services_, available https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
+
+The only difference between the PAMOE and DMOE Dev environment Helm chart is the License Service annotations which contain different `productID` and `productName`. All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
+ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
 
 The {PRODUCT_SHORT} Dev Helm charts are architecture-agnostic and work for both:
 
@@ -21,33 +31,13 @@ The {PRODUCT_SHORT} Dev Helm charts are architecture-agnostic and work for both:
 * Linux/x86_64 architecture
 
 All {PRODUCT_SHORT} container images are available as multi-architecture images on Quay.io, and the host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
+
+[source,shell]
+----
 `docker pull --platform linux/s390x quay.io/bamoe/canvas:{IMAGE_VERSION}`
-
-== {CANVAS} and its deliverables
-//tag::canvas-description[]
-{CANVAS} is a web application that provides authoring tools for Decisions and Workflows, directly in the browser. It enables different profiles of user (business automation developers and business policy managers) to create, edit and, manage Decisions and Workflows through editors and service integrations such as Git for syncing repositories, and OpenShift and Kubernetes for deploying your _Business Services_ in development mode via the Dev Deployments feature.
-//end::canvas-description[]
-
-{CANVAS} depends on the following two backend applications to provide full functionality:
-
-{EXT_SERVICES}:: Powers features like the DMN Runner and static validation of DMN, and BPMN models.
-{CORS_PROXY}:: Allows {CANVAS} Web application to communicate with Git and Cloud providers.
-
-The recommended way of installing Canvas and its backend applications is through the Dev environment Helm chart you are licensed to install. 
-
-{CANVAS} and its two backend applications are also available as container images which are published to `Quay.io` and can be used to run containers locally or with any cloud provider.
-
-{CANVAS}:: https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
-{EXT_SERVICES}:: https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
-{CORS_PROXY}:: https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
-
+----
 
 For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
-
-== Maven Repository deliverables
-The Maven libraries required to develop _Business Services_ with {PRODUCT_SHORT} are shipped as a separate container and are part of the Dev environment Helm chart.
-
-{MVN_REPO}:: https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
 
 == Installing {DEV_TOOLS}
 
@@ -67,18 +57,15 @@ For more information on using the extensions, see xref:../tools/developer-tools-
 
 == Installing the Dev Environment Helm chart (recommended)
 
-The Helm chart provides a simple way to deploy {CANVAS} and {MVN_REPO} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licensing.adoc[License Guide]).
+The Helm chart provides a simple way to deploy {CANVAS} and {MVN_REPO} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licensing.adoc[License Guide]). For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
 
 * pamoe-9.4.0-dev-environment-helm-chart.tgz
 * dmoe-9.4.0-dev-environment-helm-chart.tgz_
 
-The Helm chart provides a configurable way to deploy {CANVAS} and {MVN_REPO} in Kubernetes, OpenShift, and Minikube.
-
-For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
 
 ===  OpenShift Install
 
-To install {CANVAS} on OpenShift, first get the default OpenShift domain for your routes using the following command:
+To install on OpenShift, first get the default OpenShift domain for your routes using the following command:
 
 [source,shell,subs="attributes+"]
 ----
@@ -94,16 +81,16 @@ You can then install the Helm chart with the following commands:
 
 [source,shell,subs="attributes+"]
 ----
-helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version=9.4.0 --untar
+helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
 helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
-Where you should replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM} and <YOUR_OCP_ROUTE_DOMAIN> with the domain of your OpenShift Route.
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM} and <YOUR_OCP_ROUTE_DOMAIN> with the domain of your OpenShift Route.
 
 
 === Generic Kubernetes install
 
-To install {CANVAS} directly on a Kubernetes cluster, you will need to get the default Kubernetes cluster domain for your Ingress (see https://kubernetes.io/docs/concepts/services-networking/ingress/[Kubernetes Documentation]) for more information. This can vary depending on your cluster configuration.
+To install {CANVAS} directly on a Kubernetes cluster, you will need to get the default Kubernetes cluster domain for your Ingress (see https://kubernetes.io/docs/concepts/services-networking/ingress/[Kubernetes Documentation] for more information). This can vary depending on your cluster configuration.
 
 Once you have the domain information, you can run the following helm commands:
 
@@ -113,7 +100,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
 
-Where you should replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM} and <YOUR_KUBERNETES_CLUSTER_DOMAIN>` with the domain of your cluster and `<YOUR_KUBERNETES_INGRESS_CLASS>` with the ingress class of your cluster.
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}, <YOUR_KUBERNETES_CLUSTER_DOMAIN>` with the domain of your cluster and `<YOUR_KUBERNETES_INGRESS_CLASS>` with the ingress class of your cluster.
 
 === Minikube install
 
@@ -130,7 +117,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-minikube-nginx.yaml
 ----
 
-Where you should replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
 === Uninstalling the Chart
 
@@ -143,18 +130,31 @@ helm uninstall my-bamoe-canvas
 
 === Passing environmental variables
 
-This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[{CANVAS} Helm Chart configuration reference] for all options.
+This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[Dev Helm Chart configuration reference] for all options.
  
 [source,shell]
 ----
 helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set canvas.image.registry=quay.io
 ----
 
-Where you should replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
-== Option 2: Deploy directly on OpenShift (using oc CLI)
+The {MVN_REPO} is deployed and configured by default and accessible at:
 
-_zzz-Q probably remove whole section as it describes manual configuration that is replaced by the dev evnironment helm chart_
+[source,shell,subs="attributes+"]
+----
+TBD
+----
+
+To disable the Maven Repository in the Helm chart deployment:
+
+[source,shell,subs="attributes+"]
+----
+TBD
+----
+
+
+== Option 2: Deploying Canvas containers directly on OpenShift (using oc CLI)
 
 If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
 
@@ -216,11 +216,9 @@ oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 
 NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
-== Option 3: Running locally with Docker
+== Option 3: Running {CANVAS} containers locally with Docker
 
-_zzz-Q probably remove and focus on Docker Compose as option 2_ 
-
-=== Configuring {EXT_SERVICES}
+Use the following command to configure {EXT_SERVICES}:
 
 [source,shell,subs="attributes+"]
 ----
@@ -230,7 +228,7 @@ docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{IMAGE_VERSION}
 Access the API through the port 21345. No additional configuration is necessary.
 
 
-=== Configuring {CORS_PROXY}
+Use the following command to configure {CORS_PROXY}:
 
 [source,shell,subs="attributes+"]
 ----
@@ -239,9 +237,7 @@ docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
 ----
 The API is accessible through the port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
 
-=== Configuring {CANVAS}
-
-This image must be run with two environment variables that will allow it to communicate with the two backend services:
+The {CANVAS} image must be run with two environment variables that will allow it to communicate with the two backend services:
 
 `KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
 
@@ -258,14 +254,13 @@ docker run -p 8080:8080 -it \
 ----
 The HTTP server is accessed through the port 8080.
 
-Several customization options are available. For more information on the configurations available by using the environment variables, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
+Several customization options are available. For more information on the configurations available by using the environment variables, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS} image description on Quay.io].
 
 
 [NOTE]
 ====
-The addresses need to be accessible from the users' machines, as {CANVAS} will make requests to them directly from the user's browser.
+The configured URL addresses need to be accessible from your machine, as {CANVAS} will make requests to them directly from your browser.
 Using the internal IP/DNS services will not work.
-Requests are made directly from the user's browser to both URLs configured.
 ====
 
 Another important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
@@ -280,7 +275,7 @@ The same is true for remote Kubernetes and OpenShift instances that the users of
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
-== Option 2: Running locally with Docker Compose
+== Option 2: Running {CANVAS} containers locally with Docker Compose
 
 {CANVAS} and its related services can be run locally by using Docker Compose.
 
@@ -435,12 +430,9 @@ This value can be overwritten to add your own custom Accelerators by replacing t
 
 
 [#helm-chart-config-ref]
-== Configuration reference for {CANVAS} Helm Chart
+== Configuration reference for {PRODUCT_PAM} and {PRODUCT_DM} Dev Helm Chart
 
-_zzz-Q add reference info for Maven repo and move to reference section_
-
-The following table lists the configurable parameters of the {CANVAS}
- chart and their default values.
+The following table lists the configurable parameters of the two Dev Helm charts and their default values.
 
 |===
 | Key | Type | Default |Description
@@ -636,7 +628,7 @@ _zzz-Q review to retain anything necessary for the new Dev Helm chart or for any
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
 
-For organizations without such infrastructure, it is highly recommended to use the Container image and make it available internally for developers and continuous integration (CI) systems.
+For organizations without such infrastructure, it is highly recommended to use the Dev Helm chart to install the Container image and make it available internally for developers and continuous integration (CI) systems.
 
 For organizations that already use a Maven Repository Manager, developers and the CI systems are usually configured to connect to it.
 
@@ -656,25 +648,11 @@ There are a few options and your choice will depend on your work environment and
 
 === Deploying to OpenShift
 
-_zzz-Q still documented scenario_
-
 Choose the container image from one of the following sources: 
 
 bamoe-{VERSION}-maven-repository-image.tar.gz:: included in the distribution
 quay.io/bamoe/maven-repository:{IMAGE_VERSION}::  the image hosted on Quay.io
 
-_zzz-Q clarify Z deliverables and support for the Dev Helm chart_
-
-[NOTE]
-====
-There are two versions of the {MVN_REPO} container image: 
-
-* `bamoe-{VERSION}-maven-repository-image-s390x.tar.gz` - for the Linux s390x architecture which runs on the IBM Z platform.
-* `bamoe-{VERSION}-maven-repository-image-amd64.tar.gz` - for the Linux x86_64 architecture. 
-
-The host machine architecture should be automatically resolved when you pull the {MVN_REPO} containers. You can use the following command to specify a platform:
-`docker pull --platform linux/s390x quay.io/bamoe/maven-repository:{IMAGE_VERSION}`
-====
 
 *Using bamoe-{VERSION}-maven-repository-image.tar.gz*
 
