@@ -5,12 +5,114 @@ include::../styles/images.adoc[]
 
 {CANVAS} enables the deploy, validation and testing of models in a live environment (Kubernetes or OpenShift) through the Dev Deployments feature. Dev Deployments allow users to validate their models without needing to understand the full build and deployment pipeline, bridging the gap between modeling and runtime testing, and enable faster feedback loops.
 
+== How Dev Deployments Work
+
+Dev Deployments depend on various components working together: {CANVAS}, the Kubernetes/OpenShift cluster, container images, and the upload service.
+
+Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, {CANVAS} automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
+
+When you click `Deploy`, {CANVAS} executes the following steps:
+
+. {CANVAS} packages all workspace files into a zip file (ignoring .git directories).
+. {CANVAS} loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
+** Applies required patches to set {CANVAS} labels, annotations, and resource names.
+** Applies patches related to parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens).
+** Interpolates all tokens with their corresponding values, including parameters.
+** Splits YAML files into multiple YAMLs, creating one per resource kind.
+. Using the Kubernetes resource name and the list of saved API endpoints, {CANVAS} makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference.
+. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload.
+** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending.
+** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload.
+** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and {CANVAS} updates it with an error icon.
+. After the Dev Deployment Upload Service reaches "READY" status, {CANVAS} uploads the zip file generated in Step 1 to the upload service.
+. The Dev Deployment Upload Service receives the zip file and extracts it to the defined path (set using configured environment variables on the container). After extraction completes, the service ends with status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever the Custom Image option parameter defines).
+. A Quarkus application starts loading inside the container, while {CANVAS} polls the container to check Quarkus app readiness.
+. When Quarkus finishes loading and polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
+** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter.
+** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
+. Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
+
 == Dev Deployment options
 
 Deployment options based on project structure are:
 
-* *Custom Dev Deployment options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} lists those options.
 * *Default Dev Deployment options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} displays built-in default options.
+* *Custom Dev Deployment options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} lists those options.
+
+== Default Deployment Options
+
+When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} provides built-in default deployment options that vary based on the target platform:
+
+OpenShift:
+
+[cols="1,3"]
+|===
+|Option Name |Description
+
+|Quarkus Blank App
+|Deploys a pre-built Quarkus container image with an upload service. Supports an optional DMN Form Webapp sidecar for testing DMN models.
+
+|Custom Image
+|Deploys a custom Docker image with configurable container port and startup command. Suitable for full Java projects (Quarkus or Spring Boot).
+|===
+
+Kubernetes:
+
+[cols="1,3"]
+|===
+|Option Name |Description
+
+|Quarkus Blank App
+|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
+
+|Custom Image
+|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
+|===
+
+=== Quarkus Blank App
+
+.Quarkus Blank App deployment option
+image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
+
+This option provides the simplest deployment approach with the following requirements:
+
+* The project should contain only Decision (DMN) and Workflow (BPMN) files. {CANVAS} ignores all other files.
+* The deployment fails if any file contains errors.
+
+This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service. For more information, see (xref:dev-deployment-upload-service.html[Dev Deployment Upload Service]).
+
+{CANVAS} shows a parameter that gives you the option to Include DMN Form Webapp. This sidecar container contains a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing you to fill the inputs and simulate different scenarios.
+
+.Dev Deployment application for a Decision created from {CANVAS}
+image::tools/devDeployments/form.png[]
+
+You can switch between different Decisions using the dropdown in the top-right corner and access the Swagger UI through the kebab menu.
+
+NOTE: The DMN Form Webapp works only for Decisions. Handle Workflows directly via the API or Dev UIs.
+
+Images used in the deployment:
+
+- https://quay.io/repository/bamoe/canvas-dev-deployment-quarkus-blank-app[Canvas Dev Deployment Quarkus Blank App]: `quay.io/bamoe/canvas-dev-deployment-quarkus-blank-app:{IMAGE_VERSION}`
+- https://quay.io/repository/bamoe/canvas-dev-deployment-dmn-form-webapp[Canvas Dev Deployment DMN Form Webapp]: `quay.io/bamoe/canvas-dev-deployment-dmn-form-webapp:{IMAGE_VERSION}`
+
+=== Custom Image
+
+.Custom Image deployment option
+image::tools/devDeployments/deployment-option-custom-image.png[width=600]
+
+This option provides maximum configurability, allowing users to specify custom Docker images, container ports, and startup commands. Use this option for complete Java projects (Quarkus or Spring Boot).
+
+This combination of parameters makes it a highly flexible option, but should be used with care and follow a few requirements:
+
+* The deployed image must include an instance of the Dev Deployment Upload Service running on startup, with the service binary available in the `PATH` ({CANVAS} executes the `Command` parameter after the Dev Deployment Upload Service finishes: `dev-deployment-upload-service && <CUSTOM_COMMAND>`)
+* The Dev Deployment Upload Service must run on the port defined by the `Container Port` parameter
+* The deployment should expose an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to verify deployment success (The deployment proceeds without this endpoint, but {CANVAS} cannot verify success)
+
+Images used in the deployment:
+
+- https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
+
+NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[Creating a custom Dev Deployment image])
 
 == Creating custom Dev Deployment options
 
@@ -26,6 +128,17 @@ You can define custom deployment configurations using standard Kubernetes YAML m
 * Defining specific resource requirements, environment variables, or volume mounts
 * Supporting multiple deployment scenarios within the same project
 * Bundling Dev Deployment Options with Accelerators for project reuse
+
+=== Custom Dev Deployment guidelines
+
+When creating custom Dev Deployment Options, follow these guidelines:
+
+* Manifest files must contain exactly one Kubernetes resource each. Do not use the `---` YAML separator.
+* JSON Patches follow xref:https://datatracker.ietf.org/doc/html/rfc6902[RFC 6902]. Use `test` operations to filter which manifests receive a patch (e.g., test for `kind: Deployment`).
+* Token interpolation uses JSON Path (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) syntax. Tokens are recursive — {CANVAS} resolves inner tokens first.
+* URL templates provide access to deployed Kubernetes resources via `$.devDeployment.resources.<Kind>['<name>']`. The resource kind and name correspond to the `kind` and `metadata.name` fields from the Kubernetes resource.
+* Set the `specVersion` field to `"0.1"` for the current specification version.
+* Use `eligibleAuthProviderIds` to restrict a deployment option to specific provider types. For example, an option using OpenShift Routes should set `"eligibleAuthProviderIds": ["openshift"]`, while an option using Kubernetes Ingress should set `"eligibleAuthProviderIds": ["kind","minikube", "kubernetes-cloud"]`. When this field is omitted or left empty, the option appears for all connected providers. Valid values are `openshift`, `kind`, `minikube`, and `kubernetes-cloud`.
 
 === Directory Structure
 
@@ -412,7 +525,7 @@ devDeployment: {
 
 NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
 
-These tokens are referenced in the YAML resources using the following notation `${{ varPath.varName }}`. 
+These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
 
 The following tokens are available in manifests and patches at deploy time:
 
@@ -545,82 +658,6 @@ For example (OpenShift, Quarkus with Swagger UI):
 https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/swagger-ui/
 ----
 
-== Default Deployment Options
-
-When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} provides built-in default deployment options that vary based on the target platform:
-
-OpenShift:
-
-[cols="1,3"]
-|===
-|Option Name |Description
-
-|Quarkus Blank App
-|Deploys a pre-built Quarkus container image with an upload service. Supports an optional DMN Form Webapp sidecar for testing DMN models.
-
-|Custom Image
-|Deploys a custom Docker image with configurable container port and startup command. Suitable for full Java projects (Quarkus or Spring Boot).
-|===
-
-Kubernetes:
-
-[cols="1,3"]
-|===
-|Option Name |Description
-
-|Quarkus Blank App
-|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
-
-|Custom Image
-|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
-|===
-
-=== Quarkus Blank App
-
-.Quarkus Blank App deployment option
-image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
-
-This option provides the simplest deployment approach with the following requirements:
-
-* The project should contain only Decision (DMN) and Workflow (BPMN) files. {CANVAS} ignores all other files.
-* The deployment fails if any file contains errors.
-
-This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service. For more information, see (xref:dev-deployment-upload-service.html[Dev Deployment Upload Service]).
-
-{CANVAS} shows a parameter that gives you the option to Include DMN Form Webapp. This sidecar container contains a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing you to fill the inputs and simulate different scenarios.
-
-.Dev Deployment application for a Decision created from {CANVAS}
-image::tools/devDeployments/form.png[]
-
-You can switch between different Decisions using the dropdown in the top-right corner and access the Swagger UI through the kebab menu.
-
-NOTE: The DMN Form Webapp works only for Decisions. Handle Workflows directly via the API or Dev UIs.
-
-Images used in the deployment:
-
-- https://quay.io/repository/bamoe/canvas-dev-deployment-quarkus-blank-app[Canvas Dev Deployment Quarkus Blank App]: `quay.io/bamoe/canvas-dev-deployment-quarkus-blank-app:{IMAGE_VERSION}`
-- https://quay.io/repository/bamoe/canvas-dev-deployment-dmn-form-webapp[Canvas Dev Deployment DMN Form Webapp]: `quay.io/bamoe/canvas-dev-deployment-dmn-form-webapp:{IMAGE_VERSION}`
-
-=== Custom Image
-
-.Custom Image deployment option
-image::tools/devDeployments/deployment-option-custom-image.png[width=600]
-
-This option provides maximum configurability, allowing users to specify custom Docker images, container ports, and startup commands. Use this option for complete Java projects (Quarkus or Spring Boot).
-
-This combination of parameters makes it a highly flexible option, but should be used with care and follow a few requirements:
-
-* The deployed image must include an instance of the Dev Deployment Upload Service running on startup, with the service binary available in the `PATH` ({CANVAS} executes the `Command` parameter after the Dev Deployment Upload Service finishes: `dev-deployment-upload-service && <CUSTOM_COMMAND>`)
-* The Dev Deployment Upload Service must run on the port defined by the `Container Port` parameter
-* The deployment should expose an HTTP 200 response from the `<DEPLOYMENT_URL>/q/health` endpoint to verify deployment success (The deployment proceeds without this endpoint, but {CANVAS} cannot verify success)
-
-Images used in the deployment:
-
-- https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
-
-NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[Creating a custom Dev Deployment image])
-
-
 == Connecting Cloud Providers
 
 The deployment process (target cluster and credentials) are configured through {CANVAS} settings. For instructions on connecting to cloud providers, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
@@ -741,43 +778,6 @@ metadata:
 NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
 
 
-== How Dev Deployments Work
-
-Dev Deployments depend on various components working together: {CANVAS}, the Kubernetes/OpenShift cluster, container images, and the upload service.
-
-Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, {CANVAS} automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
-
-When you click `Deploy`, {CANVAS} executes the following steps:
-
-. {CANVAS} packages all workspace files into a zip file (ignoring .git directories).
-. {CANVAS} loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
-** Applies required patches to set {CANVAS} labels, annotations, and resource names.
-** Applies patches related to parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens).
-** Interpolates all tokens with their corresponding values, including parameters.
-** Splits YAML files into multiple YAMLs, creating one per resource kind.
-. Using the Kubernetes resource name and the list of saved API endpoints, {CANVAS} makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference.
-. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload.
-** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending.
-** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload.
-** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and {CANVAS} updates it with an error icon.
-. After the Dev Deployment Upload Service reaches "READY" status, {CANVAS} uploads the zip file generated in Step 1 to the upload service.
-. The Dev Deployment Upload Service receives the zip file and extracts it to the defined path (set using configured environment variables on the container). After extraction completes, the service ends with status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever the Custom Image option parameter defines).
-. A Quarkus application starts loading inside the container, while {CANVAS} polls the container to check Quarkus app readiness.
-. When Quarkus finishes loading and polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
-** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter.
-** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
-. Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
-
-== Custom Dev Deployment guidelines
-
-When creating custom Dev Deployment Options, follow these guidelines:
-
-* Manifest files must contain exactly one Kubernetes resource each. Do not use the `---` YAML separator.
-* JSON Patches follow xref:https://datatracker.ietf.org/doc/html/rfc6902[RFC 6902]. Use `test` operations to filter which manifests receive a patch (e.g., test for `kind: Deployment`).
-* Token interpolation uses JSON Path (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) syntax. Tokens are recursive — {CANVAS} resolves inner tokens first.
-* URL templates provide access to deployed Kubernetes resources via `$.devDeployment.resources.<Kind>['<name>']`. The resource kind and name correspond to the `kind` and `metadata.name` fields from the Kubernetes resource.
-* Set the `specVersion` field to `"0.1"` for the current specification version.
-* Use `eligibleAuthProviderIds` to restrict a deployment option to specific provider types. For example, an option using OpenShift Routes should set `"eligibleAuthProviderIds": ["openshift"]`, while an option using Kubernetes Ingress should set `"eligibleAuthProviderIds": ["kind","minikube", "kubernetes-cloud"]`. When this field is omitted or left empty, the option appears for all connected providers. Valid values are `openshift`, `kind`, `minikube`, and `kubernetes-cloud`.
 
 
 
