@@ -13,9 +13,6 @@ These tutorials complement the [official BAMOE v8 to v9 upgrade guide](https://w
 ```
 v8-to-v9-upgrade-tutorials/
 ├── README.md (this file)
-├── TUTORIAL_TEMPLATE.md (template for creating new tutorials)
-├── CONTRIBUTING.md (contribution guidelines)
-├── REVIEW_PROCESS.md (review process and quality criteria)
 ├── tutorial-01-evaluation-process/
 │   ├── README.md (tutorial content)
 │   ├── v8-app/ (original v8 application code)
