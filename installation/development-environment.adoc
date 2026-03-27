@@ -60,9 +60,10 @@ For more information on using the extensions, see xref:../tools/developer-tools-
 
 The Helm chart provides a simple way to deploy {CANVAS} and {MVN_REPO} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licensing.adoc[License Guide]). For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
 
-* pamoe-9.4.0-dev-environment-helm-chart.tgz
-* dmoe-9.4.0-dev-environment-helm-chart.tgz_
+Choose the required helm chart based on your licensed product:
 
+* pamoe-{VERSION}-dev-environment-helm-chart
+* dmoe-{VERSION}-dev-environment-helm-chart
 
 ===  OpenShift Install
 
@@ -74,7 +75,7 @@ oc get ingresses.config cluster --output jsonpath={.spec.domain}
 ----
 
 ////
-Not sure this is still applicable
+no longer applicable with dev helm charts:
 If you do not have access rights to this configuration, you can create a dummy Route resource and check its domain.
 ////
 
@@ -154,7 +155,7 @@ To disable the Maven Repository in the Helm chart deployment:
 TBD
 ----
 
-
+////
 == Option 2: Deploying Canvas containers directly on OpenShift (using oc CLI)
 
 If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
@@ -205,6 +206,7 @@ oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
 ----
+////
 
 .The OpenShift topology after {CANVAS} deployment
 image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
@@ -217,6 +219,7 @@ oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 
 NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
+////
 == Option 3: Running {CANVAS} containers locally with Docker
 
 Use the following command to configure {EXT_SERVICES}:
@@ -268,6 +271,8 @@ Another important environment variable to consider when deploying {CANVAS} is `K
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
+////
+
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
 For example, imagine a user is creating Dev Deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
@@ -276,6 +281,7 @@ The same is true for remote Kubernetes and OpenShift instances that the users of
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
+////
 == Option 2: Running {CANVAS} containers locally with Docker Compose
 
 {CANVAS} and its related services can be run locally by using Docker Compose.
@@ -296,7 +302,7 @@ docker compose up
 ----
 
 {CANVAS} will be available at http://localhost:9090.
-
+////
 
 == Securing your {CANVAS} installation
 
@@ -309,6 +315,9 @@ To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center 
 
 NOTE: You can add environment variable configuration to your docker compose file or pass it directly via a docker run command.
 
+For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+
+////
 Example JSON configuration:
 
 [source,json]
@@ -337,7 +346,7 @@ Example JSON configuration:
 *disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
 *insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
 
-After completing the configuration, you can access the features provided by each integration. For more information, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+After completing the configuration, you can access the features provided by each integration. For more information, 
 
 
 [id="custom-accelerators"]
@@ -479,7 +488,7 @@ You can use the following default accelerators for _Business Services_ that are 
 ----
 
 NOTE: You can override this value to include your own custom accelerators by either replacing the default ones or appending additional entries alongside them.
-
+////
 
 [#helm-chart-config-ref]
 == Configuration reference for {PRODUCT_PAM} and {PRODUCT_DM} Dev Helm Chart
@@ -674,9 +683,91 @@ The following table lists the configurable parameters of the two Dev Helm charts
 | {CANVAS} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
 |===
 
-== Integrating {MVN_REPO}
+== Configuration Reference for BAMOE Dev Environment Helm Chart
 
-_zzz-Q review to retain anything necessary for the new Dev Helm chart or for any integration scenarios that are important to document with the standalone Maven Repo_
+The following table lists the configurable parameters of the BAMOE Dev Environment chart and their default values.
+
+
+### Global Configuration
+
+|===
+| Key | Type | Default |Description
+
+
+| global.ingressSource | string | "" | Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only 
+
+| global.kubernetesClusterDomain | string | "" | If using Minikube or Kubernetes, set the cluster domain 
+
+| global.kubernetesIngressClass | string | "" | If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+
+| global.openshiftRouteDomain | string | "" | If using OpenShift Routes, set the Route domain 
+
+| global.chargedProductValues.productID | string | "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) | Product ID for ILMT tracking 
+
+| global.chargedProductValues.productMetric | string | "VIRTUAL_PROCESSOR
+_CORE" | Product metric for ILMT tracking 
+
+| global.chargedProductValues.productName | string | "IBM Decision Manager Open Edition" (DMOE) / "IBM Process Automation Manager Open Edition" (PAMOE) | Product name for ILMT tracking 
+
+| nameOverride | string | "" | Overrides charts name 
+
+| fullnameOverride | string | "" | Overrides charts full name 
+|===
+
+
+### Canvas Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| canvas.name | string | "canvas" | The BAMOE Canvas application name
+
+| canvas.env | list | [{"name":"KIE_SANDBOX
+_EXTENDED_SERVICES
+_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX
+_CORS_PROXY
+_URL","value":"http://127.0.0.1:8081"}] | Env variables for BAMOE Canvas deployment
+
+| canvas.image | object | {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the BAMOE Canvas image
+
+| canvas.imagePullSecrets | list | [] | Pull secrets used when pulling BAMOE Canvas image
+|===
+
+### CORS Proxy Configuration
+
+|===
+| Key | Type | Default | Description
+
+| cors_proxy.name | string | "cors-proxy" | The CORS Proxy application name
+
+| cors_proxy.env | list | [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] | Env variables for the CORS Proxy deployment
+
+| cors_proxy.image | object | {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the CORS Proxy image
+|===
+
+### Extended Services Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| extended_services.name | string | "extended-services" | The Extended Services application name 
+
+| extended_services.image | object | {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the Extended Services image 
+|===
+
+### Maven Repository Configuration
+
+|===
+| Key | Type | Default | Description
+
+| maven_repository.enabled | bool | TRUE | Enable or disable Maven Repository installation
+
+| maven_repository.name | string | "maven-repository" | The Maven Repository application name
+
+| maven_repository.image | object | {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the Maven Repository image
+|===
+
+== Integrating {MVN_REPO}
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
 

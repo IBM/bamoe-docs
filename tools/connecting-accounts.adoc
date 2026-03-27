@@ -4,6 +4,42 @@ include::../styles/images.adoc[]
 
 {CANVAS} does not feature its own authentication mechanism. Instead, {CANVAS} allows the linking of existing accounts from AI, Git, and Cloud providers. These accounts are utilized for Git operations such as Pull and Push, for creating Dev Deployments, and for accessing AI-powered services.
 
+== Configuring {CANVAS} to work with supported Git providers
+
+To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable by adding to your docker compose file or passing it directly via a docker run command when launching {CANVAS}.
+
+Example JSON configuration:
+
+[source,json]
+----
+[
+  {
+    "id": "unique identifier",
+    "domain": "https://your-git-provider.com",
+    "supportedGitRemoteDomains": ["your-git-provider.com"],
+    "type": "gitlab | githubEnterprise | bitbucketDataCenter",
+    "name": "readable name for displaying in the BAMOE UI",
+    "enabled": true,
+    "group": "git",
+    "disableEncoding": true,
+  }
+]
+----
+
+*id*:: A unique identifier for this authentication provider configuration.
+*domain*:: The base URL of your Git provider instance.
+*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
+*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
+*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
+*enabled*:: A boolean flag that enables or disables this provider.
+*group*:: Categorizes the provider for grouping similar services.
+*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
+*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
+
+After completing the configuration, you can access the features provided by each integration. 
+
+== Using connected accounts in {CANVAS}
+
 All connected accounts are visible in the Accounts dialog, which is accessible through the person icon in the top-right corner. This dialog displays the number of repositories, deployments, and AI services being used by those accounts. Clicking on the arrow provides further information about the accounts, including the date they were linked to {CANVAS}.
 
 Accounts can be removed from {CANVAS} through the Accounts dialog. Removing an account will result in repositories linked to Git provider accounts losing the ability to Push and Pull. The account linked to a repository can be changed at any time using the dropdown available on the Editor page of any file in the repository.

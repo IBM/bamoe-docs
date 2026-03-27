@@ -227,6 +227,65 @@ _zzz-Q integrate in single helm chart reference_
 | `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_USE_APACHE_HTTPD_BASE_PATH_ALIAS` | Set to `"true"` if Apache HTTPD should serve files under an alias prefixed by the base path. | _Empty_
 |===
 
+== Configuration Reference for BAMOE Runtime Environment Helm Chart
+
+The following table lists the configurable parameters of the BAMOE Runtime Environment chart and their default values.
+
+
+=== Global Configuration
+
+|===
+
+| Key | Type | Default | Description
+
+| global.ingressSource | string | "" | Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only 
+
+| global.kubernetesClusterDomain | string | "" | If using Minikube or Kubernetes, set the cluster domain
+
+| global.kubernetesIngressClass | string | "" | If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+
+| global.openshiftRouteDomain | string | "" | If using OpenShift Routes, set the Route domain
+
+| global.chargedProductValues.productID | string | "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) | Product ID for ILMT tracking
+
+| global.chargedProductValues.productMetric | string | "VIRTUAL_PROCESSOR
+_CORE" | Product metric for ILMT tracking
+
+| global.chargedProductValues.productName | string | "IBM Decision Manager Open Edition" (DMOE) / "IBM Process Automation Manager Open Edition" (PAMOE) | Product name for ILMT tracking
+
+| nameOverride | string | "" | Overrides charts name
+
+| fullnameOverride | string | "" | Overrides charts full name
+|===
+
+=== Management Console Configuration
+
+|===
+| Key | Type | Default | Description
+
+| management_console.enabled | bool | TRUE | Enable or disable Management Console installation
+
+| management_console.name | string | "management-console" | Component name
+
+| management_console.appNameOverride | string | "" | Overrides the deployed application name
+
+|===
+
+
+=== MCP Server Configuration
+
+|===
+| Key | Type | Default | Description
+
+| mcp_server.enabled | bool | TRUE | Enable or disable MCP Server installation
+
+| mcp_server.name | string | "mcp-server" | The MCP Server application name
+
+| mcp_server.env | object | {} | Env variables for BAMOE MCP Server deployment
+|===
+
+
+
 [#pre-configured-business-services]
 == {MANAGEMENT_CONSOLE} pre-configured _Business Services_ connections
 
