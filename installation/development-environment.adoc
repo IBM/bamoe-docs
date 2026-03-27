@@ -345,7 +345,7 @@ After completing the configuration, you can access the features provided by each
 
 Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. In addition they can be used to store configurations that are common to all new _Business Service_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
 
-The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[repository] by selecting the branch that corresponds to {VERSION} and Spring Boot, Quarkus, full or DMN. Use these default projects to understand what you want to change in your custom accelerator. 
+The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT} you can use four Accelerators that correspond to the following cloud development frameworks supported by {PRODUCT_SHORT} - Quarkus, Spring Boot supported by Maven or Gradle. Use these default projects to understand what you want to change in your custom accelerator. 
 
 Your custom Accelerator must be a public Git repository. After creating it, you need to write a specific JSON configuration that is used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
 
@@ -376,13 +376,24 @@ Your custom Accelerator must be a public Git repository. After creating it, you 
 
 This environment variable accepts an array of Accelerators configurations in the format described.
 
-By default, it comes pre-configured with the default accelerators:
+You can use the following default accelerators for _Business Services_ that are available for Quarkus and Spring Boot with Maven.
 
 [source,json,subs="attributes+"]
 ----
 [
-   {
-      "name": "Quarkus (DMN)",
+  {
+    "name": "Workflows (Quarkus + Maven)",
+    "iconUrl": "images/quarkus-logo.png",
+    "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
+    "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-full",
+    "dmnDestinationFolder": "src/main/resources/dmn",
+    "bpmnDestinationFolder": "src/main/resources/bpmn",
+    "otherFilesDestinationFolder": "src/main/resources/others",
+    "scesimDestinationFolder": "src/test/resources/scesim",
+    },
+    
+  {
+      "name": "Decisions (Quarkus + Maven)",
       "iconUrl": "images/quarkus-logo.png",
       "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
       "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-dmn",
@@ -391,9 +402,38 @@ By default, it comes pre-configured with the default accelerators:
       "otherFilesDestinationFolder": "src/main/resources/others",
       "scesimDestinationFolder": "src/test/resources/scesim",
     },
+
+  {
+      "name": "Workflows (Spring Boot + Maven)",
+      "iconUrl": "images/springboot-logo.png",
+      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
+      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-full",
+      "dmnDestinationFolder": "src/main/resources/dmn",
+      "bpmnDestinationFolder": "src/main/resources/bpmn",
+      "otherFilesDestinationFolder": "src/main/resources/others",
+      "scesimDestinationFolder": "src/test/resources/scesim",
+    },
     
   {
-      "name": "Quarkus (Full)",
+      "name": "Decisions (Spring Boot + Maven)",
+      "iconUrl": "images/springboot-logo.png",
+      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
+      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-dmn",
+      "dmnDestinationFolder": "src/main/resources/dmn",
+      "bpmnDestinationFolder": "src/main/resources/bpmn",
+      "otherFilesDestinationFolder": "src/main/resources/others",
+      "scesimDestinationFolder": "src/test/resources/scesim",
+    },
+]
+----
+
+You can use the following default accelerators for _Business Services_ that are available for Quarkus and Spring Boot with Gradle.
+
+[source,json,subs="attributes+"]
+----
+[
+  {
+      "name": "Workflows (Quarkus + Gradle)",
       "iconUrl": "images/quarkus-logo.png",
       "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
       "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-full",
@@ -404,18 +444,18 @@ By default, it comes pre-configured with the default accelerators:
     },
 
   {
-      "name": "Spring Boot (DMN)",
-      "iconUrl": "images/springboot-logo.png",
+      "name": "Decisions (Quarkus + Gradle)",
+      "iconUrl": "images/quarkus-logo.png",
       "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-dmn",
+      "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-dmn",
       "dmnDestinationFolder": "src/main/resources/dmn",
       "bpmnDestinationFolder": "src/main/resources/bpmn",
       "otherFilesDestinationFolder": "src/main/resources/others",
       "scesimDestinationFolder": "src/test/resources/scesim",
     },
-      
+
   {
-      "name": "Spring Boot (Full)",
+      "name": "Workflows (Spring Boot  + Gradle)",
       "iconUrl": "images/springboot-logo.png",
       "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
       "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-full",
@@ -424,10 +464,21 @@ By default, it comes pre-configured with the default accelerators:
       "otherFilesDestinationFolder": "src/main/resources/others",
       "scesimDestinationFolder": "src/test/resources/scesim",
     },
+    
+  {
+      "name": "Decisions (Spring Boot + Gradle)",
+      "iconUrl": "images/springboot-logo.png",
+      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
+      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-dmn",
+      "dmnDestinationFolder": "src/main/resources/dmn",
+      "bpmnDestinationFolder": "src/main/resources/bpmn",
+      "otherFilesDestinationFolder": "src/main/resources/others",
+      "scesimDestinationFolder": "src/test/resources/scesim",
+    },
 ]
 ----
 
-This value can be overwritten to add your own custom Accelerators by replacing the default ones, or appending to them.
+NOTE: You can override this value to include your own custom accelerators by either replacing the default ones or appending additional entries alongside them.
 
 
 [#helm-chart-config-ref]
@@ -889,6 +940,103 @@ To resolve these issues, delete the cached version of your local repository that
 
 Your Maven repository is now properly configured and ready to build _Business Service_ projects using a standard Maven workflow.
 
+=== Configure Gradle with the container image URL
+
+To configure Gradle with a container image, do the following steps:
+
+. Download the dedicated M2 repository image container, `bamoe-9.4.0-maven-repository-image.tar.gz`.
+. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply BAMOE configuration globally.
+. Create a `bamoe.gradle` file in the `init.d` directory. 
+. Add the following lines in the `bamoe.gradle` file:
++
+[source,xml]
+----
+// ~/.gradle/init.d/bamoe.gradle
+
+def bamoeRepoUrl = "https://container-URL-here" // <-- replace with your BAMOE URL
+
+// Add BAMOE repository to all projects for dependency resolution
+allprojects {
+    repositories {
+        mavenLocal()
+        maven { url = uri(bamoeRepoUrl) }
+        mavenCentral()
+    }
+}
+
+gradle.settingsEvaluated { settings ->
+    // Add BAMOE repository for plugin resolution
+    settings.pluginManagement.repositories {
+        mavenLocal()
+        maven { url = settings.uri(bamoeRepoUrl) }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+
+    // Centralize repository declarations (Gradle 9.x)
+    settings.dependencyResolutionManagement {
+        repositories {
+            mavenLocal()
+            maven { url = settings.uri(bamoeRepoUrl) }
+            mavenCentral()
+        }
+    }
+}
+----
+. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
+. If you use HTTPS for the {MVN_REPO}, you must import your internal CA certificate into one of the following:
+.. Java truststore ,recommended for all OSes, or use a merged custom truststore and point Java/Gradle to it.
+.. OS truststore, only if your OS supports it.
+
+NOTE: Do not replace Java’s default truststore (cacerts) with your own. Only add your CA or use a merged custom truststore. Replacing the default keystore can break Java security and other tools on the system.
+
+=== Configuring a local Gradle repository for {PRODUCT_SHORT}
+
+If you prefer not to use containers, you can download the {MVN_REPO} as a compressed archive and configure it locally. The {MVN_REPO} includes all libraries required for Java developers to build _Business Services_ projects.
+
+To configure the {MVN_REPO} locally, follow these steps:
+
+. Download the {MVN_REPO}, `bamoe-9.4.0-maven-repository.zip`.
+. Extract the downloaded archive.
+. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply BAMOE configuration globally.
+. Create a `bamoe.gradle` file in the `init.d` directory. 
+. Add the following lines in the `bamoe.gradle` file:
++
+[source,xml]
+----
+// ~/.gradle/init.d/bamoe.gradle
+
+def bamoeRepoUrl = "/path/to/bamoe/maven/repo/directory" // <-- replace with your BAMOE URL
+
+// Add BAMOE repository to all projects for dependency resolution
+allprojects {
+    repositories {
+        mavenLocal()
+        maven { url = uri(bamoeRepoUrl) }
+        mavenCentral()
+    }
+}
+
+gradle.settingsEvaluated { settings ->
+    // Add BAMOE repository for plugin resolution
+    settings.pluginManagement.repositories {
+        mavenLocal()
+        maven { url = settings.uri(bamoeRepoUrl) }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+
+    // Centralize repository declarations (Gradle 9.x)
+    settings.dependencyResolutionManagement {
+        repositories {
+            mavenLocal()
+            maven { url = settings.uri(bamoeRepoUrl) }
+            mavenCentral()
+        }
+    }
+}
+----
+. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
 
 == Next steps
 
