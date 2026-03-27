@@ -189,12 +189,6 @@ Replace v8 [`pom.xml`](v8-app/pom.xml) with v9 Quarkus dependencies in [`pom.xml
     <artifactId>jbpm-with-drools-quarkus</artifactId>
 </dependency>
 
-<!-- CRITICAL: REST Endpoint Generation -->
-<dependency>
-    <groupId>org.kie</groupId>
-    <artifactId>kie-addons-quarkus-process-rest</artifactId>
-</dependency>
-
 <!-- Persistence Add-on -->
 <dependency>
     <groupId>org.kie</groupId>
@@ -213,8 +207,6 @@ Replace v8 [`pom.xml`](v8-app/pom.xml) with v9 Quarkus dependencies in [`pom.xml
     <artifactId>quarkus-hibernate-orm</artifactId>
 </dependency>
 ```
-
-**⚠️ IMPORTANT:** The [`kie-addons-quarkus-process-rest`](v9-app/pom.xml:97) dependency is **required** to generate REST endpoints for your processes. Without it, no POST `/orderProcess` endpoint will be created, and you won't be able to start process instances via REST API.
 
 ### Step 4: Migrate JPA Entity Classes
 
