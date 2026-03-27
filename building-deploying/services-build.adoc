@@ -75,6 +75,31 @@ Docker:: set `quarkus.docker.buildx.platform=linux/s390x`
 Podman:: set `quarkus.podman.platform=linux/s390x`
 ====
 
+=== Gradle
+
+GraalVM is required for native builds. If you are using Gradle instead of Maven, the following Maven commands:
+
+[source,shell]
+----
+mvn clean package -Dnative
+----
+
+[source,shell]
+----
+mvn clean package -Dquarkus.container-image.build=true
+----
+
+can be replaced with the equivalent Gradle command:
+
+[source,shell]
+----
+./gradlew clean build \
+  -Dquarkus.native.enabled=true \
+  -Dquarkus.package.jar.enabled=false
+----
+
+NOTE: Maven places all build artifacts in the `target/` directory, Gradle them to `build/` directory. 
+
 == Spring Boot
 
 Standard Maven or Java commands are required to package and start the generated application:
