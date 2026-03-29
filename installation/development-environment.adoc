@@ -8,11 +8,11 @@ This section describes how to install the tools needed to create and manage Work
 {MVN_REPO}:: for accessing libraries to develop _Business Services_, 
 {DEV_TOOLS}:: to enable efficient development and collaboration of _Business Services_ within an industry standard IDE.
  
-== The Dev Environment Helm chart
-The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for {PRODUCT_DM} or {PRODUCT_PAM}:
+== The Dev environment Helm chart
+The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
 
-* pamoe-9.4.0-dev-environment-helm-chart.tgz
-* dmoe-9.4.0-dev-environment-helm-chart.tgz
+* pamoe-{VERSION}-dev-environment-helm-chart
+* dmoe-{VERSION}-dev-environment-helm-chart
 
 These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each (PRODUCT_SHORT) offering.
 
@@ -41,8 +41,6 @@ All {PRODUCT_SHORT} container images are available as multi-architecture images 
 For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
 
 == Installing {DEV_TOOLS}
-
-include::../styles/images.adoc[]
 
 You can find the developer tools at the Visual Studio Marketplace, as {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*].
 
@@ -121,6 +119,31 @@ helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-d
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
+=== The OpenShift topology after {CANVAS} deployment
+image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
+
+Your {CANVAS} instance is now up and accessible through the route created in this last step. To get it, run the following command:
+[source,shell,subs="attributes+"]
+----
+oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
+----
+
+NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+
+=== Setting up the Maven Repository
+
+The {MVN_REPO} is deployed and configured by default during the Dev environment installation. Following installation if can be accessed at:
+
+* OpenShift: https://maven-repository.<YOUR_OCP_ROUTE_DOMAIN>
+* Kubernetes: https://maven-repository.<YOUR_KUBERNETES_CLUSTER_DOMAIN>
+
+You can disable the installation of the Maven Repository in the Helm chart deployment using this command:
+
+[source,shell,subs="attributes+"]
+----
+helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set maven_repository.enabled=false
+----
+
 === Uninstalling the Chart
 
 Follow the command to uninstall the `my-bamoe-canvas` deployment:
@@ -140,20 +163,6 @@ helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set canvas.imag
 ----
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
-
-The {MVN_REPO} is deployed and configured by default and accessible at:
-
-[source,shell,subs="attributes+"]
-----
-TBD
-----
-
-To disable the Maven Repository in the Helm chart deployment:
-
-[source,shell,subs="attributes+"]
-----
-TBD
-----
 
 ////
 == Option 2: Deploying Canvas containers directly on OpenShift (using oc CLI)
@@ -206,20 +215,7 @@ oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
 ----
-////
 
-.The OpenShift topology after {CANVAS} deployment
-image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
-
-Your {CANVAS} instance is now up and accessible through the route created in this last step. To get it, run the following command:
-[source,shell,subs="attributes+"]
-----
-oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
-----
-
-NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
-
-////
 == Option 3: Running {CANVAS} containers locally with Docker
 
 Use the following command to configure {EXT_SERVICES}:
@@ -317,442 +313,129 @@ NOTE: You can add environment variable configuration to your docker compose file
 
 For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
-////
-Example JSON configuration:
-
-[source,json]
-----
-[
-  {
-    "id": "unique identifier",
-    "domain": "https://your-git-provider.com",
-    "supportedGitRemoteDomains": ["your-git-provider.com"],
-    "type": "gitlab | githubEnterprise | bitbucketDataCenter",
-    "name": "readable name for displaying in the BAMOE UI",
-    "enabled": true,
-    "group": "git",
-    "disableEncoding": true,
-  }
-]
-----
-
-*id*:: A unique identifier for this authentication provider configuration.
-*domain*:: The base URL of your Git provider instance.
-*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
-*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
-*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
-*enabled*:: A boolean flag that enables or disables this provider.
-*group*:: Categorizes the provider for grouping similar services.
-*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
-*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
-
-After completing the configuration, you can access the features provided by each integration. For more information, 
-
-
-[id="custom-accelerators"]
-== Configuring custom Accelerators for your organization
-
-Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. In addition they can be used to store configurations that are common to all new _Business Service_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
-
-The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT} you can use four Accelerators that correspond to the following cloud development frameworks supported by {PRODUCT_SHORT} - Quarkus, Spring Boot supported by Maven or Gradle. Use these default projects to understand what you want to change in your custom accelerator. 
-
-Your custom Accelerator must be a public Git repository. After creating it, you need to write a specific JSON configuration that is used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
-
-[source,json,subs="attributes+"]
-----
-{
-    "name": "Your Accelerator name",
-    "iconUrl": "https://link.to/your/logo/image",
-    "gitRepositoryUrl": "https://github.com/...",
-    "gitRepositoryGitRef": "branchName",
-    "dmnDestinationFolder": "path/to/place/dmn/files",
-    "bpmnDestinationFolder": "path/to/place/bpmn/files",
-    "otherFilesDestinationFolder": "path/to/place/other/files",
-    "scesimDestinationFolder": "path/to/place/scesim/files"
-}
-----
-
-**name**:: This is how the Accelerator is known inside {CANVAS}.
-**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
-**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
-**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
-**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
-**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
-**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
-**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
-
-=== Configuring the KIE_SANDBOX_ACCELERATORS environment variable
-
-This environment variable accepts an array of Accelerators configurations in the format described.
-
-You can use the following default accelerators for _Business Services_ that are available for Quarkus and Spring Boot with Maven.
-
-[source,json,subs="attributes+"]
-----
-[
-  {
-    "name": "Workflows (Quarkus + Maven)",
-    "iconUrl": "images/quarkus-logo.png",
-    "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-    "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-full",
-    "dmnDestinationFolder": "src/main/resources/dmn",
-    "bpmnDestinationFolder": "src/main/resources/bpmn",
-    "otherFilesDestinationFolder": "src/main/resources/others",
-    "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-    
-  {
-      "name": "Decisions (Quarkus + Maven)",
-      "iconUrl": "images/quarkus-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-dmn",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-
-  {
-      "name": "Workflows (Spring Boot + Maven)",
-      "iconUrl": "images/springboot-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-full",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-    
-  {
-      "name": "Decisions (Spring Boot + Maven)",
-      "iconUrl": "images/springboot-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-dmn",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-]
-----
-
-You can use the following default accelerators for _Business Services_ that are available for Quarkus and Spring Boot with Gradle.
-
-[source,json,subs="attributes+"]
-----
-[
-  {
-      "name": "Workflows (Quarkus + Gradle)",
-      "iconUrl": "images/quarkus-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-full",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-
-  {
-      "name": "Decisions (Quarkus + Gradle)",
-      "iconUrl": "images/quarkus-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-quarkus-dmn",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-
-  {
-      "name": "Workflows (Spring Boot  + Gradle)",
-      "iconUrl": "images/springboot-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-full",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-    
-  {
-      "name": "Decisions (Spring Boot + Gradle)",
-      "iconUrl": "images/springboot-logo.png",
-      "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator",
-      "gitRepositoryGitRef": "{IMAGE_VERSION}-spring-boot-dmn",
-      "dmnDestinationFolder": "src/main/resources/dmn",
-      "bpmnDestinationFolder": "src/main/resources/bpmn",
-      "otherFilesDestinationFolder": "src/main/resources/others",
-      "scesimDestinationFolder": "src/test/resources/scesim",
-    },
-]
-----
-
-NOTE: You can override this value to include your own custom accelerators by either replacing the default ones or appending additional entries alongside them.
-////
 
 [#helm-chart-config-ref]
-== Configuration reference for {PRODUCT_PAM} and {PRODUCT_DM} Dev Helm Chart
+== Configuration reference for Dev Helm Charts
 
-The following table lists the configurable parameters of the two Dev Helm charts and their default values.
+
+The following table lists and describes the configurable parameters of the two Dev Helm charts ({PRODUCT_PAM} and {PRODUCT_DM}) and their default values.
+
+
+=== Global Configuration
 
 |===
 | Key | Type | Default |Description
 
+
 | global.ingressSource 
-| string  
-| ""       
-| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only   
+| string 
+| "" 
+| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") 
+- For NOTES generation only 
 
 | global.kubernetesClusterDomain 
-| string  
-| ""  
-| If using Minikube or Kubernetes, set the cluster domain
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the cluster domain 
 
 | global.kubernetesIngressClass 
-| string  
-| ""  
+| string 
+| "" 
 | If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
 
 | global.openshiftRouteDomain 
-| string  
-| ""  
-| If using OpenShift Routes, set the Route domain
+| string 
+| "" 
+| If using OpenShift Routes, set the Route domain 
 
-| fullnameOverride 
-| string  
-| ""  
-| Overrides charts full name
+| global.chargedProductValues.productID 
+| string 
+| "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) 
+| Product ID for License Service tracking 
+
+| global.chargedProductValues.productMetric 
+| string 
+| "VIRTUAL_PROCESSOR_CORE" 
+| Product metric for License Manager tracking 
+
+| global.chargedProductValues.productName 
+| string 
+| "{PRODUCT_DM}" (DMOE) / "{PRODUCT_PAM}" (PAMOE) 
+| Product name for License Service tracking 
 
 | nameOverride 
-| string  
-| ""  
-| Overrides charts name
-
-| cors_proxy.autoscaling 
-| object  
-| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
-| CORS Proxy HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-
-| cors_proxy.fullnameOverride 
-| string  
-| ""  
-| Overrides charts full name
-
-| cors_proxy.image 
-| object  
-| {"account":"kie-tools","name":"cors-proxy-image","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"latest"}  
-| Image source configuration for the CORS Proxy image
-
-| cors_proxy.imagePullSecrets 
-| list  
-| []  
-| Pull secrets used when pulling CORS Proxy image
-
-| cors_proxy.ingress 
-| object  
-| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"cors-proxy.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
-| CORS Proxy OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
-
-| cors_proxy.name 
-| string  
-| "cors-proxy"  
-| The CORS Proxy application name
-
-| cors_proxy.nameOverride 
-| string  
-| ""  
-| Overrides charts name
-
-| cors_proxy.openshiftRoute 
-| object  
-| {"annotations":{},"enabled":false,"host":"cors-proxy.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}  
-| CORS Proxy OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
-
-| cors_proxy.service 
-| object  
-| {"nodePort":"","port":8080,"type":"ClusterIP"}  
-| CORS Proxy Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
-
-| cors_proxy.serviceAccount 
-| object  
-| {"annotations":{},"create":true,"name":""}  
-| CORS Proxy ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
-
-| extended_services.autoscaling 
-| object  
-| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
-| {EXT_SERVICES} HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-
-| extended_services.fullnameOverride 
-| string  
-| ""  
-| Overrides charts full name
-
-| extended_services.image 
-| object  
-| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{VERSION}"}  
-| Image source configuration for the {EXT_SERVICES} image
-
-| extended_services.imagePullSecrets 
-| list  
-| []  
-| Pull secrets used when pulling {EXT_SERVICES} image
-
-| extended_services.ingress 
-| object  
-| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"extended-services.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
-| {EXT_SERVICES} Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
-
-| extended_services.name  
-| string  
-| "extended-services"  
-| The {EXT_SERVICES} application name
-
-| extended_services.nameOverride 
-| string  
-| ""  
-| Overrides charts name
-
-| extended_services.openshiftRoute 
-| object  
-| {"annotations":{},"enabled":false,"host":"extended-services.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}  
-| {EXT_SERVICES} OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
-
-| extended_services.service 
-| object  
-| {"nodePort":"","port":21345,"type":"ClusterIP"}  
-| {EXT_SERVICES} Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
-
-| extended_services.serviceAccount 
-| object  
-| {"annotations":{},"create":true,"name":""}  
-| {EXT_SERVICES} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
-
-| kie_sandbox.autoscaling 
-| object  
-| {"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}  
-| {CANVAS} HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-| kie_sandbox.env 
-| list  
-|[{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}]  
-| Env variables for {CANVAS} deployment
-
-| kie_sandbox.fullnameOverride 
-| string  
+| string 
 | "" 
-| Overrides charts full name
+| Overrides chart name 
 
-| kie_sandbox.image 
-| object  
-| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"{VERSION}"}  
-| Image source configuration for the {CANVAS} image
-
-| kie_sandbox.imagePullSecrets 
-| list  
-| []  
-| Pull secrets used when pulling {CANVAS} image
-
-| kie_sandbox.ingress 
-| object  
-| {"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"kie-sandbox.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}  
-| {CANVAS} Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)
-
-| kie_sandbox.name 
-| string  
-| "kie_sandbox"  
-| The {CANVAS} application name
-
-| kie_sandbox.nameOverride 
-| string  
+| fullnameOverride 
+| string 
 | "" 
-| Overrides charts name
-
-| kie_sandbox.openshiftRoute 
-| object  
-| {"annotations":{},"enabled":false,"host":"kie_sandbox.{{ .Values.global.openshiftRouteDomain }}","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}} 
-| {CANVAS} OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
-
-| kie_sandbox.service 
-| object  
-| {"nodePort":"","port":8080,"type":"ClusterIP"} 
-| {CANVAS} Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)
-
-| kie_sandbox.serviceAccount 
-| object  
-| {"annotations":{},"create":true,"name":""} 
-| {CANVAS} ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)
-|===
-
-== Configuration Reference for BAMOE Dev Environment Helm Chart
-
-The following table lists the configurable parameters of the BAMOE Dev Environment chart and their default values.
-
-
-### Global Configuration
-
-|===
-| Key | Type | Default |Description
-
-
-| global.ingressSource | string | "" | Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only 
-
-| global.kubernetesClusterDomain | string | "" | If using Minikube or Kubernetes, set the cluster domain 
-
-| global.kubernetesIngressClass | string | "" | If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
-
-| global.openshiftRouteDomain | string | "" | If using OpenShift Routes, set the Route domain 
-
-| global.chargedProductValues.productID | string | "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) | Product ID for ILMT tracking 
-
-| global.chargedProductValues.productMetric | string | "VIRTUAL_PROCESSOR
-_CORE" | Product metric for ILMT tracking 
-
-| global.chargedProductValues.productName | string | "IBM Decision Manager Open Edition" (DMOE) / "IBM Process Automation Manager Open Edition" (PAMOE) | Product name for ILMT tracking 
-
-| nameOverride | string | "" | Overrides charts name 
-
-| fullnameOverride | string | "" | Overrides charts full name 
+| Overrides chart full name 
 |===
 
 
-### Canvas Configuration
+=== {CANVAS} Configuration
 
 |===
 | Key | Type | Default | Description 
 
-| canvas.name | string | "canvas" | The BAMOE Canvas application name
+| canvas.name 
+| string 
+| "canvas" |
+ The {CANVAS} application name
 
-| canvas.env | list | [{"name":"KIE_SANDBOX
-_EXTENDED_SERVICES
-_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX
-_CORS_PROXY
-_URL","value":"http://127.0.0.1:8081"}] | Env variables for BAMOE Canvas deployment
+| canvas.env 
+| list 
+| [{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}] 
+| Env variables for {CANVAS} deployment
 
-| canvas.image | object | {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the BAMOE Canvas image
+| canvas.image 
+| object 
+| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {CANVAS} image
 
-| canvas.imagePullSecrets | list | [] | Pull secrets used when pulling BAMOE Canvas image
+| canvas.imagePullSecrets 
+| list 
+| [] 
+| Pull secrets, used when pulling {CANVAS} image
 |===
 
-### CORS Proxy Configuration
+=== {CORS_PROXY} Configuration
 
 |===
 | Key | Type | Default | Description
 
-| cors_proxy.name | string | "cors-proxy" | The CORS Proxy application name
+| cors_proxy.name 
+| string 
+| "cors-proxy" 
+| The CORS Proxy application name
 
-| cors_proxy.env | list | [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] | Env variables for the CORS Proxy deployment
+| cors_proxy.env 
+| list 
+| [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] 
+| Env variables for the {CORS_PROXY} deployment
 
-| cors_proxy.image | object | {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the CORS Proxy image
+| cors_proxy.image 
+| object 
+| {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the CORS Proxy image
 |===
 
-### Extended Services Configuration
+=== Extended Services Configuration
 
 |===
 | Key | Type | Default | Description 
 
-| extended_services.name | string | "extended-services" | The Extended Services application name 
+| extended_services.name 
+| string 
+| "extended-services" 
+| The {EXT_SERVICES} application name 
 
-| extended_services.image | object | {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the Extended Services image 
+| extended_services.image 
+| object 
+| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {EXT_SERVICES} image 
 |===
 
 ### Maven Repository Configuration
@@ -760,13 +443,23 @@ _URL","value":"http://127.0.0.1:8081"}] | Env variables for BAMOE Canvas deploym
 |===
 | Key | Type | Default | Description
 
-| maven_repository.enabled | bool | TRUE | Enable or disable Maven Repository installation
+| maven_repository.enabled 
+| bool 
+| TRUE 
+| Enable or disable {MVN_REPO} installation
 
-| maven_repository.name | string | "maven-repository" | The Maven Repository application name
+| maven_repository.name 
+| string 
+| "maven-repository" 
+| The {MVN_REPO} application name
 
-| maven_repository.image | object | {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} | Image source configuration for the Maven Repository image
+| maven_repository.image 
+| object 
+| {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {MVN_REPO} image
 |===
 
+////
 == Integrating {MVN_REPO}
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
@@ -970,8 +663,9 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 ----
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
+////
 
-=== Configuring a local Maven repository for {PRODUCT_SHORT}
+== Configuring a local Maven repository for {PRODUCT_SHORT}
 
 If you prefer not to use containers, you can download and configure the {PRODUCT_SHORT} Maven repository from the compressed file.
 The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers need to build _Business Services_ projects.
@@ -1131,7 +825,7 @@ gradle.settingsEvaluated { settings ->
 
 == Next steps
 
-Once you have successfully installed and configured {CANVAS} see:
+Once you have successfully installed and configured {CANVAS} and {MVN_REPO} see:
 
 * xref:../getting-started/project-setup.adoc[Getting Started → Setting up a _Business Services_ project] for more information on Business Service projects
 * xref:../tools/canvas.adoc[{CANVAS}] for more information the main features available in {CANVAS} to configure before starting to develop your BPMN and DMN business artifacts. 

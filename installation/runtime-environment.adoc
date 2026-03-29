@@ -2,56 +2,64 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section provides information about installing the components required to host and manage deployed Business Services in the runtime environment. It includes installing the {MANAGEMENT_CONSOLE} for monitoring and administration and the {MCP_SERVER} to enable AI agents to connect to Business Services. 
+This section describes how to install the components required to host and manage deployed Business Services in the runtime environment:
 
-The recommended way of installing {MANAGEMENT_CONSOLE} and {MCP_SERVER} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for {PRODUCT_DM} or {PRODUCT_PAM}:
+{MANAGEMENT_CONSOLE}:: for monitoring and administration,
+{MCP_SERVER}:: to enable AI agents to connect to Business Services.
 
-* pamoe-9.4.0-runtime-environment-helm-chart.tgz
-* dmoe-9.4.0-runtime-environment-helm-chart.tgz
+== The Runtime environment Helm chart
+The recommended way of installing {MANAGEMENT_CONSOLE} and {MCP_SERVER} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} offering that you have purchases licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
 
-These Helm charts include the necessary licensing annotations and do not require any manual steps to add license annotations.
+* pamoe-{VERSION}-runtime-environment-helm-chart
+* dmoe-{VERSION}-runtime-environment-helm-chart
+
+These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each (PRODUCT_SHORT) offering.
+
+Each Dev Helm chart contains two sub-charts:
+
+* management_console: {MANAGEMENT_CONSOLE} application for monitoring and managing process instances, available via https://quay.io/repository/bamoe/management-console[quay.io/bamoe/management-console@{IMAGE_VERSION}]
+* mcp_server: {MCP_SERVER} contains the Model Context Protocol server enabling AI agents to invoke _Business Services_, available via https://quay.io/repository/bamoe/mcp-server[quay.io/bamoe/mcp-server:{IMAGE_VERSION}]
+
+The only difference between the PAMOE and DMOE Dev environment Helm chart is the License Service annotations which contain different `productID` and `productName`. All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
+ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
+
+The {PRODUCT_SHORT} Runtime Helm charts are architecture-agnostic and work for both:
+
+* Linux/s390x architecture which runs on the IBM Z platform
+* Linux/x86_64 architecture
+
+All {PRODUCT_SHORT} container images are available as multi-architecture images on Quay.io, and the host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
+
+[source,shell]
+----
+`docker pull --platform linux/s390x quay.io/bamoe/management-console:{IMAGE_VERSION}`
+----
+
+For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
+
 
 == Installing the Runtime Environment Helm chart
+The Helm chart provides a simple way to deploy {MANAGEMENT_CONSOLE} and {MCP_SERVER} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licensing.adoc[License Guide]). For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
 
-_zzz-Q Update to refer to the new helm charts_
+Choose the required helm chart based on your licensed product:
 
-You can install/deploy {MANAGEMENT_CONSOLE} by using Helm chart, the OpenShift CLI, or run it locally by using Docker.
+* pamoe-{VERSION}-runtime-environment-helm-chart
+* dmoe-{VERSION}-runtime-environment-helm-chart
 
-All three options will use the {MANAGEMENT_CONSOLE} container image, which contains the {MANAGEMENT_CONSOLE} Web Application.
-
-* {MANAGEMENT_CONSOLE} → https://quay.io/repository/bamoe/management-console[quay.io/bamoe/management-console@{IMAGE_VERSION}]
-
-[NOTE]
-====
-There are two versions of the {MANAGEMENT_CONSOLE} container image: 
-
-* `bamoe-{VERSION}-management-console-image-s390x.tar.gz` - for the Linux s390x architecture which runs on the IBM Z platform.
-* `bamoe-{VERSION}-management-console-image-amd64.tar.gz` - for the Linux x86_64 architecture. 
-
-The host machine architecture should be automatically resolved when you pull the {MVN_REPO} containers. You can use the following command to specify a platform:
-`docker pull --platform linux/s390x quay.io/bamoe/management-console:{IMAGE_VERSION}`
-====
-
-For more information on the product distribution see xref:../release-notes/whats-new-9-3-1.adoc#download-doc[What's New → Download Documentation]. 
 
 NOTE: {MANAGEMENT_CONSOLE} has two known issues related to environment variables: *BAMOE Management Console environment variables not working* and *BAMOE Management Console Helm Chart variables not working*. Please check the workaround in xref:../release-notes/known-limitations[Known Limitations].
 
 
-=== Option 1: Install via Helm chart (recommended)
+===  OpenShift Install
 
-The Helm chart provides a configurable way to deploy the {MANAGEMENT_CONSOLE} in Kubernetes, OpenShift, and Minikube.
+To install on OpenShift, first get the default OpenShift domain for your routes using the following command:
 
-For more information and instructions on how to install the tool, see https://helm.sh/[Helm].
-
-NOTE: For more configuration details, check the <<helm-chart-configuration>> section.
-
-First, you may need to get the default OpenShift domain for your routes by using the following command:
-
-[source,shell]
+[source,shell,subs="attributes+"]
 ----
 oc get ingresses.config cluster --output jsonpath={.spec.domain}
 ----
 
+////
 If you do not have access rights to this configuration, try creating a dummy route resource and checking its domain.
 
 Then, install the Helm chart by using the following commands:
@@ -64,36 +72,48 @@ helm install bamoe-management-console ./consoles-helm-chart \
   --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
-=== Generic Kubernetes install
+////
 
-If you want to install the {MANAGEMENT_CONSOLE} directly on a Kubernetes cluster, you may need to get the default Kubernetes cluster domain for your Ingress. The way of doing this can vary depending on your cluster configuration.
-
-You can then run the following Helm commands:
+You can then install the Helm chart with the following commands:
 
 [source,shell,subs="attributes+"]
 ----
-helm pull oci://quay.io/bamoe/consoles-helm-chart --version={IMAGE_VERSION} --untar
-helm install bamoe-management-console ./consoles-helm-chart \
- --values ./consoles-helm-chart/values-kubernetes.yaml \
-  --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" \
- --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+helm pull oci://quay.io/bamoe/dmoe-runtime-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --values ./dmoe-runtime-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
+
+Where you replace `dmoe-runtime-environment-helm-chart` with `pamoe-runtime-environment-helm-chart` if you are working with {PRODUCT_PAM} and <YOUR_OCP_ROUTE_DOMAIN> with the domain of your OpenShift Route.
+
+=== Generic Kubernetes install
+
+To install {MANAGEMENT_CONSOLE} directly on a Kubernetes cluster, you will need to get the default Kubernetes cluster domain for your Ingress (see https://kubernetes.io/docs/concepts/services-networking/ingress/[Kubernetes Documentation] for more information). This can vary depending on your cluster configuration.
+
+Once you have the domain information, you can run the following helm commands:
+
+[source,shell,subs="attributes+"]
+----
+helm pull oci://quay.io/bamoe/dmoe-runtime-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --values ./dmoe-runtime-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+----
+
+Where you replace `dmoe-runtime-environment-helm-chart` with `pamoe-runtime-environment-helm-chart` if you are working with {PRODUCT_PAM}, <YOUR_KUBERNETES_CLUSTER_DOMAIN>` with the domain of your cluster and `<YOUR_KUBERNETES_INGRESS_CLASS>` with the ingress class of your cluster.
 
 === Minikube install
 
-To install the {MANAGEMENT_CONSOLE} Helm chart on a Minikube cluster, you will need:
+To install {MANAGEMENT_CONSOLE} Helm chart on a Minikube cluster, you will need:
 
 - https://minikube.sigs.k8s.io/docs/start/[A local Minikube cluster up and runnning]
 - https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/[The Nginx Ingress installed]
 
-Use the following commands to do a Minikube-specific installation:
+Once you have the domain information, you can run the following helm commands to do a Minikube specific install:
 
 [source,shell,subs="attributes+"]
 ----
-helm pull oci://quay.io/bamoe/consoles-helm-chart --version={IMAGE_VERSION} --untar
-helm install bamoe-management-console ./consoles-helm-chart \
- --values ./consoles-helm-chart/values-minikube-nginx.yaml
+helm pull oci://quay.io/bamoe/dmoe-runtime-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --values ./dmoe-runtime-environment-helm-chart/values-minikube-nginx.yaml
 ----
+
+Where you replace `dmoe-runtime-environment-helm-chart` with `pamoe-runtime-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
 === Uninstalling the chart
 
@@ -104,9 +124,45 @@ To uninstall the `bamoe-management-console` deployment:
 helm uninstall bamoe-management-console
 ----
 
-[#helm-chart-configuration]
-=== {MVN_REPO} Helm chart configuration
+== MCP Server
+The {MCP_SERVER} is deployed and configured by default during the Runtime environment installation. 
 
+You can disable the installation of the MCP Server in the Helm chart deployment using this command:
+
+[source,shell,subs="attributes+"]
+----
+helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --set mcp.server.enabled=false
+----
+
+////
+To run the {MCP_SERVER}, complete the setup and launch the server image in a Docker environment using the following command:
+
+[source,shell, subs="attributes+"]
+----
+docker run -it --rm \
+  -p 8084:8080 \
+  --name mcp-server \
+  -e MCP_SERVER_OPENAPI_URLS=<your_business_services_OpenAPIv3_path> \
+  quay.io/bamoe/mcp-server:{IMAGE_VERSION}
+----
+////
+
+
+=== Passing Environment variables
+
+This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-configuration[Runtime Helm Chart configuration reference] for all options.
+ 
+[source,shell]
+----
+helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --set management_console.image.registry=quay.io
+----
+
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
+
+[#helm-chart-configuration]
+=== Configuration reference for Runtime Helm Charts
+
+////
 For all Helm chart installations mentioned, different settings can be applied by editing the `values.yaml` file or passing the `--set` flag as in the example:
 
 [source,shell,subs="attributes+"]
@@ -209,6 +265,7 @@ docker run -p <EXTERNAL_PORT>:8080 -e <ENV_VAR>="<VALUE>" quay.io/bamoe/manageme
 
 The {MANAGEMENT_CONSOLE} will be up at http://localhost:<EXTERNAL_PORT>
 
+
 [#available-environment-variables]
 == Available Environment Variables
 
@@ -226,10 +283,10 @@ _zzz-Q integrate in single helm chart reference_
 | `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH` | Base path used for all routes. | _Empty_
 | `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_USE_APACHE_HTTPD_BASE_PATH_ALIAS` | Set to `"true"` if Apache HTTPD should serve files under an alias prefixed by the base path. | _Empty_
 |===
+////
 
-== Configuration Reference for BAMOE Runtime Environment Helm Chart
 
-The following table lists the configurable parameters of the BAMOE Runtime Environment chart and their default values.
+The following table lists the configurable parameters of the {PRODUCT_SHORT} Runtime Environment chart and their default values.
 
 
 === Global Configuration
@@ -238,24 +295,51 @@ The following table lists the configurable parameters of the BAMOE Runtime Envir
 
 | Key | Type | Default | Description
 
-| global.ingressSource | string | "" | Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") Obs.: For NOTES generation only 
+| global.ingressSource 
+| string 
+| "" 
+| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") For NOTES generation only 
 
-| global.kubernetesClusterDomain | string | "" | If using Minikube or Kubernetes, set the cluster domain
+| global.kubernetesClusterDomain 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the cluster domain
 
-| global.kubernetesIngressClass | string | "" | If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+| global.kubernetesIngressClass 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
 
-| global.openshiftRouteDomain | string | "" | If using OpenShift Routes, set the Route domain
+| global.openshiftRouteDomain 
+| string 
+| "" 
+| If using OpenShift Routes, set the Route domain
 
-| global.chargedProductValues.productID | string | "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) | Product ID for ILMT tracking
+| global.chargedProductValues.productID 
+| string 
+| "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) 
+| Product ID for License tracking
 
-| global.chargedProductValues.productMetric | string | "VIRTUAL_PROCESSOR
-_CORE" | Product metric for ILMT tracking
+| global.chargedProductValues.productMetric 
+| string 
+| "VIRTUAL_PROCESSOR
+_CORE" 
+| Product metric for License tracking
 
-| global.chargedProductValues.productName | string | "IBM Decision Manager Open Edition" (DMOE) / "IBM Process Automation Manager Open Edition" (PAMOE) | Product name for ILMT tracking
+| global.chargedProductValues.productName 
+| string 
+| "IBM Decision Manager Open Edition" (DMOE) / "IBM Process Automation Manager Open Edition" (PAMOE) 
+| Product name for License tracking
 
-| nameOverride | string | "" | Overrides charts name
+| nameOverride 
+| string 
+| "" 
+| Overrides chart name
 
-| fullnameOverride | string | "" | Overrides charts full name
+| fullnameOverride 
+| string 
+| "" 
+| Overrides chart full name
 |===
 
 === Management Console Configuration
@@ -263,11 +347,20 @@ _CORE" | Product metric for ILMT tracking
 |===
 | Key | Type | Default | Description
 
-| management_console.enabled | bool | TRUE | Enable or disable Management Console installation
+| management_console.enabled 
+| bool 
+| TRUE 
+| Enable or disable Management Console installation
 
-| management_console.name | string | "management-console" | Component name
+| management_console.name 
+| string 
+| "management-console" 
+| Component name
 
-| management_console.appNameOverride | string | "" | Overrides the deployed application name
+| management_console.appNameOverride 
+| string 
+| "" 
+| Overrides the deployed application name
 
 |===
 
@@ -277,11 +370,20 @@ _CORE" | Product metric for ILMT tracking
 |===
 | Key | Type | Default | Description
 
-| mcp_server.enabled | bool | TRUE | Enable or disable MCP Server installation
+| mcp_server.enabled 
+| bool 
+| TRUE 
+| Enable or disable MCP Server installation
 
-| mcp_server.name | string | "mcp-server" | The MCP Server application name
+| mcp_server.name 
+| string 
+| "mcp-server" 
+| The MCP Server application name
 
-| mcp_server.env | object | {} | Env variables for BAMOE MCP Server deployment
+| mcp_server.env 
+| object 
+| {} 
+| Env variables for {MCP_SERVER} deployment
 |===
 
 
@@ -365,6 +467,4 @@ Example:
 ----
 docker run -d -p 8080:8080 -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH=bamoe-management-console -e RUNTIME_TOOLS_MANAGEMENT_CONSOLE_USE_APACHE_HTTPD_BASE_PATH_ALIAS=true quay.io/bamoe/management-console:{IMAGE_VERSION}
 ----
-
-
 
