@@ -2,7 +2,9 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_930}. See the following docs if you are upgrading from a version prior to this:
+This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_93X}. 
+
+// See the following docs if you are upgrading from a version prior to this:
 
 * xref:upgrade-overview.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
 
@@ -12,7 +14,7 @@ This guide will walk you through upgrading your:
 
 * _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} production environment with {MANAGEMENT_CONSOLE} and upgraded versions of your _Business Services_
+* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
 
 == Step 1: Download product archives
 
@@ -20,19 +22,23 @@ Start by downloading the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}
 
 == Step 2: Upgrade your {PRODUCT_SHORT} development environment
 
-When you upgrade your {PRODUCT_SHORT} development environment, you must upgrade {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}. 
+When you upgrade your {PRODUCT_SHORT} development environment in {VERSION}, the individual component deliverables have been replaced by two new Helm charts to facilitate the installation and license tracking of {PRODUCT_SHORT} components in your selected offering, DMOE or PMOE. They include the product specific licensing annotations, removing the need for manual intervention:
 
-=== Upgrade {MVN_REPO}
-It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_930}.
+The Dev helm charts include the following component Containers:
 
-If you are using the {MVN_REPO} `.zip` instead of {MVN_REPO} container images, simply extract the contents of {MVN_REPO} `.zip` version {VERSION} to your local Maven repository.
+* {CANVAS}
+* {EXT_SERVICES}
+* {CORS_PROXY}
+* {MVN_REPO}
 
-In case you have installed {MVN_REPO} in a Maven Repository Manager such as Artifactory or Nexus, follow the steps in xref:../installation/configure-maven.adoc[Installing → {MVN_REPO}] to install the new {MVN_REPO} version {VERSION}.
+=== Upgrade {CANVAS} and {MVN_REPO}
+It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_93X}.
 
-=== Upgrade {CANVAS}
-The {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_930} version (see xref:../installation/installation.adoc[Installing → {CANVAS}]). The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+Follow the steps in xref:../installation/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and{CANVAS} version.
 
-If you prefer to install a parallel version using https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategies] you can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+If you decide to uninstall the previous individual containers and replace with the Dev environment Helm chart, the {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_93X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+
+You can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
 
 [NOTE]
 ====
@@ -98,17 +104,22 @@ You might get Maven streaming text once again, and at the end of it you must hav
 +
 Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
-== Step 5: Upgrade your {PRODUCT_SHORT} production environment
+== Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
 
-After upgrading your _Business Services_ source code (Step 3), you need to upgrade {MANAGEMENT_CONSOLE} and your stateful Workflows database before deploying a new version of the upgraded _Business Services_.
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade the Components in your Runtime environment and your stateful Workflows database before deploying a new version of the upgraded _Business Services_. The individual component deliverables have been replaced by two new Helm charts to facilitate the installation and license tracking of {PRODUCT_SHORT} components in your selected offering, DMOE or PMOE. They include the product specific licensing annotations, removing the need for manual intervention:
 
-It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_930} yet. Once all your _Business Services_ are running {PRODUCT_SHORT} version {VERSION_930}, you can safely remove your previous {MANAGEMENT_CONSOLE} installation.
+The Runtime helm charts for include the following Component Containers:
 
-{MANAGEMENT_CONSOLE} {VERSION} is a drop-in replacement for the {VERSION_930} version, see xref:../installation/management-console.adoc[Installing → {MANAGEMENT_CONSOLE}] for information on installing {MANAGEMENT_CONSOLE}.
+* {MANAGEMENT_CONSOLE}
+* {MCP_SERVER}
+
+It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_93X} yet. 
+
+Follow the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment Helm chart] to install the new {MANAGEMENT_CONSOLE} version {MCP_SERVER}.
+
+{MANAGEMENT_CONSOLE} {VERSION} is a drop-in replacement for the {VERSION_930} version, see xref:../installation/management-console.adoc[Installing → The Runtime environment Helm chart] for information on installing {MANAGEMENT_CONSOLE} and {MCP_SERVER}.
 
 Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION_930}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
-
-If you installed and used the {MCP_SERVER} from {VERSION_930} you will need to retrieve and configure the {VERSION} {MCP_SERVER} (see xref:../integrating-ai/ai-mcp-server.adoc[Integrating with AI → Exposing BAMOE capabilities to AI agents through {MCP_Server}])
 
 [#migrate-stateful-workflow-db]
 === Upgrading your stateful Workflow database(s)
