@@ -5,7 +5,6 @@
   <bpmn2:itemDefinition id="_approvedItem" structureRef="Boolean" />
   <bpmn2:itemDefinition id="__reviewTask_NotStartedReassignInputXItem" structureRef="Object" />
   <bpmn2:itemDefinition id="__reviewTask_NotCompletedReassignInputXItem" structureRef="Object" />
-  <bpmn2:itemDefinition id="__reviewTask_NotStartedNotifyInputXItem" structureRef="Object" />
   <bpmn2:itemDefinition id="__reviewTask_NotCompletedNotifyInputXItem" structureRef="Object" />
   <bpmn2:process id="approvalProcess" drools:packageName="com.example.humantask" drools:version="1.0" name="Approval Process" isExecutable="true">
     <bpmn2:property id="requestor" itemSubjectRef="_requestorItem" name="requestor" />
@@ -30,7 +29,6 @@
         <bpmn2:dataInput id="_reviewTask_GroupIdInputX" name="GroupId" />
         <bpmn2:dataInput id="_reviewTask_NotStartedReassignInputX" itemSubjectRef="__reviewTask_NotStartedReassignInputXItem" name="NotStartedReassign" />
         <bpmn2:dataInput id="_reviewTask_NotCompletedReassignInputX" itemSubjectRef="__reviewTask_NotCompletedReassignInputXItem" name="NotCompletedReassign" />
-        <bpmn2:dataInput id="_reviewTask_NotStartedNotifyInputX" itemSubjectRef="__reviewTask_NotStartedNotifyInputXItem" name="NotStartedNotify" />
         <bpmn2:dataInput id="_reviewTask_NotCompletedNotifyInputX" itemSubjectRef="__reviewTask_NotCompletedNotifyInputXItem" name="NotCompletedNotify" />
         <bpmn2:dataInput id="_reviewTask_requestorInputX" name="requestor" />
         <bpmn2:dataInput id="_reviewTask_amountInputX" name="amount" />
@@ -43,7 +41,6 @@
           <bpmn2:dataInputRefs>_reviewTask_GroupIdInputX</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_reviewTask_NotStartedReassignInputX</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_reviewTask_NotCompletedReassignInputX</bpmn2:dataInputRefs>
-          <bpmn2:dataInputRefs>_reviewTask_NotStartedNotifyInputX</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_reviewTask_NotCompletedNotifyInputX</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_reviewTask_requestorInputX</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_reviewTask_amountInputX</bpmn2:dataInputRefs>
@@ -61,13 +58,13 @@
       </bpmn2:dataInputAssociation>
       <!-- ActorId assignment for Section A (ws-human-task lifecycle) -->
       <!-- Comment out for Section B (default Kogito lifecycle) -->
-     <bpmn2:dataInputAssociation>
+     <!-- <bpmn2:dataInputAssociation>
         <bpmn2:targetRef>_reviewTask_ActorIdInputX</bpmn2:targetRef>
         <bpmn2:assignment>
           <bpmn2:from xsi:type="bpmn2:tFormalExpression">admin</bpmn2:from>
           <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_ActorIdInputX</bpmn2:to>
         </bpmn2:assignment>
-      </bpmn2:dataInputAssociation> 
+      </bpmn2:dataInputAssociation> -->
       <bpmn2:dataInputAssociation>
         <bpmn2:targetRef>_reviewTask_GroupIdInputX</bpmn2:targetRef>
         <bpmn2:assignment>
@@ -92,28 +89,23 @@
       <bpmn2:dataInputAssociation>
         <bpmn2:targetRef>_reviewTask_NotStartedReassignInputX</bpmn2:targetRef>
         <bpmn2:assignment>
-          <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:supervisor]@[1m]</bpmn2:from>
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:supervisor]@[PT3S]</bpmn2:from>
           <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotStartedReassignInputX</bpmn2:to>
         </bpmn2:assignment>
       </bpmn2:dataInputAssociation>
       <bpmn2:dataInputAssociation>
         <bpmn2:targetRef>_reviewTask_NotCompletedReassignInputX</bpmn2:targetRef>
         <bpmn2:assignment>
-          <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:manager|groups:management]@[2m]</bpmn2:from>
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:manager|groups:management]@[PT90S]</bpmn2:from>
           <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotCompletedReassignInputX</bpmn2:to>
-        </bpmn2:assignment>
-      </bpmn2:dataInputAssociation>
-      <bpmn2:dataInputAssociation>
-        <bpmn2:targetRef>_reviewTask_NotStartedNotifyInputX</bpmn2:targetRef>
-        <bpmn2:assignment>
-          <bpmn2:from xsi:type="bpmn2:tFormalExpression"><![CDATA[[from:noreply@example.com|tousers:|togroups:|toemails:supervisor@example.com|replyTo:support@example.com|subject:Task Not Started - Review Request|body:Task Review Request has not been started. Requestor: #{requestor}, Amount: #{amount}. Please review this request as soon as possible.]@[30s]]]></bpmn2:from>
-          <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotStartedNotifyInputX</bpmn2:to>
         </bpmn2:assignment>
       </bpmn2:dataInputAssociation>
       <bpmn2:dataInputAssociation>
         <bpmn2:targetRef>_reviewTask_NotCompletedNotifyInputX</bpmn2:targetRef>
         <bpmn2:assignment>
-          <bpmn2:from xsi:type="bpmn2:tFormalExpression"><![CDATA[[from:noreply@example.com|tousers:|togroups:|toemails:manager@example.com|replyTo:support@example.com|subject:Task Not Completed - Review Request|body:Task Review Request is still pending completion. Requestor: #{requestor}, Amount: #{amount}. Please complete this task as soon as possible.]@[90s]]]></bpmn2:from>
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression">[from:noreply@example.com|tousers:|togroups:|toemails:manager@example.com|replyTo:|subject:Action Needed for review_request task|body:Dear user,
+
+This is a reminder that the review_request task is now pending your action. Please review the task details and complete the required steps at your earliest convenience.]@[PT90S]</bpmn2:from>
           <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotCompletedNotifyInputX</bpmn2:to>
         </bpmn2:assignment>
       </bpmn2:dataInputAssociation>
