@@ -77,10 +77,7 @@ The project structure is not changed, updates only need to be made to the depend
 </dependency>
 ----
 
-[NOTE]
-====
-Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.20[Quarkus 3.20 LTS migration guide] for any other change related to Quarkus.
-====
+Due to the update update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-tech-updates[Main Quarkus and Spring Boot Framework changes] and refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide] for more details on the main Quarkus changes.
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 . To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
@@ -90,7 +87,7 @@ Refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.20[Quarkus 
 mvn clean package
 ----
 +
-You might get Maven streaming text once again, and at the end of it you must have:
+You will get Maven streaming text again, and at the end of it you must have:
 +
 [source,console]
 ----
@@ -147,3 +144,110 @@ To upgrade safely:
 Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
 
 For more information, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].
+
+
+[#Quarkus-Spring-tech-updates]
+== Main Quarkus and Spring Boot Framework changes
+
+{PRODUCT_SHORT} {VERSION} updates the core frameworks that power _Business Services_. The most impactful change is the Hibernate ORM 6.x to 7.1 upgrade, which introduces breaking API changes that require code modifications. The following table lists and categorizes these changes. 
+
+|===
+| Component | {VERSION_931} | {VERSION} | Change Type | Impact
+
+| --- | --- | --- | --- | ---
+
+| Quarkus | 3.20.3 | 3.27.2 | Minor | HIGH
+
+| Spring Boot | 3.4.x | 3.5.10 | Minor | MEDIUM
+
+| Spring Framework | 6.1.x | 6.2.15 | Minor | MEDIUM
+
+| Hibernate ORM | 6.2.13 | 7.1.14 | Major | CRITICAL
+
+| Kafka Client | 3.6.x | 4.0.0 | Major | MEDIUM
+
+| Fabric8 K8s Client | 7.1.0 | 7.3.1 | Minor | MEDIUM
+
+| AsyncAPI | 2.x (jar 0.30.0) | 3.x (jar 1.0.5) | Major | HIGH
+
+| Jackson | 2.17.x | 2.19.2 / 2.21.1 | Minor | LOW
+
+| GraphQL Java | 22.0 | 24.3 | Minor | MEDIUM
+
+| Netty | 4.1.x | 4.1.131.Final | Minor | LOW
+
+| Vert.x | 4.5.x | 4.5.24 | Patch | LOW
+
+| JUnit Jupiter | 5.10.x | 5.12.2 / 5.13.4 | Minor | LOW
+
+|===
+
+
+=== Hibernate ORM 6.x → 7.1
+
+Hibernate 7.1 is a major version upgrade with breaking API changes, and represents the highest-impact change in this release. 
+
+|===
+| Before (Hibernate 6.x) | After (Hibernate 7.1)
+
+| --- | ---
+
+| UserType interface: No generic param | Requires generic type (e.g., UserType<JsonNode>)
+
+| nullSafeGet signature: String[] names param | int position param
+
+| SQL type declaration: Not required | Must implement getSqlType() using SqlTypes constants
+
+| Custom SQL functions: Simple constructor | Must implement render() with SqlAppender
+
+| Boolean type reference: StandardBasicTypes.BOOLEAN | BasicTypeReference<>(SqlTypes.BOOLEAN)
+
+| Native query return types: Returns java.util.Date | Returns java.time.OffsetDateTime
+
+| @Temporal annotations: Required for date fields | Not needed for OffsetDateTime fields (handled natively)
+
+| EntityManager dependency: hibernate-entitymanager | hibernate-core (entitymanager merged in)
+|===
+
+== Kafka 3.6.x → 4.0.0
+ A major version change with limited impact on _Business Services_ built with {PRODUCT_SHORT}.
+
+Test code::
+`MockProducer` default constructor was removed — use `new MockProducer<>(true, null, null)`
+
+Runtime code::
+SmallRye Kafka connector configuration is unchanged — no action needed
+
+Docker Compose:: Kafka container images need updating to 4.x versions
+
+== AsyncAPI 2.x → 3.x**
+ The AsyncAPI specification and Java library had a major version upgrade, affecting spec files and Java code referencing AsyncAPI models.
+
+Spec files must be converted: 
+asyncapi convert asyncapi-2.yaml --target-version=3.0.0 --output=asyncapi-3.yaml
+
+Java package renamed: `com.asyncapi.v2._6_0` → `com.asyncapi.v3._0_0`
+ChannelItem renamed to Channel; use channel.getAddress() instead of channel name as key
+Operations now use explicit OperationAction (SEND or RECEIVE)
+Internal BAMOE integration migrated to io.quarkiverse.asyncapi.config.AsyncAPISupplier and MapAsyncAPIRegistry
+
+
+- **Fabric8 Kubernetes Client 7.1.0 → 7.3.1**: A minor update with no breaking changes for most use cases.
+
+
+== Known Issues
+
+- Hibernate 7 + Spring ORM 6.2 EntityManagerFactory initialization issue — workaround via BeanPostProcessor
+
+
+== Common Errors After Upgrade
+
+|===
+| Error message | Cause | Fix
+
+| --- | --- | ---
+
+| ClassNotFoundException: com.asyncapi.v2...ChannelItem | AsyncAPI 3.x package rename | Update imports to com.asyncapi.v3._0_0.model.*
+
+| OIDC proxy errors or secure runtime service fails to start | quarkus-oidc-proxy upgraded from 0.2.2 to 0.3.2 | Update quarkus-oidc-proxy version to 0.3.2 in your pom.xml
+|===
