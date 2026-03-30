@@ -10,6 +10,10 @@ Table 1. Known limitations
 |===
 |Limitation |Description |Workaround
 
+|BPMN Editor: Two Timer Events — "Fire multiple times" option and CRON syntax selection reset to ISO when navigating away and back
+|When configuring timers in a BPMN file with two timer nodes, the first timer node’s configuration resets incorrectly after navigating away and returning. Specifically, the timer option resets to Fire multiple times and the syntax dropdown resets to ISO, even though the CRON value remains in the text field.
+|Configure the first timer node then click on any other node before configuring the second timer node. This prevents the reset and ensures the correct timer option and syntax selection are preserved.
+
 |Native compilation support for workflow projects.
 |Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_93X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
 |Do not use native compilation if your _Business Services_ include stateful workflow.
@@ -29,95 +33,6 @@ Table 1. Known limitations
 * Tested using Scenario and Simulation files
 
 |To avoid this issue, users must restructure their models to avoid relying on nested imports for Input Data.
-
-|DMN Editor: Copy and paste of data type property creates non-unique copy
-|When users attempt to speed up the creation of custom structures by copying and pasting structure properties, will encounter a limitation where the pasted property is not treated as a unique instance.
-
-Although it is valid to have multiple structures with properties of the same name (for example, `Car.Price` and `House.Price`), the editor links the copied property to its original. As a result, any modification made to the pasted property (for example, `House.Price`) will also affect the original (`Car.Price`), and vice versa.
-
-|To avoid this issue, users should manually create the new structure property instead of copying it. 
-
-|DMN Editor: Does not autocomplete decision name when required decision uses namespace in `href`
-|In DMN models, when a required decision is referenced by using a full namespace in the `href` attribute (e.g., <requiredDecision href="http://www.example.org/Definitions01.xml#prebureauriskDec01"/>), the expression editor fails to offer autocompletion for that decision. (eg. `prebureauriskDec01` is not in theautocompletion suggestions). This issue only affects references within the same DMN model. 
-
-|To ensure autocompletion works as expected, do not use namespaces in `href` attributes when referencing decisions within the same DMN model. Use relative references (for example, `href="#decisionName"`) instead.
-
-| BAMOE Management Console environment variables not working
-
-| When starting the BAMOE Management Console, error messages related to environment variable validation may appear in the logs. These errors do not prevent the BAMOE Management Console from starting, but any environment variables set will not take effect.
-
-a| Overwrite the initial `env.json` file inside the BAMOE Management Console container by mounting a volume on top of its path with a fixed `env.json` file.
-
-Example (Docker Compose):
-[source,shell,subs="attributes+"]
-----
-services:
-  management-console:
-    container_name: bamoe-management-console
-    image: quay.io/bamoe/management-console:{IMAGE_VERSION}
-    platform: linux/amd64
-    ports:
-      - "8380:8080"
-    volumes:
-      - /path/to/local/env.json:/management-console/app/env.json
-    environment:
-      RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID: kie-management-console
-----
-
-Fixed initial `env.json` file:
-[source,json]
-----
-{
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME": "BAMOE Management Console",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID": "bamoe-management-console",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES": "openid email profile",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE": "",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES": [],
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH": ""
-}
-----
-
-| BAMOE Management Console Helm Chart variables not working
-
-| The Helm Chart for BAMOE Management Console includes two variables that are not functional: `pimMaxBulkIterationsCount` and `pimMaxBulkSize`. These variables should be avoided for now. The Management Console container will start, but other environment variables set via Helm Chart values will be ignored.
-
-a| Overwrite the initial `env.json` file inside the BAMOE Management Console container by creating a ConfigMap with a fixed `env.json` and patching the deployment, mounting a volume on top of the initial file.
-
-Create ConfigMap:
-[source,shell]
-----
-kubectl create configmap bamoe-management-console-env \
-  --from-literal=env.json='{
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME": "BAMOE Management Console",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_CLIENT_ID": "bamoe-management-console",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_SCOPES": "openid email profile",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_OIDC_CLIENT_DEFAULT_AUDIENCE": "",
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES": [],
-  "RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH": ""
-}'
-----
-
-Patch Deployment:
-[source,shell]
-----
-kubectl patch deployment bamoe-management-console-management-console \
-  --type='strategic' \
-  -p='
-spec:
-  template:
-    spec:
-      volumes:
-        - name: env-json-volume
-          configMap:
-            name: bamoe-management-console-env
-      containers:
-        - name: management-console
-          volumeMounts:
-            - name: env-json-volume
-              mountPath: /management-console/app/env.json
-              subPath: env.json
-'
-----
 
 
 | BAMOE Canvas: Misleading Dev Deployment status for Kind/Minikube deployments
