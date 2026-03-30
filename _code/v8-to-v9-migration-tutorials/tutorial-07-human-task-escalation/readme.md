@@ -19,7 +19,7 @@ This tutorial demonstrates how to migrate human task management features from BA
 ### What You'll Learn
 
 - How human task lifecycle differs between v8 and v9
-- Migrating deadline handlers (NotStartedReassign, NotCompletedReassign, NotStartedNotify, NotCompletedNotify)
+- Migrating deadline handlers (NotStartedReassign, NotCompletedReassign, NotCompletedNotify)
 - Configuring escalation rules and SLA monitoring
 - Implementing custom task assignment strategies
 - Using the User Task Subsystem REST API
@@ -211,7 +211,7 @@ Add the following key dependencies to your v9 [`pom.xml`](v9-app/pom.xml):
     <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
 </dependency>
 
-<!-- Email Notification Dependencies (for NotStartedNotify and NotCompletedNotify) -->
+<!-- Email Notification Dependencies (for NotCompletedNotify) -->
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-addons-quarkus-mail</artifactId>
@@ -270,7 +270,7 @@ quarkus.kogito.devservices.enabled=false
 
 1. **User Task Lifecycle**: `kogito.usertasks.lifecycle=ws-human-task` enables full WS-Human Task specification support with advanced transitions (activate, start, delegate, forward). Omit this for simpler default Kogito lifecycle.
 
-2. **Jobs Service**: The `kogito.jobs-service.url` property is required for deadline handlers (NotStartedReassign, NotCompletedReassign, NotStartedNotify, NotCompletedNotify) to function.
+2. **Jobs Service**: The `kogito.jobs-service.url` property is required for deadline handlers (NotStartedReassign, NotCompletedReassign, NotCompletedNotify) to function.
 
 3. **User Groups**: Configure groups in `bamoe.devui.users.<username>.groups` to match the GroupId assignments in your BPMN process.
 
@@ -300,18 +300,6 @@ Reassigns task if not completed within 2 minutes:
     <bpmn2:assignment>
         <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:manager|groups:management]@[2m]</bpmn2:from>
         <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotCompletedReassignInputX</bpmn2:to>
-    </bpmn2:assignment>
-</bpmn2:dataInputAssociation>
-```
-
-#### NotStartedNotify
-Sends notification if not started within 30 seconds:
-```xml
-<bpmn2:dataInputAssociation>
-    <bpmn2:targetRef>_reviewTask_NotStartedNotifyInputX</bpmn2:targetRef>
-    <bpmn2:assignment>
-        <bpmn2:from xsi:type="bpmn2:tFormalExpression">[users:supervisor]@[30s]</bpmn2:from>
-        <bpmn2:to xsi:type="bpmn2:tFormalExpression">_reviewTask_NotStartedNotifyInputX</bpmn2:to>
     </bpmn2:assignment>
 </bpmn2:dataInputAssociation>
 ```
@@ -1018,14 +1006,7 @@ curl -X GET "http://localhost:8080/usertasks/instance?user=manager&group=managem
   -H "accept: application/json"
 ```
 
-#### Test D3: NotStartedNotify (30 seconds)
-
-```bash
-# Start process and wait 30 seconds
-# Check application logs for notification message
-```
-
-#### Test D4: NotCompletedNotify (90 seconds)
+#### Test D3: NotCompletedNotify (90 seconds)
 
 ```bash
 # Start task and wait 90 seconds without completing
@@ -1157,7 +1138,7 @@ user X with roles [] not authorized
 ### What You've Accomplished
 
 - Migrated human task configuration from v8 XML to v9 properties
-- Configured deadline handlers (NotStartedReassign, NotCompletedReassign, NotStartedNotify, NotCompletedNotify)
+- Configured deadline handlers (NotStartedReassign, NotCompletedReassign, NotCompletedNotify)
 - Tested both WS-Human Task and default Kogito lifecycles
 - Used User Task Subsystem REST API for task management
 - Implemented escalation rules with embedded Jobs Service
