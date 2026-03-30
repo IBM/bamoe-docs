@@ -407,6 +407,12 @@ cd v9-app
 mvn clean quarkus:dev
 ```
 
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
+
 ### 2. Create a New Process Instance
 
 ```bash
@@ -466,6 +472,12 @@ curl -X POST "http://localhost:8080/approvalWithDeadline/$PROCESS_ID/Approve_Req
 ```bash
 cd v9-app
 mvn clean quarkus:dev
+```
+
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
 ```
 
 ### Create Process Instance

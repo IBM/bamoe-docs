@@ -22,6 +22,12 @@
 mvn clean quarkus:dev -Pdevelopment
 ```
 
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
+
 Dev mode enables a number of helpful features while developing the project:
 
 - Incremental compilation

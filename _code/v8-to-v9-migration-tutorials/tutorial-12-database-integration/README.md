@@ -232,6 +232,12 @@ cd v9-app
 mvn clean quarkus:dev
 ```
 
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
+
 - **Swagger UI:** `http://localhost:8080/q/swagger-ui`
 - **GraphQL UI:** `http://localhost:8080/q/dev-ui` → Data Index GraphQL UI
 - **Health:** `http://localhost:8080/q/health`
