@@ -70,6 +70,18 @@ You can then execute your native executable with: `./target/*-1.0.0-SNAPSHOT-run
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
 
+If you are using Gradle instead of Maven, the `mvn clean package -Dnative` and `mvn clean package -Dnative -Dquarkus.native.container-build=true` Maven commands can be replaced with the equivalent Gradle command:
+
+```shell
+./gradlew clean build \
+  -Dquarkus.native.enabled=true \
+  -Dquarkus.package.jar.enabled=false
+```
+
+GraalVM is required for native builds. 
+
+NOTE: Maven places all build artifacts in the `target/` directory, Gradle them to `build/` directory. 
+
 ---
 
 ### _Notes on provided code and how to evolve this Business Service_
