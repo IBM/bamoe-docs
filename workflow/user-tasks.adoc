@@ -1,33 +1,157 @@
-= The User Tasks API
+= The User Tasks Lifecycles and API
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-A User Task is a typical process or Workflow task where a human
-performs the Task with the assistance of a software application and is scheduled through a task list manager.
+A User Task is a typical process or Workflow task where a human performs the Task with the assistance of a software application and is scheduled through a task list manager.
 
-In the previous versions it was possible to manage
-User Tasks through the Process API offered to operate on any work item.
+In the previous versions it was possible to manage User Tasks through the Process API offered to operate on any work item.
 
-From {VERSION_920} the User Tasks subsystem is provided in the Runtime
-Engine facilitating access and operations to User Tasks entities via API.  
+From {VERSION_920} the User Tasks subsystem is provided in the Runtime Engine facilitating access and operations to User Tasks entities via API.  
 
+You can choose between the two lifecycles available for the User Tasks inside your process:
+
+* The Kogito User Task Lifecycle (default)
+* The WS-Human Task Standard Lifecycle
+
+[#kogito-task-lifecycle]
+== The Default Kogito User Task Lifecycle
+
+The User Tasks subsystem defines a Default lifecycle that enables users to transition a task through different phases that will change
+the task state until it reaches a `Completion` state, allowing the associated Process Instance to continue executing. 
+
+.Default User Task lifecycle
+image::wf-usertaks-lifecycle.png[]
+
+With the Default lifecycle, when a User Task is initiated in the User Task Subsystem it starts in a *Created* state. At that moment, it automatically passes through the `Activate` phase that will set the task in *Ready* state, making the task available to the users that are allowed to work with it.
+
+The task will then remain in *Ready* state until a user claims it, which will make the task pass through the `Claim` phase making the move into a *Reserved* state and the user will become the owner of the task.
+
+With the task *Reserved*, the owner will be able to complete the task (`Complete` phase) that will finally move the task to a *Completed* that will successfully finalize the task allowing the Process Instance to continue.
+
+User Tasks in *Ready* or *Reserved* state, can also be reassigned (`Reassign` phase) that will unassign the task owner and will try to assign it to a different actor.
+
+Also, Users Tasks in *Ready* or *Reserved* state, can be finalized with the `Fail` phase, which causes the task to terminate in a *Error* state indicating an abnormal completion or through `Skip` phase that will finalize the task in a *Obsolete* state  indicating that the task was not executed.
+
+NOTE: During the `Activate` and `Reassign` phases, if the task has a single potential owner the task will be directly moved into a *Reserved* and assigned that user. This mechanism can be customized by defining a new *Task Assignment Strategy*.
+
+[#human-task-lifecycle]
+== The WS-Human Task Lifecycle
+An alternative User Task lifecycle is available in {PRODUCT_SHORT}, that adheres to the xref:https://docs.oasis-open.org/bpel4people/ws-humantask-1.1-spec-cs-01.html[WS-HumanTask standard] section 4.10 "Human Task Behavior and State Transitions".
+
+.The WS-Human Task lifecycle
+image::workflow/ws-humantask-lifecycle.png[]
+
+With the Human Task lifecycle, a Task is initiated in a *Created* state. Task creation will succeed whether the people assignment returns a set of values or an empty set. 
+
+If potential owners were not assigned automatically during task creation then they must be assigned explicitly using nomination, which is performed by the business administrator of the task. The result of evaluating potential owners removes the excluded owners from results. The task remains in the state *Created* until it is activated and has potential owners.
+
+When the task has a single potential owner, it transitions into the *Reserved* state, indicating that it is assigned to a single actual owner. If the task has multiple potential owners, it transitions into the *Ready* state, indicating that it can be claimed by one of its potential owners. Once a potential owner claims the task, it transitions into the *Reserved* state, and the potential owner becomes the actual owner.
+
+Once work is started on a task that is in state *Ready* or *Reserved*, it goes into the *InProgress* state, indicating that it is being worked on – if the transition is directly from *Ready*, the user starting the work becomes the actual owner of the task.
+
+On successful completion of the work, the task transitions into the *Completed* final state. On unsuccessful completion of the work, the task transitions into the *Failed* final state.
+
+The current actual owner of a human task can release a task to make it available again for all potential owners. A task can be released from active states that have an actual owner (*Reserved*, *InProgress*), transitioning it into the *Ready* state. Business data associated with the task (intermediate result data, ad-hoc attachments and comments) is kept.
+
+A task that is currently *InProgress* can be stopped by the actual owner, transitioning it into state *Reserved*. Business data associated with the task as well as its actual owner is kept.
+
+A potential owner, actual owner or business administrator can delegate a task to another user, making that user the actual owner of the task, and also adding them to the list of potential owners if they are not in the list. A task can be delegated when it is in an active state (*Ready*, *Reserved*, *InProgress*), and transitions the task into the *Reserved* state. Business data associated with the task is kept.
+
+Similarly, the potential owners, actual owner or business administrator of a task can forward an active task to another person or set of people, replacing themselves by the people in the list of potential owners. Potential owners can only forward tasks that are in the *Ready* state. Forwarding is only possible if the task has a set of individually assigned potential owners. It is not possible when the potential owners of the task are assigned using one or many groups. If the task is in the *Reserved* or *InProgress* state then the task is implicitly released first, that is, the task is transitioned into the *Ready* state. Business data associated with the task is kept. The user performing the forward is removed from the set of potential owners of the task, and the person who the task is forwarded to, is added to the set of potential owners.
+
+A task can be temporarily suspended transitioning into a *Suspended* state where the task cannot be acted upon. The task can continue its lifecycle only when the task is resumed from the *Suspended* state back to its previous state. Suspend and Resume transitions are allowed for tasks in states *Ready*, *Reserved* or *InProgress*.
+
+A task can be skipped, if it is marked as skippable and it moves to *Obsolete* final state. A task can also be moved to *Error* or *Exited* final states as required.
+
+=== Using suspend and suspendUntil
+You can use `suspendUntil` to suspend a user task for a predefined amount of time. Once that time period expires, the user task will be automatically resumed and transitioned to its previous active state avoiding an overhead to manually resume the user task. If required, the user tasks that are suspended with auto resume can also be manually resumed, maintaining flexibility.
+
+To suspend a user task, invoke the `usertask` transition endpoint with the following payload:
+
+[source, json]
+----
+POST /usertasks/instance/{taskId}/transition
+{
+  "transitionId": "suspend"
+}
+----
+
+To resume a user task, invoke the `usertask` transition endpoint with the following payload:
+[source, json]
+----
+POST /usertasks/instance/{taskId}/transition
+{
+  "transitionId": "resume"
+}
+----
+
+To suspend a user task with auto resume, for a predefined amount of time, you can 
+
+* invoke the `usertask` transition endpoint with the following payload:
++
+[source, json]
+----
+POST /usertasks/instance/{taskId}/transition
+{
+  "transitionId": "suspend",
+  "data": {
+    "suspendUntil": "2026-12-12T12:12:12Z"
+  }
+}
+----
+* or, use the Process Definition user task metadata attribute in {CANVAS}:
++
+image::workflow/suspenduntil-metadata.png[Metadata attribute in {CANVAS}]
++
+The user task will be suspended for the time defined in the Process Definition when the transition endpoint is invoked with a normal suspend request, resuming after the time expires:
++
+[source, json]
+----
+POST /usertasks/instance/{taskId}/transition
+{
+  "transitionId": "suspend"
+}
+----
+* or, use a dynamic value from a process variable as shown below:
++
+image::workflow/suspenduntil-dynamic-metadata.png[Dynamic value metadata attribute in {CANVAS}]
+
+NOTE: Even if we have defined `suspendUntil` in the Process Definition. It can be overridden by passing a different value of `suspendUntil` when invoking the user task transition endpoint.
+
+The following table shows the parameter formats that `suspendUntil` supports:
+
+|===
+| Format | Example | Description
+| ISO 8601 Datetime | `2026-12-12T12:12:12Z` | UTC time
+| ISO 8601 Datetime with Offset | `2026-12-12T12:12:12+05:30` | UTC time with offset
+| ISO 8601 Duration | `PT15M` | 15 minutes from now
+|  | `PT2H` | 2 hours from now
+|  | `PT2H30M` | 2 hours 30 mins from now
+|  | `PT1D` | 1 day from now
+|  | `PT1D12H` | 1 day 12 hours from now
+| Simple duration format | `30s` | 15 seconds from now
+| | `5m` | 5 minutes from now
+| | `2h` | 2 hour from now
+| | `2h30m` | 2 hours 30 mins from now
+| | `1d` | 1 day from now
+| | `1d12h` | 1 day 12 hours from now
+| | `1d12h30m` | 1 day 12 hours 30 mins from now
+|===
+
+== Switching your _Business Services_ to a different User Task Lifecycle
+ 
+You can override the default lifecycle using the following property to select the WS-Human Task Lifecycle implementation if required:
+
+[source,properties]
+----
+kogito.usertasks.lifecycle=ws-human-task
+----
+A User Task completes its entire lifecycle with the implementation they were started with. It is not possible to migrate a Process Instance to an alternative User Task Lifecycle while it is running. 
+
+If you change the configuration of your _Business Services_ to use the WS-Human Task lifecycle, all active User Tasks will complete their lifecycle with the default Kogito User Task lifecycle. New tasks would start using WS-Human Task lifecycle.
+
+== The User Tasks API
 The User Tasks API is lighter and focused on working with User Tasks: the new endpoints no longer require global process data like the `process ID`, `process Instance ID`, `task Name` as endpoint parameters, and the returned JSON objects contain richer information.
-
-NOTE: Migrating to the new API for User Task related operations is
-required. The Process API endpoints are still being provided to
-interact with the Workflow engine for WorkItem related operations. It is
-important to understand that the User Task engine supports a different
-lifecycle model compared to the Workflow engine. Invoking the General
-Process API results in a state change of the WorkItem inside the Process
-engine, whereas invoking the new User Task API results in a state change
-of the User Task itself. Using the Process API for User Tasks
-will result in unexpected outcomes and is therefore not recommended.
-This document describes the new entry points and a guide to support a
-migration to the new API. +
- +
-In addition, the usage of both APIs to work with User Tasks is not
-recommended and it should be avoided. You should perform ALL the User
-Tasks operations using the new User Tasks API. 
 
 With the new endpoints, you operate with the following
 Entities:
@@ -61,7 +185,7 @@ UserTaskView:
 * id: String
 * userTaskid: String
 * status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_
+_ERROR_)
 * taskName: String
 * taskDescription: String
 * taskPriority: String
@@ -104,7 +228,7 @@ UserTaskView:
 * id: String
 * userTaskid: String
 * status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_
+_ERROR_)
 * taskName: String
 * taskDescription: String
 * taskPriority: String
@@ -147,7 +271,7 @@ a|A JSON Collection of _UserTaskTransitionView_ elements, that represents
 the list of allowed transition for a specific User Task. A
 _UserTaskTransitionView_ element contains:
 
-* transitionId: String ("activate", "claim", "release", "complete",
+* transitionId: String (depends lifecycle - "activate", "claim", "release", "complete",
 "skip", “fail”, "reassign")
 * source: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
 _ERROR)_
@@ -185,7 +309,7 @@ a|* taskId: String (PathParameter)
 * id: String
 * userTaskid: String
 * status: String (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_
+_ERROR_)
 * taskName: String
 * taskDescription: String
 * taskPriority: String
@@ -234,7 +358,7 @@ the given input parameters were added.
 * id: String
 * userTaskid: String
 * status: String(_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_
+_ERROR_)
 * taskName: String
 * taskDescription: String
 * taskPriority: String
@@ -285,7 +409,7 @@ UserTaskView:
 * id: String
 * userTaskid: String
 * status: (_COMPLETED_, _ABORT_, _FAILED_, _EXITED_, _OBSOLETE_,
-_ERROR)_
+_ERROR_)
 * taskName: String
 * taskDescription: String
 * taskPriority: String
