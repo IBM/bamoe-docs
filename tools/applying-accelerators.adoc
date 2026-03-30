@@ -1,4 +1,4 @@
-= Configuring and using Accelerators 
+= Using Accelerators 
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
@@ -46,42 +46,5 @@ Do not modify the contents of the `accelerator.yaml` file as it is used by {CANV
 ====
 
 You can also use custom Accelerators. For more information, see xref:../installation/canvas.adoc#custom-accelerators[Installation → {CANVAS} -> Configuring custom Accelerators for your organization].
-
-[#custom-accelerators]
-== Configuring custom Accelerators for your organization
-
-Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. They can be used to store configurations that are common to all new _Business Service_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
-
-The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT}, you can use Accelerators that correspond to the cloud development frameworks it supports, including Quarkus and Spring Boot with either Maven or Gradle. Use these default accelerators to help identify what you want to modify in your own custom accelerator.
-
-The `KIE_SANDBOX_ACCELERATORS` environment variable comes pre-configured with the default accelerators, accepting an array of Accelerator configurations.
-
-You can create your custom Accelerators by overwriting the default values or by appending new accelerator definitions. 
-
-Your custom Accelerator must be a public Git repository. After creating it, write a specific JSON configuration to be used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
-
-[source,json,subs="attributes+"]
-----
-{
-    "name": "Your Accelerator name",
-    "iconUrl": "https://link.to/your/logo/image",
-    "gitRepositoryUrl": "https://github.com/...",
-    "gitRepositoryGitRef": "branchName",
-    "dmnDestinationFolder": "path/to/place/dmn/files",
-    "bpmnDestinationFolder": "path/to/place/bpmn/files",
-    "otherFilesDestinationFolder": "path/to/place/other/files",
-    "scesimDestinationFolder": "path/to/place/scesim/files"
-}
-----
-
-**name**:: This is how the Accelerator is known inside {CANVAS}.
-**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
-**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
-**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
-**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
-**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
-**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
-**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
-
 
 

@@ -155,7 +155,7 @@ Follow the command to uninstall the `my-bamoe-canvas` deployment:
 helm uninstall my-bamoe-canvas
 ----
 
-=== Passing environmental variables
+=== Passing environment variables
 
 This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[Dev Helm Chart configuration reference] for all options.
  
@@ -269,8 +269,6 @@ Another important environment variable to consider when deploying {CANVAS} is `K
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
-
-=== Installation in an air-gapped environment
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
 For example, imagine a user is creating Dev Deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
@@ -279,8 +277,7 @@ The same is true for remote Kubernetes and OpenShift instances that the users of
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
-
-== Option 2: Running {CANVAS} containers locally with Docker Compose
+== Running {CANVAS} containers locally with Docker Compose
 
 {CANVAS} and its related services can be run locally by using Docker Compose.
 
@@ -313,7 +310,72 @@ To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center 
 
 NOTE: You can add environment variable configuration to your docker compose file or pass it directly via a docker run command.
 
-For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+Example JSON configuration:
+
+[source,json]
+----
+[
+  {
+    "id": "unique identifier",
+    "domain": "https://your-git-provider.com",
+    "supportedGitRemoteDomains": ["your-git-provider.com"],
+    "type": "gitlab | githubEnterprise | bitbucketDataCenter",
+    "name": "readable name for displaying in the BAMOE UI",
+    "enabled": true,
+    "group": "git",
+    "disableEncoding": true,
+  }
+]
+----
+
+*id*:: A unique identifier for this authentication provider configuration.
+*domain*:: The base URL of your Git provider instance.
+*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
+*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
+*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
+*enabled*:: A boolean flag that enables or disables this provider.
+*group*:: Categorizes the provider for grouping similar services.
+*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
+*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
+
+After completing the configuration, you can access the features provided by each integration. For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+
+[#custom-accelerators]
+== Configuring custom Accelerators for your organization
+Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. They can be used to store configurations that are common to all new _Business Services_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
+
+The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT}, you can use Accelerators that correspond to the cloud development frameworks it supports, including Quarkus and Spring Boot with either Maven or Gradle. Use these default accelerators to help identify what you want to modify in your own custom accelerator.
+
+The `KIE_SANDBOX_ACCELERATORS` environment variable comes pre-configured with the default accelerators, accepting an array of Accelerator configurations.
+
+You can create your custom Accelerators by overwriting the default values or by appending new accelerator definitions. 
+
+Your custom Accelerator must be a public Git repository. After creating it, write a specific JSON configuration to be used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
+
+[source,json,subs="attributes+"]
+----
+{
+    "name": "Your Accelerator name",
+    "iconUrl": "https://link.to/your/logo/image",
+    "gitRepositoryUrl": "https://github.com/...",
+    "gitRepositoryGitRef": "branchName",
+    "dmnDestinationFolder": "path/to/place/dmn/files",
+    "bpmnDestinationFolder": "path/to/place/bpmn/files",
+    "otherFilesDestinationFolder": "path/to/place/other/files",
+    "scesimDestinationFolder": "path/to/place/scesim/files"
+}
+----
+
+**name**:: This is how the Accelerator is known inside {CANVAS}.
+**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
+**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
+**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
+**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
+**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
+**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
+**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
+
+For more information on using accelerators see xref:../tools/applying-accelerators.adoc[Configuring and using Accelerators]
 
 == Integrating {MVN_REPO} manually
 
@@ -516,7 +578,6 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 ----
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
-////
 
 == Configuring a local Maven repository for {PRODUCT_SHORT}
 
@@ -799,7 +860,7 @@ The following table lists and describes the configurable parameters of the two D
 | Image source configuration for the {EXT_SERVICES} image 
 |===
 
-### Maven Repository Configuration
+=== Maven Repository Configuration
 
 |===
 | Key | Type | Default | Description
