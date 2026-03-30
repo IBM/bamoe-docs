@@ -138,7 +138,7 @@ You can disable the installation of the MCP Server in the Helm chart deployment 
 helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --set mcp.server.enabled=false
 ----
 
-////
+
 To run the {MCP_SERVER}, complete the setup and launch the server image in a Docker environment using the following command:
 
 [source,shell, subs="attributes+"]
@@ -149,8 +149,6 @@ docker run -it --rm \
   -e MCP_SERVER_OPENAPI_URLS=<your_business_services_OpenAPIv3_path> \
   quay.io/bamoe/mcp-server:{IMAGE_VERSION}
 ----
-////
-
 
 == Passing Environment variables
 
@@ -207,13 +205,11 @@ Following is the list of all available configurations for the Helm chart.
 | management-console.serviceAccount            | object | `{"annotations":{},"create":true,"name":""}`                                                                                                                                                                                                            | Management Console ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)                                
 |                                              |        |                                                                                                           
 |===================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-
+////
 
 == Option 2: Deploy directly on OpenShift (using `oc` CLI)
 
-_zzz-Q probably remove?_
-
-If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}.
+If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -236,9 +232,9 @@ oc create route edge --service=bamoe-management-console
 +
 [source,shell,subs="attributes+"]
 ----
-oc label services/bamoe-management-console app.kubernetes.io/part-of=bamoe-managment-console-app
-oc label routes/bamoe-management-console app.kubernetes.io/part-of=bamoe-managment-console-app
-oc label deployments/bamoe-management-console app.kubernetes.io/part-of=bamoe-managment-console-app
+oc label services/bamoe-management-console app.kubernetes.io/part-of=bamoe-management-console-app
+oc label routes/bamoe-management-console app.kubernetes.io/part-of=bamoe-management-console-app
+oc label deployments/bamoe-management-console app.kubernetes.io/part-of=bamoe-management-console-app
 oc label deployments/bamoe-management-console app.openshift.io/runtime=js
 ----
 +
@@ -272,8 +268,6 @@ The {MANAGEMENT_CONSOLE} will be up at http://localhost:<EXTERNAL_PORT>
 
 [#available-environment-variables]
 == Available Environment Variables
-
-_zzz-Q integrate in single helm chart reference_
 
 [cols="3,6,3",options="header"]
 |===
@@ -389,7 +383,7 @@ _CORE"
 | Env variables for {MCP_SERVER} deployment
 |===
 
-
+////
 
 [#pre-configured-business-services]
 == {MANAGEMENT_CONSOLE} pre-configured _Business Services_ connections
@@ -460,7 +454,7 @@ If you are installing by using the Helm chart, this can be set by using the `man
 But if installed by using the `oc` CLI, the Deployment resource can be updated with `oc set env deployment/bamoe-management-console RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH=your-subpath`.
 
 
-=== Container image running locally by using Docker
+=== Container image running locally using Docker
 
 In this case, if running on a different port is not an option, both environment variables need to be set. `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH` with the subpath value and `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_USE_APACHE_HTTPD_BASE_PATH_ALIAS` with `"true"`.
 

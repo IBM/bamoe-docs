@@ -166,10 +166,10 @@ helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set canvas.imag
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
-////
+
 == Option 2: Deploying Canvas containers directly on OpenShift (using oc CLI)
 
-If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies.
+If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart. 
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -269,7 +269,7 @@ Another important environment variable to consider when deploying {CANVAS} is `K
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
-////
+
 === Installation in an air-gapped environment
 If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
 
@@ -279,7 +279,7 @@ The same is true for remote Kubernetes and OpenShift instances that the users of
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
-////
+
 == Option 2: Running {CANVAS} containers locally with Docker Compose
 
 {CANVAS} and its related services can be run locally by using Docker Compose.
@@ -300,7 +300,7 @@ docker compose up
 ----
 
 {CANVAS} will be available at http://localhost:9090.
-////
+
 
 == Securing your {CANVAS} installation
 
@@ -315,157 +315,11 @@ NOTE: You can add environment variable configuration to your docker compose file
 
 For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
+== Integrating {MVN_REPO} manually
 
-[#helm-chart-config-ref]
-== Configuration reference for Dev environment Helm Charts
+If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart. 
 
-The following table lists and describes the configurable parameters of the two Dev Helm charts ({PRODUCT_PAM} and {PRODUCT_DM}) and their default values.
-
-
-=== Global Configuration
-
-|===
-| Key | Type | Default |Description
-
-
-| global.ingressSource 
-| string 
-| "" 
-| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") 
-- For NOTES generation only 
-
-| global.kubernetesClusterDomain 
-| string 
-| "" 
-| If using Minikube or Kubernetes, set the cluster domain 
-
-| global.kubernetesIngressClass 
-| string 
-| "" 
-| If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
-
-| global.openshiftRouteDomain 
-| string 
-| "" 
-| If using OpenShift Routes, set the Route domain 
-
-| global.chargedProductValues.productID 
-| string 
-| "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) 
-| Product ID for License Service tracking 
-
-| global.chargedProductValues.productMetric 
-| string 
-| "VIRTUAL_PROCESSOR_CORE" 
-| Product metric for License Manager tracking 
-
-| global.chargedProductValues.productName 
-| string 
-| "{PRODUCT_DM}" (DMOE) / "{PRODUCT_PAM}" (PAMOE) 
-| Product name for License Service tracking 
-
-| nameOverride 
-| string 
-| "" 
-| Overrides chart name 
-
-| fullnameOverride 
-| string 
-| "" 
-| Overrides chart full name 
-|===
-
-
-=== {CANVAS} Configuration
-
-|===
-| Key | Type | Default | Description 
-
-| canvas.name 
-| string 
-| "canvas" |
- The {CANVAS} application name
-
-| canvas.env 
-| list 
-| [{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}] 
-| Env variables for {CANVAS} deployment
-
-| canvas.image 
-| object 
-| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
-| Image source configuration for the {CANVAS} image
-
-| canvas.imagePullSecrets 
-| list 
-| [] 
-| Pull secrets, used when pulling {CANVAS} image
-|===
-
-=== {CORS_PROXY} Configuration
-
-|===
-| Key | Type | Default | Description
-
-| cors_proxy.name 
-| string 
-| "cors-proxy" 
-| The CORS Proxy application name
-
-| cors_proxy.env 
-| list 
-| [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] 
-| Env variables for the {CORS_PROXY} deployment
-
-| cors_proxy.image 
-| object 
-| {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
-| Image source configuration for the CORS Proxy image
-|===
-
-=== Extended Services Configuration
-
-|===
-| Key | Type | Default | Description 
-
-| extended_services.name 
-| string 
-| "extended-services" 
-| The {EXT_SERVICES} application name 
-
-| extended_services.image 
-| object 
-| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
-| Image source configuration for the {EXT_SERVICES} image 
-|===
-
-### Maven Repository Configuration
-
-|===
-| Key | Type | Default | Description
-
-| maven_repository.enabled 
-| bool 
-| TRUE 
-| Enable or disable {MVN_REPO} installation
-
-| maven_repository.name 
-| string 
-| "maven-repository" 
-| The {MVN_REPO} application name
-
-| maven_repository.image 
-| object 
-| {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
-| Image source configuration for the {MVN_REPO} image
-|===
-
-////
-== Integrating {MVN_REPO}
-
-If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager.
-
-For organizations without such infrastructure, it is highly recommended to use the Dev Helm chart to install the Container image and make it available internally for developers and continuous integration (CI) systems.
+For organizations without such infrastructure, it is highly recommended to use the Dev environment Helm chart to install the Container image and make it available internally for developers and continuous integration (CI) systems.
 
 For organizations that already use a Maven Repository Manager, developers and the CI systems are usually configured to connect to it.
 
@@ -543,8 +397,6 @@ oc get route bamoe-maven-repo --output jsonpath={.spec.host}
 ----
 
 === Deploying to a Kubernetes cluster
-
-_zzz-Q Supported integration scenario?_
 
 Choose the container image from one of the following sources: 
 
@@ -823,6 +675,151 @@ gradle.settingsEvaluated { settings ->
 }
 ----
 . Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
+
+[#helm-chart-config-ref]
+== Configuration reference for Dev environment Helm Charts
+
+The following table lists and describes the configurable parameters of the two Dev Helm charts ({PRODUCT_PAM} and {PRODUCT_DM}) and their default values.
+
+
+=== Global Configuration
+
+|===
+| Key | Type | Default |Description
+
+
+| global.ingressSource 
+| string 
+| "" 
+| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") 
+- For NOTES generation only 
+
+| global.kubernetesClusterDomain 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the cluster domain 
+
+| global.kubernetesIngressClass 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+
+| global.openshiftRouteDomain 
+| string 
+| "" 
+| If using OpenShift Routes, set the Route domain 
+
+| global.chargedProductValues.productID 
+| string 
+| "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) 
+| Product ID for License Service tracking 
+
+| global.chargedProductValues.productMetric 
+| string 
+| "VIRTUAL_PROCESSOR_CORE" 
+| Product metric for License Manager tracking 
+
+| global.chargedProductValues.productName 
+| string 
+| "{PRODUCT_DM}" (DMOE) / "{PRODUCT_PAM}" (PAMOE) 
+| Product name for License Service tracking 
+
+| nameOverride 
+| string 
+| "" 
+| Overrides chart name 
+
+| fullnameOverride 
+| string 
+| "" 
+| Overrides chart full name 
+|===
+
+
+=== {CANVAS} Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| canvas.name 
+| string 
+| "canvas" |
+ The {CANVAS} application name
+
+| canvas.env 
+| list 
+| [{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}] 
+| Env variables for {CANVAS} deployment
+
+| canvas.image 
+| object 
+| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {CANVAS} image
+
+| canvas.imagePullSecrets 
+| list 
+| [] 
+| Pull secrets, used when pulling {CANVAS} image
+|===
+
+=== {CORS_PROXY} Configuration
+
+|===
+| Key | Type | Default | Description
+
+| cors_proxy.name 
+| string 
+| "cors-proxy" 
+| The CORS Proxy application name
+
+| cors_proxy.env 
+| list 
+| [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] 
+| Env variables: CORS_PROXY_ALLOWED_ORIGINS - List of origins that can use the CORS Proxy service. Requests from origins not specified will be rejected. Defaults to the Canvas origin when deployed via Helm Chart, empty when deployed manually. CORS_PROXY_ALLOWED_HOSTS - List of hosts that the CORS Proxy service can proxy to. Requests to hosts not specified will be rejected. Defaults to the * wildcard, which means that any host can be proxied. Recommend changing this environment variable to list only the hosts that will be proxied (OpenShift clusters, Git providers, AI providers, etc).
+
+| cors_proxy.image 
+| object 
+| {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the CORS Proxy image
+|===
+
+=== Extended Services Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| extended_services.name 
+| string 
+| "extended-services" 
+| The {EXT_SERVICES} application name 
+
+| extended_services.image 
+| object 
+| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {EXT_SERVICES} image 
+|===
+
+### Maven Repository Configuration
+
+|===
+| Key | Type | Default | Description
+
+| maven_repository.enabled 
+| bool 
+| TRUE 
+| Enable or disable {MVN_REPO} installation
+
+| maven_repository.name 
+| string 
+| "maven-repository" 
+| The {MVN_REPO} application name
+
+| maven_repository.image 
+| object 
+| {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {MVN_REPO} image
+|===
+
 
 == Next steps
 
