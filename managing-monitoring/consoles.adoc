@@ -191,7 +191,7 @@ image::runtime-services-modeling/mgmt-console-process-definition-page.png[Image 
 
 == Jobs
 
-The *Jobs* page displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, rescheduling a job, or canceling a job.
+The *Jobs* page displays the list of existing jobs, which you can filter and perform related management actions such as viewing job details, error messages and details, rescheduling a job, or canceling a job.
 
 .Jobs page
 image::runtime-services-modeling/mgmt-console-jobs-list.png[Image of Jobs List page in {MANAGEMENT_CONSOLE}]
@@ -214,9 +214,29 @@ image::runtime-services-modeling/mgmt-console-job-reschedule.png[Image of Jobs r
 === Jobs cancel
 
 .Job cancel success modal
-image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel modal,400]
+image::runtime-services-modeling/mgmt-console-job-cancel.png[Image of Jobs cancel dialog,400]
 
 You can also cancel multiple jobs at the same time by selecting the jobs to be canceled and clicking the *Cancel Selected* button.
+
+[#jobs-service-error-details]
+=== Jobs error messages
+
+When a job enters an error state, its status in the Jobs table on the Process Details page changes to Error. This status is displayed as a clickable link. Selecting it opens a tip that contains the detailed error message.
+
+.Jobs error message
+image::runtime-services-modeling/mgmt-console-job-error-message.png[Image of Jobs error message,400]
+
+In order to see be able to view more error details, you will need to set the following property in the `application.properties` of your _Business Service_:
+
+[source, properties]
+----
+kogito.jobs-service.exception-details-enabled=true
+----
+
+The Jobs table in the Process Details page also enables you to view job details through the Actions column. Selecting this option opens a tip that includes both the error message and detailed error information. These details can be copied directly to the clipboard, making it easier for users to share or analyze the information during troubleshooting.
+
+.Job cancel success modal
+image::runtime-services-modeling/mgmt-console-job-error.png[Image of Jobs error details dialog,400]
 
 == Tasks
 
