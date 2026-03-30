@@ -22,6 +22,12 @@
 mvn clean quarkus:dev
 ```
 
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
+
 Dev mode enables a number of helpful features while developing the project:
 
 - Incremental compilation
@@ -63,6 +69,18 @@ mvn clean package -Dnative -Dquarkus.native.container-build=true
 You can then execute your native executable with: `./target/*-1.0.0-SNAPSHOT-runner`
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
+
+If you are using Gradle instead of Maven, the `mvn clean package -Dnative` and `mvn clean package -Dnative -Dquarkus.native.container-build=true` Maven commands can be replaced with the equivalent Gradle command:
+
+```shell
+./gradlew clean build \
+  -Dquarkus.native.enabled=true \
+  -Dquarkus.package.jar.enabled=false
+```
+
+GraalVM is required for native builds. 
+
+NOTE: Maven places all build artifacts in the `target/` directory, Gradle them to `build/` directory. 
 
 ---
 

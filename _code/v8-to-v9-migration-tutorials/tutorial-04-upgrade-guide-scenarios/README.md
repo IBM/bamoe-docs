@@ -650,6 +650,12 @@ mvn clean package
 mvn clean quarkus:dev -Pdevelopment
 ```
 
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
+
 **Verify:**
 - Application starts without errors
 - Dev UI accessible at http://localhost:8080/q/dev-ui
@@ -667,6 +673,12 @@ The v9-app includes a comprehensive BPMN process demonstrating all migration sce
 ```bash
 cd v9-app
 mvn clean quarkus:dev -Pdevelopment
+```
+
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
 ```
 
 Then start the process via Dev UI or API:

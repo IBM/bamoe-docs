@@ -439,6 +439,16 @@ mvn clean install
 mvn quarkus:dev -Pdevelopment
 ```
 
+If you are using Gradle, use the following commands:
+
+```bash
+gradle clean build
+```
+
+```shell script
+gradle clean quarkusDev
+```
+
 ### Best Practices
 
 1. **Use `@ApplicationScoped`** - Required for automatic CDI registration

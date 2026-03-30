@@ -486,6 +486,13 @@ mvn clean install
 mvn quarkus:dev -Pdevelopment
 ```
 
+If you are using Gradle, use the following commands:
+
+```bash
+gradle clean build
+gradle clean quarkusDev
+```
+
 **Expected output:**
 ```
 __  ____  __  _____   ___  __ ____  ______ 

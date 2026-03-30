@@ -202,6 +202,12 @@ Expected output:
 [INFO] BUILD SUCCESS
 ```
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 ### Step 6: Run in Development Mode
 
 ```bash
@@ -216,6 +222,12 @@ __  ____  __  _____   ___  __ ____  ______
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
 INFO  [io.quarkus] your-bamoe-business-service 1.0.0-SNAPSHOT on JVM started
 INFO  [io.quarkus] Profile dev activated. Live Coding activated.
+```
+
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
 ```
 
 ### Step 7: Access Swagger UI
@@ -253,7 +265,7 @@ For more information about authoring decisions, running decisions, and testing, 
 
 **Developer Tools** - Validation on save and during Maven build
 
-**Build-time** - Full validation during `mvn clean install`
+**Build-time** - Full validation during `mvn clean install`. If you are using, Gradle, use `gradle clean build` command.
 
 **Benefits:**
 - Visual editing of decision tables
@@ -445,7 +457,7 @@ quarkus.http.port=8081
 **Solution:**
 1. Check internet connection
 2. Clear Maven cache: `rm -rf ~/.m2/repository`
-3. Rebuild: `mvn clean install -U`
+3. Rebuild: `mvn clean install -U`. If you are using, Gradle, use `gradle clean build` command.
 
 ## 6. Recap
 
@@ -454,8 +466,8 @@ quarkus.http.port=8081
 1. Created a BAMOE v9 project using the Canvas Quarkus accelerator (via Git clone or Canvas web interface)
 2. Added H2 database dependency to [`pom.xml`](v9-app/pom.xml)
 3. Copied DMN file from v8 to v9 (removed spaces from filename)
-4. Built the application with `mvn clean install`
-5. Ran the application with `mvn quarkus:dev`
+4. Built the application with `mvn clean install`. If you are using, Gradle, use `gradle clean build` command.
+5. Ran the application with `mvn quarkus:dev`. If you are using, Gradle, use `gradle clean quarkusDev` command.
 6. Tested the DMN decision using Swagger UI
 
 ### Key Differences: v8 vs v9

@@ -277,6 +277,12 @@ Edit `src/main/resources/application.properties` and add:
 mvn clean install
 ```
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 Expected output:
 ```
 [INFO] BUILD SUCCESS
@@ -313,6 +319,12 @@ src/main/resources/META-INF/processSVG/evaluation.svg
 
 SVG files are also automatically generated during the build process when you run `mvn clean install`. The generated SVG will be placed in the same location.
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 **Note:** SVG generation is optional but highly recommended for better process visualization in Dev UI.
 
 ### Step 9: Generate Forms
@@ -341,6 +353,7 @@ custom-forms-dev/
 **Note:** Form generation is optional. The Dev UI provides full task management capabilities without custom forms.
 
 ### Step 10: Run in Development Mode
+
 ```bash
 mvn clean install
 ```
@@ -357,6 +370,16 @@ __  ____  __  _____   ___  __ ____  ______
  -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
 INFO  [io.quarkus] (Quarkus Main Thread) your-bamoe-business-service 1.0.0-SNAPSHOT on JVM
+```
+
+If you are using Gradle, use the following commands:
+
+```bash
+gradle clean build
+```
+
+```shell script
+gradle clean quarkusDev
 ```
 
 ### Step 11: Access the Application
@@ -536,6 +559,12 @@ UnsupportedClassVersionError: class file version 55.0
 ```bash
 # Clean Maven cache and rebuild
 mvn clean install -U
+```
+
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
 ```
 
 ---

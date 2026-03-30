@@ -475,6 +475,12 @@ mvn clean install -pl data-model
 mvn clean install -pl process-service -am
 ```
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 **Expected Output:**
 ```
 [INFO] Reactor Summary:
@@ -655,6 +661,12 @@ mvn clean install
 mvn clean install -pl process-service -am
 ```
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 ### Issue 2: Circular Dependencies
 
 **Symptom:**
@@ -716,6 +728,13 @@ mvn clean install
 cd v9-app
 mvn clean install -pl business-rules -am
 ```
+
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 
 **Why This Happens:**
 

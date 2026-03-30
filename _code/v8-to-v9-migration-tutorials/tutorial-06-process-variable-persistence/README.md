@@ -483,6 +483,12 @@ cd v9-app
 mvn clean install
 ```
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 **Expected Output:**
 ```
 [INFO] BUILD SUCCESS
