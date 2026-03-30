@@ -1594,8 +1594,20 @@ end
 # Build
 mvn clean install
 
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
+```
+
 # Run in dev mode
 mvn quarkus:dev -Pdevelopment
+
+If you are using Gradle, use the following command:
+
+```shell script
+gradle clean quarkusDev
+```
 
 # Access Dev UI
 open http://localhost:8080/q/dev

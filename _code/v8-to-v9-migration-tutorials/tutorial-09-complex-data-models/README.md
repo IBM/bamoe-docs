@@ -249,6 +249,13 @@ mvn clean install
 mvn quarkus:dev
 ```
 
+If you are using Gradle, use the following commands:
+
+```bash
+gradle clean build
+gradle clean quarkusDev
+```
+
 **Expected Output:**
 ```
 INFO  [io.quarkus] complex-data-models-v9 1.0.0-SNAPSHOT on JVM started
@@ -267,6 +274,11 @@ Verify the project builds successfully:
 
 ```bash
 mvn clean install
+```
+If you are using Gradle, use the following command:
+
+```bash
+gradle clean build
 ```
 
 **Expected Result:**
