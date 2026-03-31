@@ -560,6 +560,38 @@ ${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.
 * The outer token becomes `${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }}`
 * Resolves the outer token to `dev-deployment-abc123.apps.cluster.example.com`
 
+===== Using `addManifests` with parameters
+
+Use `addManifests` when a parameter must conditionally deploy additional Kubernetes resources (such as a separate Service, Ingress, or ConfigMap) that don't exist in the baseline manifests.
+
+For example:
+
+[source,json]
+----
+{
+  "id": "enableExtraService",
+  "name": "Enable Extra Service",
+  "description": "Deploy an additional service alongside the main application",
+  "type": "boolean",
+  "defaultValue": false,
+  "addManifests": ["manifests/ExtraService.yaml"],
+  "patches": {
+    "manifests/Deployment.yaml": ["patches/extra-service-env.json"]
+  }
+}
+----
+
+When `enableExtraService` is `true`:
+
+* `ExtraService.yaml` is added to the set of deployed resources
+* `extra-service-env.json` patch is applied to `Deployment.yaml` (for example, to inject an environment variable pointing to the extra service)
+
+When `false`, neither the manifest nor the patch is included.
+
+[NOTE]
+====
+The `addManifests` field is optional. Use it only when the parameter needs to deploy new Kubernetes resources. If the parameter only modifies existing manifests (like the `dockerImage` text parameter example), use only the `patches` field.
+====
 
 === URL Templates
 
