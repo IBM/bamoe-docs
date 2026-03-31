@@ -186,7 +186,7 @@ For more information, see xref:../building-deploying/services-deployment.adoc#pr
 Hibernate 7.1 is a major version upgrade with breaking API changes, and represents the highest-impact change in this release. In addition, Hibernate ORM 7.1.x license changed from LGPL to Apache License 2.0, removing previous restrictions on Apache-licensed distributions.
 
 |===
-| Wht Changed | Before (Hibernate 6.x) | After (Hibernate 7.1)
+| *Change* | *Before (Hibernate 6.x)*| *After (Hibernate 7.1)*
 
 | `UserType` interface | No generic param | Requires generic type (e.g., `UserType<JsonNode>`)
 
@@ -217,7 +217,7 @@ quarkus.hibernate-orm.flush.mode=always
 For Spring Boot there is a known compatibility issue between Hibernate 7 and Spring ORM 6.2 around `EntityManagerFactory` initialization. A `BeanPostProcessor` workaround may be needed — see the Hibernate ORM 7.x Breaking Changes Analysis design document.
 
 === Kafka 3.6.x → 4.0.0
- A major version change with limited impact on _Business Services_ built with {PRODUCT_SHORT}.
+A major version change with limited impact on _Business Services_ built with {PRODUCT_SHORT}.
 
 Test code::
 `MockProducer` default constructor was removed, use `new MockProducer<>(true, null, null)` instead. 
@@ -227,8 +227,8 @@ SmallRye Kafka connector configuration is unchanged and no action is needed
 
 Docker Compose:: Kafka container images need to be updated to 4.x versions.
 
-=== AsyncAPI 2.x → 3.x**
- The AsyncAPI specification and Java library had a major version upgrade, which affects the spec files and Java code referencing AsyncAPI models.
+=== AsyncAPI 2.x → 3.x
+The AsyncAPI specification and Java library had a major version upgrade, which affects the spec files and Java code referencing AsyncAPI models.
 
 Spec files must be converted: 
 
@@ -250,11 +250,11 @@ Internal {PRODUCT_SHORT} integration migrated to `io.quarkiverse.asyncapi.config
 This represents a minor update with no breaking changes for most use cases, as described:
 
 * CDI injection (@Inject KubernetesClient) works the same way
-* Added support for both Kubernetes and OpenShift resource discovery
-* Test annotation changed: @WithKubernetesTestServer replaced by @QuarkusTestResource(KubernetesMockServerTestResource.class)
+* Additional support for both Kubernetes and OpenShift resource discovery
+* Test annotation changed: `@WithKubernetesTestServer` replaced by `@QuarkusTestResource(KubernetesMockServerTestResource.class)`
 
 === GraphQL Java 22.0 → 24.3 (Spring Boot only)
-Most APIs (DataFetcher, RuntimeWiring) remain compatible. One required configuration change for Spring Boot:
+Most APIs (`DataFetcher`, `RuntimeWiring`) remain compatible. There is one configuration change for Spring Boot:
 
 [source, properties]
 ----
@@ -273,7 +273,7 @@ Hibernate 7 + Spring ORM 6.2 EntityManagerFactory initialization issue — worka
 === Common Errors After Upgrade
 
 |===
-| Error message | Cause | Fix
+| *Error message* | *Cause* | *Fix*
 
 | ClassNotFoundException: com.asyncapi.v2...ChannelItem | AsyncAPI 3.x package rename | Update imports to com.asyncapi.v3._0_0.model.*
 
