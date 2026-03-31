@@ -42,7 +42,7 @@ If you prefer to install the Runtime environment components individually using O
 For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
 
 
-== Installing the Runtime Environment Helm chart
+== Installing the Runtime Environment Helm chart (recommended)
 The Helm chart provides a simple way to deploy {MANAGEMENT_CONSOLE} and {MCP_SERVER} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licensing.adoc[License Guide]). For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
 
 Choose the required helm chart based on your licensed product:
@@ -128,7 +128,7 @@ To uninstall the `bamoe-management-console` deployment:
 helm uninstall bamoe-management-console
 ----
 
-== MCP Server
+=== MCP Server
 The {MCP_SERVER} is deployed and configured by default during the Runtime environment installation. 
 
 You can disable the installation of the MCP Server in the Helm chart deployment using this command:
@@ -137,7 +137,6 @@ You can disable the installation of the MCP Server in the Helm chart deployment 
 ----
 helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --set mcp.server.enabled=false
 ----
-
 
 To run the {MCP_SERVER}, complete the setup and launch the server image in a Docker environment using the following command:
 
@@ -150,7 +149,7 @@ docker run -it --rm \
   quay.io/bamoe/mcp-server:{IMAGE_VERSION}
 ----
 
-== Passing Environment variables
+=== Passing Environment variables
 
 This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-configuration[Runtime Helm Chart configuration reference] for all options.
  
@@ -161,53 +160,20 @@ helm install my-bamoe-console ./dmoe-runtime-environment-helm-chart --set manage
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
 
-[#helm-chart-configuration]
-== Configuration reference for Runtime Helm Charts
-
 ////
-For all Helm chart installations mentioned, different settings can be applied by editing the `values.yaml` file or passing the `--set` flag as in the example:
 
+For all Helm chart installations mentioned, different settings can be applied by editing the `values.yaml` file or passing the `--set` flag as in the example:
 [source,shell,subs="attributes+"]
+
 ----
 helm install bamoe-management-console ./consoles-helm-chart --set <my.configuration>="<value>"
 ----
 
 Following is the list of all available configurations for the Helm chart.
 
-
-[cols="4*", options="header"]
-|===================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-| Key                                          | Type   | Default                                                                                                                                                                                                                                                 | Description                                                                                                                                     
-| global.ingressSource                         | string | `""`                                                                                                                                                                                                                                                    | Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift"). Obs.: For NOTES generation only                                   
-| global.kubernetesClusterDomain               | string | `""`                                                                                                                                                                                                                                                    | If using Minikube or Kubernetes, set the cluster domain                                                                                         
-| global.kubernetesIngressClass                | string | `""`                                                                                                                                                                                                                                                    | If using Minikube or Kubernetes, set the Ingress class (i.e, nginx)                                                                             
-| global.openshiftRouteDomain                  | string | `""`                                                                                                                                                                                                                                                    | If using OpenShift Routes, set the Route domain                                                                                                 
-| fullnameOverride                             | string | `""`                                                                                                                                                                                                                                                    | Overrides charts full name                                                                                                                      
-| nameOverride                                 | string | `""`                                                                                                                                                                                                                                                    | Overrides charts name                                                                                                                           
-| management-console.appNameOverride           | string | `""`                                                                                                                                                                                                                                                    | Overrides the deployed application name                                                                                                         
-| management-console.applicationSubpath        | string | `""`                                                                                                                                                                                                                                                    | Overrides the subpath the Management Console will be served on                                                                                  
-| management-console.autoscaling               | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}`                                                                                                                                                               | Management Console HorizontalPodAutoscaler configuration (https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)           
-| management-console.enabled                   | bool   | `true`                                                                                                                                                                                                                                                  | Enable or disable Management Console installation                                                                                               
-| management-console.env                       | object | `{}`                                                                                                                                                                                                                                                    | Custom environment variables added to the Management Console Deployment                                                                         
-| management-console.fullnameOverride          | string | `""`                                                                                                                                                                                                                                                    | Overrides charts full name                                                                                                                      
-| management-console.image                     | object | `{"account":"bamoe","name":"management-console","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"9.3.0"}`                                                                                                                                        | Image source configuration for the Management Console image                                                                                     
-| management-console.imagePullSecrets          | list   | `[]`                                                                                                                                                                                                                                                    | Pull secrets used when pulling Management Console image                                                                                         
-| management-console.ingress                   | object | `{"annotations":{},"className":"{{ .Values.global.kubernetesIngressClass }}","enabled":false,"hosts":[{"host":"management-console.{{ .Values.global.kubernetesClusterDomain }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Management Console Ingress configuration (https://kubernetes.io/docs/concepts/services-networking/ingress/)                                     
-| management-console.managedBusinessServices   | list   | `[]`                                                                                                                                                                                                                                                    | Overrides the List of Business Services that are automatically connected to the Management Console                                              
-| management-console.name                      | string | `"management-console"`                                                                                                                                                                                                                                  | Component name                                                                                                                                  
-| management-console.nameOverride              | string | `""`                                                                                                                                                                                                                                                    | Overrides charts name                                                                                                                           
-| management-console.nodeSelector              | object | `{}`                                                                                                                                                                                                                                                    |                                                                                                                                                 
-| management-console.oidcClientDefaultAudience | string | `""`                                                                                                                                                                                                                                                    | Overrides the OIDC Client Default audience when connecting to Identity Providers                                                                
-| management-console.oidcClientDefaultScopes   | string | `""`                                                                                                                                                                                                                                                    | Overrides the OIDC Client Default Scopes when connecting to Identity Providers                                                                  
-| management-console.oidcClientIdOverride      | string | `""`                                                                                                                                                                                                                                                    | Overrides the OIDC Client ID used by the Management Console                                                                                     
-| management-console.openshiftRoute            | object | `{"annotations":{},"enabled":false,"host":"management-console.{{ .Values.global.openshiftRouteDomain }}","path":"","tls":{"insecureEdgeTerminationPolicy":"None","termination":"edge"}}`                                                                | Management Console OpenShift Route configuration (https://docs.openshift.com/container-platform/4.14/networking/routes/route-configuration.html)
-| management-console.service                   | object | `{"nodePort":"","port":8081,"targetPort":8080,"type":"ClusterIP"}`                                                                                                                                                                                      | Management Console Service configuration (https://kubernetes.io/docs/concepts/services-networking/service/)                                     
-| management-console.serviceAccount            | object | `{"annotations":{},"create":true,"name":""}`                                                                                                                                                                                                            | Management Console ServiceAccount configuration (https://kubernetes.io/docs/concepts/security/service-accounts/)                                
-|                                              |        |                                                                                                           
-|===================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 ////
 
-== Option 2: Deploy directly on OpenShift (using `oc` CLI)
+== Deploy directly on OpenShift (using `oc` CLI)
 
 If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
 
@@ -247,7 +213,8 @@ oc set env deployment/bamoe-management-console <ENV_VAR>="<VALUE>"
 ----
 NOTE: For a list of environment variables, check the <<available-environment-variables>> section.
 
-== Option 3: Running locally with Docker
+== Running locally with Docker
+Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
 
 Start the container with:
 
@@ -263,7 +230,7 @@ If necessary, pass the environment variables with the `-e` flag:
 docker run -p <EXTERNAL_PORT>:8080 -e <ENV_VAR>="<VALUE>" quay.io/bamoe/management-console:{IMAGE_VERSION}
 ----
 
-The {MANAGEMENT_CONSOLE} will be up at http://localhost:<EXTERNAL_PORT>
+The {MANAGEMENT_CONSOLE} will be running at http://localhost:<EXTERNAL_PORT>
 
 
 [#available-environment-variables]
@@ -281,8 +248,9 @@ The {MANAGEMENT_CONSOLE} will be up at http://localhost:<EXTERNAL_PORT>
 | `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_BASE_PATH` | Base path used for all routes. | _Empty_
 | `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_USE_APACHE_HTTPD_BASE_PATH_ALIAS` | Set to `"true"` if Apache HTTPD should serve files under an alias prefixed by the base path. | _Empty_
 |===
-////
 
+[#helm-chart-configuration]
+== Configuration reference for Runtime Helm Charts
 
 The following table lists the configurable parameters of the {PRODUCT_SHORT} Runtime Environment chart and their default values.
 
@@ -382,8 +350,6 @@ _CORE"
 | {} 
 | Env variables for {MCP_SERVER} deployment
 |===
-
-////
 
 [#pre-configured-business-services]
 == {MANAGEMENT_CONSOLE} pre-configured _Business Services_ connections
