@@ -41,27 +41,28 @@ Table 1. Known limitations
 
 | It is still possible to access the deployment by manually typing the URL in the browser: `http://localhost/<dev_deployment_id>/q/swagger-ui` for Quarkus and `http://localhost/<dev_deployment_id>/swagger-ui/index.html` for Spring Boot. The error state can be ignored.
 
-|Quarkus Dev UI / Spring Boot Web Console / Management Console: User Task forms not loading if the Business Service runs under a sub-path
-|Unable to load the User Task Forms in the Quarkus Dev UI, Spring Boot Web Console, and the Management Console when the Business Service is running under a sub-path (quarkus.http.root-path or server.servlet.context-path).
-|To avoid this issue, either:
+|Quarkus Dev UI / Spring Boot Web Console / Management Console: User Task forms fail to load when Business Service runs under a sub-path.
+|User Task Forms fail to load in the Quarkus Dev UI, Spring Boot Web Console, and Management Console when the Business Service runs under a sub-path (configured via `quarkus.http.root-path` or `server.servlet.context-path`).
+|To avoid this issue, use one of the following alternatives:
 
-* Create the Dev Deployment in an OpenShift cluster instead.
+* Create the Dev Deployment in an OpenShift cluster instead
 
-* Test the Business Service locally instead of using Dev Deployments.
+* Test the Business Service locally instead of using Dev Deployments
 
-* Submit/transition the User Task directly using the REST API.
+* Submit or transition the User Task directly using the REST API
 
 
-|Developer Tools for VS Code: Updating the extension does not update the bamoe.accelerators.definitions setting
-|When installing the 9.4.x Developer Tools extension, if the "bamoe.accelerators.definitions" setting was manually altered via VS Code's settings, the updated accelerators are not applied.
-|Manually edit the settings.json by either:
+|Developer Tools for VS Code: Extension update does not refresh the `bamoe.accelerators.definitions` setting.
+|When you install the 9.4.x Developer Tools extension, the updated accelerators do not apply if you previously modified the bamoe.accelerators.definitions setting manually in VS Code's settings.
+|Manually edit the settings.json file using one of the following methods:
 
-* Deleting the bamoe.accelerators.definitions setting (preferred)
+* Delete the bamoe.accelerators.definitions setting (preferred).
 
-* Adding the 9.4.0 Accelerators references (when the user already has custom Accelerators)
+* Add the 9.4.0 Accelerators references if you already have custom Accelerators configured,
 
-These are the 9.4.0 Accelerator references:
-
+Following are the 9.4.0 Accelerator references:
+[source]
+----
 {
 "accelerators": [
 
@@ -89,5 +90,5 @@ These are the 9.4.0 Accelerator references:
 { "bpmnDestinationFolder": "src/main/resources/bpmn", "dmnDestinationFolder": "src/main/resources/dmn", "gitRepositoryGitRef": "9.4.0-ibm-0004-decisions-spring-boot-gradle", "gitRepositoryUrl": "https://github.com/IBM/bamoe-canvas-quarkus-accelerator", "name": "Decisions (Spring Boot + Gradle)", "otherFilesDestinationFolder": "src/main/resources/others", "scesimDestinationFolder": "src/test/resources/scesim" }
 ]
 }
-
+----
 |===
