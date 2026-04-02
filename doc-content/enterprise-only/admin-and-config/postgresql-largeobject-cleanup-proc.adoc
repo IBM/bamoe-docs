@@ -1,0 +1,169 @@
+[id='postgresql-largeobject-cleanup-proc_{context}']
+= Cleaning up PostgreSQL large objects
+
+When using PostgreSQL as the database for {PRODUCT}, the `pg_largeobject` table can grow significantly over time, even after process instances are completed. This occurs because the PostgreSQL `vacuumlo` utility only analyzes `oid` columns and does not detect CLOB data stored in `text` columns used by {PRODUCT}. As a result, `vacuumlo` might delete active large objects, causing errors.
+
+This procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data.
+
+.Prerequisites
+* PostgreSQL database is configured for {PRODUCT}.
+* You have administrative access to the PostgreSQL database.
+* The `vacuumlo` utility is available on your system.
+
+.Common error when running vacuumlo without protection
+If you run `vacuumlo` without protecting CLOB data, you might encounter the following error:
+
+[source]
+----
+Caused by: org.hibernate.HibernateException: Unable to access lob stream
+    at org.hibernate.type.descriptor.java.DataHelper.extractString(DataHelper.java:285)
+    at org.hibernate.type.descriptor.java.StringTypeDescriptor.wrap(StringTypeDescriptor.java:89)
+    at org.hibernate.type.descriptor.java.StringTypeDescriptor.wrap(StringTypeDescriptor.java:39)
+    at org.hibernate.type.descriptor.sql.ClobTypeDescriptor$1.doExtract(ClobTypeDescriptor.java:60)
+    at org.hibernate.type.descriptor.sql.BasicExtractor.extract(BasicExtractor.java:64)
+        ...
+Caused by: org.postgresql.util.PSQLException: ERROR: large object 41565 does not exist
+    at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2270)
+    at org.postgresql.core.v3.QueryExecutorImpl.receiveFastpathResult(QueryExecutorImpl.java:672)
+    at org.postgresql.core.v3.QueryExecutorImpl.fastpathCall(QueryExecutorImpl.java:501)
+    at org.postgresql.fastpath.Fastpath.fastpath(Fastpath.java:109)
+----
+
+== Maintenance period solution (with downtime)
+
+Use this approach if you can schedule a maintenance window to stop {PRODUCT}.
+
+.Procedure
+. Stop {PRODUCT}.
+
+. Connect to your PostgreSQL database and create the `jbpm_active_clob` table:
++
+[source,sql]
+----
+CREATE TABLE jbpm_active_clob ( loid oid );
+----
++
+If the table already exists, delete all records:
++
+[source,sql]
+----
+DELETE FROM jbpm_active_clob;
+----
+
+. Populate the `jbpm_active_clob` table with references to active CLOB data:
++
+[source,sql]
+----
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(expression AS oid) FROM BooleanExpression WHERE expression IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(deploymentUnit AS oid) FROM DeploymentStore WHERE deploymentUnit IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(ERROR_INFO AS oid) FROM ExecutionErrorInfo WHERE ERROR_INFO IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM I18NText WHERE text IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(qExpression AS oid) FROM QueryDefinitionStore WHERE qExpression IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(body AS oid) FROM email_header WHERE body IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM task_comment WHERE text IS NOT NULL;
+----
+
+. Run the `vacuumlo` utility to clean up orphaned large objects:
++
+[source,bash]
+----
+vacuumlo -h localhost -p 5432 -U postgres -W -v <database_name>
+----
++
+Replace `<database_name>` with your {PRODUCT} database name.
+
+. Run `VACUUM` and `REINDEX` to optimize the database:
++
+[source,sql]
+----
+VACUUM FULL;
+REINDEX DATABASE <database_name>;
+----
+
+. Clean up the `jbpm_active_clob` table:
++
+[source,sql]
+----
+DELETE FROM jbpm_active_clob;
+----
+
+. Start {PRODUCT}.
+
+== Runtime solution (without downtime)
+
+Use this approach if you cannot stop {PRODUCT} for maintenance.
+
+.Prerequisites
+* The database user has `TRIGGER` privilege on {PRODUCT} tables.
+* The database user has `USAGE` privilege on the `plpgsql` language.
+* The `postgresql-jbpm-lo-trigger-clob.sql` script is available from the {PRODUCT} add-ons.
+
+.Procedure
+. Run the trigger creation script to create triggers and the `jbpm_active_clob` table:
++
+[source,bash]
+----
+psql -h localhost -p 5432 -U postgres -d <database_name> -f postgresql-jbpm-lo-trigger-clob.sql
+----
++
+This trigger automatically copies jBPM CLOB references to the `jbpm_active_clob` table, preventing `vacuumlo` from deleting active large objects.
+
+. Populate the `jbpm_active_clob` table with references to CLOB data that existed before the trigger was created:
++
+[source,sql]
+----
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(expression AS oid) FROM BooleanExpression WHERE expression IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(deploymentUnit AS oid) FROM DeploymentStore WHERE deploymentUnit IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(ERROR_INFO AS oid) FROM ExecutionErrorInfo WHERE ERROR_INFO IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM I18NText WHERE text IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(qExpression AS oid) FROM QueryDefinitionStore WHERE qExpression IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(body AS oid) FROM email_header WHERE body IS NOT NULL;
+INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM task_comment WHERE text IS NOT NULL;
+----
++
+The trigger will now maintain the `jbpm_active_clob` table automatically for new CLOB data.
+
+. Run the `vacuumlo` utility to clean up orphaned large objects:
++
+[source,bash]
+----
+vacuumlo -h localhost -p 5432 -U postgres -W -v <database_name>
+----
+
+. Run `VACUUM` and `REINDEX` to optimize the database:
++
+[source,sql]
+----
+VACUUM FULL;
+REINDEX DATABASE <database_name>;
+----
+
+. Clean up the `jbpm_active_clob` table:
++
+[source,sql]
+----
+DELETE FROM jbpm_active_clob;
+----
+
+[NOTE]
+====
+The trigger remains active and will continue to protect CLOB data for future `vacuumlo` operations.
+====
+
+== Understanding the root cause
+
+The `vacuumlo` utility analyzes the database to find orphaned large objects, but it only examines `oid` columns. In {PRODUCT}, CLOB data is stored in `text` columns (represented as `String @Lob` fields in Java code). Because these `text` columns are not analyzed by `vacuumlo`, the utility might incorrectly identify active large objects as orphaned and delete them.
+
+The solutions described in this procedure copy jBPM CLOB references to the `jbpm_active_clob` table's `oid` column, which `vacuumlo` can detect, preventing the deletion of active large objects.
+
+== Alternative schema options
+
+{PRODUCT} provides alternative schema configurations that affect how large object data is stored:
+
+* *Since {PRODUCT} 7.9*: You can use an alternative schema that replaces `oid` columns with `bytea` columns by setting the system property `-Dorg.kie.persistence.postgresql.useBytea=true` against a newly created database schema. However, data from `text` columns is still stored in the `pg_largeobject` table, so the cleanup procedures described above still apply.
+
+* *Since {PRODUCT} 7.13*: You can use the system property `-Dorg.kie.persistence.postgresql.useText=true` to control how data in `text` columns is stored:
+** If set to `false` (default for backwards compatibility): Text data is stored in `pg_largeobject`.
+** If set to `true`: Text data is stored without using `pg_largeobject`, using `pg_toast.*` tables instead. In this case, triggers are not needed to run `vacuumlo` safely.
+
+For more information about PostgreSQL data source configuration, see https://access.redhat.com/documentation/en-us/red_hat_process_automation_manager/7.13/html/managing_red_hat_process_automation_manager_and_kie_server_settings/eap-data-source-add-proc_execution-server[Managing {PRODUCT} and {KIE_SERVER} settings].
