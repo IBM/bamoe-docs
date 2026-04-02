@@ -1,16 +1,11 @@
 [id='postgresql-largeobject-cleanup-proc_{context}']
 = Cleaning up PostgreSQL large objects
 
-When using PostgreSQL as the database for {PRODUCT}, the `pg_largeobject` table can grow significantly over time, even after process instances are completed. This occurs because the PostgreSQL `vacuumlo` utility only analyzes `oid` columns and does not detect CLOB data stored in `text` columns used by {PRODUCT}. As a result, `vacuumlo` might delete active large objects, causing errors.
+When using PostgreSQL as the database for {PRODUCT}, the `pg_largeobject` table can grow significantly over time, even after process instances are completed. This growth occurs because of how PostgreSQL's `vacuumlo` utility interacts with {PRODUCT}'s data storage.
 
-This procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data.
+The `vacuumlo` utility is designed to identify and remove orphaned large objects by analyzing `oid` columns in the database. However, {PRODUCT} stores CLOB (Character Large Object) data in `text` columns, which are represented as `String @Lob` fields in Java code. Because `vacuumlo` does not analyze `text` columns, it cannot detect these active CLOB references. As a result, the utility might incorrectly identify active large objects as orphaned and delete them, causing application errors.
 
-.Prerequisites
-* PostgreSQL database is configured for {PRODUCT}.
-* You have administrative access to the PostgreSQL database.
-* The `vacuumlo` utility is available on your system.
 
-.Common error when running vacuumlo without protection
 If you run `vacuumlo` without protecting CLOB data, you might encounter the following error:
 
 [source]
@@ -28,6 +23,14 @@ Caused by: org.postgresql.util.PSQLException: ERROR: large object 41565 does not
     at org.postgresql.core.v3.QueryExecutorImpl.fastpathCall(QueryExecutorImpl.java:501)
     at org.postgresql.fastpath.Fastpath.fastpath(Fastpath.java:109)
 ----
+
+Following procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data. The solution works by copying jBPM CLOB references to a temporary table (`jbpm_active_clob`) that uses an `oid` column. Because `vacuumlo` can detect `oid` columns, it will recognize these references and avoid deleting the active large objects.
+
+.Prerequisites
+* PostgreSQL database is configured for {PRODUCT}.
+* You have administrative access to the PostgreSQL database.
+* The `vacuumlo` utility is available on your system.
+
 
 == Maintenance period solution (with downtime)
 
@@ -149,12 +152,6 @@ DELETE FROM jbpm_active_clob;
 ====
 The trigger remains active and will continue to protect CLOB data for future `vacuumlo` operations.
 ====
-
-== Understanding the root cause
-
-The `vacuumlo` utility analyzes the database to find orphaned large objects, but it only examines `oid` columns. In {PRODUCT}, CLOB data is stored in `text` columns (represented as `String @Lob` fields in Java code). Because these `text` columns are not analyzed by `vacuumlo`, the utility might incorrectly identify active large objects as orphaned and delete them.
-
-The solutions described in this procedure copy jBPM CLOB references to the `jbpm_active_clob` table's `oid` column, which `vacuumlo` can detect, preventing the deletion of active large objects.
 
 == Alternative schema options
 
