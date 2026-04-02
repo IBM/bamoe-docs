@@ -1,12 +1,12 @@
 [id='postgresql-largeobject-cleanup-proc_{context}']
 = Cleaning up PostgreSQL large objects
 
-When using PostgreSQL as the database for {PRODUCT}, the `pg_largeobject` table can grow significantly over time, even after process instances are completed. This growth occurs because of how PostgreSQL's `vacuumlo` utility interacts with {PRODUCT}'s data storage.
+When using PostgreSQL as the database for {PRODUCT}, the `pg_largeobject` table can grow significantly over time, even after process instances are completed. This growth occurs because of how PostgreSQL's vacuumlo utility interacts with {PRODUCT}'s data storage.
 
-The `vacuumlo` utility is designed to identify and remove orphaned large objects by analyzing `oid` columns in the database. However, {PRODUCT} stores CLOB (Character Large Object) data in `text` columns, which are represented as `String @Lob` fields in Java code. Because `vacuumlo` does not analyze `text` columns, it cannot detect these active CLOB references. As a result, the utility might incorrectly identify active large objects as orphaned and delete them, causing application errors.
+The vacuumlo utility is designed to identify and remove orphaned large objects by analyzing `oid` columns in the database. However, {PRODUCT} stores CLOB (Character Large Object) data in `text` columns, which are represented as `String @Lob` fields in Java code. Because vacuumlo does not analyze `text` columns, it cannot detect these active CLOB references. As a result, the utility might incorrectly identify active large objects as orphaned and delete them, causing application errors.
 
 
-If you run `vacuumlo` without protecting CLOB data, you might encounter the following error:
+If you run vacuumlo without protecting CLOB data, you might encounter the following error:
 
 [source]
 ----
@@ -24,12 +24,12 @@ Caused by: org.postgresql.util.PSQLException: ERROR: large object 41565 does not
     at org.postgresql.fastpath.Fastpath.fastpath(Fastpath.java:109)
 ----
 
-Following procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data. The solution works by copying jBPM CLOB references to a temporary table (`jbpm_active_clob`) that uses an `oid` column. Because `vacuumlo` can detect `oid` columns, it will recognize these references and avoid deleting the active large objects.
+Following procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data. The solution works by copying jBPM CLOB references to a temporary table (`jbpm_active_clob`) that uses an `oid` column. Because vacuumlo can detect `oid` columns, it will recognize these references and avoid deleting the active large objects.
 
 .Prerequisites
 * PostgreSQL database is configured for {PRODUCT}.
 * You have administrative access to the PostgreSQL database.
-* The `vacuumlo` utility is available on your system.
+* The vacuumlo utility is available on your system.
 
 
 == Maintenance period solution (with downtime)
@@ -66,7 +66,7 @@ INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(body AS oid) FROM email_header
 INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM task_comment WHERE text IS NOT NULL;
 ----
 
-. Run the `vacuumlo` utility to clean up orphaned large objects:
+. Run the vacuumlo utility to clean up orphaned large objects:
 +
 [source,bash]
 ----
@@ -109,7 +109,7 @@ Use this approach if you cannot stop {PRODUCT} for maintenance.
 psql -h localhost -p 5432 -U postgres -d <database_name> -f postgresql-jbpm-lo-trigger-clob.sql
 ----
 +
-This trigger automatically copies jBPM CLOB references to the `jbpm_active_clob` table, preventing `vacuumlo` from deleting active large objects.
+This trigger automatically copies jBPM CLOB references to the `jbpm_active_clob` table, preventing vacuumlo from deleting active large objects.
 
 . Populate the `jbpm_active_clob` table with references to CLOB data that existed before the trigger was created:
 +
@@ -126,7 +126,7 @@ INSERT INTO jbpm_active_clob ( loid ) SELECT CAST(text AS oid) FROM task_comment
 +
 The trigger will now maintain the `jbpm_active_clob` table automatically for new CLOB data.
 
-. Run the `vacuumlo` utility to clean up orphaned large objects:
+. Run the vacuumlo utility to clean up orphaned large objects:
 +
 [source,bash]
 ----
@@ -150,7 +150,7 @@ DELETE FROM jbpm_active_clob;
 
 [NOTE]
 ====
-The trigger remains active and will continue to protect CLOB data for future `vacuumlo` operations.
+The trigger remains active and will continue to protect CLOB data for future vacuumlo operations.
 ====
 
 //== Alternative schema options
