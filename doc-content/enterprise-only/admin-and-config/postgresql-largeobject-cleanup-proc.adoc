@@ -153,14 +153,13 @@ DELETE FROM jbpm_active_clob;
 The trigger remains active and will continue to protect CLOB data for future `vacuumlo` operations.
 ====
 
-== Alternative schema options
+//== Alternative schema options
 
-{PRODUCT} provides alternative schema configurations that affect how large object data is stored:
+//{PRODUCT} provides alternative schema configurations that affect how large object data is stored:
 
-* *Since {PRODUCT} 7.9*: You can use an alternative schema that replaces `oid` columns with `bytea` columns by setting the system property `-Dorg.kie.persistence.postgresql.useBytea=true` against a newly created database schema. However, data from `text` columns is still stored in the `pg_largeobject` table, so the cleanup procedures described above still apply.
+//* *Since {PRODUCT} 7.9*: You can use an alternative schema that replaces `oid` columns with `bytea` columns by setting the system property `-Dorg.kie.persistence.postgresql.useBytea=true` against a newly created database schema. However, data from `text` columns is still stored in the `pg_largeobject` table, so the cleanup procedures described above still apply.
 
-* *Since {PRODUCT} 7.13*: You can use the system property `-Dorg.kie.persistence.postgresql.useText=true` to control how data in `text` columns is stored:
-** If set to `false` (default for backwards compatibility): Text data is stored in `pg_largeobject`.
-** If set to `true`: Text data is stored without using `pg_largeobject`, using `pg_toast.*` tables instead. In this case, triggers are not needed to run `vacuumlo` safely.
+//* *Since {PRODUCT} 7.13*: You can use the system property `-Dorg.kie.persistence.postgresql.useText=true` to control how data in `text` columns is stored:
+//** If set to `false` (default for backwards compatibility): Text data is stored in `pg_largeobject`.
+//** If set to `true`: Text data is stored without using `pg_largeobject`, using `pg_toast.*` tables instead. In this case, triggers are not needed to run `vacuumlo` safely.
 
-For more information about PostgreSQL data source configuration, see https://access.redhat.com/documentation/en-us/red_hat_process_automation_manager/7.13/html/managing_red_hat_process_automation_manager_and_kie_server_settings/eap-data-source-add-proc_execution-server[Managing {PRODUCT} and {KIE_SERVER} settings].
