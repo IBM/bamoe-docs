@@ -221,195 +221,198 @@ $ ./elytron/kie-fs-realm-patch.bat ~/$JBOSS_HOME/standalone/configuration/kie-fs
 ----
 . After you finish applying all relevant updates, start {PRODUCT} and {KIE_SERVER} and log in to {CENTRAL}.
 . Verify that all project data is present and accurate in {CENTRAL}, and in the top-right corner of the {CENTRAL} window, click your profile name and click *About* to verify the updated product version number.
-+
-If you encounter errors or notice any missing data in {CENTRAL}, you can restore the contents in the `backup` folder within the `{PRODUCT_INIT}-$VERSION-update` folder to revert the update tool changes. You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}. After restoring your previous distribution, you can try again to run the update.
-
-
-= Using migration tool to prepare Business Central .niogit directory for upgrade
-
-The `.niogit` directory of your Business Central distribution contains all Business Central data. You can use the Business Central migration tool on your `.niogit` directory to prepare project data and system configurations for patch updates and minor release upgrades. 
-
-*Prerequisites*
-
-* New version of {PRODUCT_SHORT} is installed Business Central is not running.   
-+
-NOTE: Do not run {PRODUCT_SHORT} Business Central until you have completed the steps in this section. 
-+
-* JDK 8 is installed and is available on the path where the project migration tool will be installed. 
-* Download `bamoe-version-add-ons.zip` and extract the file to a temporary directory. 
-
-*Procedure*
-
-. In the extracted `bamoe-8.0.x-add-ons.zip` folder, extract the `bamoe-8.0.x-migration-tool.zip` sub-folder. The migration tool is in the bin directory.
-. Locate the `bin/.niogit` directory in your previous installation backup, and locate the equivalent directory for your new installation.
-. Copy the `.niogit` directory from your Business Central backup directory to the bin folder of your new installation.
-+
-The copied `.niogit` folder is the directory that the migration tool will prepare for the new installation. The original `.niogit` folder remains in your old {PRODUCT_SHORT} installation and will not be modified by the migration tool in this procedure.
-+
-
-. Delete the `.index` directory from the bin directory before migrating the `.niogit` folder. This directory is automatically created when BAMOE starts and contains index data that is incompatible between versions. The bin directory will be re-indexed automatically after migration is complete. 
-
-. Note the path to the copied `.niogit` directory for the new installation. The path will be required when you run the migration tool. 
-
-. If you have specific `dependencies`, `repositories`, or `pluginRepositories` that you want to add, remove, or update as part of the project migration, create a `pom-migration.json` file containing these elements. When you run the migration tool, the tool will prompt you if you want to include this file in the migration.
-+
-The `pom-migration.json` file requires the following sections:
-+
-* `"dependencies":[]`
-* `"repositories-add":[]`
-* `"repositories-remove":[]`
-* `"repositories-update-urls":[]`
-* `"pluginRepositories-add":[]`
-* `"pluginRepositories-remove":[]`
-* `"pluginRepositories-update-urls":[]`
-+
-If any of these elements do not apply to your project, include them as empty sections to prevent parsing errors. 
-+
-Example `pom-migration.json` file: 
-+
-[source,json]
-----
-{
-  "dependencies":[
-
-    {"groupId":"junit", "artifactId":"junit", "version":"4.12", "scope":"test"},
-    {"groupId":"com.thoughtworks.xstream", "artifactId":"xstream", "version":"4.12", "scope":"test"}
-
-  ],
-
-  "repositories-add":[
-    {
-      "id":"jboss-public-repository-group",
-      "name":"JBoss Public Repository Group",
-      "url":"http://repository.jboss.org/nexus/content/groups/public/",
-      "releasesEnabled":true,
-      "releasesUpdatePolicy":"never",
-      "snapshotEnabled":true,
-      "snapshotUpdatePolicy":"never"
-    },
-    {
-      "id":"kie-internal-staging-repository-group",
-      "name":"KIE Internal Staging Repositories",
-      "url":"https://maven.repository.redhat.com/ga/",
-      "releasesEnabled":true,
-      "releasesUpdatePolicy":"never",
-      "snapshotEnabled":false,
-      "snapshotUpdatePolicy":"never"
-    }
-  ],
-
-  "repositories-remove":[
-    {
-      "id":"productization-repository", "url":"https://maven.repository.redhat.com/ga/"
-    }
-  ],
-
-  "repositories-update-urls":[
-    {
-      "id":"guvnor-m2-repo", "url":"https://maven.repository.redhat.com/ga/"
-    }
-  ],
-
-  "pluginRepositories-add":[
-
-    {
-      "id":"jboss-public-repository-group",
-      "name":"JBoss Public Repository Group",
-      "url":"http://repository.jboss.org/nexus/content/groups/public/",
-      "releasesEnabled":true,
-      "releasesUpdatePolicy":"never",
-      "snapshotEnabled":true,
-      "snapshotUpdatePolicy":"never"
-    },
-    {
-      "id":"kie-internal-staging-repository-group",
-      "name":"KIE Internal Staging Repositories",
-      "url":"https://maven.repository.redhat.com/ga/",
-      "releasesEnabled":true,
-      "releasesUpdatePolicy":"never",
-      "snapshotEnabled":false,
-      "snapshotUpdatePolicy":"never"
-    }
-
-  ],
-  "pluginRepositories-remove":[],
-  "pluginRepositories-update-urls":[]
-}
-----
-+
-Example `pom-migration.json` file with `dependencies` only: 
-+
-[source,json]
-----
-{
-  "dependencies":[
-
-    {"groupId":"junit", "artifactId":"junit", "version":"4.12", "scope":"test"},
-    {"groupId":"com.thoughtworks.xstream", "artifactId":"xstream", "version":"4.12", "scope":"test"}
-
-  ],
-  "repositories-add":[],
-  "repositories-remove":[],
-  "repositories-update-urls":[],
-  "pluginRepositories-add":[],
-  "pluginRepositories-remove":[],
-  "pluginRepositories-update-urls":[]
-}
-----
-+ 
-. In your command terminal, navigate to the temporary directory where you extracted the `bamoe-8.0.x-migration-tool` folder and run the migration tool. The `$BAMOE_NIOGIT_DIR` portion is the path to the `.niogit` directory that you previously copied to the {PRODUCT_SHORT} installation. 
 
 +
+If you encounter errors or notice any missing {CENTRAL} data, you can use the {CENTRAL} migration tool on your `.niogit` directory to prepare project data and system configurations. For more information, see xref:../assemblies/assembly-redhat-to-bamoe#niogit_directory.adoc [Using migration tool to prepare Business Central `.niogit` directory for upgrade].
++
+Alternatively, you can restore the contents in the `backup` folder within the `{PRODUCT_INIT}-$VERSION-update` folder to revert the update tool changes. You can also reinstall the relevant release artifacts from your previous version of {PRODUCT}. After restoring your previous distribution, you can try again to run the update.
 
-On Linux or UNIX-based systems: 
-+
 
-[source,shell]
-----
-cd $INSTALL_DIR/BAMOE_8.0-migration-tool/bin
-./migration-tool.sh -t $BAMOE_NIOGIT_DIR
-----
-+
-On Windows systems: 
-+
-[source,shell]
-----
-cd $INSTALL_DIR\BAMOE_8.0-migration-tool\bin
-migration-tool.bat -t $BAMOE_NIOGIT_DIR
-----
-+
-In the command prompt that appears, the following options are displayed: 
-+
-* Project structure migration
-* System configuration directory structure migration
-* Forms migration
-* POMs migration
-* All
-* Exit
-+
-. Select the *All* option to run migrations in sequence. 
-+
-. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option. Migration options described in following table:
-+
-[cols="1,1"]
-|===
-|Migration options |Description
-
-|Project structure migration 
-|Migrates the project repository structure to the new project-oriented structure used.
-
-|System configuration directory structure migration 
-|Migrates the `system.git` repository structure to the new structure used in {PRODUCT_SHORT} 8.0.x.
-
-|Forms migration
-|Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer.
-
-|POMs migration
-|Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
-|===
-+
-. After the tool finishes running, enter the option to Exit the migration tool.
-+
-The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT}.
-+
-. Project directories are in separate repositories and all other related configurations have been migrated. You can navigate to the new `.niogit` directory to inspect the restructured contents. 
+//= Using migration tool to prepare Business Central .niogit directory for upgrade
+//
+//The `.niogit` directory of your Business Central distribution contains all Business Central data. You can use the Business Central migration tool on your `.niogit` directory to prepare project data and system configurations for patch updates and minor release upgrades.
+//
+//*Prerequisites*
+//
+//* New version of {PRODUCT_SHORT} is installed Business Central is not running.
+//+
+//NOTE: Do not run {PRODUCT_SHORT} Business Central until you have completed the steps in this section.
+//+
+//* JDK 8 is installed and is available on the path where the project migration tool will be installed.
+//* Download `bamoe-version-add-ons.zip` and extract the file to a temporary directory.
+//
+//*Procedure*
+//
+//. In the extracted `bamoe-8.0.x-add-ons.zip` folder, extract the `bamoe-8.0.x-migration-tool.zip` sub-folder. The migration tool is in the bin directory.
+//. Locate the `bin/.niogit` directory in your previous installation backup, and locate the equivalent directory for your new installation.
+//. Copy the `.niogit` directory from your Business Central backup directory to the bin folder of your new installation.
+//+
+//The copied `.niogit` folder is the directory that the migration tool will prepare for the new installation. The original `.niogit` folder remains in your old {PRODUCT_SHORT} installation and will not be modified by the migration tool in this procedure.
+//+
+//
+//. Delete the `.index` directory from the bin directory before migrating the `.niogit` folder. This directory is automatically created when BAMOE starts and contains index data that is incompatible between versions. The bin directory will be re-indexed automatically after migration is complete.
+//
+//. Note the path to the copied `.niogit` directory for the new installation. The path will be required when you run the migration tool.
+//
+//. If you have specific `dependencies`, `repositories`, or `pluginRepositories` that you want to add, remove, or update as part of the project migration, create a `pom-migration.json` file containing these elements. When you run the migration tool, the tool will prompt you if you want to include this file in the migration.
+//+
+//The `pom-migration.json` file requires the following sections:
+//+
+//* `"dependencies":[]`
+//* `"repositories-add":[]`
+//* `"repositories-remove":[]`
+//* `"repositories-update-urls":[]`
+//* `"pluginRepositories-add":[]`
+//* `"pluginRepositories-remove":[]`
+//* `"pluginRepositories-update-urls":[]`
+//+
+//If any of these elements do not apply to your project, include them as empty sections to prevent parsing errors.
+//+
+//Example `pom-migration.json` file:
+//+
+//[source,json]
+//----
+//{
+//  "dependencies":[
+//
+//    {"groupId":"junit", "artifactId":"junit", "version":"4.12", "scope":"test"},
+//    {"groupId":"com.thoughtworks.xstream", "artifactId":"xstream", "version":"4.12", "scope":"test"}
+//
+//  ],
+//
+//  "repositories-add":[
+//    {
+//      "id":"jboss-public-repository-group",
+//      "name":"JBoss Public Repository Group",
+//      "url":"http://repository.jboss.org/nexus/content/groups/public/",
+//      "releasesEnabled":true,
+//      "releasesUpdatePolicy":"never",
+//      "snapshotEnabled":true,
+//      "snapshotUpdatePolicy":"never"
+//    },
+//    {
+//      "id":"kie-internal-staging-repository-group",
+//      "name":"KIE Internal Staging Repositories",
+//      "url":"https://maven.repository.redhat.com/ga/",
+//      "releasesEnabled":true,
+//      "releasesUpdatePolicy":"never",
+//      "snapshotEnabled":false,
+//      "snapshotUpdatePolicy":"never"
+//    }
+//  ],
+//
+//  "repositories-remove":[
+//    {
+//      "id":"productization-repository", "url":"https://maven.repository.redhat.com/ga/"
+//    }
+//  ],
+//
+//  "repositories-update-urls":[
+//    {
+//      "id":"guvnor-m2-repo", "url":"https://maven.repository.redhat.com/ga/"
+//    }
+//  ],
+//
+//  "pluginRepositories-add":[
+//
+//    {
+//      "id":"jboss-public-repository-group",
+//      "name":"JBoss Public Repository Group",
+//      "url":"http://repository.jboss.org/nexus/content/groups/public/",
+//      "releasesEnabled":true,
+//      "releasesUpdatePolicy":"never",
+//      "snapshotEnabled":true,
+//      "snapshotUpdatePolicy":"never"
+//    },
+//    {
+//      "id":"kie-internal-staging-repository-group",
+//      "name":"KIE Internal Staging Repositories",
+//      "url":"https://maven.repository.redhat.com/ga/",
+//      "releasesEnabled":true,
+//      "releasesUpdatePolicy":"never",
+//      "snapshotEnabled":false,
+//      "snapshotUpdatePolicy":"never"
+//    }
+//
+//  ],
+//  "pluginRepositories-remove":[],
+//  "pluginRepositories-update-urls":[]
+//}
+//----
+//+
+//Example `pom-migration.json` file with `dependencies` only:
+//+
+//[source,json]
+//----
+//{
+//  "dependencies":[
+//
+//    {"groupId":"junit", "artifactId":"junit", "version":"4.12", "scope":"test"},
+//    {"groupId":"com.thoughtworks.xstream", "artifactId":"xstream", "version":"4.12", "scope":"test"}
+//
+//  ],
+//  "repositories-add":[],
+//  "repositories-remove":[],
+//  "repositories-update-urls":[],
+//  "pluginRepositories-add":[],
+//  "pluginRepositories-remove":[],
+//  "pluginRepositories-update-urls":[]
+//}
+//----
+//+
+//. In your command terminal, navigate to the temporary directory where you extracted the `bamoe-8.0.x-migration-tool` folder and run the migration tool. The `$BAMOE_NIOGIT_DIR` portion is the path to the `.niogit` directory that you previously copied to the {PRODUCT_SHORT} installation.
+//
+//+
+//
+//On Linux or UNIX-based systems:
+//+
+//
+//[source,shell]
+//----
+//cd $INSTALL_DIR/BAMOE_8.0-migration-tool/bin
+//./migration-tool.sh -t $BAMOE_NIOGIT_DIR
+//----
+//+
+//On Windows systems:
+//+
+//[source,shell]
+//----
+//cd $INSTALL_DIR\BAMOE_8.0-migration-tool\bin
+//migration-tool.bat -t $BAMOE_NIOGIT_DIR
+//----
+//+
+//In the command prompt that appears, the following options are displayed:
+//+
+//* Project structure migration
+//* System configuration directory structure migration
+//* Forms migration
+//* POMs migration
+//* All
+//* Exit
+//+
+//. Select the *All* option to run migrations in sequence.
+//+
+//. If you prefer to run one migration option at a time, select and run the first individual migration option. After the tool runs, re-run the Business Central migration tool and select the next individual migration option in the following sequence. Enter `yes` each time you are prompted to run a specific migration option. Migration options described in following table:
+//+
+//[cols="1,1"]
+//|===
+//|Migration options |Description
+//
+//|Project structure migration
+//|Migrates the project repository structure to the new project-oriented structure used.
+//
+//|System configuration directory structure migration
+//|Migrates the `system.git` repository structure to the new structure used in {PRODUCT_SHORT} 8.0.x.
+//
+//|Forms migration
+//|Migrates forms created in the Red Hat JBoss BPM Suite forms designer to the new forms designer.
+//
+//|POMs migration
+//|Updates `pom.xml` files with dependencies required for {PRODUCT_SHORT} 8.0.x. If you want to include a path to an external `pom-migration.json` file that you created previously, enter `yes` when prompted and enter the path.
+//|===
+//+
+//. After the tool finishes running, enter the option to Exit the migration tool.
+//+
+//The `.niogit` directory structure is now compatible with Business Central in {PRODUCT_SHORT}.
+//+
+//. Project directories are in separate repositories and all other related configurations have been migrated. You can navigate to the new `.niogit` directory to inspect the restructured contents.
