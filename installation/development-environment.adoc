@@ -218,6 +218,7 @@ oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
 oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
+oc set env deployment/$APP_NAME_CORS_PROXY CORS_PROXY_ALLOWED_ORIGINS=https://$(oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host})
 ----
 
 == Running {CANVAS} containers locally with Docker
@@ -236,7 +237,7 @@ Use the following command to configure {CORS_PROXY}:
 
 [source,shell,subs="attributes+"]
 ----
-docker run -p 8090:8080 -it quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+docker run -p 8090:8080 -it -e CORS_PROXY_ALLOWED_ORIGINS=http://localhost:8080 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
 # Add the -d flag to run in detached mode.
 ----
 The API is accessible through the port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
