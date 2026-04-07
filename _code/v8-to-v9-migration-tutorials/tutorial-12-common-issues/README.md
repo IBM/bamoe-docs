@@ -129,7 +129,6 @@ find . -name "*.java" -exec sed -i 's/import javax\./import jakarta./g' {} \;
 ```
 
 **References:**
-- See **Tutorial 11: External Services Integration & Security** for REST endpoint migration examples
 - See **Tutorial 12: Database Integration** for service API migration patterns
 
 ---
@@ -560,7 +559,6 @@ end
 
 ### Issue #14: Work Item Handlers Registration
 
-**Source:** Tutorial 11 (External Services)
 
 **Problem:** v8 registers handlers in kie-deployment-descriptor.xml
 **v9:** Register via CDI beans
@@ -638,81 +636,6 @@ public class EmailHandler extends DefaultKogitoWorkItemHandler {
 
 ---
 
-### Issue #15: User Group Callback Configuration
-
-**Source:** Tutorial 11 (External Services)
-
-**Problem:** v8 uses `UserGroupCallback` configured in kie-deployment-descriptor.xml
-**v9:** Replaced by `IdentityProvider` interface with runtime-based authentication
-
-#### v8 Configuration
-
-In v8, `UserGroupCallback` was configured using options like `org.jbpm.ht.callback` and `org.jbpm.ht.custom.callback`:
-
-Common v8 implementations included:
-- `JAASUserGroupCallbackImpl` - Integrated with application server security
-- `DBUserGroupCallbackImpl` - Retrieved from database
-- `LDAPUserGroupCallbackImpl` - Accessed from LDAP directory
-- `PropsUserGroupCallbackImpl` - Defined via properties file
-
-#### v9 Solution: IdentityProvider
-
-BAMOE v9 replaces `UserGroupCallback` with the `IdentityProvider` interface, delegating authentication and authorization to the runtime environment (Quarkus or Spring Boot) using OpenID Connect (OIDC) and OAuth 2.0.
-
-**IdentityProvider Interface:**
-```java
-public interface IdentityProvider {
-    String getIdentity();
-    String getName();
-    boolean hasRole(String role);
-}
-```
-
-**Non-Secured Applications:**
-
-For applications without OIDC, pass user and group info via query parameters:
-
-```bash
-POST /usertasks/instances/{id}/transition?user=admin&group=Manager&group=IT
-```
-
-This is only allowed when:
-- Authentication is disabled: `kogito.security.auth.enabled=false`, OR
-- User can impersonate via: `kogito.security.auth.impersonation.allowed-for-roles=managers`
-
-**application.properties:**
-```properties
-kogito.security.auth.enabled=false
-kogito.security.auth.impersonation.allowed-for-roles=managers
-```
-
-**Secured Applications (OIDC Enabled):**
-
-When OIDC is enabled (`kogito.security.auth.enabled=true`), identity and roles are extracted from the bearer token:
-
-```bash
-Authorization: Bearer <my_access_token>
-```
-
-Query parameters are ignored; identity comes from token claims.
-
-**Quarkus Integration:**
-
-In Quarkus, `QuarkusIdentityProvider` bridges the Quarkus security context with the Kogito runtime:
-
-```java
-// Automatically provided by Quarkus runtime
-// Extracts user and role information from SecurityIdentity
-```
-
-**Fix:**
-1. Remove `UserGroupCallback` implementations
-2. Configure OIDC in your runtime (Quarkus/Spring Boot)
-3. Use `IdentityProvider` interface (automatically provided by runtime)
-4. For non-secured apps, use query parameters with appropriate security settings
-5. For secured apps, integrate with external IdP using OIDC
-
----
 
 ### Issue #16: Database Configuration
 

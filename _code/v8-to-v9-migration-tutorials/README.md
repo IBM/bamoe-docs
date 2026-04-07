@@ -75,17 +75,13 @@ v8-to-v9-upgrade-tutorials/
     - Maven multi-module structure and dependency management
     - Project organization in v9
 
-11. **[Tutorial 11: External Services Integration & Security](./tutorial-11-external-services-security/README.md)**
-    - REST/SOAP service integration with authentication
-    - User group callbacks and role-based access control
-
-12. **[Tutorial 12: Database Integration & Async Processing](./tutorial-12-database-async-processing/README.md)**
+11. **[Tutorial 11: Database Integration & Async Processing](./tutorial-11-database-async-processing/README.md)**
     - JDBC connections and transaction management
     - Async work item handlers and callbacks
 
 ### Common Issues & Solutions (1 tutorial)
 
-13. **[Tutorial 13: Common Migration Issues and Solutions](./tutorial-13-common-migration-issues/README.md)**
+12. **[Tutorial 12: Common Migration Issues and Solutions](./tutorial-12-common-migration-issues/README.md)**
     - Comprehensive guide to known migration issues
     - Problem descriptions, solutions, and code examples
     - Quick reference for troubleshooting
