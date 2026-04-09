@@ -12,75 +12,10 @@ You can use Gradle as the build system by following standard Gradle conventions 
 
 * Quarkus projects are built using the Quarkus plugin.
 * Spring Boot projects are built using the `kogito-gradle-plugin`.
+* Gradle does not have a built-in *profile* feature like Maven.
+* In Gradle, Maven-style profiles can be emulated by keeping common configuration in `build.gradle` and conditionally applying separate, profile-specific Gradle files (such as `profile-dev.gradle` or `profile-prod.gradle`) at build time based on a `buildProfile` environment variable.
 
 The supported version is Gradle 9.2. It is possible to use either a system-wide `gradle` executable or the project-specific `gradlew` executable for both frameworks.
-
-=== Structure
-
-The overall structure of your project is the same regardless of the framework you use. The contents of the `src` folder in a Gradle project are the same as in a Maven project.
-
-In comparison to Maven project, you can see the following files in your Gradle project:
-
-* No pom.xml file.
-* A `gradle.properties` file, that you use to define properties referenced from `settings.gradle` and `build.gradle` files.
-* A `settings.gradle` file, which serves as the entry point of every Gradle project. For more information, see xref:https://docs.gradle.org/current/userguide/settings_file_basics.html[Settings File Basics] in the official Gradle documentation.
-* A `build.gradle` file, which defines the build configuration, tasks, and plugins; refer to the official Gradle documentation for more details.
-
-NOTE: Maven places all build artifacts in the `target/` directory, while Gradle places them in the `build/` directory.
-
-=== Profiles
-
-Gradle does not have a built-in *profile* feature like Maven.
-
-To replicate Maven-style profiles in a Quarkus and Spring Boot projects using Gradle, do the following steps:
-
-. Create separate Gradle files for each profile (e.g., `profile-dev.gradle`, `profile-prod.gradle`).
-. Put profile-specific settings or properties inside the created files.
-. Keep all shared configuration in the main `build.gradle` file.
-. At build time, include the correct profile file depending on the `buildProfile` environment variable.
-
-The following example shows how you can simulate Maven-style profiles in a Quarkus project using Gradle. 
-Each profile has its own file that contains only the dependencies specific to that environment.
-
-In `profile-dev.gradle` you define required dependencies when building the application in development mode, such as using the in-memory H2 database.
-
-[source,xml]
-----
-// profile-dev.gradle
-
-dependencies {
-    implementation 'io.quarkus:quarkus-jdbc-h2'
-}
-----
-
-In `profile-prod.gradle` you add the dependencies needed for the production environment, for example using PostgreSQL.
-
-[source,xml]
-----
-// profile-prod.gradle
-
-dependencies {
-    implementation 'io.quarkus:quarkus-jdbc-postgresql'
-}
-----
-
-In the main `build.gradle` file, you load the correct profile based on the `buildProfile` property. If no profile is provided, it defaults to `prod`.
-
-[source,java]
-----
-// build.gradle
-
-if (!hasProperty('buildProfile')) ext.buildProfile = 'prod'
-
-apply from: "profile-${buildProfile}.gradle"
-----
-
-After setting up Gradle files for each profile, `buildProfile` variable could be set as system property, or as the following command line property:
-
-[source,xml]
-----
-gradlew -PbuildProfile=dev ....
-----
 
 == Quarkus build support with Maven
 
@@ -164,13 +99,31 @@ Docker:: Set `quarkus.docker.buildx.platform=linux/s390x`.
 Podman:: Set `quarkus.podman.platform=linux/s390x`.
 ====
 
+== Spring Boot build support with Maven
+
+Use standard Maven and Java commands to package and run the generated Spring Boot application.
+
+Use the following command for building the application:
+
+[source,shell]
+----
+mvn clean package
+----
+
+Use the following command for running the application locally:
+
+[source,shell]
+----
+java -jar ./target/(name_of_the_application).jar
+----
+
 == Quarkus build support with Gradle
 
-Build support for Quarkus projects, including hot reload, is provided by the `io.quarkus` plugin. All necessary versions are defined in `gradle.properties file`.
+Build support for Quarkus projects, including hot reload, is provided by the `io.quarkus` plugin. All necessary versions are defined in `gradle.properties` file.
 
 [source,xml]
 ----
-#Gradle properties
+#gradle.properties
 ##3.27.1 needed to support gradle 9.2
 quarkusPluginId=io.quarkus
 quarkusPluginVersion=3.27.1
@@ -179,7 +132,7 @@ quarkusPlatformArtifactId=quarkus-bom
 quarkusPlatformVersion=3.27.1
 taskTreeVersion=4.0.1
 junitVersion=5.12.1
-bamoeVersion=9.4.0 (<---verify)
+bamoeVersion=9.4.0
 ----
 
 Overall configuration is done in `settings.gradle` file and ensures the Quarkus plugin is correctly mapped at build time. 
@@ -203,71 +156,6 @@ rootProject.name = "(service_specific)"
 ----
 
 The main build file, `build.gradle`, applies the Quarkus plugin, sets up repositories, dependencies, and configures build tasks.
-
-[source,xml]
-----
-plugins {
-  id 'java'
-  id 'io.quarkus'
-
-  // Inspection purpose
-  id "com.dorongold.task-tree" version "${taskTreeVersion}"
-}
-
-repositories {
-  mavenCentral()
-  mavenLocal()
-  maven {
-    url = uri("https://repo.maven.apache.org/maven2/")
-  }
-  maven {
-    url = uri("https://repository.apache.org/snapshots/")
-  }
-}
-
-group '(service_specific)'
-version '(service_specific)'
-
-dependencies {
-  implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-  implementation 'io.quarkus:quarkus-arc'
-  implementation 'io.quarkus:quarkus-resteasy'
-  implementation 'io.quarkus:quarkus-resteasy-jackson'
-  implementation 'io.quarkus:quarkus-smallrye-openapi'
-
-  implementation platform("org.kie.kogito:kogito-bom:${bamoeVersion}")
-
-  implementation 'org.jbpm:jbpm-with-drools-quarkus'
-  implementation 'org.kie.kogito:process-workitems'
-  implementation 'org.kie.kogito:jbpm-flow'
-  implementation 'org.kie.kogito:jbpm-bpmn2'
-  implementation 'org.drools:drools-quarkus-decisions'
-  testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
-  testImplementation 'io.quarkus:quarkus-junit5'
-  testImplementation("io.rest-assured:rest-assured")
-}
-
-test {
-  systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
-}
-
-compileJava {
-  options.encoding = 'UTF-8'
-  options.compilerArgs << '-parameters'
-}
-
-compileTestJava {
-  options.encoding = 'UTF-8'
-}
-----
-
-Quarkus provides built-in hot reload via the `quarkusDev` task. To build and start the project with hot reload enabled, run the following command:
-[source,xml]
-----
-gradlew clean quarkusDev
-----
-
-When you modify any source file, Gradle rebuilds the affected code and Quarkus reloads the application so the changes take effect immediately.
 
 === GraalVM
 
@@ -294,49 +182,19 @@ can be replaced with the equivalent Gradle command:
 
 NOTE: Maven places all build artifacts in the `target/` directory, while Gradle places them in the `build/` directory.
 
-== Spring Boot build support with Maven
-
-Use standard Maven and Java commands to package and run the generated Spring Boot application.
-
-Use the following command for building the application:
-
-[source,shell]
-----
-mvn clean package
-----
-
-Use the following command for running the application locally:
-
-[source,shell]
-----
-java -jar ./target/(name_of_the_application).jar
-----
-
 == Spring Boot build support with Gradle
 
-Spring Boot project support is provided through the `kogito-gradle-plugin`, which serves as the Gradle equivalent of the `kogito-maven-plugin`.
-
-The `kogito-gradle-plugin` adds a new task called `generateModel`, and sets up the following internal task flow that runs before and after it:
-
-**Classes task**:: A default task, that compiles all Java sources under `src/main/java`.
-
-**generateModel**:: Reads the project's models and generates Java sources in `./build/generated/sources/kogito`.
-
-**compileSecondaryJava**:: A custom task, that compiles all of the generated sources from the previous step.
-
-To ensure the application works correctly, all Spring Boot tasks that rely on compiled code must run after `compileSecondaryJava`.
-
-All relevant versions are defined in `gradle.properties` file.
+Spring Boot support is provided by the `kogito-gradle-plugin`, the Gradle equivalent of `kogito-maven-plugin`, which introduces a `generateModel` task that runs after the standard classes task and before a custom `compileSecondaryJava` task that compiles generated sources. All Spring Boot tasks depending on compiled code must run after `compileSecondaryJava`, with versions defined in `gradle.properties`.
 
 [source,xml]
 ----
-#Gradle properties
+#gradle.properties
 
 springBootVersion=3.4.11
 springBootDependencyManagementVersion=1.1.5
 taskTreeVersion=4.0.1
 junitVersion=5.12.1
-bamoeVersion=9.4.0 (<---verify)
+bamoeVersion=9.4.0
 ----
 
 Overall configuration is done in `settings.gradle` file and ensures the Kogito plugin is correctly mapped at build time. 
@@ -366,82 +224,7 @@ NOTE: At runtime, `requested.version` is replaced with the actual plugin version
 
 The main build file, `build.gradle`, applies the Spring Boot and Kogito plugins, sets up repositories, dependencies, and configures build tasks.
 
-[source,xml]
-----
-plugins {
-  id 'java'
-  id("org.kie.kogito.gradle") version "${bamoeVersion}"
-  id "org.springframework.boot" version "${springBootVersion}"
-  id("io.spring.dependency-management") version "${springBootDependencyManagementVersion}"
-
-  // Inspection purpose
-  id "com.dorongold.task-tree" version "${taskTreeVersion}"
-}
-
-repositories {
-  mavenCentral()
-  mavenLocal()
-}
-
-dependencies {
-  implementation platform("org.kie.kogito:kogito-spring-boot-bom:${bamoeVersion}")
-  implementation("org.springframework.boot:spring-boot-starter-web")
-  implementation("org.jbpm:jbpm-spring-boot-starter")
-  implementation("org.drools:drools-decisions-spring-boot-starter")
-  testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
-  testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("io.rest-assured:rest-assured")
-  developmentOnly 'org.springframework.boot:spring-boot-devtools'
-}
-
-group '(service_specific)'
-version '(service_specific)'
-
-generateModelConfig {
-  jsonSchemaVersion = "DRAFT_2019_09"
-}
-
-compileJava {
-  options.encoding = 'UTF-8'
-  options.compilerArgs << '-parameters'
-}
-
-compileTestJava {
-  options.encoding = 'UTF-8'
-}
-
-springBoot {
-  mainClass = '(service_specific)'
-}
-
-tasks.named("resolveMainClassName") {
-  dependsOn(tasks.named("compileSecondaryJava"))
-}
-
-tasks.named("bootRun") {
-  dependsOn(tasks.named("compileSecondaryJava"))
-}
-
-tasks.named("bootJar") {
-  dependsOn(tasks.named("compileSecondaryJava"))
-}
-
-tasks.named("jar") {
-  dependsOn(tasks.named("compileSecondaryJava"))
-  from(tasks.named("compileSecondaryJava").get())
-}
-
-tasks.named("compileTestJava") {
-  dependsOn(tasks.named("compileSecondaryJava"))
-}
-
-test {
-  dependsOn(tasks.named("compileSecondaryJava"))
-  useJUnitPlatform()
-}
-----
-
-NOTE: During execution, the `bamoeVersion` value you assign to the `org.kie.kogito.gradle` plugin is internally mapped to `requested.version` by Gradle’s plugin resolution mechanism.
+NOTE: During execution, the `bamoeVersion` value you assign to the `org.kie.kogito.gradle` plugin is internally mapped to `requested.version` by Gradle's plugin resolution mechanism.
 
 To ensure that Spring Boot builds and runs correctly, you must configure `build.gradle` so that all final tasks execute after the `compileSecondaryJava` task. This is done through the following task dependencies:
 
@@ -476,53 +259,11 @@ test {
 
 This configuration ensures that tasks such as `test`, `jar`, `bootRun`, and others are executed only after the `compileSecondaryJava` task.
 
-With this configuration, all final build and execution tasks run after the `kogito-gradle-plugin` finishes generating and compiling the model classes, which in turn happens after the static Java classes are compiled. You can see the task ordering in the Gradle task tree:
+With this configuration, all final build and execution tasks run after the `kogito-gradle-plugin` finishes generating and compiling the model classes, which in turn happens after the static Java classes are compiled.
 
-[source,xml]
-----
-:bootRun
-+--- :classes
-|    +--- :compileJava
-|    \--- :processResources
-+--- :compileJava *
-+--- :compileSecondaryJava
-|    \--- :generateModel
-|         \--- :classes *
-\--- :resolveMainClassName
-     +--- :classes *
-     +--- :compileJava *
-     \--- :compileSecondaryJava *
-----
-
-The following command build and start the project using the Spring Boot bootRun task:
+You can build and start the project using the Spring Boot `bootRun` task, using the following command:
 
 [source,xml]
 ----
 gradlew clean bootRun
 ----
-
-=== Hot reload
-
-Hot reload support in Gradle projects works similarly to Maven.
-
-To enable the hot reload, do the following steps:
-
-. Add the `org.springframework.boot:spring-boot-devtools` dependency inside the `dependencies` section of your `build.gradle` file. For more information, see xref:https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-devtools[`org.springframework.boot:spring-boot-devtools`] external documentation.
-. In the terminal, start the `compileSecondaryJava` task with continuous build enabled using the following command:
-+
-[source,xml]
-----
-gradlew clean compileSecondaryJava --continuous --parallel
-----
-+
-This task will automatically re-run whenever source files are updated.
-. In a second terminal, run the Spring Boot application:
-+
-[source,xml]
-----
-gradlew bootRun
-----
-+
-NOTE: The `clean` task is not invoked.
-
-When you modify any source file, Gradle rebuilds the affected code and Spring Boot reloads the application so the changes take effect immediately.
