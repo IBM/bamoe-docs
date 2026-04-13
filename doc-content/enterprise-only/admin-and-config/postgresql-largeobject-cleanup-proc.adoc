@@ -24,7 +24,7 @@ Caused by: org.postgresql.util.PSQLException: ERROR: large object 41565 does not
     at org.postgresql.fastpath.Fastpath.fastpath(Fastpath.java:109)
 ----
 
-Following procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data. The solution works by copying jBPM CLOB references to a temporary table (`jbpm_active_clob`) that uses an `oid` column. Because vacuumlo can detect `oid` columns, it will recognize these references and avoid deleting the active large objects.
+The following procedure describes how to safely clean up the `pg_largeobject` table while protecting active CLOB data. The solution works by copying jBPM CLOB references to a temporary table (`jbpm_active_clob`) that uses an `oid` column. Because vacuumlo can detect `oid` columns, it will recognize these references and avoid deleting the active large objects.
 
 .Prerequisites
 * PostgreSQL database is configured for {PRODUCT}.
@@ -163,3 +163,12 @@ The trigger remains active and will continue to protect CLOB data for future vac
 //** If set to `false` (default for backwards compatibility): Text data is stored in `pg_largeobject`.
 //** If set to `true`: Text data is stored without using `pg_largeobject`, using `pg_toast.*` tables instead. In this case, triggers are not needed to run `vacuumlo` safely.
 
+== Alternative storage configuration
+
+{PRODUCT} provides an alternative storage configuration that controls how text column data is stored in PostgreSQL.
+
+You can use the system property `-Dorg.kie.persistence.postgresql.useText=true` to control how data in text columns is stored:
+
+* If set to `false` (default for backwards compatibility): Text data is stored in `pg_largeobject`, and you must use one of the cleanup procedures described in this document to safely run `vacuumlo`.
+
+* If set to `true`: Text data is stored without using `pg_largeobject`, using `pg_toast.*` tables instead. In this configuration, triggers are not needed to run `vacuumlo` safely, and the cleanup procedures described in this document are not required.
