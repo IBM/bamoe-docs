@@ -81,7 +81,7 @@ If you are using Gradle instead of Maven, the `mvn clean package -Dnative` and `
 
 GraalVM is required for native builds. 
 
-NOTE: Maven places all build artifacts in the `target/` directory, while Gradle places them in the `build/` directory.
+NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory.
 
 ---
 

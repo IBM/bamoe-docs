@@ -6,16 +6,7 @@ Building an executable application is the first step in deploying _Business Serv
 
 While both frameworks offer convenient ways for building container images and/or other types of executables directly from your _Business Services_ projects, you are not constrained by them. You are free to use any other build method, technique, tool or workflow you find suitable for your team and organization.
 
-== Building _Business Service_ project with Gradle vs Maven
-
-You can use Gradle as the build system by following standard Gradle conventions and practices. Gradle build support is provided in two different ways, depending on the framework you use:
-
-* Quarkus projects are built using the Quarkus plugin.
-* Spring Boot projects are built using the `kogito-gradle-plugin`.
-* Gradle does not have a built-in *profile* feature like Maven.
-* In Gradle, Maven-style profiles can be emulated by keeping common configuration in `build.gradle` and conditionally applying separate, profile-specific Gradle files (such as `profile-dev.gradle` or `profile-prod.gradle`) at build time based on a `buildProfile` environment variable.
-
-The supported version is Gradle 9.2. It is possible to use either a system-wide `gradle` executable or the project-specific `gradlew` executable for both frameworks.
+As an additional option, you can use Gradle build support. Quarkus projects use the `io.quarkus` plugin, while Spring Boot projects use the `kogito-gradle-plugin`. Although Gradle does not offer native build profiles like Maven, similar behavior can be achieved through conditional configuration based on a `buildProfile` environment variable. The supported Gradle version is 9.2, using either a system-installed `gradle` command or the included `gradlew` wrapper. For more information about Gradle, see https://docs.gradle.org/9.2.1/userguide/gradle_basics.html[Gradle official documentation].
 
 == Quarkus build support with Maven
 
@@ -119,7 +110,7 @@ java -jar ./target/(name_of_the_application).jar
 
 == Quarkus build support with Gradle
 
-Build support for Quarkus projects, including hot reload, is provided by the `io.quarkus` plugin. All necessary versions are defined in `gradle.properties` file.
+Build support for Quarkus projects is provided by the `io.quarkus` plugin. All necessary versions are defined in `gradle.properties` file.
 
 [source,xml]
 ----
@@ -180,7 +171,7 @@ can be replaced with the equivalent Gradle command:
   -Dquarkus.package.jar.enabled=false
 ----
 
-NOTE: Maven places all build artifacts in the `target/` directory, while Gradle places them in the `build/` directory.
+NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory.
 
 == Spring Boot build support with Gradle
 
@@ -224,9 +215,7 @@ NOTE: At runtime, `requested.version` is replaced with the actual plugin version
 
 The main build file, `build.gradle`, applies the Spring Boot and Kogito plugins, sets up repositories, dependencies, and configures build tasks.
 
-NOTE: During execution, the `bamoeVersion` value you assign to the `org.kie.kogito.gradle` plugin is internally mapped to `requested.version` by Gradle's plugin resolution mechanism.
-
-To ensure that Spring Boot builds and runs correctly, you must configure `build.gradle` so that all final tasks execute after the `compileSecondaryJava` task. This is done through the following task dependencies:
+During execution, the `bamoeVersion` value you assign to the `org.kie.kogito.gradle` plugin is internally mapped to `requested.version` by Gradle's plugin resolution mechanism. To ensure that Spring Boot builds and runs correctly, you must configure `build.gradle` so that all final tasks execute after the `compileSecondaryJava` task. This is done through the following task dependencies:
 
 [source,xml]
 ----
