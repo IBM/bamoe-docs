@@ -19,6 +19,9 @@ If you are currently on RHPAM/RHDM 7.13.5, you can upgrade directly to any {PROD
 .Upgrading from Red Hat to {PRODUCT_SHORT}
 image::assembly/bamoe-upgrade-flowchart.png[]
 
+=== Procedure
+
+The following steps are typically involved in upgrading from {RH_PAM} / {RH_DM} to {PRODUCT_LONG}:
 
 .Prerequisites
 Ensure the following tools are installed before starting the upgrade:
@@ -26,23 +29,13 @@ Ensure the following tools are installed before starting the upgrade:
 * https://openjdk.org[JDK 11]
 * https://maven.apache.org[Apache Maven 3.8.6] or later
 
-
-//[IMPORTANT]
-
-//Due to https://github.com/quarkusio/quarkus/issues/31011[impossibility in creating a project with Maven 3.9.0], it is recommended to use the Apache Maven version 3.8.6, or later.
-
-
-=== Procedure
-
-The following steps are typically involved in upgrading from {RH_PAM} / {RH_DM} to {PRODUCT_LONG}:
-
 == Step 1: Download Product Archives
 
 The first step in upgrade is to download the product archives from either {PRODUCT_FIX_CENTRAL_PAGE}[IBM Fix Central] _(which requires an active support subscription to {PRODUCT})_ or via the {DEV_PROGRAM_PAGE}[IBM Business Automation Manager Open Editions Developer Program] _(subject to its terms)_. 
 
-You will need to download the new versions of the product components that you have installed in your development and production environments : Business Central, {KIE_SERVER}, etc.
+You will need to download the new versions of the product components that you have installed in your development and production environments: {CENTRAL}, {KIE_SERVER}, the {HEADLESS_CONTROLLER}, the {DECISION_ENGINE} or standalone {CENTRAL} to be reinstalled.
 
-To manage the migration of your data you will also need to download the `bamoe-version-add-ons.zip` file which contains a data migration tool as well as additional product components needed in specific situations:
+To manage the migration of your data you will also need to download the `bamoe-version-add-ons.zip` file which contains a data migration tool as well as additional product components that may be required:
 
 ** **Migration tool**: Automates migration steps from Red Hat JBoss BPM Suite 6.4 to {PRODUCT_SHORT} 8.0, handling project structure, system configuration, forms, and POMs migration
 ** **Process engine (jBPM)**: Lightweight engine for executing business processes and cases, can be embedded in custom applications
@@ -136,9 +129,9 @@ During the course of your Maven dependency update, if you encounter any dependen
 
 == Step 3: Update Development and Runtime components
 
-Install the new versions of the required BAMOE components in a duplicate environment: decision engine, Business Central, KIE Server, and the headless controller, following the instructions in xref:../installing-and-configuring.html[Installing and configuring].
+Install the new versions of the required BAMOE components in a duplicate development or production environment: {CENTRAL}, {KIE_SERVER}, the {HEADLESS_CONTROLLER}, the {DECISION_ENGINE} or standalone {CENTRAL},by following the instructions in xref:../installing-and-configuring.html[Installing and configuring].
 
-It is recommended that you use the xref:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/building_applications/deployments#route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and BAMOE version 9.3.x.
+It is recommended that you use the xref:https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/building_applications/deployments#route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and BAMOE version 8.0.x.
 
 
 [id=niogit_directory]
@@ -170,7 +163,7 @@ NOTE: Do not run {PRODUCT_SHORT} 8.0.x Business Central until you have completed
 ----
 +
 
-. In your command terminal, copy the `.niogit` directory from your current Business Central distribution for Red Hat Process Automation Manager 7.13.5 to the bin folder of the new {PRODUCT_SHORT} 8.0.x installation directory:
+. In your command terminal, copy the `.niogit` directory from your 7.13.5 Business Central installation to the bin folder of the new {PRODUCT_SHORT} 8.0.x installation directory:
 +
 [source,shell]
 ----
@@ -296,7 +289,7 @@ Example `pom-migration.json` file with `dependencies` only:
 ----
 +  
 
-. In the extracted `rhpam-7.13.5-add-ons` folder, extract the `bamoe-8.0.x-migration-tool.zip` sub-folder. The migration tool is in the bin directory. 
+. In the {PRODUCT_SHORT} 8.0.x installation directory, extract the `bamoe-8.0.x-migration-tool.zip`. The migration tool is in the bin directory. 
 
 . In your command terminal, navigate to the temporary directory where you extracted the `bamoe-8.0.x-migration-tool` folder and run the migration tool. `$RHPAM_NIOGIT_DIR` is the path to the `.niogit` directory that you previously copied to the {PRODUCT_SHORT} 8.0.x installation. 
 
