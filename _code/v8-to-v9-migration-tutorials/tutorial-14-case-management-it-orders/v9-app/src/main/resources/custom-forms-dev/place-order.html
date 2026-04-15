@@ -1,0 +1,69 @@
+<div>
+	<div class="form-group">
+		<label for="CaseId">Case id</label>
+		<input type="text" id="CaseId" name="CaseId" class="form-control" value="" />
+	</div>
+	<div class="form-group">
+		<label for="Requestor">Requestor</label>
+		<input type="text" id="Requestor" name="Requestor" class="form-control" value="" />
+	</div>
+	<div class="form-group">
+		<label for="caseFile_orderInfo">Case file order info</label>
+		<input type="text" id="caseFile_orderInfo" name="caseFile_orderInfo" class="form-control" value="" />
+	</div>
+	<div class="form-check">
+		<input type="checkbox" id="caseFile_ordered" name="caseFile_ordered" class="form-check-input" />
+		<label class="form-check-label" for="caseFile_ordered">Case file ordered</label>
+	</div>
+	<script>
+		/* Utility function that fills the form with the data received from the kogito runtime */
+		function setFormData(data) {
+			if (!data) {
+				return;
+			}
+			document.getElementById("CaseId").value = data?.CaseId ?? "";
+			document.getElementById("Requestor").value = data?.Requestor ?? "";
+			document.getElementById("caseFile_orderInfo").value = data?.caseFile_orderInfo ?? "";
+			document.getElementById("caseFile_ordered").checked = data?.caseFile_ordered;
+		}
+		/* Utility function to generate the expected form output as a json object */
+		function getFormData() {
+			const formData = {};
+			formData.CaseId = document.getElementById("CaseId").value;
+			formData.Requestor = document.getElementById("Requestor").value;
+			formData.caseFile_orderInfo = document.getElementById("caseFile_orderInfo").value;
+			formData.caseFile_ordered = document.getElementById("caseFile_ordered").checked;
+			return formData;
+		}
+		/* Utility function to validate the form on the 'beforeSubmit' Lifecycle Hook */
+		function validateForm() {}
+		/*
+            Call to the Kogito console form engine. It will establish the connection with the console embeding the form
+            and return an instance of FormAPI that will allow hook custom code into the form lifecycle.
+            The `window.Form.openForm` call expects an object with the following entries:
+                - onOpen: Callback that will be called after the connection with the console is established. The callback
+                will receive the following arguments:
+                    - data: the data to be bound into the form
+                    - ctx: info about the context where the form is being displayed. This will contain information such as the form JSON Schema, process/task, user...
+        */
+		const formApi = window.Form.openForm({
+			onOpen: (data, context) => {
+				setFormData(data);
+			},
+		});
+		/*
+            Form Lifecycle Hook that will be executed before the form is submitted.
+            Throwing an error will stop the form submit. Usually should be used to validate the form.
+        */
+		formApi.beforeSubmit = () => {
+			validateForm();
+		};
+		/*
+            Form Lifecycle Hook that will be executed after the form is submitted.
+            It will receive a response object containing the `type` flag indicating if the submit has been successful and `info` with extra information about the submit result.
+        */
+		formApi.afterSubmit = (response) => {};
+		/* Generates the expected form output object to be posted */
+		formApi.getFormData = () => getFormData();
+	</script>
+</div>
