@@ -414,6 +414,31 @@ mvn clean compile quarkus:dev
 
 NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
 
+If you are using Quarkus with Gradle, to build and start the project with hot reload enabled, run the following command:
+
+[source,xml]
+----
+gradlew clean quarkusDev
+----
+
+If you are using Spring Boot with Gradle, to enable hot reload, add the `org.springframework.boot:spring-boot-devtools` dependency to the dependencies section of your `build.gradle`. For more information, see xref:https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-devtools[`org.springframework.boot:spring-boot-devtools`] external documentation.
+
+Start continuous compilation in one terminal, using the following command:
+
+[source,xml]
+----
+gradlew clean compileSecondaryJava --continuous --parallel
+----
+
+Then, in a second terminal, run the Spring Boot application:
+
+[source,xml]
+----
+gradlew bootRun
+----
+
+NOTE: The `clean` task is not invoked.
+
 ////
 
 Not necessary here as this is documented in building-deploying/services-build.adoc. Consider removing after fuller review.

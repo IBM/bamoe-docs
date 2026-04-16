@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<deployment-descriptor xsi:schemaLocation="http://www.jboss.org/jbpm deployment-descriptor.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <persistence-unit>org.jbpm.domain</persistence-unit>
+    <audit-persistence-unit>org.jbpm.domain</audit-persistence-unit>
+    <audit-mode>JPA</audit-mode>
+    <persistence-mode>JPA</persistence-mode>
+    <runtime-strategy>PER_PROCESS_INSTANCE</runtime-strategy>
+    
+    <!-- User Group Callback Configuration -->
+    <event-listeners>
+        <event-listener>
+            <resolver>mvel</resolver>
+            <identifier>new org.jbpm.services.task.identity.JAASUserGroupCallbackImpl(true)</identifier>
+            <parameters/>
+        </event-listener>
+    </event-listeners>
+    
+    <!-- Work Item Handlers for REST and SOAP -->
+    <work-item-handlers>
+        <work-item-handler>
+            <resolver>mvel</resolver>
+            <identifier>new org.jbpm.process.workitem.rest.RESTWorkItemHandler("admin", "admin", classLoader)</identifier>
+            <parameters/>
+            <name>Rest</name>
+        </work-item-handler>
+        <work-item-handler>
+            <resolver>mvel</resolver>
+            <identifier>new org.jbpm.process.workitem.webservice.WebServiceWorkItemHandler(ksession, classLoader)</identifier>
+            <parameters/>
+            <name>WebService</name>
+        </work-item-handler>
+    </work-item-handlers>
+    
+    <!-- Security Configuration -->
+    <marshalling-strategies/>
+    <required-roles>
+        <required-role>admin</required-role>
+        <required-role>manager</required-role>
+        <required-role>approver</required-role>
+    </required-roles>
+    
+    <environment-entries/>
+    <configurations/>
+</deployment-descriptor>
+
+
