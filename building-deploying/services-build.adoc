@@ -1,6 +1,7 @@
 = Building _Business Services_ executables
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
+include::../styles/tabs.adoc[]
 
 Building an executable application is the first step in deploying _Business Services_ to your runtime environment. There are several types of executable you can create, and trade-offs will vary depending on your requirements. This section covers building with the two supported frameworks: Quarkus and Spring Boot.
 
@@ -150,28 +151,52 @@ The main build file, `build.gradle`, applies the Quarkus plugin, sets up reposit
 
 === GraalVM
 
-GraalVM is required for native builds. If you are using Gradle instead of Maven, the following Maven commands:
+GraalVM is required to build native executables. Choose and run the corresponding commands.
 
-[source,shell]
+++++
+<div class="tabs-container">
+  <input type="radio" id="maven-tab" name="group1-tabs" checked>
+  <input type="radio" id="gradle-tab" name="group1-tabs">
+  
+  <div class="tabs-header">
+    <label for="maven-tab">Maven</label>
+    <label for="gradle-tab">Gradle</label>
+  </div>
+  
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,bash]
 ----
 mvn clean package -Dnative
 ----
 
-[source,shell]
+[source,bash]
 ----
 mvn clean package -Dquarkus.container-image.build=true
 ----
 
-can be replaced with the equivalent Gradle command:
+++++
+    </div>
+    <div class="tab-panel">
+++++
 
-[source,shell]
+[source,bash]
 ----
 ./gradlew clean build \
   -Dquarkus.native.enabled=true \
   -Dquarkus.package.jar.enabled=false
 ----
 
+++++
+    </div>
+  </div>
+</div>
+++++
+
 NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory.
+
 
 == Spring Boot build support with Gradle
 
