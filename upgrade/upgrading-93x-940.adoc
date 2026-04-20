@@ -14,7 +14,7 @@ This guide will walk you through upgrading your:
 
 * _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
+* {PRODUCT_SHORT} runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
 
 == Step 1: Download product archives
 
@@ -34,7 +34,7 @@ The Dev helm charts include the following component Containers:
 === Upgrade {CANVAS} and {MVN_REPO}
 It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_93X}.
 
-Follow the steps in xref:../installation/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and {CANVAS} version.
+Follow the steps in xref:../installation/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and {CANVAS} versions.
 
 If you decide to uninstall the previous individual containers and replace with the Dev environment Helm chart, the {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_93X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
@@ -42,7 +42,7 @@ You can import projects into the newly installed version (see xref:../tools/impo
 
 [NOTE]
 ====
-If you have customized your previous {CANVAS} installation, remember to apply the same Environment Variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+If you have customized your previous {CANVAS} installation, remember to apply the same environment variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
 ====
 
 === Upgrade {DEV_TOOLS}
@@ -55,15 +55,15 @@ _Business Service(s)_ project(s) can be upgraded by changing their Maven depende
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION_931}:
 
 - https://openjdk.org[JDK 21] is installed.
-- https://maven.apache.org[Apache Maven 3.9.6] is installed.
+- https://maven.apache.org[Apache Maven 3.9.11+] is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} development environment with {MVN_REPO} @ {IMAGE_VERSION}
 
-Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_930} to {PRODUCT_SHORT} version {VERSION_931}.
+Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_93X} to {PRODUCT_SHORT} version {VERSION}.
 
 The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
 
-[start=2]
+[start=1]
 . Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION}:
 +
 [source,xml,subs="+attributes"]
@@ -77,29 +77,19 @@ The project structure is not changed, updates only need to be made to the depend
 </dependency>
 ----
 
-Due to the update update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-updates[Main Quarkus and Spring Boot Framework changes] and refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide] for more details on the main Quarkus changes.
+Due to the update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-updates[Main Quarkus and Spring Boot Framework changes] and refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide] for more details on the main Quarkus changes.
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
-. To verify that your upgrade is successful, build the project one more time using Maven's standard command or any other customized build command you might have in your project.
+. To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
 +
 [source,console]
 ----
 mvn clean package
 ----
 +
-You will get Maven streaming text again, and at the end of it you must have:
+You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
 +
-[source,console]
-----
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  8.023 s
-[INFO] Finished at: 2025-09-30T17:09:00-03:00
-[INFO] ------------------------------------------------------------------------
-----
-+
-Now you can start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+You can now start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
 == Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
 
@@ -112,47 +102,42 @@ The Runtime helm charts for include the following Component Containers:
 
 It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_93X} yet. 
 
-Follow the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment Helm chart] to install the new {MANAGEMENT_CONSOLE} version {MCP_SERVER}.
-
-{MANAGEMENT_CONSOLE} {VERSION} is a drop-in replacement for the {VERSION_930} version, see xref:../installation/management-console.adoc[Installing → The Runtime environment Helm chart] for information on installing {MANAGEMENT_CONSOLE} and {MCP_SERVER}.
-
-Once you have a new installation for {MANAGEMENT_CONSOLE} version {VERSION_930}, you can follow the standard guidance on how to deploy a new version of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
+Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment Helm chart].
 
 [#migrate-stateful-workflow-db]
-=== Upgrading your stateful Workflow database(s)
+== Step 6: Upgrade your stateful Workflow database(s)
 
-You can upgrade your database(s) used by _Business Services_ that run stateful workflows in {PRODUCT_SHORT} to {VERSION}. Perform the upgrade using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
+If you have _Business Services_ that run stateful workflows in your system you will upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
 
-NOTE: This step is necessary to be able to use the new {PIM_ADDON} see xref:../managing-monitoring/migration-with-pim.adoc[Migrating your in-flight Process Instances using PIM]
+The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
 
-The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture. These subsystems are Data-Index, Data-Audit, Jobs Service, User Tasks, and Runtime Persistence.
-
-Before you begin, make sure you upgrade your _Business Services_ and your database(s) together. 
+You must upgrade your _Business Services_ and your database(s) together. 
 
 To upgrade safely:
 
-* Back up your database
+. Back up your database
 
-* Test the migration in a staging environment
+. Test the migration in a staging environment
 
-* Apply the scripts sequentially for each subsystem 
+. Schedule downtime if you are updating a production database
 
-* Schedule downtime for production
+. Apply the scripts sequentially for each subsystem 
 
-* Verify that all services function correctly after the upgrade
+. Verify that all services function correctly after the upgrade
 
 Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
 
 For more information, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].
 
+Once you have installed your runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
 
 [#Quarkus-Spring-updates]
 == Main Quarkus and Spring Boot Framework changes
 
-{PRODUCT_SHORT} {VERSION} updates the core frameworks that power _Business Services_. The most impactful change is the Hibernate ORM 6.x to 7.1 upgrade, which introduces breaking API changes that require code modifications. The following table lists and categorizes these changes. 
+{PRODUCT_SHORT} {VERSION_94} updates the core frameworks that power _Business Services_. The most impactful change is the Hibernate ORM 6.x to 7.1 upgrade, which introduces breaking API changes that require code modifications. The following table lists and categorizes these changes. 
 
 |===
-| Component | {VERSION_931} | {VERSION} | Change Type | Impact
+| Component | {VERSION_931} | {VERSION_94} | Change Type | Impact
 
 | Quarkus | 3.20.3 | 3.27.2 | Minor | HIGH
 
