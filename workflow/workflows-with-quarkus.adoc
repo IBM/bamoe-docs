@@ -373,23 +373,28 @@ To install the dependencies and run your Quarkus application in Dev mode locally
 
 ++++
 <div class="tabs-container">
-  <!-- Radio buttons for tab switching (hidden) -->
-  <input type="radio" id="tab1" name="tabs" checked>
-  <input type="radio" id="tab2" name="tabs">
-
-  <!-- Tab headers -->
+  <input type="radio" id="maven-tab" name="group1-tabs" checked>
+  <input type="radio" id="gradle-tab" name="group1-tabs">
+  
   <div class="tabs-header">
-    <label for="tab1">Maven</label>
-    <label for="tab2">Gradle</label>
+    <label for="maven-tab">Maven</label>
+    <label for="gradle-tab">Gradle</label>
   </div>
-
-  <!-- Tab content panels -->
+  
   <div class="tabs-content">
     <div class="tab-panel">
-      mvn clean quarkus:dev
+++++
+
+mvn clean quarkus:dev
+
+++++
     </div>
     <div class="tab-panel">
-      gradle clean quarkusDev
+++++
+
+gradle clean quarkusDev
+
+++++
     </div>
   </div>
 </div>
@@ -508,16 +513,60 @@ Debugging a Workflow service in Quarkus follows the standard Java remote debuggi
 . Create a remote debug configuration in your IDE on port `5005` (steps vary by IDE).
 . Start the application in dev mode:
 +
-[source,bash]
-----
-mvn clean compile quarkus:dev
-----
+++++
+  <div class="tabs-container">
+    <!-- Radio buttons for tab switching (hidden) -->
+    <input type="radio" id="tab1" name="tabs" checked>
+    <input type="radio" id="tab2" name="tabs">
+
+    <!-- Tab headers -->
+    <div class="tabs-header">
+      <label for="tab1">Maven</label>
+      <label for="tab2">Gradle</label>
+    </div>
+
+    <!-- Tab content panels -->
+    <div class="tabs-content">
+      <div class="tab-panel">
+        mvn clean compile quarkus:dev
+      </div>
+      <div class="tab-panel">
+        ./gradlew clean build quarkusDev
+      </div>
+    </div>
+  </div>
+++++
++
 . Put a breakpoint in one of the generated or custom classes.
 . Connect your IDE debugger to port `5005`.
 
 It is also possible to block the compilation until a debugger is connected, using:
 
-[source,bash]
-----
+++++
+<div class="tabs-container">
+  <input type="radio" id="maven-tab2" name="group2-tabs" checked>
+  <input type="radio" id="gradle-tab2" name="group2-tabs">
+  
+  <div class="tabs-header">
+    <label for="maven-tab2">Maven</label>
+    <label for="gradle-tab2">Gradle</label>
+  </div>
+  
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
 mvn clean compile quarkus:dev -Dsuspend
-----
+
+++++
+    </div>
+    <div class="tab-panel">
+++++
+
+./gradlew clean build quarkusDev -Dsuspend
+
+++++
+    </div>
+  </div>
+</div>
+++++

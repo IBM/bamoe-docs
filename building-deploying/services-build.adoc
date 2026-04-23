@@ -7,9 +7,11 @@ Building an executable application is the first step in deploying _Business Serv
 
 While both frameworks offer convenient ways for building container images and/or other types of executables directly from your _Business Services_ projects, you are not constrained by them. You are free to use any other build method, technique, tool or workflow you find suitable for your team and organization.
 
-As an additional option, you can use Gradle build support. Quarkus projects use the `io.quarkus` plugin, while Spring Boot projects use the `kogito-gradle-plugin`. Although Gradle does not offer native build profiles like Maven, similar behavior can be achieved through conditional configuration based on a `buildProfile` environment variable. The supported Gradle version is 9.2, using either a system-installed `gradle` command or the included `gradlew` wrapper. For more information about Gradle, see https://docs.gradle.org/9.2.1/userguide/gradle_basics.html[Gradle official documentation].
+You can use Maven or Gradle build support. If you build you project with Gradle, Quarkus projects use the `io.quarkus` plugin, while Spring Boot projects use the `org.kie.kogito:kogito-gradle-plugin`. Gradle does not include preconfigured build profiles by default. Similar behavior can be implemented through conditional configuration using a `buildProfile` environment variable. The supported Gradle version is 9.2, using either a system-installed `gradle` command or the included `gradlew` wrapper. For more information about Gradle, see https://docs.gradle.org/9.2.1/userguide/writing_build_scripts_intermediate.html[Gradle official documentation].
 
-== Quarkus build support with Maven
+== Quarkus
+
+=== Maven
 
 When you build your Business Service with Quarkus, you can select from several strategies to generate executables. Because you fully manage your _Business Service_ project on {PRODUCT_SHORT}, you can choose the build method that best aligns with your deployment architecture.
 
@@ -19,7 +21,7 @@ Quarkus supports the following build strategies:
 * Native executable
 * Standard JAR
 
-=== Building your _Business Service_ project by using Container image
+==== Building your _Business Service_ project by using Container image
 
 _Business Services_ on {PRODUCT_SHORT} are commonly deployed to hybrid cloud environments, including Red Hat OpenShift and Kubernetes. To build your _Business Service_ project as a container image, see https://quarkus.io/version/3.20/guides/container-image[Container Images] in the Quarkus documentation.
 
@@ -39,7 +41,7 @@ docker image ls
 
 Container images created with Quarkus can be both JVM- or native executable- based.
 
-=== Building your _Business Service_ project by using native executable
+==== Building your _Business Service_ project by using native executable
 
 Follow the official Quarkus guide at https://quarkus.io/version/3.20/guides/building-native-image[Building a Native Executable].
 
@@ -60,7 +62,7 @@ The native executable is generated in the `target/` directory. You can run it wi
 For more information on supported and tested environments, see xref:../release-notes/supported-environments.adoc[Supported environments].
 For more information on {PRODUCT_SHORT} native support, see xref:../release-notes/known-limitations.adoc[Known limitations] for more information on {PRODUCT_SHORT} native support.
 
-=== Building your _Business Service_ project by using standard JAR
+==== Building your _Business Service_ project by using standard JAR
 
 For more information on how to create executable JARs with Maven, see the official Maven documentation, https://maven.apache.org/guides/getting-started/index.html#How_do_I_create_a_JAR_and_install_it_in_my_local_repository.3F[How to create a JAR]. 
 
@@ -91,63 +93,16 @@ Docker:: Set `quarkus.docker.buildx.platform=linux/s390x`.
 Podman:: Set `quarkus.podman.platform=linux/s390x`.
 ====
 
-== Spring Boot build support with Maven
+=== Gradle
 
-Use standard Maven and Java commands to package and run the generated Spring Boot application.
-
-Use the following command for building the application:
-
-[source,shell]
-----
-mvn clean package
-----
-
-Use the following command for running the application locally:
-
-[source,shell]
-----
-java -jar ./target/(name_of_the_application).jar
-----
-
-== Quarkus build support with Gradle
-
-Build support for Quarkus projects is provided by the `io.quarkus` plugin. All necessary versions are defined in `gradle.properties` file.
-
-[source,xml]
-----
-#gradle.properties
-##3.27.1 needed to support gradle 9.2
-quarkusPluginId=io.quarkus
-quarkusPluginVersion=3.27.1
-quarkusPlatformGroupId=io.quarkus.platform
-quarkusPlatformArtifactId=quarkus-bom
-quarkusPlatformVersion=3.27.1
-taskTreeVersion=4.0.1
-junitVersion=5.12.1
-bamoeVersion=9.4.0
-----
+Build support for Quarkus projects is provided by the `io.quarkus` plugins. All necessary versions are defined in `gradle.properties` file.
+Adapt the plugin versions and dependencies to match the specific needs and constraints of your project. You can use `io.quarkus:quarkus-gradle-plugin`, `io.quarkus.platform:quarkus-bom` and `com.ibm.bamoe:bamoe-bom` dependencies.
 
 Overall configuration is done in `settings.gradle` file and ensures the Quarkus plugin is correctly mapped at build time. 
 
-[source,xml]
-----
-pluginManagement {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-      url = uri("https://plugins.gradle.org/m2/")
-    }
-  }
-
-  plugins {
-    id "${quarkusPluginId}" version "${quarkusPluginVersion}"
-  }
-}
-rootProject.name = "(service_specific)"
-----
-
 The main build file, `build.gradle`, applies the Quarkus plugin, sets up repositories, dependencies, and configures build tasks.
+
+For more information, see https://docs.gradle.org/9.2.1/userguide/writing_build_scripts_intermediate.html[Gradle official documentation].
 
 === GraalVM
 
@@ -195,52 +150,37 @@ mvn clean package -Dquarkus.container-image.build=true
 </div>
 ++++
 
-NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory.
+NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory. This behavior is consistent across all build modes.
 
+== Spring Boot 
 
-== Spring Boot build support with Gradle
+=== Maven
 
-Spring Boot support is provided by the `kogito-gradle-plugin`, the Gradle equivalent of `kogito-maven-plugin`, which introduces a `generateModel` task that runs after the standard classes task and before a custom `compileSecondaryJava` task that compiles generated sources. All Spring Boot tasks depending on compiled code must run after `compileSecondaryJava`, with versions defined in `gradle.properties`.
+Use standard Maven and Java commands to package and run the generated Spring Boot application.
 
-[source,xml]
+Use the following command for building the application:
+
+[source,shell]
 ----
-#gradle.properties
-
-springBootVersion=3.4.11
-springBootDependencyManagementVersion=1.1.5
-taskTreeVersion=4.0.1
-junitVersion=5.12.1
-bamoeVersion=9.4.0
+mvn clean package
 ----
+
+Use the following command for running the application locally:
+
+[source,shell]
+----
+java -jar ./target/(name_of_the_application).jar
+----
+
+=== Gradle
+
+Spring Boot support is provided by the `org.kie.kogito:kogito-gradle-plugin`, the Gradle equivalent of `org.kie.kogito:kogito-maven-plugin`, which introduces a `generateModel` task that runs after the standard classes task and before a custom `compileSecondaryJava` task that compiles generated sources. All Spring Boot tasks depending on compiled code must run after `compileSecondaryJava`, with versions defined in `gradle.properties`.
 
 Overall configuration is done in `settings.gradle` file and ensures the Kogito plugin is correctly mapped at build time. 
 
-[source,xml]
-----
-pluginManagement {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-      url = uri("https://plugins.gradle.org/m2/")
-    }
-  }
-  resolutionStrategy {
-    eachPlugin {
-      if (requested.id.namespace == "org.kie.kogito") {
-        useModule("org.kie.kogito:kogito-gradle-plugin:${requested.version}")
-      }
-    }
-  }
-}
-rootProject.name = "(service_specific)"
-----
-
-NOTE: At runtime, `requested.version` is replaced with the actual plugin version coming from `bamoeVersion`.
-
 The main build file, `build.gradle`, applies the Spring Boot and Kogito plugins, sets up repositories, dependencies, and configures build tasks.
 
-During execution, the `bamoeVersion` value you assign to the `org.kie.kogito.gradle` plugin is internally mapped to `requested.version` by Gradle's plugin resolution mechanism. To ensure that Spring Boot builds and runs correctly, you must configure `build.gradle` so that all final tasks execute after the `compileSecondaryJava` task. This is done through the following task dependencies:
+During execution, the `bamoeVersion` value you assign to the `org.kie.kogito:kogito-gradle-plugin` plugin is internally mapped to `requested.version` by Gradle's plugin resolution mechanism. To ensure that Spring Boot builds and runs correctly, you must configure `build.gradle` so that all final tasks execute after the `compileSecondaryJava` task. This is done through the following task dependencies:
 
 [source,xml]
 ----
@@ -273,7 +213,7 @@ test {
 
 This configuration ensures that tasks such as `test`, `jar`, `bootRun`, and others are executed only after the `compileSecondaryJava` task.
 
-With this configuration, all final build and execution tasks run after the `kogito-gradle-plugin` finishes generating and compiling the model classes, which in turn happens after the static Java classes are compiled.
+With this configuration, all final build and execution tasks run after the `org.kie.kogito:kogito-gradle-plugin` finishes generating and compiling the model classes, which in turn happens after the static Java classes are compiled.
 
 You can build and start the project using the Spring Boot `bootRun` task, using the following command:
 
