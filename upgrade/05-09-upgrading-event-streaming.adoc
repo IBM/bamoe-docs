@@ -29,21 +29,21 @@ For more information see xref:../workflow/event-driven-workflow.adoc[Using Event
 == Migrating Event Listeners from {PRODUCT_SHORT} v8
 Every time a process or task changes to a different point in its lifecycle, the Process Engine generates an event. You can develop a class that receives and processes such events called an event listener.
 
-The {PRODUCT_SHORT} {VERSION} Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
+The {PRODUCT_SHORT} {VERSION_RM} Process Engine provides a default implementation of the event listener interface. You can use this implementation as a starting point for your own implementation via the following two interfaces: `ProcessEventListener` and `UserTaskEventListener`.
 
-The main elements to consider when migrating your Event Listeners from {PRODUCT_SHORT} {VERSION} to {VERSION_80X} are:
+The main elements to consider when migrating your Event Listeners from {PRODUCT_SHORT} {VERSION_RM} to {VERSION_80X} are:
 
 Event timing:: In {VERSION_80X}, you had separate before/after callbacks to distinguish when your code runs relative to the state change. In (VERSION), the single callback is invoked after the state change, and you have access to both the old and new states via the `event` object.
 Interface changes:: `TaskLifeCycleEventListener` is replaced by `UserTaskEventListener`.
 Event object changes:: Replace `TaskEvent` with the appropriate event type (`UserTaskStateEvent`, `UserTaskAssignmentEvent`, `UserTaskVariableEvent`, etc.).
-CDI registration:: In {VERSION} CDI is used for listener registration. There is no need for manual registration
+CDI registration:: In {VERSION_RM} CDI is used for listener registration. There is no need for manual registration
 
-If you have implemented your own event listener in {VERSION_80X} the following sections provide more information to help you upgrade your code to work with {VERSION}.
+If you have implemented your own event listener in {VERSION_80X} the following sections provide more information to help you upgrade your code to work with {VERSION_RM}.
 
 For more information about migration, see xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-05-event-listeners/README.md[Tutorial 05: Event Listeners Migration from BAMOE v8 to v9].
 
 === The Process Event Listener Interface
-The `ProcessEventListener` interface is mostly the same in {VERSION_80X} and {VERSION}. The main difference is that are few additional event methods in {VERSION}, namely:
+The `ProcessEventListener` interface is mostly the same in {VERSION_80X} and {VERSION_RM}. The main difference is that are few additional event methods in {VERSION_RM}, namely:
 
 * onSignal
 * onMessage
@@ -53,7 +53,7 @@ The `ProcessEventListener` interface is mostly the same in {VERSION_80X} and {VE
 * onNodeStateChange
 
 === The User Task Event Listener Interface
-The `TaskLifeCycleEventListener` interface in {VERSION_80X} has been replaced by `UserTaskEventListener` in {VERSION}. The main difference is that the `TaskLifeCycleEventListener` interface had separate `beforeTaskXXX()` and `afterTaskXXX()` methods. In {VERSION} a different pattern where a single callback method receives an event containing both the old and new states, as shown in the code below:
+The `TaskLifeCycleEventListener` interface in {VERSION_80X} has been replaced by `UserTaskEventListener` in {VERSION_RM}. The main difference is that the `TaskLifeCycleEventListener` interface had separate `beforeTaskXXX()` and `afterTaskXXX()` methods. In {VERSION_RM} a different pattern where a single callback method receives an event containing both the old and new states, as shown in the code below:
 
 [source,java]
 ----
@@ -88,7 +88,7 @@ public class MyTaskListener implements TaskLifeCycleEventListener {
 }
 ----
 
-And the equivalent code in {PRODUCT_SHORT} {VERSION} is:
+And the equivalent code in {PRODUCT_SHORT} {VERSION_RM} is:
 
 [source,java]
 ----
@@ -115,4 +115,4 @@ public class MyTaskListener implements UserTaskEventListener {
 }
 ----
 
-For more information on the Event Listener Lifecycle in {VERSION} see xref:../workflow/event-driven-workflow.adoc#event-listener-lifecycle[Working with Events → Implementing an Event Listener Lifecycle in the Process Engine]
+For more information on the Event Listener Lifecycle in {VERSION_RM} see xref:../workflow/event-driven-workflow.adoc#event-listener-lifecycle[Working with Events → Implementing an Event Listener Lifecycle in the Process Engine]

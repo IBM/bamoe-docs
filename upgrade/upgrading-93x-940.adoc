@@ -4,7 +4,7 @@ include::../styles/images.adoc[]
 
 This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_93X}. 
 
-// See the following docs if you are upgrading from a version prior to this:
+See the following docs if you are upgrading from a version prior to this:
 
 * xref:upgrade-overview.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
 
@@ -61,7 +61,7 @@ The following tools are required to upgrade your _Business Service_ projects to 
 
 Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_93X} to {PRODUCT_SHORT} version {VERSION}.
 
-The project structure is not changed, updates only need to be made to the dependencies versions, some dependency names, and files.
+The project structure is not changed, updates only need to be made to the versions, names of some dependencies and files.
 
 [start=1]
 . Upgrade the BAMOE BOM in the project POM file to {BOM_VERSION}:
@@ -80,29 +80,27 @@ The project structure is not changed, updates only need to be made to the depend
 Due to the update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-updates[Main Quarkus and Spring Boot Framework changes] and refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide] for more details on the main Quarkus changes.
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
-. To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
-+
+
+To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
+
 [source,console]
 ----
 mvn clean package
 ----
-+
+
 You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
-+
-You can now start using your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+
+You can now continue developing your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
 == Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
 
-After upgrading your _Business Services_ source code (Step 3), you need to upgrade the Components in your Runtime environment and your stateful Workflows database before deploying a new version of the upgraded _Business Services_. The individual component deliverables have been replaced by two new Helm charts to facilitate the installation and license tracking of {PRODUCT_SHORT} components in your selected offering, DMOE or PMOE. They include the product specific licensing annotations, removing the need for manual intervention:
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade the components in your Runtime environment. 
 
-The Runtime helm charts for include the following Component Containers:
-
-* {MANAGEMENT_CONSOLE}
-* {MCP_SERVER}
-
-It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for upgrading {MANAGEMENT_CONSOLE} so that you still have a reliable way of managing live _Business Services_ that might not have been upgraded to {PRODUCT_SHORT} version {VERSION_93X} yet. 
+The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are now available in the Runtime Helm charts for your selected offering (DMOE or PMOE). They include the product specific licensing annotations, removing the need for manual intervention.
 
 Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment Helm chart].
+
+If you have stateful workflows in your _Business Services_ you will need to complete step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
 
 [#migrate-stateful-workflow-db]
 == Step 6: Upgrade your stateful Workflow database(s)
