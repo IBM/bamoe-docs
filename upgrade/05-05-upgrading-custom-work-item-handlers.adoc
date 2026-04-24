@@ -46,32 +46,33 @@ public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
 The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as `.wid` files and placed in the root directory of your project or in the same folder as your BPMN file, see xref:../workflow/authoring-workflows.adoc#custom-wih[Authoring Workflows with BPMN → Creating a custom Work Item Handler]
 
 === Retry mechanisms
-BAMOE 8.x there were two different mechanisms for handling retry logic in Custom WorkItemHandlers:
+In {PRODUCT_SHORT} {VERSION_80X} there were two different mechanisms for handling retry logic in Custom WorkItemHandlers:
 
 . Asynchronous WorkItemHandlers implementing Command, which contain their own configuration for retry attempts and retry delay inside the Command implementation.
 
 . WorkItemHandlers extending DefaultWorkItemHandler, which rely on the engine’s Executor for retry configuration (attempts, delay, and error handling).
 
-We need to understand what the equivalent mechanisms are in BAMOE 9.3, and how retry attempts and retry delays should be configured for Custom WorkItemHandlers in this new architecture.
+In {PRODUCT_SHORT} {VERSION_RM} retries could be happening for both synchronous and asynchronous invocations. You can configure these with the following settings:
 
-Specifically, we want to clarify:
-	•	Where retry attempts and retry delays are configured in BAMOE 9.3 when an error occurs during a WorkItem execution.
-	•	Whether BAMOE 9.3 provides an equivalent retry Executor or configurable mechanism similar to the one in 8.x.
-	•	How to throttle or space out external calls (e.g., HTTP integrations, service calls) either from WorkItemHandlers or ScriptTasks in case of intermittent failures.
-	•	If there is any recommended pattern or configuration for handling automatic retries in the new compact runtime.
-
-Our goal is to understand the official retry strategy in BAMOE 9.3 so we can migrate our existing WorkItemHandlers and ensure equivalent behavior.
-
-In {PRODUCT_SHORT} {VERSION_RM} retries could be happening for both synchronous and asynchronous invocations. You can configure these with the following settings can be used:
-
-In Quarkus
+==== Quarkus
 
 Synchrous via https://quarkus.io/guides/smallrye-fault-tolerance[Smallrye Fault Tolerance]:
 
-* kogito.faultToleranceEnabled - enable fault tolerance and retries
+* `kogito.faultToleranceEnabled` - enable fault tolerance and retries
 
-* more fine grained config options as per the doc above, eg: quarkus.fault-tolerance."global".retry.max-retries=3
+* `quarkus.fault-tolerance."global".retry.max-retries=3` for more fine grained configuration options (see doc above).
 
-Async via the embedded jobs service:
-kogito.jobs-service.maxNumberOfRetries: numbers of retry of a failred job. After this number is reached the job will be set to failure. (default is 3 times)
-kogito.jobs-service.retryMillis: interval used to retry the new job (default 60 seconds)
+Asynchronous via the embedded jobs service:
+
+* `kogito.jobs-service.maxNumberOfRetries`: numbers of retry of a failed job. After this number is reached the job will be set to failure. The default is 3 times. 
+
+* `kogito.jobs-service.retryMillis`: interval used to retry the new job. The default is 60 seconds.
+
+==== Spring Boot
+
+Synchronous (SpringBoot) via https://resilience4j.readme.io/docs/retry[resilience4j Retry]:
+
+* `kogito.faultToleranceEnabled` - enable fault tolerance and retries
+more fine grained config options as described in doc and this example: `resilience4j.retry.configs.default.maxAttempts=3`
+
+* `kogito.jobs-service.retryMillis` is a global configuration. There is currently no option to configure different / increasing delays per retry attempt
