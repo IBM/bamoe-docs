@@ -85,7 +85,7 @@ You can then install the Helm chart with the following commands:
 [source,shell,subs="attributes+"]
 ----
 helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
-helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="<YOUR_OCP_ROUTE_DOMAIN>"
 ----
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM} and <YOUR_OCP_ROUTE_DOMAIN> with the domain of your OpenShift Route.
@@ -100,7 +100,7 @@ Once you have the domain information, you can run the following helm commands:
 [source,shell,subs="attributes+"]
 ----
 helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
-helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="<YOUR_KUBERNETES_CLUSTER_DOMAIN>" --set global.kubernetesIngressClass="<YOUR_KUBERNETES_INGRESS_CLASS>"
 ----
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}, <YOUR_KUBERNETES_CLUSTER_DOMAIN>` with the domain of your cluster and `<YOUR_KUBERNETES_INGRESS_CLASS>` with the ingress class of your cluster.
@@ -117,7 +117,7 @@ Once you have the domain information, you can run the following helm commands to
 [source,shell,subs="attributes+"]
 ----
 helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
-helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-minikube-nginx.yaml
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-minikube-nginx.yaml
 ----
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
@@ -144,16 +144,16 @@ You can disable the installation of the Maven Repository in the Helm chart deplo
 
 [source,shell,subs="attributes+"]
 ----
-helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set maven_repository.enabled=false
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --set maven_repository.enabled=false
 ----
 
 === Uninstalling the Chart
 
-Follow the command to uninstall the `my-bamoe-canvas` deployment:
+Follow the command to uninstall the `my-bamoe-dev-env` deployment:
 
 [source,shell]
 ----
-helm uninstall my-bamoe-canvas
+helm uninstall my-bamoe-dev-env
 ----
 
 === Passing environment variables
@@ -162,7 +162,7 @@ This chart uses default environmental variables from `values.yaml` file. You can
  
 [source,shell]
 ----
-helm install my-bamoe-canvas ./dmoe-dev-environment-helm-chart --set canvas.image.registry=quay.io
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --set canvas.image.registry=quay.io
 ----
 
 Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
@@ -170,7 +170,7 @@ Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-
 
 == Deploying Canvas containers directly on OpenShift (using oc CLI)
 
-If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart. 
+If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -381,7 +381,7 @@ For more information on using accelerators see xref:../tools/applying-accelerato
 
 == Integrating {MVN_REPO} manually
 
-If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart. 
+If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
 
 For organizations without such infrastructure, it is highly recommended to use the Dev environment Helm chart to install the Container image and make it available internally for developers and continuous integration (CI) systems.
 

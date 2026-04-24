@@ -10,19 +10,19 @@ See the following docs if you are upgrading from a version prior to this:
 
 This guide will walk you through upgrading your:
 
-* {PRODUCT_SHORT} development environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+* {PRODUCT_SHORT} Dev environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
 
 * _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
+* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
 
 == Step 1: Download product archives
 
 Start by downloading the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. 
 
-== Step 2: Upgrade your {PRODUCT_SHORT} development environment
+== Step 2: Upgrade your {PRODUCT_SHORT} Dev environment
 
-When you upgrade your {PRODUCT_SHORT} development environment in {VERSION}, the individual component deliverables have been replaced by two new Helm charts to facilitate the installation and license tracking of {PRODUCT_SHORT} components in your selected offering, DMOE or PMOE. They include the product specific licensing annotations, removing the need for manual intervention:
+When you upgrade your {PRODUCT_SHORT} Dev environment in {VERSION}, the individual component deliverables have been replaced by two new Helm charts to facilitate the installation and license tracking of {PRODUCT_SHORT} components in your selected offering, DMOE or PMOE. They include the product specific licensing annotations, removing the need for manual intervention:
 
 The Dev helm charts include the following component Containers:
 
@@ -38,7 +38,7 @@ Follow the steps in xref:../installation/development-environment.adoc[Installing
 
 If you decide to uninstall the previous individual containers and replace with the Dev environment Helm chart, the {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_93X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
-You can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+You can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[{CANVAS} → Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
 
 [NOTE]
 ====
@@ -57,9 +57,9 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - https://openjdk.org[JDK 21] is installed.
 - https://maven.apache.org[Apache Maven 3.9.11+] is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
-- Upgraded {PRODUCT_SHORT} development environment with {MVN_REPO} @ {IMAGE_VERSION}
+- Upgraded {PRODUCT_SHORT} Dev environment with {MVN_REPO} @ {IMAGE_VERSION}
 
-Once your {PRODUCT_SHORT} development environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_93X} to {PRODUCT_SHORT} version {VERSION}.
+Once your {PRODUCT_SHORT} Dev environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_93X} to {PRODUCT_SHORT} version {VERSION}.
 
 The project structure is not changed, updates only need to be made to the versions, names of some dependencies and files.
 
@@ -77,7 +77,7 @@ The project structure is not changed, updates only need to be made to the versio
 </dependency>
 ----
 
-Due to the update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-updates[Main Quarkus and Spring Boot Framework changes] and refer to https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide] for more details on the main Quarkus changes.
+Due to the update to Quarkus and Spring Boot versions that {PRODUCT_SHORT} {VERSION} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_93X}. For more information see xref:#Quarkus-Spring-updates[Main Quarkus and Spring Boot Framework changes] and the Quarkus (https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.27[Quarkus 3.27 LTS migration guide]) and Spring Boot documentation (https://docs.spring.io/spring-boot/upgrading.html[Upgrading Spring Boot]).
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 
@@ -127,10 +127,10 @@ Avoid using KIE Flyway for automatic database schema migration in production env
 
 For more information, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].
 
-Once you have installed your runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
+Once you have installed your Runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
 
 [#Quarkus-Spring-updates]
-== Main Quarkus and Spring Boot Framework changes
+== Breaking changes due to Quarkus and Spring Boot Framework updates
 
 {PRODUCT_SHORT} {VERSION_94} updates the core frameworks that power _Business Services_. The most impactful change is the Hibernate ORM 6.x to 7.1 upgrade, which introduces breaking API changes that require code modifications. The following table lists and categorizes these changes. 
 
@@ -205,11 +205,6 @@ A major version change with limited impact on _Business Services_ built with {PR
 Test code::
 `MockProducer` default constructor was removed, use `new MockProducer<>(true, null, null)` instead. 
 
-Runtime code::
-SmallRye Kafka connector configuration is unchanged and no action is needed
-
-Docker Compose:: Kafka container images need to be updated to 4.x versions.
-
 === AsyncAPI 2.x → 3.x
 The AsyncAPI specification and Java library had a major version upgrade, which affects the spec files and Java code referencing AsyncAPI models.
 
@@ -253,7 +248,7 @@ Quarkus 3.27 continues the shift from @ConfigGroup annotations to @ConfigMapping
 Hibernate 7 + Spring ORM 6.2 EntityManagerFactory initialization issue — workaround via BeanPostProcessor
 
 
-=== Common Errors After Upgrade
+== Common Errors After Upgrade
 
 |===
 | *Error message* | *Cause* | *Fix*
