@@ -310,12 +310,23 @@ docker run -p 8180:8080 \
   quay.io/keycloak/keycloak:latest start-dev
 ```
 
-Configure Keycloak:
-1. Access Keycloak: http://localhost:8180
-2. Create realm "kie"
-3. Create client "kie-app" with secret "secret"
-4. Create users: john, mary, steve
-5. Assign roles: approver, manager, user
+Verify Keycloak Server Access:
+- Open your browser and navigate to: http://localhost:8180/auth
+- Ensure that the Keycloak server is running properly.
+- Log in to the Keycloak Administration Console using the following credentials:
+  - Username: admin
+  - Password: admin
+
+Import Realm Configuration:
+
+To import the provided kie-relam.json (realm configuration file), follow these steps:
+- In the Admin Console, click on Manage Realm.
+- Select Create Realm.
+- Click on Browse and locate the kie-relam.json file from the 'keyCloak-config' directory of this example.
+- Select the file and click Create.
+ 
+ After successful import, the new realm should appear in the realm dropdown.
+
 
 Enable OIDC in application.properties:
 ```properties
@@ -327,7 +338,7 @@ Test with JWT token:
 
 ```bash
 # Get access token
-export TOKEN=$(curl -s -X POST http://127.0.0.1:8180/realms/kie/protocol/openid-connect/token \
+export TOKEN=$(curl -s -X POST http://localhost:8180/realms/kie/protocol/openid-connect/token \
   -H 'content-type: application/x-www-form-urlencoded' \
   -d "client_id=kie-app" \
   -d "client_secret=secret" \
