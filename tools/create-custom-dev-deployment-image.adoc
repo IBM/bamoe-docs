@@ -194,6 +194,39 @@ To create a custom Dev Deployment Option in a Business Service project:
 
 When you open the Deploy dialog in {CANVAS}, displays custom options (filtered by the connected provider type).
 
+== Deployment Resources Requirements
+
+Kubernetes/OpenShift resources created by a Dev Deployment must include specific labels and annotations to enable {CANVAS} to list and manage these resources.
+
+{CANVAS} automatically adds required labels and annotations to all resources to identify and manage Dev Deployments:
+
+* *Labels:* `tools.kie.org/created-by` (value: "kie-tools"), `tools.kie.org/part-of` (value: deployment unique name)
+* *Annotations:* `tools.kie.org/workspace-id`, `tools.kie.org/workspace-name`, `tools.kie.org/deployment-option-name`, and optionally `tools.kie.org/health-status-url-template` and `tools.kie.org/deployment-access-url-template` (if defined in option.json)
+
+These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
+
+For successful deployment, each resource requires this information:
+
+[source,yaml]
+----
+metadata:
+  name: ${{ $.devDeployment.uniqueName }}
+  namespace: ${{ $.devDeployment.kubernetes.namespace }}
+  labels:
+    ${{ $.devDeployment.labels.createdBy }}: kie-tools
+    ${{ $.devDeployment.labels.partOf }}: ${{ $.devDeployment.uniqueName }}
+  annotations:
+    ${{ $.devDeployment.annotations.workspaceId }}: ${{ $.devDeployment.workspace.id }}
+    ${{ $.devDeployment.annotations.workspaceName }}: ${{ $.devDeployment.workspace.name }}
+----
+
+* The `name` identifies the deployment across the board
+* The `namespace` specifies where {CANVAS} creates the deployment in the cluster and must match the namespace configured in the connected account
+* The labels (`createdBy` and `partOf`) enable {CANVAS} to filter and map all resources related to a single deployment. **Important:** `createdBy` must always have the value `kie-tools`
+* The annotations (`workspaceId` and `workspaceName`) match a deployment to a workspace
+
+NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
+
 ==== Directory structure
 
 Dev Deployment Options are defined inside a Business Service project under the `.bamoe/dev-deployments/` directory. Each option consists of a subdirectory containing manifests, patches, and a descriptor file:
@@ -543,6 +576,93 @@ For example,
 * `maybeApplyPatches`: Patches {CANVAS} and applies only when the choice is enabled
 * `maybeAddManifests`: Additional manifests the system includes only when the choice is enabled
 
+==== Deployment tokens
+
+.Dev Deployment tokens list
+image::tools/devDeployments/tokens.png[width=720]
+
+Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster. These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
+
+For example,
+
+[source,javascript]
+----
+devDeployment: {
+  labels: {
+    createdBy: "tools.kie.org/created-by",
+    partOf: "tools.kie.org/part-of",
+ },
+  annotations: {
+    workspaceId: "tools.kie.org/workspace-id",
+    workspaceName: "tools.kie.org/workspace-name",
+ },
+  uniqueName: string,
+  uploadService: {
+    apiKey: string,
+ },
+  workspace: {
+    id: string,
+    name: string,
+ },
+  kubernetes: {
+    namespace: string,
+ },
+},
+----
+
+NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
+
+These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
+
+The following tokens are available in manifests and patches at deploy time:
+
+[cols="2,3"]
+|===
+|Token Path |Description
+
+|`$.devDeployment.uniqueName`
+|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
+
+|`$.devDeployment.workspace.id`
+|The ID of the current workspace
+
+|`$.devDeployment.workspace.name`
+|The name of the current workspace
+
+|`$.devDeployment.kubernetes.namespace`
+|The target Kubernetes namespace
+
+|`$.devDeployment.uploadService.apiKey`
+|The API key for the upload service
+
+|`$.devDeployment.labels.createdBy`
+|The label key for identifying resources created by {CANVAS} (`tools.kie.org/created-by`)
+
+|`$.devDeployment.labels.partOf`
+|The label key for grouping related resources (`tools.kie.org/part-of`)
+
+|`$.devDeployment.annotations.workspaceId`
+|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
+
+|`$.devDeployment.annotations.workspaceName`
+|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
+
+|`$.config.baseImageUrl`
+|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
+
+|`$.config.quarkusBlankAppImageUrl`
+|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
+
+|`$.config.dmnFormWebappImageUrl`
+|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
+
+|`$.config.imagePullPolicy`
+|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
+
+|`$.parameters.<parameterId>`
+|The value of a user-configured parameter
+|===
+
 ==== Token Interpolation
 
 Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) to reference values from a token map (for example, `${{ <JSON Path expression> }}`).
@@ -657,4 +777,17 @@ https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}']
 ----
 
 
+== Validation
 
+{CANVAS} validates `option.json` files against a JSON schema derived from TypeScript type definitions. {CANVAS} displays validation errors in the Deploy dialog with specific error messages.
+
+Common validation errors include:
+
+* Missing required fields (`name`, `description`, `specVersion`, `baselineManifests`)
+* Invalid parameter types
+* Manifest files referenced in `option.json` not found in the `manifests/` directory
+* Patch files referenced in `option.json` not found in the `patches/` directory
+* Invalid JSON in patch files
+* Invalid YAML in manifest files
+
+NOTE: When some options load successfully and others fail, {CANVAS} displays a warning indicating partial success and lists only the valid options.

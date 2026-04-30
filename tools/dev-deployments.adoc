@@ -5,6 +5,33 @@ include::../styles/images.adoc[]
 
 {CANVAS} enables the deploy, validation and testing of models in a live environment (Kubernetes or OpenShift) through the Dev Deployments feature. Dev Deployments allow users to validate their models without needing to understand the full build and deployment pipeline, bridging the gap between modeling and runtime testing, and enable faster feedback loops.
 
+== How Dev Deployments Work
+
+Dev deployments require multiple components to function together, namely BAMOE Canvas, the Kubernetes/OpenShift cluster, container images, and the upload service.
+
+Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, {CANVAS} automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
+
+When you click `Deploy`, {CANVAS} executes the following steps:
+
+. {CANVAS} packages all workspace files into a zip file (ignoring .git directories).
+. {CANVAS} loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
+** Applies required patches to set {CANVAS} labels, annotations, and resource names.
+** Applies patches related to parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens).
+** Interpolates all tokens with their corresponding values, including parameters.
+** Splits YAML files into multiple YAMLs, creating one per resource kind.
+. Using the Kubernetes resource name and the list of saved API endpoints, {CANVAS} makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference.
+. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload.
+** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending.
+** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload.
+** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and {CANVAS} updates it with an error icon.
+. After the Dev Deployment Upload Service reaches "READY" status, {CANVAS} uploads the zip file generated in Step 1 to the upload service.
+. The Dev Deployment Upload Service receives the zip file and extracts it to the defined path (set using configured environment variables on the container). After extraction completes, the service ends with status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever the Custom Image option parameter defines).
+. A Quarkus application starts loading inside the container, while {CANVAS} polls the container to check Quarkus app readiness.
+. When Quarkus finishes loading and polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
+** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter.
+** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
+. Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
+
 == Connecting Cloud Providers
 
 The deployment process (target cluster and credentials) are configured through {CANVAS} settings. For instructions on connecting to cloud providers, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
@@ -27,62 +54,6 @@ You can configure any available parameters displayed in the dialog (e.g., Docker
 
 .Deploy page
 image::tools/devDeployments/deploy-page.png[width=600px]
-
-== Dev Deployment options with accelerators
-
-Accelerators are Git repositories containing project templates. Bundle Dev Deployment Options with accelerators so that when a developer applies the accelerator, the deployment options automatically become available in the Deploy dialog.
-Supported Accelerator types for DMN are:
-
-* Decisions (Quarkus + Maven)
-* Decisions (Springboot + Maven)
-
-Supported Accelerator types for BPMN are:
-
-* Workflows (Quarkus + Maven)
-* Workflows (Springboot + Maven)
-
-== Monitoring Deployments
-
-After deploying, the Dev Deployments dropdown displays all active deployments with status icons:
-
-* *Spinning icon* — Deployment in progress (resources being created, application starting up)
-* *Green checkmark* — Deployment is up and healthy
-* *Red circle* — Deployment encountered an error (health check failed)
-* *Warning triangle* — Deployment is down (no running replicas)
-
-.Dev Deployments dropdown demonstrating the deployment process
-image::tools/devDeployments/kubernetes-waiting-done.png[]
-
-Click on a deployment to open the deployed application in a new browser tab (using the `deploymentAccessUrlTemplate` URL).
-
-{CANVAS} refreshes deployment status every 30 seconds automatically by polling the health endpoint.
-
-After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
-
-== Deleting Deployments
-
-To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click *Delete all* at the bottom of the dropdown.
-
-NOTE: Dev Deployments are immutable. When an error occurs or a change is required, create a new Dev Deployment.
-
-.Deleting Deployments
-image::tools/devDeployments/deleting-deployments.png[width=600px]
-
-
-== Validation
-
-{CANVAS} validates `option.json` files against a JSON schema derived from TypeScript type definitions. {CANVAS} displays validation errors in the Deploy dialog with specific error messages.
-
-Common validation errors include:
-
-* Missing required fields (`name`, `description`, `specVersion`, `baselineManifests`)
-* Invalid parameter types
-* Manifest files referenced in `option.json` not found in the `manifests/` directory
-* Patch files referenced in `option.json` not found in the `patches/` directory
-* Invalid JSON in patch files
-* Invalid YAML in manifest files
-
-NOTE: When some options load successfully and others fail, {CANVAS} displays a warning indicating partial success and lists only the valid options.
 
 //== Dev Deployment options
 
@@ -166,155 +137,42 @@ Images used in the deployment:
 
 NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[Creating a custom Dev Deployment image])
 
+== Dev Deployment options with accelerators
 
-=== Deployment tokens
+Accelerators are Git repositories containing project templates. Bundle Dev Deployment Options with accelerators so that when a developer applies the accelerator, the deployment options automatically become available in the Deploy dialog.
+Supported Accelerator types for DMN are:
 
-.Dev Deployment tokens list
-image::tools/devDeployments/tokens.png[width=720]
+* Decisions (Quarkus + Maven)
+* Decisions (Springboot + Maven)
 
-Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster. These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
+Supported Accelerator types for BPMN are:
 
-For example,
+* Workflows (Quarkus + Maven)
+* Workflows (Springboot + Maven)
 
-[source,javascript]
-----
-devDeployment: {
-  labels: {
-    createdBy: "tools.kie.org/created-by",
-    partOf: "tools.kie.org/part-of",
- },
-  annotations: {
-    workspaceId: "tools.kie.org/workspace-id",
-    workspaceName: "tools.kie.org/workspace-name",
- },
-  uniqueName: string,
-  uploadService: {
-    apiKey: string,
- },
-  workspace: {
-    id: string,
-    name: string,
- },
-  kubernetes: {
-    namespace: string,
- },
-},
-----
+== Monitoring Deployments
 
-NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
+After deploying, the Dev Deployments dropdown displays all active deployments with status icons:
 
-These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
+* *Spinning icon* — Deployment in progress (resources being created, application starting up)
+* *Green checkmark* — Deployment is up and healthy
+* *Red circle* — Deployment encountered an error (health check failed)
+* *Warning triangle* — Deployment is down (no running replicas)
 
-The following tokens are available in manifests and patches at deploy time:
+.Dev Deployments dropdown demonstrating the deployment process
+image::tools/devDeployments/kubernetes-waiting-done.png[]
 
-[cols="2,3"]
-|===
-|Token Path |Description
+Click on a deployment to open the deployed application in a new browser tab (using the `deploymentAccessUrlTemplate` URL).
 
-|`$.devDeployment.uniqueName`
-|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
+{CANVAS} refreshes deployment status every 30 seconds automatically by polling the health endpoint.
 
-|`$.devDeployment.workspace.id`
-|The ID of the current workspace
+After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
 
-|`$.devDeployment.workspace.name`
-|The name of the current workspace
+== Deleting Deployments
 
-|`$.devDeployment.kubernetes.namespace`
-|The target Kubernetes namespace
+To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click *Delete all* at the bottom of the dropdown.
 
-|`$.devDeployment.uploadService.apiKey`
-|The API key for the upload service
+NOTE: Dev Deployments are immutable. When an error occurs or a change is required, create a new Dev Deployment.
 
-|`$.devDeployment.labels.createdBy`
-|The label key for identifying resources created by {CANVAS} (`tools.kie.org/created-by`)
-
-|`$.devDeployment.labels.partOf`
-|The label key for grouping related resources (`tools.kie.org/part-of`)
-
-|`$.devDeployment.annotations.workspaceId`
-|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
-
-|`$.devDeployment.annotations.workspaceName`
-|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
-
-|`$.config.baseImageUrl`
-|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
-
-|`$.config.quarkusBlankAppImageUrl`
-|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
-
-|`$.config.dmnFormWebappImageUrl`
-|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
-
-|`$.config.imagePullPolicy`
-|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
-
-|`$.parameters.<parameterId>`
-|The value of a user-configured parameter
-|===
-
-
-
-== Deployment Resources Requirements
-
-Kubernetes/OpenShift resources created by a Dev Deployment must include specific labels and annotations to enable {CANVAS} to list and manage these resources.
-
-{CANVAS} automatically adds required labels and annotations to all resources to identify and manage Dev Deployments:
-
-* *Labels:* `tools.kie.org/created-by` (value: "kie-tools"), `tools.kie.org/part-of` (value: deployment unique name)
-* *Annotations:* `tools.kie.org/workspace-id`, `tools.kie.org/workspace-name`, `tools.kie.org/deployment-option-name`, and optionally `tools.kie.org/health-status-url-template` and `tools.kie.org/deployment-access-url-template` (if defined in option.json)
-
-These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
-
-For successful deployment, each resource requires this information:
-
-[source,yaml]
-----
-metadata:
-  name: ${{ $.devDeployment.uniqueName }}
-  namespace: ${{ $.devDeployment.kubernetes.namespace }}
-  labels:
-    ${{ $.devDeployment.labels.createdBy }}: kie-tools
-    ${{ $.devDeployment.labels.partOf }}: ${{ $.devDeployment.uniqueName }}
-  annotations:
-    ${{ $.devDeployment.annotations.workspaceId }}: ${{ $.devDeployment.workspace.id }}
-    ${{ $.devDeployment.annotations.workspaceName }}: ${{ $.devDeployment.workspace.name }}
-----
-
-* The `name` identifies the deployment across the board
-* The `namespace` specifies where {CANVAS} creates the deployment in the cluster and must match the namespace configured in the connected account
-* The labels (`createdBy` and `partOf`) enable {CANVAS} to filter and map all resources related to a single deployment. **Important:** `createdBy` must always have the value `kie-tools`
-* The annotations (`workspaceId` and `workspaceName`) match a deployment to a workspace
-
-NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
-
-
-== How Dev Deployments Work
-
-Dev deployments require multiple components to function together, namely BAMOE Canvas, the Kubernetes/OpenShift cluster, container images, and the upload service.
-
-Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, {CANVAS} automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
-
-When you click `Deploy`, {CANVAS} executes the following steps:
-
-. {CANVAS} packages all workspace files into a zip file (ignoring .git directories).
-. {CANVAS} loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
-** Applies required patches to set {CANVAS} labels, annotations, and resource names.
-** Applies patches related to parameters set in the deployment modal (each parameter corresponds to a set of patches and tokens).
-** Interpolates all tokens with their corresponding values, including parameters.
-** Splits YAML files into multiple YAMLs, creating one per resource kind.
-. Using the Kubernetes resource name and the list of saved API endpoints, {CANVAS} makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference.
-. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload.
-** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending.
-** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload.
-** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and {CANVAS} updates it with an error icon.
-. After the Dev Deployment Upload Service reaches "READY" status, {CANVAS} uploads the zip file generated in Step 1 to the upload service.
-. The Dev Deployment Upload Service receives the zip file and extracts it to the defined path (set using configured environment variables on the container). After extraction completes, the service ends with status code 0 and calls the following defined command (usually `mvn quarkus:dev` or whatever the Custom Image option parameter defines).
-. A Quarkus application starts loading inside the container, while {CANVAS} polls the container to check Quarkus app readiness.
-. When Quarkus finishes loading and polling succeeds, {CANVAS} updates the Dev Deployment icon to a success icon and provides a link to the Dev Deployment endpoint, which can be either:
-** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter.
-** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
-. Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
-
-
+.Deleting Deployments
+image::tools/devDeployments/deleting-deployments.png[width=600px]
