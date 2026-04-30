@@ -1,12 +1,12 @@
 
-= Creating a custom BAMOE Canvas Dev Deployment
+= Creating and customizing {PRODUCT_SHORT} Canvas Dev Deployments
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
 
 {CANVAS} Dev Deployments offer extensive customization capabilities to accommodate diverse project requirements and deployment scenarios. You can define deployment configurations with fine-grained control over Kubernetes or OpenShift resources, providing the flexibility to tailor deployments to your exact specifications.
 
-== Creating a custom BAMOE Canvas Dev Deployment image
+== Customization approach 1: Using a custom Dev Deployment image
 
 For convenience, one of the deployment options in {CANVAS} allows the user to input a custom image and a custom command to start the application once the upload is complete.
 
@@ -156,7 +156,7 @@ When deploying to an OpenShift cluster, `./mvnw quarkus:dev` will work without a
 
 This is because the Ingress controller is configured to use sub-paths for each Dev Deployment instead of new subdomains on the Kubernetes cluster, verify that the Quarkus app conforms to these sub-paths.
 
-== Creating custom Dev Deployment options via user-defined YAMLs
+== Customization approach 2: Using custom Dev Deployment options via user-defined YAMLs
 
 Custom Dev Deployment options enable you to create deployment configurations tailored to specific use cases and Kubernetes and OpenShift environments.
 You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
@@ -182,19 +182,7 @@ When creating custom Dev Deployment Options, follow these guidelines:
 * Set the `specVersion` field to `"0.1"` for the current specification version.
 * Use `eligibleAuthProviderIds` to restrict a deployment option to specific provider types. For example, an option using OpenShift Routes should set `"eligibleAuthProviderIds": ["openshift"]`, while an option using Kubernetes Ingress should set `"eligibleAuthProviderIds": ["kind","minikube", "kubernetes-cloud"]`. When this field is omitted or left empty, the option appears for all connected providers. Valid values are `openshift`, `kind`, `minikube`, and `kubernetes-cloud`.
 
-==== Creating a Dev Deployment Option via user-defined YAMLs in a Business Service project
-
-To create a custom Dev Deployment Option in a Business Service project:
-
-. Create the directory structure `.bamoe/dev-deployments/<option-name>/`.
-. Add Kubernetes resource YAML manifests to the `manifests/` subdirectory (one resource per file).
-. Optionally, create JSON Patch files in the `patches/` subdirectory.
-. Create the `option.json` descriptor file that references manifests, patches, and defines configurable parameters and URL templates.
-. Commit the files to the project repository.
-
-When you open the Deploy dialog in {CANVAS}, displays custom options (filtered by the connected provider type).
-
-== Deployment Resources Requirements
+=== Deployment resources requirements
 
 Kubernetes/OpenShift resources created by a Dev Deployment must include specific labels and annotations to enable {CANVAS} to list and manage these resources.
 
@@ -227,7 +215,7 @@ metadata:
 
 NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
 
-==== Directory structure
+=== Directory structure
 
 Dev Deployment Options are defined inside a Business Service project under the `.bamoe/dev-deployments/` directory. Each option consists of a subdirectory containing manifests, patches, and a descriptor file:
 
@@ -777,7 +765,7 @@ https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}']
 ----
 
 
-== Validation
+=== Validation
 
 {CANVAS} validates `option.json` files against a JSON schema derived from TypeScript type definitions. {CANVAS} displays validation errors in the Deploy dialog with specific error messages.
 
@@ -791,3 +779,15 @@ Common validation errors include:
 * Invalid YAML in manifest files
 
 NOTE: When some options load successfully and others fail, {CANVAS} displays a warning indicating partial success and lists only the valid options.
+
+=== Creating a Dev Deployment Option via user-defined YAMLs in a Business Service project
+
+To create a custom Dev Deployment Option in a Business Service project:
+
+. Create the directory structure `.bamoe/dev-deployments/<option-name>/`.
+. Add Kubernetes resource YAML manifests to the `manifests/` subdirectory (one resource per file).
+. Optionally, create JSON Patch files in the `patches/` subdirectory.
+. Create the `option.json` descriptor file that references manifests, patches, and defines configurable parameters and URL templates.
+. Commit the files to the project repository.
+
+When you open the Deploy dialog in {CANVAS}, displays custom options (filtered by the connected provider type).
