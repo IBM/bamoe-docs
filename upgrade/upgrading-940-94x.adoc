@@ -76,32 +76,4 @@ After upgrading your _Business Services_ source code (Step 3), you need to upgra
 
 Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment Helm chart].
 
-If you have stateful workflows in your _Business Services_ you will need to complete step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
-
-
-[#migrate-stateful-workflow-db]
-== Step 6: Upgrade your stateful Workflow database(s)
-
-If you have _Business Services_ that run stateful workflows in your system you can upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
-
-The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
-
-You must upgrade your _Business Services_ and your database(s) together. 
-
-To upgrade safely:
-
-. Back up your database
-
-. Test the migration in a staging environment
-
-. Schedule downtime if you are updating a production database
-
-. Apply the scripts sequentially for each subsystem 
-
-. Verify that all services function correctly after the upgrade
-
-Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
-
-For more information, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows using {DDLS}]. 
-
 Once you have installed your Runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
