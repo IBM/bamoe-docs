@@ -655,7 +655,7 @@ To resolve these issues, delete the cached version of your local repository that
 Your Maven repository is now properly configured and ready to build _Business Service_ projects using a standard Maven workflow.
 ////
 
-=== Configure Gradle with the container image URL
+== Configure Gradle with the container image URL
 
 To configure Gradle with a container image, do the following steps:
 
@@ -668,7 +668,7 @@ To configure Gradle with a container image, do the following steps:
 ----
 // ~/.gradle/init.d/bamoe.gradle
 
-def bamoeRepoUrl = "https://container-URL-here" // <-- replace with your BAMOE URL
+def bamoeRepoUrl = "https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN" 
 
 // Add BAMOE repository to all projects for dependency resolution
 allprojects {
@@ -698,7 +698,10 @@ gradle.settingsEvaluated { settings ->
     }
 }
 ----
-. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
+. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`:
++
+** OpenShift: https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN
+** Kubernetes: https://maven-repository.$YOUR_KUBERNETES_CLUSTER_DOMAIN
 . If you use HTTPS for the {MVN_REPO}, you must import your internal CA certificate into one of the following:
 .. Java truststore ,recommended for all OSes, or use a merged custom truststore and point Java/Gradle to it.
 .. OS truststore, only if your OS supports it.
