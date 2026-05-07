@@ -3,10 +3,26 @@ include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 This section describes how to install the tools needed to create and manage Workflows, Decisions, and Rules in your development environment:
 
+{DEV_TOOLS}:: to enable efficient development and collaboration on _Business Services_ within an industry standard IDE.
 {CANVAS} and its backend services, {CORS_PROXY}, {EXT_SERVICES}:: for browser-based authoring and testing of DMN, BPMN assets, 
 {MVN_REPO}:: for accessing libraries to develop _Business Services_, 
-{DEV_TOOLS}:: to enable efficient development and collaboration on _Business Services_ within an industry standard IDE.
- 
+
+For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
+
+[#dev-tools-install]
+== Installing {DEV_TOOLS}
+
+You can find the developer tools at the Visual Studio Marketplace, as {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*].
+
+The visual editors in {DEV_TOOLS} automatically update files to the latest version, making them incompatible with the {PRODUCT_SHORT} version used in _Business Services_. To control updates, turn off the *Auto Update* option. 
+
+If you are developing in Java, make sure you set up the following elements:
+
+* Your domain Java classes.
+* The activator Java class file `Activator.java` (required to activate the functionality).
+
+For more information on using the extensions, see xref:../tools/developer-tools-for-vscode.adoc[Available features → {DEV_TOOLS}].
+
 == The Dev environment Helm chart
 The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
 
@@ -32,30 +48,14 @@ The {PRODUCT_SHORT} Dev Helm charts are architecture-agnostic and work for both:
 * Linux/s390x architecture which runs on the IBM Z platform
 * Linux/x86_64 architecture
 
-All {PRODUCT_SHORT} container images are available as multi-architecture images on Quay.io, and the host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
+If you prefer to install the Dev environment components individually using OpenShift CLI and Docker this can be done using the individual {PRODUCT_SHORT} container images. They are available as multi-architecture images on Quay.io. The host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
 
 [source,shell]
 ----
 `docker pull --platform linux/s390x quay.io/bamoe/canvas:{IMAGE_VERSION}`
 ----
 
-If you prefer to install the Dev environment components individually using OpenShift CLI and Docker this can be done using the same container images. 
-
-For more information on the product distribution see xref:../release-notes/whats-new-9-4-0.adoc#download-doc[What's New → Download Documentation]. 
-
-[#dev-tools-install]
-== Installing {DEV_TOOLS}
-
-You can find the developer tools at the Visual Studio Marketplace, as {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*].
-
-The visual editors in {DEV_TOOLS} automatically update files to the latest version, making them incompatible with the {PRODUCT_SHORT} version used in _Business Services_. To control updates, turn off the *Auto Update* option. 
-
-If you are developing in Java, make sure you set up the following elements:
-
-* Your domain Java classes.
-* The activator Java class file `Activator.java` (required to activate the functionality).
-
-For more information on using the extensions, see xref:../tools/developer-tools-for-vscode.adoc[Available features → {DEV_TOOLS}].
+The following sections describe how to install the Dev environment components using the Helm chart or individually using OpenShift CLI and Docker.
 
 == Installing the Dev Environment Helm chart (recommended)
 
@@ -75,11 +75,6 @@ To install on OpenShift, first get the default OpenShift domain for your routes 
 YOUR_OCP_ROUTE_DOMAIN=$(oc get ingresses.config cluster --output jsonpath={.spec.domain})
 ----
 
-////
-no longer applicable with dev helm charts:
-If you do not have access rights to this configuration, you can create a dummy Route resource and check its domain.
-////
-
 You can then install the Helm chart with the following commands:
 
 [source,shell,subs="attributes+"]
@@ -88,7 +83,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="$YOUR_OCP_ROUTE_DOMAIN"
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. `YOUR_OCP_DOMAIN` is defined as the route to your OpenShift domain.
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}, and `YOUR_OCP_DOMAIN` defines the route to your OpenShift domain.
 
 
 === Generic Kubernetes install
@@ -103,7 +98,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="$YOUR_KUBERNETES_CLUSTER_DOMAIN" --set global.kubernetesIngressClass="$YOUR_KUBERNETES_INGRESS_CLASS"
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.`YOUR_KUBERNETES_CLUSTER_DOMAIN` and `YOUR_KUBERNETES_INGRESS_CLASS` are defined as the domain and the ingress class of your cluster, respectively.
+Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.`YOUR_KUBERNETES_CLUSTER_DOMAIN` and `YOUR_KUBERNETES_INGRESS_CLASS` are defined as the domain and the Ingress class of your cluster, respectively.
 
 === Minikube install
 
@@ -159,7 +154,7 @@ helm uninstall my-bamoe-dev-env
 
 === Passing environment variables
 
-This chart uses default environmental variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[Dev Helm Chart configuration reference] for all options.
+This chart uses default environment variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[Dev Helm Chart configuration reference] for all options.
  
 [source,shell]
 ----
@@ -312,87 +307,6 @@ You should have a secure protocol (HTTPS) available for the {CANVAS} installatio
 
 ////
 
-[#canvas-gitrepo-config]
-== Configuring {CANVAS} to work with supported Git providers
-
-To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable using the `canvas.env` Helm configuration parameter (see xref:#helm-chart-config-ref[Configuration reference for Dev environment Helm Charts]). 
-
-Example configuration:
-
-[source,json]
-----
-canvas: 
-  env: "KIE_SANDBOX_AUTH_PROVIDERS"
-  value: |
-  [
-    {
-      "id": "unique identifier",
-      "domain": "https://your-git-provider.com",
-      "supportedGitRemoteDomains": ["your-git-provider.com"],
-      "type": "gitlab | githubEnterprise | bitbucketDataCenter",
-      "name": "readable name for displaying in the BAMOE UI",
-      "enabled": true,
-      "group": "git",
-     "disableEncoding": true,
-    }
-  ]
-----
-
-*id*:: A unique identifier for this authentication provider configuration.
-*domain*:: The base URL of your Git provider instance.
-*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
-*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
-*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
-*enabled*:: A boolean flag that enables or disables this provider.
-*group*:: Categorizes the provider for grouping similar services.
-*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
-*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
-
-After completing the configuration, you can access the features provided by each integration. For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
-
-[#custom-accelerators]
-== Configuring custom Accelerators for your organization
-Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. They can be used to store configurations that are common to all new _Business Services_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
-
-The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT}, you can use Accelerators that correspond to the cloud development frameworks it supports, including Quarkus and Spring Boot with either Maven or Gradle. Use these default accelerators to help identify what you want to modify in your own custom accelerator.
-
-The `KIE_SANDBOX_ACCELERATORS` environment variable comes pre-configured with the default accelerators, accepting an array of Accelerator configurations.
-
-You can create your custom Accelerators by overwriting the default values or by appending new accelerator definitions. 
-
-Your custom Accelerator must be a public Git repository. After creating it, write a specific JSON configuration to be used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
-
-[source,json,subs="attributes+"]
-----
-canvas: 
-  env: "KIE_SANDBOX_ACCELERATORS"
-  value: |
-  [
-    {
-      "name": "Your Accelerator name",
-      "iconUrl": "https://link.to/your/logo/image",
-     "gitRepositoryUrl": "https://github.com/...",
-     "gitRepositoryGitRef": "branchName",
-     "dmnDestinationFolder": "path/to/place/dmn/files",
-     "bpmnDestinationFolder": "path/to/place/bpmn/files",
-      "otherFilesDestinationFolder": "path/to/place/other/files",
-      "scesimDestinationFolder": "path/to/place/scesim/files"
-    }
-  ]
-----
-
-**name**:: This is how the Accelerator is known inside {CANVAS}.
-**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
-**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
-**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
-**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
-**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
-**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
-**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
-
-For more information on using accelerators see xref:../tools/applying-accelerators.adoc[Configuring and using Accelerators]
-
-
 == Integrating {MVN_REPO} manually
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
@@ -415,6 +329,7 @@ There are two ways to do this:
 Before changing your Maven settings you must first deploy/run the container image somewhere.
 There are a few options and your choice will depend on your work environment and the tools that are available to you.
 
+////
 === Deploying to OpenShift
 
 Choose the container image from one of the following sources: 
@@ -548,11 +463,13 @@ docker run -d -p <PORT>:8080 quay.io/bamoe/maven-repository:{IMAGE_VERSION}
 
 You can verify the repository is running by accessing the repository in your browser at `+http://localhost:<PORT>/com/ibm/bamoe+`.
 
-=== Configure Maven with the container image URL
-To configure Maven with a container image follow these steps:
+////
 
-. Download the dedicated M2 repository image container (`bamoe-{VERSION}-maven-repository-image.tar.gz`).
-. Open the Maven `~/.m2/settings.xml` file in a text editor or IDE.
+=== Configure Maven with the container image URL
+To configure Maven with a container image installed via the Dev environment helm chart follow these steps:
+
+// . Download the dedicated M2 repository image container (`bamoe-{VERSION}-maven-repository-image.tar.gz`).
+. Open your local Maven `~/.m2/settings.xml` file in a text editor or IDE.
 +
 NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `settings.xml` file from the `$MAVEN_HOME/.m2/conf/` directory into the `~/.m2/` directory.
 
@@ -756,6 +673,85 @@ gradle.settingsEvaluated { settings ->
 ----
 . Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
 
+[#canvas-gitrepo-config]
+== Configuring {CANVAS} to work with supported Git providers
+
+To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable using the `canvas.env` Helm configuration parameter (see xref:#helm-chart-config-ref[Configuration reference for Dev environment Helm Charts]). 
+
+Example configuration:
+
+[source,json]
+----
+canvas: 
+  env: "KIE_SANDBOX_AUTH_PROVIDERS"
+  value: |
+  [
+    {
+      "id": "unique identifier",
+      "domain": "https://your-git-provider.com",
+      "supportedGitRemoteDomains": ["your-git-provider.com"],
+      "type": "gitlab | githubEnterprise | bitbucketDataCenter",
+      "name": "readable name for displaying in the BAMOE UI",
+      "enabled": true,
+      "group": "git",
+     "disableEncoding": true,
+    }
+  ]
+----
+
+*id*:: A unique identifier for this authentication provider configuration.
+*domain*:: The base URL of your Git provider instance.
+*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
+*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
+*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
+*enabled*:: A boolean flag that enables or disables this provider.
+*group*:: Categorizes the provider for grouping similar services.
+*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
+*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
+
+After completing the configuration, you can access the features provided by each integration. For more information see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+
+[#custom-accelerators]
+== Configuring custom Accelerators for your organization
+Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. They can be used to store configurations that are common to all new _Business Services_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
+
+The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT}, you can use Accelerators that correspond to the cloud development frameworks it supports, including Quarkus and Spring Boot with either Maven or Gradle. Use these default accelerators to help identify what you want to modify in your own custom accelerator.
+
+The `KIE_SANDBOX_ACCELERATORS` environment variable comes pre-configured with the default accelerators, accepting an array of Accelerator configurations.
+
+You can create your custom Accelerators by overwriting the default values or by appending new accelerator definitions. 
+
+Your custom Accelerator must be a public Git repository. After creating it, write a specific JSON configuration to be used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
+
+[source,json,subs="attributes+"]
+----
+canvas: 
+  env: "KIE_SANDBOX_ACCELERATORS"
+  value: |
+  [
+    {
+      "name": "Your Accelerator name",
+      "iconUrl": "https://link.to/your/logo/image",
+     "gitRepositoryUrl": "https://github.com/...",
+     "gitRepositoryGitRef": "branchName",
+     "dmnDestinationFolder": "path/to/place/dmn/files",
+     "bpmnDestinationFolder": "path/to/place/bpmn/files",
+      "otherFilesDestinationFolder": "path/to/place/other/files",
+      "scesimDestinationFolder": "path/to/place/scesim/files"
+    }
+  ]
+----
+
+**name**:: This is how the Accelerator is known inside {CANVAS}.
+**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
+**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
+**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
+**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
+**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
+**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
+**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
+
+For more information on using accelerators see xref:../tools/applying-accelerators.adoc[Configuring and using Accelerators]
 
 [#helm-chart-config-ref]
 == Configuration reference for Dev environment Helm Charts
