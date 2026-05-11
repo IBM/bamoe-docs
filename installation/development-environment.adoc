@@ -120,12 +120,14 @@ Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-
 === The OpenShift topology after {CANVAS} deployment
 image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
 
-Your {CANVAS} instance is now up and accessible through the route created in this last step. To get it, run the following command:
+Your {CANVAS} instance is now up and accessible. To get the route run the following command:
+
 [source,shell,subs="attributes+"]
 ----
 oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
+Where `$APP_NAME_BAMOE_CANVAS` is `bamoe-canvas`, `bamoe-extended-services` or `bamoe-cors-proxy` if you haven't changed the configuration of the Dev environment Helm chart.
 NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 [#maven-repo-setup]
@@ -254,6 +256,8 @@ docker run -p 8080:8080 -it \
 ----
 The HTTP server is accessed through the port 8080.
 
+////
+
 Several customization options are available. For more information on the configurations available by using the environment variables, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS} image description on Quay.io].
 
 
@@ -263,7 +267,7 @@ The configured URL addresses need to be accessible from your machine, as {CANVAS
 Using the internal IP/DNS services will not work.
 ====
 
-Another important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
+One of the important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
 
 By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
 
@@ -298,8 +302,6 @@ docker compose up
 
 {CANVAS} will be available at http://localhost:9090.
 
-////
-
 Not clear why this is necessary as it does not contain any additional information
 == Securing your {CANVAS} installation
 
@@ -307,7 +309,7 @@ You should have a secure protocol (HTTPS) available for the {CANVAS} installatio
 
 ////
 
-== Integrating {MVN_REPO} manually
+== Setting up the {MVN_REPO} locally
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
 
@@ -324,9 +326,10 @@ There are two ways to do this:
 * Set up a Maven repository with a Container image
 * Configure your local Maven repository
 
-=== Configuring Maven with the container image
+=== Configuring Maven with the Dev Environment helm chart
 
-Before changing your Maven settings you must first deploy/run the container image somewhere.
+Once the Dev Environment Helm chart is installed and the Maven container up and running you will need to update your Maven settings to reference this repository.
+
 There are a few options and your choice will depend on your work environment and the tools that are available to you.
 
 ////
@@ -512,7 +515,7 @@ NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `se
 <activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
 ----
 
-== Configuring a local Maven repository for {PRODUCT_SHORT}
+=== Configuring a local Maven repository for {PRODUCT_SHORT}
 
 If you prefer not to use containers, you can download and configure the {PRODUCT_SHORT} Maven repository from the compressed file.
 The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers need to build _Business Services_ projects.
@@ -574,10 +577,10 @@ Your Maven repository is now properly configured and ready to build _Business Se
 
 == Configure Gradle with the container image URL
 
-To configure Gradle with a container image, do the following steps:
+To configure Gradle with a container image installed via the Dev environment helm chart follow these steps:
 
-. Download the dedicated M2 repository image container, `bamoe-9.4.0-maven-repository-image.tar.gz`.
-. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply BAMOE configuration globally.
+// . Download the dedicated M2 repository image container, `bamoe-9.4.0-maven-repository-image.tar.gz`.
+. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply {PRODUCT_SHORT} configuration globally.
 . Create a `bamoe.gradle` file in the `init.d` directory. 
 . Add the following lines in the `bamoe.gradle` file:
 +
@@ -615,6 +618,7 @@ gradle.settingsEvaluated { settings ->
     }
 }
 ----
+
 . Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`:
 +
 ** OpenShift: https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN
@@ -631,11 +635,12 @@ If you prefer not to use containers, you can download the {MVN_REPO} as a compre
 
 To configure the {MVN_REPO} locally, follow these steps:
 
-. Download the {MVN_REPO}, `bamoe-9.4.0-maven-repository.zip`.
+. Download the {MVN_REPO}, `bamoe-{VERSION}-maven-repository.zip`.
 . Extract the downloaded archive.
 . Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply BAMOE configuration globally.
 . Create a `bamoe.gradle` file in the `init.d` directory. 
 . Add the following lines in the `bamoe.gradle` file:
+
 +
 [source,xml]
 ----
