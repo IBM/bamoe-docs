@@ -247,10 +247,7 @@ Edit `src/main/resources/application.properties` and add:
 
 ```properties
 # User Groups Configuration for Dev UI
-# Pattern: %dev.bamoe.devui.users.<username>.groups=<username>,<group1>,<group2>,...
-# IMPORTANT:
-# 1. Username must be included in the groups list
-# 2. Groups MUST match the GroupId assignments in your BPMN file
+# Pattern: %dev.bamoe.devui.users.<username>.groups=<comma separated list of groups>
 
 %dev.bamoe.devui.users.jdoe.groups=jdoe,PM,HR
 ```
@@ -627,7 +624,7 @@ Change task assignment from specific user to group:
 
 1. **BAMOE Dev UI Dependency** - Required for Dev UI task action buttons (Complete, Release, Skip). Add `bamoe-quarkus-devui` dependency to `pom.xml`. See **Step 2.2** for details.
 
-2. **User Groups Configuration** - Required for task assignment and visibility in Dev UI. Configure user groups in `application.properties` with pattern: `%dev.bamoe.devui.users.<username>.groups=<username>,<group1>,<group2>,...`. See **Step 6** for details.
+2. **User Groups Configuration** - Required for task assignment and visibility in Dev UI. Configure user groups in `application.properties` with pattern: `%dev.bamoe.devui.users.<username>.groups=<comma separated list of groups>`. See **Step 6** for details.
 
 **Optional Best Practice:**
 - **Package Name** - Update BPMN package name from `Evaluation.src.main.resources` to `com.example.evaluation` (Java convention). See **Step 4** for details.
