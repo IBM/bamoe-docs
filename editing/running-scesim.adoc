@@ -1,38 +1,71 @@
 = Running unit tests with Test Scenarios
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
+include::../styles/tabs.adoc[]
 
 Running the unit test with Test Scenarios enable you to validate the correctness of business decisions and business decision data during development. Test Scenarios can be created and modified with {DEV_TOOLS} and can be understood as a collection of unit test cases. For authoring test scenarios, see xref:../editing/authoring-scesim.html[Authoring unit tests with Test Scenarios].
 
 There are two main ways to execute Test Scenarios:
 
-== a. Using Maven in a Terminal
-Open a Terminal in the root directory of your _Business Service_ and execute:
+* Using the terminal
+* Using the *Run Java* on VS Code when you have the *Language Support for Java(TM) by Red Hat* extension installed
 
-[source,console]
+
+== Using the terminal
+
+Open a terminal in the root directory of your _Business Service_ and execute the following command:
+
+++++
+<div class="tabs-container">
+  <input type="radio" id="maven-tab" name="group1-tabs" checked>
+  <input type="radio" id="gradle-tab" name="group1-tabs">
+  
+  <div class="tabs-header">
+    <label for="maven-tab">Maven</label>
+    <label for="gradle-tab">Gradle</label>
+  </div>
+  
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,bash]
 ----
 mvn clean test
 ----
 
-Check the results to ensure the scenarios pass. The test results will be visible in your Terminal after the completion of the `mvn clean test` command.
+++++
+    </div>
+    <div class="tab-panel">
+++++
+
+[source,bash]
+----
+./gradlew clean test
+----
+
+++++
+    </div>
+  </div>
+</div>
+++++
+
+Check the results to ensure the scenarios pass. The test results are visible in your terminal after the completion of the command.
 
 image::developer-tools/scesim-runner-results.png[]
 
 
-== b. Using the 'Run Java' button on VS Code when you have the 'Language Support for Java(TM) by Red Hat' extension installed:
+== Using the *Run Java* on VS Code when you have the *Language Support for Java(TM) by Red Hat* extension installed
 
-Open the `KogitoScenarioJunitActivator.java` file and click the "Run Java" button:
+Open the `KogitoScenarioJunitActivator.java` file, then click the *Run Java* button. 
 
-Test results will appear in the native VS Code `Test Results` window.
+Test results appear in the native VS Code *Test Results* window.
 
 image::developer-tools/scesim-java-test-runner-results.png[]
 
----
+During the Maven test phase, all Test Scenarios defined in `.scesim` files are executed as a single unit test, and the results are saved in the `target/surefire-reports` folder. In Gradle, the test results are saved in the `build/test-results/test` folder.
 
-During the test phase of Maven , all Test Scenarios defined in `.scesim` files are executed as a single unit test, and the results are saved in the `target/surefire-reports` folder. 
-
-All other regular unit tests and integration tests you might have are executed and their results are stored in the same folder.
-
+All other regular unit tests and integration tests are also executed, and their results are stored in the same respective folders.
 
 // ---
 
