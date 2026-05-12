@@ -52,31 +52,27 @@ In {PRODUCT_SHORT} {VERSION_80X} there were two different mechanisms for handlin
 
 . WorkItemHandlers extending DefaultWorkItemHandler, which rely on the engine’s Executor for retry configuration (attempts, delay, and error handling).
 
-In {PRODUCT_SHORT} {VERSION_RM} retries could be happening for both synchronous and asynchronous invocations. You can configure the retry logic with the settings for Quarkus or Spring Boot described in the following sections.
+In {PRODUCT_SHORT} {VERSION_RM} retries could be happening for both synchronous and asynchronous invocations and are managed, along with timers, via the Embedded Jobs Service. Retries may occur at different points in your Process Instance for example:
 
-==== Quarkus
+* You are invoking a process execution through a REST endpoint. No nodes in the Process Definition are marked as asynchronous. Before the Process Instance reaches a safepoint, the execution fails with an exception. In this case, the retries are controlled by the `kogito.faultToleranceEnabled` property and then handled by the platform specific implementations.
 
-Synchronous via https://quarkus.io/guides/smallrye-fault-tolerance[Smallrye Fault Tolerance]:
+* A Process Instance execution is triggered by a timer expiration, and then this execution fails. In this case, the Jobs Service specific configuration properties are affecting the retry logic.
+Both these scenarios can be considered synchronous process execution - no node is marked as `async`.
+
+Setting any node in your Process Definition `async` flag will result in "asynchronous" process execution. When an `async` node is entered, the workflow engine terminates/commits the ongoing transaction, and subsequent execution happens in a separate thread, introduces an artificial safe-point in the process as well. Although the concept exists in both v8 and v9, the implementation is different.
+
+You can configure the retry logic with the following settings for both Quarkus or Spring Boot
 
 * `kogito.faultToleranceEnabled` - to enable fault tolerance and retries.
 
-* `quarkus.fault-tolerance."global".retry.max-retries=3` - for more fine grained configuration options (see documentation referenced above).
+For more fine grained configuration options for synchronous retry logic, see
 
-Asynchronous via the embedded jobs service:
+* The https://quarkus.io/guides/smallrye-fault-tolerance[Smallrye Fault Tolerance] mechanism for Quarkus, e.g.,`quarkus.fault-tolerance."global".retry.max-retries=3`
+
+* The https://resilience4j.readme.io/docs/retry[resilience4j Retry] mechanism for Spring Boot, e.g, `resilience4j.retry.configs.default.maxAttempts=3`, see https://github.com/resilience4j/resilience4j-spring-boot3-demo/blob/master/src/main/resources/application.yml#L64-L68[application.yml].
+
+Asynchronous retry logic for Quarkus and Spring Boot is via the Embedded Jobs Service:
 
 * `kogito.jobs-service.maxNumberOfRetries`- number of retries of a failed job. After this number is reached the job will be set to failure. The default is 3 times. 
 
-* `kogito.jobs-service.retryMillis`- the interval used to retry the new job. The default is 60 seconds.
-
-==== Spring Boot
-
-Synchronous via https://resilience4j.readme.io/docs/retry[resilience4j Retry]:
-
-* `kogito.faultToleranceEnabled` - to enable fault tolerance and retries.
-* Fine grained config options described in resilience4j-retry docs above, for example: 
-+
-`resilience4j.retry.configs.default.maxAttempts=3` that you can see in the https://github.com/resilience4j/resilience4j-spring-boot3-demo/blob/master/src/main/resources/application.yml#L64-L68[application.yml].
-
-Asynchronous:
-
-* `kogito.jobs-service.retryMillis` is a global configuration. There is currently no option to configure different / increasing delays per retry attempt
+* `kogito.jobs-service.retryMillis`- the interval used to retry the new job. The default is 60 seconds. This is a global configuration. There is currently no option to configure different / increasing delays per retry attempt.
