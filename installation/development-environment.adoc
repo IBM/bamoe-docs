@@ -24,7 +24,7 @@ If you are developing in Java, make sure you set up the following elements:
 For more information on using the extensions, see xref:../tools/developer-tools-for-vscode.adoc[Available features → {DEV_TOOLS}].
 
 == The Dev environment Helm chart
-The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchases licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
+The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchased licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
 
 * pamoe-{VERSION}-dev-environment-helm-chart
 * dmoe-{VERSION}-dev-environment-helm-chart
@@ -83,8 +83,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="$YOUR_OCP_ROUTE_DOMAIN"
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}, and `YOUR_OCP_DOMAIN` defines the route to your OpenShift domain.
-
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
 
 === Generic Kubernetes install
 
@@ -98,7 +97,7 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="$YOUR_KUBERNETES_CLUSTER_DOMAIN" --set global.kubernetesIngressClass="$YOUR_KUBERNETES_INGRESS_CLASS"
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.`YOUR_KUBERNETES_CLUSTER_DOMAIN` and `YOUR_KUBERNETES_INGRESS_CLASS` are defined as the domain and the Ingress class of your cluster, respectively.
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.`YOUR_KUBERNETES_CLUSTER_DOMAIN` and `YOUR_KUBERNETES_INGRESS_CLASS` are defined as the domain and the Ingress class of your cluster, respectively.
 
 === Minikube install
 
@@ -115,9 +114,9 @@ helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-minikube-nginx.yaml
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
 
-=== The OpenShift topology after {CANVAS} deployment
+=== The {CANVAS} OpenShift topology
 image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
 
 Your {CANVAS} instance is now up and accessible. To get the route run the following command:
@@ -128,6 +127,7 @@ oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
 ----
 
 Where `$APP_NAME_BAMOE_CANVAS` is `bamoe-canvas`, `bamoe-extended-services` or `bamoe-cors-proxy` if you haven't changed the configuration of the Dev environment Helm chart.
+
 NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
 
 [#maven-repo-setup]
@@ -163,7 +163,7 @@ This chart uses default environment variables from `values.yaml` file. You can o
 helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --set canvas.image.registry=quay.io
 ----
 
-Where you replace `dmoe-dev-environment-helm-chart` with `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}. 
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
 
 ////
 == Deploying Canvas containers directly on OpenShift (using oc CLI)
@@ -279,8 +279,6 @@ The same is true for remote Kubernetes and OpenShift instances that the users of
 
 For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
 
-////
-
 == Running {CANVAS} containers locally with Docker Compose
 
 {CANVAS} and its related services can be run locally by using Docker Compose.
@@ -302,6 +300,7 @@ docker compose up
 
 {CANVAS} will be available at http://localhost:9090.
 
+////
 Not clear why this is necessary as it does not contain any additional information
 == Securing your {CANVAS} installation
 
