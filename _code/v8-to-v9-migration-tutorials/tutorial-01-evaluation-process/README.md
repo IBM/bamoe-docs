@@ -248,8 +248,9 @@ Edit `src/main/resources/application.properties` and add:
 ```properties
 # User Groups Configuration for Dev UI
 # Pattern: %dev.bamoe.devui.users.<username>.groups=<comma separated list of groups>
+# You can define multiple users to simulate roles in Dev UI by listing their groups as comma-separated values.
 
-%dev.bamoe.devui.users.jdoe.groups=jdoe,PM,HR
+%dev.bamoe.devui.users.jdoe.groups=PM,HR
 ```
 
 **Why is this needed?**
