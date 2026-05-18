@@ -5,21 +5,24 @@ include::../styles/images.adoc[]
 Before you use {PRODUCT_LONG}, see the known limitations. When possible, workarounds will be included with the limitations.
 
 Table 1. Known limitations
-[%header,cols=3]
+[%header,cols=4]
 [%autowidth]
 |===
-|Limitation |Description |Workaround
+|Limitation |Description |Versions |Workaround
 
 |BPMN Editor: Timer configuration resets when editing multiple Timer Events.
 |When you configure two timer nodes in a BPMN file, the first timer node's settings reset incorrectly after you navigate away and return to it. The editor resets the timer option to "Fire multiple times" and changes the syntax dropdown to ISO, even though the CRON value remains in the text field.
+|{VERSION_940}, {VERSION_941}
 |After you configure the first timer node, click any other node before configuring the second timer node. This action prevents the reset and preserves the correct timer option and syntax selection.
 
 |Native compilation support for workflow projects.
 |Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_93X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
+|{VERSION_940}, {VERSION_941}
 |Do not use native compilation if your _Business Services_ include stateful workflow.
 
 |OpenAPI spec auto-generation when using the _io.quarkus:quarkus-oidc_ extension.
 |The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated. This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
+|{VERSION_940}, {VERSION_941}
 |Add the following to your *application.properties* file:
 `quarkus.smallrye-openapi.auto-add-bad-request-response=false`
 
@@ -32,10 +35,27 @@ Table 1. Known limitations
 
 * Tested using Scenario and Simulation files
 
+|{VERSION_940}, {VERSION_941}
 |To avoid this issue, users must restructure their models to avoid relying on nested imports for Input Data.
+
+| BAMOE Canvas: Misleading Dev Deployment status for Kind/Minikube deployments
+| After creating a Dev Deployment targeting Kind or Minikube clusters, BAMOE Canvas fails to retrieve healthcheck data from the deployment and displays it in an error state, even if the deployment succeeded. Dev Deployments targeting OpenShift clusters work as expected.
+|{VERSION_940} only
+| It is still possible to access the deployment by manually typing the URL in the browser: `http://localhost/<dev_deployment_id>/q/swagger-ui` for Quarkus and `http://localhost/<dev_deployment_id>/swagger-ui/index.html` for Spring Boot. The error state can be ignored.
+
+|Quarkus Dev UI / Spring Boot Web Console / Management Console: User Task forms fail to load when Business Service runs under a sub-path.
+|User Task Forms fail to load in the Quarkus Dev UI, Spring Boot Web Console, and Management Console when the Business Service runs under a sub-path (configured via `quarkus.http.root-path` or `server.servlet.context-path`).
+|{VERSION_940} only
+|To avoid this issue, use one of the following alternatives:
+
+* Create the Dev Deployment in an OpenShift cluster instead
+* Test the Business Service locally instead of using Dev Deployments
+* Submit or transition the User Task directly using the REST API
+
 
 |Developer Tools for VS Code: Extension update does not refresh the `bamoe.accelerators.definitions` setting.
 |When you install the 9.4.x Developer Tools extension, the updated accelerators do not apply if you previously modified the bamoe.accelerators.definitions setting manually in VS Code's settings.
+|{VERSION_940}, {VERSION_941}
 |Manually edit the settings.json file using one of the following methods:
 
 * Delete the bamoe.accelerators.definitions setting (preferred).
