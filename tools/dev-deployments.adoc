@@ -5,13 +5,31 @@ include::../styles/images.adoc[]
 
 {CANVAS} enables the deploy, validation and testing of models in a live environment (Kubernetes or OpenShift) through the Dev Deployments feature. Dev Deployments allow users to validate their models without needing to understand the full build and deployment pipeline, bridging the gap between modeling and runtime testing, and enable faster feedback loops.
 
-== How Dev Deployments Work
+Dev deployments require multiple components to function together, namely BAMOE Canvas, the Kubernetes/OpenShift cluster, container images, and the upload service. 
 
-Dev deployments require multiple components to function together, namely BAMOE Canvas, the Kubernetes/OpenShift cluster, container images, and the upload service.
+== Connecting Cloud Providers
 
-Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to {CANVAS}. During connection, {CANVAS} automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.).
+Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to BAMOE Canvas. During connection, BAMOE Canvas automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.). For instructions on connecting to Kubernetes or OpenShift cluster, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers]. 
+This connection enables the deployment of all Decisions, Workflows, and complete Java projects for development purposes only. Within any open project, you can select the connected account intended for the Dev Deployment and confirm the selection.
 
-When you click `Deploy`, {CANVAS} executes the following steps:
+== Deploying from {CANVAS}
+
+After connecting a cluster, deploy your project by opening it in {CANVAS} and clicking the *Deploy* button in the toolbar. 
+
+.Deploy dropdown for a project on {CANVAS}
+image::tools/devDeployments/kubernetes-deploy.png[width=400px]
+
+After clicking Deploy, you will be presented with options for available types of deployment (see xref:#deployment_options). 
+
+.Deploy page
+image::tools/devDeployments/deploy-page.png[width=600px]
+
+Select your deployment option and and click Confirm to start the deployment. You can also configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp) 
+
+//NOTE: When the workspace contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} hides the default options and shows only workspace-defined options.
+=== How Dev Deployments Work
+
+When you click `Confirm`, {CANVAS} executes the following steps:
 
 . {CANVAS} packages all workspace files into a zip file (ignoring .git directories).
 . {CANVAS} loads the chosen deployment option (default or custom) YAML files and modifies them dynamically:
@@ -32,28 +50,18 @@ When you click `Deploy`, {CANVAS} executes the following steps:
 ** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
 . Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
 
-== Connecting Cloud Providers
+[#deployment_options]
+== Deployment Options
 
-The deployment process (target cluster and credentials) are configured through {CANVAS} settings. For instructions on connecting to cloud providers, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+You can either use the default deployment option or you can  use the customised deployment option. 
 
-The connection enables the deployment of all Decisions, Workflows, and complete Java projects for development purposes only.
-Within any open project, select the connected account intended for the Dev Deployment and confirm the selection.
+The default options (Quarkus Blank App and Custom Image) only show up if there isn’t a custom dev deployment option defined. If a custom dev deployment is set—either through an accelerator or if you create your own, then only that custom option will be displayed.
 
-== Deploying from {CANVAS}
 
-After connecting a cluster, deploy your project by opening it in {CANVAS} and clicking the *Deploy* button in the toolbar.
+//If the workspace only contains BPMN or DMN files and has no `.bamoe/dev-deployments/` directory, built-in default options is displayed.
 
-.Deploy dropdown for a project on {CANVAS}
-image::tools/devDeployments/kubernetes-deploy.png[width=400px]
+//If the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, those deployment options are listed. 
 
-//NOTE: When the workspace contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} hides the default options and shows only workspace-defined options.
-
-{CANVAS} filters displayed options based on the selected provider, showing only options whose `eligibleAuthProviderIds` includes the selected provider type. Options with no `eligibleAuthProviderIds` defined appear for all providers.
-
-You can configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp) and click Confirm to start the deployment.
-
-.Deploy page
-image::tools/devDeployments/deploy-page.png[width=600px]
 
 //== Dev Deployment options
 
@@ -62,42 +70,24 @@ image::tools/devDeployments/deploy-page.png[width=600px]
 //* *Default Dev Deployment options* — When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} displays built-in default options.
 //* *Custom Dev Deployment options* — When the current Business Service project contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} lists those options.
 
-== Default Deployment Options
+=== Quarkus Blank App Dev Deployment option
 
-When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory, {CANVAS} provides built-in default deployment options that vary based on the target platform:
-
-OpenShift:
+Quarkus Blank App deployment option is a built-in default deployment options that vary based on the target platform:
 
 [cols="1,3"]
 |===
-|Option Name |Description
+|Target platform|Description
 
-|Quarkus Blank App
+|OpenShift
 |Deploys a pre-built Quarkus container image with an upload service. Supports an optional DMN Form Webapp sidecar for testing DMN models.
-
-|Custom Image
-|Deploys a custom Docker image with configurable container port and startup command. Suitable for full Java projects (Quarkus or Spring Boot).
-|===
-
-Kubernetes:
-
-[cols="1,3"]
-|===
-|Option Name |Description
-
-|Quarkus Blank App
-|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
-
-|Custom Image
+|Kubernetes
 |Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
 |===
-
-=== Quarkus Blank App
 
 .Quarkus Blank App deployment option
 image::tools/devDeployments/deployment-option-quarkus-blank-app.png[width=720]
 
-This option provides the simplest deployment approach with the following requirements:
+This option provides the default and simplest deployment approach with the following requirements:
 
 * The project should contain only Decision (DMN) and Workflow (BPMN) files. {CANVAS} ignores all other files.
 * The deployment fails if any file contains errors.
@@ -118,7 +108,19 @@ Images used in the deployment:
 - https://quay.io/repository/bamoe/canvas-dev-deployment-quarkus-blank-app[Canvas Dev Deployment Quarkus Blank App]: `quay.io/bamoe/canvas-dev-deployment-quarkus-blank-app:{IMAGE_VERSION}`
 - https://quay.io/repository/bamoe/canvas-dev-deployment-dmn-form-webapp[Canvas Dev Deployment DMN Form Webapp]: `quay.io/bamoe/canvas-dev-deployment-dmn-form-webapp:{IMAGE_VERSION}`
 
-=== Custom Image
+=== Custom Image Dev Deployment option
+
+Custom Image deployment option is a built-in default deployment options that vary based on the target platform:
+
+[cols="1,3"]
+|===
+|Option Name |Description
+
+|OpenShift
+|Deploys a custom Docker image with configurable container port and startup command. Suitable for full Java projects (Quarkus or Spring Boot).
+|Kubernetes
+|Uses Kubernetes Ingress resources instead of OpenShift Routes. Otherwise identical to the OpenShift variant.
+|===
 
 .Custom Image deployment option
 image::tools/devDeployments/deployment-option-custom-image.png[width=600]
@@ -137,20 +139,31 @@ Images used in the deployment:
 
 NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[Creating a custom Dev Deployment image])
 
-== Dev Deployment options with accelerators
 
-Accelerators are Git repositories containing project templates. Bundle Dev Deployment Options with accelerators so that when a developer applies the accelerator, the deployment options automatically become available in the Deploy dialog.
-Supported Accelerator types for DMN are:
+//When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory,
+===  User-defined YAMLs file Dev Deployment option
 
-* Decisions (Quarkus + Maven)
-* Decisions (Springboot + Maven)
 
-Supported Accelerator types for BPMN are:
+Using the custom Dev Deployment options via user-defined YAMLs enable you to create deployment configurations tailored to specific use cases and Kubernetes and OpenShift environments.
+You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
 
-* Workflows (Quarkus + Maven)
-* Workflows (Springboot + Maven)
+* Defining custom Kubernetes resource manifests (Deployments, Services, Routes, Ingresses, etc.)
+* Applying JSON Patches to modify manifests dynamically at deploy time
+* Configuring parameters for adjustment during deployment creation
+* Using token interpolation with recursive JSON Path expressions to reference dynamic values
+* Deploying to Kubernetes environments not officially supported by default options
+* Using custom container images or deployment configurations
+* Defining specific resource requirements, environment variables, or volume mounts
+* Supporting multiple deployment scenarios within the same project
+* Bundling Dev Deployment Options with Accelerators for project reuse
 
-== Monitoring Deployments
+For more information, see xref:create-custom-dev-deployment-image.adoc[Customizing Dev Deployment options via user-defined YAMLs]
+
+
+== Post Deployment
+You can perform the following functions after deployment:
+
+=== Monitoring Deployments
 
 After deploying, the Dev Deployments dropdown displays all active deployments with status icons:
 
@@ -168,7 +181,9 @@ Click on a deployment to open the deployed application in a new browser tab (usi
 
 After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
 
-== Deleting Deployments
+NOTE: Dev Deployments are immutable; therefore, if an error occurs or a change is required, a new Dev Deployment must be created. They can easily be deleted from the Dev Deployments dropdown. 
+
+=== Deleting Deployments
 
 To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click *Delete all* at the bottom of the dropdown.
 
