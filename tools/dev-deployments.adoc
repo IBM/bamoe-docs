@@ -195,7 +195,7 @@ devDeployment: {
 
 Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`). These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
 
-The following tokens are available in manifests and patches at deploy time:
+The following tokens are available at deploy time:
 
 [cols="2,3"]
 |===
@@ -243,6 +243,37 @@ The following tokens are available in manifests and patches at deploy time:
 |`$.parameters.<parameterId>`
 |The value of a user-configured parameter
 |===
+
+== Deployment resources requirements
+
+The Kubernetes/OpenShift resources created by a Dev Deployment must have a few labels and annotations so that BAMOE Canvas can list and manage these resources.
+
+For a successful deployment, this is the required information each resource needs:
+
+[source,javascript]
+----
+metadata:
+  name: \${{ devDeployment.uniqueName }}
+  namespace: \${{ devDeployment.kubernetes.namespace }}
+  labels:
+    \${{ devDeployment.labels.createdBy }}: kie-tools
+    \${{ devDeployment.labels.partOf }}: \${{ devDeployment.uniqueName }}
+  annotations:
+    \${{ devDeployment.annotations.workspaceId }}: \${{ devDeployment.workspace.id }}
+    \${{ devDeployment.annotations.workspaceName }}: \${{ devDeployment.workspace.name }}
+----
+
+
+
+* The `name` is how the deployment is identified across the board.
+
+* The `namespace` is where the deployment should be created in the cluster and should be the same configured in the connected account.
+
+* The labels (`createdBy` and `partOf`) are required so that BAMOE Canvas can filter and map all resources related to a single deployment. Important: `createdBy` should always have the value `kie-tools`.
+
+* The annotations (`workspaceId` and `workspaceName`) help match a deployment to a workspace.
+
+NOTE: It is important to note that the Dev Deployment service inside BAMOE Canvas already applies these required labels and annotations by patching the resource YAMLs. 
 
 == Post Deployment
 
