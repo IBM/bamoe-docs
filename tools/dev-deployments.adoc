@@ -246,8 +246,7 @@ The following tokens are available at deploy time:
 
 == Deployment resources requirements
 
-The Kubernetes/OpenShift resources created by a Dev Deployment must have a few labels and annotations so that BAMOE Canvas can list and manage these resources.
-
+The Kubernetes/OpenShift resources created by a Dev Deployment must have a few labels and annotations so that {CANVAS} can list and manage these resources. These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
 For a successful deployment, this is the required information each resource needs:
 
 [source,javascript]
@@ -263,17 +262,15 @@ metadata:
     \${{ devDeployment.annotations.workspaceName }}: \${{ devDeployment.workspace.name }}
 ----
 
-
-
 * The `name` is how the deployment is identified across the board.
 
 * The `namespace` is where the deployment should be created in the cluster and should be the same configured in the connected account.
 
-* The labels (`createdBy` and `partOf`) are required so that BAMOE Canvas can filter and map all resources related to a single deployment. Important: `createdBy` should always have the value `kie-tools`.
+* The labels (`createdBy` and `partOf`) are required so that BAMOE Canvas can filter and map all resources related to a single deployment. `createdBy` should always have the value `kie-tools`.
 
 * The annotations (`workspaceId` and `workspaceName`) help match a deployment to a workspace.
 
-NOTE: It is important to note that the Dev Deployment service inside BAMOE Canvas already applies these required labels and annotations by patching the resource YAMLs. 
+NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
 
 == Post Deployment
 

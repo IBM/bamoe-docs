@@ -158,40 +158,9 @@ This is because the Ingress controller is configured to use sub-paths for each D
 
 == Creating a custom Dev Deployment options via user-defined YAMLs
 
-You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files.
+Custom Dev Deployment options via user-defined YAMLs provide complete control over how your business automation models are deployed to Kubernetes or OpenShift clusters. Instead of relying on the default Quarkus Blank App or Custom Image options, you can define deployment configurations that precisely match your infrastructure requirements, organizational standards, and deployment scenarios.
 
-=== Requirements
-
-Kubernetes/OpenShift resources created by a Dev Deployment must include specific labels and annotations to enable {CANVAS} to list and manage these resources.
-
-{CANVAS} automatically adds required labels and annotations to all resources to identify and manage Dev Deployments:
-
-* *Labels:* `tools.kie.org/created-by` (value: "kie-tools"), `tools.kie.org/part-of` (value: deployment unique name)
-* *Annotations:* `tools.kie.org/workspace-id`, `tools.kie.org/workspace-name`, `tools.kie.org/deployment-option-name`, and optionally `tools.kie.org/health-status-url-template` and `tools.kie.org/deployment-access-url-template` (if defined in option.json)
-
-These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
-
-For successful deployment, each resource requires this information:
-
-[source,yaml]
-----
-metadata:
-  name: ${{ $.devDeployment.uniqueName }}
-  namespace: ${{ $.devDeployment.kubernetes.namespace }}
-  labels:
-    ${{ $.devDeployment.labels.createdBy }}: kie-tools
-    ${{ $.devDeployment.labels.partOf }}: ${{ $.devDeployment.uniqueName }}
-  annotations:
-    ${{ $.devDeployment.annotations.workspaceId }}: ${{ $.devDeployment.workspace.id }}
-    ${{ $.devDeployment.annotations.workspaceName }}: ${{ $.devDeployment.workspace.name }}
-----
-
-* The `name` identifies the deployment across the board
-* The `namespace` specifies where {CANVAS} creates the deployment in the cluster and must match the namespace configured in the connected account
-* The labels (`createdBy` and `partOf`) enable {CANVAS} to filter and map all resources related to a single deployment. **Important:** `createdBy` must always have the value `kie-tools`
-* The annotations (`workspaceId` and `workspaceName`) match a deployment to a workspace
-
-NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
+To create custom Dev Deployment options, you define deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This process involves creating a specific directory structure within your project or accelerator, defining the Kubernetes resources your deployment requires, and configuring parameters that users can adjust at deployment time.
 
 === Directory structure
 
@@ -212,7 +181,7 @@ Business Service Project
         └── option.json
 ----
 
-* *manifests/*: Contains standard Kubernetes resource YAML files. Each file must contain exactly one Kubernetes resource (the `---` separator is not supported).
+* *manifests/*: Contains standard Kubernetes resource YAML files.
 * *option.json*: The option descriptor that defines the deployment option, including manifests, patches, configurable parameters, and URL templates.
 * *patches/*: Contains JSON Patch files (xref:https://datatracker.ietf.org/doc/html/rfc6902[RFC 6902]) that {CANVAS} applies to manifests during processing. Patches can contain token interpolation expressions.
 
@@ -222,7 +191,7 @@ Manifest files are standard Kubernetes resource YAML files placed in the `manife
 
 Manifests can include token interpolation expressions wrapped in `${{ }}` that {CANVAS} replaces with actual values at deploy time. However, keep manifests free of tokens when possible and use JSON Patches to inject dynamic values instead. This approach allows the same manifests to work for standalone Kubernetes deployments outside of {CANVAS}.
 
-.Example:
+.Deployment Manifest example:
 
 [source,yaml]
 ----
@@ -281,7 +250,7 @@ The supported operations are:
 * `replace`: Replaces the value at the specified path
 * `test`: Tests that a value at the specified path matches (used as a filter and {CANVAS} applies patches only to manifests that pass all test operations)
 
-*Baseline deployment patch*
+.Baseline deployment patch example
 
 This patch applies to all Deployment resources. The `test` operation ensures {CANVAS} applies it only to Deployment manifests:
 
@@ -313,7 +282,7 @@ This patch applies to all Deployment resources. The `test` operation ensures {CA
 ]
 ----
 
-*Adding a sidecar container*
+.Adding a sidecar container example
 
 This patch adds a DMN Form Webapp sidecar container to the Deployment:
 
@@ -349,7 +318,7 @@ This patch adds a DMN Form Webapp sidecar container to the Deployment:
 
 The `option.json` file serves as the central configuration for a Dev Deployment option, specifying the deployment name, description, manifests, patches, parameters, and URL templates.
 
-.Option Descriptor Parameters
+.Option Descriptor parameters
 [cols="1,1,1,3"]
 |===
 |Field |Type |Required |Description
@@ -441,11 +410,11 @@ The `option.json` file serves as the central configuration for a Dev Deployment 
 }
 ----
 
-=== Parameter Types
+==== Parameter Types
 
 Parameters enable users to customize deployments during creation. {CANVAS} displays appropriate input controls for each parameter type in the deployment dialog.
 
-==== Text Parameter
+.Text Parameter
 
 Provides free-form text input for values such as Docker image URLs or commands.
 
@@ -469,7 +438,7 @@ For example,
 * `patches`: Map of manifest filenames to patch file paths. {CANVAS} applies these patches when using the parameter, and patches can reference the parameter value via `${{ $.parameters.<parameterId> }}`
 * `addManifests`: Optional list of additional manifest files to include when using this parameter
 
-==== Number Parameter
+.Number Parameter
 
 Provides numeric input field.
 
@@ -494,7 +463,7 @@ For example,
 * `patches`: Map of manifest filenames to patch file paths. {CANVAS} applies these patches when using the parameter, and patches can reference the parameter value via `${{ $.parameters.<parameterId> }}`
 * `addManifests`: Optional list of additional manifest files to include when using this parameter
 
-==== Boolean Parameter
+.Boolean Parameter
 
 Provides checkbox toggle.
 
@@ -517,7 +486,7 @@ For example,
 * `defaultValue`: `true` or `false`
 When the `defaultValue` is `true` {CANVAS} applies associated patches and includes additional manifests.
 
-==== Choice Parameter
+.Choice Parameter
 
 Provides enable/disable toggle. When enabled, {CANVAS} conditionally applies associated patches and includes additional manifests.
 
@@ -541,23 +510,6 @@ For example,
 * `defaultValue`: `"enabled"` or `"disabled"`
 * `maybeApplyPatches`: Patches {CANVAS} and applies only when the choice is enabled
 * `maybeAddManifests`: Additional manifests the system includes only when the choice is enabled
-
-
-==== Token Interpolation
-
-Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) to reference values from a token map (for example, `${{ <JSON Path expression> }}`).
-
-Tokens support nesting (recursive), meaning a JSON Path expression can itself contain tokens. The interpolation engine resolves tokens from the inside out, with a maximum recursion depth of 50 to prevent infinite loops.
-
-For example:
-[source]
-----
-${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
-----
-
-* {CANVAS} resolves inner token `${{ $.devDeployment.uniqueName }}` to `dev-deployment-abc123`
-* The outer token becomes `${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }}`
-* Resolves the outer token to `dev-deployment-abc123.apps.cluster.example.com`
 
 ===== Using `addManifests` with parameters
 
@@ -585,16 +537,26 @@ When `enableExtraService` is `true`:
 * `ExtraService.yaml` is added to the set of deployed resources
 * `extra-service-env.json` patch is applied to `Deployment.yaml` (for example, to inject an environment variable pointing to the extra service)
 
-When `false`, neither the manifest nor the patch is included.
+When `enableExtraService` is `false`, neither the manifest nor the patch is included.
 
-[NOTE]
-====
-The `addManifests` field is optional. Use it only when the parameter needs to deploy new Kubernetes resources. If the parameter only modifies existing manifests (like the `dockerImage` text parameter example), use only the `patches` field.
-====
+NOTE: The `addManifests` field is optional. Use it only when the parameter needs to deploy new Kubernetes resources. If the parameter only modifies existing manifests (like the `dockerImage` text parameter example), use only the `patches` field.
 
-=== URL Templates
 
-URL templates configure how {CANVAS} connects to the deployed application for uploading assets, checking health, and providing access links.
+==== Token Interpolation
+
+Token interpolation enables dynamic value injection into manifests, patches, and URL templates at deploy time. Tokens use the format `${{ }}` and employ JSON Path expressions (xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) to reference values from a token map (for example, `${{ <JSON Path expression> }}`).
+
+Tokens support nesting (recursive), meaning a JSON Path expression can itself contain tokens. The interpolation engine resolves tokens from the inside out, with a maximum recursion depth of 50 to prevent infinite loops.
+
+For example:
+[source]
+----
+${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
+----
+
+* {CANVAS} resolves inner token `${{ $.devDeployment.uniqueName }}` to `dev-deployment-abc123`
+* The outer token becomes `${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }}`
+* Resolves the outer token to `dev-deployment-abc123.apps.cluster.example.com`
 
 ==== Additional Tokens in URL Templates
 
@@ -624,7 +586,11 @@ ${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.
 ${{ $.devDeployment.resources.Ingress['${{ $.devDeployment.uniqueName }}'].status.loadBalancer.ingress[0].hostname }}
 ----
 
-==== Upload Service URL Template
+==== URL Templates
+
+URL templates configure how {CANVAS} connects to the deployed application for uploading assets, checking health, and providing access links.
+
+.Upload Service URL Template
 
 Specifies the URL where {CANVAS} uploads workspace assets (BPMN/DMN files) to the deployed application. {CANVAS} uses this immediately after deployment to transfer files to the running container.
 
@@ -634,7 +600,7 @@ For example (OpenShift):
 https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}
 ----
 
-==== Health Status URL Template
+.Health Status URL Template
 
 Specifies the URL that {CANVAS} polls every 30 seconds to check the health of the deployed application. The endpoint should return HTTP 200 when the application is healthy.
 
@@ -646,7 +612,7 @@ https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}']
 
 When this template is provided, {CANVAS} uses it directly for health checks. When not provided, {CANVAS} falls back to probing both Quarkus (`/q/health`) and Spring Boot (`/actuator/health`) endpoints.
 
-==== Deployment Access URL Template
+.Deployment Access URL Template
 
 Specifies the URL displayed to the user as a clickable link to access the deployed application.
 
@@ -656,8 +622,7 @@ For example (OpenShift, Quarkus with Swagger UI):
 https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/swagger-ui/
 ----
 
-
-== Dev Deployment option with accelerators
+=== Dev Deployment option with accelerators
 
 Accelerators are Git repositories containing project templates. Bundle Dev Deployment Options with accelerators so that when a developer applies the accelerator, the deployment options automatically become available in the Deploy dialog.
 Supported Accelerator types for DMN are:
@@ -672,7 +637,7 @@ Supported Accelerator types for BPMN are:
 
 For more information, see xref:create-custom-dev-deployment-image.adoc[Configuring custom Accelerators for your organization]
 
-== Creating a Dev Deployment Option via user-defined YAMLs in a Business Service project
+=== Dev Deployment Option via user-defined YAMLs in a Business Service project
 You can create custom Dev Deployment options tailored to your Business Service project's specific requirements by defining user-defined YAML manifests and configuration files within your project structure.  To create a custom Dev Deployment Option in a Business Service project:
 
 . Create the directory structure `.bamoe/dev-deployments/<option-name>/`.
@@ -683,9 +648,9 @@ You can create custom Dev Deployment options tailored to your Business Service p
 
 When you open the Deploy dialog in {CANVAS}, displays custom options (filtered by the connected provider type).
 
-== Validation
+=== Validating Dev Deployment
 
-{CANVAS} validates `option.json` files against a JSON schema derived from TypeScript type definitions. {CANVAS} displays validation errors in the Deploy dialog with specific error messages.
+{CANVAS} validates `option.json` files against a JSON schema derived from `TypeScript` type definitions. {CANVAS} displays validation errors in the Deploy dialog with specific error messages. If there are errors, then you must revisit the deployment option configuration and correct it before reopening the dev deployment modal.
 
 Common validation errors include:
 
