@@ -587,32 +587,41 @@ To configure Gradle with a container image installed via the Dev environment hel
 ----
 // ~/.gradle/init.d/bamoe.gradle
 
-def bamoeRepoUrl = "https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN" 
+def bamoeRepoUrl = "http://localhost:9999/"
 
 // Add BAMOE repository to all projects for dependency resolution
 allprojects {
-    repositories {
+    
+ repositories {
         mavenLocal()
-        maven { url = uri(bamoeRepoUrl) }
+        gradlePluginPortal()
         mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
     }
+
 }
 
 gradle.settingsEvaluated { settings ->
     // Add BAMOE repository for plugin resolution
     settings.pluginManagement.repositories {
         mavenLocal()
-        maven { url = settings.uri(bamoeRepoUrl) }
         gradlePluginPortal()
         mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
     }
 
     // Centralize repository declarations (Gradle 9.x)
     settings.dependencyResolutionManagement {
         repositories {
             mavenLocal()
-            maven { url = settings.uri(bamoeRepoUrl) }
             mavenCentral()
+            maven { url = settings.uri(bamoeRepoUrl) }
         }
     }
 }
@@ -645,32 +654,41 @@ To configure the {MVN_REPO} locally, follow these steps:
 ----
 // ~/.gradle/init.d/bamoe.gradle
 
-def bamoeRepoUrl = "/path/to/bamoe/maven/repo/directory" // <-- replace with your BAMOE URL
+def bamoeRepoUrl = "http://localhost:9999/"
 
 // Add BAMOE repository to all projects for dependency resolution
 allprojects {
-    repositories {
+    
+ repositories {
         mavenLocal()
-        maven { url = uri(bamoeRepoUrl) }
+        gradlePluginPortal()
         mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
     }
+
 }
 
 gradle.settingsEvaluated { settings ->
     // Add BAMOE repository for plugin resolution
     settings.pluginManagement.repositories {
         mavenLocal()
-        maven { url = settings.uri(bamoeRepoUrl) }
         gradlePluginPortal()
         mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
     }
 
     // Centralize repository declarations (Gradle 9.x)
     settings.dependencyResolutionManagement {
         repositories {
             mavenLocal()
-            maven { url = settings.uri(bamoeRepoUrl) }
             mavenCentral()
+            maven { url = settings.uri(bamoeRepoUrl) }
         }
     }
 }
