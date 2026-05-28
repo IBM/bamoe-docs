@@ -48,31 +48,34 @@ The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Inste
 === Retry mechanisms
 In {PRODUCT_SHORT} {VERSION_80X} there were two different mechanisms for handling retry logic in Custom WorkItemHandlers:
 
-. Asynchronous WorkItemHandlers implementing Command, which contain their own configuration for retry attempts and retry delay inside the Command implementation.
+. WorkItemHandlers extending `DefaultWorkItemHandler`, which rely on the engine’s Executor for retry configuration (attempts, delay, and error handling).
 
-. WorkItemHandlers extending DefaultWorkItemHandler, which rely on the engine’s Executor for retry configuration (attempts, delay, and error handling).
+. Asynchronous WorkItemHandlers implementing `Command`, which contain their own configuration for retry attempts and retry delay inside the `Command` implementation.
 
 In {PRODUCT_SHORT} {VERSION_RM} retries could be happening for both synchronous and asynchronous invocations and are managed, along with timers, via the Embedded Jobs Service. Retries may occur at different points in your Process Instance for example:
 
-* You are invoking a process execution through a REST endpoint. No nodes in the Process Definition are marked as asynchronous. Before the Process Instance reaches a safepoint, the execution fails with an exception. In this case, the retries are controlled by the `kogito.faultToleranceEnabled` property and then handled by the platform specific implementations.
+* when invoking a process execution through a REST endpoint and no nodes in the Process Definition are marked as asynchronous. Before the Process Instance reaches a safepoint, the execution fails with an exception. 
+** In this case, the retries are controlled by the `kogito.faultToleranceEnabled` property and then handled by the platform specific implementations.
 
-* A Process Instance execution is triggered by a timer expiration, and then this execution fails. In this case, the Jobs Service specific configuration properties are affecting the retry logic.
-Both these scenarios can be considered synchronous process execution - no node is marked as `async`.
+* when a Process Instance execution is triggered by a timer expiration, and this execution fails. 
+** In this case, the Jobs Service specific configuration properties affect the retry logic.
 
-Setting any node in your Process Definition `async` flag will result in "asynchronous" process execution. When an `async` node is entered, the workflow engine terminates/commits the ongoing transaction, and subsequent execution happens in a separate thread, introduces an artificial safe-point in the process as well. Although the concept exists in both v8 and v9, the implementation is different.
+Both these scenarios can be considered synchronous process execution because there is no node marked as `async`.
 
-You can configure the retry logic with the following settings for both Quarkus or Spring Boot
+You can configure the retry logic with the following settings for both Quarkus or Spring Boot:
 
 * `kogito.faultToleranceEnabled` - to enable fault tolerance and retries.
 
-For more fine grained configuration options for synchronous retry logic, see
+For more fine grained configuration options for synchronous retry logic, see:
 
 * The https://quarkus.io/guides/smallrye-fault-tolerance[Smallrye Fault Tolerance] mechanism for Quarkus, e.g.,`quarkus.fault-tolerance."global".retry.max-retries=3`
 
 * The https://resilience4j.readme.io/docs/retry[resilience4j Retry] mechanism for Spring Boot, e.g, `resilience4j.retry.configs.default.maxAttempts=3`, see https://github.com/resilience4j/resilience4j-spring-boot3-demo/blob/master/src/main/resources/application.yml#L64-L68[application.yml].
 
-Asynchronous retry logic for Quarkus and Spring Boot is via the Embedded Jobs Service:
+Setting any node in your Process Definition with the `async` flag will result in "asynchronous" process execution. When an `async` node is entered, the workflow engine terminates/commits the ongoing transaction, and subsequent execution happens in a separate thread. This has the additional benefit of introducing an artificial safe-point in the process. Although the concept exists in both v8 and v9, the implementation is different.
 
-* `kogito.jobs-service.maxNumberOfRetries`- number of retries of a failed job. After this number is reached the job will be set to failure. The default is 3 times. 
+Asynchronous retry logic for Quarkus and Spring Boot is defined using the Embedded Jobs Service:
 
-* `kogito.jobs-service.retryMillis`- the interval used to retry the new job. The default is 60 seconds. This is a global configuration. There is currently no option to configure different / increasing delays per retry attempt.
+* `kogito.jobs-service.maxNumberOfRetries`- the number of retries of a failed job. After this number is reached the job will be set to failure. The default is 3 times. 
+
+* `kogito.jobs-service.retryMillis`- the interval used to retry the new job. The default is 60 seconds. This is a global configuration. There is currently no option to configure different or increasing delays per retry attempt.
