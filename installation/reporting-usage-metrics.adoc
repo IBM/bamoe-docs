@@ -1,0 +1,299 @@
+= Reporting usage metrics with IBM Usage Metering Service
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Reporting usage metrics with IBM Usage Metering Service
+
+Usage metrics of {PRODUCT} are collected with IBM® Usage Metering Service (UMS) and sent to IBM Software Central (SWC). UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
+
+It is your responsibility to maintain compliance with the licensing terms and conditions. However, to audit the use of IBM software, UMS is used to capture business value metrics and send, automatically and periodically, compliance data for auditing purposes to SWC.
+
+To disable UMS, when it is enabled
+
+. Update the {PRODUCT_SHORT} CR by setting shared_configuration.sc_enable_usage_metering to "false".
+. When the change is complete, the operator picks up the change in the next reconcile and sets the enable flag in the connection point (softwareCentral.enable: false).
+. The operator also deletes the cron jobs that are defined to send metrics to SWC.
+
+To enable UMS, when it is disabled
+
+. Update the {PRODUCT_SHORT} CR by setting shared_configuration.sc_enable_usage_metering to "true".
+. When the change is complete, the CP4BA operator picks up the change in the next reconcile and sets the enable flag in the connection point (softwareCentral.enable: true).
+. The operator starts the cron jobs that are defined to send metrics to SWC.
+
+By default, usage metering is enabled and {PRODUCT_SHORT} sends usage metrics data to UMS daily.
+
+A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
+
+The following identifiers are used for {PRODUCT_SHORT}. The identifier or productId is used to correlate data for each capability based on whether it is a non-production or production deployment license type.
+
+////
+Table 1. Listing of the identifiers for each CP4BA capability
+Capability
+	
+Group identifiers
+Business Automation Application	
+Non-production
+
+    productId: 2b2ccb47cfc247619efbb88c130cc136
+    productName: Business Automation Application - CP4BA - Non Prod
+
+Production
+
+    productId: 20b0c693f93b42c6917cd7ae46d97462
+    productName: Business Automation Application - CP4BA
+
+Business Automation Insights	
+Non-production
+
+    productId: 11117b07ee53456a9cd41fb6751b0759
+    productName: Business Automation Insights - CP4BA - Non Prod
+
+Production
+
+    productId: cf2f2b926ff14ce38aa3014637581037
+    productName: Business Automation Insights - CP4BA
+
+Business Automation Navigator	
+Production
+
+    productId: 0f002233b583454d8a0bd72c665a01a3
+    productName: Business Automation Navigator - CP4BA
+
+Business Automation Studio	
+Production
+
+    productId: 548b34304806411693fe77097b688702
+    productName: Business Automation Studio - CP4BA
+
+Business Automation Workflow	
+Non-production
+
+    productId: 2fab82f1ebe541bbbef74ea2be143192
+    productName: Business Automation Workflow Containers - CP4BA - Non Prod
+
+Production
+
+    productId: 2700c91c8c4b4abcb08ddd3e228c09a2
+    productName: Business Automation Workflow Containers - CP4BA
+
+Content Collector for SAP Applications	
+Non-production
+
+    productId: a2ef7db7c7f04fc68204f411cd3eb782
+    productName: Content Collector for SAP Applications Containers - CP4BA - Non Prod
+
+Production
+
+    productId: 91fbd935ea3344b68d7667e8b0b60df3
+    productName: Content Collector for SAP Applications Containers - CP4BA
+
+Content Cortex	
+Production
+
+    productId: 9c2d4f167cdb411fa3b1d787eb3c7c34
+    productName: Content Cortex Containers - CP4BA
+
+Decision Intelligence Client Managed Software	
+Non-production
+
+    productId: 867ac1b08acd40b691d68cc5c3e47d66
+    productName: Decision Intelligence Client Managed Software - CP4BA - Non Prod
+
+Production
+
+    productId: 3f1d7caa69374823813c79d48dce6a1f
+    productName: Decision Intelligence Client Managed Software - CP4BA
+
+Document Processing	
+Non-production
+
+    productId: 7fe57c4d81a64cbe8664a5838bcf58e3
+    productName: Automation Document Processing Containers - CP4BA - Non Prod
+
+Production
+
+    productId: 3e9cca2be0014be0921bd638e9fc5fd1
+    productName: Automation Document Processing Containers - CP4BA
+
+Enterprise Records	
+Production
+
+    productId: 7b0caa58999c4a4384619aac20ed8875
+    productName: Enterprise Records Containers - CP4BA
+
+Operational Decision Manager	
+Non-production
+
+    productId: d803dec7647d48d39f6803e077d36080
+    productName: Operational Decision Manager - CP4BA - Non Prod
+
+Production
+
+    productId: cfdbd71c64094971a70b6985df6b1e93
+    productName: Operational Decision Manager - CP4BA
+
+Workflow Process Service Authoring	
+Non-production
+
+    productId: d3231b33169149f0a5af5d8b782399da
+    productName: Workflow Process Service - CP4BA - Non Prod
+
+Production
+
+    productId: bcf180b9bc864d458800e72951849bfe
+    productName: Workflow Process Service - CP4BA
+
+Workstream Services	
+Non-production
+
+    productId: 7501ee9fb6c14fcfae671cd7350bf231
+    productName: Automation Workstream Services - CP4BA - Non Prod
+
+Production
+
+    productId: 902d248ea6234a2a81d3c774a755f2ea
+    productName: Automation Workstream Services - CP4BA
+
+The following metrics are collected for each capability in addition to values for the version, environment, architecture, and platform.
+Table 2. Listing of capability metrics
+Capability
+	
+Metrics
+Business Automation Application	
+
+    BAA.ApplicationEngine.ApplicationInvoke
+    BAA.ApplicationEngine.ActionFlowInvoke
+    BAA.ApplicationEngine.AutomationServiceInvokeByApplication
+    BAA.ApplicationEngine.AutomationServiceInvokeByExternal
+
+Business Automation Insights	
+
+    Storage usage.
+    Number of events per capability.
+    Number of monitoring sources.
+    Number of dashboards.
+    Number of charts per dashboard.
+    Average event size.
+
+The following metric names are used:
+
+    TOTAL_NUMBER_OF_DOCUMENTS
+    GLOBAL_STORAGE_SIZE_MB
+    AVG_DOCUMENT_SIZE_BYTES
+    TOTAL_NUMBER_OF_MONITORING_SOURCES
+    NUMBER_OF_DASHBOARDS
+    NUMBER_OF_ALERTS
+    NUMBER_OF_GOALS
+    NUMBER_OF_CHARTS
+    NUMBER_OF_PREDICTIONS
+    NUMBER_OF_DOCUMENTS_BPMN_TIMESERIES
+    NUMBER_OF_DOCUMENTS_ODM_TIMESERIES
+    NUMBER_OF_DOCUMENTS_CASE_TIMESERIES
+    NUMBER_OF_DOCUMENTS_CONTENT_TIMESERIES
+    NUMBER_OF_DOCUMENTS_NAVIGATOR_TIMESERIES
+    NUMBER_OF_DOCUMENTS_DI_TIMESERIES
+    NUMBER_OF_DOCUMENTS_BPMN_SUMMARIES
+    NUMBER_OF_DOCUMENTS_CASE_SUMMARIES
+    NUMBER_OF_DOCUMENTS_BPEL_SUMMARIES
+
+Content Cortex	
+
+    Measures the volume of activity for each respective API. The following Content Engine metric names are used:
+        java_rpc_calls
+        dot_net_rpc_calls
+        css_objects_indexed
+        es_os_objects_created
+        db2_db_count
+        oracle_db_count
+        mssql_db_count
+        postgresql_db_count
+        asa_write_bytes
+        fcd_fcps_in_use
+    CMIS component:
+        cmis_inbound
+        cmis_document_upload
+        cmis_document_read
+    Instrument actions in ACCE to understand the most commonly executed functions.
+        document_creates
+        propertytemplate_creates
+        choicelist_creates
+        folder_creates
+        sweep_creates
+
+Decision Intelligence Client Managed Software	
+
+    Number of executed decisions.
+
+Document Processing	
+
+    Total documents processed (NUM_DOCS_PROCESSED).
+    Total pages processed (NUM_PAGES_PROCESSED).
+    API request counts.
+    Active user counts.
+
+Operational Decision Manager	
+
+    dc_pods_count
+    dc_registered_users
+    dc_num_of_artifacts
+    dr_pods_count
+    dsc_pods_count
+    dsr_pods_count
+
+Business Automation Workflow	
+
+    BAW.PFS.bpd
+    BAW.PFS.case
+    BAW.BPMNengine.activity
+    BAW.BPMNengine.processstarted
+    BAW.BPMNengine.messagerec
+    BAW.BPMNengine.messagesent
+    BAW.BPMNengine.timer
+    BAW.BPMNengine.tracking
+    BAW.Serviceengine.servicetask
+    BAW.Serviceengine.decisiontask
+    BAW.Serviceengine.scripttask
+    BAW.Serviceengine.genaitask
+    BAW.Serviceengine.aiagenttask
+    BAW.Serviceengine.contenttask
+    BAW.Serviceengine.tracking
+    BAW.Serviceengine.started
+    BAW.Serviceengine.rest
+    BAW.Serviceengine.web
+    BAW.Serviceengine.mq
+    BAW.Serviceengine.kafka
+    COMPONENT_ID_DESKTOP_PD
+    COMPONENT_ID_DATA_VISUALIZATION
+    CSHS.Task
+    CSHS.InstanceDetails
+    CSHS.Other
+    CSHS.IntermediateTrackingEvent
+    BAW.ProcessPortal.ProcessLaunch
+    BAW.ProcessPortal.SavedSearchCreate
+    BAW.ProcessPortal.SavedSearchEdit
+    BAW.ProcessPortal.SavedSearchUpdateDefault
+    BAW.ProcessPortal.ProcessPerformanceDashboardInvoke
+    BAW.ProcessPortal.TeamPerformanceDashboardInvoke
+    BAW.ProcessPortal.ProcessDashboardInvoke
+    BAW.ProcessPortal.SocialMention
+    BAW.ProcessPortal.SocialFollow
+    BAW.ProcessPortal.SocialComment
+    BAW.ProcessPortal.ProfileUpdate
+    BAW.Workplace.ProcessLaunch
+    BAW.Workplace.CaseLaunch
+    BAW.Workplace.WorkstreamLaunch
+    BAW.Workplace.SavedSearchCreate
+    BAW.Workplace.SavedSearchEdit
+    BAW.Workplace.SavedSearchUpdateDefault
+    BAW.Workplace.TeamDashboardInvoke
+    BAW.Workplace.ProfileUpdate
+    BAW.WorkplaceAssistant.ContentTool
+    BAW.WorkplaceAssistant.TaskTool
+    BAW.WorkplaceAssistant.ProcessTool
+    BAW.WorkplaceAssistant.CaseTool
+    BAW.Case
+    BAW.Case.P8Activity
+    BAW.Case.TODOActivity
+    BAW.Case.QuickTask
+
+ ////

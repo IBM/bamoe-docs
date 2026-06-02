@@ -1,0 +1,130 @@
+= Upgrading from 9.4.x
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_94x}. 
+
+See the following docs if you are upgrading from a version prior to this:
+
+* xref:upgrade-overview.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
+
+This guide will walk you through upgrading your:
+
+* {PRODUCT_SHORT} Dev environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+
+* _Business Service(s)_ project(s)
+
+* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
+
+== Step 1: Download product archives
+
+Start by downloading the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. 
+
+== Step 2: Upgrade your {PRODUCT_SHORT} Dev environment
+
+To upgrade your {PRODUCT_SHORT} Dev environment to {VERSION}, you can use the Dev environment Helm chart to install the updated component containers you require. The Dev helm chart includes the following component containers:
+
+* {CANVAS}
+* {EXT_SERVICES}
+* {CORS_PROXY}
+* {MVN_REPO}
+
+=== Upgrade {CANVAS} and {MVN_REPO}
+It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_94X}.
+
+Follow the steps in xref:../installation/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and {CANVAS} versions.
+
+If you decide to uninstall the previous individual containers and replace with the Dev environment Helm chart, the {VERSION} version of {CANVAS} is a drop in replacement for the {VERSION_94X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+
+You can import projects into the newly installed version (see xref:../tools/importing-existing-projects.adoc[{CANVAS} → Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+
+[NOTE]
+====
+If you have customized your previous {CANVAS} installation, remember to apply the same environment variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+====
+
+=== Upgrade {DEV_TOOLS}
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded. See xref:../tools/developer-tools-for-vscode.adoc[{DEV_TOOLS}].
+
+== Step 3: Upgrade your _Business Service(s)_ project(s)
+
+_Business Service(s)_ project(s) can be upgraded by changing their Maven dependencies and configuration files.  
+
+The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}:
+
+- https://openjdk.org[JDK 21] is installed.
+- https://maven.apache.org[Apache Maven 3.9.11+] is installed.
+- https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
+- Upgraded {PRODUCT_SHORT} Dev environment with {MVN_REPO} @ {IMAGE_VERSION}
+
+Once your {PRODUCT_SHORT} Dev environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_94X} to {PRODUCT_SHORT} version {VERSION}.
+
+The project structure is not changed, and updates only need to be made to the versions and the names of some dependencies and files. 
+
+In {PRODUCT_SHORT} version {VERSION}, the BAMOE BOM and specific Quarkus and Spring Boot BOMs are replaced by a single BAMOE specific BOM for type of _Business Service_. 
+
+[start=1]
+. In your project POM file replace the `com.ibm.bamoe:bamoe-bom` and your framework specific BOM by one of the following, depending on how you are developing your _Business Services_
++
+* `com.ibm.bamoe:bamoe-quarkus-bom` for Quarkus projects
+* `com.ibm.bamoe:bamoe-spring-boot-bom` for Spring Boot projects
+* `com.ibm.bamoe:bamoe-embedded-bom` for Embedded mode projects. 
+
+For more information on dependencies see xref:../reference-guide/maven-repository-libraries.adoc[{PRODUCT_SHORT} Maven repository libraries].
+
+Due to the update to Spring Boot versions that {PRODUCT_SHORT} {VERSION_RM} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_94X}. For more information see xref:#Spring-updates[Breaking Spring Boot Framework changes] and the Spring Boot documentation (https://docs.spring.io/spring-boot/upgrading.html[Upgrading Spring Boot]).
+
+== Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
+
+To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
+
+[source,console]
+----
+mvn clean package
+----
+
+You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
+
+You can now continue developing your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+
+== Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
+
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade the components in your Runtime environment. 
+
+The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are available in the Runtime Helm charts for your selected offering (DMOE or PMOE), including the product specific licensing annotations.
+
+Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment].
+
+If you have stateful workflows in your _Business Services_ you will need to complete step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
+
+[#migrate-stateful-workflow-db]
+== Step 6: Upgrade your stateful Workflow database(s)
+
+If you have _Business Services_ that run stateful workflows in your system you will upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
+
+The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
+
+You must upgrade your _Business Services_ and your database(s) together. 
+
+To upgrade safely:
+
+. Back up your database
+
+. Test the migration in a staging environment
+
+. Schedule downtime if you are updating a production database
+
+. Apply the scripts sequentially for each subsystem 
+
+. Verify that all services function correctly after the upgrade
+
+Avoid using KIE Flyway for automatic database schema migration in production environments. Instead, apply the scripts manually to maintain control and reduce the risk of issues.
+
+For more information, see xref:../building-deploying/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../workflow/overview.html[Overview of stateful Workflows with Compact Architecture].
+
+Once you have installed your Runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../building-deploying/services-build.adoc[Building Business Services executables] and xref:../building-deploying/services-deployment.adoc[Deploying Business Services]).
+
+[#Spring-updates]
+== Breaking changes Spring Boot Framework updates
+
+{PRODUCT_SHORT} {VERSION_94} updates the Spring Boot framework that power _Business Services_...
