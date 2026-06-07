@@ -1,0 +1,108 @@
+= Customizing BAMOE Container Images
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+In this section you will find information on the supported customization scenarios for the {PRODUCT_SHORT} container images by overriding their base operating system images while maintaining full functionality and compatibility. 
+
+A few of the reasons you may need to customize {PRODUCT_SHORT} containers include:
+
+* to comply with corporate security policies, 
+* to rapidly patch vulnerabilities, 
+* or to standardize your container infrastructure.
+
+You can customize any of the six container images available via the Dev and Runtime environment Helm charts:
+
+== Development Environment Images
+
+You can customize any of following images that support the {PRODUCT_SHORT} development and authoring experience:
+
+1. **Canvas Image** - Web-based business automation canvas application
+2. **CORS Proxy Image** - Cross-Origin Resource Sharing proxy service
+3. **Extended Services Image** - Quarkus-based backend services
+4. **Maven Repository Image** - Maven artifact repository server
+
+== Runtime Environment Images
+
+You can customize any of the following images that support the {PRODUCT_SHORT} runtime environment:
+
+1. **Management Console Image** - Runtime management and monitoring console
+2. **MCP Server Image** - Model Context Protocol server for AI/LLM integration
+
+
+== Preparing your customization setup
+
+Before you begin overriding BAMOE container images, ensure you have the following tools and access:
+
+- **Docker** (20.10+) or **Podman** (3.0+)
+- **Docker Buildx** (for multi-architecture builds)
+- Access to source BAMOE images (quay.io/bamoe/*)
+- Access to your desired base images (e.g., Red Hat Container Catalog)
+
+You can use the following commands to validate your setup:
+
+[source, shell, subs="attributes+"]
+----
+// Check Docker version
+docker --version
+
+// Check Buildx availability
+docker buildx version
+
+// Test access to BAMOE images
+docker pull quay.io/bamoe/canvas:main
+
+// Check Podman version (if using Podman)
+podman --version
+----
+
+== Understanding Multistage Builds
+
+All override approaches described in this section use Docker/Podman multistage builds which you can configure in the following way in a dockerfile:
+
+[source, dockerfile, subs="attributes+"]
+----
+# Stage 1: Source - Pull the existing {PRODUCT_SHORT} image
+FROM quay.io/bamoe/canvas:main AS source
+
+# Stage 2: Custom - Build with your desired base OS
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
+
+# Copy files from source and add your configurations
+COPY --from=source /path/to/files /path/to/files
+----
+
+IMPORTANT: 
+====
+When using `COPY --from=source`, only files and directories are copied. The following Dockerfile directives are **NOT inherited**:
+
+- ❌ `ENV` - Environment variabfles
+- ❌ `ARG` - Build arguments
+- ❌ `EXPOSE` - Port declarations
+- ❌ `USER` - Runtime user context
+- ❌ `WORKDIR` - Working directory
+- ❌ `HEALTHCHECK` - Health monitoring
+- ❌ `ENTRYPOINT` / `CMD` - Startup commands
+- ❌ `LABEL` - Metadata
+- ❌ `VOLUME` - Volume declarations
+
+You must explicitly recreate all these configurations in your override Container file.
+====
+
+== Summary of customization scenarios for each container
+
+[cols="1,1,1,1,1,1,1"]
+|===
+|*Scenario* |*Canvas* |*CORS Proxy* |*Extended Services* |*Maven Repository* |*Management Console* |*MCP Server*
+
+| **Override OS** | Change UBI version | Change UBI version | Change UBI version in Java base | Change UBI version | Change UBI version | Change UBI version in Java base
+
+| **Override Runtime** | N/A (httpd from OS) | Rebuild with different Node.js | Change Java base image | N/A (httpd from OS) | N/A (httpd from OS) | Change Java base image
+
+| **Security Patches** | `microdnf update -y` | `microdnf update -y` | Use latest base + update | `microdnf update -y` | `microdnf update -y` | Use latest base + update
+
+| **Performance Optimization** | Minimize layers, clean cache | NODE_ENV=production, memory limits | JVM tuning, G1GC | Minimize layers, clean cache | Minimize layers, clean cache | JVM tuning, G1GC
+
+| **Enterprise Certificates** | System CA trust | NODE_EXTRA_CA_CERTS | Java truststore import | System CA trust | System CA trust | Java truststore import
+
+|===
+
+Multi-stage builds provide the flexibility to address all five scenarios while maintaining full {PRODUCT_SHORT} functionality and enterprise security requirements.
