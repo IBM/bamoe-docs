@@ -143,7 +143,7 @@ image::tools/devDeployments/deployment-option-custom-image.png[width=720]
 Notice the `Docker Image` parameter; it must be changed to the custom image tag created (`quay.io/myUserName/myDevDeploymentImage:latest` in this example).
 
 Also, notice the `Command` parameter; Its value is the command executed inside the `$HOME_PATH/app` directory after the upload step is finished.
-In other words, after the xref:../reference-guide/deployment_tokens.adoc#token_interpolation[token interpolation] is finished, the resulting command executed on the container will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
+In other words, after the xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] is finished, the resulting command executed on the container will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
 
 This image does not provide the Maven binary globally, so it is not possible to call `mvn` directly. Instead, the image provides a Maven wrapper that can be called with `./mvnw` from the `$HOME_PATH` directory.
 
@@ -200,7 +200,7 @@ Business Service Project
 
 Place standard Kubernetes resource YAML files in the manifests/ directory. Each file must contain exactly one resource. Multi-document YAML files with `---` separators are not supported.
 
-You can include xref:../reference-guide/deployment_tokens.adoc#token_interpolation[token interpolation] expressions in manifests using the `${{ }}` format. {CANVAS} replaces these tokens with actual values at deploy time. Keep manifests free of tokens when possible. Use JSON Patches to inject dynamic values instead. This approach lets you use the same manifests for standalone Kubernetes deployments outside {CANVAS}.
+You can include xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] expressions in manifests using the `${{ }}` format. {CANVAS} replaces these tokens with actual values at deploy time. Keep manifests free of tokens when possible. Use JSON Patches to inject dynamic values instead. This approach lets you use the same manifests for standalone Kubernetes deployments outside {CANVAS}.
 
 .Deployment Manifest example:
 
