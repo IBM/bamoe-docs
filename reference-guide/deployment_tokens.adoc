@@ -1,0 +1,110 @@
+= Dev Deployment tokens
+:icons: image
+:iconsdir: ../images/icons
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+.Dev Deployment tokens list
+image::tools/devDeployments/tokens.png[width=720]
+Dev Deployment tokens enable dynamic configuration of your deployments. These tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster. These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
+
+For example,
+
+[source,javascript]
+----
+devDeployment: {
+  labels: {
+    createdBy: "tools.kie.org/created-by",
+    partOf: "tools.kie.org/part-of",
+ },
+  annotations: {
+    workspaceId: "tools.kie.org/workspace-id",
+    workspaceName: "tools.kie.org/workspace-name",
+ },
+  uniqueName: string,
+  uploadService: {
+    apiKey: string,
+ },
+  workspace: {
+    id: string,
+    name: string,
+ },
+  kubernetes: {
+    namespace: string,
+ },
+},
+----
+
+Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`). These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
+
+The following tokens are available at deploy time:
+
+[cols="2,3"]
+|===
+|Token Path |Description
+
+|`$.devDeployment.uniqueName`
+|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
+
+|`$.devDeployment.workspace.id`
+|The ID of the current workspace
+
+|`$.devDeployment.workspace.name`
+|The name of the current workspace
+
+|`$.devDeployment.kubernetes.namespace`
+|The target Kubernetes namespace
+
+|`$.devDeployment.uploadService.apiKey`
+|The API key for the upload service
+
+|`$.devDeployment.labels.createdBy`
+|The label key for identifying resources created by {CANVAS} (`tools.kie.org/created-by`)
+
+|`$.devDeployment.labels.partOf`
+|The label key for grouping related resources (`tools.kie.org/part-of`)
+
+|`$.devDeployment.annotations.workspaceId`
+|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
+
+|`$.devDeployment.annotations.workspaceName`
+|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
+
+|`$.config.baseImageUrl`
+|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
+
+|`$.config.quarkusBlankAppImageUrl`
+|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
+
+|`$.config.dmnFormWebappImageUrl`
+|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
+
+|`$.config.imagePullPolicy`
+|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
+
+|`$.parameters.<parameterId>`
+|The value of a user-configured parameter
+|===
+
+[#token_interpolation]
+== Token Interpolation
+
+Tokens inject dynamic values into your manifests at deploy time. Use the `${{ }}` syntax with a JSON Path expression (following xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) to reference values.
+
+For example, `${{ $.devDeployment.uniqueName }}` resolves to the actual deployment name, such as `dev-deployment-abc123`.
+
+Tokens can contain other tokens (Nested tokens). {CANVAS} resolves them from inside out (maximum depth: 50).
+
+.Example of nested token resolution
+[source]
+----
+Original: 
+${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
+
+Step 1: Resolve inner token
+${{ $.devDeployment.uniqueName }} → dev-deployment-abc123
+
+Step 2: Resolve outer token
+${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }} 
+→ dev-deployment-abc123.apps.cluster.example.com
+----

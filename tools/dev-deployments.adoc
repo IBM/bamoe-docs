@@ -7,9 +7,10 @@ include::../styles/images.adoc[]
 
 Dev deployments require multiple components to function together, namely BAMOE Canvas, the Kubernetes/OpenShift cluster, container images, and the upload service. 
 
-== Connecting Cloud Providers
+== Connecting to Cloud Providers
 
 Before creating any Dev Deployment, establish a Kubernetes or OpenShift cluster connection to BAMOE Canvas. During connection, BAMOE Canvas automatically fetches all possible API endpoints and maps them to their corresponding Kubernetes resource names, enabling it to apply and manage different resources (Deployments, Ingresses, Routes, Services, etc.). For instructions on connecting to Kubernetes or OpenShift cluster, see xref:../tools/connecting-accounts.adoc[Connecting to Git and Cloud providers]. 
+
 This connection enables the deployment of all Decisions, Workflows, and complete Java projects for development purposes only. Within any open project, you can select the connected account intended for the Dev Deployment and confirm the selection.
 
 == Deploying from {CANVAS}
@@ -24,7 +25,8 @@ After clicking Deploy, you will be presented with options for available types of
 .Deploy page
 image::tools/devDeployments/deploy-page.png[width=600px]
 
-Select your deployment option and and click Confirm to start the deployment. You can also configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp). For the list of available tokens, See xref:#deployment_tokens[Deployment tokens]
+Select your deployment option and and click Confirm to start the deployment. You can also configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp). For the list of available tokens, See xref:../reference-guide/deployment_tokens.adoc[Dev Deployment tokens].
+
 
 //NOTE: When the workspace contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} hides the default options and shows only workspace-defined options.
 === How Dev Deployments Work
@@ -38,7 +40,7 @@ When you click `Confirm`, {CANVAS} executes the following steps:
 ** Interpolates all tokens with their corresponding values, including parameters.
 ** Splits YAML files into multiple YAMLs, creating one per resource kind.
 . Using the Kubernetes resource name and the list of saved API endpoints, {CANVAS} makes requests to the cluster to apply each resource YAML, saving the returned resource ID locally for later reference.
-. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the Dev Deployment Upload Service status to check readiness for upload.
+. The cluster initiates Pods, Services, and other resources. Simultaneously, {CANVAS} polls the cluster to determine whether the Deployment is healthy and ready, first by fetching the Deployment resource status, then, when healthy, polling the xref:dev-deployment-upload-service.html[Dev Deployment Upload Service] status to check readiness for upload.
 ** When the Deployment resource is not healthy, {CANVAS} continues polling its status whenever it lists Kubernetes resources and displays an error icon if the Deployment errors out or a loading icon if the Deployment is pending.
 ** When the Deployment is healthy, {CANVAS} starts polling the Dev Deployment Upload Service running inside the deployed containers to check readiness for upload.
 ** When the Dev Deployment Upload Service fails to respond after a pre-defined timeout, the Dev Deployment fails and {CANVAS} updates it with an error icon.
@@ -55,7 +57,7 @@ When you click `Confirm`, {CANVAS} executes the following steps:
 
 You can either use the default deployment option or you can use the customised deployment option. 
 
-The default options (Quarkus Blank App and Custom Image) only show up if there isn’t a custom dev deployment option defined. If a custom dev deployment is set—either through an accelerator or if you create your own, then only that custom option will be displayed.
+If a custom dev deployment is set—either through an accelerator or if you create your own, then only that custom option will be displayed. The default options (Quarkus Blank App and Custom Image) only show up if there isn’t a custom dev deployment option defined. 
 
 
 //If the workspace only contains BPMN or DMN files and has no `.bamoe/dev-deployments/` directory, built-in default options is displayed.
@@ -92,7 +94,7 @@ This option provides the default and simplest deployment approach with the follo
 * The project should contain only Decision (DMN) and Workflow (BPMN) files. {CANVAS} ignores all other files.
 * The deployment fails if any file contains errors.
 
-This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service. For more information, see (xref:dev-deployment-upload-service.html[Dev Deployment Upload Service]).
+This option uses a pre-defined Quarkus project template that includes all dependencies necessary to run a Decision or Workflow. It runs on a container image with Java and Maven, as well as the Dev Deployment Upload Service.
 
 {CANVAS} shows a parameter that gives you the option to Include DMN Form Webapp. This sidecar container contains a webapp that parses the backend service API and dynamically generates a form with all of the Decisions inputs and outputs, allowing you to fill the inputs and simulate different scenarios.
 
@@ -137,11 +139,11 @@ Images used in the deployment:
 
 - https://quay.io/repository/bamoe/canvas-dev-deployment-base[Canvas Dev Deployment Base]: `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`
 
-NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment-image.html[Creating a custom Dev Deployment image])
+NOTE: This image is used by default, but it can be changed to any other available image. If using another image, it is recommended creating it based off of `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}`. For informatio, see  xref:create-custom-dev-deployment.html[Creating a custom Dev Deployment image].
 
 
 //When the workspace contains only BPMN or DMN files without a `.bamoe/dev-deployments/` directory,
-===  User-defined YAMLs file Dev Deployment option
+=== Dev Deployment option via User-defined YAMLs file 
 
 Using the custom Dev Deployment options via user-defined YAMLs enable you to create deployment configurations tailored to specific use cases and Kubernetes and OpenShift environments.
 You can define custom deployment configurations using standard Kubernetes YAML manifests, JSON Patches, and descriptor files. This capability provides complete control over application deployment, including:
@@ -156,95 +158,9 @@ You can define custom deployment configurations using standard Kubernetes YAML m
 * Supporting multiple deployment scenarios within the same project
 * Bundling Dev Deployment options with Accelerators for project reuse
 
-For more information, see xref:create-custom-dev-deployment-image.adoc[Customizing Dev Deployment options via user-defined YAMLs]
+For more information, see xref:create-custom-dev-deployment.adoc#2[Customizing Dev Deployment options via user-defined YAMLs].
 
-[#deployment_tokens]
-== Deployment tokens
-
-.Dev Deployment tokens list
-image::tools/devDeployments/tokens.png[width=720]
-
-Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster. These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
-
-For example,
-
-[source,javascript]
-----
-devDeployment: {
-  labels: {
-    createdBy: "tools.kie.org/created-by",
-    partOf: "tools.kie.org/part-of",
- },
-  annotations: {
-    workspaceId: "tools.kie.org/workspace-id",
-    workspaceName: "tools.kie.org/workspace-name",
- },
-  uniqueName: string,
-  uploadService: {
-    apiKey: string,
- },
-  workspace: {
-    id: string,
-    name: string,
- },
-  kubernetes: {
-    namespace: string,
- },
-},
-----
-
-Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`). These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. 
-
-The following tokens are available at deploy time:
-
-[cols="2,3"]
-|===
-|Token Path |Description
-
-|`$.devDeployment.uniqueName`
-|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
-
-|`$.devDeployment.workspace.id`
-|The ID of the current workspace
-
-|`$.devDeployment.workspace.name`
-|The name of the current workspace
-
-|`$.devDeployment.kubernetes.namespace`
-|The target Kubernetes namespace
-
-|`$.devDeployment.uploadService.apiKey`
-|The API key for the upload service
-
-|`$.devDeployment.labels.createdBy`
-|The label key for identifying resources created by {CANVAS} (`tools.kie.org/created-by`)
-
-|`$.devDeployment.labels.partOf`
-|The label key for grouping related resources (`tools.kie.org/part-of`)
-
-|`$.devDeployment.annotations.workspaceId`
-|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
-
-|`$.devDeployment.annotations.workspaceName`
-|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
-
-|`$.config.baseImageUrl`
-|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
-
-|`$.config.quarkusBlankAppImageUrl`
-|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
-
-|`$.config.dmnFormWebappImageUrl`
-|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
-
-|`$.config.imagePullPolicy`
-|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
-
-|`$.parameters.<parameterId>`
-|The value of a user-configured parameter
-|===
-
-== Deployment resources requirements
+== Resources requirements for default Dev Deployment options 
 
 The Kubernetes/OpenShift resources created by a Dev Deployment must have a few labels and annotations so that {CANVAS} can list and manage these resources. These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
 For a successful deployment, this is the required information each resource needs:
