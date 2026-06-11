@@ -58,7 +58,7 @@ Beside the POM file, the `application.properties` file is required to further cu
 
 All {PRODUCT_SHORT} components rely on the default DataSource to establish the connection with the Database. You must correctly configure a DataSource in your application by following the Quarkus platform guidelines.
 
-Configuring persistence for {PRODUCT_SHORT} requires a following set of dependencies and configurations in your application:
+Configuring persistence for {PRODUCT_SHORT} requires the following set of dependencies and configurations to be added to your application:
 
 `io.quarkus:quarkus-agroal`:: For Quarkus DataSource Connection Pool with Security and Transaction support.
 `io.quarkus:quarkus-jdbc-{{your-database-type}}`:: For Database Specific Quarkus JDBC Driver.
@@ -69,13 +69,9 @@ https://quarkus.io/version/3.20/guides/datasource[Configure data sources in Quar
 
 === Configuring persistence for PostgreSQL
 
-To configure PostgreSQL persistence for your _Business Service_, in your POM file add the following dependencies:
+To configure PostgreSQL persistence for your _Business Service_, you will need the following specific dependency:
 
-* `io.quarkus:quarkus-agroal`
-* `quarkus-jdbc-postgresql`
-* `org.kie:kie-addons-quarkus-persistence-jdbc`
-
-For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+* `io.quarkus:quarkus-jdbc-postgresql`
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -93,13 +89,9 @@ kogito.persistence.type=jdbc
 
 === Configuring persistence for Microsoft SQL Server
 
-To configure Microsoft SQL Server persistence for your _Business Service_, in your POM file add the following dependencies:
+To configure Microsoft SQL Server persistence for your _Business Service_, you will need the following specific dependency:
 
-* `io.quarkus:quarkus-agroal`
 * `io.quarkus:quarkus-jdbc-mssql`
-* `org.kie:kie-addons-quarkus-persistence-jdbc`
-
-For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -115,18 +107,18 @@ quarkus.datasource.jdbc.url=${QUARKUS_DATASOURCE_JDBC_URL:jdbc:sqlserver://0.0.0
 kogito.persistence.type=jdbc
 ----
 
-NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarkus Dev Mode and want to use the Database Dev Services, ensure to read the https://quarkus.io/version/3.20/guides/databases-dev-services[Dev Services for Databases] guide and apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.20/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
+NOTE: If your _Business Service_ uses Microsoft SQL Server persistence in Quarkus Dev Mode and you want to use the Database Dev Services, read the https://quarkus.io/version/3.27/guides/databases-dev-services[Dev Services for Databases] guide and apply the required `License Acceptance` configuration as explained in the https://quarkus.io/version/3.27/guides/databases-dev-services#license_acceptance[Proprietary Databases - License Acceptance] topic.
 
 
 ==== {PRODUCT_SHORT} mappings for Microsoft SQL Server
 
-Additionally, if the _Business Service_ includes Data-Index or Jobs Service, it is also required to add the `com.ibm.bamoe:bamoe-mssql-mappings` dependency to ensure the correct behaviour of those components. 
+Additionally, if the _Business Service_ includes Data-Index or Jobs Service, you will need to add the `com.ibm.bamoe:bamoe-mssql-mappings` dependency to ensure the correct behavior of those components. 
 
 This module includes the necessary Hibernate ORM mappings to support remapping of some JPA entities used in both components. The mappings contained are:
 
 `META-INF/bamoe-data-index-orm.xml`:: This file remaps some entities from the data-index component.
 `META-INF/bamoe-job-service-orm.xml`:: This file remaps some entities from the job-service component.
-`com.ibm.bamoe:bamoe-mssql-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
+`com.ibm.bamoe:bamoe-mssql-mappings`:: Required database-specific mappings to ensure the persistence layer works correctly with the database dialect and limitations. 
 
 Those mappings can be configured by using the `quarkus.hibernate-orm.mapping-files` configuration, and each one should be
 added only if the associated component is present in the application dependencies.
@@ -156,7 +148,7 @@ At the application level, configure the transaction isolation level at the conne
 
 [source,properties]
 ----
-    quarkus.datasource.jdbc.new-connection-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+quarkus.datasource.jdbc.new-connection-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
 ----
 
 NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
@@ -164,13 +156,9 @@ NOTE: This property requires the database schema to be set up manually with the 
 
 === Configuring persistence for Oracle
 
-To configure Oracle persistence for your _Business Service_, in your POM add the following dependencies:
+To configure Oracle persistence for your _Business Service_, you will need to add the following specific dependency:
 
-* `io.quarkus:quarkus-agroal`
 * `io.quarkus:quarkus-jdbc-oracle`
-* `org.kie:kie-addons-quarkus-persistence-jdbc`
-
-For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -206,15 +194,31 @@ Add the following configuration property required in your `application.propertie
 quarkus.hibernate-orm.mapping-files=META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml
 ----
 
+[#db2-quarkus-config]
+=== Configuring persistence for Db2
+To configure Db2 persistence for your _Business Service_, you will need to add the following specific dependency:
+
+* `io.quarkus:quarkus-jdbc-db2`
+
+Add the following configuration properties required in your `application.properties`:
+
+[source,properties]
+----
+<!-- Application default Datasource - Db2 -->
+quarkus.datasource.db-kind=db2
+quarkus.datasource.username=bamoe-user
+quarkus.datasource.password=bamoe-pass
+quarkus.datasource.jdbc.url=jdbc:db2://host:port/testdb
+
+<!-- Enabling jdbc persistence -->
+kogito.persistence.type=jdbc
+----
+
 === Configuring persistence for H2 (Development only)
 
-In development environments, you can use H2 persistence for your _Business Service_, in your POM add the following dependencies:
+In development environments, you can use H2 persistence for your _Business Service_, you will need to add the following specific dependency:
 
-* `io.quarkus:quarkus-agroal`
 * `io.quarkus:quarkus-jdbc-h2`
-* `org.kie:kie-addons-quarkus-persistence-jdbc`
-
-For the `org.kie:kie-addons-quarkus-persistence-jdbc` dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 Add the following configuration property required in your `application.properties`:
 

@@ -56,13 +56,11 @@ Beside the POM file, the `application.properties` file is required to further cu
 
 {PRODUCT_SHORT} _Business Services_ containing workflow(s) and all the Workflow subsystems (Data-Index, Data-Audit, Jobs Service, and User Tasks) use JDBC to persist in relational databases.
 
-All {PRODUCT_SHORT} components will rely on the default DataSource to establish the connection with the Database. Therefore it is important that the applications has a DataSource correctly configured according to the Spring Boot platform guidelines.
+All {PRODUCT_SHORT} components rely on the default DataSource to establish the connection with the Database. Therefore it is important that the applications has a DataSource correctly configured according to the Spring Boot platform guidelines.
 
 Configuring persistence for {PRODUCT_SHORT} requires a minimal set of dependencies and configurations in your application. 
 
-* If you use flyway, include the PostgreSQL `flyway-database-postgresql` dependency for the DB.
-
-* To enable persistence for the Workflow Engine with JDBC, use `org.kie:kie-addons-springboot-persistence-jdbc` KIE JDBC Persistence Add-on for Springboot. For the add-on, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
+`org.kie:kie-addons-springboot-persistence-jdbc`:: KIE JDBC Persistence Add-on for Springboot see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_stateful_persistence[Workflows Stateful persistence].
 
 NOTE: For full information about how to configure DataSources in Spring Boot, check the
 https://docs.spring.io/spring-boot/how-to/data-access.html[Data Access] guide.
@@ -71,8 +69,8 @@ https://docs.spring.io/spring-boot/how-to/data-access.html[Data Access] guide.
 
 To configure PostgreSQL persistence for your _Business Service_, in your POM file add the following dependencies:
 
-- `postgresql`
-- If you use flyway, include `flyway-database-postgresql` dependency.
+* `org.postgresql:postgresql`
+* `org.flywaydb:flyway-database-postgresql` if you use flyway
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -91,8 +89,8 @@ kogito.persistence.type=jdbc
 
 To configure Microsoft SQL Server persistence for your _Business Service_, in your POM file add the following dependencies:
 
-- `mssql-jdbc`
-- If you use flyway, include `flyway-sqlserver` dependency.
+* `com.microsoft.sqlserver:mssql-jdbc`
+* `org.flywaydb:flyway-sqlserver` if you use flyway.
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -133,15 +131,15 @@ At the database level, enable snapshot isolation and row versioning by running t
 
 [source,sql]
 ----
-    ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
-    ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
+ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
+ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
 ----
 
 At the application level, configure the transaction isolation level at the connection level by adding the following property:
 
 [source,properties]
 ----
-    spring.datasource.hikari.connection-init-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT 
+spring.datasource.hikari.connection-init-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT 
 ----
 
 NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
@@ -150,8 +148,8 @@ NOTE: This property requires the database schema to be set up manually with the 
 
 To configure Oracle persistence for your _Business Service_, in your POM add the following dependencies:
 
-- `ojdbc11`
-- If you use flyway, include `flyway-database-oracle` dependency.
+- `com.oracle.database.jdbc:ojdbc11`
+- `org.flywaydb:flyway-database-oracle` if you use flyway
 
 Add the following configuration properties required in your `application.properties`:
 
@@ -182,9 +180,33 @@ Add the following configuration property required in your `application.propertie
 spring.jpa.mapping-resources=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml
 ----
 
+[#db2-spring-config]
+=== Configuring persistence for Db2
+
+To configure Db2 persistence for your _Business Service_, in your POM add the following dependencies:
+
+- `com.ibm.db2:jcc`
+- `org.flywaydb:flyway-database-db2` if you use flyway
+
+Add the following configuration properties required in your `application.properties`:
+
+[source,properties]
+----
+spring.datasource.url=jdbc:db2://host:port/testdb
+spring.datasource.username=bamoe-user
+spring.datasource.password=bamoe-pass
+spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver
+
+// Enabling jdbc persistence
+kogito.persistence.type=jdbc
+
+// Optional enable flyway for automated schema management
+kie.flyway.enabled=true
+----
+
 === Configuring persistence for H2 (Development only)
 
-To configure H2 persistence for your _Business Service_ in your POM file add the `h2` dependency. Flyway dependency is not required for H2.
+To configure H2 persistence for your _Business Service_ in your POM file add the `com.h2database:h2` dependency. The Flyway dependency is not required for H2.
 
 Add the following configuration properties required in your `application.properties`:
 
