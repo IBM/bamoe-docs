@@ -1,64 +1,135 @@
 = Customizing BAMOE container images
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
-In this section you will find all the information needed to implement any of the supported customization scenarios for the {PRODUCT_SHORT} container images. Customization is made possible by overriding the base operating system images while maintaining full functionality and compatibility with future {PRODUCT_SHORT} releases. 
+In this section you will find all the information needed to implement the supported customization scenarios for the {PRODUCT_SHORT} container images. The following lists the main reasons to customize container images: 
 
-A few of the reasons you may need to customize {PRODUCT_SHORT} containers include:
+* Security Compliance, to update for specific OS versions
+* Vulnerability Management, to quickly patch vulnerabilities
+* Standardization, to maintain consistency across your container infrastructure
+* Corporate Policies, to comply with internal requirements for approved base images
+* Performance Optimization, to use optimized base images for specific environments
+* Regional Requirements, to meet specific regulatory or compliance requirements
 
-* to comply with corporate security policies, 
-* to rapidly patch vulnerabilities, 
-* or to standardize your container infrastructure.
+Customization is made possible by overriding the base operating system images. This enables you to maintain the functionality and compatibility with {PRODUCT_SHORT} releases. 
 
-You can customize any of the six container images available via the Dev and Runtime environment Helm charts:
+[#introducing-container-images]
+== Introducing the {PRODUCT_SHORT} container images
 
-[#dev-images]
-== Dev environment images
+You can customize any of the containers delivered in the {PRODUCT_SHORT} distribution. The following table lists the container images that can be customized, along with their descriptions, helm charts, and types.
 
-You can customize any of following images that support the {PRODUCT_SHORT} development and authoring experience:
-
-[cols="1,1,1"]
+[cols="1,1,1,1"]
 |===
 |*Container Image* 
 |*Description*
+|*Helm Chart*
 |*Type*
 
 |Canvas
 |Web-based business automation canvas application
+|Dev environment
 |httpd based
 
 |Cors Proxy
 |Cross-Origin Resource Sharing proxy service
+|Dev environment
 |NodeJS based
 
 |Extended Services
 |Quarkus-based backend services
+|Dev environment
+|Java based
+
+|Canvas Dev Deployment Base
+|Base image used to test the deployment of a Canvas application
+|N/A
+|Java based
+
+|Canvas Dev Deployment DMN Form Webapp
+|Sidecar container to generate a web form for DMN input and output
+|N/A
+|httpd based
+
+|Canvas Dev Deployment Quarkus Blank App
+|Deployment option that varies depending on target platform (Kubernetes or OpenShift)
+|N/A
 |Java based
 
 |Maven Repository
 |Maven artifact repository server
+|Dev environment
 |httpd based
-|=== 
-
-[#runtime-images]
-== Runtime environment images
-
-You can customize any of the following images that support the {PRODUCT_SHORT} runtime environment:
-
-[cols="1,1,1"]
-|===
-|*Container Image* 
-|*Description*
-|*Type*
 
 |Management Console
 |Runtime management and monitoring console
+|Runtime environment
 |httpd based
 
 |MCP Server
 |Model Context Protocol server for AI/LLM integration
+|Runtime environment
+|Java based
+
+|Data Cleanup Tool
+|Tool used to manage historical workflow data and prevent unlimited growth.
+|N/A
 |Java based
 |=== 
 
+
+=== Understanding container image types
+
+{PRODUCT_SHORT} container images are built on different technology stacks, which affects how you override their base images:
+
+==== Httpd based images
+
+Http based images use Apache HTTP Server (httpd) as their web server to serve static web applications. The {PRODUCT_SHORT} containers are: Canvas, Management Console, Maven Repository, Canvas Dev Deployment DMN Form Webapp. The main characteristics of httpd based containers are that they:
+
+* serve HTML, JavaScript, CSS, and other static assets
+* use httpd configuration files for routing and security headers
+* require httpd package installation in the base OS
+* run as non-root user (typically UID 1000) for OpenShift compatibility
+* need specific directory permissions for httpd to write logs and manage runtime files
+
+When overriding httpd based images, you must:
+- install the httpd package in the new base OS
+- copy httpd configuration files from the source image
+- recreate proper file permissions for OpenShift (group 0 with g=u permissions)
+- configure httpd to listen on non-privileged ports (>1024)
+
+==== Node.js based images
+
+Node-js based images run Node.js applications using the Node.js runtime environment. The {PRODUCT_SHORT} containers are: Cors-proxy and their main characteristics are that they:
+
+- execute JavaScript code on the server side
+- use Node.js runtime (bundled via NVM - Node Version Manager)
+- typically serve REST APIs or proxy services
+- are lightweight and have fast startup times
+- their environment variables control Node.js behavior (NODE_ENV, NODE_OPTIONS)
+
+When overriding node.js based images, you must:
+- bundle Node.js runtime in the source image via NVM
+- install NVM and the desired Node.js version in your base image to change Node.js version 
+- set NODE_EXTRA_CA_CERTS for custom certificate trust
+- use NODE_ENV=production for performance optimization
+- control memory usage with NODE_OPTIONS="--max-old-space-size=512"
+
+==== Java based images
+
+Java based images run Java applications, typically built with Quarkus framework using OpenJDK runtime. The {PRODUCT_SHORT} containers are: Extended Services, MCP Server, Canvas Dev Deployment Base, Canvas Dev Deployment Quarkus Blank App, Data Cleanup Tool and their main characteristics are that they:
+
+* execute compiled Java bytecode using JVM (Java Virtual Machine)
+* use OpenJDK base images that include both OS and Java runtime
+* are Quarkus applications packaged as quarkus-run.jar with dependencies
+* support JVM tuning for performance and memory management
+* require Java truststore for SSL/TLS certificate management
+
+
+When overriding Java based images, you must consider the following:
+- base image provides both OS and Java runtime (e.g., ubi9/openjdk-17-runtime:1.19)
+- changing base image version updates both OS and Java version
+- JVM flags can optimize performance (-XX:+UseContainerSupport, -XX:MaxRAMPercentage=75.0)
+- custom certificates must be imported into Java truststore using keytool
+- applications typically expose health check endpoints for monitoring
 
 == Preparing your customization setup
 
@@ -88,7 +159,7 @@ podman --version
 
 == Understanding multistage builds
 
-All override approaches described in this section use Docker/Podman multistage builds which you can configure in the following way in a dockerfile:
+All override approaches described in this section use Docker/Podman multistage builds which you can configure in the following way in a Dockerfile:
 
 [source, dockerfile, subs="attributes+"]
 ----
@@ -104,7 +175,7 @@ COPY --from=source /path/to/files /path/to/files
 
 IMPORTANT: 
 ====
-When using `COPY --from=source`, only files and directories are copied. The following Dockerfile directives are **NOT inherited**:
+When using `COPY --from=source`, only files and directories are copied. The following Dockerfile directives are not inherited:
 
 * `ENV` - Environment variables
 * `ARG` - Build arguments
@@ -123,14 +194,14 @@ You must explicitly recreate all these configurations in your override Container
 The procedure to follow is the detailed below
 
 . **Choose Your Scenario**: Identify which override scenario applies to your needs (see xref:#override-scenarios[Common override scenarios])
-. **Select Your Images**: Determine which BAMOE images need customization (see xref:#dev-images[Dev environment images] and xref:#runtime-images[Runtime environment images])
+. **Select Your Images**: Determine which BAMOE images need customization (see xref:#introducing-container-images[Introducing container images])
 . **Build Custom Images**: Follow the patterns in this guide to create your custom images
 . **Test Thoroughly**: Complete the testing checklist before production deployment
 . **Deploy**: Use Docker Compose or Helm charts to deploy your custom images
 . **Monitor**: Continuously monitor your custom images in production
 . **Maintain**: Keep your custom images updated with security patches and {PRODUCT_SHORT} releases
 
-== Common override scenario summary
+== Common override scenarios
 The following table lists the common customization scenarios and the container images they apply to. Each of the following sections describes how to implement a scenario.  
 
 [cols="1,1,1,1,1,1,1"]
@@ -154,16 +225,10 @@ Multistage builds provide the flexibility to address all five scenarios while ma
 [#override-os]
 == Scenario 1: Override operating system version
 
-Your organization may require all containers to run on a specific OS version (e.g., UBI 9.6 instead of 9.7) for security compliance or standardization. This scenario applies to the following container images:
+Your organization may require all containers to run on a specific OS version (e.g., UBI 9.6 instead of 9.7) for security compliance or standardization. This scenario can apply to all container images:
 
-* Canvas
-* Management Console
-* Maven Repository
-* Extended Services
-* Cors Proxy
-
-[#canvas-console-maven-os]
-=== Canvas, Management Console and Maven Repository images
+[#httpd-os]
+=== Common Dockerfile template for Httpd based images
 
 Canvas, Management Console, and Maven Repository images all use `httpd` and follow a similar Dockerfile structure as shown in the following template. You can simply replace the placeholders with the appropriate values for your target image:
 
@@ -192,7 +257,7 @@ HEALTHCHECK --interval=1m --timeout=5s CMD curl -f http://localhost:${<PORT_ENV_
 <ENTRYPOINT_OR_CMD>
 ----
 
-The following table lists the placeholder values for the three container images that can use the template:
+The following table lists the placeholder values for the main container images that can use the template:
 
 [cols="1a,1a,1a,1a"]
 |===
@@ -255,7 +320,7 @@ For all three images you must recreate proper permissions after copying files fr
 OpenShift and other container platforms run containers with arbitrary UIDs but always use group ID 0 (root group). This permission setup allows the application to function correctly regardless of the assigned UID.
 
 [#cors-proxy-os]
-=== Cors Proxy image
+=== Common Dockerfile template for Node.js based images
 CORS Proxy is the only Node.js based image in {PRODUCT_SHORT}. It uses NVM (Node Version Manager) to manage Node.js runtime. The following template shows common operations:
 
 [source, dockerfile]
@@ -282,8 +347,8 @@ The following list describes the common operations for the CORS Proxy image:
 . Security Patches: Apply `microdnf update -y` to base OS; Node.js runtime is copied from source.
 . Performance Tuning: Set `NODE_ENV=production` and Node.js memory limits.
 
-[#extser-mcpserver-os]
-=== Extended Services and MCP Server
+[#java-os]
+=== Common Dockerfile template for Java based images
 Both Extended Services and MCP Server are Quarkus-based Java applications that use OpenJDK base images. The following template works for both images when overriding the OS version:
 
 [source, dockerfile]
@@ -336,7 +401,7 @@ The following table lists the placeholder values for the two container images th
 | `<CMD_OR_ENTRYPOINT>` | `CMD java -Dquarkus.http.port=$EXTENDED_SERVICES_PORT -jar quarkus-run.jar` | `CMD ["java", "-Dquarkus.log.level=${MCP_SERVER_DEBUG_LEVEL}", "-Dquarkus.http.port=${MCP_SERVER_PORT}", "-Dbamoe.mcpserver.openapi.urls=${MCP_SERVER_OPENAPI_URLS}", "-Dquarkus.oidc.auth-server-url=${MCP_SERVER_SECURITY_AUTH_SERVER_URL}", "-Dquarkus.oidc.tenant-enabled=${MCP_SERVER_SECURITY_ENABLED}", "-Dquarkus.oidc.client-id=${MCP_SERVER_SECURITY_OIDC_CLIENT_ID}", "-Dquarkus.oidc.credentials.secret=${MCP_SERVER_SECURITY_AUTH_SECRET}", "-Dquarkus.http.auth.permission.authenticated.policy=${MCP_SERVER_SECURITY_AUTH_PERMISSION}", "-jar", "quarkus-run.jar"]`
 |===
 
-The following points are important to understand when customizing Extended Services or the MCP Server image: 
+The following points are important to understand when customizing Extended Services, MCP Server image or other Java based images: 
 
 * Java-based images use OpenJDK base images that include both the OS and Java runtime.
 * Changing the base image version updates both the OS and potentially the Java version
@@ -368,8 +433,8 @@ Your organization may require a specific runtime version of a (e.g., Java 21 ins
 * MCP Server 
 * Cors Proxy
 
-=== Extended Services and MCP Server
-As these two container images are Java based, you can use the same process described in Scenario 1, see xref:#extser-mcpserver-os[Overriding operating system version → Extended Services and MCP Server], and change the Java version in the base image.
+=== Using a different Java version in Java based images
+As Extended services and MCP Server container images are Java based, you can use the same process described in Scenario 1, see xref:#java-os[Overriding operating system version → Java based images], and change the Java version in the base image.
 
 * To upgrade to Java21 use `registry.access.redhat.com/ubi9/openjdk-21-runtime:1.20` instead of `openjdk-17-runtime`
 
@@ -377,19 +442,21 @@ As these two container images are Java based, you can use the same process descr
 
 The Dockerfile structure remains the same - only the `FROM` line changes to specify the desired Java version.
 
-=== Cors Proxy
+=== Using a different Node.js version
 Node.js is bundled in the source image of Cors Proxy via NVM. If you want to change the Node.js version, you will need to do the following:
 
 . Install NVM in your base image.
 . Install the Node.js version you want to use.
 . Copy only the application code and not the Node.js runtime.
-Changing your Node.js version requires rebuilding the Node.js runtime in your base image.
+. Rebuild the Node.js runtime in your base image.
+
+// check last step
 
 The Dockerfile structure in this case is the following:
 
 [source,dockerfile]
 ----
-ROM quay.io/bamoe/cors-proxy:main AS source
+FROM quay.io/bamoe/cors-proxy:main AS source
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
 
@@ -412,18 +479,12 @@ CMD ["node", "/home/kie-sandbox/cors-proxy/index.js"]
 == Scenario 3: Override for security patch upgrades
 You may need to customize the {PRODUCT_SHORT} container images in order to patch a critical security vulnerability (CVE) that has been discovered in the base OS or runtime, without waiting for an official {PRODUCT_SHORT} release.
 
-This scenario applies to the following container images:
-
-* Canvas
-* Management Console
-* Maven Repository
-* Extended Services
-* Cors Proxy
+This scenario applies to all container images (see xref:#introducing-container-images[Introducing container images]).
 
 To achieve this, you can use the same Dockerfile templates described in Scenario 1 (see xref:#override-os[Overriding operating system version]) and add security update commands to apply patches. 
 
-=== Canvas, Management Console and Maven Repository
-Use the common template from Scenario 1 (see xref:#canvas-console-maven-os[Overriding operating system version → Canvas, Management Console and Maven]), and add the following security update step after installing httpd:
+=== Httpd based images
+To override an httpd based container (e.g., Canvas, Management Console) add the following security update step to the common Dockerfile template, after installing httpd:
 
 [source,dockerfile]
 ----
@@ -436,9 +497,9 @@ RUN microdnf install httpd curl && \
 
 The `microdnf update -y` command applies all available security patches to the base OS and installed packages.
 
-=== Extended Services, MCP Server
+=== Java based images Extended Services, MCP Server
 
-Use the common template from Scenario 1 (see xref:#extser-mcpserver-os[Overriding operating system version → Ext Services and MCP Server]) and add the following security update step:
+To override an Java based container (e.g., Extended Services, MCP Server) add the following security update step to the common Dockerfile template:
 
 [source,dockerfile]
 ----
@@ -451,13 +512,13 @@ RUN microdnf update -y && microdnf clean all
 USER 1000
 ----
 
-This file enables:
+This file enables the:
 
-* Use of the latest version of the OpenJDK runtime base image (e.g., `1.20` instead of `1.19`)
-* Addition of `microdnf update -y` with root privileges to apply additional OS-level patches
+* use of the latest version of the OpenJDK runtime base image (e.g., `1.20` instead of `1.19`)
+* addition of `microdnf update -y` with root privileges to apply additional OS-level patches
 
-=== Cors Proxy
-Use the common template from Scenario 1 (see xref:#cors-proxy-os[Overriding operating system version → Cors Proxy]), and add the following security update step after the FROM statement:
+=== Node.js based images
+To override a Node.js based container (e.g., Cors Proxy) add the following security update step to the common Dockerfile template after the FROM statement:
 
 [source,dockerfile]
 ----
@@ -472,20 +533,14 @@ Where the `microdnf update -y` command patches the base OS. Node.js runtime is c
 == Scenario 4: Performance optimization
 Your organization needs to optimize container images for better performance, reduced size, or specific hardware configurations.
 
-This scenario applies to the following container images:
+This scenario applies to all container images (see xref:#introducing-container-images[Introducing container images]).
 
-* Canvas
-* Management Console
-* Maven Repository
-* Extended Services
-* Cors Proxy
-
-To achieve this you can use the same Dockerfile templates from Scenario 1 (see xref:#canvas-os[Overriding operating system version]), but add performance optimization flags and settings.
+To achieve this you can use the same Dockerfile templates from Scenario 1 (see xref:#override-os[Overriding operating system version]) and add performance optimization flags and settings.
 
 === Best practices for performance optimization (all images)
 The following practices apply to all container images:
 
-. Minimize Layers by combine RUN commands to reduce image layers
+. Minimize Layers by combining RUN commands to reduce image layers
 +
 [source,dockerfile]
 ----
@@ -509,14 +564,14 @@ RUN microdnf install httpd && \
        rm -rf /var/cache/yum /tmp/*
 ----
 
-Use Specific Package Versions: Avoid unnecessary updates
+. Use Specific Package Versions and avoid unnecessary updates
 
 [source,dockerfile]
 ----
    RUN microdnf install httpd-2.4.57 curl-8.0.1
 ----
 
-=== Canvas, Management Console and Maven Repository
+=== Httpd based images
 
 Add the following to the common dockerfile template to achieve your objective. 
 

@@ -1,0 +1,948 @@
+= Comprehensive Application Properties Reference
+:icons: image
+:iconsdir: ../images/icons
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Configuration for a _Business Service_ project is done within the `META-INF/application.properties` file in both Quarkus and Spring Boot.
+
+This file will also contain other configuration properties for the application.
+
+This comprehensive reference lists all available properties in a _Business Services_ project, including their descriptions, types, possible values, and defaults.
+
+== Global Properties
+
+Global properties do not belong to a particular engine or feature of {PRODUCT}.
+These properties affect the entire application regardless of what features are being used.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.service.url
+a|The service URL needed to connect to the runtime endpoint from outside the service.
+|string
+|
+
+a|kogito.generate.rest
+a|Toggle enabling the global REST endpoint generation.
+|boolean
+a|true
+
+a|kogito.generate.di
+a|Toggle enabling dependency injection.
+|boolean
+a|true
+
+a|kogito.codegen.ignoreHiddenFiles
+a|Toggle to ignore hidden files when collecting files for code generation.
+|boolean
+|true
+
+a|kogito.codegen.process.failOnError
+a|Toggle to fail when there are parsing/validation errors of workflow assets.
+|boolean
+|true
+
+a|kogito.rest.resource.type
+a|Specifier of the type of REST resource to generate.
+Valid values: "reactive", or "".
+|string
+a|
+
+a|kogito.faultToleranceEnabled
+a|Toggle to enable fault tolerance and retries for process execution failures.
+|boolean
+a|
+
+|===
+
+== Transaction and Concurrency Properties
+
+Properties related to transaction management and concurrent access control.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.transactionEnabled
+a|Globally sets transactions as enabled for the entire application.
+|boolean
+a|true
+
+a|kogito.processes.transactionEnabled
+a|Sets transactions as enabled for the Process API layer, overriding global behavior.
+|boolean
+a|true
+
+a|kogito.usertasks.transactionEnabled
+a|Sets transactions as enabled for the User Tasks API layer, overriding global behavior.
+|boolean
+a|true
+
+a|kogito.persistence.optimistic.lock
+a|Toggle to use optimistic locking in the database for concurrent access control.
+NOTE: This property has no impact if transactions are disabled.
+|boolean
+a|false
+
+|===
+
+== Engine-Specific Properties
+
+{PRODUCT} is composed of multiple engines. Each engine has its own properties.
+
+=== Decision Engine Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.decisions
+a|Toggle enabling code generation for the decisions engine.
+|boolean
+a|true
+
+a|kogito.generate.rest.decisions
+a|Toggle for REST decisions endpoint generation.
+|boolean
+a|true
+
+a|kogito.decisions.stronglytyped
+a|Toggle to enable generated Java classes to support strongly typed input.
+|boolean
+a|false
+
+a|kogito.decisions.validation
+a|Validation activation for decision models.
+Possible values: ENABLED, DISABLED, IGNORE
+|string
+a|ENABLED
+
+a|kogito.addon.tracing.decision.kafka.bootstrapAddress
+a|Bootstrap Kafka server address for decision tracing.
+|string
+a|
+
+a|kogito.addon.tracing.decision.asyncEnabled
+a|Toggle enabling asynchronous collection of decision events.
+|boolean
+a|true
+
+|===
+
+=== Persistence Engine Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.persistence
+a|Toggle enabling code generation for the persistence engine.
+|boolean
+a|true
+
+a|kogito.generate.rest.persistence
+a|Toggle for REST persistence endpoint generation.
+|boolean
+a|true
+
+a|kogito.persistence.data-index.proto.generation
+a|Toggle to enable generation of Protobuf marshallers for Data-Index.
+|boolean
+a|true
+
+a|kogito.persistence.proto.marshaller
+a|Toggle to enable generation of Protobuf marshallers.
+|boolean
+a|true
+
+a|kogito.persistence.type
+a|Database persistence type.
+Possible values: JDBC, MONGODB, FILESYSTEM, KAFKA, INFINISPAN, POSTGRESQL
+|enum
+a|
+
+a|kogito.persistence.auto.ddl
+a|Toggle to automatically apply database schema changes.
+|boolean
+a|true
+
+a|kogito.persistence.query.timeout.millis
+a|Query execution timeout in milliseconds.
+|long
+a|10000
+
+|===
+
+=== Process/Workflow Engine Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.process
+a|Toggle enabling code generation for the Process/Workflow engine.
+|boolean
+a|true
+
+a|kogito.generate.rest.process
+a|Toggle for REST process endpoint generation.
+|boolean
+a|true
+
+a|kogito.process.instances.limit
+a|Maximum number of process instances to be returned by GET API.
+|short
+|1000
+
+a|kogito.processes.businessCalendar
+a|Fully qualified class name of custom business calendar implementation.
+Must implement `org.kie.kogito.calendar.BusinessCalendar`.
+|string
+a|
+
+a|kogito.codegen.workflow
+a|Toggle enabling code generation for the workflow engine.
+|boolean
+a|true
+
+a|kogito.generate.rest.workflow
+a|Toggle for REST workflow endpoint generation.
+|boolean
+a|true
+
+a|kogito.workflow.version-strategy
+a|Strategy used to resolve a Process version.
+|string
+a|workflow
+
+a|kogito.workflow.proto.marshaller
+a|Toggle to generate Protobuf marshallers for runtime.
+|boolean
+a|true
+
+a|kogito.workflow.data-index.proto.generation
+a|Toggle to generate Protobuf marshallers for Data-Index.
+|boolean
+a|true
+
+a|kogito.logger.always-include
+a|Always include the Workflow debug logger.
+By default, this will only be included in dev and test.
+Setting this to true will also include the Workflow debug logger in Prod.
+|boolean
+|false
+
+|===
+
+=== Rules Engine Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.codegen.rules
+a|Toggle enabling code generation for the rules engine.
+|boolean
+a|true
+
+a|kogito.generate.rest.rules
+a|Toggle for REST rules endpoint generation.
+|boolean
+a|true
+
+a|kogito.rules.`rule_unit_name`.event-processing-type
+a|Type of event processing for a given rule-unit.
+Possible values: CLOUD, STREAM
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.clock-type
+a|Event clock type for a given rule-unit.
+Possible values: PSEUDO, REALTIME
+|string
+a|
+
+a|kogito.rules.`rule_unit_name`.sessions-pool
+a|The size for the sessions pool.
+|int
+a|
+
+|===
+
+=== User Tasks Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.usertasks.lifecycle
+a|User task lifecycle implementation to use.
+Possible values: ws-human-task
+|string
+a|
+
+|===
+
+== Events and Messaging Properties
+
+Properties for event publishing, messaging, and Cloud Events integration.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.quarkus.events.threads.poolSize
+a|Maximum number of threads to handle incoming events by channel.
+Available for both Quarkus and Spring Boot.
+|int
+|10
+
+a|kogito.quarkus.events.threads.queueSize
+a|Maximum size of queue to hold incoming events to be processed by threads in the pool.
+Available for both Quarkus and Spring Boot.
+|int
+|1
+
+a|kogito.events.processinstances.enabled
+a|Toggle enabling publishing of process instances events.
+|boolean
+|true
+
+a|kogito.events.processinstances.errors.propagate
+a|Toggle to propagate errors for process instance emitter.
+|boolean
+|false
+
+a|kogito.events.processdefinitions.enabled
+a|Toggle to enable publishing process definition events.
+|boolean
+|true
+
+a|kogito.events.processdefinitions.errors.propagate
+a|Toggle to propagate errors for Process Definition emitter.
+|boolean
+|false
+
+a|kogito.events.usertasks.enabled
+a|Toggle to enable publishing User Tasks events.
+|boolean
+|true
+
+a|kogito.events.usertasks.errors.propagate
+a|Toggle to propagate errors for User Tasks.
+|boolean
+|false
+
+a|kogito.events.variables.enabled
+a|Toggle to enable publishing process variable events.
+|boolean
+|true
+
+a|kogito.messaging.as-cloudevents
+a|Toggle used to enable Cloud Events.
+|boolean
+|true
+
+a|kogito.addon.cloudevents.kafka.kogito_incoming_stream
+a|Kafka topic to listen to for incoming CloudEvents.
+|string
+|
+
+a|kogito.addon.cloudevents.kafka.kogito_outgoing_stream
+a|Kafka topic to post to for outgoing CloudEvents.
+|string
+|
+
+a|kogito.jackson.fail-on-empty-bean
+a|Toggle if Jackson will fail on an empty bean.
+|boolean
+|false
+
+a|kogito.addon.messaging.incoming.defaultName
+a|Incoming channel default name.
+|string
+|kogito_incoming_stream
+
+a|kogito.addon.messaging.outgoing.defaultName
+a|Outgoing channel default name.
+|string
+|kogito_outgoing_stream
+
+|===
+
+== Security and Authentication Properties
+
+Properties for authentication, authorization, and user identity management.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.security.auth.enabled
+a|Toggle enabling the application security context when resolving current User Identity.
+|boolean
+a|false
+
+a|kogito.security.auth.impersonation.allowed-for-roles
+a|Comma-separated list of roles that allow identity impersonation when resolving the actual User Identity.
+These roles should be configured in the Identity Provider the runtime is configured to use.
+|string
+a|
+
+|===
+
+== Monitoring and Observability Properties
+
+Properties for Prometheus metrics, Grafana dashboards, and monitoring configuration.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.monitoring.rule.useDefault
+a|Toggle to enable/disable default rule metrics from being exported.
+|boolean
+a|true
+
+a|kogito.monitoring.process.useDefault
+a|Toggle to enable/disable default process metrics from being exported.
+|boolean
+a|true
+
+a|kogito.monitoring.interceptor.useDefault
+a|Toggle to enable/disable default interceptor metrics from being exported.
+|boolean
+a|true
+
+a|kogito.grafana.disabled.operational.dashboards
+a|Comma-separated list of operational dashboard names to disable generation.
+|string
+a|
+
+a|kogito.grafana.disabled.domain.dashboards
+a|Comma-separated list of domain dashboard names to disable generation.
+|string
+a|
+
+|===
+
+== Development Tools Properties
+
+Properties for development services and tools.
+
+=== DevServices Properties
+
+Kogito DevServices function only when a Quarkus application is in dev mode.
+Enabling DevServices starts an in-memory Data-Index container.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.kogito.devservices.port
+a|Optional port the dev service will listen to.
+If not defined, 8180 will be used.
+|int
+|8180
+
+a|quarkus.kogito.devservices.enabled
+a|Toggle to enable DevServices for Kogito.
+|boolean
+|true
+
+a|quarkus.kogito.devservices.image-name
+a|The Data-Index image to use.
+|string
+|
+
+a|quarkus.kogito.devservices.shared
+a|(Quarkus Only) Toggle to enable sharing of Quarkus Dev Services.
+When shared, Quarkus looks for running containers using label-based service discovery.
+If a matching container is found, it is used, so a second one is not started.
+Otherwise, Dev Services for a new Data-Index instance is started.
+The discovery uses the `kogito-dev-service-data-index` label.
+The value is configured using the `service-name` property.
+Container sharing is only used in dev mode.
+|boolean
+|true
+
+a|quarkus.kogito.devservices.service-name
+a|The value of the `kogito-dev-service-data-index` label attached to the started container.
+This property is used when `shared` is set to `true`.
+In this case, before starting a container, Dev Services looks for a container with the `kogito-dev-service-data-index` label set to the configured value.
+If found, it will use this container instead of starting a new one.
+Otherwise, it starts a new container with the `kogito-dev-service-data-index` label set to the specified value.
+|string
+|kogito-data-index
+
+a|quarkus.jbpm.devui.users.`<user-name>`.groups
+a|Groups to which the provided user (specified in the name of the config) belongs.
+This is only used when testing/developing services through DevUI.
+The configured user (specified by the `user name`) and their groups (specified in this configuration) will be listed in a Task Inbox dropdown so the developer can switch between users during development and testing.
+|List of strings
+a|None
+
+|===
+
+== Integration Services Properties
+
+Properties for Data-Index, Jobs Service, and Flyway integration.
+
+=== Data-Index Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.dataindex.http.url
+a|HTTP port the Data-Index will use to accept incoming requests.
+Used to connect the runtime, with svg addon, to the data-index.
+|string
+a|http://localhost:${quarkus.http.port}
+
+a|kogito.dataindex.ws.url
+a|HTTP port the Data-Index websocket will use to accept incoming requests.
+|string
+a|ws://localhost:${quarkus.http.port}
+
+a|kogito.data-index.graphql.ui.always-include
+a|Toggle to determine if the GraphQL UI should be enabled.
+By default, this is only included if the application is running in dev mode.
+|boolean
+a|false
+
+a|kogito.data-index.url
+a|URL the Data-Index will use.
+The same as `kogito.dataindex.http.url`, kept for backwards compatibility.
+|string
+a|
+
+|===
+
+=== Jobs Service Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kogito.jobs-service.schedulerChunkInMinutes
+a|The current chunk size in minutes the scheduler handles.
+Used to keep a limited number of jobs scheduled in the in-memory scheduler. This property also controls the time interval used by the job service to synchronize in-memory jobs from the persistent store.
+|long
+a|10
+
+a|kogito.jobs-service.retryMillis
+a|Delay, in milliseconds, between retries when a job execution fails and must be retried.
+|long
+a|100
+
+a|kogito.jobs-service.maxNumberOfRetries
+a|Maximum number of retries configured for the periodic jobs loading procedure.
+Every time the procedure is started this value is considered.
+|int
+a|3
+
+a|kogito.jobs-service.numberOfWorkerThreads
+a|Maximum number of worker threads available to execute jobs.
+|int
+a|10
+
+a|kogito.jobs-service.exception-details-enabled
+a|Toggle to enable detailed exception information in job error messages.
+|boolean
+a|false
+
+a|kogito.jobs-service.management.heartbeat.management-id
+a|Management ID string for job service heartbeat management.
+|string
+a|
+
+|===
+
+=== Flyway Properties
+
+The Flyway integration has the concept of a "module."
+A Flyway module is any Apache Maven artifact, typically a JAR file, that contains a `kie-flyway.properties` file.
+An individual module can be skipped during the initial migration by setting the module enabled to `false` using the property within the table.
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|kie.flyway.enabled
+a|Toggles the execution of the Flyway initializer during application startup.
+|boolean
+|true
+
+a|kie.flyway.modules.`<module-name>`.enabled
+a|Enables the execution of the Flyway initializer for a specific Kie module.
+|boolean
+|true
+
+|===
+
+== Quarkus-Specific Properties for BAMOE
+
+These are Quarkus framework properties that are commonly used with BAMOE applications.
+
+=== OIDC and Security Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.oidc.enabled
+a|Determines if OIDC extension is enabled.
+|boolean
+|true
+
+a|quarkus.oidc.tenant-enabled
+a|Specifies whether the tenant configuration is enabled.
+|boolean
+|true
+
+a|quarkus.oidc.auth-server-url
+a|The base URL of the OpenID Connect (OIDC) server.
+|URI
+|
+
+a|quarkus.oidc.client-id
+a|The client id of the application.
+|string
+|
+
+a|quarkus.oidc.credentials.secret
+a|The client secret used by the client_secret_basic authentication method.
+|string
+|
+
+a|quarkus.http.auth.permission.`<name>`.paths
+a|List of paths that the permission applies to.
+|string
+|
+
+a|quarkus.http.auth.permission.`<name>`.policy
+a|The policy to apply to the paths.
+Possible values: authenticated, permit, deny, or custom policy name
+|string
+|
+
+|===
+
+=== Datasource Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.datasource.db-kind
+a|The kind of database.
+Possible values: postgresql, mssql, oracle, db2, h2, mysql, mariadb
+|string
+|
+
+a|quarkus.datasource.username
+a|The datasource username.
+|string
+|
+
+a|quarkus.datasource.password
+a|The datasource password.
+|string
+|
+
+a|quarkus.datasource.jdbc.url
+a|The datasource JDBC URL.
+|string
+|
+
+a|quarkus.datasource.jdbc.new-connection-sql
+a|SQL statement to execute when a new connection is created.
+|string
+|
+
+a|quarkus.hibernate-orm.mapping-files
+a|Comma-separated list of ORM mapping files to include.
+|string
+|
+
+a|quarkus.hibernate-orm.database.generation
+a|Database generation mode.
+Possible values: none, create, drop-and-create, drop, update, validate
+|string
+|
+
+|===
+
+=== Container Image and Deployment Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.container-image.build
+a|Toggle to build a container image.
+|boolean
+|false
+
+a|quarkus.container-image.push
+a|Toggle to push the container image to a registry.
+|boolean
+|false
+
+a|quarkus.container-image.builder
+a|The container image builder to use.
+Possible values: docker, jib, podman, buildpack
+|string
+|
+
+a|quarkus.container-image.registry
+a|The container registry to use.
+|string
+|
+
+a|quarkus.container-image.group
+a|The group/organization in the container registry.
+|string
+|
+
+a|quarkus.container-image.name
+a|The name of the container image.
+|string
+|
+
+a|quarkus.container-image.tag
+a|The tag of the container image.
+|string
+|latest
+
+a|quarkus.docker.buildx.platform
+a|Platform for Docker buildx (e.g., linux/amd64, linux/s390x).
+|string
+|
+
+a|quarkus.jib.platforms
+a|Platform for Jib builds (e.g., linux/s390x).
+|string
+|
+
+a|quarkus.podman.platform
+a|Platform for Podman builds (e.g., linux/s390x).
+|string
+|
+
+|===
+
+=== OpenShift Deployment Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.openshift.deploy
+a|Toggle to deploy to OpenShift after build.
+|boolean
+|false
+
+a|quarkus.openshift.route.expose
+a|Toggle to expose the application via an OpenShift route.
+|boolean
+|false
+
+a|quarkus.openshift.route.tls.termination
+a|TLS termination type for the route.
+Possible values: edge, passthrough, reencrypt
+|string
+|
+
+a|quarkus.openshift.route.tls.insecure-edge-termination-policy
+a|Policy for insecure traffic.
+Possible values: None, Allow, Redirect
+|string
+|
+
+a|quarkus.openshift.annotations.`<key>`
+a|Annotations to add to OpenShift resources (e.g., for license tracking).
+|string
+|
+
+|===
+
+=== Development and API Documentation Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.swagger-ui.always-include
+a|Toggle to always include Swagger UI, even in production.
+|boolean
+|false
+
+a|quarkus.smallrye-openapi.path
+a|Path where the OpenAPI document will be available.
+|string
+|/q/openapi
+
+a|quarkus.smallrye-openapi.auto-add-bad-request-response
+a|Toggle to automatically add 400 Bad Request responses to OpenAPI spec.
+|boolean
+|true
+
+a|quarkus.http.port
+a|HTTP port the application listens on.
+|int
+|8080
+
+a|quarkus.http.non-application-root-path
+a|Base path for non-application endpoints (e.g., health, metrics).
+|string
+|/q
+
+a|quarkus.http.root-path
+a|Root path for the application.
+|string
+|/
+
+|===
+
+=== Native Build Properties
+
+[cols="3,4,^,^"]
+|===
+^h|Property Name
+^h|Description
+h|Type
+h|Default
+
+a|quarkus.native.enabled
+a|Toggle to enable native image build.
+|boolean
+|false
+
+a|quarkus.package.jar.enabled
+a|Toggle to enable JAR packaging.
+|boolean
+|true
+
+a|quarkus.native.auto-service-loader-registration
+a|Toggle to automatically register service loaders in native image.
+|boolean
+|true
+
+|===
+
+== Additional Configuration Notes
+
+=== Property Precedence
+
+Properties can be overridden using different mechanisms:
+
+1. System properties (`-Dproperty=value`)
+2. Environment variables
+3. `application.properties` file
+4. Profile-specific properties (e.g., `%dev.property=value`)
+
+=== Profile-Specific Configuration
+
+Quarkus supports configuration profiles. Prefix properties with `%profile.` to make them profile-specific:
+
+[source,properties]
+----
+# Production
+kogito.persistence.type=jdbc
+
+# Development only
+%dev.kie.flyway.enabled=true
+%dev.quarkus.swagger-ui.always-include=true
+
+# Test only
+%test.kogito.persistence.type=filesystem
+----
+
+=== Environment Variable Mapping
+
+Properties can be set via environment variables by:
+
+1. Converting to uppercase
+2. Replacing dots (`.`) with underscores (`_`)
+3. Replacing dashes (`-`) with underscores (`_`)
+
+Example: `kogito.service.url` becomes `KOGITO_SERVICE_URL`
+
+=== Spring Boot Specific Notes
+
+While most properties work in both Quarkus and Spring Boot, some are framework-specific:
+
+- Properties starting with `quarkus.` are Quarkus-specific
+- Spring Boot uses standard Spring configuration mechanisms
+- The `kogito.*` and `kie.*` properties work in both frameworks
+
+=== Related Documentation
+
+For more information, see:
+
+- xref:../workflow/workflows-with-quarkus.adoc[Workflow Services with Quarkus]
+- xref:../workflow/workflows-with-springboot.adoc[Workflow Services with Spring Boot]
+- xref:../building-deploying/security.adoc[Security Configuration]
+- xref:../managing-monitoring/monitoring-services.adoc[Monitoring Services]
+- xref:../workflow/database-considerations.adoc[Database Considerations]
