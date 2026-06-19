@@ -263,24 +263,18 @@ public class CustomUserTaskAssignmentStrategy extends BasicUserTaskAssignmentStr
 
 [#custom-wih]
 == Creating a custom WorkItemHandler
+
+This section provides a step-by-step guide for implementing a custom WorkItemHandler in {PRODUCT_SHORT}, handler definition, and integration with a BPMN process.
+
 A Work Item represents a task or activity in a workflow that typically involves external operations, such as calling REST APIs, performing database operations, or consuming SOAP web services. A Custom Work Item Handler (WIH) is a user-defined Java class that implements the logic for executing such tasks. It extends the capabilities of standard BPMN tasks (like Service Tasks) by allowing you to plug in custom code to meet specific business requirements not covered by built-in functionality.
 
 Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
 
-This section provides a step-by-step guide for implementing a custom WorkItemHandler in {PRODUCT_SHORT}, handler definition, and integration with a BPMN process.
-
-In a _Business Service_ project created using xref:../getting-started/project-setup.adoc[Accelerators], add the following dependency to your project POM to enable the necessary APIs:
-
-[,xml]
-----
-<dependency>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-api</artifactId>
-</dependency>
-----
+Add the `org.kie.kogito:kogito-api` dependency to your project POM to set up your _Business Service_ project created using xref:../getting-started/project-setup.adoc[Accelerators]. This dependency enables the necessary Kogito APIs required for further configuration and development. For more information see https://central.sonatype.com/artifact/org.kie.kogito/kogito-api[`org.kie.kogito:kogito-api`] external documentation.
 
 === Implement the custom WorkItemHandler
-To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the following lifecycle methods to define the behavior of your Custom Task:
+
+To implement the custom logic, create a Java class named `MyConcatWorkItemHandler`. This class should extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` dependency and override the following lifecycle methods to define the behavior of your Custom Task:
 
 * `+activateWorkItemHandler(...)+` the implementation logic for executing the custom task. 
 * `+abortWorkItemHandler(...)+` the logic for handling abort scenarios of the custom task, such as cleanup. 
@@ -325,9 +319,10 @@ public class MyConcatWorkItemHandler extends DefaultKogitoWorkItemHandler {
 ----
 
 ==== Registering the custom WorkItemHandler
-To use a custom WorkItemHandler in a process instance, it must be registered before the process starts. This registration informs the engine which handler to invoke for a given task.
 
-Register your handler by extending `DefaultWorkItemHandlerConfig`:
+To use a custom WorkItemHandler in a process instance, you must register it before the process starts. This registration informs the engine which handler to invoke for a given task.
+
+Register your handler by extending `DefaultWorkItemHandlerConfig` in the following way:
 
 [source,java]
 ----
@@ -354,7 +349,7 @@ Icons for custom tasks can be placed in the same directory as the `.wid` file.
 
 If the BPMN Editor detects `*.wid` files in both locations (`global/` and directory of the opened BPMN file), the contents of the two files are merged and displayed together in Custom Tasks palette.
 
-The following shows an example `.wid` file:
+The following example illustrates the structure of a `.wid` file:
 
 [,json]
 ----
@@ -377,66 +372,56 @@ The following shows an example `.wid` file:
 ]
 ----
 
-NOTE: In some cases, {CANVAS} may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run `git add customtask.wid` to ensure the file is tracked. If the issue persists, try reopening the BAMOE project in a new VS Code workspace.
+NOTE: In some cases, {CANVAS} may not immediately recognize the `.wid` file, causing the custom Work Item to be unavailable in the designer palette. To resolve this, run `git add customtask.wid` command to ensure the file is tracked. If the issue persists, try reopening the BAMOE project in a new VS Code workspace.
 
 === Using the custom Work Item in a BPMN process
 
-Once your `.wid` file and handler class are in place, you can  integrate the Custom Task into a BPMN process using the BPMN Editor.
+After your `.wid` file and handler class are in place, you can integrate the Custom Task into a BPMN process using the BPMN Editor.
 
-Once the , drag and drop your Custom Task (`MyConcatDefinitions`) onto the BPMN editor canvas.
+To add the Custom Task into a BPMN process, do the following steps:
 
-image::upgrade/05-05-upgrading-custom-work-item-handlers-devtoolview.png[width=250]
+. Drag and drop the Custom Task onto the BPMN editor canvas.
 
-==== Process model
+. Create process variables in the *Process Data* section. The variables store input values when starting the process and they must match the parameters in the `.wid` file.
 
-After adding the Custom Task, your process definition should resemble the following:
-
-image::upgrade/05-05-upgrading-custom-work-item-handlers-process_new.png[width=500]
-
-==== Define process variables
-
-Create process variables to accept input values when starting the process instance. These variables will be mapped to the parameters defined in your `.wid` file.
-
-image::upgrade/05-05-upgrading-custom-work-item-handlers-processdata.png[width=250]
-
-==== Configure data assignments
-Define the Data Input and Data Output Assignments for the custom Work Item. This ensures that the input values are passed to the handler and the output is captured in the process.
-
-image::upgrade/05-05-upgrading-custom-work-item-handlers-properties.png[width=90%]
+. Set the *Data Input* and *Data Output Assignments*. This ensures inputs are passed to the handler and outputs are saved to process variables.
 
 === Build and run in local Dev mode
-Once you have implemented your custom WorkItemHandler and integrated your Custom Task in a Workflow, you can compile and run your _Business Service_ in Quarkus Dev mode to test its functionality using hot reload. 
 
-[source,sh]
+After you implement your custom WorkItemHandler and integrate your Custom Task in a Workflow, to build and run in local Dev mode, do the following steps:
+
+1. Run the following command to start your _Business Service_ in Quarkus Dev mode and test changes using hot reload:
+
+[source,xml]
 ----
 mvn clean compile quarkus:dev
 ----
-
-NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code--no need to restart the application.
-
++
+NOTE: Dev mode allows hot reload of business assets like processes, rules, decision tables, and Java code. You do not need to restart the application.
++
 If you are using Quarkus with Gradle, to build and start the project with hot reload enabled, run the following command:
-
++
 [source,xml]
 ----
 gradlew clean quarkusDev
 ----
-
++
 If you are using Spring Boot with Gradle, to enable hot reload, add the `org.springframework.boot:spring-boot-devtools` dependency to the dependencies section of your `build.gradle`. For more information, see xref:https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-devtools[`org.springframework.boot:spring-boot-devtools`] external documentation.
 
-Start continuous compilation in one terminal, using the following command:
-
+2. Start continuous compilation in one terminal, by using the following command:
++
 [source,xml]
 ----
 gradlew clean compileSecondaryJava --continuous --parallel
 ----
 
-Then, in a second terminal, run the Spring Boot application:
-
+3. In a second terminal, run the Spring Boot application by using the following command:
++
 [source,xml]
 ----
 gradlew bootRun
 ----
-
++
 NOTE: The `clean` task is not invoked.
 
 ////
@@ -510,7 +495,7 @@ curl -X 'POST' \
 
 === Expected output
 
-After submitting the request, you should see log output similar to the following:
+After submitting the request, you should see log output similar to the following example:
 
 [source,console]
 ----
