@@ -64,17 +64,17 @@ The REST Work Item Handler supports multiple configuration approaches to accommo
 * Request payload,
 * Access tokens or OIDC security.
 
-Configuration can be provided at three distinct layers:
+Configuration can be provided at the following layers:
 
-1. **BPMN Model Configuration** (Design-time)
-2. **Application Properties Configuration** (Deployment-time)
-3. **Environment Variables Configuration** (Runtime)
+* BPMN Model Configuration (Design-time)
+* Application Properties Configuration (Deployment-time)
+* Environment Variables Configuration (Runtime)
 
 === BPMN Model Configuration (Design-time)
 
 BPMN Model Configuration is embedded directly in the BPMN process definition through the REST Service Call Task properties panel. Values except test token are stored in the BPMN XML file. Test token is only for testing nd not stored in the file. Values are visible to anyone with access to the process definition.
 
-See the following example for reference.
+See the following example for reference:
 
 [source,xml]
 ----
@@ -89,7 +89,7 @@ Use the BPMN Model Configuration when public API endpoints are used and no secur
 
 Application Properties Configuration is a configuration provided in `application.properties`. Values are read at application startup and can be different per environment. Supports property placeholders for environment variables. Requires application restart to take effect. This approach is recommended for environment-specific configuration.
 
-See the following example for reference.
+See the following example for reference:
 
 [source,properties]
 ----
@@ -112,7 +112,7 @@ quarkus.log.category."org.kogito.workitem.rest".level=DEBUG
 
 Environment Variables Configuration is a configuration provided through operating system environment variables or container orchestration platforms. This approach is most secure for sensitive data like API keys and passwords. Requires application restart to take effect. This approach is recommended for environment-specific configuration.
 
-See the following example for reference.
+See the following example for reference:
 
 [source,yaml]
 ----
@@ -129,16 +129,16 @@ services:
 
 . Open BPMN Editor in BAMOE Canvas or Developer Tools for VS Code.
 . Create new workflow or open existing one. 
-. Add **REST Service Call Task**, drag it to the canvas from the task palette, and connect to workflow sequence flow.
+. Add REST Service Call Task, drag it to the canvas from the task palette, and connect to workflow sequence flow.
 . Configure the REST Service Call Task, by doing the following actions:
    .. Set HTTP method (GET, POST, PUT, DELETE, PATCH).
    .. Enter target URL.
    .. Choose authentication strategy.
    .. Optional: Add headers, request payload, and timeout.
-. Choose authentication strategy by selecting one of the following authentication options:
-   - `propagated`: For user-initiated workflows.
-   - `configured`: For system-triggered processes (requires `RestServiceCallTaskId`).
-   - `none`: For public APIs.
+. Select authentication strategy. Choose one of the following authentication methods based on your use case:
+   * `propagated` - Use when the workflow is triggered by a user and you want to forward their authentication token to the REST API.
+   * `configured` - Use for system-triggered workflows that need a pre-configured service account token, requires `RestServiceCallTaskId`.
+   * `none` - Use for public APIs that don't require authentication.
 . Map response to process variables.
 . Configure **Result** output mapping, use the mapped data in subsequent workflow steps.
 . Optional: Handle errors. Define what happens if the REST call fails.
@@ -146,6 +146,70 @@ services:
 . Deploy to local environment.
 . Trigger workflow with test data. Send a request or manually start it.
 . Verify the REST call succeeds.
+
+== Token Configuration for REST Work Item Handler
+
+The REST Work Item Handler introduces the following configuration properties:
+
+- Access Token Configuration (Configured Strategy),
+- Debug Logging.
+
+=== Access Token Configuration
+
+This configuration specifies the access token to use when `AccessTokenAcquisitionStrategy` is set to `configured`. This property is required for system-triggered processes that cannot rely on user authentication context. It is a string property that can be set in the application properties file or as an environment variable.
+
+Use the following property format:
+
+[source, properties]
+----
+kogito.processes.{processId}.{RestServiceCallTaskId}.access_token
+----
+
+See the following example for reference:
+
+[source, properties]
+----
+# Quarkus
+kogito.processes.user-lookup.FindUserRestCall.access_token=${USER_MGMT_TOKEN}
+----
+
+You can also set the property using an environment variable:
+[source, bash]
+----
+KOGITO_PROCESSES_{PROCESSID}_{RESTSERVICECALLTASKID}_ACCESS_TOKEN
+---- 
+
+See the following example for reference:
+[source, bash]
+----
+export KOGITO_PROCESSES_USER_LOOKUP_FINDUSERRESTCALL_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+----
+
+=== Debug Logging
+
+This configuration enables detailed logging for the REST Work Item Handler, including request/response details, authentication flow, and error diagnostics. You can use it for debugging and monitoring REST calls in production environments. It is a string property that can be set in the application properties file or as an environment variable. The default value is `INFO`, and the supported log levels are `TRACE`, `DEBUG`, `INFO`, `WARN`, and `ERROR`. It is not required for system-triggered processes that cannot rely on user authentication context.
+
+Use the following property format:
+[source, properties]
+----
+quarkus.log.category."org.kogito.workitem.rest".level
+quarkus.log.category."org.kie.kogito.process.workitems".level
+----
+
+See the following example for reference:
+
+[source, properties]
+----
+# Quarkus
+quarkus.log.category."org.kogito.workitem.rest".level=DEBUG
+quarkus.log.category."org.kie.kogito.process.workitems".level=DEBUG
+
+# Spring Boot (application.yml)
+logging:
+  level:
+    org.kogito.workitem.rest: DEBUG
+    org.kie.kogito.process.workitems: DEBUG
+----
 
 == Using REST Service Call Task with Kogito REST Work Item Handler
 
@@ -157,12 +221,9 @@ Follow these steps to integrate REST API calls into your workflows:
 
 . Add the Task to Your Workflow.
    .. Open your workflow in BPMN Editor in BAMOE Canvas or Developer Tools for VS Code.
-   .. Locate **REST Service Call Task** in the task palette.
-   .. Drag it to the canvas and connect it to your workflow sequence flow
+   .. Locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence flow.
 
-. Configure Basic REST Parameters.
-+
-Set the following properties in the task properties panel:
+. Configure Basic REST Parameters. Set the following properties in the task properties panel:
 +
 [source,properties]
 ----
@@ -173,17 +234,12 @@ RequestTimeout: 60000 (milliseconds, optional)
 +
 You can use process variable interpolation syntax `#{variableName}` to make URLs dynamic.
 
-. Select authentication strategy.
-+
-Choose the appropriate authentication method based on your use case:
-+
-* `propagated` - Use when the workflow is triggered by a user and you want to forward their authentication token to the REST API
-* `configured` - Use for system-triggered workflows that need a pre-configured service account token (requires `RestServiceCallTaskId`)
-* `none` - Use for public APIs that don't require authentication
+. Select authentication strategy. Choose one of the following authentication methods based on your use case:
+   * `propagated` - Use when the workflow is triggered by a user and you want to forward their authentication token to the REST API.
+   * `configured` - Use for system-triggered workflows that need a pre-configured service account token, requires `RestServiceCallTaskId`.
+   * `none` - Use for public APIs that don't require authentication.
 
-. Optional: Add headers and query parameters.
-+
-Configure HTTP headers and query parameters as needed:
+. Optional: Add headers and query parameters. Configure the following HTTP headers and query parameters as needed:
 +
 [source,properties]
 ----
@@ -196,8 +252,8 @@ QUERY_limit: 50
 NOTE: Prefix header names with `HEADER_` and query parameters with `QUERY_`.
 
 . Configure Request Payload for POST, PUT, and PATCH.
-   .. Map a process variable to the `ContentData` input parameter
-   .. The handler automatically serializes your data to JSON
+   .. Map a process variable to the `ContentData` input parameter.
+   .. The handler automatically serializes your data to JSON.
    .. See xref:work-item-handler-intro.adoc#request-payload-config[Request Payload Configuration] for more information.
 
 . Map the Response to Process Variables.
@@ -207,9 +263,9 @@ NOTE: Prefix header names with `HEADER_` and query parameters with `QUERY_`.
 The response is automatically deserialized from JSON.
 
 . Test your configuration.
-   .. Use the built-in testing capability in the BPMN Editor
-   .. Verify the REST call succeeds with test data
-   .. Check response mapping works as expected
+   .. Use the built-in testing capability in the BPMN Editor.
+   .. Verify the REST call succeeds with test data.
+   .. Check response mapping works as expected.
 
 === For Business Service Developers
 
@@ -254,9 +310,11 @@ Request payloads for POST, PUT, and PATCH operations are provided through the `C
 * Expression-based mapping.
 * Literal string value.
 
-To use the **direct process variable mapping** method, do the following steps:
+=== Direct Process Variable Mapping
 
-. Create process variable. See the following example for reference.
+To use the direct process variable mapping method, do the following steps:
+
+. Create process variable. See the following example for reference:
 +
 [source,java]
 ----
@@ -268,7 +326,7 @@ employeeData.put("email", "john.doe@example.com");
 employeeData.put("department", "Engineering");
 ----
 
-. Map to *ContentData* in BPMN. See the following example for reference.
+. Map to ContentData in BPMN. See the following example for reference:
 +
 [source,xml]
 ----
@@ -281,14 +339,18 @@ employeeData.put("department", "Engineering");
 
 . Assign the `employeeData` process variable to the request body. The REST Work Item Handler handles JSON serialization automatically when sending POST, PUT, or PATCH requests.
 
-To configure request payloads by using **expression-based mapping**, in BPMN Editor properties panel add the following property:
+=== Expression-Based Mapping
+
+To configure request payloads by using expression-based mapping, in BPMN Editor properties panel add the following property:
 
 [source,xml]
 ----
 ContentData: #{employeeData}
 ----
 
-You can configure simple payloads by using **literal string value **method. In BPMN Editor properties panel add the following property:
+=== Literal String Value
+
+You can configure simple payloads by using literal string value method. In BPMN Editor properties panel add the following property:
 
 [source,xml]
 ----
@@ -380,9 +442,9 @@ Operation: POST
 
 **Scenario:** Hiring workflow calls ERP system using user's authentication token
 
-**Access:** BPMN Editor → Task Palette → REST Service Call Task
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
 
-**Configuration:**
+Use the following configuration:
 
 [source,xml]
 ----
@@ -395,11 +457,11 @@ Operation: POST
 
 === Use Case 2: System-Triggered REST Call with Configured Token
 
-**Scenario:** Scheduled workflow calls inventory system using pre-configured token
+**Scenario:** Scheduled workflow calls inventory system using pre-configured token.
 
-**Access:** BPMN Editor → Task Palette → REST Service Call Task
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
 
-**Configuration:**
+Use the following configuration:
 
 [source,xml]
 ----
@@ -410,7 +472,8 @@ Operation: POST
 - HEADER_Content-Type: application/json
 ----
 
-**Application Properties:**
+Use the following environment variable configuration in your `application.properties`:
+
 [source,xml]
 ----
 kogito.processes.inventory-check.CheckInventory.access_token=${INVENTORY_TOKEN}
@@ -420,9 +483,9 @@ kogito.processes.inventory-check.CheckInventory.access_token=${INVENTORY_TOKEN}
 
 **Scenario:** Workflow fetches weather data from public API
 
-**Access:** BPMN Editor → Task Palette → REST Service Call Task
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
 
-**Configuration:**
+Use the following configuration:
 
 [source,xml]
 ----
@@ -430,68 +493,4 @@ kogito.processes.inventory-check.CheckInventory.access_token=${INVENTORY_TOKEN}
 - Url: https://api.weather.com/v1/forecast?city=#{city}
 - AccessTokenAcquisitionStrategy: none
 - QUERY_units: metric
-----
-
-== Token Configuration for REST Work Item Handler
-
-The REST Work Item Handler introduces the following configuration properties:
-
-- Access Token Configuration (Configured Strategy),
-- Debug Logging.
-
-=== Access Token Configuration
-
-This configuration specifies the access token to use when `AccessTokenAcquisitionStrategy` is set to `configured`. This property is required for system-triggered processes that cannot rely on user authentication context. It is a string property that can be set in the application properties file or as an environment variable.
-
-Use the following property format:
-
-[source, properties]
-----
-kogito.processes.{processId}.{RestServiceCallTaskId}.access_token
-----
-
-See the following example for reference:
-
-[source, properties]
-----
-# Quarkus
-kogito.processes.user-lookup.FindUserRestCall.access_token=${USER_MGMT_TOKEN}
-----
-
-You can also set the property using an environment variable:
-[source, bash]
-----
-KOGITO_PROCESSES_{PROCESSID}_{RESTSERVICECALLTASKID}_ACCESS_TOKEN
----- 
-
-See the following example for reference:
-[source, bash]
-----
-export KOGITO_PROCESSES_USER_LOOKUP_FINDUSERRESTCALL_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-----
-
-=== Debug Logging
-
-This configuration enables detailed logging for the REST Work Item Handler, including request/response details, authentication flow, and error diagnostics. You can use it for debugging and monitoring REST calls in production environments. It is a string property that can be set in the application properties file or as an environment variable. The default value is `INFO`, and the supported log levels are `TRACE`, `DEBUG`, `INFO`, `WARN`, and `ERROR`. It is not required for system-triggered processes that cannot rely on user authentication context.
-
-Use the following property format:
-[source, properties]
-----
-quarkus.log.category."org.kogito.workitem.rest".level
-quarkus.log.category."org.kie.kogito.process.workitems".level
-----
-
-See the following example for reference:
-
-[source, properties]
-----
-# Quarkus
-quarkus.log.category."org.kogito.workitem.rest".level=DEBUG
-quarkus.log.category."org.kie.kogito.process.workitems".level=DEBUG
-
-# Spring Boot (application.yml)
-logging:
-  level:
-    org.kogito.workitem.rest: DEBUG
-    org.kie.kogito.process.workitems: DEBUG
 ----
