@@ -166,16 +166,17 @@ You can define custom deployment configurations using standard Kubernetes YAML m
 
 For more information, see xref:create-custom-dev-deployment.adoc#2[Customizing Dev Deployment options via user-defined YAMLs].
 
-== Resources requirements for default Dev Deployment options 
+== Resources requirements for Dev Deployment options 
 
-The Kubernetes/OpenShift resources created by a Dev Deployment must have a few labels and annotations so that {CANVAS} can list and manage these resources. These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
-For a successful deployment, this is the required information each resource needs:
+The Kubernetes/OpenShift resources created by a Dev Deployment must have specific metadata so that {CANVAS} can list and manage these resources. {CANVAS} applies this metadata using two different mechanisms:
+
+=== Automatically applied labels and annotations
+
+{CANVAS} automatically force-adds the following labels and annotations to every Kubernetes resource through JSON Patch, regardless of the deployment option (default or custom):
 
 [source,javascript]
 ----
 metadata:
-  name: \${{ devDeployment.uniqueName }}
-  namespace: \${{ devDeployment.kubernetes.namespace }}
   labels:
     \${{ devDeployment.labels.createdBy }}: kie-tools
     \${{ devDeployment.labels.partOf }}: \${{ devDeployment.uniqueName }}
@@ -184,17 +185,46 @@ metadata:
     \${{ devDeployment.annotations.workspaceName }}: \${{ devDeployment.workspace.name }}
 ----
 
+* The `createdBy` label identifies resources created by {CANVAS} and always has the value `kie-tools`.
+
+* The `partOf` label groups all resources related to a single deployment.
+
+* The `workspaceId` and `workspaceName` annotations match a deployment to a workspace.
+
+These labels and annotations are NOT configurable and are automatically stamped on every resource by {CANVAS} code.
+
+=== Token-interpolated name and namespace
+
+The resource `name` and `namespace` are set through xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] in the manifest YAML:
+
+[source,javascript]
+----
+metadata:
+  name: \${{ devDeployment.uniqueName }}
+  namespace: \${{ devDeployment.kubernetes.namespace }}
+----
+
 * The `name` is how the deployment is identified across the board.
 
 * The `namespace` is where the deployment should be created in the cluster and should be the same configured in the connected account.
 
-* The labels (`createdBy` and `partOf`) are required so that BAMOE Canvas can filter and map all resources related to a single deployment. `createdBy` should always have the value `kie-tools`.
+[cols="1,2,2"]
+|===
+|Field |Default Dev Deployment |Custom Dev Deployment
 
-* The annotations (`workspaceId` and `workspaceName`) help match a deployment to a workspace.
+|`metadata.name`
+|Always set (all default manifests include the token)
+|Not guaranteed (custom author must include the token)
 
-NOTE: The Dev Deployment service inside {CANVAS} automatically applies these required labels and annotations by patching the resource YAMLs.
+|`metadata.namespace`
+|Always set (all default manifests include the token)
+|Not guaranteed (custom author must include the token)
+|===
 
-=== How Dev Deployments Work
+IMPORTANT: For custom Dev Deployments, you must include the `name` and `namespace` tokens in your manifest YAML to ensure proper deployment identification and management.
+
+
+== How Dev Deployments Work
 
 When you click `Confirm`, {CANVAS} executes the following steps:
 
