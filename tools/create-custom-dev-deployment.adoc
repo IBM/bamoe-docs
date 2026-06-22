@@ -240,14 +240,14 @@ spec:
               name: app-volume
 ----
 
-The Dev Deployment service inside {CANVAS} automatically applies required labels and annotations by patching the resource YAMLs during deployment. You do not need to manually add them to your manifests.
+{CANVAS} automatically force-adds required labels and annotations to every Kubernetes resource through JSON Patch during deployment. These are not configurable and you do not need to manually add them to your manifests.
 
-**Automatically Added Labels:**
+**Automatically Added Labels (via JSON Patch):**
 
 * `tools.kie.org/created-by` — Always set to `kie-tools`
 * `tools.kie.org/part-of` — Set to the deployment's unique name
 
-**Automatically Added Annotations:**
+**Automatically Added Annotations (via JSON Patch):**
 
 * `tools.kie.org/workspace-id` — Links to workspace ID
 * `tools.kie.org/workspace-name` — Links to workspace name
@@ -256,6 +256,8 @@ The Dev Deployment service inside {CANVAS} automatically applies required labels
 * `tools.kie.org/deployment-access-url-template` — (Optional) If defined in option.json
 
 These labels and annotations enable {CANVAS} to discover, list, and manage Dev Deployments in the cluster.
+
+NOTE: Unlike the automatically added labels and annotations, the `metadata.name` and `metadata.namespace` fields are set through token interpolation in your manifest YAML. You must include these tokens (`${{ $.devDeployment.uniqueName }}` and `${{ $.devDeployment.kubernetes.namespace }}`) in your custom manifests to ensure proper deployment identification and management.
 
 
 ==== Configuring the JSON Patches (patches/)
