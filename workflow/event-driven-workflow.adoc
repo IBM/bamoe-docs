@@ -1070,7 +1070,121 @@ public void afterVariableChanged(ProcessVariableChangedEvent event) {
 }
 ----
 
+[#external-event-publisher]
+=== Publishing engine events to an external read model
 
+The `ProcessEventListener` and `UserTaskEventListener` interfaces described above run **inside** the engine transaction. They are the right choice for in-process reactions such as logging, validation, or sending a signal back to the engine.
 
+When the goal is to forward the same engine events to an external read model - for example an Elasticsearch index that powers a custom dashboard or that an internal consumer queries directly - use the `org.kie.kogito.event.EventPublisher` interface. The engine batches the events produced during each command and delivers the batch to every registered publisher when the command completes successfully. If the command throws an exception, the unit of work is aborted, the batch is discarded, and the publisher is not invoked, so a publisher never sees events from a failed engine command.
 
+The Kafka-based Process event add-on described earlier in this page is itself a registered `EventPublisher`. A custom publisher coexists with it transparently - both fire on every committed batch, and each writes to its own destination.
+
+==== The EventPublisher interface
+
+The interface is published in the package `org.kie.kogito.event` and declares two methods:
+
+[source,java]
+----
+public interface EventPublisher {
+    void publish(DataEvent<?> event);
+    void publish(Collection<DataEvent<?>> events);
+}
+----
+
+Implement both methods. Which one carries the work depends on the style you want:
+
+* *Granular style.* Write one downstream record per engine event. Put your logic in `publish(DataEvent<?>)`; from `publish(Collection<DataEvent<?>>)` loop over the batch and call `publish(DataEvent<?>)` for each event. Use this style when each engine event maps directly to a row or document in your destination.
+
+* *Aggregated style.* Group multiple events from the same engine commit into one downstream record. Put your logic in `publish(Collection<DataEvent<?>>)`. Use this style when you want, for example, one rich document per User Task transition that combines state, variable, and assignment events from the same commit.
+
+==== Auto-registration
+
+A class that implements `EventPublisher` and is marked as a CDI bean (Quarkus) or a Spring bean (Spring Boot) is discovered and registered by the engine automatically. No manual wiring:
+
+[source,java]
+----
+package org.acme;
+
+import java.util.Collection;
+
+import org.kie.kogito.event.DataEvent;
+import org.kie.kogito.event.EventPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped // Quarkus. Use @Component on Spring Boot.
+public class MyExternalPublisher implements EventPublisher {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyExternalPublisher.class);
+
+    @Override
+    public void publish(DataEvent<?> event) {
+        // per-event logic - write one record to the external destination
+        LOGGER.info("Engine event: type={}, data={}", event.getType(), event.getData());
+    }
+
+    @Override
+    public void publish(Collection<DataEvent<?>> events) {
+        // per-batch logic - granular publishers simply loop, aggregated publishers merge
+        events.forEach(this::publish);
+    }
+}
+----
+
+Multiple publishers can coexist, every registered `EventPublisher` receives every committed batch.
+
+==== Event types delivered to a publisher
+
+The same data event types that the Process event add-on publishes to Kafka are delivered to a custom publisher. The useful ones for an external read model for example are:
+
+[cols="1,2"]
+|===
+|*Event type* |*Sent when*
+
+|`ProcessInstanceStateDataEvent`
+|A Process Instance changes lifecycle state.
+
+|`ProcessInstanceVariableDataEvent`
+|A Process Instance variable is set or changed.
+
+|`UserTaskInstanceStateDataEvent`
+|A User Task changes state (Created, Ready, Reserved, Completed, and so on).
+
+|`UserTaskInstanceAssignmentDataEvent`
+|The set of users or groups assigned to a User Task changes.
+
+|`UserTaskInstanceVariableDataEvent`
+|A User Task input or output variable is set or changed.
+|===
+
+Each event exposes `getType()`, which returns the event type name as a string, and `getData()`, which returns the typed event body — for example `ProcessInstanceStateEventBody` or `UserTaskInstanceStateEventBody`. An implementation typically switches on `getType()` to dispatch to per-type logic.
+
+The `DataEvent` objects passed to a publisher are the same in-memory representations the Kafka add-on consumes. The Kafka add-on serializes them to the CloudEvents JSON format before publishing; a custom publisher is free to work with the typed event objects directly, or to apply its own serialization.
+
+==== Filtering non-transition state events
+
+During User Task initialization, the engine emits several `UserTaskInstanceStateDataEvent` instances where the old and new state are the same (for example, `Created` -> `Created`). The engine labels these non-transition events with `eventType = "Modify"` on the event body, so a publisher that is interested only in real lifecycle transitions can skip them with a single check:
+
+[source,java]
+----
+UserTaskInstanceStateEventBody body = ((UserTaskInstanceStateDataEvent) event).getData();
+if (!"Modify".equals(body.getEventType())) {
+    // real transition: Ready, Reserved, Completed, and so on
+    writeToDestination(body);
+}
+----
+
+The aggregated reference publisher in the example uses the same filter after merging the batch by `userTaskInstanceId`.
+
+==== Reference example
+
+For complete working examples demonstrating `EventPublisher` implementations, see the `process-event-listeners-quarkus` and `process-event-listeners-springboot` examples in the {PRODUCT_SHORT} examples repository xref:../getting-started/examples.adoc[Getting Started Example _Business Service_ projects].
+
+These examples include:
+
+* `ElasticsearchEventPublisher.java` - a granular per-event publisher implementation
+* `HumanTaskChangedPublisher.java` - an aggregated per-transition publisher implementation
+* A sample Hiring process that demonstrates both publishers writing to Elasticsearch
 
