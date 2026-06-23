@@ -25,37 +25,10 @@ After clicking Deploy, you will be presented with options for available types of
 .Deploy page
 image::tools/devDeployments/deploy-page.png[width=600px]
 
-Select your deployment option and and click Confirm to start the deployment. You can also configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp). For the list of available tokens, See xref:../reference-guide/deployment-tokens.adoc[Dev Deployment tokens].
+Select your deployment option and and click Confirm to start the deployment. You can also configure any available parameters displayed in the dialog (e.g., Docker image, container port, or enable/disable optional components like DMN Form Webapp). For the list of available tokens, see xref:#deployment_tokens[Dev Deployment tokens].
 
 
 //NOTE: When the workspace contains a `.bamoe/dev-deployments/` directory with valid options, {CANVAS} hides the default options and shows only workspace-defined options.
-
-== Post Deployment
-
-Upon confirmation of the Dev Deployment, the Dev Deployments dropdown will open, displaying all active deployments with status icons:
-
-* *Spinning icon* — Deployment in progress (resources being created, application starting up)
-* *Green checkmark* — Deployment is up and healthy
-* *Red circle* — Deployment encountered an error (health check failed)
-* *Warning triangle* — Deployment is down (no running replicas)
-
-.Dev Deployments dropdown demonstrating the deployment process
-image::tools/devDeployments/kubernetes-waiting-done.png[]
-
-Click on a deployment to open the deployed application in a new browser tab.
-
-After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
-
-NOTE: Dev Deployments are immutable; therefore, if an error occurs or a change is required, a new Dev Deployment must be created. They can easily be deleted from the Dev Deployments dropdown. 
-
-== Deleting Deployments
-
-To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click *Delete all* at the bottom of the dropdown.
-
-NOTE: Dev Deployments are immutable. When an error occurs or a change is required, create a new Dev Deployment.
-
-.Deleting Deployments
-image::tools/devDeployments/deleting-deployments.png[width=600px]
 
 
 [#deployment_options]
@@ -166,6 +139,51 @@ You can define custom deployment configurations using standard Kubernetes YAML m
 
 For more information, see xref:create-custom-dev-deployment.adoc#2[Customizing Dev Deployment options via user-defined YAMLs].
 
+[#deployment_tokens]
+== Dev Deployment tokens
+
+.Dev Deployment tokens list
+image::tools/devDeployments/tokens.png[width=720]
+
+Dev Deployment tokens are "variables" that can be used inside the parameters on the Dev Deployment modal. They are also used inside the resource YAMLs applied to the Kubernetes/OpenShift cluster (see the topic below). These tokens are then interpolated during the deployment, replacing their strings with a runtime value.
+
+For example,
+
+[source,javascript]
+----
+devDeployment: {
+  labels: {
+    createdBy: "tools.kie.org/created-by",
+    partOf: "tools.kie.org/part-of",
+ },
+  annotations: {
+    workspaceId: "tools.kie.org/workspace-id",
+    workspaceName: "tools.kie.org/workspace-name",
+ },
+  uniqueName: string,
+  uploadService: {
+    apiKey: string,
+ },
+  workspace: {
+    id: string,
+    name: string,
+ },
+  kubernetes: {
+    namespace: string,
+ },
+},
+----
+
+NOTE: Some tokens are pre-defined, and others are generated during runtime (like `uniqueName` and `uploadService.apiKey`).
+
+These tokens are referenced in the YAML resources using the following notation `${{ $.varPath.varName }}`. Here are some examples from the tokens above:
+
+* ${{ devDeployment.labels.createdBy }}
+* ${{ devDeployment.annotations.workspaceId }}
+* ${{ devDeployment.uniqueName }}
+* ${{ devDeployment.kubernetes.namespace }}
+
+
 == Resources requirements for Dev Deployment options 
 
 The Kubernetes/OpenShift resources created by a Dev Deployment must have specific metadata so that {CANVAS} can list and manage these resources. {CANVAS} applies this metadata using two different mechanisms:
@@ -195,7 +213,7 @@ These labels and annotations are NOT configurable and are automatically stamped 
 
 === Token-interpolated name and namespace
 
-The resource `name` and `namespace` are set through xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] in the manifest YAML:
+The resource `name` and `namespace` are set through xref:../create-custom-dev-deployment.adoc#token_interpolation[token interpolation] in the manifest YAML:
 
 [source,javascript]
 ----
@@ -223,6 +241,33 @@ metadata:
 
 NOTE: For custom Dev Deployments, you must include the `name` and `namespace` tokens in your manifest YAML to ensure proper deployment identification and management.
 
+== Post Deployment
+
+Upon confirmation of the Dev Deployment, the Dev Deployments dropdown will open, displaying all active deployments with status icons:
+
+* *Spinning icon* — Deployment in progress (resources being created, application starting up)
+* *Green checkmark* — Deployment is up and healthy
+* *Red circle* — Deployment encountered an error (health check failed)
+* *Warning triangle* — Deployment is down (no running replicas)
+
+.Dev Deployments dropdown demonstrating the deployment process
+image::tools/devDeployments/kubernetes-waiting-done.png[]
+
+Click on a deployment to open the deployed application in a new browser tab.
+
+After approximately 30 seconds, a green checkmark appears next to the Dev Deployment. When the deployment includes the `Include DMN Form Webapp` option, selecting an item in the list navigates to the webapp form for decisions. Otherwise, it navigates to the Swagger UI for the application.
+
+NOTE: Dev Deployments are immutable; therefore, if an error occurs or a change is required, a new Dev Deployment must be created. They can easily be deleted from the Dev Deployments dropdown. 
+
+== Deleting Deployments
+
+To delete a deployment, hover over it in the Dev Deployments dropdown and click the trash icon. To delete all deployments at once, click *Delete all* at the bottom of the dropdown.
+
+NOTE: Dev Deployments are immutable. When an error occurs or a change is required, create a new Dev Deployment.
+
+.Deleting Deployments
+image::tools/devDeployments/deleting-deployments.png[width=600px]
+
 
 == How Dev Deployments Work
 
@@ -246,6 +291,5 @@ When you click `Confirm`, {CANVAS} executes the following steps:
 ** The Quarkus Swagger UI, when deployed via Custom Image or Quarkus Blank App options without the DMN Form Webapp parameter.
 ** The DMN Form Webapp when the checkbox for it was checked during deployment creation.
 . Users interact with the Dev Deployment to test and validate decisions and processes. After completion, delete a deployment by hovering over it in the Dev Deployments list and clicking the trash icon.
-
 
 

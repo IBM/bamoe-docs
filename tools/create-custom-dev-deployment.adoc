@@ -143,7 +143,7 @@ image::tools/devDeployments/deployment-option-custom-image.png[width=720]
 Notice the `Docker Image` parameter; it must be changed to the custom image tag created (`quay.io/myUserName/myDevDeploymentImage:latest` in this example).
 
 Also, notice the `Command` parameter; Its value is the command executed inside the `$HOME_PATH/app` directory after the upload step is finished.
-In other words, after the xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] is finished, the resulting command executed on the container will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
+In other words, after the xref:#token_interpolation[token interpolation] is finished, the resulting command executed on the container will be `dev-deployment-upload-service && ./mvnw quarkus:dev`.
 
 This image does not provide the Maven binary globally, so it is not possible to call `mvn` directly. Instead, the image provides a Maven wrapper that can be called with `./mvnw` from the `$HOME_PATH` directory.
 
@@ -192,7 +192,7 @@ Business Service Project
 
 Place standard Kubernetes resource YAML files in the manifests/ directory. Each file must contain exactly one resource. Multi-document YAML files with `---` separators are not supported.
 
-You can include xref:../reference-guide/deployment-tokens.adoc#token_interpolation[token interpolation] expressions in manifests using the `${{ }}` format. {CANVAS} replaces these tokens with actual values at deploy time. Keep manifests free of tokens when possible. Use JSON Patches to inject dynamic values instead. This approach lets you use the same manifests for standalone Kubernetes deployments outside {CANVAS}.
+You can include xref:#token_interpolation[token interpolation] expressions in manifests using the `${{ }}` format. {CANVAS} replaces these tokens with actual values at deploy time. Keep manifests free of tokens when possible. Use JSON Patches to inject dynamic values instead. This approach lets you use the same manifests for standalone Kubernetes deployments outside {CANVAS}.
 
 .Deployment Manifest example:
 
@@ -621,8 +621,85 @@ For example (OpenShift, Quarkus with Swagger UI):
 ----
 https://${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}/${{ $.devDeployment.uniqueName }}/q/swagger-ui/
 ----
+[#token_interpolation]
+=== Token Interpolation
 
-==== Additional Tokens in URL Templates
+Tokens allow you to inject dynamic values into manifests at deployment time. Define a token using the `${{ }}` syntax and provide a JSON Path expression (following xref:https://datatracker.ietf.org/doc/html/rfc9535[RFC 9535]) that identifies the value to insert. 
+
+For example, `${{ $.devDeployment.uniqueName }}` resolves to the actual deployment name, such as `dev-deployment-abc123`.
+
+During deployment, {CANVAS} resolves each token and replaces it with the corresponding value.
+
+Tokens can contain other tokens (Nested tokens). {CANVAS} resolves them from inside out (maximum depth: 50).
+
+.Example of nested token resolution
+[source]
+----
+Original: 
+${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.ingress[0].host }}
+
+Step 1: Resolve inner token
+${{ $.devDeployment.uniqueName }} → dev-deployment-abc123
+
+Step 2: Resolve outer token
+${{ $.devDeployment.resources.Route['dev-deployment-abc123'].status.ingress[0].host }} 
+→ dev-deployment-abc123.apps.cluster.example.com
+----
+
+
+
+=== Available Tokens
+
+The following tokens are available in manifests and patches at deploy time:
+
+[cols="2,3"]
+|===
+|Token Path |Description
+
+|`$.devDeployment.uniqueName`
+|The unique name generated for this deployment (e.g., `dev-deployment-abc123`)
+
+|`$.devDeployment.workspace.id`
+|The ID of the current workspace
+
+|`$.devDeployment.workspace.name`
+|The name of the current workspace
+
+|`$.devDeployment.kubernetes.namespace`
+|The target Kubernetes namespace
+
+|`$.devDeployment.uploadService.apiKey`
+|The API key for the upload service
+
+|`$.devDeployment.labels.createdBy`
+|The label key for identifying resources created by {CANVAS} (`tools.kie.org/created-by`)
+
+|`$.devDeployment.labels.partOf`
+|The label key for grouping related resources (`tools.kie.org/part-of`)
+
+|`$.devDeployment.annotations.workspaceId`
+|The annotation key for the workspace ID (`tools.kie.org/workspace-id`)
+
+|`$.devDeployment.annotations.workspaceName`
+|The annotation key for the workspace name (`tools.kie.org/workspace-name`)
+
+|`$.config.baseImageUrl`
+|The base container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`)
+
+|`$.config.quarkusBlankAppImageUrl`
+|The Quarkus blank app container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_QUARKUS_BLANK_APP_IMAGE_URL`)
+
+|`$.config.dmnFormWebappImageUrl`
+|The DMN Form Webapp container image URL (from `KIE_SANDBOX_DEV_DEPLOYMENT_DMN_FORM_WEBAPP_IMAGE_URL`)
+
+|`$.config.imagePullPolicy`
+|The image pull policy (from `KIE_SANDBOX_DEV_DEPLOYMENT_IMAGE_PULL_POLICY`)
+
+|`$.parameters.<parameterId>`
+|The value of a user-configured parameter
+|===
+
+=== Additional Tokens in URL Templates
 
 After deployment, you can access properties of deployed Kubernetes resources using URL templates. This is useful when you need to reference dynamic values like hostnames.
 
@@ -652,20 +729,12 @@ ${{ $.devDeployment.resources.Route['${{ $.devDeployment.uniqueName }}'].status.
 ${{ $.devDeployment.resources.Ingress['${{ $.devDeployment.uniqueName }}'].status.loadBalancer.ingress[0].hostname }}
 ----
 
-=== Dev Deployment option with accelerators
+=== Bundling Custom Dev Deployments with Accelerators
 
-Accelerators are Git repositories containing project templates. Bundle your custom Dev Deployment options with accelerators to make them available automatically when developers apply the accelerator.
-Supported Accelerator types for DMN are:
+Bundle your custom Dev Deployment options with accelerators to make them available automatically when developers apply the accelerator.
 
-* Decisions (Quarkus + Maven)
-* Decisions (Springboot + Maven)
+For more information on configuring custom Accelerators, see xref:../installation/development-environment.adoc#custom-accelerators[Configuring custom Accelerators for your organization]. For more information on using accelerators see xref:../applying-accelerators.adoc[Using Accelerators].
 
-Supported Accelerator types for BPMN are:
-
-* Workflows (Quarkus + Maven)
-* Workflows (Springboot + Maven)
-
-For more information, see xref:../installation/development-environment.adoc#custom-accelerators[Configuring custom Accelerators for your organization].
 
 === Creating Dev Deployment options in a Business Service project
 
