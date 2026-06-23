@@ -309,6 +309,175 @@ You should have a secure protocol (HTTPS) available for the {CANVAS} installatio
 
 ////
 
+== Deploy {CANVAS} in an air-gapped OpenShift environment
+
+If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the application.
+
+=== Prerequisites
+
+* Access to an OpenShift cluster with the `oc` CLI tool installed and configured
+* Podman installed on your local machine
+* Access to pull images from `quay.io/bamoe`
+
+
+=== Procedure
+
+. Log in to the OpenShift cluster using the OpenShift CLI.
++
+[source,shell]
+----
+oc login <OPENSHIFT_API_URL>
+----
++
+. Select or create the target project where the {CANVAS} application will be deployed.
++
+[source,shell]
+----
+oc project bamoecanvas
+----
++
+. Retrieve the OpenShift internal image registry route.
++
+[source,shell]
+----
+oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'
+----
++
+If the default route is not enabled, enable it using the following command.
++
+[source,shell]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --type=merge -p '{"spec":{"defaultRoute":true}}'
+----
++
+. Set environment variables for the registry and namespace.
++
+[source,shell]
+----
+REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+NAMESPACE=$(oc project -q)
+----
++
+. Log in to the OpenShift image registry using Podman.
++
+[source,shell]
+----
+podman login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
+----
++
+. Pull the {CANVAS} images from the Quay repository.
++
+[source,shell,subs="attributes+"]
+----
+podman pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
+----
++
+. Tag the images for the OpenShift internal registry.
++
+[source,shell,subs="attributes+"]
+----
+podman tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
+podman tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
+podman tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
+----
++
+. Push the images to the OpenShift internal registry.
++
+[source,shell,subs="attributes+"]
+----
+podman push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
+----
++
+. Verify that the images are available in the internal registry.
++
+[source,shell]
+----
+oc get imagestreams
+----
++
+.Example output
+[source,shell]
+----
+NAME                IMAGE REPOSITORY                                                                                          TAGS             UPDATED
+canvas              default-route-openshift-image-registry.apps.example.com/bamoecanvas/canvas                                9.3.1-ibm-0006   2 minutes ago
+cors-proxy          default-route-openshift-image-registry.apps.example.com/bamoecanvas/cors-proxy                            9.3.1-ibm-0006   21 seconds ago
+extended-services   default-route-openshift-image-registry.apps.example.com/bamoecanvas/extended-services                     9.3.1-ibm-0006   About a minute ago
+----
++
+. Define environment variables for naming and labeling the resources.
++
+[source,shell]
+----
+export APP_PART_OF=bamoe-canvas-app
+export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
+export APP_NAME_CORS_PROXY=bamoe-cors-proxy
+export APP_NAME_BAMOE_CANVAS=bamoe-canvas
+----
++
+. Deploy {EXTENDED_SERVICES} and label its resources.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/extended-services:{IMAGE_VERSION} --name=$APP_NAME_EXTENDED_SERVICES
+
+oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
+oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
+----
++
+. Deploy the {CORS_PROXY} and label its resources.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --name=$APP_NAME_CORS_PROXY
+
+oc create route edge --service=$APP_NAME_CORS_PROXY
+oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
+----
++
+. Deploy the {CANVAS} application and configure environment variables to connect to the backend services.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/canvas:{IMAGE_VERSION} --name=$APP_NAME_BAMOE_CANVAS \
+  -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
+  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
+
+oc create route edge --service=$APP_NAME_BAMOE_CANVAS
+oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
+----
++
+. Retrieve the route details to access the deployed application.
++
+[source,shell]
+----
+oc get route
+----
++
+.Example output
+[source,shell]
+----
+NAME                      HOST/PORT                                                                PATH   SERVICES                  PORT        TERMINATION   WILDCARD
+bamoe-canvas              bamoe-canvas-bamoecanvas.apps.example.com                                       bamoe-canvas              8080-tcp    edge          None
+bamoe-cors-proxy          bamoe-cors-proxy-bamoecanvas.apps.example.com                                   bamoe-cors-proxy          8080-tcp    edge          None
+bamoe-extended-services   bamoe-extended-services-bamoecanvas.apps.example.com                            bamoe-extended-services   21345-tcp   edge          None
+----
+
+The {CANVAS} application is now accessible at the route URL shown in the output (for example, `https://bamoe-canvas-bamoecanvas.apps.example.com`).
+
+
 == Setting up the {MVN_REPO} locally
 
 If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
