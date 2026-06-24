@@ -119,7 +119,7 @@ v9-app/
 
 | Aspect | v8 | v9 |
 |--------|----|----|
-| **Parent POM** | KIE BOM | BAMOE BOM + Quarkus BOM |
+| **Parent POM** | KIE BOM | Quarkus BOM |
 | **Java Version** | 1.8 | 17 |
 | **Packaging** | kjar, war | jar |
 | **Rules Module** | kjar with kmodule.xml | jar with Rule Units |
@@ -157,27 +157,20 @@ mvn dependency:tree
 
 2. **Add Quarkus BOM:**
    ```xml
-   <dependency>
-       <groupId>io.quarkus.platform</groupId>
-       <artifactId>quarkus-bom</artifactId>
-       <version>3.20.3</version>
-       <type>pom</type>
-       <scope>import</scope>
-   </dependency>
-   ```
+    <dependencyManagement>
+        <dependencies>
+        <dependency>
+            <groupId>com.ibm.bamoe</groupId>
+            <artifactId>bamoe-quarkus-bom</artifactId>
+            <version>3.20.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        </dependencies>
+    </dependencyManagement>
+    ```
 
-3. **Add BAMOE BOM:**
-   ```xml
-   <dependency>
-       <groupId>com.ibm.bamoe</groupId>
-       <artifactId>bamoe-bom</artifactId>
-       <version>9.3.1-ibm-0006</version>
-       <type>pom</type>
-       <scope>import</scope>
-   </dependency>
-   ```
-
-4. **Manage internal module versions centrally:**
+3. **Manage internal module versions centrally:**
    ```xml
    <dependencyManagement>
        <dependencies>
@@ -841,7 +834,7 @@ import jakarta.validation.constraints.NotNull;
 
 ### Migration Checklist
 
-- [] Update parent POM to use BAMOE BOM and Quarkus BOM
+- [] Update parent POM to use Quarkus BOM
 - [] Change Java version from 1.8 to 17
 - [] Migrate data-model module (javax → jakarta)
 - [] Convert business-rules from kjar to jar with Rule Units

@@ -18,56 +18,88 @@ For more information on Maven BOM, see https://maven.apache.org/guides/introduct
 
 To manage dependency versions and configurations, include the appropriate BOM in the `dependencyManagement` section of your _Business Service_ project's POM.
 
-IMPORTANT: The order of BOM imports determines the resolution of dependencies.
+IMPORTANT: Import only the BOM that matches framework of your _Business Service_ project.
 
-=== {PRODUCT_SHORT} BOM
-
-[source,xml,subs="attributes+"]
-----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>com.ibm.bamoe</groupId>
-      <artifactId>bamoe-bom</artifactId>
-      <version>{BOM_VERSION}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-----
-
-=== Spring Boot BOM
+=== Quarkus BOM (Maven)
 
 [source,xml,subs="attributes+"]
 ----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <version>{SPRING_VERSION_94}</version>
-      <optional>true</optional>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.ibm.bamoe</groupId>
+        <artifactId>bamoe-quarkus-bom</artifactId>
+        <version>{QUARKUS_VERSION_95}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 ----
 
-=== Quarkus BOM
+=== Spring Boot BOM (Maven)
 
 [source,xml,subs="attributes+"]
 ----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>io.quarkus.platform</groupId>
-      <artifactId>quarkus-bom</artifactId>
-      <version>{QUARKUS_VERSION_94}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.ibm.bamoe</groupId>
+        <artifactId>bamoe-spring-boot-bom</artifactId>
+        <version>{SPRING_VERSION_95}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+----
+
+=== Embedded mode BOM (Maven)
+
+[source,xml,subs="attributes+"]
+----
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.ibm.bamoe</groupId>
+        <artifactId>bamoe-embedded-bom</artifactId>
+        <version>{EMBEDDED_VERSION_95}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+----
+
+=== Quarkus BOM (Gradle)
+
+[source,java,subs="attributes+"]
+----
+dependencies {
+  /* Quarkus BOM */
+  implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:{QUARKUS_VERSION_95}")
+
+  /* The BAMOE BOM manages all dependencies required to create */
+  /* Business Services — including Apache KIE, Drools, jBPM, and Kogito */
+  implementation platform("com.ibm.bamoe:bamoe-quarkus-bom:{QUARKUS_VERSION_95}")
+
+  ...
+}
+----
+
+=== Spring Boot BOM (Gradle)
+
+[source,java,subs="attributes+"]
+----
+dependencies {
+  /* Spring Boot BOM */
+  implementation enforcedPlatform("org.springframework.boot:spring-boot-dependencies:{SPRING_VERSION_95}")
+
+  /* The BAMOE BOM manages all dependencies required to create */
+  /* Business Services — including Apache KIE, Drools, jBPM, and Kogito */
+  implementation platform("com.ibm.bamoe:bamoe-spring-boot-bom:{SPRING_VERSION_95}")
+...
+}
 ----
 
 == Building Business Services (Quarkus)
