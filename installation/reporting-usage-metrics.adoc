@@ -1,32 +1,54 @@
-= Reporting usage metrics with IBM Usage Metering Service
+= Collecting and sending metrics to IBM Software Central
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-Reporting usage metrics with IBM Usage Metering Service
+To maintain compliance with IBM licensing terms and conditions, you must collect and send license and usage metrics for {PRODUCT} are to IBM Software Central (SWC). The tool you use will depend on your deployment environment:
 
-Usage metrics of {PRODUCT} are collected with IBM® Usage Metering Service (UMS) and sent to IBM Software Central (SWC). UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
+ * IBM License Service (ILS) and IBM® Usage Metering Service (UMS) are used for deployments in a containerized environment. UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
+ * IBM License Metric Tool (ILMT) is used for deployments in a non-containerized environment.
 
 It is your responsibility to maintain compliance with the licensing terms and conditions. However, to audit the use of IBM software, UMS is used to capture business value metrics and send, automatically and periodically, compliance data for auditing purposes to SWC.
 
+== Working in a containerized environment
+The `includeSWCUpload` annotation is included in all BAMOE Helm chart subcharts, referenced when you install the Dev Environment (see xref:development-environment.adoc#dev-env-helm[Installing Dev Environment Helm chart]) and your Runtime Environment (see xref:runtime-environment.adoc#runtime-env-helm[Installing Runtime Environment Helm chart]). When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central, where they can be visualized in Amplitude dashboards.
+
+// can customer access the Amplitude dashboard?
+
+The following describes the process for an installation in a containerized environment (Kubernetes or OpenShift):
+
+. Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
+
+. Configure ILS (IBM License Service):
+   - Upgrade to ILS version 4.x or higher (see [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
+   - Create an OpenShift secret with the entitlement key: `oc create secret`
+   - Configure ILS with the entitlement key: `oc apply`
+
+. Deploy BAMOE:
+   - Install BAMOE using Helm charts (the `includeSWCUpload: true` annotation is automatically included from version 9.5.0 onwards)
+   - For customer-created Business Services, define the required annotations in version-controlled deployment YAML used by GitOps or CI/CD process
+
+You must obtain and configure an IBM Entitlement Key from IBM Container Library
+
+VPC count data is uploaded to Software Central once per day (configurable)
+
 To disable UMS, when it is enabled
 
-. Update the {PRODUCT_SHORT} CR by setting shared_configuration.sc_enable_usage_metering to "false".
-. When the change is complete, the operator picks up the change in the next reconcile and sets the enable flag in the connection point (softwareCentral.enable: false).
-. The operator also deletes the cron jobs that are defined to send metrics to SWC.
-
 To enable UMS, when it is disabled
-
-. Update the {PRODUCT_SHORT} CR by setting shared_configuration.sc_enable_usage_metering to "true".
-. When the change is complete, the CP4BA operator picks up the change in the next reconcile and sets the enable flag in the connection point (softwareCentral.enable: true).
-. The operator starts the cron jobs that are defined to send metrics to SWC.
 
 By default, usage metering is enabled and {PRODUCT_SHORT} sends usage metrics data to UMS daily.
 
 A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
 
-The following identifiers are used for {PRODUCT_SHORT}. The identifier or productId is used to correlate data for each capability based on whether it is a non-production or production deployment license type.
+== Working in a non-containerized environment
+This capability enables metrics upload through configuration of ILMT (IBM License Metric Tool). To activate this you must upgrade to ILMT version 9.2.43 or higher,and configure their entitlement key in the ILMT console to enable upload of contractual metrics collected via SWID tags and disconnected scanners.
+
+
+- **Metrics upload:** VPC count data is uploaded to Software Central once per day (configurable)
 
 ////
+
+The following identifiers are used for {PRODUCT_SHORT}. The identifier or productId is used to correlate data for each capability based on whether it is a non-production or production deployment license type.
+
 Table 1. Listing of the identifiers for each CP4BA capability
 Capability
 	

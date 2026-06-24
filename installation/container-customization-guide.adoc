@@ -1,7 +1,7 @@
-= Customizing BAMOE container images
+= Extending BAMOE container base images
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
-In this section you will find all the information needed to implement the supported customization scenarios for the {PRODUCT_SHORT} container images. The following lists the main reasons to customize container images: 
+In this section you will find all the information needed to implement the supported customization scenarios for the {PRODUCT_SHORT} container base images. This is possible by overriding the base operating system images which enables you to maintain the functionality and compatibility with {PRODUCT_SHORT} releases. The following lists the main reasons to extend the container base images: 
 
 * Security Compliance, to update for specific OS versions
 * Vulnerability Management, to quickly patch vulnerabilities
@@ -10,12 +10,10 @@ In this section you will find all the information needed to implement the suppor
 * Performance Optimization, to use optimized base images for specific environments
 * Regional Requirements, to meet specific regulatory or compliance requirements
 
-Customization is made possible by overriding the base operating system images. This enables you to maintain the functionality and compatibility with {PRODUCT_SHORT} releases. 
-
 [#introducing-container-images]
 == Introducing {PRODUCT_SHORT} container images
 
-You can customize any of the containers delivered in the {PRODUCT_SHORT} distribution. The following table lists the container images that can be customized, along with their descriptions, whether they are delivered through helm chart, and type.
+You can extend any of the base images for tge containers delivered in the {PRODUCT_SHORT} distribution. The following table lists the container images that can be extended, along with their descriptions, whether they are delivered through Helm chart, and type.
 
 [cols="1,1,1,1"]
 |===
@@ -25,7 +23,7 @@ You can customize any of the containers delivered in the {PRODUCT_SHORT} distrib
 |*Type*
 
 |Canvas
-|Web-based business automation canvas application
+|Web-based business automation Canvas application
 |Dev environment
 |httpd based
 
@@ -89,10 +87,10 @@ Http based images use Apache HTTP Server (httpd) as their web server to serve st
 
 When overriding httpd based images, you must:
 
-* install the httpd package in the new base OS
-* copy httpd configuration files from the source image
-* recreate proper file permissions for OpenShift (group 0 with g=u permissions)
-* configure httpd to listen on non-privileged ports (>1024)
+. Install the httpd package in the new base OS.
+. Copy httpd configuration files from the source image.
+. Recreate proper file permissions for OpenShift (group 0 with g=u permissions).
+. Configure httpd to listen on non-privileged ports (>1024).
 
 === Node.js based images
 

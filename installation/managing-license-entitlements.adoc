@@ -81,7 +81,7 @@ spec:
 ----
 
 
-== Using IBM License Metric Tool (ILMT) for non-containerized _Business Service_ deployments
+== Using IBM License Metric Tool (ILMT) for non-containerized Business Services deployments
 IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) license terms. ILMT can calculate VPC consumption only when software identification tags exist and are activated by the customer. 
 
 See the section, https://www.ibm.com/support/pages/downloading-ibm-license-metric-tool-92[License Metric Tool with disconnected scanners to install on Linux or Windows] on the page, for guidelines on how to obtain and install ILMT.
@@ -104,13 +104,7 @@ If you are developing traditional Java applications, non-containerized Quarkus o
 
 If you developed your _Business Service_ using the project Accelerators the required libraries are automatically included in your application (see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Introducing Accelerators])
 
-
-
-=== Using and Configuring {PRODUCT_SHORT} ILMT Libraries
-
 License Metric Tool automatically detects the following {PRODUCT_LONG} version {VERSION} release chargeable components that are part of the product:
-
-
 
 The respective libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
 If the SWIDTAG_DIR is not set, the library defaults to the home directory of the hosting application.
@@ -132,28 +126,42 @@ Following is an example of the swidtag file content:
 
 
 
-== Using IBM License Service (ILS) for containerized deployments
+== Using IBM License Service (ILS) for containerized Business Services deployments
+You can define license tracking annotations in your version-controlled deployment YAML file under `spec.template.metadata.annotations`:
 
+For {PRODUCT_DM}:
 
-=== Tracking _Business Service_ licenses
-Once you have created your _Business Service_ using {PRODUCT_SHORT} you must also ensure that license tracking is enabled before deployment. You can do this by updating the `src/main/resources/application.properties` file by adding the following properties for {PRODUCT_DM}:
-
-[source,properties]
+[source,yaml]
 ----
-# OpenShift - License Service Annotations
-openshift.quarkus.openshift.annotations.productID="46b14c7f2f894218a7879b3f6416024f"
-openshift.quarkus.openshift.annotations.productName="IBM Decision Manager Open Edition"
-openshift.quarkus.openshift.annotations.productMetric="VIRTUAL_PROCESSOR_CORE"
-openshift.quarkus.openshift.annotations.productChargedContainers="All"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-business-service
+spec:
+  template:
+    metadata:
+      annotations:
+        productName: "IBM Decision Manager Open Edition"
+        productID: "46b14c7f2f894218a7879b3f6416024f"
+        productVersion: "9.5.0"
+        productMetric: "VIRTUAL_PROCESSOR_CORE"
 ----
 
-Or the following properties for {PRODUCT_PAM}, see xref:../installation/licensing.adoc[Licensing Overview]:
 
-[source,properties]
+Or the following properties for {PRODUCT_PAM}:
+
+[source,yaml]
 ----
-# OpenShift - License Service Annotations
-openshift.quarkus.openshift.annotations.productID="72984f114b54496a8a44be139154a988"
-openshift.quarkus.openshift.annotations.productName="IBM Process Automation Manager Open Edition"
-openshift.quarkus.openshift.annotations.productMetric="VIRTUAL_PROCESSOR_CORE"
-openshift.quarkus.openshift.annotations.productChargedContainers="All"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-business-service
+spec:
+  template:
+    metadata:
+      annotations:
+        productName: "IBM Process Automation Manager Open Edition"
+        productID: "72984f114b54496a8a44be139154a988"
+        productVersion: "9.5.0"
+        productMetric: "VIRTUAL_PROCESSOR_CORE"
 ----
