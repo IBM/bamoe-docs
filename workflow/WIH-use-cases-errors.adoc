@@ -1,0 +1,124 @@
+= WorkItemHandler use cases and error handling
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+This section provides examples of how you can use the WorkItemHandler in various scenarios, including error handling and edge cases.
+
+== BAMOE REST WorkItemHandler examples
+
+BAMOE provides examples to demonstrate BAMOE REST WorkItemHandler capabilities. These examples are part of the official BAMOE Examples repository and are included in the BAMOE distribution zip file under `/examples` directory. For more information, see the https://github.ibm.com/dba/bamoe-examples[BAMOE Examples repository].
+
+The https://github.ibm.com/dba/bamoe-examples/tree/main/process-rest-workitem-quarkus[process-rest-workitem-quarkus] is an already existing example enhanced with new capabilities. The example demonstrates BAMOE REST WorkItemHandler used with Quarkus. The example includes the following elements:
+
+- authentication strategies (`none`, `propagated`, `configured`),
+- token propagation in service-to-service communication,
+- static token configuration for system-triggered processes,
+- Docker Compose deployment scenarios,
+- Keycloak integration for OIDC authentication.
+
+The https://github.ibm.com/dba/bamoe-examples/tree/main/process-rest-workitem-springboot[process-rest-workitem-springboot] is a new example for BAMOE 9.x. The example demonstrates the BAMOE REST WorkItemHandler in Spring Boot runtime. The example includes the following elements:
+
+- Spring Security integration,
+- OAuth2 Resource Server configuration,
+- Spring Boot externalized configuration,
+- Application.yml configuration patterns.
+
+== BAMOE REST WorkItemHandler use cases
+
+See the following use cases to understand how to use the WorkItemHandler in your workflows.
+
+=== Use Case 1: User-Initiated REST Call with Token Propagation
+
+**Scenario:** Hiring workflow calls ERP system using user's authentication token
+
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
+
+Use the following configuration:
+
+[source,xml]
+----
+- Method: POST
+- Url: https://erp.company.com/api/employees
+- AccessTokenAcquisitionStrategy: propagated
+- HEADER_Content-Type: application/json
+- ContentData: #{employeeData}
+----
+
+=== Use Case 2: System-Triggered REST Call with Configured Token
+
+**Scenario:** Scheduled workflow calls inventory system using pre-configured token.
+
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
+
+Use the following configuration:
+
+[source,xml]
+----
+- Method: GET
+- Url: https://inventory.company.com/api/stock
+- AccessTokenAcquisitionStrategy: configured
+- RestServiceCallTaskId: CheckInventory
+- HEADER_Content-Type: application/json
+----
+
+Use the following environment variable configuration in your `application.properties`:
+
+[source,xml]
+----
+kogito.processes.inventory-check.CheckInventory.access_token=${INVENTORY_TOKEN}
+----
+
+=== Use Case 3: Public API Call Without Authentication
+
+**Scenario:** Workflow fetches weather data from public API
+
+Open BPMN Editor, locate REST Service Call Task in the task palette, drag it to the canvas and connect it to your workflow sequence.
+
+Use the following configuration:
+
+[source,xml]
+----
+- Method: GET
+- Url: https://api.weather.com/v1/forecast?city=#{city}
+- AccessTokenAcquisitionStrategy: none
+- QUERY_units: metric
+----
+
+== BAMOE REST WorkItemHandler error handling
+
+BAMOE REST WorkItemHandler provides error handling across multiple failure scenarios. See the following table for reference.
+
+[cols="5*", options="header"]
+|===
+| **Type of error** | **HTTP Status Code** | **Handling** | **Log Message** | **Process Behavior**
+
+| 4xx Client Errors | 400 Bad Request | `WorkItemExecutionException` thrown a|
+[source,xml]
+----
+REST call failed with 400 Bad Request. 
+URL: https://api.example.com/users. 
+Request body: {...}. 
+Response: {...} 
+---- | Task fails, can be caught by Error Boundary Event
+| 5xx Server Errors | 500 Internal Server Error | `WorkItemExecutionException` thrown a|
+[source,xml]
+----
+REST call failed with 500 Internal Server Error. 
+URL: https://api.example.com/users. 
+Timestamp: 2026-06-02T08:00:00Z
+---- | Task fails, can be caught by Error Boundary Event
+| Authentication Error | 401 Unauthorized | `WorkItemExecutionException` thrown a|
+[source,xml]
+----
+REST call failed with 401 Unauthorized. 
+Authentication method: configured. 
+RestServiceCallTaskId: ErpIntegration_v2
+---- | Task fails, check token configuration
+| Authentication Error | 403 Forbidden | `WorkItemExecutionException` thrown a|
+[source,xml]
+----
+REST call failed with 403 Forbidden. 
+Endpoint: https://api.example.com/admin. 
+Operation: POST
+---- | Task fails, check user permissions
+|===
