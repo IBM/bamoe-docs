@@ -83,7 +83,9 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
 
 [#business-service-container-deployment]
 == Containerized Business Services deployment using IBM License Service (ILS)
-To ensure correct license tracking of your Business Services deployed as containers in a Kubernetes or OpenShift environment,  you define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`:
+Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[procedure to install IBM License Service] for stand-alone software.
+
+You can then use ILS to track licenses in your Business Services deployed as containers in a Kubernetes or OpenShift environment. To activate this you must define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`:
 
 For {PRODUCT_DM}:
 
@@ -168,7 +170,7 @@ annotations:
 ----
 
 === Enforcing licensing policy
-If you want to ensure that license tracking annotations are enforced in all deployments, are not removed or modified by an unauthorized person and an audit trail is maintained, you can implement external policy enforcement in either of the two following ways: 
+If you want to enforce license tracking annotations in all deployments, ensure they are not removed or modified by an unauthorized person and maintain an audit trail, you can implement external policy enforcement in one of the following ways: 
 
 * Using Kyverno (Kubernetes-native) which works across all Kubernetes distributions including OpenShift, validates deployments at cluster level and rejects deployments that don't have required annotations. 
 * Using the native OpenShift capability: OpenShift Admission Policies (available in OpenShift 4.17+), integrated with OpenShift admission control system. 
