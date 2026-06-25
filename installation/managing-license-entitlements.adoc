@@ -4,14 +4,50 @@ include::../styles/images.adoc[]
 
 This section includes information on managing your {PRODUCT_SHORT} licenses for containerized and non-containerized deployments of {PRODUCT_SHORT} components and _Business Services_.
 
-== Using IBM License Service (ILS) for {PRODUCT_SHORT} component containers
+== For {PRODUCT_SHORT} component containers with IBM License Service (ILS)
 Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[procedure to install IBM License Service] for stand-alone software.
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
 When you install a component via the product specific Dev and Runtime Helm charts that correspond to your IBM license ({PRODUCT_DM} or {PRODUCT_PAM}), preconfigured license annotations are included in the global values. These annotations are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. The merge uses the Helm merge function and happens in each deployment template. The `chargedProductAnnotations` (containing License Manager metadata) are combined with `podAnnotations` (any custom annotations). The template expressions are evaluated using the `tpl` function, which replaces token references with actual values from the global configuration.
 
-If you choose not to install via these Helm charts, the license tracking annotations must be manually added to each of the {PRODUCT_SHORT} containers after installation. To do this you can run the following commands from where the containers are installed and depending on your product and component container.
+If you choose not to install via these Helm charts, the license tracking annotations must be manually added to the container deployment YAML or to each of the {PRODUCT_SHORT} containers after installation. 
+
+For {PRODUCT_DM}:
+
+[source,yaml,subs="attributes+"]
+----
+spec:
+  template:
+    metadata:
+      annotations:
+        productID: "46b14c7f2f894218a7879b3f6416024f"
+        productName: "IBM Decision Manager Open Edition"
+        productMetric: "VIRTUAL_PROCESSOR_CORE"
+        productChartedContainers: "All"
+        includeSWCUpload: true
+----
+
+
+Or the following for {PRODUCT_PAM}:
+
+[source,yaml,subs="attributes+"]
+----
+spec:
+  template:
+    metadata:
+      annotations:
+        productID: "72984f114b54496a8a44be139154a988"
+        productName: "IBM Process Automation Manager Open Edition"
+        productMetric: "VIRTUAL_PROCESSOR_CORE"
+        productChargedContainers:"All"
+        includeSWCUpload: true
+
+----
+
+Where `includeSWCUpload` indicates whether the Virtual Processor Core count is uploaded to Software Central automatically or manually (see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central])
+
+To patch the containers after installation, you can run the following commands from where they are installed, substituting your product offering and container resource name (`bamoe-canvas_deployment_name`).
 
 * OpenShift - {PRODUCT_DM}
 +
@@ -21,7 +57,6 @@ oc patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
   
-
 * Kubernetes - {PRODUCT_DM}
 +
 [source,shell]
@@ -38,7 +73,6 @@ oc patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
   
-
 * Kubernetes - {PRODUCT_PAM}
 +
 [source,shell]
@@ -47,42 +81,8 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
 
-Where `bamoe-canvas_deployment_name` is the name of the Deployment resource created when you installed {CANVAS}.
-
-
-* Deployment using `yaml` resources - {PRODUCT_DM}
-+
-[source,yaml]
-----
-spec:
-  ...
-  template:
-    metadata:
-      annotations:    
-        productID: "46b14c7f2f894218a7879b3f6416024f"
-        productName: "IBM Decision Manager Open Edition"
-        productMetric: "VIRTUAL_PROCESSOR_CORE"
-        productChargedContainers: "All"
-----
-
-* Deployment using `yaml` resources - {PRODUCT_PAM}
-+
-[source,yaml]
-----
-spec:
-  ...
-  template:
-    metadata:
-      annotations:    
-        productID: "72984f114b54496a8a44be139154a988"
-        productName: "IBM Process Automation Manager Open Edition"
-        productMetric: "VIRTUAL_PROCESSOR_CORE"
-        productChargedContainers: "All"
-----
-
-
-== Using IBM License Metric Tool (ILMT) for non-containerized Business Services deployments
-IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) license terms. ILMT can calculate VPC consumption only when software identification tags exist and are activated by the customer. 
+== For non-containerized Business Services deployments with IBM License Metric Tool (ILMT) 
+IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) license terms. It calculates VPC consumption when software identification tags exist and are activated by the customer. 
 
 See the section, https://www.ibm.com/support/pages/downloading-ibm-license-metric-tool-92[License Metric Tool with disconnected scanners to install on Linux or Windows] on the page, for guidelines on how to obtain and install ILMT.
 
@@ -102,11 +102,9 @@ If you are developing traditional Java applications, non-containerized Quarkus o
  `com.ibm.bamoe:ilmt-compliance-java-pamoe` (Java)
 |===
 
-If you developed your _Business Service_ using the project Accelerators the required libraries are automatically included in your application (see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Introducing Accelerators])
+If you developed your _Business Service_ using the project Accelerators the required libraries are part of your project POM and will need to be uncommented manually for non-containerized deployments (see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Introducing Accelerators]). For the full Maven dependency see xref:../reference-guide/maven-repository-libraries.adoc[Reference → {PRODUCT_SHORT} Maven repository libraries]
 
-License Metric Tool automatically detects the following {PRODUCT_LONG} version {VERSION} release chargeable components that are part of the product:
-
-The respective libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
+These libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
 If the SWIDTAG_DIR is not set, the library defaults to the home directory of the hosting application.
 
 It is important to note that if the SWIDTAG_DIR environment variable contains invalid content or an invalid path, the hosting application fails to deploy.
@@ -124,14 +122,12 @@ Following is an example of the swidtag file content:
 </SoftwareIdentity>
 ----
 
-
-
 == Using IBM License Service (ILS) for containerized Business Services deployments
-You can define license tracking annotations in your version-controlled deployment YAML file under `spec.template.metadata.annotations`:
+To ensure correct license tracking of your Business Services deployed as containers in a Kubernetes or OpenShift environment,  you define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`:
 
 For {PRODUCT_DM}:
 
-[source,yaml]
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: apps/v1
 kind: Deployment
@@ -143,14 +139,14 @@ spec:
       annotations:
         productName: "IBM Decision Manager Open Edition"
         productID: "46b14c7f2f894218a7879b3f6416024f"
-        productVersion: "9.5.0"
+        productVersion: "{VERSION}"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
+        includeSWCUpload: true
 ----
 
+Or the following for {PRODUCT_PAM}:
 
-Or the following properties for {PRODUCT_PAM}:
-
-[source,yaml]
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: apps/v1
 kind: Deployment
@@ -162,6 +158,88 @@ spec:
       annotations:
         productName: "IBM Process Automation Manager Open Edition"
         productID: "72984f114b54496a8a44be139154a988"
+        productVersion: "{VERSION}"
+        productMetric: "VIRTUAL_PROCESSOR_CORE"
+        includeSWCUpload: true
+----
+
+Where `includeSWCUpload` indicates whether the Virtual Processor Core count is uploaded to Software Central automatically or manually (see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central])
+
+=== Patching previously deployed _Business Services_ containers
+If you have _Business Services_ that are deployed in a production environment you can add the required annotations using kubectl patch, in the following way:
+
+[source,bash]
+----
+kubectl patch deployment <deployment-name> -p '
+spec:
+  template:
+    metadata:
+      annotations:
+        productName: "<product-name>"
+        productID: "<product-id>"
         productVersion: "9.5.0"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
 ----
+
+=== Validating annotations
+Once you have included required annotations either before deployment or by patching, you can verify that all is correct using the following command:
+
+[source, bash]
+----
+kubectl get deployment <name> -o yaml
+----
+
+The following example shows a command to verify and filter the "annotations" part of the YAML file:
+
+[source, bash]
+----
+kubectl get deployment <deployment-name> -n <namespace> -o yaml | grep -A 5 "annotations:"
+----
+
+And will result in the following type of output:
+
+[source, yaml]
+----
+annotations:
+  productName: "<product-name>"
+  productID: "<product-id>"
+  productVersion: "9.5.0"
+  productMetric: "VIRTUAL_PROCESSOR_CORE"
+----
+
+=== Enforcing licensing policy
+If you want to ensure that license tracking annotations are enforced in all deployments, are not removed or modified by an unauthorized person and an audit trail is maintained, you can implement external policy enforcement in either of the two following ways: 
+
+* Using Kyverno (Kubernetes-native) which works across all Kubernetes distributions including OpenShift, validates deployments at cluster level and rejects deployments that don't have required annotations. 
+* Using the native OpenShift capability: OpenShift Admission Policies (available in OpenShift 4.17+), integrated with OpenShift admission control system. 
+
+. Install Kyverno on Kubernetes/OpenShift cluster.
+. Create namespace naming convention to isolate BAMOE deployments into dedicated namespaces (e.g., `bamoe-production`, `bamoe-dev`)
+. Choose a scoping strategy:
+** Label-based (Opt-in): Label specific namespaces with `audit-scope: "true"`
+** Pattern-based (Automatic): Use wildcard patterns to match namespaces (e.g., `bamoe-*`)
+** Exclude system namespaces to prevent disruption (`kube-system`, `kube-public`, `openshift-*`, etc.)
+. Define Kyverno policy to validate required annotations in `spec.template.metadata.annotations`
+. Test policy in audit mode in non-production environments
+. Switch to enforce mode after validation
+. Monitor policy reports
+
+The following example shows pattern-based namespace scoping:
+
+[source,yaml]
+----
+match:
+  any:
+    - resources:
+        namespaces:
+          - "bamoe-*"  # Automatically applies to bamoe-production, bamoe-dev, etc.
+----
+
+The following example shows how to verify policy enforcement using Kyverno:
+
+[source,bash]
+----
+kubectl get clusterpolicy -A
+kubectl describe clusterpolicy <policy-name>
+----
+
