@@ -4,7 +4,7 @@ include::../styles/images.adoc[]
 
 This section includes information on managing your {PRODUCT_SHORT} licenses for containerized and non-containerized deployments of {PRODUCT_SHORT} components and _Business Services_.
 
-== For {PRODUCT_SHORT} component containers with IBM License Service (ILS)
+== {PRODUCT_SHORT} component containers with IBM License Service (ILS)
 Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[procedure to install IBM License Service] for stand-alone software.
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
@@ -81,48 +81,8 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
 
-== For non-containerized Business Services deployments with IBM License Metric Tool (ILMT) 
-IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) license terms. It calculates VPC consumption when software identification tags exist and are activated by the customer. 
-
-See the section, https://www.ibm.com/support/pages/downloading-ibm-license-metric-tool-92[License Metric Tool with disconnected scanners to install on Linux or Windows] on the page, for guidelines on how to obtain and install ILMT.
-
-If you are developing traditional Java applications, non-containerized Quarkus or Spring Boot applications or using embedded mode, the following libraries must be included in your application:
-
-|=== 
-|Chargeable Software Components| Libraries
-
-|{PRODUCT_DM}
-|`com.ibm.bamoe:ilmt-compliance-quarkus-dmoe` (Quarkus) _or_
- `com.ibm.bamoe:ilmt-compliance-spring-boot-dmoe` (Spring Boot) _or_
- `com.ibm.bamoe:ilmt-compliance-java-dmoe` (Java)
-
-|{PRODUCT_PAM} 
-|`com.ibm.bamoe:ilmt-compliance-quarkus-pamoe` (Quarkus) _or_
- `com.ibm.bamoe:ilmt-compliance-spring-boot-pamoe` (Spring Boot) _or_
- `com.ibm.bamoe:ilmt-compliance-java-pamoe` (Java)
-|===
-
-If you developed your _Business Service_ using the project Accelerators the required libraries are part of your project POM and will need to be uncommented manually for non-containerized deployments (see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Introducing Accelerators]). For the full Maven dependency see xref:../reference-guide/maven-repository-libraries.adoc[Reference → {PRODUCT_SHORT} Maven repository libraries]
-
-These libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
-If the SWIDTAG_DIR is not set, the library defaults to the home directory of the hosting application.
-
-It is important to note that if the SWIDTAG_DIR environment variable contains invalid content or an invalid path, the hosting application fails to deploy.
-
-The swidtag file is an XML file content based on ISO/IEC 19770-2:2015 specification. 
-Following is an example of the swidtag file content:
-
-[source,xml]
-----
-<?xml version="1.0" encoding="UTF-8"?>
-<SoftwareIdentity name="IBM Decision Manager Open Edition" tagId="ibm.com-3d9d28f19d0f45fda113c07fb481e3ea-9.0.0" version="9.0.0" versionScheme="multipartnumeric" xml:lang="en" xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.iso.org/iso/19770/-2/2015-current/schema.xsd schema.xsd">
-    <Meta persistentId="3d9d28f19d0f45fda113c07fb481e3ea"/>
-    <Meta generator="4-1-20210113"/>
-    <Entity name="IBM" regid="ibm.com" role="licensor tagCreator softwareCreator"/>
-</SoftwareIdentity>
-----
-
-== Using IBM License Service (ILS) for containerized Business Services deployments
+[#business-service-container-deployment]
+== Containerized Business Services deployment using IBM License Service (ILS)
 To ensure correct license tracking of your Business Services deployed as containers in a Kubernetes or OpenShift environment,  you define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`:
 
 For {PRODUCT_DM}:
@@ -241,5 +201,46 @@ The following example shows how to verify policy enforcement using Kyverno:
 ----
 kubectl get clusterpolicy -A
 kubectl describe clusterpolicy <policy-name>
+----
+
+== Non-containerized Business Services deployment using IBM License Metric Tool (ILMT) 
+IBM® License Metric Tool generates reports to help you maintain compliance with your Virtual Processor Core (VPC) license terms. It calculates VPC consumption when software identification tags exist and are activated by the customer. 
+
+See the section, https://www.ibm.com/support/pages/downloading-ibm-license-metric-tool-92[License Metric Tool with disconnected scanners to install on Linux or Windows] on the page, for guidelines on how to obtain and install ILMT.
+
+If you are developing traditional Java applications, non-containerized Quarkus or Spring Boot applications or using embedded mode, the following libraries must be included in your application:
+
+|=== 
+|Chargeable Software Components| Libraries
+
+|{PRODUCT_DM}
+|`com.ibm.bamoe:ilmt-compliance-quarkus-dmoe` (Quarkus) _or_
+ `com.ibm.bamoe:ilmt-compliance-spring-boot-dmoe` (Spring Boot) _or_
+ `com.ibm.bamoe:ilmt-compliance-java-dmoe` (Java)
+
+|{PRODUCT_PAM} 
+|`com.ibm.bamoe:ilmt-compliance-quarkus-pamoe` (Quarkus) _or_
+ `com.ibm.bamoe:ilmt-compliance-spring-boot-pamoe` (Spring Boot) _or_
+ `com.ibm.bamoe:ilmt-compliance-java-pamoe` (Java)
+|===
+
+If you developed your _Business Service_ using the project Accelerators the required libraries are part of your project POM and will need to be uncommented manually for non-containerized deployments (see xref:../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Introducing Accelerators]). For the full Maven dependency see xref:../reference-guide/maven-repository-libraries.adoc[Reference → {PRODUCT_SHORT} Maven repository libraries]
+
+These libraries use the system variable SWIDTAG_DIR to determine the directory for creating a swidtag file. If the SWIDTAG_DIR variable is set, the library uses the specified directory for swidtag file creation. 
+If the SWIDTAG_DIR is not set, the library defaults to the home directory of the hosting application.
+
+It is important to note that if the SWIDTAG_DIR environment variable contains invalid content or an invalid path, the hosting application fails to deploy.
+
+The swidtag file is an XML file content based on ISO/IEC 19770-2:2015 specification. 
+Following is an example of the swidtag file content:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<SoftwareIdentity name="IBM Decision Manager Open Edition" tagId="ibm.com-3d9d28f19d0f45fda113c07fb481e3ea-9.0.0" version="9.0.0" versionScheme="multipartnumeric" xml:lang="en" xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.iso.org/iso/19770/-2/2015-current/schema.xsd schema.xsd">
+    <Meta persistentId="3d9d28f19d0f45fda113c07fb481e3ea"/>
+    <Meta generator="4-1-20210113"/>
+    <Entity name="IBM" regid="ibm.com" role="licensor tagCreator softwareCreator"/>
+</SoftwareIdentity>
 ----
 
