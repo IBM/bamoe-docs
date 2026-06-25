@@ -94,12 +94,12 @@ When overriding httpd based images, you must:
 
 === Node.js based images
 
-Node-js based images run Node.js applications using the Node.js runtime environment. The {PRODUCT_SHORT} containers are: Cors-proxy and their main characteristics are that they:
+Node.js (Cors Proxy) based images run Node.js applications using the Node.js runtime environment. The main characteristics of a Node.js based images are:
 
-* execute JavaScript code on the server side
-* use Node.js runtime (bundled via NVM * Node Version Manager)
-* typically serve REST APIs or proxy services
-* are lightweight and have fast startup times
+* JavaScript code is executed on the server side
+* they use Node.js runtime (bundled Node Version Manager - NVM)
+* they typically serve REST APIs or proxy services
+* they are lightweight and have fast startup times
 * their environment variables control Node.js behavior (NODE_ENV, NODE_OPTIONS)
 
 When overriding node.js based images, you must:
@@ -317,7 +317,7 @@ OpenShift and other container platforms run containers with arbitrary UIDs but a
 
 [#nodejs-template]
 === Common Dockerfile template for Node.js based images
-The following template includes the common operations for the only Node.js based image in {PRODUCT_SHORT}. It uses NVM (Node Version Manager) to manage the Node.js runtime:
+The following template includes the common operations for the only Node.js based image in {PRODUCT_SHORT}. It uses Node Version Manager (NVM) to manage the Node.js runtime:
 
 [source, dockerfile]
 ----
@@ -885,14 +885,14 @@ RUN for cert in /tmp/ca-certificates/*.crt; do \
 
 Once you have built your custom {PRODUCT_SHORT} images with overridden base images, you need to deploy them in your environment. This section covers the two main deployment methods.
 
-=== Method 1: Using direct Openshift deployment
+=== Direct OpenShift deployment
 
 You can use your custom images directly in two common scenarios: 
 
 * Docker Compose for local/development environments 
 * OpenShift for production deployments
 
-Use this process for Docker Compose: 
+Use this procedure for Docker Compose: 
 
 . Update your `docker-compose.yml` to reference your custom images:
 +
@@ -971,7 +971,7 @@ spec:
 oc apply -f deployment-config.yaml
 ----
 
-=== Method 2: Using with Helm Charts
+=== Deployment via Dev and Runtime environment Helm Charts
 
 {PRODUCT_SHORT} provides two Helm charts as OCI artifacts that you can pull from the registry and use to deploy your custom images:
 
