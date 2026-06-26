@@ -216,7 +216,7 @@ NOTE: For a list of environment variables, check the <<available-environment-var
 [#air-gapped]
 == Deploy in an air-gapped OpenShift environment
 
-If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the application.
+If you have an air-gapped OpenShift cluster and need to deploy {MANAGEMENT_CONSOLE} and {MCP_SERVER} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the applications.
 
 === Procedure
 
@@ -227,11 +227,11 @@ If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using im
 oc login <OPENSHIFT_API_URL>
 ----
 +
-. Select or create the target Namespace where the {CANVAS} application will be deployed.
+. Select or create the target Namespace where the runtime environment components will be deployed.
 +
 [source,shell]
 ----
-oc project bamoecanvas
+oc project bamoe-runtime
 ----
 +
 . Retrieve the OpenShift internal image registry route.
@@ -263,31 +263,28 @@ NAMESPACE=$(oc project -q)
 docker login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
 ----
 +
-. Pull the {CANVAS} images from the Quay repository.
+. Pull the runtime environment images from the Quay repository.
 +
 [source,shell,subs="attributes+"]
 ----
-docker pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
-docker pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
-docker pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
+docker pull --arch amd64 quay.io/bamoe/management-console:{IMAGE_VERSION}
+docker pull --arch amd64 quay.io/bamoe/mcp-server:{IMAGE_VERSION}
 ----
 +
 . Tag the images for the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-docker tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
-docker tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
-docker tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
+docker tag quay.io/bamoe/management-console:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/management-console:{IMAGE_VERSION}
+docker tag quay.io/bamoe/mcp-server:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/mcp-server:{IMAGE_VERSION}
 ----
 +
 . Push the images to the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-docker push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
-docker push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
-docker push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
+docker push $REGISTRY/$NAMESPACE/management-console:{IMAGE_VERSION} --tls-verify=false
+docker push $REGISTRY/$NAMESPACE/mcp-server:{IMAGE_VERSION} --tls-verify=false
 ----
 +
 . Verify that the images are available in the internal registry.
@@ -298,66 +295,49 @@ oc get imagestreams
 ----
 +
 .Example output
-[source,shell]
+[source,shell,subs="attributes+"]
 ----
-NAME                IMAGE REPOSITORY                                                                                          TAGS             UPDATED
-canvas              default-route-openshift-image-registry.apps.example.com/bamoecanvas/canvas                                9.3.1-ibm-0006   2 minutes ago
-cors-proxy          default-route-openshift-image-registry.apps.example.com/bamoecanvas/cors-proxy                            9.3.1-ibm-0006   21 seconds ago
-extended-services   default-route-openshift-image-registry.apps.example.com/bamoecanvas/extended-services                     9.3.1-ibm-0006   About a minute ago
+NAME                   IMAGE REPOSITORY                                                                                             TAGS             UPDATED
+management-console     default-route-openshift-image-registry.apps.example.com/bamoe-runtime/management-console                     {IMAGE_VERSION}   2 minutes ago
+mcp-server             default-route-openshift-image-registry.apps.example.com/bamoe-runtime/mcp-server                             {IMAGE_VERSION}   21 seconds ago
 ----
 +
 . Define environment variables for naming and labeling the resources.
 +
 [source,shell]
 ----
-export APP_PART_OF=bamoe-canvas-app
-export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
-export APP_NAME_CORS_PROXY=bamoe-cors-proxy
-export APP_NAME_BAMOE_CANVAS=bamoe-canvas
+export APP_PART_OF=bamoe-runtime-environment
+export APP_NAME_MANAGEMENT_CONSOLE=bamoe-management-console
+export APP_NAME_MCP_SERVER=bamoe-mcp-server
 ----
 +
-. Deploy Extended Services and label its resources.
-+
-[source,shell,subs="attributes+"]
-----
-oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/extended-services:{IMAGE_VERSION} --name=$APP_NAME_EXTENDED_SERVICES
-
-oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
-oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
-oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
-----
-+
-. Deploy the {CORS_PROXY} and label its resources.
+. Deploy the {MANAGEMENT_CONSOLE} and label its resources.
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --name=$APP_NAME_CORS_PROXY
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/management-console:{IMAGE_VERSION} --name=$APP_NAME_MANAGEMENT_CONSOLE
 
-oc create route edge --service=$APP_NAME_CORS_PROXY
-oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
+oc create route edge --service=$APP_NAME_MANAGEMENT_CONSOLE
+oc label services/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_MANAGEMENT_CONSOLE app.openshift.io/runtime=nodejs
 ----
 +
-. Deploy the {CANVAS} application and configure environment variables to connect to the backend services.
+. Deploy the {MCP_SERVER} and label its resources.
 +
 [source,shell,subs="attributes+"]
 ----
-oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/canvas:{IMAGE_VERSION} --name=$APP_NAME_BAMOE_CANVAS \
-  -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
-  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/mcp-server:{IMAGE_VERSION} --name=$APP_NAME_MCP_SERVER
 
-oc create route edge --service=$APP_NAME_BAMOE_CANVAS
-oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
-oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
-oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
+oc create route edge --service=$APP_NAME_MCP_SERVER
+oc label services/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_MCP_SERVER app.openshift.io/runtime=nodejs
 ----
 +
-. Retrieve the route details to access the deployed application.
+. Retrieve the route details to access the deployed applications.
 +
 [source,shell]
 ----
@@ -367,13 +347,12 @@ oc get route
 .Example output
 [source,shell]
 ----
-NAME                      HOST/PORT                                                                PATH   SERVICES                  PORT        TERMINATION   WILDCARD
-bamoe-canvas              bamoe-canvas-bamoecanvas.apps.example.com                                       bamoe-canvas              8080-tcp    edge          None
-bamoe-cors-proxy          bamoe-cors-proxy-bamoecanvas.apps.example.com                                   bamoe-cors-proxy          8080-tcp    edge          None
-bamoe-extended-services   bamoe-extended-services-bamoecanvas.apps.example.com                            bamoe-extended-services   21345-tcp   edge          None
+NAME                       HOST/PORT                                                                PATH   SERVICES                   PORT        TERMINATION   WILDCARD
+bamoe-management-console   bamoe-management-console-bamoe-runtime.apps.example.com                         bamoe-management-console   8080-tcp    edge          None
+bamoe-mcp-server           bamoe-mcp-server-bamoe-runtime.apps.example.com                                 bamoe-mcp-server           8080-tcp    edge          None
 ----
 
-The {CANVAS} application is now accessible at the route URL shown in the output (for example, `https://bamoe-canvas-bamoecanvas.apps.example.com`).
+The {MANAGEMENT_CONSOLE} is now accessible at the route URL shown in the output (for example, `https://bamoe-management-console-bamoe-runtime.apps.example.com`), and the {MCP_SERVER} is accessible at its respective route URL (for example, `https://bamoe-mcp-server-bamoe-runtime.apps.example.com`).
 
 == Running locally with Docker
 Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
