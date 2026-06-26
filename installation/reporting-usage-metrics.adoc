@@ -2,179 +2,184 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-To maintain compliance with IBM licensing terms and conditions, you must collect and send license and usage metrics for {PRODUCT} are to IBM Software Central (SWC). The tool you use will depend on your deployment environment:
+To maintain compliance with IBM licensing terms and conditions, you must collect license and usage metrics (VPC Count) for {PRODUCT} and upload manually or automatically to IBM Software Central (SWC). The tool you use will depend on your deployment environment:
 
  * IBM License Service (ILS) and IBM® Usage Metering Service (UMS) are used for deployments in a containerized environment. UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
  * IBM License Metric Tool (ILMT) is used for deployments in a non-containerized environment.
 
-It is your responsibility to maintain compliance with the licensing terms and conditions. However, to audit the use of IBM software, UMS is used to capture business value metrics and send, automatically and periodically, compliance data for auditing purposes to SWC.
+In addition if you install (see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=usage-metering-service[IBM Usage Metering Service]) you can collect additional metrics (e.g., Node Instance Count) and generate usage reports which can be used for auditing or to track adoption of {PRODUCT_SHORT}, and that can be visualized in IBM Software Central.
+
+If ILS is temporarily unavailable the last reported value continue to be used. Data synchronizes automatically when connectivity is restored, see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation] for more details.
+
+For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool[ILMT Documentation].
 
 == Working in a containerized environment
-The `includeSWCUpload` annotation is included in all BAMOE Helm chart subcharts, referenced when you install the Dev Environment (see xref:development-environment.adoc#dev-env-helm[Installing Dev Environment Helm chart]) and your Runtime Environment (see xref:runtime-environment.adoc#runtime-env-helm[Installing Runtime Environment Helm chart]). When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central, where they can be visualized in Amplitude dashboards.
+The `includeSWCUpload` annotation is included for all {PRODUCT_SHORT} components when you install the Dev and Runtime Environments or create Business Services with the Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]). When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
 
-// can customer access the Amplitude dashboard?
-
-The following describes the process for an installation in a containerized environment (Kubernetes or OpenShift):
+The following describes the process for setting up metric uploading in a containerized environment (Kubernetes or OpenShift):
 
 . Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
 
-. Configure ILS (IBM License Service):
-   - Upgrade to ILS version 4.x or higher (see [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
-   - Create an OpenShift secret with the entitlement key: `oc create secret`
-   - Configure ILS with the entitlement key: `oc apply`
+. Install IBM License Service (or upgrade to) ILS version 4.x or higher, using instructions in the [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
 
-. Deploy BAMOE:
-   - Install BAMOE using Helm charts (the `includeSWCUpload: true` annotation is automatically included from version 9.5.0 onwards)
-   - For customer-created Business Services, define the required annotations in version-controlled deployment YAML used by GitOps or CI/CD process
+. Create an OpenShift secret with the entitlement key: 
+* `oc create secret`
 
-You must obtain and configure an IBM Entitlement Key from IBM Container Library
+. Configure ILS with the entitlement key: 
+*`oc apply`
 
-VPC count data is uploaded to Software Central once per day (configurable)
+. Install {PRODUCT_SHORT} components using Helm charts where the `includeSWCUpload: true` annotation is automatically included (see xref:development-environment.adoc#dev-env-helm[Installing Development environment] or runtime-environment.adoc#runtime-env-helm[Installing Runtime environment]). 
 
-To disable UMS, when it is enabled
+. For customer-created _Business Services_, define the required annotations in a version-controlled deployment YAML file that can be used by your GitOps or CI/CD process (see xref:managing-license-entitlements.adoc#business-service-container-deployment[Managing your license entitlements])
 
-To enable UMS, when it is disabled
+Steps 3 and 4 define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually. 
 
-By default, usage metering is enabled and {PRODUCT_SHORT} sends usage metrics data to UMS daily.
+VPC count data is uploaded to Software Central once per day (configurable). A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
 
-A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
+=== Configuring Adoption Metric upload
+If you would like to obtain more visibility on the adoption of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you must install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. The additional adoption metrics collected in {PRODUCT_SHORT} deployments in a containerized environments are:
 
-== Working in a non-containerized environment
-This capability enables metrics upload through configuration of ILMT (IBM License Metric Tool). To activate this you must upgrade to ILMT version 9.2.43 or higher,and configure their entitlement key in the ILMT console to enable upload of contractual metrics collected via SWID tags and disconnected scanners.
+* Process Step Executions (NODE_INSTANCE_COUNT): Total count of workflow node executions across all process instances
+* Monthly Active Users (MAU): Tracked via UMS infrastructure
+
+Follow this procedure to configure metric collection and visualization:
+
+. Install IBM Usage Metering Service via the [IBM Cloud Pak Foundational Services installation with Helm Charts](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=services-installing-foundational-service-helm-charts). 
+
+. Create BAMOE-Specific ServiceMeterDefinition:
+** Create a `node-execution-meter.yaml` file. Choose the appropriate `productId` and `productName` based on your BAMOE product, here we have used PAMOE product details for example:
++
+[source,yaml]
+----
+   apiVersion: operator.ibm.com/v1
+   kind: IBMServiceMeterDefinition
+   metadata:
+     name: bamoe-node-execution-meter
+     namespace: ${BAMOE_NAMESPACE}
+
+   spec:
+     mappingId: NODE_COUNT_MAPPING_0001
+     processing: ADD
+     repeat: true
+
+     breakdownDefs:
+       - breakdownBy:
+           name: NODE_INSTANCE_COUNT
+         groupBy:
+           - deployments_type
+           - version
+           - license_type
+         processing: ADD
+         source: metricQuantity
+
+     data:
+       metricDescription: "Count of process nodes executed"
+       metricName: NODE_INSTANCE_COUNT
+       productId: "72984f114b54496a8a44be139154a988"
+       productName: "IBM Process Automation Manager Open Edition"
+----
+   
+. Apply the ServiceMeterDefinition:
+   
+[source,bash]
+----
+   oc apply -f node-execution-meter.yaml
+
+   # Verify creation
+   oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
+----
+
+. Deploy your _Business Services_:
+** BAMOE applications automatically include the UMS metrics collection add-on
+** No code changes required in workflow applications
+** Metrics collection starts automatically when workflows execute
+
+. Verify BAMOE Metrics Collection**:
+
+     After deploying and executing workflows:
+
+     ```bash
+     # Check BAMOE application logs for UMS connectivity
+     oc logs -f deployment/<your-bamoe-app-name> -n ${BAMOE_NAMESPACE} | grep -i ums
+
+     # Expected log message: "UMS API connectivity test successful"
+     ```
+
+     **View Collected BAMOE Metrics**:
+     - Metrics automatically uploaded daily at 12:05 AM UTC to IBM Software Central
+     - View metrics in IBM Software Central → Usage section
 
 
-- **Metrics upload:** VPC count data is uploaded to Software Central once per day (configurable)
+**BAMOE Application Configuration:**
+
+Add the following properties to your BAMOE application's `application.properties` file to enable metrics collection:
+```properties
+# Enable UMS addon
+bamoe.ums.enabled=true
+# UMS environment type
+bamoe.ums.environment=CONTAINERIZED
+# UMS API endpoint - internal cluster service for upload port
+bamoe.ums.api.endpoint=https://ibm-usage-metering-instance.<namespace>.svc.cluster.local:8081/api/v1/event
+# UMS API authentication type
+bamoe.ums.api.auth.type=bearer
+# UMS API authentication token (reference to secret)
+bamoe.ums.api.auth.token=${UMS_AUTH_TOKEN}
+# UMS Logging (optional - for troubleshooting)
+quarkus.log.category."com.ibm.bamoe.addons.ums".level=TRACE
+quarkus.log.category."com.ibm.bamoe.addons.ums".min-level=TRACE
+```
+**Configuration Notes:**
+- Replace `<namespace>` in the endpoint URL with your BAMOE namespace
+- The `UMS_AUTH_TOKEN` should reference the token from the `ibm-usage-metering-upload-token` secret created by UMS
+- Logging properties are optional and useful for troubleshooting metrics submission issues
+**Disabling Metrics Collection:**
+If you need to disable metrics collection, set the following property in your BAMOE application's `application.properties`:
+
+```properties
+# Disable UMS metrics collection
+bamoe.ums.enabled=false
+```
+
+**Note:** Disabling metrics collection may impact license compliance visibility and reporting.
+
+
+### What does this change mean for the new user/existing user?
+
+**For New Users (First-time BAMOE Installation):**
+
+- **Additional Setup Step**: Must install UMS service and create BAMOE ServiceMeterDefinition before deploying applications
+- **BAMOE Add-on**: Metrics collection add-on automatically included in BAMOE 9.5.0+ applications
+- **No Code Changes**: Workflow applications work without modification
+- **Benefit**: Automatic workflow execution tracking and license compliance from day one
+
+
+
+
+
+
+== Working with non-containerized Business Services 
+When developing non-containerized _Business Services_ you can upload metrics by configuring IBM License Metric Tool(ILMT) version 9.2.43 (or higher) with an entitlement key. This key must be configured in the ILMT Console to enable upload to IBM Software Central of the contractual VPC metric collected via SWID tags and disconnected scanners. For more information on configuring your Business Service to use required SWID tags see xref:managing-license-entitlements.adoc[Managing your license entitlements]). 
+
+. Install or upgrade to ILMT version 9.2.43 or higher (see [ILMT Documentation](https://www.ibm.com/docs/en/license-metric-tool))
+
+. Ensure scanners are compatible with this version
+
+. Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
+
+. Configure the Software Central integration, see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-configuring-connection-software[Configuring the connection to Software Central]
+** This step includes configuring the IBM Entitlement Key in ILMT
+** For air-gapped environments, configure the entitlement key in disconnected scanner configuration
+
+. By default, after configuration, metrics are automatically uploaded once per day:
+* For on-demand upload, see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to Software Central]
+
+. Verify that SWID tags are properly installed and that metrics have been successfully uploaded to xref:https://swc.saas.ibm.com/en-us/software-central[Software Central]
+
 
 ////
 
 The following identifiers are used for {PRODUCT_SHORT}. The identifier or productId is used to correlate data for each capability based on whether it is a non-production or production deployment license type.
 
-Table 1. Listing of the identifiers for each CP4BA capability
-Capability
-	
-Group identifiers
-Business Automation Application	
-Non-production
-
-    productId: 2b2ccb47cfc247619efbb88c130cc136
-    productName: Business Automation Application - CP4BA - Non Prod
-
-Production
-
-    productId: 20b0c693f93b42c6917cd7ae46d97462
-    productName: Business Automation Application - CP4BA
-
-Business Automation Insights	
-Non-production
-
-    productId: 11117b07ee53456a9cd41fb6751b0759
-    productName: Business Automation Insights - CP4BA - Non Prod
-
-Production
-
-    productId: cf2f2b926ff14ce38aa3014637581037
-    productName: Business Automation Insights - CP4BA
-
-Business Automation Navigator	
-Production
-
-    productId: 0f002233b583454d8a0bd72c665a01a3
-    productName: Business Automation Navigator - CP4BA
-
-Business Automation Studio	
-Production
-
-    productId: 548b34304806411693fe77097b688702
-    productName: Business Automation Studio - CP4BA
-
-Business Automation Workflow	
-Non-production
-
-    productId: 2fab82f1ebe541bbbef74ea2be143192
-    productName: Business Automation Workflow Containers - CP4BA - Non Prod
-
-Production
-
-    productId: 2700c91c8c4b4abcb08ddd3e228c09a2
-    productName: Business Automation Workflow Containers - CP4BA
-
-Content Collector for SAP Applications	
-Non-production
-
-    productId: a2ef7db7c7f04fc68204f411cd3eb782
-    productName: Content Collector for SAP Applications Containers - CP4BA - Non Prod
-
-Production
-
-    productId: 91fbd935ea3344b68d7667e8b0b60df3
-    productName: Content Collector for SAP Applications Containers - CP4BA
-
-Content Cortex	
-Production
-
-    productId: 9c2d4f167cdb411fa3b1d787eb3c7c34
-    productName: Content Cortex Containers - CP4BA
-
-Decision Intelligence Client Managed Software	
-Non-production
-
-    productId: 867ac1b08acd40b691d68cc5c3e47d66
-    productName: Decision Intelligence Client Managed Software - CP4BA - Non Prod
-
-Production
-
-    productId: 3f1d7caa69374823813c79d48dce6a1f
-    productName: Decision Intelligence Client Managed Software - CP4BA
-
-Document Processing	
-Non-production
-
-    productId: 7fe57c4d81a64cbe8664a5838bcf58e3
-    productName: Automation Document Processing Containers - CP4BA - Non Prod
-
-Production
-
-    productId: 3e9cca2be0014be0921bd638e9fc5fd1
-    productName: Automation Document Processing Containers - CP4BA
-
-Enterprise Records	
-Production
-
-    productId: 7b0caa58999c4a4384619aac20ed8875
-    productName: Enterprise Records Containers - CP4BA
-
-Operational Decision Manager	
-Non-production
-
-    productId: d803dec7647d48d39f6803e077d36080
-    productName: Operational Decision Manager - CP4BA - Non Prod
-
-Production
-
-    productId: cfdbd71c64094971a70b6985df6b1e93
-    productName: Operational Decision Manager - CP4BA
-
-Workflow Process Service Authoring	
-Non-production
-
-    productId: d3231b33169149f0a5af5d8b782399da
-    productName: Workflow Process Service - CP4BA - Non Prod
-
-Production
-
-    productId: bcf180b9bc864d458800e72951849bfe
-    productName: Workflow Process Service - CP4BA
-
-Workstream Services	
-Non-production
-
-    productId: 7501ee9fb6c14fcfae671cd7350bf231
-    productName: Automation Workstream Services - CP4BA - Non Prod
-
-Production
-
-    productId: 902d248ea6234a2a81d3c774a755f2ea
-    productName: Automation Workstream Services - CP4BA
 
 The following metrics are collected for each capability in addition to values for the version, environment, architecture, and platform.
 Table 2. Listing of capability metrics
