@@ -213,16 +213,10 @@ oc set env deployment/bamoe-management-console-app <ENV_VAR>="<VALUE>"
 ----
 NOTE: For a list of environment variables, check the <<available-environment-variables>> section.
 
-== Deploy {CANVAS} in an air-gapped OpenShift environment
+[#air-gapped]
+== Deploy in an air-gapped OpenShift environment
 
 If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the application.
-
-=== Prerequisites
-
-* Access to an OpenShift cluster with the `oc` CLI tool installed and configured
-* Podman installed on your local machine
-* Access to pull images from `quay.io/bamoe`
-
 
 === Procedure
 
@@ -233,7 +227,7 @@ If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using im
 oc login <OPENSHIFT_API_URL>
 ----
 +
-. Select or create the target project where the {CANVAS} application will be deployed.
+. Select or create the target Namespace where the {CANVAS} application will be deployed.
 +
 [source,shell]
 ----
@@ -262,38 +256,38 @@ REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{
 NAMESPACE=$(oc project -q)
 ----
 +
-. Log in to the OpenShift image registry using Podman.
+. Log in to the OpenShift image registry.
 +
 [source,shell]
 ----
-podman login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
+docker login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
 ----
 +
 . Pull the {CANVAS} images from the Quay repository.
 +
 [source,shell,subs="attributes+"]
 ----
-podman pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
-podman pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
-podman pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
+docker pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
+docker pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+docker pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
 ----
 +
 . Tag the images for the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-podman tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
-podman tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
-podman tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
+docker tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
+docker tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
+docker tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
 ----
 +
 . Push the images to the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-podman push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
-podman push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
-podman push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
+docker push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
+docker push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
+docker push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
 ----
 +
 . Verify that the images are available in the internal registry.
@@ -322,7 +316,7 @@ export APP_NAME_CORS_PROXY=bamoe-cors-proxy
 export APP_NAME_BAMOE_CANVAS=bamoe-canvas
 ----
 +
-. Deploy {EXTENDED_SERVICES} and label its resources.
+. Deploy Extended Services and label its resources.
 +
 [source,shell,subs="attributes+"]
 ----
@@ -381,7 +375,6 @@ bamoe-extended-services   bamoe-extended-services-bamoecanvas.apps.example.com  
 
 The {CANVAS} application is now accessible at the route URL shown in the output (for example, `https://bamoe-canvas-bamoecanvas.apps.example.com`).
 
-
 == Running locally with Docker
 Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
 
@@ -391,6 +384,7 @@ Start the container with:
 ----
 docker run -p <EXTERNAL_PORT>:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
 ----
+
 
 If necessary, pass the environment variables with the `-e` flag:
 
