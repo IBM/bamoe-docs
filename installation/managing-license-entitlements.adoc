@@ -9,7 +9,9 @@ Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?t
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
-When you install a component via the product specific Dev and Runtime Helm charts that correspond to your IBM license ({PRODUCT_DM} or {PRODUCT_PAM}), preconfigured license annotations are included in the global values. These annotations are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. The merge uses the Helm merge function and happens in each deployment template. The `chargedProductAnnotations` (containing License Manager metadata) are combined with `podAnnotations` (any custom annotations). The template expressions are evaluated using the `tpl` function, which replaces token references with actual values from the global configuration.
+When you install a component via the product specific Dev and Runtime Helm charts that correspond to your IBM license ({PRODUCT_DM} or {PRODUCT_PAM}), preconfigured license annotations are included in the global values. These annotations are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. 
+
+The merge uses the Helm merge function and happens in each deployment template. The `chargedProductAnnotations` (containing License Manager metadata) are combined with `podAnnotations` (any custom annotations). The template expressions are evaluated using the `tpl` function, which replaces token references with actual values from the global configuration.
 
 If you choose not to install via these Helm charts, the license tracking annotations must be manually added to the container deployment YAML or to each of the {PRODUCT_SHORT} containers after installation. 
 

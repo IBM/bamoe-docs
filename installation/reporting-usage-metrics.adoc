@@ -7,20 +7,20 @@ To maintain compliance with IBM licensing terms and conditions, you must collect
  * IBM License Service (ILS) and IBM® Usage Metering Service (UMS) are used for deployments in a containerized environment. UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
  * IBM License Metric Tool (ILMT) is used for deployments in a non-containerized environment.
 
-In addition if you install (see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=usage-metering-service[IBM Usage Metering Service]) you can collect additional metrics (e.g., Node Instance Count) and generate usage reports which can be used for auditing or to track adoption of {PRODUCT_SHORT}, and that can be visualized in IBM Software Central.
+In addition if you install (see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=usage-metering-service[IBM Usage Metering Service]) you can collect additional metrics (e.g., Node Instance Count) and generate usage reports which can be used for auditing or to track adoption of {PRODUCT_SHORT}. Usage reports can be visualized in IBM Software Central.
 
 If ILS is temporarily unavailable the last reported value continue to be used. Data synchronizes automatically when connectivity is restored, see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation] for more details.
 
-For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool[ILMT Documentation].
+For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=tool-troubleshooting-support[IBM License Metric Tool → Troubleshooting and support].
 
 == Working in a containerized environment
-The `includeSWCUpload` annotation is included for all {PRODUCT_SHORT} components when you install the Dev and Runtime Environments or create Business Services with the Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]). When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
+If you are working in a containerized environment (Kubernetes or OpenShift), when you install the Dev and Runtime Environments and create Business Services with Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]) the `includeSWCUpload` annotation is automatically included in deployment YAML files. When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
 
-The following describes the process for setting up metric uploading in a containerized environment (Kubernetes or OpenShift):
+The following describes the process for setting up metric uploading :
 
 . Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
 
-. Install IBM License Service (or upgrade to) ILS version 4.x or higher, using instructions in the [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
+. Install IBM License Service (or upgrade to) version 4.x or higher, using instructions in the [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
 
 . Create an OpenShift secret with the entitlement key: 
 * `oc create secret`
@@ -32,22 +32,23 @@ The following describes the process for setting up metric uploading in a contain
 
 . For customer-created _Business Services_, define the required annotations in a version-controlled deployment YAML file that can be used by your GitOps or CI/CD process (see xref:managing-license-entitlements.adoc#business-service-container-deployment[Managing your license entitlements])
 
-Steps 3 and 4 define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually. 
+Steps 3 and 4 define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually (see xref:#manual-upload[Uploading metrics manually]). 
 
 VPC count data is uploaded to Software Central once per day (configurable). A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
 
-=== Configuring Adoption Metric upload
-If you would like to obtain more visibility on the adoption of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you must install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. The additional adoption metrics collected in {PRODUCT_SHORT} deployments in a containerized environments are:
+=== Configuring adoption metric upload
+If you need more visibility on the adoption of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you can install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. It is a namespace-level service that collects and stores metrics data. 
 
-* Process Step Executions (NODE_INSTANCE_COUNT): Total count of workflow node executions across all process instances
+With UMS the following Adoption metrics are collected from {PRODUCT_SHORT} deployments in a containerized environment:
+
+* Process Step Executions (NODE_INSTANCE_COUNT): Total count of Workflow node executions across all Process Instances
 * Monthly Active Users (MAU): Tracked via UMS infrastructure
 
-Follow this procedure to configure metric collection and visualization:
+You can configure metric collection and visualization by following this procedure:
 
-. Install IBM Usage Metering Service via the [IBM Cloud Pak Foundational Services installation with Helm Charts](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=services-installing-foundational-service-helm-charts). 
+. Install IBM Usage Metering Service via the xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=services-installing-foundational-service-helm-charts[IBM Cloud Pak Foundational Services installation with Helm Charts]. 
 
-. Create BAMOE-Specific ServiceMeterDefinition:
-** Create a `node-execution-meter.yaml` file. Choose the appropriate `productId` and `productName` based on your BAMOE product, here we have used PAMOE product details for example:
+. Create {PRODUCT_SHORT} specific `ServiceMeterDefinition` in a `node-execution-meter.yaml` file. The `productId` and `productName` depend on your offering (see: xref:licensing.adoc[License Guide]). This example uses {PRODUCT_PAM} product details for example:
 +
 [source,yaml]
 ----
@@ -80,46 +81,23 @@ Follow this procedure to configure metric collection and visualization:
 ----
    
 . Apply the ServiceMeterDefinition:
-   
++
 [source,bash]
 ----
-   oc apply -f node-execution-meter.yaml
+oc apply -f node-execution-meter.yaml
 
-   # Verify creation
-   oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
+# Verify creation
+oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
 ----
 
-. Deploy your _Business Services_:
-** BAMOE applications automatically include the UMS metrics collection add-on
-** No code changes required in workflow applications
-** Metrics collection starts automatically when workflows execute
-
-. Verify BAMOE Metrics Collection**:
-
-     After deploying and executing workflows:
-
-     ```bash
-     # Check BAMOE application logs for UMS connectivity
-     oc logs -f deployment/<your-bamoe-app-name> -n ${BAMOE_NAMESPACE} | grep -i ums
-
-     # Expected log message: "UMS API connectivity test successful"
-     ```
-
-     **View Collected BAMOE Metrics**:
-     - Metrics automatically uploaded daily at 12:05 AM UTC to IBM Software Central
-     - View metrics in IBM Software Central → Usage section
-
-
-**BAMOE Application Configuration:**
-
-Add the following properties to your BAMOE application's `application.properties` file to enable metrics collection:
-```properties
-# Enable UMS addon
+. If you want to customize UMS settings add any of the following properties to your _Business Service_ `application.properties` file:
++
+[source,properties]
+----
+# Enable UMS addon, used to deactivate
 bamoe.ums.enabled=true
-# UMS environment type
-bamoe.ums.environment=CONTAINERIZED
 # UMS API endpoint - internal cluster service for upload port
-bamoe.ums.api.endpoint=https://ibm-usage-metering-instance.<namespace>.svc.cluster.local:8081/api/v1/event
+bamoe.ums.api.endpoint=https://ibm-usage-metering-instance.${BAMOE_NAMESPACE}.svc.cluster.local:8081/api/v1/event
 # UMS API authentication type
 bamoe.ums.api.auth.type=bearer
 # UMS API authentication token (reference to secret)
@@ -127,35 +105,43 @@ bamoe.ums.api.auth.token=${UMS_AUTH_TOKEN}
 # UMS Logging (optional - for troubleshooting)
 quarkus.log.category."com.ibm.bamoe.addons.ums".level=TRACE
 quarkus.log.category."com.ibm.bamoe.addons.ums".min-level=TRACE
-```
-**Configuration Notes:**
-- Replace `<namespace>` in the endpoint URL with your BAMOE namespace
-- The `UMS_AUTH_TOKEN` should reference the token from the `ibm-usage-metering-upload-token` secret created by UMS
-- Logging properties are optional and useful for troubleshooting metrics submission issues
-**Disabling Metrics Collection:**
-If you need to disable metrics collection, set the following property in your BAMOE application's `application.properties`:
+----
 
-```properties
+. Deploy your _Business Services_ which  automatically include the UMS metrics collection add-on.
+
+. Metrics collection starts automatically when workflows execute and you can verify metrics Collection for your _Business Service_ using the following command:
++
+[source,bash]
+----
+# Check BAMOE application logs for UMS connectivity
+oc logs -f deployment/<your-bamoe-app-name> -n ${BAMOE_NAMESPACE} | grep -i ums
+
+# Expected log message: "UMS API connectivity test successful"
+----
+
+. View Collected {PRODUCT_SHORT} metrics in IBM Software Central (Usage section). 
+* Metrics are automatically uploaded daily at 12:05 AM UTC to IBM Software Central unless you have deactivated Metric collection (see xref:#deactivate-metric[Deactivating automatic metric upload]).
+
+Where:
+
+* `${BAMOE_NAMESPACE}` in the endpoint URL is replaced with your BAMOE namespace
+* The `UMS_AUTH_TOKEN` should reference the token from the `ibm-usage-metering-upload-token` secret created by UMS
+* Logging properties are optional and useful for troubleshooting metrics submission issues
+
+=== Deactivating metric collection
+If you need to disable metrics collection, set the following property in your _Business Services_ `application.properties`:
+
+[source,bash]
+----
 # Disable UMS metrics collection
 bamoe.ums.enabled=false
-```
+----
 
-**Note:** Disabling metrics collection may impact license compliance visibility and reporting.
+NOTE: Deactivating metrics collection may impact license compliance visibility and reporting. See xref:#manual-upload[]
 
-
-### What does this change mean for the new user/existing user?
-
-**For New Users (First-time BAMOE Installation):**
-
-- **Additional Setup Step**: Must install UMS service and create BAMOE ServiceMeterDefinition before deploying applications
-- **BAMOE Add-on**: Metrics collection add-on automatically included in BAMOE 9.5.0+ applications
-- **No Code Changes**: Workflow applications work without modification
-- **Benefit**: Automatic workflow execution tracking and license compliance from day one
-
-
-
-
-
+[#manual-upload]
+=== Uploading metrics manually in ILMT
+To upload contractual data to IBM Software Central in ILMT see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to IBM Software Central]
 
 == Working with non-containerized Business Services 
 When developing non-containerized _Business Services_ you can upload metrics by configuring IBM License Metric Tool(ILMT) version 9.2.43 (or higher) with an entitlement key. This key must be configured in the ILMT Console to enable upload to IBM Software Central of the contractual VPC metric collected via SWID tags and disconnected scanners. For more information on configuring your Business Service to use required SWID tags see xref:managing-license-entitlements.adoc[Managing your license entitlements]). 
@@ -175,152 +161,3 @@ When developing non-containerized _Business Services_ you can upload metrics by 
 
 . Verify that SWID tags are properly installed and that metrics have been successfully uploaded to xref:https://swc.saas.ibm.com/en-us/software-central[Software Central]
 
-
-////
-
-The following identifiers are used for {PRODUCT_SHORT}. The identifier or productId is used to correlate data for each capability based on whether it is a non-production or production deployment license type.
-
-
-The following metrics are collected for each capability in addition to values for the version, environment, architecture, and platform.
-Table 2. Listing of capability metrics
-Capability
-	
-Metrics
-Business Automation Application	
-
-    BAA.ApplicationEngine.ApplicationInvoke
-    BAA.ApplicationEngine.ActionFlowInvoke
-    BAA.ApplicationEngine.AutomationServiceInvokeByApplication
-    BAA.ApplicationEngine.AutomationServiceInvokeByExternal
-
-Business Automation Insights	
-
-    Storage usage.
-    Number of events per capability.
-    Number of monitoring sources.
-    Number of dashboards.
-    Number of charts per dashboard.
-    Average event size.
-
-The following metric names are used:
-
-    TOTAL_NUMBER_OF_DOCUMENTS
-    GLOBAL_STORAGE_SIZE_MB
-    AVG_DOCUMENT_SIZE_BYTES
-    TOTAL_NUMBER_OF_MONITORING_SOURCES
-    NUMBER_OF_DASHBOARDS
-    NUMBER_OF_ALERTS
-    NUMBER_OF_GOALS
-    NUMBER_OF_CHARTS
-    NUMBER_OF_PREDICTIONS
-    NUMBER_OF_DOCUMENTS_BPMN_TIMESERIES
-    NUMBER_OF_DOCUMENTS_ODM_TIMESERIES
-    NUMBER_OF_DOCUMENTS_CASE_TIMESERIES
-    NUMBER_OF_DOCUMENTS_CONTENT_TIMESERIES
-    NUMBER_OF_DOCUMENTS_NAVIGATOR_TIMESERIES
-    NUMBER_OF_DOCUMENTS_DI_TIMESERIES
-    NUMBER_OF_DOCUMENTS_BPMN_SUMMARIES
-    NUMBER_OF_DOCUMENTS_CASE_SUMMARIES
-    NUMBER_OF_DOCUMENTS_BPEL_SUMMARIES
-
-Content Cortex	
-
-    Measures the volume of activity for each respective API. The following Content Engine metric names are used:
-        java_rpc_calls
-        dot_net_rpc_calls
-        css_objects_indexed
-        es_os_objects_created
-        db2_db_count
-        oracle_db_count
-        mssql_db_count
-        postgresql_db_count
-        asa_write_bytes
-        fcd_fcps_in_use
-    CMIS component:
-        cmis_inbound
-        cmis_document_upload
-        cmis_document_read
-    Instrument actions in ACCE to understand the most commonly executed functions.
-        document_creates
-        propertytemplate_creates
-        choicelist_creates
-        folder_creates
-        sweep_creates
-
-Decision Intelligence Client Managed Software	
-
-    Number of executed decisions.
-
-Document Processing	
-
-    Total documents processed (NUM_DOCS_PROCESSED).
-    Total pages processed (NUM_PAGES_PROCESSED).
-    API request counts.
-    Active user counts.
-
-Operational Decision Manager	
-
-    dc_pods_count
-    dc_registered_users
-    dc_num_of_artifacts
-    dr_pods_count
-    dsc_pods_count
-    dsr_pods_count
-
-Business Automation Workflow	
-
-    BAW.PFS.bpd
-    BAW.PFS.case
-    BAW.BPMNengine.activity
-    BAW.BPMNengine.processstarted
-    BAW.BPMNengine.messagerec
-    BAW.BPMNengine.messagesent
-    BAW.BPMNengine.timer
-    BAW.BPMNengine.tracking
-    BAW.Serviceengine.servicetask
-    BAW.Serviceengine.decisiontask
-    BAW.Serviceengine.scripttask
-    BAW.Serviceengine.genaitask
-    BAW.Serviceengine.aiagenttask
-    BAW.Serviceengine.contenttask
-    BAW.Serviceengine.tracking
-    BAW.Serviceengine.started
-    BAW.Serviceengine.rest
-    BAW.Serviceengine.web
-    BAW.Serviceengine.mq
-    BAW.Serviceengine.kafka
-    COMPONENT_ID_DESKTOP_PD
-    COMPONENT_ID_DATA_VISUALIZATION
-    CSHS.Task
-    CSHS.InstanceDetails
-    CSHS.Other
-    CSHS.IntermediateTrackingEvent
-    BAW.ProcessPortal.ProcessLaunch
-    BAW.ProcessPortal.SavedSearchCreate
-    BAW.ProcessPortal.SavedSearchEdit
-    BAW.ProcessPortal.SavedSearchUpdateDefault
-    BAW.ProcessPortal.ProcessPerformanceDashboardInvoke
-    BAW.ProcessPortal.TeamPerformanceDashboardInvoke
-    BAW.ProcessPortal.ProcessDashboardInvoke
-    BAW.ProcessPortal.SocialMention
-    BAW.ProcessPortal.SocialFollow
-    BAW.ProcessPortal.SocialComment
-    BAW.ProcessPortal.ProfileUpdate
-    BAW.Workplace.ProcessLaunch
-    BAW.Workplace.CaseLaunch
-    BAW.Workplace.WorkstreamLaunch
-    BAW.Workplace.SavedSearchCreate
-    BAW.Workplace.SavedSearchEdit
-    BAW.Workplace.SavedSearchUpdateDefault
-    BAW.Workplace.TeamDashboardInvoke
-    BAW.Workplace.ProfileUpdate
-    BAW.WorkplaceAssistant.ContentTool
-    BAW.WorkplaceAssistant.TaskTool
-    BAW.WorkplaceAssistant.ProcessTool
-    BAW.WorkplaceAssistant.CaseTool
-    BAW.Case
-    BAW.Case.P8Activity
-    BAW.Case.TODOActivity
-    BAW.Case.QuickTask
-
- ////
