@@ -132,7 +132,7 @@ Where `includeSWCUpload` indicates whether the Virtual Processor Core count is u
 === Patching previously deployed _Business Services_ containers
 If you have _Business Services_ that are deployed in a production environment you can add the required annotations using kubectl patch, in the following way:
 
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
 kubectl patch deployment <deployment-name> -p '
 spec:
@@ -141,7 +141,7 @@ spec:
       annotations:
         productName: "<product-name>"
         productID: "<product-id>"
-        productVersion: "9.5.0"
+        productVersion: "{VERSION}"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
 ----
 
@@ -162,12 +162,12 @@ kubectl get deployment <deployment-name> -n <namespace> -o yaml | grep -A 5 "ann
 
 And will result in the following type of output:
 
-[source, yaml]
+[source,yaml,subs="attributes+"]
 ----
 annotations:
   productName: "<product-name>"
   productID: "<product-id>"
-  productVersion: "9.5.0"
+  productVersion: "{VERSION}"
   productMetric: "VIRTUAL_PROCESSOR_CORE"
 ----
 

@@ -14,32 +14,26 @@ If ILS is temporarily unavailable the last reported value continue to be used. D
 For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=tool-troubleshooting-support[IBM License Metric Tool → Troubleshooting and support].
 
 == Working in a containerized environment
-If you are working in a containerized environment (Kubernetes or OpenShift), when you install the Dev and Runtime Environments and create Business Services with Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]) the `includeSWCUpload` annotation is automatically included in deployment YAML files. When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
+If you are working in a containerized environment (Kubernetes or OpenShift), when you are xref:development-environment.adoc#dev-env-helm[Installing Development environment] or the xref:runtime-environment.adoc#runtime-env-helm[Installing Runtime environment] using Helm charts and create Business Services with Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]) the `includeSWCUpload` annotation is automatically included in deployment YAML files. When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
 
 The following describes the process for setting up metric uploading :
 
 . Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
 
-. Install IBM License Service (or upgrade to) version 4.x or higher, using instructions in the [ILS Documentation](https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service))
+. Install IBM License Service (or upgrade to) version 4.x or higher, using instructions in the xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation].
 
-. Create an OpenShift secret with the entitlement key: 
-* `oc create secret`
+. Create an OpenShift secret with the entitlement key: `oc create secret`
 
-. Configure ILS with the entitlement key: 
-*`oc apply`
+. Configure ILS with the entitlement key: `oc apply`
 
-. Install {PRODUCT_SHORT} components using Helm charts where the `includeSWCUpload: true` annotation is automatically included (see xref:development-environment.adoc#dev-env-helm[Installing Development environment] or runtime-environment.adoc#runtime-env-helm[Installing Runtime environment]). 
-
-. For customer-created _Business Services_, define the required annotations in a version-controlled deployment YAML file that can be used by your GitOps or CI/CD process (see xref:managing-license-entitlements.adoc#business-service-container-deployment[Managing your license entitlements])
-
-Steps 3 and 4 define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually (see xref:#manual-upload[Uploading metrics manually]). 
+The above steps define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually (see xref:#manual-upload[Uploading metrics manually]). 
 
 VPC count data is uploaded to Software Central once per day (configurable). A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
 
 === Configuring adoption metric upload
-If you need more visibility on the adoption of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you can install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. It is a namespace-level service that collects and stores metrics data. 
+In order to gather adoption metrics of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you must install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. It is a namespace-level service that collects and stores metrics data. 
 
-With UMS the following Adoption metrics are collected from {PRODUCT_SHORT} deployments in a containerized environment:
+UMS enables the collection of the following adoption metrics from {PRODUCT_SHORT} deployments in a containerized environment:
 
 * Process Step Executions (NODE_INSTANCE_COUNT): Total count of Workflow node executions across all Process Instances
 * Monthly Active Users (MAU): Tracked via UMS infrastructure
@@ -80,17 +74,21 @@ You can configure metric collection and visualization by following this procedur
        productName: "IBM Process Automation Manager Open Edition"
 ----
    
-. Apply the ServiceMeterDefinition:
+. Apply the `ServiceMeterDefinition`:
 +
 [source,bash]
 ----
 oc apply -f node-execution-meter.yaml
+----
 
-# Verify creation
+. Verify the creation of the `ServiceMeterDefinition` custom resources in the specified namespace. 
++
+[source,bash]
+----
 oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
 ----
 
-. If you want to customize UMS settings add any of the following properties to your _Business Service_ `application.properties` file:
+. To customize UMS, you can add any of the following properties to your _Business Service_ `application.properties` file:
 +
 [source,properties]
 ----
@@ -107,7 +105,7 @@ quarkus.log.category."com.ibm.bamoe.addons.ums".level=TRACE
 quarkus.log.category."com.ibm.bamoe.addons.ums".min-level=TRACE
 ----
 
-. Deploy your _Business Services_ which  automatically include the UMS metrics collection add-on.
+. Deploy your _Business Service_, which automatically include the UMS metrics collection add-on.
 
 . Metrics collection starts automatically when workflows execute and you can verify metrics Collection for your _Business Service_ using the following command:
 +
@@ -140,15 +138,15 @@ bamoe.ums.enabled=false
 NOTE: Deactivating metrics collection may impact license compliance visibility and reporting. See xref:#manual-upload[]
 
 [#manual-upload]
-=== Uploading metrics manually in ILMT
-To upload contractual data to IBM Software Central in ILMT see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to IBM Software Central]
+=== Uploading metrics manually in License Service
+To upload contractual data to IBM Software Central in License Service see...
 
 == Working with non-containerized Business Services 
 When developing non-containerized _Business Services_ you can upload metrics by configuring IBM License Metric Tool(ILMT) version 9.2.43 (or higher) with an entitlement key. This key must be configured in the ILMT Console to enable upload to IBM Software Central of the contractual VPC metric collected via SWID tags and disconnected scanners. For more information on configuring your Business Service to use required SWID tags see xref:managing-license-entitlements.adoc[Managing your license entitlements]). 
 
-. Install or upgrade to ILMT version 9.2.43 or higher (see [ILMT Documentation](https://www.ibm.com/docs/en/license-metric-tool))
+. Install or upgrade to ILMT version 9.2.43 or higher (see xref:https://www.ibm.com/docs/en/license-metric-tool[ILMT Documentation])
 
-. Ensure scanners are compatible with this version
+. Ensure scanners are compatible with this version.
 
 . Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
 
@@ -156,8 +154,11 @@ When developing non-containerized _Business Services_ you can upload metrics by 
 ** This step includes configuring the IBM Entitlement Key in ILMT
 ** For air-gapped environments, configure the entitlement key in disconnected scanner configuration
 
-. By default, after configuration, metrics are automatically uploaded once per day:
-* For on-demand upload, see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to Software Central]
+. By default, after configuration, metrics are automatically uploaded once per day. For on-demand upload, see xref:#manual-upload-ILMT[Uploading metrics manually in ILMT]
 
 . Verify that SWID tags are properly installed and that metrics have been successfully uploaded to xref:https://swc.saas.ibm.com/en-us/software-central[Software Central]
+
+[#manual-upload-ILMT]
+=== Uploading metrics manually in ILMT
+To upload contractual data to IBM Software Central in ILMT see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to IBM Software Central]
 

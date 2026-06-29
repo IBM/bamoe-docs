@@ -45,7 +45,8 @@ For both products, {PRODUCT_DM} and {PRODUCT_PAM}, clients can expect the follow
 * This solution is currently not available as a Software as a Service (SaaS) offering.
 * While active, the subscription entitles clients to use and receive support for the commercially available releases.
 * While maintaining at least one active subscription, each and every active instance or installation of the software requires active subscriptions.
-* {PRODUCT_SHORT} components and _Business Services_ you build must include the license tracking annotations, see xref:ilmt-track-bamlcns-metrictool.adoc[Tracking license use in ILMT] or xref:ilmt-track-bamlcns-kubernetes.adoc[Tracking license use in Kubernetes], depending on your development environment.
+* {PRODUCT_SHORT} components and _Business Services_ you build must include the contractual license tracking annotations, see xref:managing-license-entitlements.adoc[Managing your license entitlements].
+* Contractual license metrics must be regularly uploaded to IBM Software Central, see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central]
 
 === Licensing for Disaster Recovery or Backup
 
@@ -96,12 +97,12 @@ Additional information, can be found at https://www.ibm.com/software/passportadv
 
 == License Reporting
 
-The IBM License Metric Tool (ILMT) tracks which software programs are installed on particular physical hardware or in VMs entitled under VPCs. IBM License Service collects and measures license usage of products deployed in Kubernetes. Depending on your environment the tool or service provide reports that can be presented to IBM when compliance around entitlement capacity is requested.
+License reporting is available with IBM License Metric Tool (ILMT) in a non-container environment and with IBM License Service (ILS) in a container environment. ILMT tracks which software programs are installed on particular physical hardware or in VMs entitled under VPCs. ILS collects and measures license usage of products deployed in a cloud environment, OpenShift of Kubernetes. Depending on your environment the tool or service provide reports that can be presented to IBM when compliance around entitlement capacity is requested, and you can also configure automatic upload via ILMT or ILS. 
 
 When installing {PRODUCT_LONG} in *containers*:
 
 * The container size specifies the CPU-limit of the container. This is reported as the deployment size of the container instance for {PRODUCT_LONG}. If no CPU-limit is set for the container, then the reported size of the container is set to be the size of the worker node where the container instance is deployed.
-* Container deployments of the product components must use IBM License Service to report on their deployment for licensing usage. The IBM License Service needs to be deployed on Kubernetes. For more information see xref:ilmt-track-bamlcns-kubernetes.adoc[Tracking BAMOE License use Kubernetes]
+* Container deployments of the product components must use IBM License Service to report on their deployment for licensing usage. The IBM License Service needs to be deployed on Kubernetes. For more information see xref:managing-license-entitlements.adoc[Managing your license entitlements]
 
 When installing {PRODUCT_LONG} in *Virtual Machines (VMs)*:
 
@@ -113,10 +114,8 @@ When installing {PRODUCT_LONG} in *Virtual Machines (VMs)*:
 IBM clients are responsible for:
 
 * Deploying and configuring {PRODUCT_LONG} in line with their license entitlement.
-* Ensuring container deployments of {PRODUCT_SHORT} and _Business Services_ built with {PRODUCT_SHORT} are reporting correctly to IBM License Service.
-* Ensuring that if installing into virtual machines, that ILMT or other tools are correctly configured to track installations.
-
-Installation of the Dev and Runtime environment Helm charts enables the licensing information to be set up automatically in the Cloud environment. 
+* Ensuring that ILMT or ILS are correctly configured to track installations in your containerized or non-containerized deployment environment (see xref:managing-license-entitlements.adoc[Managing your license entitlements]).
+* Ensuring deployments of {PRODUCT_SHORT} components and _Business Services_ built with {PRODUCT_SHORT} are reporting correctly to IBM Software Central (see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central]).
 
 == Accessing the software
 

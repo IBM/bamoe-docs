@@ -17,18 +17,16 @@ This version upgrades foundational technologies and brings support for new ones:
 More information in xref:supported-environments.adoc[Learn more...].
 
 == Support for Spring Boot 4.x
-{PRODUCT_SHORT} now supports Spring Boot 4.x. This update addresses the end of support for Spring Boot 3.x and enables {PRODUCT_SHORT} customers to benefit from a fully supported foundation. It ensures that your applications remain secure, compliant and ready for future innovation xref:../.adoc[Learn more...]
+{PRODUCT_SHORT} now supports Spring Boot 4.x. This update addresses the end of support for Spring Boot 3.x and enables {PRODUCT_SHORT} customers to benefit from a fully supported foundation. It ensures that your applications remain secure, compliant and ready for future innovation xref:../upgrade/upgrade/upgrading-94x-95x.adoc.adoc[Learn more...]
 
-== New support for Db2
-{PRODUCT_SHORT} now fully supports the Db2 database to cover all key database technologies. All workflow subsystems and the {DATA_CLEANUP} and {PIM_ADDON_SHORT} run on distributed Db2. 
-
-Stateful workflow persistence can be configured for _Business Services_ that are:
+== Support for IBM Db2
+IBM {PRODUCT_SHORT} now fully supports the IBM Db2 database, completing the set of key database technologies that are supported by {PRODUCT_SHORT}. This feature ensures continuity for IBM clients who have selected IBM DB2 as a strategic database choice. All workflow subsystems and the {DATA_CLEANUP} and {PIM_ADDON_SHORT} run on distributed Db2. Stateful workflow persistence can be configured for _Business Services_ that are:
 
 * Quarkus based xref:../workflow/workflows-with-quarkus.adoc#db2-quarkus-config[Learn more...]
 
 * Spring Boot based xref:../workflow/workflows-with-quarkus.adoc#db2-spring-config[Learn more...]
 
-== Work Item Handler library 
+== New REST Service call task Work Item Handler available in library 
 The new REST API Work Item Handler is delivered in the library of Work Item Handlers (WIHs) which provides out of the box solutions for common integration tasks. The new REST WIH supports secured endpoints with OpenID Connect token acquisition, making integration with modern APIs easier and more secure. This enhancement also reduces the upgrade effort for v8 customers and simplifies connecting {PRODUCT_SHORT} workflows to external systems. 
 
 xref:../workflow/work-item-handler-intro.adoc[Learn more...]
@@ -51,16 +49,16 @@ A new section in the documentation describes how to implement common use cases t
 
 xref:../installation/container-customization-guide.adoc[Learn more...]
 
-== Workflow Runtime Aggregated Transactional external Event publishing
-Publishing Workflow-related Events to external storage systems (E.g., ElasticSearch) is now possible. This allows _Business Services_ to off-load data externally to reduce pressure in the transactional Workflow Engine database. xref:../workflow/event-driven-workflow.adoc[Learn more...]
+== Workflow Runtime aggregated transactional external Event publishing
+It is now possible to publish Process and User Task events from a _Business Service_ to any external read model (for example, an Elasticsearch index that powers a custom dashboard), without changing the Workflow Engine. You can write a single class that implements the public `org.kie.kogito.event.EventPublisher` interface. The class is auto-discovered by the Workflow Engine through CDI (Quarkus) or Spring component scanning (Spring Boot). This allows _Business Services_ to offload data externally to reduce pressure in the transactional Workflow Engine database. Two new product examples have been added to the distribution: `process-event-listeners-quarkus` and `process-event-listeners-springboot`. xref:../workflow/event-driven-workflow.adoc#external-event-publisher[Learn more...]
 
 == Quarkus and Spring Boot dependencies now managed in separate BOMs
-In order to enable {PRODUCT_SHORT} to support the most recent versions of Quarkus and Spring Boot, dependencies are now managed in two framework specific BOMs instead of the previous `bamoe-bom`. 
+{PRODUCT_SHORT} dependencies are now managed in specific BOMs for your projects in Quarkus, Spring Boot or Embedded mode instead of the previous `bamoe-bom`. This improvement enables support for the latest framework features without version conflicts._
 
 xref:../upgrade/upgrading-94x-95x.adoc[Learn more...]
 
-== Track your usage of BAMOE deployments with IBM Usage Metering Service
-The Usage Metering Service integrates with your {PRODUCT_SHORT} deployments to gather data, which can be used to view component and feature usage. This integration also enables you to ensure you are compliant with your licensing terms and collect and analyze data about the usage of deployed BAMOE components and _Business Services_. xref:../installation/reporting-usage-metrics.adoc[Learn more...]
+== Automated upload of licensing and adoption metrics to IBM Software Central 
+You now have the option to automatically upload {PRODUCT_SHORT} contractual and adoption metrics to IBM Software Central and use IBM Usage Metering Service to collect and analyze data on your {PRODUCT_SHORT} component and _Business Services_ deployments across your organization. The automated upload ensures that you are compliant with your licensing terms at all times. xref:../installation/reporting-usage-metrics.adoc[Learn more...]
 
 == New Accelerator deliverable part of {PRODUCT_SHORT} distribution
 The {PRODUCT_SHORT} distribution now includes the default Accelerator files as a downloadable archive. They were previously only available in a public Git repository on version specific branches. Delivering them as part of each release enables you to have offline access to them and quickly identify what has changed between releases. xref:../tools/applying-accelerators.adoc[Learn more...]
