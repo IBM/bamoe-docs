@@ -357,34 +357,34 @@ NAMESPACE=$(oc project -q)
 +
 [source,shell]
 ----
-docker login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
+podman login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
 ----
 +
 . Pull the {CANVAS} images from the Quay repository.
 +
 [source,shell,subs="attributes+"]
 ----
-docker pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
-docker pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
-docker pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
 ----
 +
 . Tag the images for the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-docker tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
-docker tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
-docker tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
+podman tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
+podman tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
+podman tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
 ----
 +
 . Push the images to the OpenShift internal registry.
 +
 [source,shell,subs="attributes+"]
 ----
-docker push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
-docker push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
-docker push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
 ----
 +
 . Verify that the images are available in the internal registry.
