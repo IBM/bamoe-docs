@@ -373,6 +373,70 @@ docker run -p <EXTERNAL_PORT>:8080 -e <ENV_VAR>="<VALUE>" quay.io/bamoe/manageme
 
 The {MANAGEMENT_CONSOLE} will be running at http://localhost:<EXTERNAL_PORT>
 
+[#runtime-env-tls-cert]
+== Configuring Runtime containers with Passthrough Transport Layer Security (TLS)
+{PRODUCT_SHORT} container images can now optionally serve traffic directly over HTTPS using a TLS certificate and a key provided by the customer. This enables end-to-end encryption between the user browser and the container on OpenShift, through a passthrough Route. By default TLS not active and your existing deployment behavior is maintained. 
+
+In the Runtime environment the following containers support this:
+
+[cols="1,1,1"]
+|===
+| *Container* | *Certificate environment variable* | *Key environment variable*
+
+| Management Console
+| `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_TLS_CERTIFICATE_PATH` 
+| `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_TLS_KEY_PATH`    
+
+| MCP Server 
+| `MCP_SERVER_TLS_CERTIFICATE_PATH` 
+| `MCP_SERVER_TLS_KEY_PATH`
+|===
+
+When both variables are set, the container serves HTTPS on port `8443` (Management Console, MCP Server). When the variables are unset, the container behaves exactly as before, serving HTTP only.
+
+The matching Helm subcharts for each container expose a new `tls` block that wires this up automatically:
+
+[source,yaml]
+----
+tls:
+  enabled: false        # set to true to turn on in-container TLS
+  secretName: ""        # name of an existing kubernetes.io/tls Secret (required when enabled)
+  mountPath: /etc/tls
+  certPath: /etc/tls/tls.crt
+  keyPath: /etc/tls/tls.key
+  httpsPort: 8443    
+----
+
+When `tls.enabled=true`, the chart mounts the TLS Secret into the container, sets the TLS environment variables, exposes the HTTPS port on the Service, and the OpenShift Route is configured for Passthrough termination using `openshiftRoute.tls.termination=passthrough`.
+
+When installing through the Helm chart the procedure is:
+
+. Create a Kubernetes TLS Secret in the target namespace:
++
+[source,bash]
+----
+oc create secret tls bamoe-tls \
+     --cert=path/to/tls.crt \
+     --key=path/to/tls.key
+----
+
+. In the Helm values file for the {PRODUCT_SHORT} component, enable TLS and reference the Secret:
++
+[source,yaml]
+----
+tls:
+  enabled: true
+  secretName: bamoe-tls
+openshiftRoute:
+  enabled: true
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect
+----
+
+. Run `helm install` (or `helm upgrade`) as usual.
+
+The Secret must be of type `kubernetes.io/tls` and contain both `tls.crt` and `tls.key` keys. If `tls.enabled=true` is set without a `secretName`, the chart aborts with a clear error message before reaching the cluster.
 
 [#available-environment-variables]
 == Available Environment Variables

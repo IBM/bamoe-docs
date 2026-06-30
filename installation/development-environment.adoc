@@ -860,6 +860,77 @@ gradle.settingsEvaluated { settings ->
 ----
 . Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
 
+[#dev-env-tls-cert]
+== Configuring Dev containers with Passthrough Transport Layer Security (TLS)
+{PRODUCT_SHORT} container images can optionally serve traffic directly over HTTPS using a TLS certificate and a key provided by the customer. This enables end-to-end encryption between the user browser and the container on OpenShift, through a passthrough Route. By default TLS not active and your existing deployment behavior is maintained. 
+
+In the Dev environment the following BAMOE container images support this:
+
+[cols="1,1,1"]
+|===
+| *Container* | *Certificate environment variable* | *Key environment variable*
+
+| Canvas 
+|`CANVAS_TLS_CERTIFICATE_PATH`
+| `CANVAS_TLS_KEY_PATH`  
+
+| CORS Proxy 
+|`CORS_PROXY_TLS_CERTIFICATE_PATH` 
+| `CORS_PROXY_TLS_KEY_PATH`
+
+| Extended Services 
+| `EXTENDED_SERVICES_TLS_CERTIFICATE_PATH` 
+| `EXTENDED_SERVICES_TLS_KEY_PATH`  
+|===
+
+When both variables are set, the container serves HTTPS on port `8443` (Canvas, Extended Services). CORS Proxy is the exception as it reuses its existing port (default `8080`) and serves HTTPS on the same port when TLS is enabled. When the variables are unset, the container behaves exactly as before, serving HTTP only.
+
+The matching Helm subcharts for each container expose a new `tls` block that wires this up automatically:
+
+[source,yaml]
+----
+tls:
+  enabled: false        # set to true to turn on in-container TLS
+  secretName: ""        # name of an existing kubernetes.io/tls Secret (required when enabled)
+  mountPath: /etc/tls
+  certPath: /etc/tls/tls.crt
+  keyPath: /etc/tls/tls.key
+  httpsPort: 8443       # not present for CORS Proxy; CORS Proxy reuses service.port (default 8080)
+----
+
+When `tls.enabled=true`, the chart mounts the TLS Secret into the container, sets the TLS environment variables, exposes the HTTPS port on the Service, and the OpenShift Route is configured for Passthrough termination using `openshiftRoute.tls.termination=passthrough`.
+
+When installing through the Helm chart the procedure is:
+
+. Create a Kubernetes TLS Secret in the target namespace:
++
+[source,bash]
+----
+oc create secret tls bamoe-tls \
+     --cert=path/to/tls.crt \
+     --key=path/to/tls.key
+----
+
+. In the Helm values file for the {PRODUCT_SHORT} component, enable TLS and reference the Secret:
++
+[source,yaml]
+----
+tls:
+  enabled: true
+  secretName: bamoe-tls
+openshiftRoute:
+  enabled: true
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect
+----
+
+. Run `helm install` (or `helm upgrade`) as usual.
+
+The Secret must be of type `kubernetes.io/tls` and contain both `tls.crt` and `tls.key` keys. If `tls.enabled=true` is set without a `secretName`, the chart aborts with a clear error message before reaching the cluster.
+
+For more information on how to implement this in the Runtime environment Helm chart containers see xref:runtime-environment.adoc#runtime-env-tls-cert[Configuring Runtime containers with Passthrough Transport Layer Security (TLS)]
+
 [#canvas-gitrepo-config]
 == Configuring {CANVAS} to work with supported Git providers
 

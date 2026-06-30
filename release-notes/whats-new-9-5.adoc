@@ -33,14 +33,16 @@ The new REST Service Call Task WorkItemHandler is delivered in the BAMOE WorkIte
 
 xref:../workflow/work-item-handler-intro.adoc[Learn more...]
 
-== Support for passthrough TLS termination inside BAMOE containers
-In {VERSION_950} the {PRODUCT_SHORT} container images now optionally support traffic directly over HTTPS using a TLS certificate and customer-provided keys. This enables end-to-end encryption between the user browser and the container on OpenShift through a Passthrough Route. If you are operating in regulated environments you may need TLS to be terminated as close to the application as possible to support:
+== Red Hat OpenShift Container Platform Passthrough support for BAMOE containers
+In {VERSION_950} the {PRODUCT_SHORT} container images now optionally support traffic directly over HTTPS using a TLS certificate and customer-provided keys. This enables end-to-end encryption between the user browser and the container on OpenShift through a Passthrough Route. If you are operating in regulated environments you may need TLS to be terminated as close to the application as possible, to support:
 
  * Zero-trust architectures
  * Compliance with industry standards (e.g., PCI-DSS, HIPAA)
  * Environments without Ingress controllers or where passthrough is mandated
  
-You can now choose passthrough TLS when installing your dev and runtime environment helm charts: xref:../building-deploying/security.adoc[Learn more...]
+You can now choose Passthrough TLS when installing your dev and runtime environment helm charts: xref:../installation/development-environment.adoc#dev-env-tls-cert[Learn more...]
+
+You can also configure your _Business Services_ with Passthrough TLS. xref:../building-deploying/security.adoc#bus-services-tls-cert[Learn more...]
 
 == New documented procedure to customize Dev and Runtime component containers
 A new section in the documentation describes how to implement common use cases to customize the {PRODUCT_SHORT} containers deployed in the Dev and Runtime environment. You may want to customize the containers ({CANVAS} and related containers, {MVN_REPO}, {MANAGEMENT_CONSOLE}, {MCP_SERVER}) for one of the following reasons:
@@ -51,15 +53,15 @@ A new section in the documentation describes how to implement common use cases t
 
 xref:../installation/container-customization-guide.adoc[Learn more...]
 
-== Workflow Runtime aggregated transactional external Event publishing
-It is now possible to publish Process and User Task events from a _Business Service_ to any external read model (for example, an Elasticsearch index that powers a custom dashboard), without changing the Workflow Engine. You can write a single class that implements the public `org.kie.kogito.event.EventPublisher` interface. The class is auto-discovered by the Workflow Engine through CDI (Quarkus) or Spring component scanning (Spring Boot). This allows _Business Services_ to offload data externally to reduce pressure in the transactional Workflow Engine database. Two new product examples have been added to the distribution: `process-event-listeners-quarkus` and `process-event-listeners-springboot`. xref:../workflow/event-driven-workflow.adoc#external-event-publisher[Learn more...]
+== Workflow Runtime Event publishing to external storage systems
+It is now possible to publish Process and User Task events from a _Business Service_ to any external read model, without changing the Workflow Engine. A single, stable EventPublisher interface, implemented by a custom handler, is able to receive committed Event batches from the Workflow Engine. This feature enables _Business Services_ to offload data externally, for example to an Elasticsearch index that powers a custom dashboard. Two new product examples have been added to the distribution: `process-event-listeners-quarkus` and `process-event-listeners-springboot`. xref:../workflow/event-driven-workflow.adoc#external-event-publisher[Learn more...]
 
 == Quarkus and Spring Boot dependencies now managed in separate BOMs
 {PRODUCT_SHORT} dependencies are now managed in specific BOMs for your projects in Quarkus, Spring Boot, or Embedded mode instead of the previous `bamoe-bom`. This improvement enables support for the latest framework features without version conflicts.
 
 xref:../upgrade/upgrading-94x-95x.adoc[Learn more...]
 
-== Automated upload of licensing and adoption metrics to IBM Software Central 
+== Enhanced License usage tracking 
 You now have the option to automatically upload {PRODUCT_SHORT} contractual and adoption metrics to IBM Software Central and use IBM Usage Metering Service to collect and analyze data on your {PRODUCT_SHORT} component and _Business Services_ deployments across your organization. The automated upload ensures that you are compliant with your licensing terms at all times. xref:../installation/reporting-usage-metrics.adoc[Learn more...]
 
 == New Accelerator deliverable part of {PRODUCT_SHORT} distribution
