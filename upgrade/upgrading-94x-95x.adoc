@@ -2,7 +2,7 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_94x}. 
+This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_94x}.
 
 See the following sections if you are upgrading from a version prior to this:
 
@@ -63,14 +63,13 @@ The project structure is not changed, and updates only need to be made to the ve
 
 In {PRODUCT_SHORT} version {VERSION}, the BAMOE BOM and specific Quarkus and Spring Boot BOMs are replaced by a single BAMOE-specific BOM for the type of _Business Service_.
 
-[start=1]
-. In your project POM file replace the `com.ibm.bamoe:bamoe-bom` and your framework specific BOM by one of the following, depending on how you are developing your _Business Services_
-+
+Depending on the type of your _Business Service_, in the project POM file replace the `com.ibm.bamoe:bamoe-bom` and your framework-specific BOM with one of the following dependencies:
+
 * `com.ibm.bamoe:bamoe-quarkus-bom` for Quarkus projects
 * `com.ibm.bamoe:bamoe-spring-boot-bom` for Spring Boot projects
 * `com.ibm.bamoe:bamoe-embedded-bom` for Embedded mode projects. 
 
-For more information on dependencies see xref:../reference-guide/maven-repository-libraries.adoc[{PRODUCT_SHORT} Maven repository libraries].
+For more information, see xref:../reference-guide/maven-repository-libraries.adoc[{PRODUCT_SHORT} Maven repository libraries].
 
 Due to the update to Spring Boot versions that {PRODUCT_SHORT} {VERSION_RM} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_94X}. For more information, see xref:#Spring-updates[Breaking Spring Boot Framework changes] and the Spring Boot documentation (https://docs.spring.io/spring-boot/upgrading.html[Upgrading Spring Boot]).
 
@@ -83,7 +82,7 @@ To verify that your upgrade is successful, rebuild the project using Maven's sta
 mvn clean package
 ----
 
-You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
+If your upgrade was successful, Maven prints `BUILD SUCCESS` at the end of the output.
 
 You can now continue developing your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
 
@@ -95,7 +94,7 @@ The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are available in 
 
 Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../installation/runtime-environment.adoc[Installing → Runtime Environment].
 
-If you have stateful workflows in your _Business Services_ you will need to complete step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
+If you have stateful workflows in your _Business Services_ you will need to complete Step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
 
 [#migrate-stateful-workflow-db]
 == Step 6: Upgrade your stateful Workflow database(s)
