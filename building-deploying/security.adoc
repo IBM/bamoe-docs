@@ -235,7 +235,7 @@ Finally, make sure that the `spring.autoconfigure.exclude` property is **unset**
 
 [#bus-services-tls-cert]
 == Configuring _Business Services_ with Passthrough Transport Layer Security (TLS)
-If you require end-to-end encryption between user browser and your _Business Service_ container you can use the required Accelerator and uncomment the TLS block properties in your `application.properties` file. No other dependencies or code changes are required. 
+If you require end-to-end encryption between your user's browser and your _Business Service_ container you can use the required Accelerator and uncomment the TLS block properties in your `application.properties` file. No other dependencies or code changes are required. 
 
 For Quarkus based _Business Services_ uncomment the following properties:
 
@@ -243,6 +243,8 @@ For Quarkus based _Business Services_ uncomment the following properties:
 ----
 %prod.quarkus.http.ssl.certificate.files=/var/run/secrets/tls/tls.crt
 %prod.quarkus.http.ssl.certificate.key-files=/var/run/secrets/tls/tls.key
+%prod.quarkus.http.insecure-requests=disabled
+%prod.quarkus.http.http2=false
 ----
 
 For Spring Boot based _Business Services_ uncomment the following properties:
@@ -250,6 +252,8 @@ For Spring Boot based _Business Services_ uncomment the following properties:
 [source, properties]
 ----
 server.ssl.certificate=/var/run/secrets/tls/tls.crt
+server.ssl.certificate-private-key=/var/run/secrets/tls/tls.key
+server.http2.enabled=false
 ----
 
 For _Business Services_ containing Workflows, you will need to force HTTPS-only, by switching `kogito.service.url`, `kogito.jobs-service.url`, and `kogito.data-index.url` to `https://`. You will find an inline note regarding this in the accelerator file.

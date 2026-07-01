@@ -9,7 +9,7 @@ To maintain compliance with IBM licensing terms and conditions, you must collect
 
 In addition if you install (see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=usage-metering-service[IBM Usage Metering Service]) you can collect additional metrics (e.g., Node Instance Count) and generate usage reports which can be used for auditing or to track adoption of {PRODUCT_SHORT}. Usage reports can be visualized in IBM Software Central.
 
-If ILS is temporarily unavailable the last reported value continue to be used. Data synchronizes automatically when connectivity is restored, see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation] for more details.
+If ILS is temporarily unavailable the last reported values continue to be used and data synchronizes automatically when connectivity is restored, see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation].
 
 For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=tool-troubleshooting-support[IBM License Metric Tool → Troubleshooting and support].
 
@@ -26,7 +26,9 @@ The following describes the process for setting up metric uploading :
 
 . Configure ILS with the entitlement key: `oc apply`
 
-The above steps define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually (see xref:#manual-upload[Uploading metrics manually]). 
+The above steps define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually. 
+
+// (see xref:#manual-upload[Uploading metrics manually]). 
 
 VPC count data is uploaded to Software Central once per day (configurable). A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
 
@@ -38,7 +40,7 @@ UMS enables the collection of the following adoption metrics from {PRODUCT_SHORT
 * Process Step Executions (NODE_INSTANCE_COUNT): Total count of Workflow node executions across all Process Instances
 * Monthly Active Users (MAU): Tracked via UMS infrastructure
 
-You can configure metric collection and visualization by following this procedure:
+You can configure metric collection and visualization using the following procedure:
 
 . Install IBM Usage Metering Service via the xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=services-installing-foundational-service-helm-charts[IBM Cloud Pak Foundational Services installation with Helm Charts]. 
 
