@@ -116,3 +116,40 @@ public class MyTaskListener implements UserTaskEventListener {
 ----
 
 For more information on the Event Listener Lifecycle in {VERSION_RM} see xref:../workflow/event-driven-workflow.adoc#event-listener-lifecycle[Working with Events → Implementing an Event Listener Lifecycle in the Process Engine]
+
+== Migrating External Event Emitters from {PRODUCT_SHORT} v8
+
+In {PRODUCT_SHORT} {VERSION_80X}, users who needed to replicate engine state to an external read model (for example, an Elasticsearch index that powers a custom dashboard) implemented a custom `EventEmitter` on top of `TransactionalPersistenceEventManager`. The engine delivered `InstanceView`-style snapshots through the `deliver` / `apply` / `drop` lifecycle around the JTA transaction.
+
+In BAMOE 9, the v8 type names (`EventEmitter`, `InstanceView`, `TransactionalPersistenceEventManager`) no longer exist. The equivalent extension point is the `org.kie.kogito.event.EventPublisher` interface in `kogito-api`. The engine batches the events produced during each command and delivers the batch to every registered publisher when the unit of work commits. If the unit of work is aborted, the batch is discarded and the publisher is not called.
+
+The customer surface is preserved: one (or two) implementation classes, registered through standard CDI / Spring annotations instead of a `META-INF/services` file.
+
+=== Type-by-type mapping
+
+The following table shows the {VERSION_80X} types and their {VERSION_RM} equivalents:
+
+[cols="1,2"]
+|===
+|*{PRODUCT_SHORT} {VERSION_80X}* |*{PRODUCT_SHORT} {VERSION_RM}*
+
+|`org.jbpm.persistence.api.integration.EventEmitter`
+|`org.kie.kogito.event.EventPublisher`
+
+|`TransactionalPersistenceEventManager` (`deliver` / `apply` / `drop` dispatcher)
+|`UnitOfWork` (`start` / `end` / `abort`) plus `EventManager`
+
+|`InstanceView`
+|`DataEvent<?>` - see `org.kie.kogito.event.process.*` and `org.kie.kogito.event.usertask.*`
+
+|`TaskInstanceView`
+|`UserTaskInstanceStateDataEvent`
+
+|`ProcessInstanceView`
+|`ProcessInstanceStateDataEvent`
+
+|`META-INF/services` registration
+|`@ApplicationScoped` (Quarkus) or `@Component` (Spring Boot)
+|===
+
+For the full `EventPublisher` SPI reference, the two implementation styles, and a working code example, see xref:../workflow/event-driven-workflow.adoc#external-event-publisher[Working with Events -> Publishing engine events to an external read model].
