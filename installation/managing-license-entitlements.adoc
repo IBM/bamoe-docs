@@ -9,11 +9,29 @@ Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?t
 
 NOTE: The link directs you to the instructions on installing the standalone version of IBM License Service included in the IBM Cloud Pak(TM) Foundational Services. It is important to note that the {PRODUCT_SHORT} is not part of IBM Cloud Pak(TM).
 
-When you install a component via the product specific Dev and Runtime Helm charts that correspond to your IBM license ({PRODUCT_DM} or {PRODUCT_PAM}), preconfigured license annotations are included in the global values. These annotations are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. 
+IBM License Service recognizes IBM software components or services built with IBM software running in containers, through container license annotations. 
+
+[#annotations]
+=== Annotations
+The ILS annotations depend on the {PRODUCT_SHORT} product offering you have purchased {PRODUCT_DM} or {PRODUCT_PAM}. In the YAML files or OpenShift commands shown in this section you will need to insert the values associated with your purchased offering shown below:
+
+|=== 
+|*Chargeable Software Components*| *Annotation Values*
+|{PRODUCT_DM} 
+a| `productID: "46b14c7f2f894218a7879b3f6416024f"
+productName: "IBM Decision Manager Open Edition"`
+|{PRODUCT_PAM}
+a| `productID: "72984f114b54496a8a44be139154a988"
+productName: "IBM Process Automation Manager Open Edition"`
+|===
+
+When you install a component via the Dev and Runtime Helm charts that correspond to your product offering, preconfigured license annotations are included in the global values. 
+
+These annotations are automatically propagated to all sub-chart deployments and merged with any custom pod annotations. 
 
 The merge uses the Helm merge function and happens in each deployment template. The `chargedProductAnnotations` (containing License Manager metadata) are combined with `podAnnotations` (any custom annotations). The template expressions are evaluated using the `tpl` function, which replaces token references with actual values from the global configuration.
 
-If you choose not to install via these Helm charts, the license tracking annotations must be manually added to the container deployment YAML or to each of the {PRODUCT_SHORT} containers after installation. 
+If you choose not to install via these Helm charts, the license tracking annotations must be manually added to the container deployment YAML or to each of the {PRODUCT_SHORT} containers after installation as shown in the following 
 
 For {PRODUCT_DM}:
 
@@ -30,7 +48,6 @@ spec:
         includeSWCUpload: true
 ----
 
-
 Or the following for {PRODUCT_PAM}:
 
 [source,yaml,subs="attributes+"]
@@ -42,14 +59,14 @@ spec:
         productID: "72984f114b54496a8a44be139154a988"
         productName: "IBM Process Automation Manager Open Edition"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
-        productChargedContainers:"All"
+        productChargedContainers: "All"
         includeSWCUpload: true
 
 ----
 
 Where `includeSWCUpload` indicates whether the Virtual Processor Core count is uploaded to Software Central automatically or manually (see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central])
 
-To patch the containers after installation, you can run the following commands from where they are installed, substituting your product offering and container resource name (`bamoe-canvas_deployment_name`).
+To patch the containers after installation, you can run the following commands from where they are installed, substituting your product offering information (see xref:#annotations[Annotations]) and the container resource name (`bamoe-canvas_deployment_name`):
 
 * OpenShift - {PRODUCT_DM}
 +
@@ -57,22 +74,6 @@ To patch the containers after installation, you can run the following commands f
 ----
 oc patch deployment <bamoe-canvas_deployment_name> -p \
   '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
-----
-  
-* Kubernetes - {PRODUCT_DM}
-+
-[source,shell]
-----
-kubectl patch deployment <bamoe-canvas_deployment_name> -p \
-  '{"spec": {"template":{"metadata":{"annotations":{"productID":"46b14c7f2f894218a7879b3f6416024f", "productName": "IBM Decision Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
-----
-
-* OpenShift - {PRODUCT_PAM}
-+
-[source,shell]
-----
-oc patch deployment <bamoe-canvas_deployment_name> -p \
-  '{"spec": {"template":{"metadata":{"annotations":{"productID":"72984f114b54496a8a44be139154a988", "productName": "IBM Process Automation Manager Open Edition", "productMetric": "VIRTUAL_PROCESSOR_CORE", "productChargedContainers": "All"}}}} }'
 ----
   
 * Kubernetes - {PRODUCT_PAM}
@@ -87,7 +88,7 @@ kubectl patch deployment <bamoe-canvas_deployment_name> -p \
 == Containerized Business Services deployment using IBM License Service (ILS)
 Follow the https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[procedure to install IBM License Service] for stand-alone software.
 
-You can then use ILS to track licenses in your Business Services deployed as containers in a Kubernetes or OpenShift environment. To activate this you must define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`:
+You can then use ILS to track licenses in your Business Services deployed as containers in a Kubernetes or OpenShift environment. To activate this you must define license tracking annotations in a version-controlled deployment YAML file in the pod template metadata, under `spec.template.metadata.annotations`. Substitute the {PRODUCT_PAM} specific annotations if required (see xref:#annotations[Annotations]):
 
 For {PRODUCT_DM}:
 
@@ -108,45 +109,34 @@ spec:
         includeSWCUpload: true
 ----
 
-Or the following for {PRODUCT_PAM}:
-
-[source,yaml,subs="attributes+"]
-----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-business-service
-spec:
-  template:
-    metadata:
-      annotations:
-        productName: "IBM Process Automation Manager Open Edition"
-        productID: "72984f114b54496a8a44be139154a988"
-        productVersion: "{VERSION}"
-        productMetric: "VIRTUAL_PROCESSOR_CORE"
-        includeSWCUpload: true
-----
-
 Where `includeSWCUpload` indicates whether the Virtual Processor Core count is uploaded to Software Central automatically or manually (see xref:reporting-usage-metrics.adoc[Collecting and sending metrics to IBM Software Central])
 
 === Patching previously deployed _Business Services_ containers
-If you have _Business Services_ that are deployed in a production environment you can add the required annotations using kubectl patch, in the following way:
+If you have _Business Services_ deployed in a production environment you can add the required annotations using kubectl patch, in the following way:
 
 [source,bash,subs="attributes+"]
 ----
-kubectl patch deployment <deployment-name> -p '
-spec:
-  template:
-    metadata:
-      annotations:
-        productName: "<product-name>"
-        productID: "<product-id>"
-        productVersion: "{VERSION}"
-        productMetric: "VIRTUAL_PROCESSOR_CORE"
+kubectl patch deployment <deployment-name>  --type='merge' -p {
+
+"spec": {
+  "template": {
+    "metadata": {
+      "annotations": {
+        "productName": "IBM Decision Manager Open Edition",
+        "productID": "46b14c7f2f894218a7879b3f6416024f",
+        "productVersion": "{VERSION}",
+        "productMetric": "VIRTUAL_PROCESSOR_CORE"
+        }
+      }
+    }
+  }
+}'
 ----
 
+Substitute the {PRODUCT_PAM} specific annotations if required (see xref:#annotations[Annotations])
+
 === Validating annotations
-Once you have included required annotations either before deployment or by patching, you can verify that all is correct using the following command:
+Once you have included required annotations during installation or post installation by patching, you can verify that all is correct using the following command:
 
 [source, bash]
 ----
@@ -160,7 +150,7 @@ The following example shows a command to verify and filter the "annotations" par
 kubectl get deployment <deployment-name> -n <namespace> -o yaml | grep -A 5 "annotations:"
 ----
 
-And will result in the following type of output:
+That results in the following type of output:
 
 [source,yaml,subs="attributes+"]
 ----
@@ -236,7 +226,7 @@ If the SWIDTAG_DIR is not set, the library defaults to the home directory of the
 It is important to note that if the SWIDTAG_DIR environment variable contains invalid content or an invalid path, the hosting application fails to deploy.
 
 The swidtag file is an XML file content based on ISO/IEC 19770-2:2015 specification. 
-Following is an example of the swidtag file content:
+The following shows an example swidtag file:
 
 [source,xml]
 ----

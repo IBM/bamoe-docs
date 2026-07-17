@@ -1,0 +1,621 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BAMOE Application Properties Reference</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 32px 16px 48px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; }
+  .toc { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px 20px; margin-bottom: 36px; }
+  .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #57606a; margin-bottom: 10px; }
+  .toc ol { padding-left: 18px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: #3b82d4; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  section { margin-bottom: 44px; }
+  h2.section-title {
+    font-size: 17px;
+    font-weight: 700;
+    border-bottom: 2px solid #3b82d4;
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+    scroll-margin-top: 20px;
+  }
+  h3.subsection { font-size: 14px; font-weight: 600; color: #57606a; text-transform: uppercase; letter-spacing: .04em; margin: 22px 0 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+  thead tr { background: #f7f8fa; }
+  th { text-align: left; padding: 8px 10px; font-weight: 600; border: 1px solid #e5e7eb; white-space: nowrap; }
+  td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  td:first-child { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; color: #7c5cd8; white-space: nowrap; }
+  tr:nth-child(even) { background: #fafafa; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-q { background: #dbeafe; color: #1e40af; }
+  .badge-s { background: #dcfce7; color: #166534; }
+  .badge-b { background: #fef3c7; color: #92400e; }
+  .badge-e { background: #fce7f3; color: #9d174d; }
+  .note { background: #f7f8fa; border-left: 3px solid #3b82d4; padding: 8px 12px; margin: 10px 0 16px; font-size: 13px; color: #57606a; border-radius: 0 4px 4px 0; }
+  .source-ref { font-size: 11px; color: #57606a; margin-top: 4px; }
+  footer { border-top: 1px solid #e5e7eb; padding-top: 14px; text-align: center; font-size: 12px; color: #57606a; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>BAMOE Application Properties Reference</h1>
+<p class="subtitle">All properties extracted from BAMOE 9.5.x documentation source files (*.adoc), organized by use case.<br />
+Badges: <span class="badge badge-q">Quarkus</span> <span class="badge badge-s">Spring Boot</span> <span class="badge badge-b">Both</span> <span class="badge badge-e">Env var / tool</span></p>
+
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#persistence">Persistence &amp; Database</a></li>
+    <li><a href="#security">Security, Authentication &amp; Authorization</a></li>
+    <li><a href="#tls">TLS / Transport Layer Security</a></li>
+    <li><a href="#monitoring">Monitoring, Metrics &amp; Grafana</a></li>
+    <li><a href="#messaging">Messaging, Events &amp; Kafka</a></li>
+    <li><a href="#knative">Knative Eventing Add-on</a></li>
+    <li><a href="#jobs">Jobs Service</a></li>
+    <li><a href="#transactions">Transactions &amp; Locking</a></li>
+    <li><a href="#workflow-dev">Workflow Development &amp; DevUI</a></li>
+    <li><a href="#business-calendar">Business Calendar</a></li>
+    <li><a href="#rest-wih">REST WorkItemHandler</a></li>
+    <li><a href="#rules">Rules &amp; Decision Tables</a></li>
+    <li><a href="#deployment">Container Image &amp; OpenShift Deployment</a></li>
+    <li><a href="#ums">Usage Metering Service (UMS)</a></li>
+    <li><a href="#data-cleanup">Data Cleanup Tool</a></li>
+  </ol>
+</div>
+
+
+<section id="persistence">
+<h2 class="section-title">1 · Persistence &amp; Database</h2>
+
+<h3 class="subsection">Quarkus — PostgreSQL</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default / Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.datasource.db-kind</td><td>Database driver kind for the default datasource</td><td>String</td><td><code>postgresql</code></td></tr>
+    <tr><td>quarkus.datasource.username</td><td>Database username</td><td>String</td><td>—</td></tr>
+    <tr><td>quarkus.datasource.password</td><td>Database password</td><td>String</td><td>—</td></tr>
+    <tr><td>quarkus.datasource.jdbc.url</td><td>JDBC connection URL. Supports profile expressions.</td><td>String</td><td><code>${QUARKUS_DATASOURCE_JDBC_URL:jdbc:postgresql://0.0.0.0:5432/bamoe-db}</code></td></tr>
+    <tr><td>kogito.persistence.type</td><td>Persistence backend. Must be <code>jdbc</code> for relational DBs.</td><td>String</td><td><code>jdbc</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc</p>
+
+<h3 class="subsection">Quarkus — Microsoft SQL Server</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.datasource.db-kind</td><td>Database driver kind</td><td>String</td><td><code>mssql</code></td></tr>
+    <tr><td>quarkus.datasource.jdbc.url</td><td>JDBC URL with SQL Server parameters</td><td>String</td><td><code>jdbc:sqlserver://0.0.0.0:1433;DatabaseName=bamoe-db;encrypt=true;trustServerCertificate=true;</code></td></tr>
+    <tr><td>quarkus.hibernate-orm.mapping-files</td><td>Comma-separated ORM mapping files for MSSQL entity remapping</td><td>String</td><td><code>META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml</code></td></tr>
+    <tr><td>quarkus.datasource.jdbc.new-connection-sql</td><td>SQL statement run on each new connection — used to set snapshot isolation for MSSQL</td><td>String</td><td><code>SET TRANSACTION ISOLATION LEVEL SNAPSHOT;</code></td></tr>
+    <tr><td>kie.flyway.enabled</td><td>Controls whether KIE Flyway auto-creates the database schema. Set to <code>false</code> in production when schema is managed manually (required with MSSQL snapshot isolation).</td><td>Boolean</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc</p>
+
+<h3 class="subsection">Quarkus — Oracle</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.datasource.db-kind</td><td>Database driver kind</td><td>String</td><td><code>oracle</code></td></tr>
+    <tr><td>quarkus.datasource.jdbc.url</td><td>JDBC URL for Oracle</td><td>String</td><td><code>jdbc:oracle:thin:@//oracle:1521/FREEPDB1</code></td></tr>
+    <tr><td>quarkus.hibernate-orm.mapping-files</td><td>ORM mapping files for Oracle entity remapping</td><td>String</td><td><code>META-INF/bamoe-user-task-orm.xml,META-INF/bamoe-job-service-orm.xml</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc</p>
+
+<h3 class="subsection">Quarkus — Db2</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.datasource.db-kind</td><td>Database driver kind</td><td>String</td><td><code>db2</code></td></tr>
+    <tr><td>quarkus.datasource.jdbc.url</td><td>JDBC URL for Db2</td><td>String</td><td><code>jdbc:db2://host:port/testdb</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc</p>
+
+<h3 class="subsection">Quarkus — H2 (Development only)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.datasource.db-kind</td><td>Database driver kind</td><td>String</td><td><code>h2</code></td></tr>
+    <tr><td>datasource.devservices.properties.NON_KEYWORDS</td><td>Avoids reserved-word conflicts in H2 dev services</td><td>String</td><td><code>VALUE,KEY</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc</p>
+
+<h3 class="subsection">Spring Boot — DataSource (common)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>spring.datasource.url</td><td>JDBC connection URL</td><td>String</td><td><code>jdbc:postgresql://0.0.0.0:5432/bamoe-db</code></td></tr>
+    <tr><td>spring.datasource.username</td><td>Database username</td><td>String</td><td>—</td></tr>
+    <tr><td>spring.datasource.password</td><td>Database password</td><td>String</td><td>—</td></tr>
+    <tr><td>spring.datasource.driver-class-name</td><td>JDBC driver class (required for Db2)</td><td>String</td><td><code>com.ibm.db2.jcc.DB2Driver</code></td></tr>
+    <tr><td>kogito.persistence.type</td><td>Must be <code>jdbc</code> for JDBC persistence</td><td>String</td><td><code>jdbc</code></td></tr>
+    <tr><td>kie.flyway.enabled</td><td>Enables KIE Flyway auto schema creation. Dev only.</td><td>Boolean</td><td><code>true</code> (dev), <code>false</code> (prod)</td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-springboot.adoc</p>
+
+<h3 class="subsection">Spring Boot — Microsoft SQL Server (extra)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>spring.jpa.mapping-resources</td><td>Hibernate ORM mapping files for MSSQL / Oracle entity remapping</td><td>String</td><td><code>META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-job-service-orm.xml</code></td></tr>
+    <tr><td>spring.datasource.hikari.connection-init-sql</td><td>SQL run on connection init — set SNAPSHOT isolation for MSSQL</td><td>String</td><td><code>SET TRANSACTION ISOLATION LEVEL SNAPSHOT</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-springboot.adoc</p>
+
+<h3 class="subsection">Spring Boot — H2 (Development only)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>spring.datasource.url</td><td>H2 in-memory JDBC URL with reserved-word workaround</td><td>String</td><td><code>jdbc:h2:mem:bamoe;NON_KEYWORDS=VALUE,KEY</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">KIE Flyway (Quarkus &amp; Spring Boot)</h3>
+<div class="note">Use profile prefix <code>%dev.</code> in Quarkus to scope Flyway to development only. In production, disable Flyway and apply the DDL scripts from the distribution manually.</div>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th><th>Framework</th></tr></thead>
+  <tbody>
+    <tr><td>kie.flyway.enabled</td><td>Enables/disables automatic database schema creation via KIE Flyway migrations at startup</td><td>Boolean</td><td><code>false</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>%dev.kie.flyway.enabled</td><td>Enables Flyway in Quarkus development profile only</td><td>Boolean</td><td><code>true</code></td><td><span class="badge badge-q">Quarkus</span></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-quarkus.adoc, workflow/workflows-with-springboot.adoc, building-deploying/services-deployment.adoc</p>
+</section>
+
+
+<section id="security">
+<h2 class="section-title">2 · Security, Authentication &amp; Authorization</h2>
+
+<h3 class="subsection">Quarkus — OpenID Connect (OIDC)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.oidc.enabled</td><td>Determines whether the OIDC extension is enabled</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.oidc.tenant-enabled</td><td>Specifies whether the tenant configuration is enabled</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.oidc.auth-server-url</td><td>Base URL of the OpenID Connect (OIDC) server / realm</td><td>URI</td><td>—</td></tr>
+    <tr><td>quarkus.oidc.client-id</td><td>Client ID of the application registered with the IdP</td><td>String</td><td>—</td></tr>
+    <tr><td>quarkus.oidc.credentials.secret</td><td>Client secret used by the <code>client_secret_basic</code> authentication method</td><td>String</td><td>—</td></tr>
+    <tr><td>quarkus.oidc.roles.role-claim</td><td>JWT claim path used to extract roles (e.g., Keycloak realm roles)</td><td>String</td><td><code>realm_access.roles</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Quarkus — HTTP Authorization</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.http.auth.permission."&lt;name&gt;".paths</td><td>Comma-separated URL paths (or prefix with <code>/*</code>) this permission check applies to</td><td>List&lt;URI&gt;</td><td><code>quarkus.http.auth.permission.authenticated.paths=/*</code></td></tr>
+    <tr><td>quarkus.http.auth.permission."&lt;name&gt;".policy</td><td>HTTP policy for the permission set. Built-in: <code>permit</code>, <code>deny</code>, <code>authenticated</code></td><td>String</td><td><code>quarkus.http.auth.permission.public.policy=permit</code></td></tr>
+    <tr><td>quarkus.http.auth.permission.unsecure.paths</td><td>Paths exempt from authentication (e.g., health checks)</td><td>String</td><td><code>/health/*</code></td></tr>
+    <tr><td>quarkus.http.auth.permission.unsecure.policy</td><td>Policy for exempt paths</td><td>String</td><td><code>permit</code></td></tr>
+    <tr><td>quarkus.http.auth.permission.secure.paths</td><td>Paths requiring authentication</td><td>String</td><td><code>/*</code></td></tr>
+    <tr><td>quarkus.http.auth.permission.secure.policy</td><td>Policy for secured paths</td><td>String</td><td><code>authenticated</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Spring Boot — OAuth2</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>spring.security.oauth2.resourceserver.jwt.issuer-uri</td><td>Issuer URI of the JWT token provider. Enables OAuth2 Resource Server JWT validation.</td><td>URI</td><td><code>http://127.0.0.1:8180/realms/kie</code></td></tr>
+    <tr><td>spring.security.oauth2.client.registration.&lt;id&gt;.client-id</td><td>Client ID for the OAuth2 client registration</td><td>String</td><td><code>bamoe-app</code></td></tr>
+    <tr><td>spring.security.oauth2.client.registration.&lt;id&gt;.client-secret</td><td>Client secret for the OAuth2 client registration</td><td>String</td><td>—</td></tr>
+    <tr><td>spring.security.oauth2.client.registration.&lt;id&gt;.authorization-grant-type</td><td>OAuth2 grant type</td><td>String</td><td><code>authorization_code</code></td></tr>
+    <tr><td>spring.security.oauth2.client.registration.&lt;id&gt;.scope</td><td>Scopes requested from the IdP</td><td>String</td><td><code>openid,profile,email</code></td></tr>
+    <tr><td>spring.security.oauth2.client.provider.&lt;id&gt;.issuer-uri</td><td>IdP issuer URI for the named provider</td><td>URI</td><td><code>https://keycloak.example.com/auth/realms/kie-realm</code></td></tr>
+    <tr><td>spring.security.user.name</td><td>Default username when using Spring's auto-configured basic auth</td><td>String</td><td>—</td></tr>
+    <tr><td>spring.security.user.password</td><td>Default password when using Spring's auto-configured basic auth</td><td>String</td><td>—</td></tr>
+    <tr><td>spring.autoconfigure.exclude</td><td>Disables Spring Boot auto-configuration classes. Used to turn off default security.</td><td>String</td><td><code>org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Kogito / BAMOE — User Task Authentication</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.security.auth.enabled</td><td>Globally enables the Security Context for resolving the current User Identity in User Task API</td><td>Boolean</td><td><code>false</code></td></tr>
+    <tr><td>kogito.security.auth.impersonation.allowed-for-roles</td><td>Comma-separated list of roles/groups whose members are allowed to impersonate other users when submitting User Tasks</td><td>String</td><td><code>""</code> (empty)</td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">OpenAPI / Swagger workaround (OIDC + OpenAPI conflict)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.smallrye-openapi.auto-add-bad-request-response</td><td>Prevents errors when OIDC extension is present but no additional schema is generated. Set to <code>false</code> as a workaround.</td><td>Boolean</td><td><code>true</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: building-deploying/security.adoc, upgrade/05-06-upgrading-user-groups-callback.adoc, upgrade/05-08-upgrading-authentication-authorization.adoc, release-notes/known-limitations.adoc</p>
+</section>
+
+
+<section id="tls">
+<h2 class="section-title">3 · TLS / Transport Layer Security</h2>
+
+<h3 class="subsection">Quarkus — Passthrough TLS</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>%prod.quarkus.http.ssl.certificate.files</td><td>Path to the TLS certificate file (PEM) in production</td><td>String</td><td><code>/var/run/secrets/tls/tls.crt</code></td></tr>
+    <tr><td>%prod.quarkus.http.ssl.certificate.key-files</td><td>Path to the TLS private key file (PEM) in production</td><td>String</td><td><code>/var/run/secrets/tls/tls.key</code></td></tr>
+    <tr><td>%prod.quarkus.http.insecure-requests</td><td>Disables plain HTTP when set to <code>disabled</code></td><td>String</td><td><code>disabled</code></td></tr>
+    <tr><td>%prod.quarkus.http.http2</td><td>Disables HTTP/2 for TLS passthrough scenarios</td><td>Boolean</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Spring Boot — Passthrough TLS</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>server.ssl.certificate</td><td>Path to the TLS certificate file (PEM)</td><td>String</td><td><code>/var/run/secrets/tls/tls.crt</code></td></tr>
+    <tr><td>server.ssl.certificate-private-key</td><td>Path to the TLS private key file (PEM)</td><td>String</td><td><code>/var/run/secrets/tls/tls.key</code></td></tr>
+    <tr><td>server.http2.enabled</td><td>Disables HTTP/2 for TLS passthrough scenarios</td><td>Boolean</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+
+<div class="note">For Business Services containing Workflows, also switch <code>kogito.service.url</code>, <code>kogito.jobs-service.url</code>, and <code>kogito.data-index.url</code> to <code>https://</code> when enabling TLS.</div>
+<p class="source-ref">Source: building-deploying/security.adoc</p>
+</section>
+
+
+<section id="monitoring">
+<h2 class="section-title">4 · Monitoring, Metrics &amp; Grafana</h2>
+
+<h3 class="subsection">Prometheus metrics (Quarkus &amp; Spring Boot)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th><th>Framework</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.monitoring.rule.useDefault</td><td>Export default rule (DRL) metrics. Set to <code>false</code> to disable.</td><td>Boolean</td><td><code>true</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.monitoring.process.useDefault</td><td>Export default process metrics. Set to <code>false</code> to disable.</td><td>Boolean</td><td><code>true</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.monitoring.interceptor.useDefault</td><td>Export default interceptor metrics. Set to <code>false</code> to disable.</td><td>Boolean</td><td><code>true</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.addons.monitoring.prometheus.enabled</td><td>Enables the Prometheus monitoring add-on (legacy property used in v8 upgrade path)</td><td>Boolean</td><td><code>true</code></td><td><span class="badge badge-b">Both</span></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Grafana dashboard generation</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.grafana.disabled.operational.dashboards</td><td>Comma-separated list of operational dashboard identifiers to suppress from generation</td><td>String</td><td><code>Hello,Traffic Violation</code></td></tr>
+    <tr><td>kogito.grafana.disabled.domain.dashboards</td><td>Comma-separated list of domain dashboard identifiers to suppress from generation</td><td>String</td><td><code>LoanEligibility</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Quarkus — logging (general &amp; Micrometer)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.log.level</td><td>Overall application log level</td><td>String</td><td><code>INFO</code></td></tr>
+    <tr><td>quarkus.log.category."&lt;category&gt;".level</td><td>Category-specific log level</td><td>String</td><td><code>TRACE</code></td></tr>
+    <tr><td>quarkus.micrometer.export.prometheus.enabled</td><td>Enables Micrometer Prometheus exporter</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.micrometer.export.prometheus.path</td><td>Path at which Prometheus metrics are exposed</td><td>String</td><td><code>/metrics</code></td></tr>
+    <tr><td>quarkus.opentelemetry.enabled</td><td>Enables OpenTelemetry tracing</td><td>Boolean</td><td><code>false</code></td></tr>
+    <tr><td>quarkus.opentelemetry.tracer.exporter.otlp.endpoint</td><td>OTLP exporter endpoint for OpenTelemetry traces</td><td>URI</td><td><code>http://localhost:4317</code></td></tr>
+    <tr><td>kogito.addons.tracing.decision.enabled</td><td>Enables decision (DMN) tracing add-on</td><td>Boolean</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: managing-monitoring/monitoring-services.adoc, upgrade/05-02-upgrading-client-server-projects.adoc</p>
+</section>
+
+
+<section id="messaging">
+<h2 class="section-title">5 · Messaging, Events &amp; Kafka</h2>
+
+<h3 class="subsection">MicroProfile Reactive Messaging (channel pattern)</h3>
+<div class="note">Pattern: <code>mp.messaging.[incoming|outgoing].&lt;channel-name&gt;.&lt;property&gt;</code></div>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>mp.messaging.incoming.&lt;channel&gt;.connector</td><td>Connector used for the incoming channel (e.g., <code>smallrye-kafka</code>)</td><td>String</td><td><code>smallrye-kafka</code></td></tr>
+    <tr><td>mp.messaging.incoming.&lt;channel&gt;.value.deserializer</td><td>Kafka value deserializer class</td><td>String</td><td><code>org.apache.kafka.common.serialization.StringDeserializer</code></td></tr>
+    <tr><td>mp.messaging.incoming.&lt;channel&gt;.auto.offset.reset</td><td>Kafka offset reset policy</td><td>String</td><td><code>earliest</code></td></tr>
+    <tr><td>mp.messaging.incoming.&lt;channel&gt;.topic</td><td>Kafka topic name (if different from channel name)</td><td>String</td><td>—</td></tr>
+    <tr><td>mp.messaging.outgoing.&lt;channel&gt;.connector</td><td>Connector for the outgoing channel</td><td>String</td><td><code>smallrye-kafka</code></td></tr>
+    <tr><td>mp.messaging.outgoing.&lt;channel&gt;.value.serializer</td><td>Kafka value serializer class</td><td>String</td><td><code>org.apache.kafka.common.serialization.StringSerializer</code></td></tr>
+    <tr><td>mp.messaging.outgoing.&lt;channel&gt;.topic</td><td>Kafka topic name (if different from channel name)</td><td>String</td><td>—</td></tr>
+    <tr><td>kafka.bootstrap.servers</td><td>Kafka broker URL(s) used by Smallrye connectors</td><td>String</td><td><code>localhost:9092</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Process event add-on — pre-defined channels</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>mp.messaging.outgoing.kogito-processinstances-events.connector</td><td>Connector for process instance events channel</td><td>String</td><td><code>smallrye-kafka</code></td></tr>
+    <tr><td>mp.messaging.outgoing.kogito-processinstances-events.topic</td><td>Kafka topic for process instance events</td><td>String</td><td><code>kogito-processinstances-events</code></td></tr>
+    <tr><td>mp.messaging.outgoing.kogito-processinstances-events.value.serializer</td><td>Serializer for process instance events</td><td>String</td><td><code>org.apache.kafka.common.serialization.StringSerializer</code></td></tr>
+    <tr><td>mp.messaging.outgoing.kogito-usertaskinstances-events.*</td><td>Same set of properties for user task instance events channel</td><td>—</td><td><code>kogito-usertaskinstances-events</code></td></tr>
+    <tr><td>mp.messaging.outgoing.kogito-variables-events.*</td><td>Same set of properties for variable events channel</td><td>—</td><td><code>kogito-variables-events</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Messaging add-on — default channel names</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.addon.messaging.incoming.defaultName</td><td>Overrides the default incoming channel name (<code>kogito_incoming_stream</code>)</td><td>String</td><td><code>kogito_incoming_stream</code></td></tr>
+    <tr><td>kogito.addon.messaging.outgoing.defaultName</td><td>Overrides the default outgoing channel name (<code>kogito_outgoing_stream</code>)</td><td>String</td><td><code>kogito_outgoing_stream</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Event publishing — disable per type</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.events.usertasks.enabled</td><td>Enable/disable publishing of user task instance events</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>kogito.events.variables.enabled</td><td>Enable/disable publishing of process variable events</td><td>Boolean</td><td><code>true</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/event-driven-workflow.adoc, reference-guide/tmp--addons.adoc</p>
+</section>
+
+
+<section id="knative">
+<h2 class="section-title">6 · Knative Eventing Add-on</h2>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>org.kie.kogito.addons.knative.eventing.sink.namespace</td><td>Kubernetes namespace for the Knative sink</td><td>String</td><td><code>default</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.sink.name</td><td>Name of the Knative sink resource</td><td>String</td><td><code>my-sink</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.sink.api-version</td><td>Kubernetes API version of the sink resource</td><td>String</td><td><code>eventing.knative.dev/v1</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.sink.kind</td><td>Kubernetes resource kind of the sink</td><td>String</td><td><code>Broker</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.broker</td><td>Name of a pre-defined Broker to use instead of generating a default</td><td>String</td><td><code>myKafkaBroker</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.generate-kogito-source</td><td>When <code>true</code>, generates a <code>KogitoSource</code> instead of a <code>SinkBinding</code></td><td>Boolean</td><td><code>false</code></td></tr>
+    <tr><td>org.kie.kogito.addons.knative.eventing.auto-generate-broker</td><td>Enables automatic generation of a default in-memory Broker</td><td>Boolean</td><td><code>true</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: reference-guide/tmp--addons.adoc</p>
+</section>
+
+
+<section id="jobs">
+<h2 class="section-title">7 · Jobs Service</h2>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th><th>Framework</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.jobs-service.schedulerChunkInMinutes</td><td>Interval (in minutes) at which the embedded Jobs Service synchronizes jobs from the persistent store. Used in multi-pod deployments.</td><td>Integer</td><td><code>10</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.jobs-service.exception-details-enabled</td><td>When <code>true</code>, exposes detailed error messages for failed jobs in the Management Console</td><td>Boolean</td><td><code>false</code></td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.jobs-service.numberOfWorkerThreads</td><td>Number of worker threads. Set to <code>1</code> as a workaround for extra task generation after timer nodes in multi-instance subprocesses.</td><td>Integer</td><td>—</td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.jobs-service.management.heartbeat.management-id</td><td>Unique ID string for the Jobs Service heartbeat management (needed when not using embedded Jobs Service in legacy setups)</td><td>String</td><td>—</td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.jobs-service.url</td><td>URL of the external Jobs Service. Switch to <code>https://</code> when TLS is enabled.</td><td>URI</td><td>—</td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.data-index.url</td><td>URL of the external Data-Index service. Switch to <code>https://</code> when TLS is enabled.</td><td>URI</td><td>—</td><td><span class="badge badge-b">Both</span></td></tr>
+    <tr><td>kogito.service.url</td><td>Base URL of this Business Service — used for callbacks and links. Switch to <code>https://</code> when TLS is enabled.</td><td>URI</td><td>—</td><td><span class="badge badge-b">Both</span></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: building-deploying/services-deployment.adoc, managing-monitoring/consoles.adoc, building-deploying/security.adoc, release-notes/known-limitations.adoc</p>
+</section>
+
+
+<section id="transactions">
+<h2 class="section-title">8 · Transactions &amp; Locking</h2>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.transactionEnabled</td><td>Globally enables/disables transactions for the entire application</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>kogito.processes.transactionEnabled</td><td>Enables/disables transactions for the Process API layer, overriding the global setting</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>kogito.usertasks.transactionEnabled</td><td>Enables/disables transactions for the User Tasks API layer, overriding the global setting</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>kogito.persistence.optimistic.lock</td><td>Enables optimistic locking to handle concurrent access to the same process instance. Has no effect when transactions are disabled.</td><td>Boolean</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/database-considerations.adoc</p>
+</section>
+
+
+<section id="workflow-dev">
+<h2 class="section-title">9 · Workflow Development &amp; DevUI</h2>
+
+<h3 class="subsection">Spring Boot Web Console</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>bamoe.web-console.enabled</td><td>Enables the BAMOE Spring Web Console developer UI</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>bamoe.web-console.users.&lt;username&gt;.groups</td><td>Comma-separated list of groups for a named user in the Web Console. Used for development-time task simulation.</td><td>String</td><td><code>bamoe.web-console.users.jdoe.groups=admin,HR,IT</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-springboot.adoc</p>
+
+<h3 class="subsection">Spring Boot — GraphQL (Data-Index) UI</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>spring.graphql.graphiql.enabled</td><td>Enables the GraphiQL UI for the Data-Index GraphQL API</td><td>Boolean</td><td><code>false</code></td></tr>
+    <tr><td>spring.graphql.graphiql.path</td><td>Path at which the GraphiQL UI is accessible</td><td>String</td><td><code>/graphiql</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/workflows-with-springboot.adoc</p>
+
+<h3 class="subsection">Quarkus — Swagger / OpenAPI</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.swagger-ui.always-include</td><td>Includes the Swagger UI even in production builds</td><td>Boolean</td><td><code>false</code></td></tr>
+    <tr><td>quarkus.smallrye-openapi.path</td><td>Path at which the OpenAPI spec is served</td><td>String</td><td><code>/q/openapi</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: upgrade/05-02-upgrading-client-server-projects.adoc</p>
+
+<h3 class="subsection">Runtime — HTTP</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.http.port</td><td>HTTP port the Quarkus application listens on</td><td>Integer</td><td><code>8080</code></td></tr>
+  </tbody>
+</table>
+</section>
+
+
+<section id="business-calendar">
+<h2 class="section-title">10 · Business Calendar (calendar.properties)</h2>
+<div class="note">These properties go in <code>src/main/resources/calendar.properties</code> — their presence activates the Business Calendar feature automatically.</div>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>business.start.hour</td><td>Hour of day when business starts (0–23)</td><td>Integer</td><td><code>9</code></td></tr>
+    <tr><td>business.end.hour</td><td>Hour of day when business ends; must be &gt; start hour (0–23)</td><td>Integer</td><td><code>17</code></td></tr>
+    <tr><td>business.hours.per.day</td><td>Calculated automatically as end − start. Do not set directly.</td><td>Integer (calc.)</td><td><code>8</code></td></tr>
+    <tr><td>business.weekend.days</td><td>Comma-separated day numbers (1=Sun … 7=Sat). Use <code>0</code> to treat all days as working days.</td><td>Integer list</td><td><code>7,1</code> (Sat &amp; Sun)</td></tr>
+    <tr><td>business.days.per.week</td><td>Calculated automatically as 7 − number of weekend days. Do not set directly.</td><td>Integer (calc.)</td><td><code>5</code></td></tr>
+    <tr><td>business.holiday.date.format</td><td>Date format pattern used for <code>business.holidays</code></td><td>String</td><td><code>yyyy-MM-dd</code></td></tr>
+    <tr><td>business.holidays</td><td>Holiday dates. Single: <code>2024-12-25</code>. List: <code>2024-12-25,2024-12-31</code>. Range: <code>2024-11-12:2024-11-14</code>.</td><td>String</td><td>(none)</td></tr>
+    <tr><td>business.cal.timezone</td><td>Timezone for all business time calculations (Java TimeZone format). Defaults to system timezone (UTC in Quarkus).</td><td>String</td><td>system default</td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Custom Business Calendar (application.properties)</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.processes.businessCalendar</td><td>Fully-qualified class name of a custom <code>BusinessCalendar</code> implementation. Overrides the default <code>BusinessCalendarImpl</code>. Remove <code>calendar.properties</code> when using this setting.</td><td>String</td><td><code>org.acme.MyCustomBusinessCalendar</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/extending-workflow-engine.adoc, upgrade/05-07-upgrading-business-calendar.adoc</p>
+</section>
+
+
+<section id="rest-wih">
+<h2 class="section-title">11 · REST WorkItemHandler (Service Call Task)</h2>
+
+<h3 class="subsection">Access token (configured strategy)</h3>
+<div class="note">Format: <code>kogito.processes.{processId}.{RestServiceCallTaskId}.access_token</code> — used when <code>AccessTokenAcquisitionStrategy=configured</code>.</div>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>kogito.processes.&lt;processId&gt;.&lt;taskId&gt;.access_token</td><td>Pre-configured OAuth/Bearer access token for the named REST Service Call Task in a given process. Required for system-triggered workflows. Can reference an environment variable via <code>${TOKEN_VAR}</code>.</td><td>String</td><td><code>kogito.processes.user-lookup.FindUserRestCall.access_token=${USER_MGMT_TOKEN}</code></td></tr>
+    <tr><td>kogito.rest.default.timeout</td><td>Default timeout in milliseconds for REST calls made by the WorkItemHandler</td><td>Integer (ms)</td><td><code>30000</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Debug logging</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.log.category."org.kogito.workitem.rest".level</td><td>Log level for REST WorkItemHandler request/response diagnostics (Quarkus)</td><td>String</td><td><code>INFO</code></td></tr>
+    <tr><td>quarkus.log.category."org.kie.kogito.process.workitems".level</td><td>Log level for the Kogito process work items engine (Quarkus)</td><td>String</td><td><code>INFO</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: workflow/WIH-BAMOE-REST.adoc, workflow/WIH-use-cases-errors.adoc</p>
+</section>
+
+
+<section id="rules">
+<h2 class="section-title">12 · Rules &amp; Decision Tables (Drools)</h2>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>drools.trimCellsInDTable</td><td>Controls whether whitespace is trimmed from decision table cell values before processing. Set to <code>false</code> to preserve intentional whitespace in cell values.</td><td>Boolean</td><td><code>true</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: editing/authoring-rules.adoc</p>
+</section>
+
+
+<section id="deployment">
+<h2 class="section-title">13 · Container Image &amp; OpenShift Deployment</h2>
+
+<h3 class="subsection">Quarkus container image build</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.container-image.build</td><td>Triggers container image build during Maven package phase when set to <code>true</code></td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.container-image.push</td><td>Pushes the built image to the registry when <code>true</code></td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.container-image.builder</td><td>Container image builder to use (<code>docker</code>, <code>jib</code>, <code>podman</code>)</td><td>String</td><td><code>docker</code></td></tr>
+    <tr><td>quarkus.container-image.registry</td><td>Container image registry URL</td><td>String</td><td><code>docker.io</code></td></tr>
+    <tr><td>quarkus.container-image.group</td><td>Registry group or username</td><td>String</td><td><code>myuser</code></td></tr>
+    <tr><td>quarkus.container-image.name</td><td>Image name</td><td>String</td><td><code>myapp</code></td></tr>
+    <tr><td>quarkus.container-image.tag</td><td>Image tag</td><td>String</td><td><code>v1.0.0</code></td></tr>
+    <tr><td>quarkus.docker.buildx.platform</td><td>Target platform for Docker Buildx cross-builds. Required for IBM Z (s390x) targets.</td><td>String</td><td><code>linux/amd64</code> or <code>linux/s390x</code></td></tr>
+    <tr><td>quarkus.jib.platforms</td><td>Target platform(s) for Jib builds. Use for IBM Z targets.</td><td>String</td><td><code>linux/s390x</code></td></tr>
+    <tr><td>quarkus.podman.platform</td><td>Target platform for Podman builds</td><td>String</td><td><code>linux/s390x</code></td></tr>
+    <tr><td>quarkus.native.enabled</td><td>Enables native compilation (Gradle)</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.package.jar.enabled</td><td>Enables/disables JAR packaging (Gradle — set to <code>false</code> for native-only builds)</td><td>Boolean</td><td><code>true</code></td></tr>
+  </tbody>
+</table>
+
+<h3 class="subsection">Quarkus OpenShift deployment</h3>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>quarkus.openshift.deploy</td><td>Deploys the application to OpenShift when <code>true</code> (passed as Maven system property)</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.openshift.route.expose</td><td>Creates an OpenShift Route for the deployment when <code>true</code></td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>quarkus.openshift.route.tls.termination</td><td>TLS termination type for the OpenShift Route</td><td>String</td><td><code>edge</code></td></tr>
+    <tr><td>quarkus.openshift.route.tls.insecure-edge-termination-policy</td><td>Policy for insecure edge termination</td><td>String</td><td><code>None</code></td></tr>
+    <tr><td>quarkus.hibernate-orm.database.generation</td><td>Hibernate DDL generation mode (legacy — prefer KIE Flyway)</td><td>String</td><td><code>update</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: building-deploying/services-build.adoc, getting-started/deploying-to-openshift.adoc</p>
+</section>
+
+
+<section id="ums">
+<h2 class="section-title">14 · Usage Metering Service (UMS)</h2>
+<div class="note">Properties are set in the Business Service <code>application.properties</code> to configure metric collection for IBM Software Central compliance reporting.</div>
+<table>
+  <thead><tr><th>Property</th><th>Description</th><th>Type</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>bamoe.ums.enabled</td><td>Enables or disables the UMS metrics collection add-on</td><td>Boolean</td><td><code>true</code></td></tr>
+    <tr><td>bamoe.ums.api.endpoint</td><td>Internal cluster endpoint for the UMS upload API</td><td>URI</td><td><code>https://ibm-usage-metering-instance.${BAMOE_NAMESPACE}.svc.cluster.local:8081/api/v1/event</code></td></tr>
+    <tr><td>bamoe.ums.api.auth.type</td><td>Authentication type for UMS API calls</td><td>String</td><td><code>bearer</code></td></tr>
+    <tr><td>bamoe.ums.api.auth.token</td><td>Bearer token for UMS API authentication. Should reference a secret.</td><td>String</td><td><code>${UMS_AUTH_TOKEN}</code></td></tr>
+    <tr><td>quarkus.log.category."com.ibm.bamoe.addons.ums".level</td><td>Log level for the UMS add-on (useful for troubleshooting)</td><td>String</td><td><code>INFO</code></td></tr>
+    <tr><td>quarkus.log.category."com.ibm.bamoe.addons.ums".min-level</td><td>Minimum log level the UMS add-on will emit</td><td>String</td><td><code>INFO</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: installation/reporting-usage-metrics.adoc</p>
+</section>
+
+
+<section id="data-cleanup">
+<h2 class="section-title">15 · Data Cleanup Tool (Environment Variables)</h2>
+<div class="note">These are environment variables passed to the BAMOE Data Cleanup container image, not <code>application.properties</code> entries.</div>
+<table>
+  <thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Mandatory</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>QUARKUS_DATASOURCE_USERNAME</td><td>Database username</td><td>String</td><td>✓</td><td>—</td></tr>
+    <tr><td>QUARKUS_DATASOURCE_PASSWORD</td><td>Database password</td><td>String</td><td>✓</td><td>—</td></tr>
+    <tr><td>QUARKUS_DATASOURCE_JDBC_URL</td><td>JDBC connection URL for the target database</td><td>String</td><td>✓</td><td>—</td></tr>
+    <tr><td>QUARKUS_PROFILE</td><td>Database profile to use. Values: <code>postgresql</code>, <code>mssql</code>, <code>oracle</code></td><td>String</td><td>✓</td><td>—</td></tr>
+    <tr><td>QUARKUS_LOG_LEVEL</td><td>Overall Quarkus log level for the tool</td><td>String</td><td>—</td><td><code>INFO</code></td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_SUBSYSTEMS</td><td>Comma-separated list of subsystems to clean up. Options: <code>data-audit,data-index</code> or <code>data-audit</code> alone. Cleaning only <code>data-index</code> without <code>data-audit</code> is not supported.</td><td>List&lt;String&gt;</td><td>—</td><td><code>data-audit,data-index</code></td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_BATCH_SIZE</td><td>Number of process instances per delete transaction. Keep moderate to avoid DB performance impact.</td><td>Integer</td><td>—</td><td><code>1000</code></td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN_PERIOD</td><td>Delete processes older than this many days before today. Takes precedence over <code>OLDER_THAN</code> if both are set.</td><td>Integer (days)</td><td>—</td><td>—</td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_OLDER_THAN</td><td>Delete processes completed/aborted before this date (format: <code>YYYY-MM-DD</code>)</td><td>Date</td><td>—</td><td>—</td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_PROCESSES</td><td>Comma-separated list of parent process IDs to include in cleanup. Non-parent IDs are skipped.</td><td>List&lt;String&gt;</td><td>—</td><td>all</td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_LOG_LEVEL</td><td>Log level for tool-specific log messages</td><td>String</td><td>—</td><td><code>INFO</code></td></tr>
+    <tr><td>BAMOE_DATA_CLEANUP_TOOL_ACCEPT</td><td>Set to <code>true</code> to confirm deletion. When <code>false</code> (default), the tool performs a dry run showing what would be deleted.</td><td>Boolean</td><td>—</td><td><code>false</code></td></tr>
+  </tbody>
+</table>
+<p class="source-ref">Source: managing-monitoring/managing-runtime-data.adoc</p>
+</section>
+
+<footer>
+  Made with IBM Bob
+</footer>
+
+</div>
+</body>
+</html>

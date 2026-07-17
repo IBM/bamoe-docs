@@ -80,7 +80,7 @@ You can configure metric collection and visualization using the following proced
 +
 [source,bash]
 ----
-oc apply -f node-execution-meter.yaml
+oc apply -f node-execution-meter.yaml -n ${BAMOE_NAMESPACE}
 ----
 
 . Verify the creation of the `ServiceMeterDefinition` custom resources in the specified namespace. 
@@ -90,19 +90,19 @@ oc apply -f node-execution-meter.yaml
 oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
 ----
 
-. To customize UMS, you can add any of the following properties to your _Business Service_ `application.properties` file:
+. To customize UMS, you can add any of the following optional properties to your _Business Service_ `application.properties` file:
 +
 [source,properties]
 ----
-# Enable UMS addon, used to deactivate
+# Activate/deactivate the UMS addon
 bamoe.ums.enabled=true
-# UMS API endpoint - internal cluster service for upload port
+# Specify UMS API endpoint - internal cluster service for upload port
 bamoe.ums.api.endpoint=https://ibm-usage-metering-instance.${BAMOE_NAMESPACE}.svc.cluster.local:8081/api/v1/event
-# UMS API authentication type
+# Specify UMS API authentication type
 bamoe.ums.api.auth.type=bearer
 # UMS API authentication token (reference to secret)
 bamoe.ums.api.auth.token=${UMS_AUTH_TOKEN}
-# UMS Logging (optional - for troubleshooting)
+# Activate UMS Logging for troubleshooting
 quarkus.log.category."com.ibm.bamoe.addons.ums".level=TRACE
 quarkus.log.category."com.ibm.bamoe.addons.ums".min-level=TRACE
 ----
