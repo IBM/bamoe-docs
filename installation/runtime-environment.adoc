@@ -4,32 +4,32 @@ include::../styles/images.adoc[]
 
 This section describes how to install the components required to host and manage deployed Business Services in the runtime environment:
 
-{MANAGEMENT_CONSOLE}:: for monitoring and administration,
+{MANAGEMENT_CONSOLE}:: to monitor and carry out administration of deployed _Business Services_.
 {MCP_SERVER}:: to enable AI agents to connect to Business Services.
 
 [#runtime-env-helm]
 == The Runtime environment Helm chart
-The recommended way of installing {MANAGEMENT_CONSOLE} and {MCP_SERVER} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} offering that you have purchases licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
+The recommended way of installing {MANAGEMENT_CONSOLE} and {MCP_SERVER} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} offering that corresponds to your license:
 
-* pamoe-{VERSION}-runtime-environment-helm-chart
-* dmoe-{VERSION}-runtime-environment-helm-chart
+* pamoe-{VERSION}-runtime-environment-helm-chart for {PRODUCT_PAM}.
+* dmoe-{VERSION}-runtime-environment-helm-chart for {PRODUCT_DM}.
 
-These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each {PRODUCT_SHORT} offering.
+These Helm charts include the necessary licensing annotations, avoiding the need for the manual configuration required in previous releases. The annotations are injected into all deployed containers and ensure accurate license tracking from deployment. The charts are pre-configured with the correct product IDs, product names, and metrics for each {PRODUCT_SHORT} offering, greatly simplifying the installation process.
 
-The charts integrate Management Console configuration via Helm parameters, enabling centralized configuration in a single `values.yaml`, version-controlled settings, and automatic conversion to environment variables during deployment, eliminating manual configuration, see xref:#helm-chart-configuration [Configuration reference for Runtime Helm Charts]
+The charts enable the configuration of Management Console and MCP Server through Helm parameters which are automatically converted to environment variables during deployment. This enables the centralization of all configuration parameters, in a single `values.yaml` that can be managed in version control systems, see xref:#helm-chart-configuration [Configuration reference for Runtime Helm Charts]
 
-Each Dev Helm chart contains two sub-charts:
+Each Runtime Helm chart contains two sub-charts which you can also install individually. However if you do choose this option you will need to manage licensing and other configuration manually:
 
 * management_console: {MANAGEMENT_CONSOLE} application for monitoring and managing process instances, available via https://quay.io/repository/bamoe/management-console[quay.io/bamoe/management-console@{IMAGE_VERSION}]
 * mcp_server: {MCP_SERVER} contains the Model Context Protocol server enabling AI agents to invoke _Business Services_, available via https://quay.io/repository/bamoe/mcp-server[quay.io/bamoe/mcp-server:{IMAGE_VERSION}]
 
-The only difference between the PAMOE and DMOE Dev environment Helm chart is the License Service annotations which contain different `productID` and `productName`. All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
+All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
 ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
 
 The {PRODUCT_SHORT} Runtime Helm charts are architecture-agnostic and work for both:
 
 * Linux/s390x architecture which runs on the IBM Z platform
-* Linux/x86_64 architecture
+* Linux/x86_64 architecture which runs on other platform architectures supported by {PRODUCT_SHORT}.
 
 All {PRODUCT_SHORT} container images are available as multi-architecture images on Quay.io, and the host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
 
@@ -175,7 +175,7 @@ Following is the list of all available configurations for the Helm chart.
 
 == Deploy directly on OpenShift (using `oc` CLI)
 
-If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
+If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Runtime Helm chart.
 
 NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
 
@@ -354,7 +354,7 @@ NOTE: For a list of environment variables, check the <<available-environment-var
 // The {MANAGEMENT_CONSOLE} is now accessible at the route URL shown in the output (for example, `\https://bamoe-management-console-bamoe-runtime.apps.example.com`), and the {MCP_SERVER} is accessible at its respective route URL (for example, `\https://bamoe-mcp-server-bamoe-runtime.apps.example.com`).
 
 == Running locally with Docker
-Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev Helm chart.
+Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Runtime Helm chart.
 
 Start the container with:
 

@@ -25,29 +25,29 @@ For more information on using the extensions, see xref:../tools/developer-tools-
 
 [#dev-env-helm]
 == The Dev environment Helm chart
-The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} Offering that you have purchased licenses for, {PRODUCT_DM} or {PRODUCT_PAM}:
+The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} offering that corresponds to your license:
 
-* pamoe-{VERSION}-dev-environment-helm-chart
-* dmoe-{VERSION}-dev-environment-helm-chart
+* pamoe-{VERSION}-dev-environment-helm-chart for {PRODUCT_PAM}.
+* dmoe-{VERSION}-dev-environment-helm-chart for {PRODUCT_DM}.
 
-These Helm charts include the necessary licensing annotations and do not require any manual configuration, as was the case in previous releases. Required annotations are injected into all deployed containers, ensuring accurate license tracking from deployment, and simplifying the installation process. The charts are pre-configured with the correct product IDs, product names, and metrics for each {PRODUCT_SHORT} offering.
+These Helm charts include the necessary licensing annotations, avoiding the need for the manual configuration required in previous releases. The annotations are injected into all deployed containers and ensure accurate license tracking from deployment. The charts are pre-configured with the correct product IDs, product names, and metrics for each {PRODUCT_SHORT} offering, greatly simplifying the installation process.
 
-The charts integrate Canvas configuration via Helm parameters, enabling centralized configuration in a single `values.yaml`, version-controlled settings, and automatic conversion to environment variables during deployment, eliminating manual configuration, see xref:#helm-chart-config-ref [Configuration reference for Dev Helm Charts]
+The charts enable the configuration of Maven, Canvas and its backend services through Helm parameters which are automatically converted to environment variables during deployment. This enables the centralization of all configuration parameters, in a single `values.yaml` that can be managed in version control systems, see xref:#helm-chart-config-ref [Configuration reference for Dev Helm Charts]
 
-Each Dev Helm chart contains four sub-charts which you can install individually but you will need to manage licensing and other configuration manually:
+Each Dev Helm chart contains four sub-charts which you can also install individually. However if you do choose this option you will need to manage licensing and other configuration manually:
 
 * canvas: The main {CANVAS} application for modeling BPMN and DMN, available via https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
 * cors_proxy: The service for cross-origin requests, that enables {CANVAS} to communicate directly from the browser, with Git and Cloud providers, available via https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
 * extended_services: The service that enhances {CANVAS} capabilities with the DMN Runner and BPMN and DMN model static validation services, available via https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
 * maven_repository: The Maven artifact repository required to develop _Business Services_, available via https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
 
-The only difference between the PAMOE and DMOE Dev environment Helm chart is the License Service annotations which contain different `productID` and `productName`. All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
+All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
 ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
 
 The {PRODUCT_SHORT} Dev Helm charts are architecture-agnostic and work for both:
 
-* Linux/s390x architecture which runs on the IBM Z platform
-* Linux/x86_64 architecture
+* Linux/s390x architecture which runs on the IBM Z platform.
+* Linux/x86_64 architecture which runs on other platform architectures supported by {PRODUCT_SHORT}.
 
 If you prefer to install the Dev environment components individually using OpenShift CLI and Docker this can be done using the individual {PRODUCT_SHORT} container images. They are available as multi-architecture images on Quay.io. The host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
 
@@ -312,9 +312,9 @@ You should have a secure protocol (HTTPS) available for the {CANVAS} installatio
 ////
 
 [#air-gapped-canvas-deployment]
-== Deploy {CANVAS} in an air-gapped OpenShift environment
+== Install {CANVAS} in an air-gapped OpenShift environment
 
-If you have an air-gapped OpenShift cluster and need to deploy {CANVAS} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the application.
+If you are installing in an air-gapped OpenShift cluster and need to install the Dev Helm chart using images from the internal registry, you pull images from Quay.io, push them to the OpenShift internal registry, before deploying the environment components.
 
 
 . Log in to the OpenShift cluster using the OpenShift CLI.
