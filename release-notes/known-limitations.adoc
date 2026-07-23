@@ -12,17 +12,17 @@ Table 1. Known limitations
 
 |BPMN Editor: Timer configuration resets when editing multiple Timer Events.
 |When you configure two timer nodes in a BPMN file, the settings of the first timer node reset incorrectly after you navigate away and return to it. The editor resets the timer option to "Fire multiple times" and changes the syntax dropdown to ISO, even though the CRON value remains in the text field.
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 |After you configure the first timer node, click any other node before configuring the second timer node. This action prevents the reset and preserves the correct timer option and syntax selection.
 
 |Native compilation support for workflow projects.
 |Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 |Do not use native compilation if your _Business Services_ include stateful workflow.
 
 |OpenAPI spec auto-generation when using the _io.quarkus:quarkus-oidc_ extension.
 |The _io.quarkus:quarkus-smallrye-openapi_ extension will cause errors when starting a Business Service if the _io.quarkus:quarkus-oidc_ extension is also present and no other schema is generated. This only happens if the _io.quarkus:quarkus-oidc_ extension is enabled.
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 a|Add the following to your `application.properties` file:
 `quarkus.smallrye-openapi.auto-add-bad-request-response=false`
 
@@ -35,7 +35,7 @@ a|Users who rely heavily on imported DMN models to build modular DMN models with
 
 * Tested using Scenario and Simulation files
 
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 |To avoid this issue, restructure your models to avoid relying on nested imports for Input Data.
 
 |Developer Tools for VS Code: Extension update does not refresh the `bamoe.accelerators.definitions` setting.
@@ -80,12 +80,12 @@ The following are the {VERSION} Accelerator references:
 ----
 |Kafka consumer group ACL configuration requires review.
 |BAMOE includes Apache Kafka components affected by CVE-2026-41115. This issue is caused by a discrepancy between the Kafka documentation and the actual authorization behavior of the CONSUMER_GROUP_DESCRIBE API. The Kafka implementation correctly requires the DESCRIBE permission on a GROUP resource, while the documentation previously indicated that READ permission was required. No software fix is available because the implementation is functioning as intended. However, existing Kafka ACL configurations may require review to ensure permissions are granted appropriately.
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 |Review Kafka consumer group ACLs and verify that permissions are configured according to the corrected authorization model. Grant DESCRIBE permissions only where required and remove unnecessary permissions to maintain the principle of least privilege.
 
 |Workflow Engine: Extra tasks are generated after timer node execution in multi-instance subprocess
 |Extra tasks are generated after timer node execution in multi-instance subprocess.
-|{VERSION_950}
+|{VERSION_950}, {VERSION_951}
 |Add the following to your `application.properties` file:
 `kogito.jobs-service.numberOfWorkerThreads=1`
 
