@@ -10,7 +10,7 @@ Some features present in {CANVAS} are not available for {DEV_TOOLS}, but you can
 
 Test Scenarios in {PRODUCT} enable you to validate the functionality of business decisions and business decision data. In a Test Scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
 
-You define Test Scenarios in `.scesim` (scenario simulation) files that you can model using {{DEV_TOOLS}]. You can use one or multiple `.scesim` files in your _Business Service_ project, and each `.scesim` file can contain one or multiple Test Scenarios based on the defined decision data.
+You define Test Scenarios in `.scesim` (scenario simulation) files that you can model using {DEV_TOOLS}. You can use one or multiple `.scesim` files in your _Business Service_ project, and each `.scesim` file can contain one or multiple Test Scenarios based on the defined decision data.
 
 .Example Test Scenarios for 'PersonDecisions' DMN decision logic
 
@@ -18,28 +18,27 @@ image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDec
 
 When you run the Test Scenarios in your _Business Service_ project, all Test Scenarios in all `.scesim` files are run as part of the same command. However, individual Test Scenarios are independent, so one scenario cannot affect or modify another. You can run Test Scenarios at any time during project development. You do not need to compile or deploy your decision service to run Test Scenarios, but your _Business Service_ project needs to be compilable and free from build errors.
 
+This documentation provides a step-by-step guide on how to use the Test Scenario Editor in VS Code to test DMN assets created in {PRODUCT_SHORT}. For more examples, see xref:../getting-started/examples.adoc[Example Business Service projects].
 
-This documentation provides a step-by-step guide on how to use the Test Scenario Editor in VS Code to test DMN assets created in {PRODUCT_SHORT}. For more information, see an existing project in https://github.com/apache/incubator-kie-kogito-examples/tree/stable/kogito-quarkus-examples/dmn-pmml-quarkus-example[kie-kogito-examples] GitHub repo. However, this reference will provide the steps to enable Test Scenario in your own project.
-
-NOTE: Currently, {PRODUCT_SHORT} supports DMN-based Test Scenario only and not the Rule-based Test Scenario. It is still possible to **run** a Rule-based Test Scenario generated with {PRODUCT_SHORT} version {VERSION_80X} in Business Central using the old APIs. You can find an example xref:../getting-started/examples.adoc[here].
+NOTE: {PRODUCT_SHORT} supports DMN-based Test Scenario only and not the Rule-based Test Scenario. It is still possible to **run** a Rule-based Test Scenario generated with {PRODUCT_SHORT} version {VERSION_80X} in Business Central using the old APIs.
 
 // TBD move to upgrade
 
-Also, all the DMN-based scesim assets created prior to version {VERSION} requires a user action to update the related DMN file location. This is requested because the DMN file path is now managed in a relative format.
+Also, all the DMN-based scesim assets created prior to version {VERSION} require a user action to update the related DMN file location. This is required because the DMN file path is now managed in a relative format.
 
 == Project Setup
 
 To run the scenario, you must have set up {MVN_REPO} and {DEV_TOOLS}. See xref:../installation/development-environment.adoc[Installing → Dev Environment]. Optionally, you can use Language Support for Java(TM) by Red Hat.
 
-== Cloning the Example Project
+== Accessing the Example Project
 
-If you are a new {PRODUCT_SHORT} user and do not have any project to set up yet, or you prefer having an out-of-the-box project to deal with, you can use the previously mentioned example in the `incubator-kie-kogito-examples` repository.
+If you are a new {PRODUCT_SHORT} user and do not have any project to set up yet, or you prefer having an out-of-the-box project to deal with, you can use an example project available in BAMOE.
 
-1. Clone the `incubator-kie-kogito-examples` repository.
-2. Open {DEV_TOOLS} and navigate to `incubator-kie-kogito-examples/kogito-quarkus-examples/dmn-quarkus-example`.
-This project contains all the necessary files and prerequisites for this tutorial.
+To access the example project, go to the xref:../release-notes/whats-new-9-5.adoc#download-doc[Download documents] section, download the Example ZIP file and choose the example that matches your _Business Service_ project requirements.
 
-== Setup any project
+The example project contains all the necessary files and prerequisites for this tutorial.
+
+== Setting up any project
 
 To enable Test Scenario in your project, follow these steps:
 
@@ -61,9 +60,9 @@ image::developer-tools/scesim-activator.png[scesim activator]
 3. Create the `src/test/resources` directory for storing `.scesim` files.
 
 == Creating a Test Scenario
-Create `PersonDecisions.dmn` file in `src/main/resources` directory.
-Its content is available at xref:../getting-started/business-rule-microservice.adoc#example-person-decisions-dmn[Example PersonDecisions DMN file] section.
-It is the first model that is tested using a `.scesim` file.
+Create the `PersonDecisions.dmn` file in the `src/main/resources` directory.
+Its content is available in the xref:../getting-started/business-rule-microservice.adoc#example-person-decisions-dmn[Example PersonDecisions DMN file] section.
+This is the first model that is tested using a `.scesim` file.
 
 Then, in the `src/test/resources` directory, create a new file with the `.scesim` extension.
 
@@ -107,7 +106,7 @@ For this example, the Test Scenario specifies the following values:
 * *EXPECT*: Set the following value:
 ** *isAdult* -> *value*: `true`
 
-The corresponding `PersonDecisions.dmn` model in this example contains an `isAdult` DMN decision that determines the persons with more than 18 years of age are adults. This example Test Scenario tests whether the person John Quark with 20 years of age is correctly identified by the `isAdult` DMN decision as an adult (`true`), based on the decision logic.
+The corresponding `PersonDecisions.dmn` model in this example contains an `isAdult` DMN decision that determines that persons older than 18 years of age are adults. This example Test Scenario tests whether the person John Quark, aged 20, is correctly identified by the `isAdult` DMN decision as an adult (`true`), based on the decision logic.
 
 Right-click any cell in row 1 and select *Insert row below* to create additional Test Scenarios as needed.
 
@@ -120,7 +119,7 @@ For this example, a second Test Scenario in row 2 specifies the following values
 * *EXPECT*: Set the following value:
 ** *isAdult* -> *value*: `false`
 
-This example scenario tests whether the person Jenny Quark with 15 years of age is correctly identified by the `isAdult` DMN decision as not an adult (`false`), based on the decision logic.
+This example scenario tests whether the person Jenny Quark, aged 15, is correctly identified by the `isAdult` DMN decision as not an adult (`false`), based on the decision logic.
 --
 * Continue adding Test Scenarios as needed to complete the Test Scenario file.
 +
