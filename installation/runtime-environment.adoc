@@ -173,7 +173,7 @@ Following is the list of all available configurations for the Helm chart.
 
 ////
 
-== Deploy directly on OpenShift (using `oc` CLI)
+== Deploy directly on OpenShift (using oc CLI)
 
 If you have an OpenShift cluster and are authenticated through the `oc` CLI tool, follow these steps to deploy the {MANAGEMENT_CONSOLE}. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Runtime Helm chart.
 
@@ -203,155 +203,14 @@ oc label routes/bamoe-management-console-app app.kubernetes.io/part-of=bamoe-man
 oc label deployments/bamoe-management-console-app app.kubernetes.io/part-of=bamoe-management-console-app
 oc label deployments/bamoe-management-console-app app.openshift.io/runtime=js
 ----
-+
-. Configure Environment Variables
-+
- You can configure the {MANAGEMENT_CONSOLE} by using the environment variables in the Deployment:
+
+. Configure the {MANAGEMENT_CONSOLE} via the environment variables in the Deployment:
+
 [source,shell,subs="attributes+"]
 ----
 oc set env deployment/bamoe-management-console-app <ENV_VAR>="<VALUE>"
 ----
 NOTE: For a list of environment variables, check the <<available-environment-variables>> section.
-
-// [#air-gapped]
-// == Deploy in an air-gapped OpenShift environment
-//
-// If you have an air-gapped OpenShift cluster and need to deploy {MANAGEMENT_CONSOLE} and {MCP_SERVER} using images from the internal registry, follow these steps. This procedure involves pulling images from Quay.io, pushing them to the OpenShift internal registry, and deploying the applications.
-//
-//
-// . Log in to the OpenShift cluster using the OpenShift CLI.
-// +
-// [source,shell]
-// ----
-// oc login <OPENSHIFT_API_URL>
-// ----
-// +
-// . Select or create the target Namespace where the runtime environment components will be deployed.
-// +
-// [source,shell]
-// ----
-// oc project bamoe-runtime
-// ----
-// +
-// . Retrieve the OpenShift internal image registry route.
-// +
-// [source,shell]
-// ----
-// oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'
-// ----
-// +
-// If the default route is not enabled, enable it using the following command.
-// +
-// [source,shell]
-// ----
-// oc patch configs.imageregistry.operator.openshift.io/cluster --type=merge -p '{"spec":{"defaultRoute":true}}'
-// ----
-// +
-// . Set environment variables for the registry and namespace.
-// +
-// [source,shell]
-// ----
-// REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
-// NAMESPACE=$(oc project -q)
-// ----
-// +
-// . Log in to the OpenShift image registry.
-// +
-// [source,shell]
-// ----
-// docker login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
-// ----
-// +
-// . Pull the runtime environment images from the Quay repository.
-// +
-// [source,shell,subs="attributes+"]
-// ----
-// docker pull --arch amd64 quay.io/bamoe/management-console:{IMAGE_VERSION}
-// docker pull --arch amd64 quay.io/bamoe/mcp-server:{IMAGE_VERSION}
-// ----
-// +
-// . Tag the images for the OpenShift internal registry.
-// +
-// [source,shell,subs="attributes+"]
-// ----
-// docker tag quay.io/bamoe/management-console:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/management-console:{IMAGE_VERSION}
-// docker tag quay.io/bamoe/mcp-server:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/mcp-server:{IMAGE_VERSION}
-// ----
-// +
-// . Push the images to the OpenShift internal registry.
-// +
-// [source,shell,subs="attributes+"]
-// ----
-// docker push $REGISTRY/$NAMESPACE/management-console:{IMAGE_VERSION} --tls-verify=false
-// docker push $REGISTRY/$NAMESPACE/mcp-server:{IMAGE_VERSION} --tls-verify=false
-// ----
-// +
-// . Verify that the images are available in the internal registry.
-// +
-// [source,shell]
-// ----
-// oc get imagestreams
-// ----
-// +
-// .Example output
-// [source,shell,subs="attributes+"]
-// ----
-// NAME                   IMAGE REPOSITORY                                                                                             TAGS             UPDATED
-// management-console     default-route-openshift-image-registry.apps.example.com/bamoe-runtime/management-console                     {IMAGE_VERSION}   2 minutes ago
-// mcp-server             default-route-openshift-image-registry.apps.example.com/bamoe-runtime/mcp-server                             {IMAGE_VERSION}   21 seconds ago
-// ----
-// +
-// . Define environment variables for naming and labeling the resources.
-// +
-// [source,shell]
-// ----
-// export APP_PART_OF=bamoe-runtime-environment
-// export APP_NAME_MANAGEMENT_CONSOLE=bamoe-management-console
-// export APP_NAME_MCP_SERVER=bamoe-mcp-server
-// ----
-// +
-// . Deploy the {MANAGEMENT_CONSOLE} and label its resources.
-// +
-// [source,shell,subs="attributes+"]
-// ----
-// oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/management-console:{IMAGE_VERSION} --name=$APP_NAME_MANAGEMENT_CONSOLE
-//
-// oc create route edge --service=$APP_NAME_MANAGEMENT_CONSOLE
-// oc label services/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
-// oc label routes/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
-// oc label deployments/$APP_NAME_MANAGEMENT_CONSOLE app.kubernetes.io/part-of=$APP_PART_OF
-// oc label deployments/$APP_NAME_MANAGEMENT_CONSOLE app.openshift.io/runtime=nodejs
-// ----
-// +
-// . Deploy the {MCP_SERVER} and label its resources.
-// +
-// [source,shell,subs="attributes+"]
-// ----
-// oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/mcp-server:{IMAGE_VERSION} --name=$APP_NAME_MCP_SERVER
-//
-// oc create route edge --service=$APP_NAME_MCP_SERVER
-// oc label services/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
-// oc label routes/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
-// oc label deployments/$APP_NAME_MCP_SERVER app.kubernetes.io/part-of=$APP_PART_OF
-// oc label deployments/$APP_NAME_MCP_SERVER app.openshift.io/runtime=nodejs
-// ----
-// +
-// . Retrieve the route details to access the deployed applications.
-// +
-// [source,shell]
-// ----
-// oc get route
-// ----
-// +
-// .Example output
-// [source,shell]
-// ----
-// NAME                       HOST/PORT                                                                PATH   SERVICES                   PORT        TERMINATION   WILDCARD
-// bamoe-management-console   bamoe-management-console-bamoe-runtime.apps.example.com                         bamoe-management-console   8080-tcp    edge          None
-// bamoe-mcp-server           bamoe-mcp-server-bamoe-runtime.apps.example.com                                 bamoe-mcp-server           8080-tcp    edge          None
-// ----
-//
-// The {MANAGEMENT_CONSOLE} is now accessible at the route URL shown in the output (for example, `\https://bamoe-management-console-bamoe-runtime.apps.example.com`), and the {MCP_SERVER} is accessible at its respective route URL (for example, `\https://bamoe-mcp-server-bamoe-runtime.apps.example.com`).
 
 == Running locally with Docker
 Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Runtime Helm chart.
@@ -362,7 +221,6 @@ Start the container with:
 ----
 docker run -p <EXTERNAL_PORT>:8080 quay.io/bamoe/management-console:{IMAGE_VERSION}
 ----
-
 
 If necessary, pass the environment variables with the `-e` flag:
 
