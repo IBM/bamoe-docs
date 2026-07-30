@@ -2,7 +2,7 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section shows the different options to deploy a business application to OpenShift using different methods. Choose the appropriate deployment method based on the development workflow and environment requirements.
+This section shows the different options to deploy a _Business Service_ to OpenShift. Choose the appropriate deployment method based on the development workflow and environment requirements.
 
 == Prerequisites
 
@@ -33,11 +33,11 @@ To build and deploy the application directly on OpenShift, follow these steps:
 oc login
 ----
 
-. Add the OpenShift extension to the Quarkus project:
+. Add the OpenShift and Docker extension to the Quarkus project:
 +
 [source,shell]
 ----
-mvn quarkus:add-extension -Dextensions='quarkus-openshift'
+mvn quarkus:add-extension -Dextensions='quarkus-openshift',quarkus-container-image-docker"
 ----
 
 . Update the `src/main/resources/application.properties` file to enable the creation of an OpenShift Route by adding the following properties. For more information, see https://quarkus.io/version/3.20/guides/deploying-to-openshift#exposing_routes[Exposing routes]:
@@ -68,7 +68,7 @@ If you are working on Linux s390x on the IBM Z platform, you must override the `
 In addition `quarkus-openshift` uses a default image `groundnuty/k8s-wait-for:no-root-v1.7` for wait-for-container image task that does not support the s390x architecture. To use this extension, you need to use a custom wait-for container image that is built for s390x architecture, see https://quarkus.io/guides/init-tasks#using-a-custom-wait-for-container-image[Quarkus Guides → Using a custom wait-for container image].
 ====
 
-=== Build Locally with Docker and Automatically Deploy on OpenShift
+=== Build Locally with Docker and automatically deploy on OpenShift
 
 The image created in the process is based on the IBM Semeru image (`icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal`), which can be customized by editing the `Dockerfile.jvm` file in `src/main/docker`.
 
@@ -241,6 +241,54 @@ Example: `docker.io`:: The URL of the container image registry where the Docker 
 Example: `myuser`:: The group or user in the container image registry.
 Example: `myapp`:: The name of the Docker image to be built.
 Example: `v1.0.0`:: The tag of the Docker image.
+
+=== Deploying your Business Service as an Uber Jar to OpenShift
+
+To package your _Business Service_ as an Uber Jar, build a container image based on the IBM Semeru runtime and deploy it directly to OpenShift using binary builds and the OpenShift CLI as shown in the following procedure:
+
+. Build your project in the usual way:
++
+`mvn clean package`
+
+. Log in to OpenShift CLI using the following command:
++
+`oc login`
+
+. Add the following `Dockerfile` to your project root folder, replacing the `<app>-runner.jar` with the name of your application runner Jar:
++
+[source,bash]
+----
+FROM icr.io/appcafe/ibm-semeru-runtimes:open-17-jre-ubi-minimal
+
+USER 0
+
+COPY target/<app>-runner.jar /app/application.jar
+
+RUN chgrp -R 0 /app && \
+chmod -R g+rwX /app
+
+USER 1001
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["java","-jar","/app/application.jar"]
+----
+
+. Create the Binary Build configuration using your Dockerfile, specifying the name of the OpenShift deployment to be created:
++
+`oc new-build --name=<deployment_name> <1> --binary --strategy=docker`
+
+. Start the build which uploads local files to OpenShift, builds the container image using the Dockerfile, and pushes the image to the registry, using the following command:
++
+`oc start-build <deployment_name> --from-dir=. --follow`
+
+. Deploy the _Business Service_ image as an Openshift application:
++
+`oc new-app <deployment_name>`
+
+Your newly built image is now available an OpenShift application.
 
 == Next steps
 
