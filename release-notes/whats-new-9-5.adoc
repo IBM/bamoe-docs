@@ -2,34 +2,39 @@
 include::../partials/attributes.adoc[]
 include::../styles/images.adoc[]
 
-This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VERSION_95x} versions.
+This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VERSION_X} versions.
 
+////
 Version {VERSION} is now available. You can find information on fixes and known limitations in {VERSION} in the section: xref:#fix-list-known-limitations[Fixes and Known Limitations in {VERSION_RM} versions]
+////
 
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
 
-* Spring Boot - {SPRING_VERSION_95} from {SPRING_VERSION_94}
-* (New!) IBM Db2 - 11.5, 12.1
+* TBD
 
 More information in xref:supported-environments.adoc[Learn more...].
 
-== Support for Spring Boot 4.x
-{PRODUCT_SHORT} now supports Spring Boot 4.x. This update addresses the end of support for Spring Boot 3.x and enables {PRODUCT_SHORT} customers to benefit from a fully supported foundation. It ensures that your applications remain secure, compliant and ready for future innovation.
 
-xref:../upgrade/upgrading-94x-95x.adoc[Learn more...]
+== Workflow engine - Data isolation for _Business Services_ connected to a single database
 
-== Support for IBM Db2
-IBM {PRODUCT_SHORT} now fully supports the IBM Db2 database, completing the set of key database technologies that are supported by {PRODUCT_SHORT}. This feature ensures continuity for IBM clients who have selected IBM Db2 as a strategic database choice. All workflow subsystems and the {DATA_CLEANUP} and {PIM_ADDON_SHORT} run on distributed Db2. Stateful workflow persistence can be configured for _Business Services_ that are:
+When multiple _Business Services_ within the Compact Architecture configuration, they may share the same database. In the previous versions of {PRODUCT_SHORT} the persistence subsystems — Data Index, Jobs Service, Data Audit, User Task storage, and Process Instance storage were able to read data from any _Business Service_ in that shared database, causing data leakage between services. To avoid this each _Business Service_ required its own database. 
 
-* Quarkus based xref:../workflow/workflows-with-quarkus.adoc#db2-quarkus-config[Learn more...]
+In {PRODUCT_SHORT} {VERSION_VM}, you are are now able to activate data isolation between services with a single configuration property: `kogito.persistence.data-isolation.enabled=true`. When enabled, each _Business Service_ automatically filters all database queries to return only its own data. The filtering happens at the SQL level and no additional network calls or external services are required.
 
-* Spring Boot based xref:../workflow/workflows-with-quarkus.adoc#db2-spring-config[Learn more...]
+xref:../workflow/database-considerations.adoc[Learn more...]
 
-== New REST Service Call Task WorkItemHandler added to the WIHs Library
-The new REST Service Call Task WorkItemHandler is delivered in the BAMOE WorkItemHandlers (WIHs) Library which provides out of the box solutions for common integration tasks. The new WorkItemHandler supports secured endpoints with OpenID Connect token acquisition, making integration with modern APIs easier and more secure. This enhancement also reduces the upgrade effort for v8 customers and simplifies connecting {PRODUCT_SHORT} workflows to external systems. 
 
-xref:../workflow/work-item-handler-intro.adoc[Learn more...]
+== Workflow engine - Workflow versioning
+Due to historical limitations, workflow versioning in {PRODUCT_SHORT} 9 is done using the process ID, meaning that evolving a workflow will generate multiple IDs (e.g., hiring, hiring2, and so on). The workflow engine generates endpoints based on the process ID of a workflow. By changing the workflow process ID, customers are required to update their client applications to use new endpoints (for example, update /hiring to /hiring2).
+ 
+
+To address routing between multiple Business Services, {PRODUCT_SHORT} {VERSION} introduces a new capability called "Routing Management". This capability will focus on managing the routing of requests between different _Business Services_, ensuring that the correct workflow is invoked based on the request context. This is similar to the feature provided by KIE Container {PRODUCT_SHORT} (VERSION_80x)
+
+The Data isolation for _Business Services_ connected to a single database" feature ensures that existing process instances remain bound to the process definition from which they were created.
+
+
+xref:../building-deploying/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
 
 == Red Hat OpenShift Container Platform Passthrough support for BAMOE containers
 {PRODUCT_SHORT} container images now optionally support traffic directly over HTTPS using a TLS certificate and customer-provided keys. This enables end-to-end encryption between the user browser and the container on OpenShift through a Passthrough Route. If you are operating in regulated environments you may need TLS to be terminated as close to the application as possible, to support:
@@ -44,28 +49,12 @@ Passthrough TLS can be configured for:
 
 * _Business Services_ through Accelerators. xref:../building-deploying/security.adoc#bus-services-tls-cert[Learn more...]
 
-== New documented procedure to customize Dev and Runtime component containers
-A new section in the documentation describes how to implement common use cases to customize the {PRODUCT_SHORT} containers deployed in the Dev and Runtime environment. You may want to customize the containers ({CANVAS} and related containers, {MVN_REPO}, {MANAGEMENT_CONSOLE}, {MCP_SERVER}) for one of the following reasons:
+== Automatic execution of {PIM_ADDON} on _Business Service_ startup
+ In {PRODUCT_SHORT} {VERSION_95x}, the {PIM_ADDON} was run manually by users to execute migration plans after deployment. This meant that if you are using Blue/Green deployment pipelines you could not use the {PIM_ADDON} because pipelines terminate the old service version immediately after the new version passes health/readiness probes, and as a consequnce there was no window for an operator to trigger the migration externally between the two service versions being live simultaneously.
 
-* to comply with corporate security policies, 
-* to rapidly patch vulnerabilities, 
-* or to standardize your container infrastructure.
+{PRODUCT_SHORT} {VERSION} enables {PIM_ADDON} to be optionally configured to execute automatically on _Business Service_ startup.
 
-xref:../installation/container-customization-guide.adoc[Learn more...]
-
-== Workflow Runtime Event publishing to external storage systems
-It is now possible to publish Process and User Task events from a _Business Service_ to any external read model, without changing the Workflow Engine. A single, stable EventPublisher interface, implemented by a custom handler, is able to receive committed Event batches from the Workflow Engine. This feature enables _Business Services_ to offload data externally, for example, to an Elasticsearch index that powers a custom dashboard. Two new product examples have been added to the distribution: `process-event-listeners-quarkus` and `process-event-listeners-springboot`. xref:../workflow/event-driven-workflow.adoc#external-event-publisher[Learn more...]
-
-== Quarkus and Spring Boot dependencies now managed in separate BOMs
-{PRODUCT_SHORT} dependencies are now managed in specific BOMs for your projects in Quarkus, Spring Boot, or Embedded mode instead of the previous `bamoe-bom`. This improvement enables support for the latest framework features without version conflicts.
-
-xref:../upgrade/upgrading-94x-95x.adoc[Learn more...]
-
-== Enhanced License usage tracking 
-You now have the option to automatically upload {PRODUCT_SHORT} contractual and adoption metrics to IBM Software Central and use IBM Usage Metering Service to collect and analyze data on your {PRODUCT_SHORT} component and _Business Services_ deployments across your organization. The automated upload ensures that you are compliant with your licensing terms at all times. xref:../installation/reporting-usage-metrics.adoc[Learn more...]
-
-== New Accelerators deliverable part of {PRODUCT_SHORT} distribution
-The {PRODUCT_SHORT} distribution now includes the default Accelerators files as a downloadable archive. They were previously only available in a public Git repository on version specific branches. Delivering them as part of each release enables you to have offline access to them and quickly identify what has changed between releases. xref:../tools/applying-accelerators.adoc[Learn more...]
+xref:../managing-monitoring/migration-with-pim.adoc[Learn more...]
 
 [#fix-list-known-limitations]
 == Fixes and Known Limitations in {VERSION_95} versions
