@@ -19,7 +19,7 @@ v8-to-v9-upgrade-tutorials/
 │   └── v9-app/ (migrated v9 application code)
 ├── tutorial-02-mortgage-application/
 ├── tutorial-03-traffic-violation/
-└── ... (13 tutorials total)
+└── ... (14 tutorials total)
 ```
 
 ## Tutorial List
@@ -65,26 +65,38 @@ v8-to-v9-upgrade-tutorials/
    - Work item handlers and template-based notifications
    - Custom work item handler migration
 
-### Custom Scenarios (4 tutorials)
+### Security (1 tutorial)
+
+11. **[Tutorial 11: Custom Identity Provider](./tutorial-11-usergroupcallback-security/README.md)**
+    - Replacing v8 UserGroupCallback with a custom IdentityProvider in v9
+    - CDI-based security configuration and Keycloak integration
+
+### Custom Scenarios (3 tutorials)
 
 9. **[Tutorial 9: Complex Data Models](./tutorial-09-complex-data-models/README.md)**
    - JPA entities with @Entity annotations and Hibernate validation
    - Data model migration patterns
 
-10. **[Tutorial 10: Multi-Module Projects](./tutorial-10-multi-module-projects/README.md)**
+10. **[Tutorial 10: Multi-Module Projects](./tutorial-10-multi-module/README.md)**
     - Maven multi-module structure and dependency management
     - Project organization in v9
 
-11. **[Tutorial 11: Database Integration & Async Processing](./tutorial-11-database-async-processing/README.md)**
+12. **[Tutorial 12: Database Integration](./tutorial-12-database-integration/README.md)**
     - JDBC connections and transaction management
     - Async work item handlers and callbacks
 
 ### Common Issues & Solutions (1 tutorial)
 
-12. **[Tutorial 12: Common Migration Issues and Solutions](./tutorial-12-common-migration-issues/README.md)**
+13. **[Tutorial 13: Common Migration Issues and Solutions](./tutorial-13-common-issues/README.md)**
     - Comprehensive guide to known migration issues
     - Problem descriptions, solutions, and code examples
     - Quick reference for troubleshooting
+
+### Case Management (1 tutorial)
+
+14. **[Tutorial 14: Case Management IT Orders](./tutorial-14-case-management-it-orders/README.md)**
+    - Migration of v8 ad-hoc case management to v9
+    - Handling conditional milestone activation changes
 
 ## Tutorial Structure
 
@@ -189,7 +201,7 @@ During tutorial development, we've identified and documented these common issues
 10. **Null Values** - Prints `null$` in output
 11. **Package Names** - Many packages renamed
 
-See [Tutorial 13](./tutorial-13-common-migration-issues/README.md) for detailed solutions.
+See [Tutorial 13](./tutorial-13-common-issues/README.md) for detailed solutions.
 
 ## Additional Resources
 
@@ -201,7 +213,7 @@ See [Tutorial 13](./tutorial-13-common-migration-issues/README.md) for detailed 
 
 For questions or issues:
 
-1. Check [Tutorial 13: Common Migration Issues](./tutorial-13-common-migration-issues/README.md)
+1. Check [Tutorial 13: Common Migration Issues](./tutorial-13-common-issues/README.md)
 2. Review the [official upgrade guide](https://www.ibm.com/docs/en/ibamoe/9.3.x?topic=upgrading-from-80x)
 3. Contact BAMOE support
 
