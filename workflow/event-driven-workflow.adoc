@@ -59,8 +59,6 @@ The following table shows more detail on message events and the corresponding Ka
 
 |===
 
-// Correlation feature (although this is advanced and could also be linking to the process-event-driven example itself)
-
 To configure messaging capabilities for your _Business Services_ in Quarkus add the `org.kie:kie-addons-quarkus-messaging` dependency. For the dependency, see xref:../reference-guide/maven-repository-libraries.adoc#_workflows_quarkus_add_ons_and_extra_features[Workflows (Quarkus add-ons and extra features)].
 
 As the Quarkus add-on is vendor independent you will need to add the `io.quarkus:quarkus-messaging-kafka` dependency to be able to use Kafka as the message broker. For more information, see xref:https://central.sonatype.com/artifact/io.quarkus/quarkus-messaging-kafka[`io.quarkus:quarkus-messaging-kafka`] external documentation.
@@ -69,9 +67,17 @@ You can see an example application of an event driven process (`process-event-dr
 
 The Spring Boot add-on is Kafka-specific therefore you will only need to add the `org.kie:kie-addons-springboot-messaging` dependency to enable messaging. For more information, see xref:https://central.sonatype.com/artifact/org.kie/kie-addons-springboot-messaging[`org.kie:kie-addons-springboot-messaging`] external documentation.
 
+// Correlation feature (although this is advanced and could also be linking to the process-event-driven example itself)
+
 == Correlating Messages to Engines at Runtime
 
-Correlation uses three BPMN components to route messages to the correct process instance:
+In the following cases you will want to use the the Correlation feature:
+
+* The message sender does not know or need to know the specific Process Instance ID
+* The matching key is a business identifier already present in the message payload and not an internal engine ID
+* You want loose coupling where routing logic is in the BPMN Process Definition and not in the message producer. In this situation the message producer sends domain events and the engine decides where they land.
+
+Correlation uses three BPMN components to route messages to the correct Process Instance at runtime:
 
 . *Correlation Property* - Defines which field to extract from the message
 +
@@ -81,14 +87,14 @@ Example: `<bpmn2:messagePath>id</bpmn2:messagePath>` extracts the `id` field
 +
 Example: `<bpmn2:correlationKey id="CorrelationKeyId">` references the property above
 
-. *Correlation Subscription* - Defines the expected value for matching
+. *Correlation Subscription* - Defines the expected value for matching with a running Process Instance
 +
 Example: `<bpmn2:dataPath>"1"</bpmn2:dataPath>` means only match if `id = "1"`
 
 *Runtime Behavior*: When a message arrives, the engine:
 
 * Extracts the correlation property value (e.g., `id` field from message)
-* Checks if any process instance expects that specific value
+* Checks if any Process Instance expects that specific value
 * Delivers the message only to matching instances
 * Discards messages with no match
 
@@ -138,11 +144,7 @@ mp.messaging.outgoing.<channel-name>.value.serializer=org.apache.kafka.common.se
 
 == Message Routing with kogitoprocrefid
 
-For intermediate message workflows, `kogitoprocrefid` routes incoming messages to the correct waiting process instance. This field needs to come in on the intermediate message. The value should be the Process Instance ID of the process that is currently waiting. This is a necessary step for getting the incoming message assigned to the right Process Instance.
-
-**When is it needed?**
-
-Use `kogitoprocrefid` when you have multiple Process Instances waiting at the same intermediate catch event and need to route a message to a specific instance. Without `kogitoprocrefid`, the message will be delivered to any waiting Process Instance, which may not be the intended one.
+When you have multiple Process Instances waiting for the same intermediate catch event you can use the `kogitoprocrefid` field to route incoming messages to a specific waiting Process Instance. The value must be the Process Instance ID of the process that is currently waiting. The sender must have obtained ID previously, for example, from a start-event response, REST API call or external storage. Without `kogitoprocrefid`, the message will be delivered to any waiting Process Instance resulting in unintended consequences.
 
 **How to include it in the message:**
 
@@ -252,7 +254,7 @@ mp.messaging.[incoming|outgoing].<channel name>.<property name>= <property value
 
 If the defined property is not found, then the topic name is considered to be the same as Kafka name.
 
-The process event add-on defines a channel for each event type (`kogito-processinstances-events`, `kogito-usertaskinstances-events`, `kogito-variables-events`, `kogito-processdefinitions-events`). Therefore, when the process event add-on is enabled, you must add the event types to your `application.properties` file using the following properties:
+The process event add-on defines a channel for each event type (`kogito-processinstances-events`, `kogito-usertaskinstances-events`, `kogito-variables-events`, `kogito-processdefinitions-events`). Therefore, when the process event add-on is enabled, you must add the event types to your `application.properties` file using the following properties for Quarkus:
 
 [source,properties,subs="+attributes"]
 ----
