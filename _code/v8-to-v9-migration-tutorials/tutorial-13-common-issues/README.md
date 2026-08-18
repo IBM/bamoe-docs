@@ -7,7 +7,7 @@ This tutorial consolidates ALL common migration issues from BAMOE v8 to v9, incl
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [All 11 Core Migration Issues](#all-11-core-migration-issues)
+2. [All 9 Core Migration Issues](#all-9-core-migration-issues)
 3. [Additional Issues from Tutorials](#additional-issues-from-tutorials)
 4. [Quick Reference Tables](#quick-reference-tables)
 5. [Migration Workflow](#migration-workflow)
@@ -32,7 +32,7 @@ This is your **reference** for migrating from BAMOE v8.0.x to v9.3.x. Few known 
 
 ---
 
-## All 11 Core Migration Issues
+## All 9 Core Migration Issues
 
 ### Issue #1: javax → jakarta Package Migration
 
@@ -486,7 +486,7 @@ src/main/resources/
 
 ---
 
-### Issue #12: Packaging Change (kjar → jar)
+### Issue #12: Packaging Change (from kjar to jar)
 
 **Source:** Tutorial 10 (Multi-Module)
 
@@ -523,7 +523,7 @@ src/main/resources/
 
 ---
 
-### Issue #13: ruleflow-group → Rule Units
+### Issue #13: Conversion from ruleflow-group to Rule Units
 
 **Source:** Tutorial 10 (Multi-Module)
 
@@ -636,8 +636,7 @@ public class EmailHandler extends DefaultKogitoWorkItemHandler {
 
 ---
 
-
-### Issue #16: Database Configuration
+### Issue #15: Database Configuration
 
 **Source:** Tutorial 12 (Database Integration)
 
@@ -744,7 +743,7 @@ kogito.data-index.quarkus.enabled=true
 
 ---
 
-### Issue #17: REST Endpoint Changes
+### Issue #16: REST Endpoint Changes
 
 **Source:** Multiple tutorials
 
@@ -768,7 +767,7 @@ POST /{processId}/{instanceId}/{taskId}/complete
 
 ---
 
-### Issue #18: BPMN-DRL Integration - insert() and delete() Have No Effect
+### Issue #17: BPMN-DRL Integration - insert() and delete() Have No Effect
 
 **Source:** Tutorial 02 (Mortgage Application) - Discovered during DRL verification
 
