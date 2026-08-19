@@ -84,6 +84,7 @@ The following are the {VERSION} Accelerator references:
 ]
 }
 ----
+
 |Kafka consumer group ACL configuration requires review.
 |{PRODUCT_SHORT} includes Apache Kafka components affected by CVE-2026-41115. This issue is caused by a discrepancy between the Kafka documentation and the actual authorization behavior of the CONSUMER_GROUP_DESCRIBE API. The Kafka implementation correctly requires the DESCRIBE permission on a GROUP resource, while the documentation previously indicated that READ permission was required. No software fix is available because the implementation is functioning as intended. However, existing Kafka ACL configurations may require review to ensure permissions are granted appropriately.
 |{VERSION_950}, {VERSION_951}, {VERSION_952}
@@ -94,5 +95,10 @@ The following are the {VERSION} Accelerator references:
 |{VERSION_950}, {VERSION_951}, {VERSION_952}
 |Add the following to your `application.properties` file:
 `kogito.jobs-service.numberOfWorkerThreads=1`
+
+|PIM and Runtime Persistence: SQL queries are not compatible with Oracle Database versions earlier than 23c.
+|The Process Instance Migration (PIM) add-on and the Runtime Persistence add-on use Common Table Expressions (CTEs) with the `VALUES` row constructor syntax for data-isolation filtering. Oracle Database versions earlier than 23c do not support this SQL syntax, which prevents PIM and data-isolation from functioning correctly when using Oracle Database 19c or other pre-23c instances.
+|{VERSION_952}
+|Upgrade to Oracle Database 23c or later, which introduced support for the `VALUES` row constructor syntax.
 
 |===
