@@ -126,6 +126,7 @@ spring.jpa.mapping-resources=META-INF/bamoe-data-index-orm.xml,META-INF/bamoe-jo
 ==== Transaction isolation settings for Microsoft SQL Server
 
 To ensure {PRODUCT_SHORT} works properly when configured with a Microsoft SQL Server database and to prevent deadlocks under load, you must enable snapshot isolation at both the database and application levels.
+This configuration is mandatory when applying DDL scripts manually with `kie.flyway.enabled=false`.
 
 At the database level, enable snapshot isolation and row versioning by running the following SQL commands:
 
@@ -139,10 +140,13 @@ At the application level, configure the transaction isolation level at the conne
 
 [source,properties]
 ----
-spring.datasource.hikari.connection-init-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT 
+spring.datasource.hikari.connection-init-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT
 ----
 
-NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
+NOTE: When `kie.flyway.enabled=false`, the database schema must be applied manually before starting the application. Both the database-level and connection-level snapshot isolation settings above are required in that case.
+
+For very high concurrency workloads, transient deadlocks are automatically handled by Spring Boot's Resilience4j integration, which retries failed operations with a 500 ms backoff by default.
+No additional retry configuration is required.
 
 === Configuring persistence for Oracle
 
