@@ -15,22 +15,25 @@ By mapping the original Process Definition nodes to updated Process Definition n
 
 This functionality enables you to:
 
-* To keep long running processes aligned with evolving business rules and business needs.
-* To reduce operational risk through evolution of obsolete workflows.
-* To maintain flexibility to adapt your processes without restarting Process Instances. 
+* Keep long-running processes aligned with evolving business rules and business needs.
+* Reduce operational risk by replacing obsolete workflows.
+* Maintain flexibility to adapt your processes without restarting Process Instances.
 
 == Guidelines and Process
 A migration plan should be developed on a mirror of your production system. Before doing the actual migration, you should backup your database and plan downtime for your users to avoid conflicting changes on the same processes. Performing a Process Instance Migration on a live system could result in errors, and even data corruption. Only restore access once the migration has finished executing.
 
-The hierarchy between a Process and its subprocesses are preserved during migration. When a Process Instance is migrated all its subprocesses, including nested ones, are also automatically migrated. Alternatively, if you attempt to migrate a subprocess without migrating its parent process, the migration will fail.
+The hierarchy between a Process and its subprocesses is preserved during migration. When a Process Instance is migrated, all its subprocesses, including nested ones, are also automatically migrated. Alternatively, if you attempt to migrate a subprocess without migrating its parent process, the migration will fail.
 
 NOTE: The new version of the Process Definition must be compatible with the previous version. If this is not the case you may have errors during the next interaction with Process Instances that have been migrated. In this situation you will need to use PIM to migrate Process Instances again to a compatible data model. 
 
-The process to set up plan and migrate Process Instances to new Process Definitions in your production system is the following: 
+To set up a plan and migrate Process Instances to new Process Definitions in your production system, do the following steps:
 
 . Include the xref:../reference-guide/maven-repository-libraries.adoc#PIM-addon-dependency[{PIM_ADDON_SHORT}] dependency in your _Business Service_ POM.
 
-NOTE: If you are upgrading from {VERSION_930} ensure you have run the database migration scripts (see xref:.https://www.ibm.com/docs/en/ibamoe/9.4.x?topic=upgrading-from-93x[Upgrading your stateful Workflow database]) to add required PIM tables (see xref:../reference-guide/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables])
+NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the following steps before proceeding:
++
+* Run the database migration scripts. For more information, see xref:https://www.ibm.com/docs/en/ibamoe/9.4.x?topic=upgrading-from-93x[Upgrading your stateful Workflow database].
+* Add the required PIM tables. For more information, see xref:../reference-guide/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables].
 
 . Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}.
 
@@ -42,26 +45,26 @@ NOTE: If you are upgrading from {VERSION_930} ensure you have run the database m
 + You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
 + During migration, the state of a Process Instance is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
 
-If you are using Quarkus your migrations can take time due to heavy database updates. You can configure the following transaction timeout in `application.properties`:
+If you are using Quarkus, your migrations can take time due to heavy database updates. You can configure the following transaction timeout in `application.properties`:
 
 [source,properties]
 ----
 bamoe.pim.transaction-timeout=<seconds>
 ----
 
-If you are experiencing slowness during the PIM execution with PostgreSQL, make sure that database statistics are up-to-date by running `ANALYZE` or disable nested loop joins in the database:
+If you are experiencing slowness during the PIM execution with PostgreSQL, make sure that database statistics are up-to-date by running `ANALYZE`, or disable nested loop joins in the database:
 
 [source,properties]
 ----
 enable_nestloop=off
 ----
 
-For more information on using the {MANAGEMENT_CONSOLE} to migrate Process Instances see xref:consoles.adoc#process-instance-migration-ui[Management Console → Process Instance Migration]
+For more information on using the {MANAGEMENT_CONSOLE} to migrate Process Instances, see xref:consoles.adoc#process-instance-migration-ui[Management Console → Process Instance Migration].
 
-For more information on using the {PIM_ADDON_SHORT} API to migrate Process Instances to a new Process Definition see xref:#pim-migration-rest[Process to migrate via REST API]
+For more information on using the {PIM_ADDON_SHORT} API to migrate Process Instances to a new Process Definition, see xref:#pim-migration-rest[Process to migrate via REST API].
 
 === What happens during migration?
-PIM does more than just switch Process Definitions, it ensures consistency across the stateful process subsystems in the following ways:
+PIM does more than just switch Process Definitions; it ensures consistency across the stateful process subsystems in the following ways:
 
 Subsystem adaptation:: Migrates process nodes and updates associated elements in subsystems like Data-Index and User Tasks (Jobs Service does not require adaptation). After migration, the _Business Service_ remains fully functional through both REST APIs and UIs.
 
@@ -97,7 +100,7 @@ The following table describes the rules for *Explicit Node mappings*:
 |Tasks in BPMN are immutable in the User Task subsystem. To modify task details during migration, define a new task with a different ID and node ID in the target Process Definition and map accordingly.
 
 |*Implicit mapping must become explicit*
-|If a node must be explicitly mapped in the plan, any implicit mapping must become explicit. In this case, the BAMOE PIM Add-on automatically converts implicit mappings to explicit, adding them to the plan.
+|If a node must be explicitly mapped in the plan, any implicit mapping must become explicit. In this case, the BAMOE PIM Add-on automatically converts implicit mappings to explicit mappings, adding them to the plan.
 
 |===
 
@@ -144,13 +147,13 @@ The endpoint returns the plan details, validation status, and warnings/errors if
 . You can use `GET /pim/plans` to retrieve all migration plans, and optionally filter using the `sourceProcessId` and `targetProcessId` as query parameters. 
 
 === Managing migrations 
-You can use the following endpoints to  execute and retrieve information on migrations with the PIM Add-on:
+You can use the following endpoints to execute and retrieve information on migrations with the PIM Add-on:
 
 You can use `POST /pim/migration` to execute the migration of active Process Instances from the source to the target Process Definition using the specified migration plan.
 
-* If you want full migration where all active Process Instances of the source process will be migrated, do not specify any Process Instance IDs
+* If you want a full migration where all active Process Instances of the source process will be migrated, do not specify any Process Instance IDs.
 +
-* If you want bulk migration to migrate a subset of Process Instances, provide a list of Process Instance IDs to be included in the bulk migration. 
+* If you want a bulk migration to migrate a subset of Process Instances, provide a list of Process Instance IDs to be included in the bulk migration.
 +
 Each database has a maximum number of parameters allowed in an update operation. This affects how many process instance IDs you can include in a bulk migration request. Below are the limits for each supported database:
 
