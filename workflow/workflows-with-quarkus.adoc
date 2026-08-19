@@ -131,13 +131,14 @@ quarkus.hibernate-orm.mapping-files=META-INF/bamoe-data-index-orm.xml,META-INF/b
 ==== Transaction isolation settings for Microsoft SQL Server
 
 To ensure {PRODUCT_SHORT} works properly when configured with a Microsoft SQL Server database and to prevent deadlocks under load, you must enable snapshot isolation at both the database and application levels.
+This configuration is mandatory when applying DDL scripts manually with `kie.flyway.enabled=false`.
 
 At the database level, enable snapshot isolation and row versioning by running the following SQL commands:
 
 [source,sql]
 ----
-    ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
-    ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
+ALTER DATABASE <DATABASE_NAME> SET ALLOW_SNAPSHOT_ISOLATION ON;
+ALTER DATABASE <DATABASE_NAME> SET READ_COMMITTED_SNAPSHOT ON;
 ----
 
 At the application level, configure the transaction isolation level at the connection level by adding the following property:
@@ -147,17 +148,20 @@ At the application level, configure the transaction isolation level at the conne
 quarkus.datasource.jdbc.new-connection-sql=SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
 ----
 
-NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
+NOTE: When `kie.flyway.enabled=false`, the database schema must be applied manually before starting the application. Both the database-level and connection-level snapshot isolation settings above are required in that case.
 
-For very high concurrency workloads, you can additionally enable an optional retry configuration to absorb any residual transient deadlocks so they do not surface as errors from the {PRODUCT_SHORT} Workflow engine. Add the following properties to your _Business Service_ `application.properties`:
+For very high concurrency workloads, you can enable an optional retry configuration to absorb any residual transient deadlocks so they do not surface as errors from the {PRODUCT_SHORT} Workflow engine.
+Add the following commented-out properties to your _Business Service_ `application.properties` and uncomment them when needed:
 
 [source,properties]
 ----
-%mssql.quarkus.fault-tolerance.retry.max-retries=10
-%mssql.quarkus.fault-tolerance.retry.delay=50
-%mssql.quarkus.fault-tolerance.retry.jitter=150
+# Optional: uncomment under high load to retry and absorb transient SQL failures or deadlocks
+#%mssql.quarkus.fault-tolerance.retry.max-retries=10
+#%mssql.quarkus.fault-tolerance.retry.delay=50
+#%mssql.quarkus.fault-tolerance.retry.jitter=150
 ----
 
+NOTE: If your _Business Service_ uses Spring Boot instead of Quarkus, Resilience4j's default retry behavior already handles transient deadlocks with a 500 ms backoff, so no additional retry configuration is required.
 
 === Configuring persistence for Oracle
 
