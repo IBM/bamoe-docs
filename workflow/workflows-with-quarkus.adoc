@@ -149,6 +149,15 @@ quarkus.datasource.jdbc.new-connection-sql=SET TRANSACTION ISOLATION LEVEL SNAPS
 
 NOTE: This property requires the database schema to be set up manually with the configuration property `kie.flyway.enabled` set to false.
 
+For very high concurrency workloads, you can additionally enable an optional retry configuration to absorb any residual transient deadlocks so they do not surface as errors from the {PRODUCT_SHORT} Workflow engine. Add the following properties to your _Business Service_ `application.properties`:
+
+[source,properties]
+----
+%mssql.quarkus.fault-tolerance.retry.max-retries=10
+%mssql.quarkus.fault-tolerance.retry.delay=50
+%mssql.quarkus.fault-tolerance.retry.jitter=150
+----
+
 
 === Configuring persistence for Oracle
 
