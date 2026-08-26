@@ -1,0 +1,58 @@
+= FAQ
+include::../../partials/attributes.adoc[]
+:imagesdir: ../../images
+include::../../styles/images.adoc[]
+
+This section provides answers to frequently asked questions about upgrading from BAMOE v8 to BAMOE v9.
+
+== Quick reference guide to the common migration scenarios
+
+View common migration issues from BAMOE v8 to v9 frequently encountered when upgrading projects.
+
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-1-javax--jakarta-package-migration[javax → jakarta Package Migration]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-2-variable-context-does-not-exist[Variable `context` Does Not Exist]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-3-raw-list-type-without-type-parameter[Raw List Type Without Type Parameter]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-4-boolean-getter-method-naming[Boolean Getter Method Naming]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-5-entity-annotation-on-process-variables[`@Entity` Annotation on Process Variables]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-6-npe-in-error-handling[NPE in Error Handling]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-7-legacy-rules-with-rule-units[DRL Rules with Rule Units]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-8-null-values-being-printed[`null$` Values Being Printed]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-9-null-on-omitted-values[Null on Omitted Values]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-10-form-migration-frm-files[Form Migration (`.frm` files)]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-11-kmodulexml-not-needed[kmodule.xml Not Needed]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-12-packaging-change-from-kjar-to-jar[Packaging Change (from kjar to jar)]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-13-convert-ruleflow-group-to-rule-units[Conversion from ruleflow-group to Rule Units]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-14-work-item-handlers-registration[Work Item Handlers Registration]
+// * xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-15-user-group-callback-configuration[User Group Callback Configuration]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-15-database-configuration[Database Configuration]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-16-rest-endpoint-changes[REST Endpoint Changes]
+* xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-13-common-issues/README.md#issue-17-bpmn-drl-integration---insert-and-delete-have-no-effect[BPMN-DRL Integration - `insert()` and `delete()` Have No Effect]
+
+== How to *migrate* a BAMOE v8 KJAR to BAMOE v9?
+
+BAMOE v9 no longer includes the KIE Server, so you cannot deploy a KJAR directly to a server as in v8. 
+
+The recommended approach to make your BAMOE v8 KJAR compatible with BAMOE v9 is to duplicate your BAMOE v8 project (to preserve a backup) and follow the steps outlined in the xref:05-00-upgrading-projects/index.adoc[Upgrading Projects] section.
+
+== What is the Business Service deployment granularity?
+
+In BAMOE v9, a _Business Service_ is a standalone, containerized application that encapsulates domain-specific logic, such as Workflows, Decisions, Rules, or Decision Tables, and is built using Quarkus or Spring Boot. Each Business Service can be versioned, monitored, and managed independently, aligning with modern microservices best practices.
+
+This represents a shift from BAMOE v8, where multiple business assets were typically bundled into a single KJAR and deployed to a centralized KIE Server.
+
+With BAMOE v9, **you define the granularity of your deployments**. You have the flexibility to:
+- **Bundle multiple business assets** (e.g., BPMN, DMN, DRL) into a single Business Service
+- **Deploy multiple Business Services** within the same Kubernetes pod for tighter coupling or resource efficiency
+- **Separate Business Services** into distinct deployments to improve modularity, scalability, and maintainability
+
+This flexibility allows you to tailor your deployment strategy to your organization's architecture, performance, and operational requirements. For additional information, see https://www.ibm.com/docs/en/ibamoe/9.2.x?topic=services-deploying-business[Deploying Business Services].
+
+== What are the alternatives to Smart Router?
+
+Since Smart Router is no longer available in BAMOE v9, you can achieve similar load balancing using any solution compatible with cloud environments. 
+
+== What are the alternatives to the BAMOE v8 Operator?
+
+BAMOE v9 does not provide its own Operator. Instead, it offers Helm charts to simplify deployment. The BAMOE Dev and Runtime Helm Charts install all required components in your Dev or Runtime environment on Kubernetes or OpenShift clusters. These charts support flexible configuration and align with infrastructure-as-code practices. For more details, see xref:../../installing/index.adoc[Installing].
+
+

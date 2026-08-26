@@ -1,0 +1,169 @@
+= Collecting and sending metrics to IBM Software Central
+include::../../partials/attributes.adoc[]
+:imagesdir: ../../images
+include::../../styles/images.adoc[]
+
+To maintain compliance with IBM licensing terms and conditions, you must collect license and usage metrics (VPC Count) for {PRODUCT} and upload manually or automatically to IBM Software Central (SWC). The tool you use will depend on your deployment environment:
+
+ * IBM License Service (ILS) and IBM® Usage Metering Service (UMS) are used for deployments in a containerized environment. UMS captures business value metrics and generates usage reports, which can be used for auditing purposes and evidence of compliance.
+ * IBM License Metric Tool (ILMT) is used for deployments in a non-containerized environment.
+
+In addition if you install (see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=usage-metering-service[IBM Usage Metering Service]) you can collect additional metrics (e.g., Node Instance Count) and generate usage reports which can be used for auditing or to track adoption of {PRODUCT_SHORT}. Usage reports can be visualized in IBM Software Central.
+
+If ILS is temporarily unavailable the last reported values continue to be used and data synchronizes automatically when connectivity is restored, see xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation].
+
+For non-containerized deployments, failure handling is managed by ILMT as documented in xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=tool-troubleshooting-support[IBM License Metric Tool → Troubleshooting and support].
+
+== Working in a containerized environment
+If you are working in a containerized environment (Kubernetes or OpenShift), when you are xref:../development-environment.adoc#dev-env-helm[Installing Development environment] or the xref:../runtime-environment.adoc#runtime-env-helm[Installing Runtime environment] using Helm charts and create Business Services with Accelerators (see xref:managing-license-entitlements[Managing your license entitlements]) the `includeSWCUpload` annotation is automatically included in deployment YAML files. When combined with customer-configured entitlement keys, this annotation enables the upload of contractual metrics to IBM Software Central.
+
+The following describes the process for setting up metric uploading :
+
+. Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
+
+. Install IBM License Service (or upgrade to) version 4.x or higher, using instructions in the xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=license-service[ILS Documentation].
+
+. Create an OpenShift secret with the entitlement key: `oc create secret`
+
+. Configure ILS with the entitlement key: `oc apply`
+
+The above steps define the connection and authentication necessary to connect your cluster to IBM's licensing infrastructure.  If you choose not to configure an entitlement key, {PRODUCT_SHORT} product metrics cannot be automatically uploaded and you will need to do this manually. 
+
+// (see xref:#manual-upload[Uploading metrics manually]). 
+
+VPC count data is uploaded to Software Central once per day (configurable). A single payload is used to send multiple metrics that are correlated for each capability. Data from local storage can be obtained through REST API as a snapshot file or a JSON object. It can then be used for local dashboarding or sent to reporting tools, such as IBM License Service Reporter (LSR).
+
+=== Configuring adoption metric upload
+In order to gather adoption metrics of {PRODUCT_SHORT} and the deployment of _Business Services_ across your organization you must install IBM Usage Metering Service in your {PRODUCT_SHORT} namespace. It is a namespace-level service that collects and stores metrics data. 
+
+UMS enables the collection of the following adoption metrics from {PRODUCT_SHORT} deployments in a containerized environment:
+
+* Process Step Executions (NODE_INSTANCE_COUNT): Total count of Workflow node executions across all Process Instances
+* Monthly Active Users (MAU): Tracked via UMS infrastructure
+
+You can configure metric collection and visualization using the following procedure:
+
+. Install IBM Usage Metering Service via the xref:https://www.ibm.com/docs/en/cloud-paks/foundational-services/4.x_cd?topic=services-installing-foundational-service-helm-charts[IBM Cloud Pak Foundational Services installation with Helm Charts]. 
+
+. Create {PRODUCT_SHORT} specific `ServiceMeterDefinition` in a `node-execution-meter.yaml` file. The `productId` and `productName` depend on your offering (see: xref:licensing.adoc[License Guide]). This example uses {PRODUCT_PAM} product details for example:
++
+[source,yaml]
+----
+   apiVersion: operator.ibm.com/v1
+   kind: IBMServiceMeterDefinition
+   metadata:
+     name: bamoe-node-execution-meter
+     namespace: ${BAMOE_NAMESPACE}
+
+   spec:
+     mappingId: NODE_COUNT_MAPPING_0001
+     processing: ADD
+     repeat: true
+
+     breakdownDefs:
+       - breakdownBy:
+           name: NODE_INSTANCE_COUNT
+         groupBy:
+           - deployments_type
+           - version
+           - license_type
+         processing: ADD
+         source: metricQuantity
+
+     data:
+       metricDescription: "Count of process nodes executed"
+       metricName: NODE_INSTANCE_COUNT
+       productId: "72984f114b54496a8a44be139154a988"
+       productName: "IBM Process Automation Manager Open Edition"
+----
+   
+. Apply the `ServiceMeterDefinition`:
++
+[source,bash]
+----
+oc apply -f node-execution-meter.yaml -n ${BAMOE_NAMESPACE}
+----
+
+. Verify the creation of the `ServiceMeterDefinition` custom resources in the specified namespace. 
++
+[source,bash]
+----
+oc get ibmservicemeterdefinition -n ${BAMOE_NAMESPACE}
+----
+
+. To customize UMS, you can add any of the following optional properties to your _Business Service_ `application.properties` file:
++
+[source,properties]
+----
+# Activate/deactivate the UMS addon
+bamoe.ums.enabled=true
+# Specify UMS API endpoint - internal cluster service for upload port
+bamoe.ums.api.endpoint=https://ibm-usage-metering-instance.${BAMOE_NAMESPACE}.svc.cluster.local:8081/api/v1/event
+# Specify UMS API authentication type
+bamoe.ums.api.auth.type=bearer
+# UMS API authentication token (reference to secret)
+bamoe.ums.api.auth.token=${UMS_AUTH_TOKEN}
+# Activate UMS Logging for troubleshooting
+quarkus.log.category."com.ibm.bamoe.addons.ums".level=TRACE
+quarkus.log.category."com.ibm.bamoe.addons.ums".min-level=TRACE
+----
+
+. Deploy your _Business Service_, which automatically include the UMS metrics collection add-on.
+
+. Metrics collection starts automatically when workflows execute and you can verify metrics Collection for your _Business Service_ using the following command:
++
+[source,bash]
+----
+# Check BAMOE application logs for UMS connectivity
+oc logs -f deployment/<your-bamoe-app-name> -n ${BAMOE_NAMESPACE} | grep -i ums
+
+# Expected log message: "UMS API connectivity test successful"
+----
+
+. View Collected {PRODUCT_SHORT} metrics in IBM Software Central (Usage section). 
+* Metrics are automatically uploaded daily at 12:05 AM UTC to IBM Software Central unless you have deactivated Metric collection (see xref:#deactivate-metric[Deactivating automatic metric upload]).
+
+Where:
+
+* `${BAMOE_NAMESPACE}` in the endpoint URL is replaced with your BAMOE namespace
+* The `UMS_AUTH_TOKEN` should reference the token from the `ibm-usage-metering-upload-token` secret created by UMS
+* Logging properties are optional and useful for troubleshooting metrics submission issues
+
+=== Deactivating metric collection
+If you need to disable metrics collection, set the following property in your _Business Services_ `application.properties`:
+
+[source,bash]
+----
+# Disable UMS metrics collection
+bamoe.ums.enabled=false
+----
+
+NOTE: Deactivating metrics collection may impact license compliance visibility and reporting. See xref:#manual-upload[]
+
+////
+[#manual-upload]
+=== Uploading metrics manually in License Service
+To upload contractual data to IBM Software Central in License Service see...
+////
+
+== Working with non-containerized Business Services 
+When developing non-containerized _Business Services_ you can upload metrics by configuring IBM License Metric Tool(ILMT) version 9.2.43 (or higher) with an entitlement key. This key must be configured in the ILMT Console to enable upload to IBM Software Central of the contractual VPC metric collected via SWID tags and disconnected scanners. For more information on configuring your Business Service to use required SWID tags see xref:managing-license-entitlements.adoc[Managing your license entitlements]). 
+
+. Install or upgrade to ILMT version 9.2.43 or higher (see xref:https://www.ibm.com/docs/en/license-metric-tool[ILMT Documentation])
+
+. Ensure scanners are compatible with this version.
+
+. Generate an IBM Entitlement Key through the xref:https://myibm.ibm.com/products-services/containerlibrary[IBM Container Library]
+
+. Configure the Software Central integration, see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-configuring-connection-software[Configuring the connection to Software Central]
+** This step includes configuring the IBM Entitlement Key in ILMT
+** For air-gapped environments, configure the entitlement key in disconnected scanner configuration
+
+. By default, after configuration, metrics are automatically uploaded once per day. For on-demand upload, see xref:#manual-upload-ILMT[Uploading metrics manually in ILMT]
+
+. Verify that SWID tags are properly installed and that metrics have been successfully uploaded to xref:https://swc.saas.ibm.com/en-us/software-central[Software Central]
+
+[#manual-upload-ILMT]
+=== Uploading metrics manually in ILMT
+To upload contractual data to IBM Software Central in ILMT see xref:https://www.ibm.com/docs/en/license-metric-tool/9.2.0?topic=central-uploading-contractual-data-software[Uploading contractual data to IBM Software Central]
+

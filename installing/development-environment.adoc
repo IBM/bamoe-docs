@@ -1,0 +1,1179 @@
+= Development Environment 
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+This section describes how to install the tools needed to create and manage Workflows, Decisions, and Rules in your development environment:
+
+{DEV_TOOLS}:: to enable efficient development and collaboration on _Business Services_ within an industry standard IDE.
+{CANVAS} and its backend services, {CORS_PROXY}, {EXT_SERVICES}:: for browser-based authoring and testing of DMN, BPMN assets, 
+{MVN_REPO}:: for accessing libraries to develop _Business Services_, 
+
+For more information on the product distribution see xref:../release-notes/whats-new-9-6.adoc#download-doc[What's New → Download Documentation]. 
+
+[#dev-tools-install]
+== Installing {DEV_TOOLS}
+
+You can find the developer tools at the Visual Studio Marketplace, as {DEV_TOOLS_VSCODE_MARKETPLACE_LINK}[*{DEV_TOOLS}*].
+
+The visual editors in {DEV_TOOLS} automatically update files to the latest version, making them incompatible with the {PRODUCT_SHORT} version used in _Business Services_. To control updates, turn off the *Auto Update* option. 
+
+If you are developing in Java, make sure you set up the following elements:
+
+* Your domain Java classes.
+* The activator Java class file `Activator.java` (required to activate the functionality).
+
+For more information on using the extensions, see xref:../available-features/development-environment/developer-tools-for-vscode/index.adoc[Available features → {DEV_TOOLS}].
+
+[#dev-env-helm]
+== The Dev environment Helm chart
+The recommended way of installing {MVN_REPO} and {CANVAS} is to install the pre-configured Helm charts for the {PRODUCT_SHORT} offering that corresponds to your license:
+
+* pamoe-{VERSION}-dev-environment-helm-chart for {PRODUCT_PAM}.
+* dmoe-{VERSION}-dev-environment-helm-chart for {PRODUCT_DM}.
+
+These Helm charts include the necessary licensing annotations, avoiding the need for the manual configuration required in previous releases. The annotations are injected into all deployed containers and ensure accurate license tracking from deployment. The charts are pre-configured with the correct product IDs, product names, and metrics for each {PRODUCT_SHORT} offering, greatly simplifying the installation process.
+
+The charts enable the configuration of Maven, Canvas and its backend services through Helm parameters which are automatically converted to environment variables during deployment. This enables the centralization of all configuration parameters, in a single `values.yaml` that can be managed in version control systems, see xref:#helm-chart-config-ref [Configuration reference for Dev Helm Charts]
+
+Each Dev Helm chart contains four sub-charts which you can also install individually. However if you do choose this option you will need to manage licensing and other configuration manually:
+
+* canvas: The main {CANVAS} application for modeling BPMN and DMN, available via https://quay.io/repository/bamoe/canvas[quay.io/bamoe/canvas:{IMAGE_VERSION}]
+* cors_proxy: The service for cross-origin requests, that enables {CANVAS} to communicate directly from the browser, with Git and Cloud providers, available via https://quay.io/repository/bamoe/cors-proxy[quay.io/bamoe/cors-proxy:{IMAGE_VERSION}]
+* extended_services: The service that enhances {CANVAS} capabilities with the DMN Runner and BPMN and DMN model static validation services, available via https://quay.io/repository/bamoe/extended-services[quay.io/bamoe/extended-services:{IMAGE_VERSION}]
+* maven_repository: The Maven artifact repository required to develop _Business Services_, available via https://quay.io/repository/bamoe/maven-repository[quay.io/bamoe/maven-repository:{IMAGE_VERSION}]
+
+All sub-charts receive License Service annotations automatically through the global configuration of the parent chart. The annotations are applied to every pod deployment,
+ensuring complete license tracking coverage for all {PRODUCT_SHORT} containers.
+
+The {PRODUCT_SHORT} Dev Helm charts are architecture-agnostic and work for both:
+
+* Linux/s390x architecture which runs on the IBM Z platform.
+* Linux/x86_64 architecture which runs on other platform architectures supported by {PRODUCT_SHORT}.
+
+If you prefer to install the Dev environment components individually using OpenShift CLI and Docker this can be done using the individual {PRODUCT_SHORT} container images. They are available as multi-architecture images on Quay.io. The host machine architecture is automatically resolved when you pull the container images. You can use the following command to specify a platform if required:
+
+[source,shell]
+----
+`docker pull --platform linux/s390x quay.io/bamoe/canvas:{IMAGE_VERSION}`
+----
+
+The following sections describe how to install the Dev environment components using the Helm chart or individually using OpenShift CLI and Docker.
+
+== Installing the Dev Environment Helm chart (recommended)
+
+The Helm chart provides a simple way to deploy {CANVAS} and {MVN_REPO} in Kubernetes, OpenShift, and Minikube with pre-configured licensing depending on your licensed product (see xref:licenses-tracking-usage/licensing.adoc[License Guide]). For more information on using the Helm tool, see https://helm.sh/docs[Helm Docs].
+
+Choose the required helm chart based on your licensed product:
+
+* pamoe-{VERSION}-dev-environment-helm-chart
+* dmoe-{VERSION}-dev-environment-helm-chart
+
+===  OpenShift Install
+
+To install on OpenShift, first get the default OpenShift domain for your routes using the following command to define the `YOUR_OCP_ROUTE_DOMAIN` variable:
+
+[source,shell,subs="attributes+"]
+----
+YOUR_OCP_ROUTE_DOMAIN=$(oc get ingresses.config cluster --output jsonpath={.spec.domain})
+----
+
+You can then install the Helm chart with the following commands:
+
+[source,shell,subs="attributes+"]
+----
+helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml --set global.openshiftRouteDomain="$YOUR_OCP_ROUTE_DOMAIN"
+----
+
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
+
+=== Generic Kubernetes install
+
+To install {CANVAS} directly on a Kubernetes cluster, you will need to get the default Kubernetes cluster domain for your Ingress (see https://kubernetes.io/docs/concepts/services-networking/ingress/[Kubernetes Documentation] for more information). This can vary depending on your cluster configuration.
+
+Once you have the domain information, you can run the following helm commands:
+
+[source,shell,subs="attributes+"]
+----
+helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-kubernetes.yaml --set global.kubernetesClusterDomain="$YOUR_KUBERNETES_CLUSTER_DOMAIN" --set global.kubernetesIngressClass="$YOUR_KUBERNETES_INGRESS_CLASS"
+----
+
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.`YOUR_KUBERNETES_CLUSTER_DOMAIN` and `YOUR_KUBERNETES_INGRESS_CLASS` are defined as the domain and the Ingress class of your cluster, respectively.
+
+=== Minikube install
+
+To install {CANVAS} Helm chart on a Minikube cluster, you will need:
+
+- https://minikube.sigs.k8s.io/docs/start/[A local Minikube cluster up and running]
+- https://v1-32.docs.kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/[The Nginx Ingress installed]
+
+Once you have the domain information, you can run the following helm commands to do a Minikube specific install:
+
+[source,shell,subs="attributes+"]
+----
+helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={VERSION} --untar
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --values ./dmoe-dev-environment-helm-chart/values-minikube-nginx.yaml
+----
+
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
+
+=== The {CANVAS} OpenShift topology
+image::bamoe-canvas-openshift-topology.png[OpenShift topology after {CANVAS} deployment]
+
+Your {CANVAS} instance is now up and accessible. To get the route run the following command:
+
+[source,shell,subs="attributes+"]
+----
+oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host}
+----
+
+Where `$APP_NAME_BAMOE_CANVAS` is `bamoe-canvas`, `bamoe-extended-services` or `bamoe-cors-proxy` if you haven't changed the configuration of the Dev environment Helm chart.
+
+NOTE: All services will be available through `https`, which means that if you are deploying them to a local OpenShift instance (i.e. through CRC), the {CANVAS} Web application, the {EXT_SERVICES}, and {CORS_PROXY} backends will all be using self-signed certificates, causing warnings in your browser. To fix this, access each URL individually and allow them in your browser.
+
+[#maven-repo-setup]
+=== Setting up the Maven Repository
+
+The {MVN_REPO} is deployed and configured by default during the Dev environment installation. After installation it can be accessed at:
+
+* OpenShift: https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN
+* Kubernetes: https://maven-repository.$YOUR_KUBERNETES_CLUSTER_DOMAIN
+
+You can disable the installation of the Maven Repository in the Helm chart deployment using this command:
+
+[source,shell,subs="attributes+"]
+----
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --set maven_repository.enabled=false
+----
+
+=== Uninstalling the Chart
+
+Follow the command to uninstall the `my-bamoe-dev-env` deployment:
+
+[source,shell]
+----
+helm uninstall my-bamoe-dev-env
+----
+
+=== Passing environment variables
+
+This chart uses default environment variables from `values.yaml` file. You can override the variables by passing them through the command line. See xref:#helm-chart-config-ref[Dev Helm Chart configuration reference] for all options.
+ 
+[source,shell]
+----
+helm install my-bamoe-dev-env ./dmoe-dev-environment-helm-chart --set canvas.image.registry=quay.io
+----
+
+Where `dmoe-dev-environment-helm-chart` is replaced by `pamoe-dev-environment-helm-chart` if you are working with {PRODUCT_PAM}.
+
+////
+== Deploying Canvas containers directly on OpenShift (using oc CLI)
+
+If you have an OpenShift cluster and are logged in by using the `oc` CLI tool, follow these steps to deploy {CANVAS} and its dependencies. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
+
+NOTE: Labeling the resources is optional, but it will make organizing and identifying your deployed resources significantly easier.
+
+. Define variables that will be useful to name and label the resources created.
++
+[source,shell,subs="attributes+"]
+----
+export APP_PART_OF=bamoe-canvas-app
+export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
+export APP_NAME_CORS_PROXY=bamoe-cors-proxy
+export APP_NAME_BAMOE_CANVAS=bamoe-canvas
+----
+. Deploy {EXT_SERVICES} and label its resources
++
+[source,shell,subs="attributes+"]
+----
+oc new-app quay.io/bamoe/extended-services:{IMAGE_VERSION} --name=$APP_NAME_EXTENDED_SERVICES
+oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
+oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
+----
+. Deploy {CORS_PROXY} and label its resources
++
+[source,shell,subs="attributes+"]
+----
+oc new-app quay.io/bamoe/cors-proxy:{IMAGE_VERSION} --name=$APP_NAME_CORS_PROXY
+oc create route edge --service=$APP_NAME_CORS_PROXY
+oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
+----
+. Finally, deploy the {CANVAS} image and set the environment variables required to connect it to the {EXT_SERVICES} and {CORS_PROXY} backends.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app quay.io/bamoe/canvas:{IMAGE_VERSION} --name=$APP_NAME_BAMOE_CANVAS \
+  -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
+  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
+oc create route edge --service=$APP_NAME_BAMOE_CANVAS
+oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
+oc set env deployment/$APP_NAME_CORS_PROXY CORS_PROXY_ALLOWED_ORIGINS=https://$(oc get route $APP_NAME_BAMOE_CANVAS --output jsonpath={.spec.host})
+----
+
+== Running {CANVAS} containers locally with Docker
+
+Use the following command to configure {EXT_SERVICES}:
+
+[source,shell,subs="attributes+"]
+----
+docker run -p 21345:21345 -it quay.io/bamoe/extended-services:{IMAGE_VERSION}
+# Add the -d flag to run in detached mode.
+----
+Access the API through the port 21345. No additional configuration is necessary.
+
+
+Use the following command to configure {CORS_PROXY}:
+
+[source,shell,subs="attributes+"]
+----
+docker run -p 8090:8080 -it -e CORS_PROXY_ALLOWED_ORIGINS=http://localhost:8080 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+# Add the -d flag to run in detached mode.
+----
+The API is accessible through the port 8090 (8080 is reserved for the bamoe-canvas image). No additional configuration is necessary.
+
+The {CANVAS} image must be run with two environment variables that will allow it to communicate with the two backend services:
+
+`KIE_SANDBOX_EXTENDED_SERVICES_URL`:: E.g., https://extended-services.bamoe.company.com[https://extended-services.bamoe.my-company.com]
+
+`KIE_SANDBOX_CORS_PROXY_URL`:: E.g., https://cors-proxy.bamoe.company.com[https://cors-proxy.bamoe.my-company.com]
+
+If you are running locally, by following the previous steps, use the following command to start your {CANVAS} instance with the backend services:
+[source,shell,subs="attributes+"]
+----
+docker run -p 8080:8080 -it \
+  -e KIE_SANDBOX_EXTENDED_SERVICES_URL=http://localhost:21345 \
+  -e KIE_SANDBOX_CORS_PROXY_URL=http://localhost:8090 \
+  quay.io/bamoe/canvas:{IMAGE_VERSION}
+# Add the -d flag to run in detached mode.
+----
+The HTTP server is accessed through the port 8080.
+
+////
+
+Several customization options are available. For more information on the configurations available by using the environment variables, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS} image description on Quay.io].
+
+
+[NOTE]
+====
+The configured URL addresses need to be accessible from your machine, as {CANVAS} will make requests to them directly from your browser.
+Using the internal IP/DNS services will not work.
+====
+
+One of the important environment variable to consider when deploying {CANVAS} is `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`. It points to a container image that is used when creating a Dev Deployment.
+
+By default, {CANVAS} is configured to fetch this image from https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}[https://quay.io/bamoe/canvas-dev-deployment-base:{BOM_VERSION}].
+
+If you are installing {CANVAS} in an air-gapped environment, you will need to configure `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL` to point to an image in a registry where the Cloud providers used by {CANVAS} users can access it.
+
+For example, imagine a user is creating Dev Deployments for Decisions on {CANVAS} to a local Kubernetes they have installed on their machine, for example Kind or Minikube.
+This local Kubernetes instance must be able to download the image configured in `KIE_SANDBOX_DEV_DEPLOYMENT_BASE_IMAGE_URL`.
+The same is true for remote Kubernetes and OpenShift instances that the users of {CANVAS} will configure to create their Dev Deployments for Decisions.
+For more information on deploying {CANVAS} in an air-gapped OpenShift environment, see xref:#air-gapped-canvas-deployment[Deploy {CANVAS} in an air-gapped OpenShift environment].
+
+
+For other customization options of {CANVAS}, see https://quay.io/repository/bamoe/canvas?tab=info[{CANVAS}'s image description on Quay.io].
+
+== Running {CANVAS} containers locally with Docker Compose
+
+{CANVAS} and its related services can be run locally by using Docker Compose.
+
+For more information, see https://docs.docker.com/get-docker/[Docker Installation], and https://docs.docker.com/compose/install/[Compose Plugin Installation].
+
+The `bamoe-{VERSION}-canvas-docker-compose.zip` can only be downloaded from IBM Passport Advantage, and you can find information on the https://www.ibm.com/support/pages/node/7277082[BAMOE {VERSION_RM} Download Document].
+
+To Run {CANVAS} with Docker Compose follow these steps:
+
+. Extract the downloaded `bamoe-{VERSION}-canvas-docker-compose.zip`.
+. In a terminal, navigate to the extracted folder: `bamoe-{VERSION}-canvas-docker-compose`.
+. Run the following command:
++
+[source,shell]
+----
+docker compose up
+----
+
+{CANVAS} will be available at http://localhost:9090.
+
+////
+Not clear why this is necessary as it does not contain any additional information
+== Securing your {CANVAS} installation
+
+You should have a secure protocol (HTTPS) available for the {CANVAS} installation, as well as all services that {CANVAS} has access to. For example, remote git repositories or container orchestration like OpenShift. To enable a secure protocol, follow your Kubernetes distribution documentation.
+
+////
+
+[#air-gapped-canvas-deployment]
+== Install {CANVAS} in an air-gapped OpenShift environment
+
+If you are installing in an air-gapped OpenShift cluster and need to install the Dev Helm chart using images from the internal registry, you pull images from Quay.io, push them to the OpenShift internal registry, before deploying the environment components.
+
+
+. Log in to the OpenShift cluster using the OpenShift CLI.
++
+[source,shell]
+----
+oc login <OPENSHIFT_API_URL>
+----
++
+. Select or create the target Namespace where the {CANVAS} application will be deployed.
++
+[source,shell]
+----
+oc project bamoecanvas
+----
++
+. Retrieve the OpenShift internal image registry route.
++
+[source,shell]
+----
+oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'
+----
++
+If the default route is not enabled, enable it using the following command.
++
+[source,shell]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --type=merge -p '{"spec":{"defaultRoute":true}}'
+----
++
+. Set environment variables for the registry and namespace.
++
+[source,shell]
+----
+REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+NAMESPACE=$(oc project -q)
+----
++
+. Log in to the OpenShift image registry.
++
+[source,shell]
+----
+podman login -u kubeadmin -p $(oc whoami --show-token) $REGISTRY --tls-verify=false
+----
++
+. Pull the {CANVAS} images from the Quay repository.
++
+[source,shell,subs="attributes+"]
+----
+podman pull --arch amd64 quay.io/bamoe/canvas:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/cors-proxy:{IMAGE_VERSION}
+podman pull --arch amd64 quay.io/bamoe/extended-services:{IMAGE_VERSION}
+----
++
+. Tag the images for the OpenShift internal registry.
++
+[source,shell,subs="attributes+"]
+----
+podman tag quay.io/bamoe/canvas:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION}
+podman tag quay.io/bamoe/cors-proxy:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION}
+podman tag quay.io/bamoe/extended-services:{IMAGE_VERSION} $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION}
+----
++
+. Push the images to the OpenShift internal registry.
++
+[source,shell,subs="attributes+"]
+----
+podman push $REGISTRY/$NAMESPACE/canvas:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/extended-services:{IMAGE_VERSION} --tls-verify=false
+podman push $REGISTRY/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --tls-verify=false
+----
++
+. Verify that the images are available in the internal registry.
++
+[source,shell]
+----
+oc get imagestreams
+----
++
+.Example output
+[source,shell]
+----
+NAME                IMAGE REPOSITORY                                                                                          TAGS             UPDATED
+canvas              default-route-openshift-image-registry.apps.example.com/bamoecanvas/canvas                                9.3.1-ibm-0006   2 minutes ago
+cors-proxy          default-route-openshift-image-registry.apps.example.com/bamoecanvas/cors-proxy                            9.3.1-ibm-0006   21 seconds ago
+extended-services   default-route-openshift-image-registry.apps.example.com/bamoecanvas/extended-services                     9.3.1-ibm-0006   About a minute ago
+----
++
+. Define environment variables for naming and labeling the resources.
++
+[source,shell]
+----
+export APP_PART_OF=bamoe-canvas-app
+export APP_NAME_EXTENDED_SERVICES=bamoe-extended-services
+export APP_NAME_CORS_PROXY=bamoe-cors-proxy
+export APP_NAME_BAMOE_CANVAS=bamoe-canvas
+----
++
+. Deploy Extended Services and label its resources.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/extended-services:{IMAGE_VERSION} --name=$APP_NAME_EXTENDED_SERVICES
+
+oc create route edge --service=$APP_NAME_EXTENDED_SERVICES
+oc label services/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_EXTENDED_SERVICES app.openshift.io/runtime=golang
+----
++
+. Deploy the {CORS_PROXY} and label its resources.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/cors-proxy:{IMAGE_VERSION} --name=$APP_NAME_CORS_PROXY
+
+oc create route edge --service=$APP_NAME_CORS_PROXY
+oc label services/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_CORS_PROXY app.openshift.io/runtime=nodejs
+----
++
+. Deploy the {CANVAS} application and configure environment variables to connect to the backend services.
++
+[source,shell,subs="attributes+"]
+----
+oc new-app image-registry.openshift-image-registry.svc:5000/$NAMESPACE/canvas:{IMAGE_VERSION} --name=$APP_NAME_BAMOE_CANVAS \
+  -e KIE_SANDBOX_EXTENDED_SERVICES_URL=https://$(oc get route $APP_NAME_EXTENDED_SERVICES --output jsonpath={.spec.host}) \
+  -e KIE_SANDBOX_CORS_PROXY_URL=https://$(oc get route $APP_NAME_CORS_PROXY --output jsonpath={.spec.host})
+
+oc create route edge --service=$APP_NAME_BAMOE_CANVAS
+oc label services/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label routes/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.kubernetes.io/part-of=$APP_PART_OF
+oc label deployments/$APP_NAME_BAMOE_CANVAS app.openshift.io/runtime=js
+----
++
+. Retrieve the route details to access the deployed application.
++
+[source,shell]
+----
+oc get route
+----
++
+.Example output
+[source,shell]
+----
+NAME                      HOST/PORT                                                                PATH   SERVICES                  PORT        TERMINATION   WILDCARD
+bamoe-canvas              bamoe-canvas-bamoecanvas.apps.example.com                                       bamoe-canvas              8080-tcp    edge          None
+bamoe-cors-proxy          bamoe-cors-proxy-bamoecanvas.apps.example.com                                   bamoe-cors-proxy          8080-tcp    edge          None
+bamoe-extended-services   bamoe-extended-services-bamoecanvas.apps.example.com                            bamoe-extended-services   21345-tcp   edge          None
+----
+
+The {CANVAS} application is now accessible at the route URL shown in the output (for example, `\https://bamoe-canvas-bamoecanvas.apps.example.com`).
+
+
+== Setting up the {MVN_REPO} locally
+
+If you have a Maven Repository Manager such as Artifactory or Nexus, you can import the compressed {PRODUCT_SHORT} Maven repository content into Maven Repository Manager. Note that you will need to add licensing annotations manually if you follow this procedure rather than using the Dev environment Helm chart. 
+
+For organizations without such infrastructure, it is highly recommended to use the Dev environment Helm chart to install the Container image and make it available internally for developers and continuous integration (CI) systems.
+
+For organizations that already use a Maven Repository Manager, developers and the CI systems are usually configured to connect to it.
+
+If you are using the Container image, ensure that it is made available and provide the URL that developers and CI systems need to specify in their `settings.xml` file.
+
+NOTE: When you configure the repository by modifying the Maven `settings.xml` file, the changes apply to all of your Maven projects.
+
+There are two ways to do this:
+
+* Set up a Maven repository with a Container image
+* Configure your local Maven repository
+
+=== Configuring Maven with the Dev Environment helm chart
+
+Once the Dev Environment Helm chart is installed and the Maven container up and running you will need to update your Maven settings to reference this repository.
+
+There are a few options and your choice will depend on your work environment and the tools that are available to you.
+
+////
+=== Deploying to OpenShift
+
+Choose the container image from one of the following sources: 
+
+bamoe-{VERSION}-maven-repository-image.tar.gz:: included in the distribution
+quay.io/bamoe/maven-repository:{IMAGE_VERSION}::  the image hosted on Quay.io
+
+
+*Using bamoe-{VERSION}-maven-repository-image.tar.gz*
+
+Enable the OpenShift registry and log into it using Docker:
+
+[source,shell]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+export REGISTRY=`oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}'`
+docker login -u `oc whoami` -p `oc whoami --show-token` ${REGISTRY}
+----
+
+Import the image from the `tar.gz` file, re-tag it, and push it to the OpenShift registry, replacing <PROJECT_NAME> with your OpenShift Project (namespace):
+
+[source,shell]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
+docker push ${REGISTRY}/<PROJECT_NAME>/maven-repository:{IMAGE_VERSION}
+----
+
+Set an environment variable with the image name
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION}
+----
+
+*Using quay.io/bamoe/maven-repository:{IMAGE_VERSION}*
+
+This case is simpler as you only need to set an environment variable with the image URL
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Create the Deployment and Route
+
+[source,shell]
+----
+oc new-app ${BAMOE_MAVEN_REPOSITORY_IMAGE} --name bamoe-maven-repo
+oc create route edge --service=bamoe-maven-repo
+----
+
+Get the Maven repository URL to be used in the next steps:
+
+[source,shell,subs="attributes+"]
+----
+oc get route bamoe-maven-repo --output jsonpath={.spec.host}
+----
+
+=== Deploying to a Kubernetes cluster
+
+Choose the container image from one of the following sources: 
+
+bamoe-{VERSION}-maven-repository-image.tar.gz:: included in the distribution
+quay.io/bamoe/maven-repository:{IMAGE_VERSION}::  the image hosted on Quay.io
+
+==== Using the `tar.gz` included in the distribution
+
+This step varies depending on your cluster configuration, but it may involve setting up an image registry (or using one that is already set up), loading and re-tagging the docker image, and pushing it to the registry with the new tag.
+
+[source,shell,subs="attributes+"]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+docker tag quay.io/bamoe/maven-repository:{IMAGE_VERSION} <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION}
+docker push <REGISTRY_URL>/<NAMESPACE>/maven-repository:{IMAGE_VERSION}
+----
+
+NOTE: If you are using a local Kubernetes cluster with Minikube or Kind you can skip the re-tagging and pushing and follow these commands: for Minikube, run `minikube image load quay.io/bamoe/maven-repository:{IMAGE_VERSION}`; for Kind, run `kind load docker-image quay.io/bamoe/maven-repository:{IMAGE_VERSION}`.
+
+Set an env var with the image name, For Kind and Minikube use the original quay.io URL for this variable:
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=maven-repository:{IMAGE_VERSION}
+----
+
+==== Using Quay.io hosted version
+
+In this case, all you need to do is set an env var with the image URL
+
+[source,shell,subs="attributes+"]
+----
+export BAMOE_MAVEN_REPOSITORY_IMAGE=quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Create the Deployment and Ingress, replacing `<EXTERNAL_BAMOE_MAVEN_REPO_URL>` with the URL that is mapped to your cluster:
+
+[source,shell]
+----
+kubectl create deployment bamoe-maven-repo --image=${BAMOE_MAVEN_REPOSITORY_IMAGE}
+kubectl expose deployment bamoe-maven-repo --port=80 --target-port=8080
+kubectl create ingress bamoe-maven-repo --rule="<EXTERNAL_BAMOE_MAVEN_REPO_URL>/*=bamoe-maven-repo:80"
+----
+
+For Kind or Minikube you could use something like `bamoe-maven-repo.localhost`, and then map this hostname to the cluster IP on your `/etc/hosts` file.
+
+=== Running on Docker locally
+
+Start by loading the `tar.gz` file or pulling the image from Quay.io:
+
+* **bamoe-{VERSION}-maven-repository-image.tar.gz**
++
+[source,shell,subs="attributes+"]
+----
+docker image load --input bamoe-{VERSION}-maven-repository-image.tar.gz
+----
+
+* **quay.io/bamoe/maven-repository:{IMAGE_VERSION}**
++
+[source,shell,subs="attributes+"]
+----
+docker pull quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+Run the image mapping its `<PORT>` to the port that you want the container to be mapped to on your host.
+
+[source,shell,subs="attributes+"]
+----
+docker run -d -p <PORT>:8080 quay.io/bamoe/maven-repository:{IMAGE_VERSION}
+----
+
+You can verify the repository is running by accessing the repository in your browser at `+http://localhost:<PORT>/com/ibm/bamoe+`.
+
+////
+
+=== Configure Maven with the container image URL
+To configure Maven with a container image installed via the Dev environment helm chart follow these steps:
+
+// . Download the dedicated M2 repository image container (`bamoe-{VERSION}-maven-repository-image.tar.gz`).
+. Open your local Maven `~/.m2/settings.xml` file in a text editor or IDE.
++
+NOTE: If there is no `settings.xml` file in the `~/.m2/` directory, copy the `settings.xml` file from the `$MAVEN_HOME/.m2/conf/` directory into the `~/.m2/` directory.
+
+. Add the following lines to the `<profiles>` element of the `settings.xml` file:
++
+[source,xml]
+----
+<profile>
+  <id>ibm-bamoe-enterprise-maven-repository</id>
+  <repositories>
+    <repository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url>https://container-URL-here</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url>https://container-URL-here/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</profile>
+----
+. Add the following lines to the `<activeProfiles>` element of the `settings.xml` file and save the file:
++
+[source,xml]
+----
+<activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
+----
+
+=== Configuring a local Maven repository for {PRODUCT_SHORT}
+
+If you prefer not to use containers, you can download and configure the {PRODUCT_SHORT} Maven repository from the compressed file.
+The {PRODUCT_SHORT} Maven repository contains the libraries that Java developers need to build _Business Services_ projects.
+
+To configure the {PRODUCT_SHORT} Maven repository locally follow these steps:
+
+. Download the Maven Repository `bamoe-{VERSION}-maven-repository.zip`.
+. Extract the downloaded archive.
+. Go to the `~/.m2/` directory and open the Maven `settings.xml` file in a text editor or IDE.
+. Add the following lines to the `<profiles>` element of the Maven settings.xml file, where `<MAVEN_REPOSITORY>` is the path of the Maven repository that you downloaded.
+  The format of `<MAVEN_REPOSITORY>` must be `+file://$PATH+`. For example, `+file:///home/userX/bamoe-{VERSION}-maven-repository/+`:
++
+[source,xml]
+----
+<profile>
+  <id>ibm-bamoe-enterprise-maven-repository</id>
+  <repositories>
+    <repository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url><MAVEN_REPOSITORY></url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ibm-bamoe-enterprise-maven-repository</id>
+      <url><MAVEN_REPOSITORY></url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</profile>
+----
+
+. Add the following lines to the `<activeProfiles>` element of the Maven `settings.xml` file and save the file:
+
+[source,xml]
+----
+<activeProfile>ibm-bamoe-enterprise-maven-repository</activeProfile>
+----
+
+If your Maven repository contains outdated artifacts, you might encounter Maven error messages when you build or deploy the project, such as:
+
+* `Missing artifact <PROJECT_NAME>`
+* `[ERROR] Failed to execute goal on project <ARTIFACT_NAME>; Could not resolve dependencies for <PROJECT_NAME>`
+
+To resolve these issues, delete the cached version of your local repository that is located in the  `~/.m2/repository` directory to force a download of the latest Maven artifacts.
+
+Your Maven repository is now properly configured and ready to build _Business Service_ projects using a standard Maven workflow.
+
+== Configure Gradle with the container image URL
+
+To configure Gradle with a container image installed via the Dev environment helm chart follow these steps:
+
+// . Download the dedicated M2 repository image container, `bamoe-9.4.0-maven-repository-image.tar.gz`.
+. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply {PRODUCT_SHORT} configuration globally.
+. Create a `bamoe.gradle` file in the `init.d` directory. 
+. Add the following lines in the `bamoe.gradle` file:
++
+[source,xml]
+----
+// ~/.gradle/init.d/bamoe.gradle
+
+def bamoeRepoUrl = "http://localhost:9999/"
+
+// Add BAMOE repository to all projects for dependency resolution
+allprojects {
+    
+ repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
+    }
+
+}
+
+gradle.settingsEvaluated { settings ->
+    // Add BAMOE repository for plugin resolution
+    settings.pluginManagement.repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
+    }
+
+    // Centralize repository declarations (Gradle 9.x)
+    settings.dependencyResolutionManagement {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            maven { url = settings.uri(bamoeRepoUrl) }
+        }
+    }
+}
+----
+
+. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`:
++
+** OpenShift: https://maven-repository.$YOUR_OCP_ROUTE_DOMAIN
+** Kubernetes: https://maven-repository.$YOUR_KUBERNETES_CLUSTER_DOMAIN
+. If you use HTTPS for the {MVN_REPO}, you must import your internal CA certificate into one of the following:
+.. Java truststore ,recommended for all OSes, or use a merged custom truststore and point Java/Gradle to it.
+.. OS truststore, only if your OS supports it.
+
+NOTE: Do not replace Java’s default truststore (cacerts) with your own. Only add your CA or use a merged custom truststore. Replacing the default keystore can break Java security and other tools on the system.
+
+=== Configuring a local Gradle repository for {PRODUCT_SHORT}
+
+If you prefer not to use containers, you can download the {MVN_REPO} as a compressed archive and configure it locally. The {MVN_REPO} includes all libraries required for Java developers to build _Business Services_ projects.
+
+To configure the {MVN_REPO} locally, follow these steps:
+
+. Download the {MVN_REPO}, `bamoe-{VERSION}-maven-repository.zip`.
+. Extract the downloaded archive.
+. Create the `~/.gradle/init.d/` directory, if it does not exist. Any Gradle build executed on this machine will automatically run any scripts placed in this directory during the initialization phase, allowing you to apply BAMOE configuration globally.
+. Create a `bamoe.gradle` file in the `init.d` directory. 
+. Add the following lines in the `bamoe.gradle` file:
+
++
+[source,xml]
+----
+// ~/.gradle/init.d/bamoe.gradle
+
+def bamoeRepoUrl = "http://localhost:9999/"
+
+// Add BAMOE repository to all projects for dependency resolution
+allprojects {
+    
+ repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
+    }
+
+}
+
+gradle.settingsEvaluated { settings ->
+    // Add BAMOE repository for plugin resolution
+    settings.pluginManagement.repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url = uri(bamoeRepoUrl)
+            allowInsecureProtocol = true
+        }
+    }
+
+    // Centralize repository declarations (Gradle 9.x)
+    settings.dependencyResolutionManagement {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            maven { url = settings.uri(bamoeRepoUrl) }
+        }
+    }
+}
+----
+. Replace the value assigned to `bamoeRepoUrl` variable with the real {MVN_REPO} `url`.
+
+[#dev-env-tls-cert]
+== Configuring Dev containers with Passthrough Transport Layer Security (TLS)
+{PRODUCT_SHORT} container images can optionally serve traffic directly over HTTPS using a TLS certificate and a key provided by the customer. This enables end-to-end encryption between the user browser and the container on OpenShift, through a passthrough Route. By default TLS not active and your existing deployment behavior is maintained. 
+
+In the Dev environment the following BAMOE container images support this:
+
+[cols="1,1,1"]
+|===
+| *Container* | *Certificate environment variable* | *Key environment variable*
+
+| Canvas 
+|`CANVAS_TLS_CERTIFICATE_PATH`
+| `CANVAS_TLS_KEY_PATH`  
+
+| CORS Proxy 
+|`CORS_PROXY_TLS_CERTIFICATE_PATH` 
+| `CORS_PROXY_TLS_KEY_PATH`
+
+| Extended Services 
+| `EXTENDED_SERVICES_TLS_CERTIFICATE_PATH` 
+| `EXTENDED_SERVICES_TLS_KEY_PATH`  
+|===
+
+When both variables are set, the container serves HTTPS on port `8443` (Canvas, Extended Services). CORS Proxy is the exception as it reuses its existing port (default `8080`) and serves HTTPS on the same port when TLS is enabled. When the variables are unset, the container behaves exactly as before, serving HTTP only.
+
+The matching Helm subcharts for each container expose a new `tls` block that wires this up automatically:
+
+[source,yaml]
+----
+tls:
+  enabled: false        # set to true to turn on in-container TLS
+  secretName: ""        # name of an existing kubernetes.io/tls Secret (required when enabled)
+  mountPath: /etc/tls
+  certPath: /etc/tls/tls.crt
+  keyPath: /etc/tls/tls.key
+  httpsPort: 8443       # not present for CORS Proxy; CORS Proxy reuses service.port (default 8080)
+----
+
+When `tls.enabled=true`, the chart mounts the TLS Secret into the container, sets the TLS environment variables, exposes the HTTPS port on the Service, and the OpenShift Route is configured for Passthrough termination using `openshiftRoute.tls.termination=passthrough`.
+
+When installing through the Helm chart the procedure is:
+
+. Create a Kubernetes TLS Secret in the target namespace:
++
+[source,bash]
+----
+oc create secret tls bamoe-tls \
+     --cert=path/to/tls.crt \
+     --key=path/to/tls.key
+----
+
+. In the Helm values file for the {PRODUCT_SHORT} component, enable TLS and reference the Secret:
++
+[source,yaml]
+----
+tls:
+  enabled: true
+  secretName: bamoe-tls
+openshiftRoute:
+  enabled: true
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect
+----
+
+. Run `helm install` (or `helm upgrade`) as usual.
+
+The Secret must be of type `kubernetes.io/tls` and contain both `tls.crt` and `tls.key` keys. If `tls.enabled=true` is set without a `secretName`, the chart aborts with a clear error message before reaching the cluster.
+
+For more information on how to implement this in the Runtime environment Helm chart containers see xref:runtime-environment.adoc#runtime-env-tls-cert[Configuring Runtime containers with Passthrough Transport Layer Security (TLS)]
+
+[#canvas-gitrepo-config]
+== Configuring {CANVAS} to work with supported Git providers
+
+To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable using the `canvas.env` Helm configuration parameter (see xref:#helm-chart-config-ref[Configuration reference for Dev environment Helm Charts]). 
+
+Example configuration:
+
+[source,json]
+----
+canvas: 
+  env: "KIE_SANDBOX_AUTH_PROVIDERS"
+  value: |
+  [
+    {
+      "id": "unique identifier",
+      "domain": "https://your-git-provider.com",
+      "supportedGitRemoteDomains": ["your-git-provider.com"],
+      "type": "gitlab | githubEnterprise | bitbucketDataCenter",
+      "name": "readable name for displaying in the BAMOE UI",
+      "enabled": true,
+      "group": "git",
+     "disableEncoding": true,
+    }
+  ]
+----
+
+*id*:: A unique identifier for this authentication provider configuration.
+*domain*:: The base URL of your Git provider instance.
+*supportedGitRemoteDomains*:: A list of Git remote domains that this provider can authenticate with.
+*type*:: Specifies the provider type (GitHub Enterprise Server, GitLab, or BitBucket Data Center).
+*name*:: A readable name displayed in the {PRODUCT_SHORT} UI.
+*enabled*:: A boolean flag that enables or disables this provider.
+*group*:: Categorizes the provider for grouping similar services.
+*disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
+*insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
+
+After completing the configuration, you can access the features provided by each integration. For more information see xref:../available-features/development-environment/canvas/connecting-accounts.adoc[Connecting to Git and Cloud providers].
+
+[#custom-accelerators]
+== Configuring custom Accelerators for your organization
+Accelerators are Git repositories that contain a skeleton of an application and that are used to convert a working directory with your `.dmn` and `.bpmn` files into a fully functional application that can be built and deployed. They can be used to store configurations that are common to all new _Business Services_ projects within an organization, making them available in {CANVAS} and {DEV_TOOLS} for all users in your organization.
+
+The default Quarkus and Spring Boot accelerators, available in {CANVAS} and {DEV_TOOLS}, can be found in the xref:https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] by selecting the branch that corresponds to {VERSION}. In {PRODUCT_SHORT}, you can use Accelerators that correspond to the cloud development frameworks it supports, including Quarkus and Spring Boot with either Maven or Gradle. Use these default accelerators to help identify what you want to modify in your own custom accelerator.
+
+Accelerators are published as part of the release. You can access the following elements:
+
+- A downloadable ZIP file contains all accelerators templates,
+- Branches for each accelerator in the public GitHub repository,
+- Version-tagged GitHub releases that correspond to BAMOE product version.
+
+For more information, see xref:../available-features/development-environment/canvas/applying-accelerators.adoc#accessing-accelerators[Accessing Accelerators].
+
+The `KIE_SANDBOX_ACCELERATORS` environment variable comes pre-configured with the default accelerators, accepting an array of Accelerator configurations.
+
+You can create your custom Accelerators by overwriting the default values or by appending new accelerator definitions. 
+
+Your custom Accelerator must be a public Git repository. After creating it, write a specific JSON configuration to be used in the `KIE_SANDBOX_ACCELERATORS` environment variable for {CANVAS}:
+
+[source,json,subs="attributes+"]
+----
+canvas: 
+  env: "KIE_SANDBOX_ACCELERATORS"
+  value: |
+  [
+    {
+      "name": "Your Accelerator name",
+      "iconUrl": "https://link.to/your/logo/image",
+     "gitRepositoryUrl": "https://github.com/...",
+     "gitRepositoryGitRef": "branchName",
+     "dmnDestinationFolder": "path/to/place/dmn/files",
+     "bpmnDestinationFolder": "path/to/place/bpmn/files",
+      "otherFilesDestinationFolder": "path/to/place/other/files",
+      "scesimDestinationFolder": "path/to/place/scesim/files"
+    }
+  ]
+----
+
+**name**:: This is how the Accelerator is known inside {CANVAS}.
+**iconUrl**:: An optional parameter to add an image/logo along with your Accelerator name.
+**gitRepositoryUrl**:: This is where your Accelerator is hosted. Must be an URL that can be used with Git clone.
+**gitRepositoryGitRef**:: Specifies where in your repository the Accelerator is located. Could be a branch, commit, tag, anything that can be used with Git checkout.
+**dmnDestinationFolder**:: Specifies where your DMN and PMML files will be moved after applying the Accelerator (relative to the project root).
+**bpmnDestinationFolder**:: Specifies where your BPMN files will be moved after applying the Accelerator (relative to the project root).
+**otherFilesDestinationFolder**:: Specifies where other files will be moved after applying the Accelerator (relative to the project root).
+**scesimDestinationFolder**:: Specifies where Scesim files will be moved after applying the Accelerator (relative to the project root).
+
+For more information on using accelerators, see xref:../available-features/development-environment/canvas/applying-accelerators.adoc[Using Accelerators]
+
+[#helm-chart-config-ref]
+== Configuration reference for Dev environment Helm Charts
+
+The following table lists and describes the configurable parameters of the two Dev Helm charts ({PRODUCT_PAM} and {PRODUCT_DM}) and their default values.
+
+
+=== Global Configuration
+
+|===
+| Key | Type | Default |Description
+
+
+| global.ingressSource 
+| string 
+| "" 
+| Which ingress source is being used (none/"minikube"/"kubernetes"/"openshift") 
+- For NOTES generation only 
+
+| global.kubernetesClusterDomain 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the cluster domain 
+
+| global.kubernetesIngressClass 
+| string 
+| "" 
+| If using Minikube or Kubernetes, set the Ingress class (i.e: nginx)
+
+| global.openshiftRouteDomain 
+| string 
+| "" 
+| If using OpenShift Routes, set the Route domain 
+
+| global.chargedProductValues.productID 
+| string 
+| "46b14c7f2f894218a7879b3f6416024f" (DMOE) / "72984f114b54496a8a44be139154a988" (PAMOE) 
+| Product ID for License Service tracking 
+
+| global.chargedProductValues.productMetric 
+| string 
+| "VIRTUAL_PROCESSOR_CORE" 
+| Product metric for License Manager tracking 
+
+| global.chargedProductValues.productName 
+| string 
+| "{PRODUCT_DM}" (DMOE) / "{PRODUCT_PAM}" (PAMOE) 
+| Product name for License Service tracking 
+
+| nameOverride 
+| string 
+| "" 
+| Overrides chart name 
+
+| fullnameOverride 
+| string 
+| "" 
+| Overrides chart full name 
+|===
+
+
+=== {CANVAS} Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| canvas.name 
+| string 
+| "canvas" |
+ The {CANVAS} application name
+
+| canvas.env 
+| list 
+| [{"name":"KIE_SANDBOX_EXTENDED_SERVICES_URL","value":"http://127.0.0.1:21345"},{"name":"KIE_SANDBOX_CORS_PROXY_URL","value":"http://127.0.0.1:8081"}] 
+| Env variables for {CANVAS} deployment
+
+| canvas.image 
+| object 
+| {"account":"bamoe","name":"canvas","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {CANVAS} image
+
+| canvas.imagePullSecrets 
+| list 
+| [] 
+| Pull secrets, used when pulling {CANVAS} image
+|===
+
+=== {CORS_PROXY} Configuration
+
+|===
+| Key | Type | Default | Description
+
+| cors_proxy.name 
+| string 
+| "cors-proxy" 
+| The CORS Proxy application name
+
+| cors_proxy.env 
+| list 
+| [{"name":"CORS_PROXY_ALLOWED_ORIGINS","value":"http://127.0.0.1:8080"},{"name":"CORS_PROXY_ALLOWED_HOSTS","value":"*"}] 
+| Env variables: CORS_PROXY_ALLOWED_ORIGINS - List of origins that can use the CORS Proxy service. Requests from origins not specified will be rejected. Defaults to the Canvas origin when deployed via Helm Chart, empty when deployed manually. CORS_PROXY_ALLOWED_HOSTS - List of hosts that the CORS Proxy service can proxy to. Requests to hosts not specified will be rejected. Defaults to the * wildcard, which means that any host can be proxied. Recommend changing this environment variable to list only the hosts that will be proxied (OpenShift clusters, Git providers, AI providers, etc).
+
+| cors_proxy.image 
+| object 
+| {"account":"bamoe","name":"cors-proxy","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the CORS Proxy image
+|===
+
+=== Extended Services Configuration
+
+|===
+| Key | Type | Default | Description 
+
+| extended_services.name 
+| string 
+| "extended-services" 
+| The {EXT_SERVICES} application name 
+
+| extended_services.image 
+| object 
+| {"account":"bamoe","name":"extended-services","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {EXT_SERVICES} image 
+|===
+
+=== Maven Repository Configuration
+
+|===
+| Key | Type | Default | Description
+
+| maven_repository.enabled 
+| bool 
+| TRUE 
+| Enable or disable {MVN_REPO} installation
+
+| maven_repository.name 
+| string 
+| "maven-repository" 
+| The {MVN_REPO} application name
+
+| maven_repository.image 
+| object 
+| {"account":"bamoe","name":"maven-repository","pullPolicy":"IfNotPresent","registry":"quay.io","tag":"main"} 
+| Image source configuration for the {MVN_REPO} image
+|===
+
+
+== Next steps
+
+Once you have successfully installed and configured {CANVAS} and {MVN_REPO} via the Dev environment Helm chart, as well as {DEV_TOOLS}, see the following sections:
+
+* xref:../getting-started/project-setup.adoc[Getting Started → Business Service project setup] for more information on Business Service projects.
+* xref:../available-features/development-environment/canvas/index.adoc[{CANVAS}] for more information the main features available in {CANVAS} to configure before starting to develop your BPMN and DMN business artifacts. 
+
+* xref:../available-features/development-environment/developer-tools-for-vscode/index.adoc[{DEV_TOOLS}] for more information on the main features available in {DEV_TOOLS}.
+
+* xref:runtime-environment.adoc[Runtime environment]]
+
+
+

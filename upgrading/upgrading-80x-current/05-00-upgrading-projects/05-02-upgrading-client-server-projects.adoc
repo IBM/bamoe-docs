@@ -1,0 +1,202 @@
+= Upgrading client-server projects
+
+include::../../../partials/attributes.adoc[]
+:imagesdir: ../../../images
+include::../../../styles/images.adoc[]
+
+This section provides a step-by-step process for upgrading client-server projects from {PRODUCT_SHORT} v8 to v9, covering key changes in configuration, security, and deployment.
+While both versions use standard Maven project structures (e.g., `pom.xml`, `src/main/java`, `src/main/resources`), there are important differences that must be addressed to ensure a successful migration.
+
+== The POM file
+
+The `pom.xml` file used in {PRODUCT_SHORT} v8 is not compatible with {PRODUCT_SHORT} v9. To create a compatible POM, you can either use a {PRODUCT_SHORT} Accelerator or manually configure it from scratch.
+
+=== Using {PRODUCT_SHORT} Accelerators
+
+{PRODUCT_SHORT} Accelerators are project templates with a ready-to-use structure designed to help you quickly get started with a __Business Service__ project. These templates include a pre-configured POM files tailored for {PRODUCT_SHORT} v9.
+
+The easiest way to upgrade your project is to replace your existing v8 pom.xml with the one provided in the {PRODUCT_SHORT} v9 Accelerator, available here:
+
+* https://github.com/IBM/bamoe-canvas-quarkus-accelerator[{CANVAS} Quarkus Accelerator (GitHub)].
+
+*NOTE:* Use the `pom.xml` content from a branch corresponding to your {PRODUCT_SHORT} v9 version.
+
+For more information on Accelerators see xref:../../../getting-started/project-setup.adoc#gs-accelerators[Getting Started → Setting up a _Business Services_ project] and xref:../../../available-features/development-environment/canvas/applying-accelerators.adoc[{CANVAS} → Using Accelerators].
+
+NOTE: You can not simply *Apply Accelerator* from the *{CANVAS}* to {PRODUCT_SHORT} v8 project. It would result into invalid project structure. Read more about this limitation xref:../11-not-supported.adoc[here].
+
+=== Manual upgrade
+
+If you prefer more control over your Maven configuration, you can manually upgrade your pom.xml by selecting the appropriate dependencies from the official {MVN_REPO}:
+
+* xref:../../../reference/maven-repository-libraries.adoc[{MVN_REPO} Libraries]
+
+This approach is for advanced users who want to fine-tune their project setup or integrate with existing enterprise build pipelines.
+
+== The application properties file [[application-properties]]
+
+The `application.properties` content of {PRODUCT_SHORT} v8 is not compatible with {PRODUCT_SHORT} v9.
+This table shows a summary of the properties specific to v8 and v9.
+
+|===
+| *Feature* | *{PRODUCT_SHORT} 8* | *{PRODUCT_SHORT} 9.2*
+
+| `kieserver.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `drools.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `jbpm.*` properties
+| ✅ Used
+| ❌ Deprecated
+
+| `kogito.*` properties
+| ❌ Not available
+| ✅ Introduced
+|===
+
+The {PRODUCT_SHORT} v9 `application.properties` content will depend on the technology being used.
+
+*NOTE:* Please review xref:../../../release-notes/supported-environments.adoc[{PRODUCT_SHORT} Supported environments].
+
+// You can find a reference of the main application properties in {PRODUCT_SHORT} v9 in xref:../reference-guide/application-properties.adoc[Reference → Application Properties]. You will also find multiple examples based on different use cases throughout the documentation by searching by keyword or by property.
+
+Similarly to the POM file you can also find `application.properties` in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[{PRODUCT_SHORT} Accelerators]. Make sure you select the version of the repository branch corresponding to chosen accelerator.
+
+//consider linking to the section on accelerators
+
+=== Example: `application.properties` {PRODUCT_SHORT} 9 (Quarkus-based)
+
+[source,properties]
+----
+# Server configuration
+quarkus.http.port=8080
+quarkus.log.level=INFO
+
+# Data source configuration (PostgreSQL)
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=kogito_user
+quarkus.datasource.password=kogito_pass
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/kogito_db
+quarkus.hibernate-orm.database.generation=update
+
+# Kogito persistence
+kogito.persistence.type=jdbc
+
+# Enable Kafka messaging
+mp.messaging.incoming.kogito_in.connector=smallrye-kafka
+mp.messaging.incoming.kogito_in.topic=kogito-events
+mp.messaging.incoming.kogito_in.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+mp.messaging.outgoing.kogito_out.connector=smallrye-kafka
+mp.messaging.outgoing.kogito_out.topic=kogito-responses
+mp.messaging.outgoing.kogito_out.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+# Enable OpenAPI and Swagger UI
+quarkus.swagger-ui.always-include=true
+quarkus.smallrye-openapi.path=/q/openapi
+
+# Tracing and monitoring
+quarkus.opentelemetry.enabled=true
+quarkus.opentelemetry.tracer.exporter.otlp.endpoint=http://localhost:4317
+quarkus.micrometer.export.prometheus.enabled=true
+quarkus.micrometer.export.prometheus.path=/metrics
+
+# Kogito add-ons
+kogito.addons.tracing.decision.enabled=true
+kogito.addons.monitoring.prometheus.enabled=true
+----
+
+=== Example: `application.properties` {PRODUCT_SHORT} 9 (Spring Boot-based)
+
+[source,properties]
+----
+# Server configuration
+server.port=8080
+logging.level.root=INFO
+
+# Data source configuration (PostgreSQL)
+spring.datasource.url=jdbc:postgresql://localhost:5432/kogito_db
+spring.datasource.username=kogito_user
+spring.datasource.password=kogito_pass
+spring.jpa.hibernate.ddl-auto=update
+
+# Kogito persistence
+kogito.persistence.type=jdbc
+
+# Kafka configuration
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=kogito-group
+spring.kafka.consumer.auto-offset-reset=earliest
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.StringSerializer
+
+# Kogito Kafka topics
+kogito.events.incoming=kogito-events
+kogito.events.outgoing=kogito-responses
+
+# OpenAPI and Swagger
+springdoc.api-docs.path=/v3/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+
+# Tracing and monitoring
+management.endpoints.web.exposure.include=*
+management.endpoint.prometheus.enabled=true
+management.metrics.export.prometheus.enabled=true
+
+#kogito.addons.tracing.decision.enabled=true
+kogito.addons.monitoring.prometheus.enabled=true
+----
+
+== Security configurations
+
+In {PRODUCT_SHORT} v8, security was typically configured using JBoss EAP SSO. These approaches, while functional, were tightly coupled to the application server.
+
+With {PRODUCT_SHORT} v9, security configuration has shifted to a modern, standards-based model using external Identity Providers (IdPs) that support OpenID Connect (OIDC). This change aligns with cloud-native best practices and enables more flexible, centralized authentication and authorization strategies.
+
+For detailed steps on how to migrate your existing security configurations, refer to the xref:05-08-upgrading-authentication-authorization.adoc[Upgrading Authentication and Authorization] section.
+
+== Asset upgrade
+
+Please, see the xref:05-04-upgrading-individual-assets.adoc[Upgrading individual assets] section to learn how to upgrade individual assets.
+
+== API upgrade
+
+Please, see the xref:../06-production-environment-comparison.adoc#api-differences[Production environment comparison] section to understand API changes.
+
+
+== How do you know it worked?
+
+To validate that the project upgrade was successful, the upgraded {PRODUCT_SHORT} v9 project must be built and run. The two options to do this are described below.
+
+=== The Quarkus Dev mode
+
+The upgraded {PRODUCT_SHORT} v9 project is a Maven Quarkus project that we can build and start locally as `mvn clean package` `mvn clean quarkus:dev`.
+The procedure is described in the Getting started with business rule microservice xref:../../../getting-started/business-rule-microservice.adoc[Getting Started → Rule Service in 15 minutes]. If you are using Gradle, use the `gradle clean quarkusDev` command.
+
+Your `application.properties` must contain the following property:
+
+[,properties]
+----
+quarkus.swagger-ui.always-include=true
+----
+
+Once the Dev mode is up and running we should be able to see available Rest endpoints using the address: `+http://localhost:8080/q/swagger-ui/#/+`, 
+
+=== Deployment to OpenShift
+
+Deploying a __Business Service__ to OpenShift is described in: xref:../../../getting-started/deploying-to-openshift.adoc[Getting Started → Deploying your first Business Service to OpenShift using Quarkus].
+
+Your `application.properties` must contain the following property:
+
+[,properties]
+----
+quarkus.swagger-ui.always-include=true
+----
+
+Once the OpenShift deployment is up and running you should be able to see available Rest endpoints using the address: `[OpenShift deployment endpoint]/q/swagger-ui/#/`

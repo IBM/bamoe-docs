@@ -1,0 +1,820 @@
+= BAMOE Maven Repository libraries reference
+include::../partials/attributes.adoc[]
+include::../styles/images.adoc[]
+
+Listed below you can find all consumable dependencies included in {MVN_REPO}. 
+
+Dependencies not listed here are considered internal and should not be used directly.
+
+Internal dependencies are subject to https://maven.apache.org/repositories/artifacts.html[GAV] and internal contents changing without notice.
+
+== BAMOE Bill of Materials (BOM)
+
+To facilitate version management and simplify upgrades, {PRODUCT_SHORT} provides different BOMs that adhere to Maven best practices.
+
+BOM is a collection of fully supported libraries that can be used in _Business Service_ projects.
+
+For more information on Maven BOM, see https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Bill_of_Materials_.28BOM.29_POMs[BOM POMs guide].
+
+To manage dependency versions and configurations, include the appropriate BOM in the `dependencyManagement` section of your _Business Service_ project's POM.
+
+IMPORTANT: Import only the BOM that matches framework of your _Business Service_ project.
+
+=== Quarkus BOM (Maven)
+
+[source,xml,subs="attributes+"]
+----
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.ibm.bamoe</groupId>
+      <artifactId>bamoe-quarkus-bom</artifactId>
+      <version>{BOM_VERSION}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+----
+
+=== Spring Boot BOM (Maven)
+
+[source,xml,subs="attributes+"]
+----
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.ibm.bamoe</groupId>
+      <artifactId>bamoe-spring-boot-bom</artifactId>
+      <version>{BOM_VERSION}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+----
+
+=== Embedded mode BOM (Maven)
+
+[source,xml,subs="attributes+"]
+----
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.ibm.bamoe</groupId>
+      <artifactId>bamoe-embedded-bom</artifactId>
+      <version>{BOM_VERSION}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+----
+
+=== Quarkus BOM (Gradle)
+
+[source,java,subs="attributes+"]
+----
+dependencies {
+  /* Quarkus BOM */
+  implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:{BOM_VERSION}")
+
+  /* The BAMOE BOM manages all dependencies required to create */
+  /* Business Services — including Apache KIE, Drools, jBPM, and Kogito */
+  implementation platform("com.ibm.bamoe:bamoe-quarkus-bom:{BOM_VERSION}")
+
+  ...
+}
+----
+
+=== Spring Boot BOM (Gradle)
+
+[source,java,subs="attributes+"]
+----
+dependencies {
+  /* Spring Boot BOM */
+  implementation enforcedPlatform("org.springframework.boot:spring-boot-dependencies:{BOM_VERSION}")
+
+  /* The BAMOE BOM manages all dependencies required to create */
+  /* Business Services — including Apache KIE, Drools, jBPM, and Kogito */
+  implementation platform("com.ibm.bamoe:bamoe-spring-boot-bom:{BOM_VERSION}")
+...
+}
+----
+
+== Building Business Services (Quarkus)
+
+Mandatory dependencies for building your Business Services with Quarkus.
+
+More at xref:../building-deploying/services-build.adoc[Building Business Services executables].
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-maven-plugin</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-gradle-plugin</artifactId>
+</dependency>
+----
+
+== Building Business Services (Spring Boot)
+
+Mandatory dependencies for building your Business Services with Spring Boot.
+
+More at xref:../building-deploying/services-build.adoc[Building Business Services executables].
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-maven-plugin</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.kie.kogito</groupId>
+    <artifactId>kogito-gradle-plugin</artifactId>
+</dependency>
+----
+
+
+[id=decisions-rules]
+== Decisions, Rules, and Decision Tables (Quarkus)
+Mandatory dependencies for enabling Decisions and Rules in your _Business Services_ with Quarkus.
+
+More at xref:../decisions-rules-test-scenarios/quarkus-dmn-drl.adoc[Decisions and Rules services wih Quarkus].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-quarkus-decisions</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-quarkus-rules</artifactId>
+</dependency>
+----
+
+== Decisions, Rules, and Decision Tables (Spring Boot)
+Mandatory dependencies for enabling Decisions and Rules in your _Business Services_ with Spring Boot.
+
+More at xref:../decisions-rules-test-scenarios/springboot-dmn-drl.adoc[Decisions and Rules services wih Spring Boot].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-decisions-spring-boot-starter</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-rules-spring-boot-starter</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<plugin>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-maven-plugin</artifactId>
+</plugin>
+----
+
+== Decisions, Rules, and Decision Tables (Dev + testing)
+
+More at xref:../decisions-rules-test-scenarios/authoring-scesim.adoc[Authoring unit tests with Test Scenarios].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-scenario-simulation</artifactId>
+  <scope>test</scope>
+</dependency>
+----
+
+== Decisions, Rules, and Decision Tables (Quarkus add-ons )
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-decisions</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-addons-quarkus-events-rules</artifactId>
+</dependency>
+----
+
+== Decisions, Rules, and Decision Tables (Spring Boot add-ons)
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-events-decisions</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-addons-springboot-events-rules</artifactId>
+</dependency>
+----
+
+== Workflows (Quarkus)
+Mandatory dependencies for enabling Workflows in your _Business Services_ with Quarkus.
+
+More at xref:../workflows/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-quarkus</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-with-drools-quarkus</artifactId>
+</dependency>
+----
+
+== Workflows (Spring Boot)
+
+Mandatory dependencies for enabling Workflows in your _Business Services_ with Spring Boot.
+
+More at xref:../workflows/workflows-with-springboot.adoc[Workflows services with Spring Boot].
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.jbpm</groupId>
+    <artifactId>jbpm-with-drools-spring-boot-starter</artifactId>
+</dependency>
+----
+
+== Workflows (Quarkus add-ons and extra features)
+For Workflow _Business Services_ built with Quarkus. 
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-process-management</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-events-process</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-knative-eventing</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-messaging</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-quarkus-mail</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-rest-workitem</artifactId>
+</dependency>
+----
+
+== Workflows (Spring Boot add-ons and extra features)
+For Workflow _Business Services_ built with Spring Boot. 
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-process-management</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-events-process</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+      <groupId>org.kie.kogito</groupId>
+      <artifactId>kogito-addons-springboot-messaging</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-springboot-mail</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie.kogito</groupId>
+  <artifactId>kogito-rest-workitem</artifactId>
+</dependency>
+----
+
+== Workflows (Quarkus dev + testing)
+// More at xref:../workflows/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-quarkus-devui</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-process-svg</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-source-files</artifactId>
+</dependency>
+----
+
+== Workflows (Spring Boot dev + testing)
+// More at xref:../workflows/workflows-with-quarkus.adoc[Workflows services with Quarkus].
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-spring-boot-web-console</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-process-svg</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-source-files</artifactId>
+</dependency>
+----
+
+== Workflows Stateful persistence
+
+More at xref:../workflows/workflows-with-quarkus.adoc[Workflows with Quarkus], and xref:../workflows/workflows-with-springboot.adoc[Workflows with Spring Boot].
+
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-persistence-jdbc</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-mssql-mappings</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-oracle-mappings</artifactId>
+</dependency>
+----
+
+== Workflows (Stateful) subsystem → Data-Index
+
+More at xref:../workflows/overview.adoc#data-index[The Data-Index subsystem].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-index-jpa</artifactId>
+</dependency>
+----
+
+== Workflows (Stateful) subsystem → Data-Audit
+
+More at xref:../workflows/overview.adoc#data-audit[The Data-Audit subsystem].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-data-audit</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-data-audit-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-audit</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-data-audit-jpa</artifactId>
+</dependency>
+----
+
+== Workflows (Stateful) subsystem → Jobs Service
+
+More at xref:../workflows/overview.adoc#jobs-service[The Jobs Service subsystem].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-embedded-jobs</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kogito-addons-springboot-embedded-jobs-jpa</artifactId>
+</dependency>
+----
+
+
+== Workflows (Stateful) subsystem → User Tasks
+
+More at xref:../workflows/overview.adoc#user-tasks[The User Tasks subsystem].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.jbpm</groupId>
+  <artifactId>jbpm-addons-springboot-usertask-storage-jpa</artifactId>
+</dependency>
+----
+
+[#PIM-addon-dependency]
+== Workflows Process Instance Migration (PIM) Add-on 
+
+Add the following dependency to be able to use PIM to migrate your running processes on Quarkus:
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-addons-quarkus-pim</artifactId>
+</dependency>
+----
+
+Add the following dependency on Spring Boot.
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-addons-spring-boot-pim</artifactId>
+</dependency>
+----
+
+
+
+== Monitoring
+
+More at xref:../managing-monitoring/monitoring-services.adoc[Monitoring Business Services].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-quarkus-monitoring-prometheus</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-addons-springboot-monitoring-prometheus</artifactId>
+</dependency>
+----
+
+== Decisions, Rules, and Decision Tables (Embedded Java mode)
+More at xref:../decisions-rules-test-scenarios/embedded-dmn-drl.adoc[Decisions and Rules _Business Services_ in Embedded Java mode].
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-compiler</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-model-compiler</artifactId>
+</dependency>
+----
+
+Add the following dependency for `DebugRuleRuntimeEventListener.java`:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-core</artifactId>
+</dependency>
+----
+
+Add the following dependency for `kmodule.xml`:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-xml-support</artifactId>
+</dependency>
+----
+
+////
+Removing as this is not a BAMOE library 
+Add the following dependency for logging:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-api</artifactId>
+  <version>2.0.13</version>
+</dependency>
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-simple</artifactId>
+  <version>2.0.13</version>
+</dependency>
+----
+////
+
+Add the following dependency for DMN models:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.kie</groupId>
+  <artifactId>kie-dmn-core</artifactId>
+</dependency>
+----
+
+Add the following dependencies for DRL files:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-mvel</artifactId>
+</dependency>
+----
+
+Add the following dependencies for Decision Tables:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.drools</groupId>
+  <artifactId>drools-decisiontables</artifactId>
+</dependency>
+----
+
+Add the following plugin in the `<build>` section of your `pom.xml` to obtain build time validation for embedded projects:
+
+[source,xml]
+----
+<build>
+  <plugin>
+    <groupId>org.kie</groupId>
+    <artifactId>kie-maven-plugin</artifactId>
+  </plugin>
+</build>
+----
+
+[id="ai-integration"]
+== AI integration
+The following dependencies enable custom AI agent to be integrated into Workflows, for _Business Services_ built with Quarkus or Spring Boot.
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-ai-agent-task-work-item-handler-quarkus</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-ai-agent-task-work-item-handler-spring-boot</artifactId>
+</dependency>
+----
+
+The following dependencies enable Gen AI tasks to be integrated into Workflows, for _Business Services_ built with Quarkus or Spring Boot.
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-gen-ai-task-work-item-handler-quarkus</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-gen-ai-task-work-item-handler-spring-boot</artifactId>
+</dependency>
+----
+
+== ILMT Compliance libraries
+
+More at xref:../installing/index.adoc[Installing → Licenses and tracking usage]
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-quarkus-dmoe</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-spring-boot-dmoe</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-java-dmoe</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-quarkus-pamoe</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-spring-boot-pamoe</artifactId>
+</dependency>
+----
+
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>ilmt-compliance-java-pamoe</artifactId>
+</dependency>
+----
+
