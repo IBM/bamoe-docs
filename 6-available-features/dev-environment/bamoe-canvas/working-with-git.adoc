@@ -1,0 +1,132 @@
+= Working with Git 
+include::../../../_partials/attributes.adoc[]
+:imagesdir: ../../../_images
+include::../../../_styles/images.adoc[]
+
+{CANVAS} streamlines the usage of Git to simplify workflows and guide users through a contribution model that minimizes conflicts and mitigates the complexity of managing a Git repository.
+
+All Git repositories in {CANVAS} are stored in-browser and can be synced with a remote Git repository using a simplified set of operations, avoiding the complexities typically encountered when using Git from the Command Line.
+
+{CANVAS} automatically saves all changes and persists them on the local disk.
+It is safe to close browser tabs and turn off the computer, as work will be retained upon return.
+However, it is recommended to Push work after each development session to ensure changes are securely stored with the Git provider in case of computer issues.
+
+Each card on the Home page represents a separate Git repository and can contain any number of files, nested directories, and file types.
+{CANVAS} is capable of handling large repositories, with internal tests supporting up to 10,000 files.
+Although large repositories are supported, users are discouraged from creating them, as {CANVAS} is optimized for working with microservices deployed to a Cloud environment.
+
+== Branches
+
+Users can specify the branch to work with when importing a remote Git repository.
+For projects created directly on {CANVAS}, the default `main` branch is used.
+Changing branches of Git repositories on {CANVAS} is not possible.
+To work on two separate branches simultaneously, import the repository again and select a different branch.
+
+== Conflict Resolution
+
+Conflicts, although rare when working on a feature branch, can still occur if changes are made externally or if a branch is shared with a peer.
+
+When synchronizing a repository on {CANVAS}, a conflict will trigger an alert similar to the following:
+
+.Conflict error dialog
+image::tools/image8.png[Conflict error dialog]
+
+{CANVAS} does not provide a mechanism for resolving conflicts directly.
+Instead, it allows users to switch to a new branch temporarily, ignore the conflict, and continue working.
+
+To resolve conflicts externally, users can employ their preferred method and tool, Push the changes, and then return to {CANVAS} and Pull.
+Work can then be resumed from the previous state.
+
+
+== Integration features of Git Providers
+
+The integration features of Git Providers in {CANVAS} enable seamless collaboration and version control, allowing users to efficiently manage their projects and repositories.
+
+.Variables used in URL patterns
+[options="header"]
+|===
+|Variable |Description
+|`<Groups>` |Top-level containers to organize related projects and users
+|`<Subgroups>` |Nested groups for deeper organization within a group
+|`<Projects>` |Repositories containing code, issues, pipelines, and more
+|`<Snippets>` |Small pieces of code or text that can be shared and reused
+|===
+
+{CANVAS} supports the following operations across providers:
+
+.Repository Cloning
+You can clone entire repositories into the {PRODUCT_SHORT} workspace. The supported URL patterns are:
+
+* For GitLab:
+** `\https://<domain>/<group-or-subgroups>/<project>.git`
+** `\https://<domain>/<group-or-subgroups>/<project>`
+* For Bitbucket Data Center:
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse`
+** `\https://<domain>/scm/<project-key>/<repo-name>.git`
+
+You can also clone the repository  on a specific branch:
+
+* For GitLab: `\https://<domain>/<group-or-subgroups>/<project>/tree/<branch-name>`
+
+* For Bitbucket Data Center: `\https://<domain>/projects/<project-key>/repos/<repo>/browse?at=refs/heads/<branch-name>`
+
+.Cloning a repository
+image::tools/cloning-repo.png[width=600]
+
+
+.Import Files from Repositories or Branches
+You can import specific files from a repository or a specific branch. The supported URL patterns are:
+
+* For GitLab: `\https://<domain>/<group-or-subgroups>/<project>/blob/<branch-name>/<path-to-file>`
+* For Bitbucket Data Center:
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>`
+** `\https://<domain>/projects/<project-key>/repos/<repo>/browse/<path-to-file>?at=refs/heads/<branch-name>`
+
+.Importing a repository
+image::tools/importing-repo.png[width=600]
+
+.Creating repository from {PRODUCT_SHORT} workspace
+
+You can create new repositories directly from the workspace after connecting with a Git provider. To create a new repository:
+
+. Navigate to *Share* → *Authentication Source*.
+. Select the connected authentication provider from the dropdown to see the *Create <Git Provider> Repository* option.
++
+.Selecting the Authentication Provider
+image::tools/select-auth-provider.png[width=600]
++
+. Click *Create <Git Provider> Repository*.
+. Choose a project to create the repository.
++
+NOTE: You can create the repository under a user, group, or subgroup. Visibility settings are inherited from the group or subgroup it belongs to. If no project is available or permission is missing, a warning message is displayed.
++
+. Enter the repository name and select Private or Public.
+. Click *Create* to generate a new repository. After successful creation, BAMOE displays a success message with the repository URL.
+
+.Push and Pull Changes
+
+After cloning or creating a repository, you can:
+
+* Push changes made in the workspace to the remote repository.
+* Pull updates from the remote repository to keep the local copy in sync.
+
+.Push and Pull 
+image::tools/push-pull.png[width=600]
+
+
+.Code Snippets
+You can create Personal Snippets (belong to a user) and Project Snippets (associated with a project types of snippets) in GitLab. You can choose to create these snippets under their own account or under a specific project. The visibility settings for these snippets are inherited from the project they belong to. Additionally, since snippets are not full Git repositories, they do not support branching like projects do.
+The supported URL patterns are:
+
+* Personal Snippets: `\https://<domain>/snippets/<snippet-id>`
+
+* Project Snippets: `\https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>`
+
+You can also import a specific file from a snippet using the following URL patterns:
+
+* Personal Snippets: `\https://<domain>/snippets/<snippet-id>/raw/<branch>/<file-name>`
+* Project Snippets: `\https://<domain>/<group-or-subgroups>/<project>/snippets/<snippet-id>/raw/<branch>/<file-name>`
+
+NOTE: Bitbucket Data Center does not support native code snippets therefore snippet-related features are not available for Bitbucket Data Center.
+
+

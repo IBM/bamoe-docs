@@ -1,0 +1,42 @@
+= Operation considerations
+include::../../_partials/attributes.adoc[]
+:imagesdir: ../../_images
+include::../../_styles/images.adoc[]
+
+This chapter addresses some of the operation considerations when upgrading from BAMOE v8 to v9.
+
+== Database cleanup
+
+In both versions of {PRODUCT_SHORT}, data created by the workflow engine can be classified in two general categories:
+
+* Runtime Data
+* Historical Data
+
+Runtime Data - or live data - is related to active Process Instances. This kind of data is generally deleted by the engine when the related process instance is completed.
+
+Historical Data, on the other hand, is used to keep track of current and past Process Instances. This includes data kept in audit log tables, or data kept for query purposes. This kind of data is not deleted automatically by {PRODUCT_SHORT}.
+
+In {PRODUCT_SHORT} v8 there are several approaches to delete audit data, as outlined in the https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=services-managing-monitoring-business-processes-in-business-central#manage-log-file-proc[{PRODUCT_SHORT} {VERSION_80X} User Documentation]. The most commonly used on is to schedule the (periodic) execution of the `LogCleanupCommand`.
+
+In {PRODUCT_SHORT} version {VERSION_RM} the {DATA_CLEANUP} enables you to clean up historical data, see xref:../../10-managing-and-monitoring-business-services/managing-runtime-data.adoc[Managing historical Business Services data in Workflow runtime]
+
+
+// incl. Database migrations
+
+== Deploying and evolving Business Process Models (BPMN)
+
+When deployed Process applications start to be consumed and Process Instances are created, if you need to make changes to the Business Process models (BPMN) files you will need to manage this. As a general guideline, it is safe to deploy a new version of your application if there are no changes to BPMN files or if your BPMN files are "stateless processes" (a.k.a. Straight-through processes, or STPs). However, if the sequence flow of a BPMN file of a stateful process changes with new nodes, and/or new "`paths`" of execution, you cannot simply change your BPMN file(s) and deploy a new version your application. Instead, the recommended way is that you keep the current BPMN file(s) unchanged and duplicate them under a new name (and with a different ID), so that new Process Instances can be created already from this new version.
+
+For more information on how to evolve Workflows across _Business Service_ deployments see xref:../../9-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Building and Deploying _Business Services_ → Evolving Workflows]
+
+=== In-flight Process Instance Migration
+
+For longer running processes you may need to make updates to the Process Definition and re-deploy before the process has finished execution. 
+
+In {PRODUCT_SHORT} v8, PIM is provided through kie-server management REST APIs. A standalone PIM tool is also available to facilitate the use of these APIs, as well as to create migration files that are required for complex migration scenarios. See the https://www.ibm.com/docs/en/ibamoe/8.0.x?topic=services-managing-monitoring-business-processes-in-business-central[{PRODUCT_SHORT} {VERSION_80X} User Documentation].
+
+In {PRODUCT_SHORT} {VERSION_RM} you can use the {PIM_ADDON} via API or its integration with the {MANAGEMENT_CONSOLE} to plan and migrate Process Instances to newer versions, see xref:../../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Managing and Monitoring _Business Services_ → Migrating with PIM]
+
+The {PRODUCT_SHORT} v9 PIM APIs are part of the {PIM_ADDON}, and are not compatible with {PRODUCT_SHORT} v8 PIM APIs. In addition, a PIM UI as part of {MANAGEMENT_CONSOLE} facilitates use of these APIs. The REST endpoints enable the migration of multiple or all Process Instances from a source process definition to a target process definition.
+
+// incl. Scaling up/down
