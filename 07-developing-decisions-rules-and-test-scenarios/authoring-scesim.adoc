@@ -1,0 +1,267 @@
+= Authoring unit tests with Test Scenarios
+include::../_partials/attributes.adoc[]
+include::../_styles/images.adoc[]
+
+As a developer of business decisions, you can use Test Scenarios in {PRODUCT} to test the decision logic in your _Business Services_ during development. Test Scenarios can be created and modified with {DEV_TOOLS}.
+
+Some features present in {CANVAS} are not available for {DEV_TOOLS}, but you can achieve a similar experience of DMN Runner with Test Scenario Editor.
+
+== Creating unit tests with Test Scenarios
+
+Test Scenarios in {PRODUCT} enable you to validate the functionality of business decisions and business decision data. In a Test Scenario, you use data from your project to set given conditions and expected results based on one or more defined business decisions. When you run the scenario, the expected results and actual results of the decision instance are compared. If the expected results match the actual results, the test is successful. If the expected results do not match the actual results, then the test fails.
+
+You define Test Scenarios in `.scesim` (scenario simulation) files that you can model using {DEV_TOOLS}. You can use one or multiple `.scesim` files in your _Business Service_ project, and each `.scesim` file can contain one or multiple Test Scenarios based on the defined decision data.
+
+.Example Test Scenarios for 'PersonDecisions' DMN decision logic
+
+image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDecisionsTest Test Scenario]
+
+When you run the Test Scenarios in your _Business Service_ project, all Test Scenarios in all `.scesim` files are run as part of the same command. However, individual Test Scenarios are independent, so one scenario cannot affect or modify another. You can run Test Scenarios at any time during project development. You do not need to compile or deploy your decision service to run Test Scenarios, but your _Business Service_ project needs to be compilable and free from build errors.
+
+This documentation provides a step-by-step guide on how to use the Test Scenario Editor in VS Code to test DMN assets created in {PRODUCT_SHORT}. For more examples, see xref:../05-getting-started/examples.adoc[Example Business Service projects].
+
+NOTE: {PRODUCT_SHORT} supports DMN-based Test Scenario only and not the Rule-based Test Scenario. It is still possible to **run** a Rule-based Test Scenario generated with {PRODUCT_SHORT} version {VERSION_80X} in Business Central using the old APIs.
+
+// TBD move to upgrade
+
+Also, all the DMN-based scesim assets created prior to version {VERSION} require a user action to update the related DMN file location. This is required because the DMN file path is now managed in a relative format.
+
+== Project Setup
+
+To run the scenario, you must have set up {MVN_REPO} and {DEV_TOOLS}. See xref:../03-installing/development-environment.adoc[Installing → Dev Environment]. Optionally, you can use Language Support for Java(TM) by Red Hat.
+
+== Accessing the Example Project
+
+If you are a new {PRODUCT_SHORT} user and do not have any project to set up yet, or you prefer having an out-of-the-box project to deal with, you can use an example project available in BAMOE.
+
+To access the example project, go to the xref:../01-release-notes/whats-new-9-6.adoc#download-doc[Download documents] section, download the Example ZIP file and choose the example that matches your _Business Service_ project requirements.
+
+The example project contains all the necessary files and prerequisites for this tutorial.
+
+== Setting up any project
+
+To enable Test Scenario in your project, follow these steps:
+
+1. Add the `org.kie.kogito:kogito-scenario-simulation` dependency to your project's POM file to enable the Test Scenario runner. For the dependency, see xref:../12-reference/maven-repository-libraries.adoc#_decisions_rules_and_decision_tables_dev_testing[Decisions, Rules, and Decision Tables (Dev + testing)].
+
+2. Create the `KogitoScenarioJunitActivatorTest.java` file in the `src/test/java/testscenario` directory:
++
+[source,java]
+----
+   package testscenario;
+   import org.drools.scenariosimulation.backend.runner.TestScenarioActivator;
+
+   @TestScenarioActivator
+   public class KogitoScenarioJunitActivatorTest { }
+----
++
+image::developer-tools/scesim-activator.png[scesim activator]
+
+3. Create the `src/test/resources` directory for storing `.scesim` files.
+
+== Creating a Test Scenario
+Create the `PersonDecisions.dmn` file in the `src/main/resources` directory.
+Its content is available in the xref:../05-getting-started/business-rule-microservice.adoc#example-person-decisions-dmn[Example PersonDecisions DMN file] section.
+This is the first model that is tested using a `.scesim` file.
+
+Then, in the `src/test/resources` directory, create a new file with the `.scesim` extension.
+
+image::developer-tools/scesim-file-creation.png[scesim file creation]
+
+For this example, the Test Scenario file corresponds to a `PersonDecisions.dmn` model in the _Business Service_ project:
+
+The Test Scenario Editor automatically generates a scenario template based on the available DMN data types and fields that you defined in the DMN model.
+
+The *GIVEN* columns specify input conditions based on the corresponding decision service.
+The *EXPECT* column specifies the expected results of the decision service based on the defined *GIVEN* conditions.
+Each row in the table is a defined scenario with example values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
+
+You can right-click the relevant header cells to insert or delete columns as needed to modify the table structure. You can also select the relevant header cells to modify or insert data objects from the *Test Tools* panel in the right toolbar.
+
+Modify the generated Test Scenario header cells and specified data objects as needed to design the Test Scenario template. Many of the header cell values might already be defined for you.
+
+Use the following resources in the right toolbar of the Test Scenario Editor to help you design your Test Scenario header cells:
+
+* *Settings*: Use this panel to change the target *DMN model* selection if needed or to select the option *Skip this simulation during the test*. This skip option excludes the Test Scenario file from being run when you run all Test Scenario files in the _Business Service_ project. If you update these settings, you must save, close, and then reopen the Test Scenario file for the changes to take effect.
+* *Test Tools*: Use this panel to select and insert the data objects for a selected header cell. These data objects come from the target DMN model specified in the *Settings* toolbar option.
+* *Scenario Cheatsheet*: Use this panel to review supported Test Scenario table actions, syntax, and other options.
+
+For this example, the Test Scenario file defines the following parameters:
+
+* *GIVEN*: The first header cell (instance) is set to the *Person* data object and the subheader cells (properties) are set to the *Age* and *Name* data objects. Any other generated columns under *GIVEN* are deleted.
+* *EXPECT*: The first header cell (instance) is set to the *isAdult* data object and the subheader cell (property) is set to the *value* data object. Any other generated columns under *EXPECT* are deleted.
+
+.Example Test Scenario header cells
+
+image::test-scenarios/kogito-test-scenario-example-person-headers-create.png[Image of Test Scenario template]
+
+In row 1, create a Test Scenario with values for the *GIVEN* and *EXPECT* definitions to test the decision logic of the corresponding decision service.
+
+For this example, the Test Scenario specifies the following values:
+
+* *Scenario description*: `Is an adult`
+* *GIVEN*: Set the following values:
+** *Person* -> *Age*: `20`
+** *Person* -> *Name*: `John Quark`
+* *EXPECT*: Set the following value:
+** *isAdult* -> *value*: `true`
+
+The corresponding `PersonDecisions.dmn` model in this example contains an `isAdult` DMN decision that determines that persons older than 18 years of age are adults. This example Test Scenario tests whether the person John Quark, aged 20, is correctly identified by the `isAdult` DMN decision as an adult (`true`), based on the decision logic.
+
+Right-click any cell in row 1 and select *Insert row below* to create additional Test Scenarios as needed.
+
+For this example, a second Test Scenario in row 2 specifies the following values:
+
+* *Scenario description*: `Is underage`
+* *GIVEN*: Set the following values:
+** *Person* -> *Age*: `15`
+** *Person* -> *Name*: `Jenny Quark`
+* *EXPECT*: Set the following value:
+** *isAdult* -> *value*: `false`
+
+This example scenario tests whether the person Jenny Quark, aged 15, is correctly identified by the `isAdult` DMN decision as not an adult (`false`), based on the decision logic.
+--
+* Continue adding Test Scenarios as needed to complete the Test Scenario file.
++
+--
+The following Test Scenario file is the completed `PersonDecisionsTest.scesim` example:
+
+.Example Test Scenarios for 'PersonDecisions' DMN decision logic
+
+image::test-scenarios/kogito-test-scenario-example-person.png[Image of PersonDecisionsTest Test Scenario]
+
+This example Test Scenario file tests the decision logic for the following `PersonDecisions.dmn` model in the _Business Service_ project. The DMN model determines whether the specified person is an adult or is underage.
+
+.Example 'PersonDecisions' DMN decision requirements diagram (DRD)
+
+image::test-scenarios/kogito-dmn-example-person.png[Image of PersonDecisions DRD,400]
+
+.Example DMN boxed expression for 'isAdult' decision
+
+image::test-scenarios/kogito-dmn-example-person-logic.png[Image of PersonDecisions Decision Table,480]
+
+If you plan to use the same value for a *GIVEN* input condition in all Test Scenario rows in the file, you can use the *Background* tab to define the global header cell and value definitions and exclude the column from the Test Scenario table template. The *GIVEN* input conditions in the *Background* page are treated as background data for the table and are applied to all Test Scenarios listed.
+
+For example, if the previous Test Scenario example requires the same value for the person `Age` in all Test Scenarios, you can define the `Age` value in the *Background* page and exclude that column from the Test Scenario table template. In this case, the `Age` is set to `20` for all Test Scenarios.
+
+.Example Test Scenarios with repeated value for 'Age'
+
+image::test-scenarios/kogito-test-scenario-example-person-background.png[Image of Test Scenario template,600]
+
+.Example background definition with repeated value for 'Age'
+
+image::test-scenarios/kogito-test-scenario-example-person-background2.png[Image of Test Scenario template,600]
+
+.Modified Test Scenario template with excluded 'Age' column
+
+image::test-scenarios/kogito-test-scenario-example-person-background3.png[Image of Test Scenario template,600]
+
+The following Test Scenario file is a more advanced `TrafficViolationTest.scesim` example:
+
+.Example Test Scenarios for 'Traffic Violation' DMN decision logic
+
+image::test-scenarios/kogito-test-scenario-example-traffic-violation.png[Image of TrafficViolationTest Test Scenario]
+
+This example Test Scenario file tests the decision logic for the following `Traffic Violation.dmn` model in the _Business Service_ project. This DMN model determines fine amounts and driver suspension for traffic violations.
+
+.Example 'Traffic Violation' DMN decision requirements diagram (DRD)
+
+image::test-scenarios/kogito-dmn-example-traffic-violation.png[Image of Traffic Violation decision diagram,600]
+
+.Example DMN boxed expression for 'Fine' decision
+
+image::test-scenarios/kogito-dmn-example-traffic-violation-fine.png[Image of Fine Decision Table,720]
+
+.Example DMN boxed expression for 'Should the driver be suspended?' decision
+
+image::test-scenarios/kogito-dmn-example-traffic-violation-suspension.png[Image of Should the driver be suspended? context expression,720]
+
+== Defining list values in Test Scenarios
+
+NOTE: This feature is available in the Test Scenario Editor (classic) only. In the new Test Scenario Editor, you need to use a DMN FEEL expression to define a List value.
+
+[role="_abstract"]
+When data types in Decision Model and Notation (DMN) models are configured as `List` types, you can set the values of the list for that data object in the corresponding Test Scenario. You can define list values in cells for both *GIVEN* and *EXPECT* columns.
+
+.Procedure
+. In your VS Code IDE, open the DMN file that contains the decisions that you want to test and select the *Data Types* tab to view the data types for the DMN model.
+. Add or modify a data type of any kind, toggle the *List* option to define the data type as a list, and save the DMN file.
++
+--
+For example, the following `State` data type is part of a DMN model for determining fine amounts and driver suspension in a traffic violation decision service. In this case, the `State` data type is defined as a `List` type so that the relevant states can be explicitly listed in the decision service or Test Scenarios.
+
+.Example 'State' data type as a list
+image::test-scenarios/kogito-test-scenario-example-list-type.png[Image of State data type as a list type]
+--
+. Add or modify a Test Scenario (`.scesim`) file that corresponds to the DMN decision service and insert the DMN data type that you defined as a `List` type in a relevant *GIVEN* or *EXPECT* header cell.
++
+--
+For example, the following `TrafficViolationTest.scesim` Test Scenario file uses the *Driver* -> *State* data object defined previously as a `List` type as part of the *GIVEN* parameters for the traffic violation scenarios.
+
+.Example 'State' data type in a Test Scenario header cell
+image::test-scenarios/kogito-test-scenario-example-list-type-scenario.png[Image of State data type as a list type in Test Scenario]
+--
+. Double-click a value cell in the column and in the window that appears, select from the following options:
++
+--
+* *Create List*: Use this option to create a list using the guided form in the window. Select *Add list value* to begin adding list values.
+* *Define List*: Use this option to define a list as a Friendly Enough Expression Language (FEEL) literal expression.
+
+.Create a list in guided form
+
+image::test-scenarios/kogito-test-scenario-example-list-define-UI.png[Image of window to create list]
+
+image::test-scenarios/kogito-test-scenario-example-list-define-UI2.png[Image of window to add list values]
+
+.Define a list as FEEL expression
+
+image::test-scenarios/kogito-test-scenario-example-list-define-expression.png[Image of window to define list as FEEL expression]
+--
+. Click *Save* in the list window to save the list values.
++
+--
+The value for the selected cell in the Test Scenario is now defined with the new list.
+
+.Example list for 'State' cell value
+image::test-scenarios/kogito-test-scenario-example-list-type-scenario2.png[Image of State column with new list value]
+--
+
+[id="ref-test-scenarios-supported-feel-data-types_{context}"]
+== Supported FEEL data types in DMN Test Scenarios
+
+[role="_abstract"]
+The Test Scenario Editor supports the following Friendly Enough Expression Language (FEEL) data types for Decision Model and Notation (DMN) Test Scenarios:
+
+.Supported FEEL data types in DMN Test Scenarios
+[width="",cols="3,6"]
+|===
+|Supported data types | Description
+
+|Numbers
+|Numbers based on the http://ieeexplore.ieee.org/document/4610935/[IEEE 754-2008] Decimal 128 format, with additional number notations extended by {PRODUCT}, such as `1.2e3` for `1.2*10**3` (scientific) and `0xff` for `255` (hexadecimal)
+
+|Strings
+|Any sequence of characters delimited by double quotation marks, such as `"John Doe"`, `"Brno"`, and `""`
+
+|Boolean values
+|`true`, `false`, and `null`.
+
+|Dates, time, and date and time
+|Date literals, time literals, and combined date and time literals, such as `date("2019-05-13")`, `time("14:10:00+02:00")`, and `date and time( "2019-05-13T23:59:00" )`
+
+|Years and months duration, days and time duration
+|Duration strings for years, months, days, hours, minutes, and seconds that follow the format defined in the https://www.w3.org/TR/xmlschema-2/#duration[XML Schema Part 2: Datatypes] document, such as `duration( "P2Y" )` for year, `duration( "P3Y5M" )` for year and month, `duration( "P23D" )` for days, `duration( "PT12H" )` for hours, and `duration( "P1DT23H12M30S" )` for days, hours, minutes, and seconds.
+
+|Functions
+|Built-in math functions, such as `avg` and `max`, or variables of functions extended by {PRODUCT}, such as `function(a, b) a + b`
+
+|Contexts
+|Lists of key and value pairs, such as `{x : 5, y : 3}` and `{x : 5, even : false, type : "integer number"}`
+
+|Ranges and lists
+|Range literals and list literals, such as `[1 .. 10]` and `[2, 3, 4, 5]`
+|===
+
+For more information about supported Test Scenario actions and data types, see the *Scenario Cheatsheet* icon in the right toolbar of the Test Scenario Editor in Visual Studio Code (VS Code).
+
+For more information about FEEL data types, see {DMN_FEEL_HANDBOOK_LINK}[DMN FEEL Handbook].

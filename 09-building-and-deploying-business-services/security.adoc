@@ -1,0 +1,259 @@
+= Securing _Business Service_ API endpoints
+include::../_partials/attributes.adoc[]
+include::../_styles/images.adoc[]
+
+_Business Services_ on {PRODUCT_SHORT} rely on Quarkus or Spring Boot to configure authentication and authorization, and will query their provided security-related data for information about who the authenticated user is, performing a request and the permissions (roles/groups) they have. This applies particularly to the stateful Workflows subsystem for User Tasks.
+
+After configuring your _Business Service_ to integrate its security layer, you can rely on an external Identity Providers (IdPs) such as Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution.
+
+{MANAGEMENT_CONSOLE} can connect to secured _Business Services_ if they expose enough information about their configured Identity Provider. See xref:#mgmt-console-oidc-proxy[Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_] for more details.
+
+[#authentication-quarkus]
+== Authentication (Quarkus)
+Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can learn how to set up the authorization layer in Quarkus in this https://quarkus.io/version/3.20/guides/security-oidc-bearer-token-authentication[guide].
+
+The first step is to configure the Quarkus OpenID Connect (OIDC) extension by setting the properties in the `src/main/resources/application.properties` file. 
+
+The list of properties required to setup your project may change based on your security needs, Identity and Access Management Solution, see the example configuration below:
+
+[source]
+----
+quarkus.oidc.enabled=true
+quarkus.oidc.tenant-enabled=true
+quarkus.oidc.auth-server-url=http://localhost:8280/auth/realms/kogito
+quarkus.oidc.client-id=kogito-service
+quarkus.oidc.credentials.secret=secret
+----
+
+The following table describes in detail the properties shown in the example, which are a subset of all properties available, see https://quarkus.io/version/3.20/guides/security-oidc-configuration-properties-reference[OIDC configuration property reference] for more information.
+
+[%header,cols=4]
+[%autowidth]
+
+|===
+
+|Property | Description | Type | Default value
+|quarkus.oidc.enabled | It determines OIDC extension is enabled
+ | Boolean | true
+|quarkus.oidc.tenant-enabled | Specifies whether the tenant configuration is
+enabled
+ | Boolean | true
+|quarkus.oidc.auth-server-url  | The base URL of the OpenID
+Connect (OIDC) server
+ | URI | -
+|quarkus.oidc.client.id  | The client id of the application
+ | string  | -
+|quarkus.oidc.credentials.secret  | The client secret used by the
+client_secret_basic
+authentication method
+ | string  | -
+
+|===
+
+[#authentication-spring-boot]
+== Authentication (Spring Boot)
+
+Spring Boot supports protecting endpoints using OAuth 2.0 Bearer tokens, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can find more information about the Spring Boot OAuth 2.0 Resource Server in the https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Documentation].
+
+In order to use this functionality in a _Business Services_ on {PRODUCT_SHORT}, the first step is to add the required dependencies to the application `pom.xml` file:
+
+[source,xml]
+----
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+    </dependency>
+----
+
+In addition, you will need to configure Spring Security to secure the application with OAuth2. To enable support for bearer tokens based on JSON Web Token (JWT) format, add the following configuration property to your application:
+
+[source]
+----
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://127.0.0.1:8180/realms/kie
+----
+
+Additional configuration settings can be applied through the Spring Boot `SecurityFilterChain` bean.
+
+[#authorization-quarkus]
+== Authorization (Quarkus)
+Quarkus incorporates a pluggable web security layer. When security is active, the system performs a permission check on all HTTP requests to determine if they should proceed. For more information, see https://quarkus.io/version/3.20/guides/security-authorize-web-endpoints-reference[Authorization of web endpoints] in the official Quarkus guide. See an example configuration below:
+
+[source]
+----
+quarkus.http.auth.permission.authenticated.paths=/*
+quarkus.http.auth.permission.authenticated.policy=authenticated
+quarkus.http.auth.permission.public.paths=/q/*,/docs/*,/oidc/info
+quarkus.http.auth.permission.public.policy=permit
+----
+
+Properties are pluggable based on how many permission rules you want to define for your application.
+
+In the following example, two permissions are defined:
+
+authenticated:: Used for REST entrypoints that requires an Authorization.
+public:: Used for publicly accessible REST entrypoints.
+
+You can find a detailed explanation on permissions and the properties to add to your `application.properties` file in the Quarkus https://quarkus.io/version/3.8/guides/security-authorize-web-endpoints-reference[guide] 
+
+The available properties can be configured for all user-defined permission rules. For example, the `quarkus.http.auth.permission."permissions".policy` property with the specified permissions can have two properties, see following table:
+
+[%header,cols=3]
+[%autowidth]
+|===
+
+|Property | Description | Type 
+
+|quarkus.http.auth.permission."permissions".paths
+_e.g.,
+quarkus.http.auth.permission.authenticated.paths
+quarkus.http.auth.permission.public.paths_
+
+ | The paths that this permission check applies to. If the path ends in /*
+then this is treated as a path prefix, otherwise it is treated as an exact
+match.
+ | List of URI
+
+ |quarkus.http.auth.permission."permissions".policy
+_e.g.,
+quarkus.http.auth.permission.authenticated.policy
+quarkus.http.auth.permission.public.policy_
+
+ | The HTTP policy that this permission set is linked to. There are three built-in policies: permit, deny and authenticated. Role based policies can be defined, and extensions
+ | String
+|===
+
+[#authorization-spring-boot]
+== Authorization (Spring Boot)
+With Spring Security enabled, you gain fine-grained control over the authorization rules using the `AuthorizationFilter` of the Spring Security Filter Chain. 
+
+The following code snippet shows a sample `AuthorizationFilter` configuration. It enforces authentication for all endpoints, except the `/q/oidc/.well-known/openid-configuration` endpoint which can be accessed unauthenticated. In this sample setup, no specific roles are required to enforce authorization.
+
+[source,java]
+----
+      .authorizeHttpRequests(auth -> auth
+              .requestMatchers("/q/oidc/.well-known/openid-configuration").permitAll()
+              .anyRequest().authenticated())
+----
+
+You can find more information on this topic and available configuration options in the https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Documentation].
+
+
+== Authentication in User Task API endpoints
+The xref:../08-developing-stateful-workflows/user-tasks.adoc[User Task API] integrates seamlessly with the Authentication and Authorization mechanisms of Quarkus, with the option to receive `user` and `groups` as QueryParameters. For this integration to happen, the following properties should be set in the `application.properties` file of your _Business Service_ project:
+
+[cols="1,1,1,1"]
+|===
+|*Property* |*Description* |*Type* |*Default* 
+
+|`kogito.security.auth.enabled` | It globally enables the entire application using the Security Context when resolving the current User Identity |Boolean |false 
+
+|`kogito.security.auth.impersonation.allowed-for-roles` | `groupName1,groupName2,...`
+Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
+
+|===
+
+[#mgmt-console-oidc-proxy]
+== Connecting {MANAGEMENT_CONSOLE} to live _Business Services_
+For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available. Different solutions exist for Quarkus and Spring Boot.
+
+=== Quarkus
+
+You need to use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` add-on, as it creates new endpoints in the _Business Service_ where one of them is `/q/oidc/.well-known/openid-configuration`, which provides the Identity Provider URL. It is the same URL that is defined in the `quarkus.oidc.auth-server-url` property.
+
+To use the `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` add-on, add an entry with version `0.2.2` to the `<dependencies>` section of your POM file.
+
+////
+[source,xml]
+----
+<dependency>
+  <groupId>io.quarkiverse.oidc-proxy</groupId>
+  <artifactId>quarkus-oidc-proxy</artifactId>
+  <version>0.2.2</version>
+</dependency>
+----
+////
+NOTE: Version 0.2.2 of `io.quarkiverse.oidc-proxy:quarkus-oidc-proxy` is compatible with Quarkus 3.20 (LTS). Do not use versions 0.1.x or 0.3.x.
+
+=== Spring Boot
+
+The `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on enables you to create an `/q/oidc/.well-known/openid-configuration` endpoint. It provides the Identity Provider URL which is the same URL that is defined in the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property.
+
+To use the `com.ibm.bamoe:bamoe-spring-boot-idp-discovery` add-on, add an entry to the `<dependencies>` section of your POM file.
+
+////
+[source,xml]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-spring-boot-idp-discovery</artifactId>
+</dependency>
+----
+////
+
+Then add the endpoint as an exception to your web security configuration, for example:
+
+[source,java]
+----
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+@Configuration
+@EnableWebSecurity
+@ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.issuer-uri")
+class BamoeSpringBootWebSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> {
+            }) // enables CORS with default settings
+            .csrf(csrf -> csrf.disable()) // disable CSRF
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/q/oidc/.well-known/openid-configuration").permitAll()
+                    .anyRequest().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
+            }));
+
+        return http.build();
+    }
+}
+----
+
+The configuration is only loaded if the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property is set, which means that this `WebSecurityConfig` is only used when Spring Boot is configured to use an Identity Provider.
+
+The `/q/oidc/.well-known/openid-configuration` path is added as an exception to make sure that the {MANAGEMENT_CONSOLE} is able to access it when adding this application as a connected Business Service.
+
+Finally, make sure that the `spring.autoconfigure.exclude` property is **unset**.
+
+[#bus-services-tls-cert]
+== Configuring _Business Services_ with Passthrough Transport Layer Security (TLS)
+If you require end-to-end encryption between your user's browser and your _Business Service_ container you can use the required Accelerator and uncomment the TLS block properties in your `application.properties` file. No other dependencies or code changes are required. 
+
+For Quarkus based _Business Services_ uncomment the following properties:
+
+[source, properties]
+----
+%prod.quarkus.http.ssl.certificate.files=/var/run/secrets/tls/tls.crt
+%prod.quarkus.http.ssl.certificate.key-files=/var/run/secrets/tls/tls.key
+%prod.quarkus.http.insecure-requests=disabled
+%prod.quarkus.http.http2=false
+----
+
+For Spring Boot based _Business Services_ uncomment the following properties:
+
+[source, properties]
+----
+server.ssl.certificate=/var/run/secrets/tls/tls.crt
+server.ssl.certificate-private-key=/var/run/secrets/tls/tls.key
+server.http2.enabled=false
+----
+
+For _Business Services_ containing Workflows, you will need to force HTTPS-only, by switching `kogito.service.url`, `kogito.jobs-service.url`, and `kogito.data-index.url` to `https://`. You will find an inline note regarding this in the accelerator file.

@@ -1,0 +1,63 @@
+= What's new in version 9.6
+include::../_partials/attributes.adoc[]
+include::../_styles/images.adoc[]
+
+This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VERSION_X} versions.
+
+////
+Version {VERSION} is now available. You can find information on fixes and known limitations in {VERSION} in the section: xref:#fix-list-known-limitations[Fixes and Known Limitations in {VERSION_RM} versions]
+////
+
+== Modernized technology stack
+This version upgrades foundational technologies and brings support for new ones:
+
+* TBD
+
+More information in xref:supported-environments.adoc[Learn more...].
+
+
+== Workflow engine - Data isolation for _Business Services_ connected to a single database
+
+When multiple _Business Services_ within the Compact Architecture configuration, they may share the same database. In the previous versions of {PRODUCT_SHORT} the persistence subsystems — Data Index, Jobs Service, Data Audit, User Task storage, and Process Instance storage were able to read data from any _Business Service_ in that shared database, causing data leakage between services. To avoid this each _Business Service_ required its own database. 
+
+In {PRODUCT_SHORT} {VERSION_VM}, you are are now able to activate data isolation between services with a single configuration property: `kogito.persistence.data-isolation.enabled=true`. When enabled, each _Business Service_ automatically filters all database queries to return only its own data. The filtering happens at the SQL level and no additional network calls or external services are required.
+
+xref:../08-developing-stateful-workflows/database-considerations.adoc[Learn more...]
+
+
+== Workflow engine - Workflow versioning
+Due to historical limitations, workflow versioning in {PRODUCT_SHORT} 9 is done using the process ID, meaning that evolving a workflow will generate multiple IDs (e.g., hiring, hiring2, and so on). The workflow engine generates endpoints based on the process ID of a workflow. By changing the workflow process ID, customers are required to update their client applications to use new endpoints (for example, update /hiring to /hiring2).
+ 
+
+To address routing between multiple Business Services, {PRODUCT_SHORT} {VERSION} introduces a new capability called "Routing Management". This capability will focus on managing the routing of requests between different _Business Services_, ensuring that the correct workflow is invoked based on the request context. This is similar to the feature provided by KIE Container {PRODUCT_SHORT} (VERSION_80x)
+
+The Data isolation for _Business Services_ connected to a single database" feature ensures that existing process instances remain bound to the process definition from which they were created.
+
+
+xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
+
+
+== Automatic execution of {PIM_ADDON} on _Business Service_ startup
+In {PRODUCT_SHORT} {VERSION_95x}, the {PIM_ADDON} was run manually by users to execute migration plans after deployment. This meant that if you use Blue/Green deployment pipelines you could not use the {PIM_ADDON} because pipelines terminate the old service version immediately after the new version passes health/readiness probes, and as a consequence there was no window for an operator to trigger the migration externally between the two service versions being live simultaneously.
+
+{PRODUCT_SHORT} {VERSION} enables {PIM_ADDON} to be optionally configured to execute automatically on _Business Service_ startup.
+
+xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Learn more...]
+
+////
+[#fix-list-known-limitations]
+== Fixes and Known Limitations in {VERSION_96} versions
+You can find information on the fixes and Known limitations in each {VERSION_95X} version via the following links:
+
+* xref:fix-list.adoc[Release Notes → Fix List]
+
+* xref:known-limitations.adoc[Release Notes → Known Limitations]
+////
+
+[#download-doc]
+== Download documents 
+For more information on {PRODUCT_LONG} version {VERSION} download document, see 
+
+// TBD
+
+https://www.ibm.com/support/pages/node/7277082[BAMOE {VERSION_95} Download Document].

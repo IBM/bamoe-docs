@@ -1,0 +1,79 @@
+= Patching your 9.5 version
+include::../_partials/attributes.adoc[]
+include::../_styles/images.adoc[]
+
+This section describes the steps you must take to apply a patch to your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_950}. 
+
+See the following sections if you are upgrading from a version prior to this:
+
+* xref:../03-installing/index.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
+
+{PRODUCT_SHORT} provides automated update tools to apply patch updates to the components in your Dev and Runtime environments. It is important to maintain your patch updates in order to benefit from the security fixes and bug corrections. 
+
+This guide walks you through patching your:
+
+* {PRODUCT_SHORT} Dev environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
+
+* _Business Service(s)_ project(s)
+
+* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
+
+== Step 1: Download product archives
+
+Download the new versions of your currently installed components from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program].
+
+// is there an upgrade tool or does the helm chart have an automatic upgrade mechanism?
+
+== Step 2: Patch your Dev environment
+
+Follow the steps in xref:../03-installing/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new versions of {MVN_REPO}, {CANVAS} and {MCP_SERVER}.
+
+The {VERSION} version of {CANVAS} is a drop-in replacement for the {VERSION_950} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+
+[NOTE]
+====
+If you have customized your previous {CANVAS} installation, remember to apply the same environment variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+====
+
+=== Upgrade {DEV_TOOLS}
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors, it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded. See xref:../06-available-features/dev-environment/bamoe-developer-tools-for-vscode/index.adoc[{DEV_TOOLS}].
+
+== Step 3: Upgrade your _Business Service(s)_ project(s)
+
+_Business Service(s)_ project(s) can be upgraded by changing their Maven dependencies and configuration files.  
+
+The project structure is not changed. You need to update the versions, names of selected dependencies and files.
+
+[start=1]
+. Upgrade the {PRODUCT_SHORT} BOM in the project POM file to {BOM_VERSION}:
++
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+----
+
+== Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
+To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
+
+[source,console]
+----
+mvn clean package
+----
+
+You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
+
+You can now continue developing your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
+
+== Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
+
+After upgrading your _Business Services_ source code (Step 3), you need to upgrade the components in your Runtime environment.
+
+Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment].
+
+Once you have upgraded your Runtime environment, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).

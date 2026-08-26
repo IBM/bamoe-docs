@@ -1,0 +1,131 @@
+= BAMOE Components in the Software Development Lifecycle
+include::../_partials/attributes.adoc[]
+include::../_styles/images.adoc[]
+
+The following sections show how {PRODUCT_SHORT} components can be integrated into your Software Development lifecycle, and enable you to:
+
+* develop, build and test _Business Services_ in the Dev environment, 
+* deploy, invoke, manage and monitor (different user profiles or AI agents) _Business Services_ in the Runtime environment. 
+
+The figures also show the integrations of {PRODUCT_SHORT} components with the various standard software that you will use to develop your Cloud Native applications. 
+
+[#dev-components]
+== The Dev Environment
+
+.{PRODUCT_SHORT} components in the Dev environment
+image::arch-overview/arch-dev.png[width=700]
+
+In the Dev environment:
+
+* Technical Business Analysts and Developers can use either of the two main interfaces {CANVAS} and {DEV_TOOLS} to edit Business Service assets which can be stored in your preferred Git provider.
+
+* {PRODUCT_SHORT} Accelerators and the {MVN_REPO} can be used to build executable _Business Services_, based on your preferred development framework (Quarkus or Spring Boot). The execution of the business Processes and Decisions in the _Business Services_ can be tested and built into a container image to be deployed to your Runtime environment. 
+
+[#runtime-components]
+== The Runtime Environment
+
+.{PRODUCT_SHORT} components in the Runtime environment
+image::arch-overview/arch-runtime.png[width=700]
+
+In the Runtime environment various user profiles or AI agents can interact with your Business Service in the following ways:
+
+* DevOps and Developer profiles can manage the deployment of _Business Services_, the setup of Databases and Data cleanup for stateful workflow, and any required monitoring dashboards for _Business Services_ using industry standard software. 
+
+* If the _Business Services_ contain events or have a security layer configured, they connect using pre-configured settings to the Kafka Events broker or the identity provider running in your system. 
+
+* Business Analysts and Operators can analyze the results of the execution of _Business Services_ with actual data, in real time, via the Management Console. When Workflow Process Definitions evolve they can also manage the migration of long running Process Instances to the new definitions using the integrated PIM UI. 
+
+* Your deployed systems invoke _Business Services_ using the {PRODUCT_SHORT} Rest or GraphQL API endpoints. 
+
+* AI agents can use the {MCP_SERVER} to invoke _Business Services_ capabilities such as the execution of DMN decision/Rule models or the creation, retrieval or modification of Process Instances. 
+
+The symbols in each diagram are described in the table below:
+
+[%header,cols=2]
+[%autowidth]
+|===
+|Symbol |Description
+a|
+image::arch-overview/lgnd-bs-stage.png[width=260]
+|A stage of a _Business Service_ in the development lifecycle when using {PRODUCT_SHORT}.
+
+a|
+image::arch-overview/lgnd-bamoe-comp.png[width=260]
+| A component of {PRODUCT_SHORT} that can be deployed in the development lifecycle and used by different user profiles. 
+
+a|
+image::arch-overview/lgnd-bamoe-feature.png[width=260]
+|A feature of {PRODUCT_SHORT} used within the development lifecycle, often available within a component.
+
+a|
+image::arch-overview/lgnd-bamoe-user.png[width=120]
+|A user of the {PRODUCT_SHORT} components and features. 
+
+a|
+image::arch-overview/lgnd-ext-sys.png[]
+|External software that can be integrated with your {PRODUCT_SHORT} _Business Services_. 
+
+a|
+image::arch-overview/lgnd-db-storage.png[width=240]
+|Persistent storage that can be used to store business artifacts in the Dev environment and Process Instances and data in _Business Services_ at runtime. 
+
+a|
+image::arch-overview/lgnd-usr-sys.png[]
+|The system you develop that invokes _Business Services_ developed using {PRODUCT_SHORT} to meet your business requirements. 
+
+a|
+image::arch-overview/lgnd-end-usr.png[width=110]
+
+|End users of the system you develop that invokes _Business Services_ developed using {PRODUCT_SHORT}. 
+
+|===
+
+== {PRODUCT_SHORT} Component and Feature Reference
+
+The following tables list the different {PRODUCT_SHORT} components and main features available to integrate into your Software Development lifecycle and develop _Business Services_. 
+
+[%header,cols=2]
+[%autowidth]
+|===
+|Component/Feature |Description
+
+|{CANVAS}
+|A standalone web application that provides authoring and testing tools for Decisions and Processes in your browser. Business Analysts will find this particularly helpful. Developers may prefer to use the {DEV_TOOLS} which provides the same features in addition to enterprise developer features, see xref:../06-available-features/dev-environment/bamoe-canvas/index.adoc[Available features → Dev Environment → {CANVAS}]. 
+
+|{DEV_TOOLS}
+|An integration with Microsoft VS Code editor provides the tools to create, edit, test, and visualize business processes (BPMN), decisions (DMN) and test scenarios (SceSim). These tools, combined with existing Java extensions, provide a fully integrated and consistent workspace for Business Service developers, see xref:../06-available-features/dev-environment/bamoe-developer-tools-for-vscode/index.adoc[Available features → Dev Environment → {DEV_TOOLS}].
+
+|{PRODUCT_SHORT} Accelerators
+|A feature used to rapidly create an executable project starting with a business process or a decision file and adding the necessary files and locations to build and deploy _Business Services_. Each new project will contain instructions in a README file, an Apache Maven `pom.xml` file referencing project dependencies, and build the expected file structure for the _Business Services_, see xref:../06-available-features/dev-environment/bamoe-canvas/applying-accelerators.adoc[Available features → Dev Environment → Using Accelerators].
+
+|{MVN_REPO}
+|An image or a zip file which contains all the third-party libraries referenced by core {PRODUCT_SHORT} components. It can be installed in an artifact repository or locally. It ensures that component versions and references are maintained with supported versions, see xref:../03-installing/development-environment.adoc#maven-repo-setup[Installing → Dev Environment → {MVN_REPO}].
+
+|{MANAGEMENT_CONSOLE}
+|A Web application that provides a view into a running process in your _Business Services_. You can view which step a process is in while it is running, trigger new processes, and interact with user/human tasks via forms. You can also plan and manage the migration of running processes via the {PIM_ADDON} integration with the Console, see xref:../10-managing-and-monitoring-business-services/consoles.adoc[Managing live Workflows using {MANAGEMENT_CONSOLE}]
+
+|{QUARKUS_DEV_UI}
+|Tools and views that can be used during development, to interact and view _Business Services_. These tools run locally and are accessible in your browser. The {QUARKUS_DEV_UI} is built upon the existing Quarkus DevUI, see xref:../08-developing-stateful-workflows/workflows-with-quarkus.adoc#quarkus-dev-ui[Developing stateful Workflows → Workflow services with Quarkus]
+
+|{SPRING_WEB_CONSOLE}
+|Tools and views that can be used during development, to interact and view _Business Services_. These tools run locally and are accessible in your browser. The {SPRING_WEB_CONSOLE} is built via Spring Boot and existing assets from the {QUARKUS_DEV_UI}, see xref:../08-developing-stateful-workflows/workflows-with-springboot.adoc#spring-web-console[Developing stateful Workflows → Workflow services with Spring Boot]
+
+|{PRODUCT_SHORT} Data Cleanup Tool 
+|A tool written in Java to remove out-of-date information from the production database and provided as a container. The Data cleanup tool communicates with all supported databases to remove completed and aborted process instances and related data from a database, ensuring queries continue at acceptable levels of performance, see xref:../10-managing-and-monitoring-business-services/managing-runtime-data.adoc[Managing and Monitoring _Business Services_ → Managing historical _Business Services_ data in Workflow runtime]
+
+|{PRODUCT_SHORT} Database mapping libraries for Oracle and MS SQL Server
+|Different databases use different reserved words. These mapping libraries adapt the base SQL queries and connections to their respective databases avoiding conflicts with reserved words.
+
+|AI Integrations: {PRODUCT_SHORT} Gen AI task
+|A BPMN workflow task which enables easy invocation of an LLM. The Gen AI task provides input for the provider, model, temperature, token limit and prompt. When executed, the task will use the configured information to query the LLM and return the provided response, see xref:../11-integrating-with-ai/custom-generative-ai-task.adoc[Integrating with AI → Using Gen AI Tasks in Workflows]
+
+|AI Integrations: {MCP_SERVER} (Tech Preview)
+|A Quarkus-based service that exposes {PRODUCT_SHORT} decision and rule models to external AI agents via the MCP protocol. Allows DMN, DRL, and BPMN decisions and workflows to be exposed as "Tools" to support an Agentic AI landscape. This component builds on the Quarkus MCP server extension, see xref:https://docs.quarkiverse.io/quarkus-mcp-server/dev/[Quarkus MCP Server]. For more information on {MCP_SERVER} see xref:../11-integrating-with-ai/ai-mcp-server.adoc[Integrating with AI → Exposing {PRODUCT_SHORT} capabilities to AI agents through {MCP_SERVER}]
+
+|AI Integrations: {PRODUCT_SHORT} AI Agent task (Tech Preview)
+|A BPMN workflow task which enables an integration with Langflow to select flows or agents to be integrated into {PRODUCT_SHORT} Workflows, see xref:../11-integrating-with-ai/ai-agent-task.adoc[Integrating with AI → Using AI Agent Tasks in Workflows]
+
+|{PIM_ADDON}
+|The Process Instance Migration (PIM) integrates with {MANAGEMENT_CONSOLE} and enables you to plan and manage the migration of Process Instances to new Process Definitions, providing full visualization of process definitions, facilitating tasks such as node mapping and migration scheduling, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Managing and Monitoring _Business Services_ → Migrating Process Instances using {PIM_ADDON}]
+|===
+
