@@ -36,7 +36,6 @@ The Data isolation for _Business Services_ connected to a single database" featu
 
 xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
 
-
 == Automatic execution of {PIM_ADDON} on _Business Service_ startup
 In {PRODUCT_SHORT} {VERSION_95x}, the {PIM_ADDON} was run manually by users to execute migration plans after deployment. This meant that if you use Blue/Green deployment pipelines you could not use the {PIM_ADDON} because pipelines terminate the old service version immediately after the new version passes health/readiness probes, and as a consequence there was no window for an operator to trigger the migration externally between the two service versions being live simultaneously.
 
@@ -44,10 +43,10 @@ In {PRODUCT_SHORT} {VERSION_95x}, the {PIM_ADDON} was run manually by users to e
 
 xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Learn more...]
 
-== New Role-based Access Control for Business Services in Management Console and via GraphQL
-In {PRODUCT_SHORT} {VERSION_95x} any users of the {MANAGEMENT_CONSOLE} or the Data Index GraphQL API could see all pages, run all actions and GraphQL queries or mutations. There was no built-in way to make features or operations read-only or unavailable, or hide pages from a specific user. 
+== New Role-based access control for Business Services in production
+{PRODUCT_SHORT} {VERSION} provides fine-grained role-based access control (RBAC) at a _Business Service_ level to control access through the Management Console or API. Features can now be restricted by user role, enabling enterprises to enforce read-only or read/write access per capability. Permissions are sourced from the Identity Provider, ensuring centralized governance and compliance.
 
-Using the new Role-based Access Control you are now able to :
+Using the new Role-based Access Control you are now able to:
 
 - Specify which Management Console pages or actions are visible for specific user profiles depending on their permissions.
 - Protect the underlying Business Service REST and GraphQL endpoints by role.
@@ -55,11 +54,11 @@ Using the new Role-based Access Control you are now able to :
 
 The capability is provided through two new add-ons: 
 
-BAMOE RBAC Add-on:: Exposes user permissions to the Management Console via a `/me` endpoint, and optionally cross-checks permissions against the Business Service's route security. 
+{RBAC_ADDON}:: Exposes user permissions to the Management Console via a `/me` endpoint, and optionally cross-checks permissions against the Business Service's route security. 
 
 BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index GraphQL endpoint (`/graphql`).
 
-xref:../10-managing-and-monitoring-business-services/consoles.adoc[Learn more...]
+xref:../09-buiding-and-deploying-business-services/security.adoc[Learn more...]
 
 
 ////

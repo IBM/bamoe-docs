@@ -33,10 +33,9 @@ The following table describes in detail the properties shown in the example, whi
 |===
 
 |Property | Description | Type | Default value
-|quarkus.oidc.enabled | It determines OIDC extension is enabled
+|quarkus.oidc.enabled | It enables the OIDC extension
  | Boolean | true
-|quarkus.oidc.tenant-enabled | Specifies whether the tenant configuration is
-enabled
+|quarkus.oidc.tenant-enabled | It enables the tenant configuration
  | Boolean | true
 |quarkus.oidc.auth-server-url  | The base URL of the OpenID
 Connect (OIDC) server
@@ -53,23 +52,15 @@ authentication method
 [#authentication-spring-boot]
 == Authentication (Spring Boot)
 
-Spring Boot supports protecting endpoints using OAuth 2.0 Bearer tokens, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can find more information about the Spring Boot OAuth 2.0 Resource Server in the https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Documentation].
+Spring Boot supports endpoint protection using OAuth 2.0 Bearer tokens, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can find more information about the Spring Boot OAuth 2.0 Resource Server in the https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Documentation].
 
-In order to use this functionality in a _Business Services_ on {PRODUCT_SHORT}, the first step is to add the required dependencies to the application `pom.xml` file:
+To use this functionality in a _Business Services_ on {PRODUCT_SHORT}, add the required dependencies to the `<dependencyManagement>` section of your project POM: 
 
-[source,xml]
-----
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-    </dependency>
-----
+* `org.springframework.boot:spring-boot-starter-security`
+* `org.springframework.boot:spring-boot-starter-oauth2-resource-server`
 
-In addition, you will need to configure Spring Security to secure the application with OAuth2. To enable support for bearer tokens based on JSON Web Token (JWT) format, add the following configuration property to your application:
+
+In addition, you will need to configure Spring Security to secure the application with OAuth2. To enable support for bearer tokens based on JSON Web Token (JWT) format, add the following configuration property to your application properties file:
 
 [source]
 ----
@@ -94,8 +85,8 @@ Properties are pluggable based on how many permission rules you want to define f
 
 In the following example, two permissions are defined:
 
-authenticated:: Used for REST entrypoints that requires an Authorization.
-public:: Used for publicly accessible REST entrypoints.
+authenticated:: Used for REST endpoints that requires an Authorization.
+public:: Used for publicly accessible REST endpoints.
 
 You can find a detailed explanation on permissions and the properties to add to your `application.properties` file in the Quarkus https://quarkus.io/version/3.8/guides/security-authorize-web-endpoints-reference[guide] 
 
@@ -231,7 +222,23 @@ The configuration is only loaded if the `spring.security.oauth2.resourceserver.j
 
 The `/q/oidc/.well-known/openid-configuration` path is added as an exception to make sure that the {MANAGEMENT_CONSOLE} is able to access it when adding this application as a connected Business Service.
 
-Finally, make sure that the `spring.autoconfigure.exclude` property is **unset**.
+Finally, make sure that the `spring.autoconfigure.exclude` property is `unset`.
+
+[#RBAC-config]
+== Configuring Role-based access control (RBAC) for _Business Services_
+You can further protect interactions with your _Business Services_ in production using a Role-based access control system that reuses role definitions that already exist in the OpenID Connect Identity provider that you are using (Keycloak, Auth0, Okta, or Azure AD). This system enables you to:
+
+* Hide {MANAGEMENT_CONSOLE} pages or actions from users that do not have the right permissions.
+* Protect the underlying _Business Service_ REST and GraphQL endpoints by role.
+
+The capability is available via the following add-ons, available for Quarkus and Spring Boot, that are part of the BAMOE BOM and can be added to your _Business Services_:
+
+{RBAC_ADDON}:: Exposes user permissions to the Management Console via a `/me` endpoint, and optionally cross-checks permissions against the Business Service's route security. 
+
+BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index GraphQL endpoint (`/graphql`).
+
+RBAC is a layered security feature. The {RBAC_ADDON} controls **what the user sees** in the UI; the BAMOE RBAC Data-Index Add-on and the framework's built-in route security control **what the user can actually call** on the backend. To get a fully secure setup, customers should configure both.
+
 
 [#bus-services-tls-cert]
 == Configuring _Business Services_ with Passthrough Transport Layer Security (TLS)
