@@ -6,7 +6,7 @@ This section summarizes the new functionality and changes in {PRODUCT_SHORT} {VE
 
 ////
 Version {VERSION} is now available. You can find information on fixes and known limitations in {VERSION} in the section: xref:#fix-list-known-limitations[Fixes and Known Limitations in {VERSION_RM} versions]
-////
+
 
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
@@ -14,34 +14,26 @@ This version upgrades foundational technologies and brings support for new ones:
 * TBD
 
 More information in xref:supported-environments.adoc[Learn more...].
+////
 
+== Workflow engine - Workflow versioning
+{PRODUCT_SHORT} {VERSION} now supports the creation and deployment of a new version of a Process Definition with the same ID and and a new Version number. In previous versions of {PRODUCT_SHORT} {VERSION_9x} versioning was done via the Process ID, which meant that updating a workflow generated multiple IDs (e.g., hiring, hiring2, etc.). Because the workflow engine generates endpoints based on the Process ID of a workflow this required updates to your client applications to use new endpoints (e.g., /hiring to /hiring2). The process to migrate Process Instances to the new version of the Process Definition is more streamlined. 
+
+xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
+
+== Automatic execution of {PIM_ADDON} to migrate _Business Services_ on startup
+When deploying a new version of the Process Definition automatically via a CI/CD pipeline
+there is often no simple way to migrate in-flight Process Instances to a new version of the Process Definition
+as part of the deployment. To address this, {PRODUCT_SHORT} {VERSION} can now trigger the {PIM_ADDON} automatically on Business Service startup, via migration plans that are specified in JSON files, enabling you to use your existing CI/CD pipelines without the need for complex modifications. {PIM_ADDON_SHORT} automatically registers those plans and migrates all matching active Process Instances, ensuring distributed locking to guarantee exactly-once execution across replicas. xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Learn more...]
 
 == Workflow engine - Data isolation for _Business Services_ connected to a single database
 
 When multiple _Business Services_ within the Compact Architecture configuration, they may share the same database. In the previous versions of {PRODUCT_SHORT} the persistence subsystems — Data Index, Jobs Service, Data Audit, User Task storage, and Process Instance storage were able to read data from any _Business Service_ in that shared database, causing data leakage between services. To avoid this each _Business Service_ required its own database. 
 
-In {PRODUCT_SHORT} {VERSION_VM}, you are are now able to activate data isolation between services with a single configuration property: `kogito.persistence.data-isolation.enabled=true`. When enabled, each _Business Service_ automatically filters all database queries to return only its own data. The filtering happens at the SQL level and no additional network calls or external services are required.
+In {PRODUCT_SHORT} {VERSION_RM}, you are are now able to activate data isolation between services with a single configuration property: `kogito.persistence.data-isolation.enabled=true`. When enabled, each _Business Service_ automatically filters all database queries to return only its own data. The filtering happens at the SQL level and no additional network calls or external services are required.
 
 xref:../08-developing-stateful-workflows/database-considerations.adoc[Learn more...]
 
-
-== Workflow engine - Workflow versioning
-Due to historical limitations, workflow versioning in {PRODUCT_SHORT} 9 is done using the process ID, meaning that evolving a workflow will generate multiple IDs (e.g., hiring, hiring2, and so on). The workflow engine generates endpoints based on the process ID of a workflow. By changing the workflow process ID, customers are required to update their client applications to use new endpoints (for example, update /hiring to /hiring2).
- 
-
-To address routing between multiple Business Services, {PRODUCT_SHORT} {VERSION} introduces a new capability called "Routing Management". This capability will focus on managing the routing of requests between different _Business Services_, ensuring that the correct workflow is invoked based on the request context. This is similar to the feature provided by KIE Container {PRODUCT_SHORT} (VERSION_80x)
-
-The Data isolation for _Business Services_ connected to a single database" feature ensures that existing process instances remain bound to the process definition from which they were created.
-
-
-xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
-
-== Automatic execution of {PIM_ADDON} on _Business Service_ startup
-In {PRODUCT_SHORT} {VERSION_95x}, the {PIM_ADDON} was run manually by users to execute migration plans after deployment. This meant that if you use Blue/Green deployment pipelines you could not use the {PIM_ADDON} because pipelines terminate the old service version immediately after the new version passes health/readiness probes, and as a consequence there was no window for an operator to trigger the migration externally between the two service versions being live simultaneously.
-
-{PRODUCT_SHORT} {VERSION} enables {PIM_ADDON} to be optionally configured to execute automatically on _Business Service_ startup.
-
-xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Learn more...]
 
 == New Role-based access control for Business Services in production
 {PRODUCT_SHORT} {VERSION} provides fine-grained role-based access control (RBAC) at a _Business Service_ level to control access through the Management Console or API. Features can now be restricted by user role, enabling enterprises to enforce read-only or read/write access per capability. Permissions are sourced from the Identity Provider, ensuring centralized governance and compliance.
@@ -50,7 +42,7 @@ Using the new Role-based Access Control you are now able to:
 
 - Specify which Management Console pages or actions are visible for specific user profiles depending on their permissions.
 - Protect the underlying Business Service REST and GraphQL endpoints by role.
-- Utilize your existing role definitions in the OpenID Connect (OIDC) Identity Provider that you are using in your organization (Keycloak, Auth0, Okta, or Azure AD).
+- Utilize existing role definitions defined by the OpenID Connect (OIDC) Identity Provider that your organization uses (Keycloak, Auth0, Okta, or Azure AD).
 
 The capability is provided through two new add-ons: 
 
@@ -60,6 +52,15 @@ BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index Grap
 
 xref:../09-buiding-and-deploying-business-services/security.adoc[Learn more...]
 
+== Database password encryption in BAMOE container images
+With {PRODUCT_SHORT} {VERSION}, the {DATA_CLEANUP} now offers
+two new ways to supply database credentials: encrypted (AES-GCM, decrypted by the tool at
+startup), and Vault (fetched from HashiCorp Vault when the tool starts). The tool decides which
+mode to use based on environment variables set. No configuration file changes are needed. xref:../10-managing-and-monitoring-business-services/managing-runtime-data.adoc[Learn more...]
+
+== Support for dynamic Subprocess invocation
+{PRODUCT_SHORT} {VERSION} includes support for dynamic subprocess calls, where the identifier of the called
+subprocess is set at runtime in a process variable. This feature was supported by {PRODUCT_SHORT} 8, and the availability of this feature in {VERSION} facilitates migration of BAMOE 8 applications to this version. xref:../xxxx.adoc[Learn more...]
 
 ////
 [#fix-list-known-limitations]
