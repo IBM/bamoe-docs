@@ -225,19 +225,215 @@ The `/q/oidc/.well-known/openid-configuration` path is added as an exception to 
 Finally, make sure that the `spring.autoconfigure.exclude` property is `unset`.
 
 [#RBAC-config]
-== Configuring Role-based access control (RBAC) for _Business Services_
-You can further protect interactions with your _Business Services_ in production using a Role-based access control system that reuses role definitions that already exist in the OpenID Connect Identity provider that you are using (Keycloak, Auth0, Okta, or Azure AD). This system enables you to:
+== Configuring Role-based access control (RBAC) for _Business Services_ at runtime
+You can further protect interactions with your _Business Services_ in production using a Role-based access control (RBAC) system that reuses role definitions that already exist in the OpenID Connect Identity provider that you are using (Keycloak, Auth0, Okta, or Azure AD). This system enables you to:
 
 * Hide {MANAGEMENT_CONSOLE} pages or actions from users that do not have the right permissions.
 * Protect the underlying _Business Service_ REST and GraphQL endpoints by role.
 
 The capability is available via the following add-ons, available for Quarkus and Spring Boot, that are part of the BAMOE BOM and can be added to your _Business Services_:
 
-{RBAC_ADDON}:: Exposes user permissions to the Management Console via a `/me` endpoint, and optionally cross-checks permissions against the Business Service's route security. 
+{RBAC_ADDON_SHORT}:: Exposes user permissions to the Management Console via a `/me` endpoint, and optionally cross-checks permissions against the security of the _Business Service_ route. 
 
 BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index GraphQL endpoint (`/graphql`).
 
-RBAC is a layered security feature. The {RBAC_ADDON} controls **what the user sees** in the UI; the BAMOE RBAC Data-Index Add-on and the framework's built-in route security control **what the user can actually call** on the backend. To get a fully secure setup, customers should configure both.
+RBAC is a layered security feature. The {RBAC_ADDON_SHORT} controls what the user sees in the UI. Whereas the BAMOE RBAC Data-Index Add-on and the framework's built-in route security control what the different users of the _Business Service_ can call on the backend. To get a fully secure setup, customers should configure both.
+
+[#RBAC-permissions]
+=== RBAC Permissions
+
+A Permission is a token that grants access to a specific Management Console feature or GraphQL operation. The BAMOE RBAC Add-on ships with a fixed catalog of permissions:
+
+[%header,cols=4]
+[%autowidth]
+|===
+|Permission |Management Console operations |Data Audit GraphQL operations |  Kind
+
+| `process-definitions:view`
+| View the Process Definitions page and list 
+| `ProcessDefinitions`, `CountProcessDefinitions` 
+| read
+
+| `process-definitions:execute` 
+| Start a process instance from a definition and view the start form 
+|N/A 
+|N/A 
+
+| `process-instances:view` 
+| View the Process Instances page, details, variables, SVG, and timeline 
+| `ProcessInstances`, `CountProcessInstances` 
+| read
+
+| `process-instances:update` 
+| Abort, retry, or skip instances; edit variables; trigger nodes
+| `ProcessInstanceAbort`, `ProcessInstanceRetry`, `ProcessInstanceSkip`, `ProcessInstanceUpdateVariables`, `ProcessInstanceRescheduleSlaTimer`, `NodeInstanceTrigger`, `NodeInstanceCancel`, `NodeInstanceRetrigger`, `NodeInstanceRescheduleSlaTimer` 
+| write
+
+| `jobs:view`
+| View the Jobs page and details 
+| `Jobs`, `CountJobs`
+| read
+
+| `jobs:update` 
+| Cancel or reschedule jobs
+| `JobCancel`, `JobReschedule`
+| write
+
+| `tasks:view`
+| View the Tasks page and task details 
+| `UserTaskInstances`, `CountUserTaskInstances`
+| read
+
+| `tasks:update`
+| Claim, complete, reassign, skip, release, fail tasks 
+| `UserTaskInstanceUpdate`, `UserTaskInstanceCommentCreate`, `UserTaskInstanceCommentUpdate`, `UserTaskInstanceCommentDelete`, `UserTaskInstanceAttachmentCreate`, `UserTaskInstanceAttachmentUpdate`, `UserTaskInstanceAttachmentDelete`
+| write
+
+| `tasks:impersonate`
+| Act on a task on behalf of another user 
+| N/A
+| N/A
+
+| `pim:view` 
+| View the Process Instance Migration (PIM) plans page 
+| N/A
+| N/A
+
+| `pim:update` 
+| Create, delete, and execute PIM plans
+| N/A
+| N/A
+|===
+
+Each permission protects multiple UI elements. For example, `process-instances:update` controls the abort, retry, skip, and variable-edit buttons across both the *Process Instances* page as well as the *Process Details* page.
+
+NOTE: The list of permissions is fixed and you cannot customize it in this release. 
+
+`process-definitions:execute`, `pim:view`, and `pim:update` are not GraphQL operations, so they are not in the table; they are enforced on REST endpoints instead (starting a process, and the migration-plan endpoints). `tasks:impersonate` is not an operation either; it filters the `UserTaskInstances` results, described in xref:#user-task-filtering[User Task Filtering].
+
+=== Roles and the /me endpoint
+
+The {RBAC_ADDON_SHORT} maps your existing OIDC roles to permissions using the _Business Service_ `application.properties` file in the following way.
+
+[source, properties]
+----
+bamoe.rbac.permissions.<role>=<permission1>,<permission2>,...
+----
+
+After OIDC login, the Management Console calls a new `GET /me` endpoint exposed by the add-on. The response contains the user name, their roles, and the union of permissions across all roles as shown in the following example:
+
+[source, json]
+----
+{
+  "user": "alice",
+  "roles": ["managers"],
+  "permissions": [
+    "process-definitions:view",
+    "process-definitions:execute",
+    "process-instances:view",
+    "process-instances:update",
+    "tasks:impersonate"
+  ]
+}
+----
+
+The {MANAGEMENT_CONSOLE} then uses this list to drive its UI: hide menu items, hide buttons, block direct URL access, as shown in the table in xref:#RBAC-permissions[RBAC permissions].
+
+A role has no permissions until you configure them. The RBAC Data Audit Add-on layer works the same way, so the two layers agree by default (see xref:##graphql-rbac[Controlling GraphQL operations by role]). 
+
+=== How it works
+
+The following sections describe the different phases of the RBAC system. 
+
+*Phase 1 — Connection on adding a _Business Service_ to the Management Console*
+
+* The user enters the Business Service URL in the Management Console. 
+* The Management Console queries the Business Service's `/q/oidc/.well-known/openid-configuration` endpoint to discover which Identity Provider is configured. No IdP URL is entered manually — the Business Service advertises it. The user is redirected to the IdP login page, signs in, and is redirected back. 
+* The Management Console exchanges that code for an access token and id token via a back-channel call to the IdP's token endpoint. The access token carries the user's roles in its claims and is sent on every subsequent request to the _Business Service_.
+
+*Phase 2 — Permission resolution on login and token refresh*
+
+* The Management Console calls `GET /me` on the _Business Service_. 
+
+* The {RBAC_ADDON_SHORT} reads the roles from the token, looks them up in `application.properties`, and returns the user's name, roles, and resolved permissions. 
+
+* If the {RBAC_ADDON_SHORT} is not installed, the call returns `404` and the Management Console falls back to unrestricted access.
+
+*Phase 3 — Enforcement on every user action*
+
+* The Management Console uses the permissions from `GET /me` to show or hide navigation items, buttons, and pages.
+
+* When the user takes an action, both layers enforce the decision independently: 
+** the framework's route security checks the token against configured path policies (returning `200`, `401` or `403` for REST), 
+** the RBAC Data-Index Add-on checks roles against the configured GraphQL operations (returning data, `errorType: FORBIDDEN` or a list filtered to the user's tasks for `UserTaskInstances` for GraphQL). 
+* The UI layer and the backend layer agree because both are driven by the same role-to-permission mappings in `application.properties`.
+
+[#graphql-rbac]
+=== Controlling GraphQL operations by role
+Each GraphQL operation is controlled individually using the syntax:
+
+[source, properties]
+----
+bamoe.data-index.<OperationName>.roles=<role1>,<role2>,...
+----
+
+An operation with no `bamoe.data-index.<OperationName>.roles` property (or an empty value) is denied for all users, and stays denied until you list the roles allowed to call it which is the same behavior as `Get /me` layer. 
+
+Only users whose roles are part of that list can call the operation. Everyone else receives a GraphQL error with `errorType: FORBIDDEN` and the following extensions:
+
+[source, json]
+----
+{
+  "extensions": {
+    "code": "FORBIDDEN",
+    "operation": "ProcessInstanceAbort",
+    "requiredPermission": "process-instances:update"
+  }
+}
+----
+
+Grant the same roles here that you grant with `bamoe.rbac.permissions.*`.
+
+Each operation is controlled by one permission. Grant every operation in a permission's row to the roles that hold that permission (the same roles you list in `bamoe.rbac.permissions.*`).
+
+A feature can also depend on an operation controlled by a different permission. The Process Instance Migration (PIM) pages read Process Definitions through the `ProcessDefinitions` query, so a user with `pim:view` or `pim:update` also needs `process-definitions:view` to load them. 
+
+Example:
+
+[source,properties]
+----
+# Reads
+bamoe.data-index.ProcessInstances.roles=managers,user
+bamoe.data-index.CountProcessInstances.roles=managers,user
+bamoe.data-index.ProcessDefinitions.roles=managers,user
+bamoe.data-index.CountProcessDefinitions.roles=managers,user
+bamoe.data-index.Jobs.roles=managers,user
+bamoe.data-index.CountJobs.roles=managers,user
+bamoe.data-index.UserTaskInstances.roles=managers,user
+bamoe.data-index.CountUserTaskInstances.roles=managers,user
+
+# Only managers can mutate — process-instances:update
+bamoe.data-index.ProcessInstanceAbort.roles=managers
+bamoe.data-index.ProcessInstanceRetry.roles=managers
+bamoe.data-index.ProcessInstanceSkip.roles=managers
+bamoe.data-index.ProcessInstanceUpdateVariables.roles=managers
+bamoe.data-index.ProcessInstanceRescheduleSlaTimer.roles=managers
+bamoe.data-index.NodeInstanceTrigger.roles=managers
+bamoe.data-index.NodeInstanceCancel.roles=managers
+bamoe.data-index.NodeInstanceRetrigger.roles=managers
+bamoe.data-index.NodeInstanceRescheduleSlaTimer.roles=managers
+# jobs:update
+bamoe.data-index.JobCancel.roles=managers
+bamoe.data-index.JobReschedule.roles=managers
+# tasks:update
+bamoe.data-index.UserTaskInstanceUpdate.roles=managers
+bamoe.data-index.UserTaskInstanceCommentCreate.roles=managers
+bamoe.data-index.UserTaskInstanceCommentUpdate.roles=managers
+bamoe.data-index.UserTaskInstanceCommentDelete.roles=managers
+bamoe.data-index.UserTaskInstanceAttachmentCreate.roles=managers
+bamoe.data-index.UserTaskInstanceAttachmentUpdate.roles=managers
+bamoe.data-index.UserTaskInstanceAttachmentDelete.roles=managers
+----
 
 
 [#bus-services-tls-cert]
