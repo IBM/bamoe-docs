@@ -244,13 +244,11 @@ The capability is available via the following add-ons, available for Quarkus and
 
 BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index GraphQL endpoint (`/graphql`).
 
+The four BAMOE workflow accelerator templates include these libraries as part of the project POM file as well as the full RBAC configuration block in the `application.properties` (see xref:../06-available-features/dev-environment/bamoe-canvas/applying-accelerators.adoc[{CANVAS} → Using Accelerators]). Once you have applied the appropriate accelerator to your BPMN model you can implement RBAC by simply uncommenting the dependencies and the properties blocks and replacing the role names. 
+
 RBAC is a layered security feature. The {RBAC_ADDON_SHORT} controls what the user sees in the UI. Whereas the {PRODUCT_SHORT} RBAC Data-Index Add-on and the framework's built-in route security control what the different users of the _Business Service_ can call on the backend. To get a fully secure setup, customers should configure both.
 
-NOTE: Quarkus Dev UI and Spring Boot Web Console are development tools and are not intended for production use. They do not call `/me`. Instead, they receive the full permission list and behave as if the user had every permission, so that all features are available during development.
-
-// Is this the right place to refer to the accelerator blocks, or better at the end?
-
-The four BAMOE workflow accelerator templates ship a full RBAC configuration block in their `application.properties` which is commented-out by default. To implement RBAC you simply uncomment the block, replace the role names, and add the matching add-on dependency. The accelerators cover every supported framework and build tool. 
+NOTE: Quarkus Dev UI and Spring Boot Web Console are development tools and are not intended for production use and therefore RBAC is not applicable to their usage. They do not call `/me` and instead they receive the full permission list all users have access to all features are available during development.
 
 [#rbac-permissions]
 === RBAC Permissions
@@ -263,32 +261,33 @@ A Permission is a token that grants access to a specific Management Console feat
 |Permission |Management Console operations |Data Audit GraphQL operations |  Kind
 
 | `process-definitions:view`
-| View the Process Definitions page and list 
+| View the Process Definitions navigation entry.
+
 | `ProcessDefinitions`, `CountProcessDefinitions` 
 | read
 
 | `process-definitions:execute` 
-| Start a process instance from a definition and view the start form 
+| Controls the start action button, the form, and starting a new instance of your Process.
 |N/A 
 |N/A 
 
 | `process-instances:view` 
-| View the Process Instances page, details, variables, SVG and timeline 
+| View the Process Instances page, details, variables, SVG and timeline
 | `ProcessInstances`, `CountProcessInstances` 
 | read
 
 | `process-instances:update` 
-| Abort, retry, or skip instances; edit variables; trigger nodes
+| Controls abort, retry, or skip instances buttons in both the list and the details page; edit variables; trigger nodes
 | `ProcessInstanceAbort`, `ProcessInstanceRetry`, `ProcessInstanceSkip`, `ProcessInstanceUpdateVariables`, `ProcessInstanceRescheduleSlaTimer`, `NodeInstanceTrigger`, `NodeInstanceCancel`, `NodeInstanceRetrigger`, `NodeInstanceRescheduleSlaTimer` 
 | write
 
 | `jobs:view`
-| View the Jobs page and details 
+| View the Jobs page and details, in both the Jobs page and the Process Instance details page.
 | `Jobs`, `CountJobs`
 | read
 
 | `jobs:update` 
-| Cancel or reschedule Jobs
+| Cancel or reschedule Jobs, in both the Jobs page and the Process Instance details page.
 | `JobCancel`, `JobReschedule`
 | write
 
@@ -298,22 +297,22 @@ A Permission is a token that grants access to a specific Management Console feat
 | read
 
 | `tasks:update`
-| Claim, complete, reassign, skip, release, fail tasks 
+| Controls claim, complete, reassign, skip, release, fail tasks and any custom transition. 
 | `UserTaskInstanceUpdate`, `UserTaskInstanceCommentCreate`, `UserTaskInstanceCommentUpdate`, `UserTaskInstanceCommentDelete`, `UserTaskInstanceAttachmentCreate`, `UserTaskInstanceAttachmentUpdate`, `UserTaskInstanceAttachmentDelete`
 | write
 
 | `tasks:impersonate`
-| Act on a task on behalf of another user 
+| Controls the impersonation section of the Task form (to enable action on a task on behalf of another user)
 | N/A
 | N/A
 
 | `pim:view` 
-| View the Process Instance Migration (PIM) plans page 
+| View the Process Instance Migration (PIM) plans page and filters.
 | N/A
 | N/A
 
 | `pim:update` 
-| Create, delete, and execute PIM plans
+| Controls create, delete, and execute PIM plans
 | N/A
 | N/A
 |===
@@ -326,7 +325,7 @@ NOTE: The list of permissions is fixed and you cannot customize it in this relea
 
 === How it works
 
-The following sections describe the different phases of the RBAC system once you have included the RBAC plug-in as part of your _Business Service_ dependencies. 
+The following sections describe the different phases of the RBAC system once it is configured for you _Business Service_. 
 
 *Phase 1 — Connection on adding a _Business Service_ to the Management Console*
 
@@ -345,29 +344,28 @@ The following sections describe the different phases of the RBAC system once you
 *Phase 3 — Enforcement on every user action*
 
 * The Management Console uses the permissions from `GET /me` to show or hide navigation items, buttons, and pages.
-
 * When the user takes an action, both layers enforce the decision independently: 
 ** the framework's route security checks the token against configured path policies (returning `200`, `401` or `403` for REST), 
 ** the RBAC Data-Index Add-on checks roles against the configured GraphQL operations (returning data, `errorType: FORBIDDEN` or a list filtered to the user's tasks for `UserTaskInstances` for GraphQL). 
 * The UI layer and the backend layer agree because both are driven by the same role-to-permission mappings in `application.properties`.
 
 === Controlling the Management Console operations for your _Business Service_ by role 
-To limit access to your _Business Service_ functionality in Management Console, add the {RBAC_ADDON_SHORT} dependency to your _Business Service_:
+To limit access to your _Business Service_ functionality in Management Console, ensure your  _Business Service_ has the required {RBAC_ADDON_SHORT} dependency:
 
-* Use this dependency on Quarkus: `com.ibm.bamoe:bamoe-addons-quarkus-rbac`
+* On Quarkus: `com.ibm.bamoe:bamoe-addons-quarkus-rbac`
 
-* Use this dependency on Spring Boot: `com.ibm.bamoe:bamoe-addons-spring-boot-rbac`
+* On Spring Boot: `com.ibm.bamoe:bamoe-addons-spring-boot-rbac`
 
 Both artifacts are part of the BAMOE BOM, so no explicit version is needed.
 
-THe OIDC roles must be mapped to {PRODUCT_SHORT} permissions (see xref:#rbac-permissions[RBAC Permissions]) using the _Business Service_ `application.properties` file in the following way.
+Your OIDC roles must be mapped to {PRODUCT_SHORT} permissions (see xref:#rbac-permissions[RBAC Permissions]) using the _Business Service_ `application.properties` file as shown below:
 
 [source, properties]
 ----
 bamoe.rbac.permissions.<role>=<permission1>,<permission2>,...
 ----
 
-Once the dependency is on the classpath, following _Business Service_ deployment the add-on auto-registers and exposes `GET /me` and optionally validates that permissions are aligned with the Business Service's REST route security. After OIDC login, the {MANAGEMENT_CONSOLE} uses the response that contains the user name, role(s) and the union of permissions across the role(s), to drive its UI response, as shown in the following example:
+When your _Business Service_ is deployed the add-on auto-registers and exposes `GET /me` and optionally validates that permissions are aligned with the Business Service's REST route security. After OIDC login, the {MANAGEMENT_CONSOLE} uses the response that contains the user name, role(s) and the union of permissions across the role(s), to drive its UI response, as shown in the following example:
 
 [source, json]
 ----
@@ -386,18 +384,16 @@ Once the dependency is on the classpath, following _Business Service_ deployment
 
 A role has no permissions until you configure them. The RBAC Data Audit Add-on layer works the same way, so the two layers agree by default (see xref:##graphql-rbac[Controlling GraphQL operations by role]). 
 
-Unknown permission names are silently skipped and a warning is logged at startup. Empty role names (for example `bamoe.rbac.permissions.=...`) are also skipped with a warning.
+==== Console behavior with RBAC
 
-==== Console behavior with different permissions
+The Overview page is always available to any authenticated user. The following list shows the expected behavior depending on the permissions configured for your Business Service:
 
-The Overview page is always available to any authenticated user. The exact behavior depends on the Business Service's RBAC configuration:
+* Navigation to specific pages from the left side bar is available or not depending on the `*:view` permissions.
+* An Access Denied page if the user navigates directly to a restricted URL.
+* Action buttons are hidden or deactivated depending on the `*:execute` or `*:update` permissions the user has, for example to abort, retry, complete, etc.
+* The impersonation section on task forms is hidden when the user does not have `tasks:impersonate` permission.
 
-* Hide navigation entries for pages the user cannot view (anything controlled by a `*:view` permission).
-* Show an Access Denied page if the user navigates directly to a restricted URL.
-* Hide or deactivate action buttons the user cannot use (abort, retry, complete, etc.).
-* Hide the impersonation section on task forms when the user does not have `tasks:impersonate` permission.
-
-The following table describes different situations that may occur with RBAC configuration:
+The following table describes different situations that may occur with RBAC configuration and the {MANAGEMENT_CONSOLE}:
 
 [%header,cols=2]
 [%autowidth]
@@ -411,6 +407,9 @@ The following table describes different situations that may occur with RBAC conf
 | Add-on present, but no `bamoe.rbac.permissions.*` configured
 | `/me` returns `permissions: []`. The Management Console treats RBAC as active and grants nothing. All sections except Overview are hidden. This is a misconfiguration.
 
+| Add-on present, but permission name is incorrect, or an empty role name (for example `bamoe.rbac.permissions.=...`) 
+| A warning is logged at startup and the permission is silently skipped. This is a misconfiguration.
+
 | Add-on is not present (`/me` returns 404)
 | The Management Console falls back to unrestricted access. All pages are visible, same behavior as before the capability.  
 
@@ -421,15 +420,15 @@ The following table describes different situations that may occur with RBAC conf
 | The error is swallowed, the existing permissions are kept, and a warning is logged. The user is not interrupted.
 |===
 
-==== Multiple Business Services in the All Runtimes view
+==== Using the "All Business Services" view
 
-When the Management Console connects to multiple Business Services in the All Runtimes view:
+When the Management Console connects to multiple Business Services in the All Business Services view:
 
 . The Management Console queries `/me` on each connected runtime.
-. The user's effective permissions in the All Runtimes view are the union of permissions across all connected services where the add-on is present.
+. What the user sees in this view depends on the union of permissions across all connected services where the add-on is present.
 . Services without the add-on contribute nothing to the union.
-. Per-row filtering is still applied: in mixed listings, rows from a runtime where the user lacks a permission are filtered out.
-. If every runtime returns empty or undefined permissions, RBAC is treated as inactive in the All Runtimes view and behavior falls back to unrestricted access.
+. In mixed listings, rows from a _Business Service_ where the user lacks a permission are filtered out.
+. If every _Business Service_ returns empty or undefined permissions, RBAC is treated as inactive in the All Runtimes view and behavior falls back to unrestricted access.
 
 [#impersonation]
 ==== Impersonation
@@ -498,50 +497,34 @@ The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBoot
 * https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Security - Authorize HttpServletRequests] — `authorizeHttpRequests()` rules using `hasAuthority` / `hasAnyAuthority`.
 * https://docs.spring.io/spring-boot/reference/web/spring-security.html[Spring Boot 3.5 - Spring Security] — the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property and associated Spring Boot auto-configuration.
 
-////
-=== Affected Management Console pages
+=== Accessing a working sample
 
-The screenshots below show the pages affected by RBAC and the permissions that control their elements.
+You can find a full RBAC setup in the `examples/process-security` example that is included in the _Business Service_ project samples zip file (see xref:../05-getting-started/examples.adoc[Example Business Service projects]). It is a complete, runnable _Business Service_ that demonstrates every aspect of RBAC. 
 
-* Overview
+* Two roles are defined: `managers` (full access) and `user` (read-only).
+* Keycloak is wired as the OIDC provider.
+* Route security is fully declared in `application.properties` using `quarkus.http.auth.policy.*` and `quarkus.http.auth.permission.*`.
+* The BAMOE RBAC Add-on is installed and has `bamoe.rbac.validation.enabled=true`, so the startup validation is exercised.
+* The BAMOE RBAC Data-Index Add-on controls every GraphQL operation, with mutations restricted to `managers`.
+* `kogito.security.auth.impersonation.allowed-for-roles=managers` is set, so the `tasks:impersonate` permission and the `UserTaskInstances` filtering paths are both exercised.
 
-`process-instances:view` controls the metrics shown on the Overview page - pages-overview.png
+You can clone this example and adapt it for your own RBAC implementation on a new _Business Service_.
 
-* Process Definitions
+=== Troubleshooting your RBAC configuration
+**The user sees only the Overview page after login.**
+The add-on is present but `bamoe.rbac.permissions.<role>=...` is not configured for any of the user's roles. Either add a permission mapping for one of the user's roles or remove the add-on dependency to fall back to unrestricted access.
 
-`process-definitions:view` controls the page and navigation entry. `process-definitions:execute` controls the start action button, the form, and starting a new instance - pages-process-definitions.png
+**A page is visible but actions are disabled even though the user is in the right group.**
+The Identity Provider may not be exposing the role in the JWT claim the framework reads. In Spring Boot with Keycloak, roles live in `realm_access.roles`, which Spring Security does not read by default. A `JwtAuthenticationConverter` is needed — see the official [Spring Security 6.5 - OAuth 2.0 Resource Server JWT: Extracting Authorities Manually](https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html#oauth2resourceserver-jwt-authorization-extraction) documentation.
 
-* Process Instances
+**Startup logs show `Permission '<x>' filtered out for user roles [...]`.**
+`bamoe.rbac.validation.enabled=true` is on and the add-on filtered the permission because the matching route is not secured for any of the user's roles. Either add a `quarkus.http.auth.permission.*` policy for the route (Quarkus) or align the `SecurityFilterChain` rules (Spring Boot). On Spring Boot, route-level filtering is **not** performed automatically; only impersonation is validated.
 
-`process-instances:view` controls the page, filters, and copy buttons. `process-instances:update` controls abort, retry, and skip buttons in both the list and the details page. The jobs section inside the instance details is additionally controlled by `jobs:view` and `jobs:update`.
+**GraphQL requests return `errorType: FORBIDDEN`.**
+The RBAC Data-Index Add-on is in use and the user's role is not in the `bamoe.data-index.<OperationName>.roles` list. The error response includes the operation name and the BAMOE RBAC permission that controls it; use them to identify the missing role.
 
-pages-process-instances.png
-
-pages-process-instances-detail-1.png
-
-pages-process-instances-detail-2.png
-
-* Jobs
-
-`jobs:view` controls the page, filters, and details. `jobs:update` controls "Cancel Selected" and "Reschedule".
-
-pages-jobs.png
-
-* Tasks
-
-`tasks:view` controls the page, filters, and details. `tasks:update` controls claim, complete, reassign, skip, release, fail, and any custom transition. `tasks:impersonate` controls the impersonation section of the task form.
-
-pages-tasks.png
-
-pages-tasks-details.png
-
-* Process Instance Migration (PIM)
-
-`pim:view` controls the plans page and filters. `pim:update` controls creating, deleting, and executing PIM plans.
-
-pages-advanced-pim.png
-////
-
+**Tasks the user expects to see are missing from the Tasks page.**
+The Data-Index add-on filters `UserTaskInstances` per task assignment when the user does not have a role listed in `kogito.security.auth.impersonation.allowed-for-roles`. To see all tasks, the user must be granted an impersonation role.
 
 [#graphql-rbac]
 === Controlling GraphQL operations by role
