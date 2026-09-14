@@ -41,7 +41,9 @@ Runtime:: The Kogito-powered foundational framework providing basic services req
 
 Storage:: An external system where _Business Services_ containing stateful Workflows store Process Instances, Data-Index, Data-Audit, Jobs Service, and User Tasks data. All subsystems store data in the same storage, which is usually a relation database such as PostgreSQL.
 
-For more information on the subsystems: *Data-Index*, *Data-Audit*, *Jobs Service* and *User Tasks* see the following sections. 
+Data isolation:: An opt-in mechanism that enables multiple _Business Services_ in a Compact Architecture deployment to share a single database safely. When enabled using `kogito.persistence.data-isolation.enabled=true`, each _Business Service_ automatically filters database queries at the SQL level across all persistence subsystems (Process Instance storage, User Task storage, Data-Index, Jobs Service, and Data-Audit) so it only accesses its own data. For more information, see xref:database-considerations.adoc#data-isolation-shared-databases[Database considerations → Data isolation for shared databases].
+
+For more information on the subsystems: *Data-Index*, *Data-Audit*, *Jobs Service* and *User Tasks* see the following sections.
 
 [#data-index]
 == The Data-Index subsystem
@@ -64,6 +66,11 @@ The Data Audit subsystem enables you to inspect what happened during process exe
 * Jobs Service
 
 See the associated xref:data-audit-api.adoc[Data-Audit API]
+
+[NOTE]
+====
+When data isolation is enabled, built-in Data-Audit queries are automatically isolated to the local _Business Service_. Custom user-defined queries require explicit filtering on the `(process_id, process_version)` and `(root_process_id, root_process_version)` column pairs. For more information, see xref:data-audit-api.adoc[Data-Audit API].
+====
 
 [#jobs-service]
 == The embedded Jobs Service subsystem

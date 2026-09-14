@@ -26,6 +26,11 @@ To retrieve the GraphQL schema definition including a list of all registered que
 
 Register a new query with a complex data type:
 
+[NOTE]
+====
+When data isolation is enabled (`kogito.persistence.data-isolation.enabled=true`), built-in platform-managed Data-Audit queries are filtered automatically. For custom user-defined queries, you must add explicit filters on the `(process_id, process_version)` and `(root_process_id, root_process_version)` column pairs to restrict results to the local _Business Service_. Filtering on `root_process_id` and `root_process_version` ensures child instances created by Call Activities are properly scoped to the owning parent _Business Service_.
+====
+
 [source,]
 ----
 curl -H "Content-Type: application/json" -H "Accept: application/json" -s -X POST http://localhost:8080/data-audit/r/ -d '

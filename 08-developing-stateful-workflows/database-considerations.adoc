@@ -43,3 +43,93 @@ NOTE: This property has no impact if you have deactivated transactions by settin
 For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance[the SmallRye Fault Tolerance for Quarkus] or https://resilience4j.readme.io/docs/getting-started-3[resilience4j for Spring Boot].
 +
 - With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
+
+[#data-isolation-shared-databases]
+== Data isolation for shared databases
+
+In a Compact Architecture deployment, multiple _Business Services_ can share the same database instance. In versions of {PRODUCT_SHORT} prior to {VERSION_RM}, all persistence subsystems — Data-Index, Jobs Service, Data-Audit, User Task storage, and Process Instance storage — could read data from every _Business Service_ connected to that shared database, which could lead to data leakage between services.
+
+Starting with {PRODUCT_SHORT} {VERSION_RM}, you can enable *data isolation* with a single configuration property:
+
+[source,properties]
+----
+kogito.persistence.data-isolation.enabled=true
+----
+
+When enabled, each _Business Service_ automatically filters all database queries to return only its own data. Filtering occurs directly at the SQL level, without requiring additional network calls or external services.
+
+This feature is *opt-in and disabled by default*. Existing deployments are unaffected until you explicitly enable it.
+
+=== Isolated subsystems
+
+When data isolation is enabled, the following subsystems isolate their database access:
+
+[cols="1,2"]
+|===
+|Subsystem |Isolation behavior
+
+|Process Instance storage |Returns only process instances (including sub-processes) belonging to the local _Business Service_.
+|User Task storage |Returns only user tasks originating from the local _Business Service_.
+|Data-Index (embedded) |GraphQL queries return only process and task data scoped to the local _Business Service_.
+|Jobs Service (embedded) |Loads and executes only jobs scheduled by the local _Business Service_.
+|Data-Audit (embedded) |Built-in platform-managed queries return only audit log entries from the local _Business Service_.
+|===
+
+[NOTE]
+====
+Data-Audit *custom user-defined queries* are not automatically isolated. When defining custom queries, you must explicitly filter results by the `(process_id, process_version)` and `(root_process_id, root_process_version)` column pairs to restrict results to the owning _Business Service_. For more details, see xref:data-audit-api.adoc[Data-Audit API].
+====
+
+=== When to use data isolation
+
+Data isolation is *optional*. It is designed for environments where multiple _Business Services_ deliberately share a single database tier to reduce infrastructure costs and operational overhead.
+
+Data isolation is relevant only when *all four* of the following conditions are met simultaneously:
+
+1. Persistence is enabled on the _Business Service_.
+2. Multiple _Business Services_ share the same database.
+3. The deployment uses the Compact Architecture (subsystems are embedded in the _Business Service_).
+4. More than one _Business Service_ connects to that shared database.
+
+If each _Business Service_ connects to its own dedicated database, data boundaries are already enforced at the database level and this feature is not required.
+
+=== Configuration and usage
+
+==== Enabling data isolation
+
+To enable data isolation, add the following property to your _Business Service_ `application.properties`:
+
+[source,properties]
+----
+# Enable data isolation for shared database deployments
+kogito.persistence.data-isolation.enabled=true
+----
+
+No additional configuration is required. At startup, the _Business Service_ automatically discovers its deployed process definitions and applies filtering to all persistence queries.
+
+Data isolation is supported on both Quarkus (see xref:workflows-with-quarkus.adoc#enabling-data-isolation[Workflow services with Quarkus]) and Spring Boot (see xref:workflows-with-springboot.adoc#enabling-data-isolation[Workflow services with Spring Boot]) runtimes.
+
+==== Horizontal scaling
+
+Horizontal scaling is fully supported. Multiple instances or pods of the same _Business Service_ share identical process definitions and apply the exact same query filters. No extra configuration is needed when scaling pods.
+
+==== Sub-process handling
+
+Sub-process isolation is handled automatically. Sub-process instances are associated with the owning _Business Service_ using the `(root_process_id, root_process_version)` pair in addition to `(process_id, process_version)`. Consequently, Call Activity child instances are visible only to the service that owns the root process in the execution hierarchy.
+
+=== Upgrading and migration considerations
+
+When upgrading existing deployments with shared databases to {PRODUCT_SHORT} {VERSION_RM}:
+
+* **Database schema updates**: The {VERSION_RM} database migration scripts add new process reference columns to the affected subsystem tables. The migration is backward compatible.
+* **Permissive filtering for pre-upgrade data**: For existing records that do not have the new column values populated, queries operate permissively and continue returning those rows across services until the process instances are updated or completed.
+* **Fresh deployments**: For strict, immediate data isolation from day one, a fresh database deployment is recommended rather than an in-place upgrade with active in-flight instances.
+* **Data Events payload**: Data Events emitted by the engine now include `processId`, `processVersion`, `rootProcessId`, and `rootProcessVersion` across all event types. Ensure downstream consumers are updated to handle the new fields.
+* **Process Instance Migration (PIM) add-on**: The {PIM_ADDON} has been extended to support migration of the Jobs Service schema as well as the new process reference columns introduced by data isolation. For more information, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Migrating in-flight Process Instances].
+
+=== API and Management Console interaction
+
+* **REST APIs**: Transparent to callers. No endpoint changes or special parameters are needed.
+* **GraphQL APIs**: Existing GraphQL types are extended with additive process version fields to allow the {MANAGEMENT_CONSOLE} to correctly distinguish models and versions across services.
+* **Management Console**: The {MANAGEMENT_CONSOLE} queries each _Business Service_ individually through its own endpoint and displays the isolated view exposed by that service.
+* **Performance**: Filtering is executed directly in SQL queries without extra network roundtrips. When disabled (`false`, the default), there is zero performance overhead.

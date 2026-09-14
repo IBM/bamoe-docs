@@ -221,6 +221,21 @@ spring.datasource.username=bamoe
 spring.datasource.password=bamoe
 ----
 
+[#enabling-data-isolation]
+=== Enabling data isolation for shared databases
+
+When deploying multiple _Business Services_ sharing a single database in Compact Architecture, you can enable data isolation so that each service automatically filters queries and accesses only its own data across all embedded persistence subsystems (Process Instance storage, User Task storage, Data-Index, Jobs Service, and Data-Audit).
+
+Add the following configuration property to your `application.properties`:
+
+[source,properties]
+----
+# Enable data isolation for shared database deployments
+kogito.persistence.data-isolation.enabled=true
+----
+
+When enabled, the service automatically detects its process definitions at startup and filters persistence queries at the SQL level. For detailed architecture, upgrade considerations, and subsystem isolation behavior, see xref:database-considerations.adoc#data-isolation-shared-databases[Database considerations → Data isolation for shared databases].
+
 == Code structure
 
 A Workflow service built with Spring Boot includes the following key elements that define its structure, behavior, and runtime configuration:
