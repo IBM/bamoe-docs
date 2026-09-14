@@ -1,4 +1,4 @@
-= Securing _Business Service_ API endpoints
+= Securing _Business Services_
 include::../_partials/attributes.adoc[]
 include::../_styles/images.adoc[]
 
@@ -6,10 +6,13 @@ _Business Services_ on {PRODUCT_SHORT} rely on Quarkus or Spring Boot to configu
 
 After configuring your _Business Service_ to integrate its security layer, you can rely on an external Identity Providers (IdPs) such as Keycloak or Microsoft Entra ID as your project’s Identity and Access Management Solution.
 
-{MANAGEMENT_CONSOLE} can connect to secured _Business Services_ if they expose enough information about their configured Identity Provider. See xref:#mgmt-console-oidc-proxy[Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_] for more details.
+{MANAGEMENT_CONSOLE} can connect to secured _Business Services_ if they expose enough information about their configured Identity Provider. See xref:#mgmt-console-oidc-proxy[Allowing {MANAGEMENT_CONSOLE} to connect to live _Business Services_] for more details. You can also set up a full Role-based access control using the functionality provided in the {RBAC_ADDON} functionality which configures access to Business Services in the Management Console and through the Data Audit GraphQL API (see xref:#rbac-config[Configuring RBAC for _Business Services_ at runtime]). 
+
+== Authentication 
+_Business Services_ on {PRODUCT_SHORT} rely on Quarkus or Spring Boot to configure authentication and will query their provided security-related data to identify and authenticate a user. 
 
 [#authentication-quarkus]
-== Authentication (Quarkus)
+=== Quarkus
 Quarkus supports the Bearer token authentication mechanism through the Quarkus OpenID Connect (OIDC) extension, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can learn how to set up the authorization layer in Quarkus in this https://quarkus.io/version/3.20/guides/security-oidc-bearer-token-authentication[guide].
 
 The first step is to configure the Quarkus OpenID Connect (OIDC) extension by setting the properties in the `src/main/resources/application.properties` file. 
@@ -50,7 +53,7 @@ authentication method
 |===
 
 [#authentication-spring-boot]
-== Authentication (Spring Boot)
+=== Spring Boot
 
 Spring Boot supports endpoint protection using OAuth 2.0 Bearer tokens, based on the https://openid.net/developers/how-connect-works/[OpenID Connect] protocol. You can find more information about the Spring Boot OAuth 2.0 Resource Server in the https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Documentation].
 
@@ -58,7 +61,6 @@ To use this functionality in a _Business Services_ on {PRODUCT_SHORT}, add the r
 
 * `org.springframework.boot:spring-boot-starter-security`
 * `org.springframework.boot:spring-boot-starter-oauth2-resource-server`
-
 
 In addition, you will need to configure Spring Security to secure the application with OAuth2. To enable support for bearer tokens based on JSON Web Token (JWT) format, add the following configuration property to your application properties file:
 
@@ -69,8 +71,11 @@ spring.security.oauth2.resourceserver.jwt.issuer-uri=http://127.0.0.1:8180/realm
 
 Additional configuration settings can be applied through the Spring Boot `SecurityFilterChain` bean.
 
+== Authorization 
+Once a user is authenticated the authorization layer uses that identity (and its associated roles/groups) to decide on the access the user has to _Business Service_ endpoints. If you also configure the {RBAC_ADDON} with permissions for each authenticated role, it is possible to filter the functionality available in {MANAGEMENT_CONSOLE} as well as the operations available through the Data Audit GraphQL API (see xref:#rbac-config[Configuring RBAC for _Business Services_ at runtime]). 
+
 [#authorization-quarkus]
-== Authorization (Quarkus)
+=== Quarkus
 Quarkus incorporates a pluggable web security layer. When security is active, the system performs a permission check on all HTTP requests to determine if they should proceed. For more information, see https://quarkus.io/version/3.20/guides/security-authorize-web-endpoints-reference[Authorization of web endpoints] in the official Quarkus guide. See an example configuration below:
 
 [source]
@@ -118,7 +123,7 @@ quarkus.http.auth.permission.public.policy_
 |===
 
 [#authorization-spring-boot]
-== Authorization (Spring Boot)
+=== Spring Boot
 With Spring Security enabled, you gain fine-grained control over the authorization rules using the `AuthorizationFilter` of the Spring Security Filter Chain. 
 
 The following code snippet shows a sample `AuthorizationFilter` configuration. It enforces authentication for all endpoints, except the `/q/oidc/.well-known/openid-configuration` endpoint which can be accessed unauthenticated. In this sample setup, no specific roles are required to enforce authorization.
@@ -132,7 +137,7 @@ The following code snippet shows a sample `AuthorizationFilter` configuration. I
 
 You can find more information on this topic and available configuration options in the https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Documentation].
 
-
+[#authentication-usertask-api]
 == Authentication in User Task API endpoints
 The xref:../08-developing-stateful-workflows/user-tasks.adoc[User Task API] integrates seamlessly with the Authentication and Authorization mechanisms of Quarkus, with the option to receive `user` and `groups` as QueryParameters. For this integration to happen, the following properties should be set in the `application.properties` file of your _Business Service_ project:
 
@@ -146,6 +151,8 @@ The xref:../08-developing-stateful-workflows/user-tasks.adoc[User Task API] inte
 Used to specify a list of roles or groups, authorized for identity impersonation when resolving the actual User Identity (comma-separated). Every group defined in this property will act as a superuser, giving all the members part of that group the rights to impersonate any other user. This feature is very useful to change a User Task status assigned to an unavailable user. |String |"" empty string
 
 |===
+
+If `kogito.security.auth.enabled=true` is absent, `kogito.security.auth.impersonation.allowed-for-roles` has no effect and any authenticated user can read another user's tasks through `GET /usertasks/instance?user=<other-user>`. This applies to both Quarkus and Spring Boot.
 
 [#mgmt-console-oidc-proxy]
 == Connecting {MANAGEMENT_CONSOLE} to live _Business Services_
@@ -224,7 +231,7 @@ The `/q/oidc/.well-known/openid-configuration` path is added as an exception to 
 
 Finally, make sure that the `spring.autoconfigure.exclude` property is `unset`.
 
-[#RBAC-config]
+[#rbac-config]
 == Configuring Role-based access control (RBAC) for _Business Services_ at runtime
 You can further protect interactions with your _Business Services_ in production using a Role-based access control (RBAC) system that reuses role definitions that already exist in the OpenID Connect Identity provider that you are using (Keycloak, Auth0, Okta, or Azure AD). This system enables you to:
 
@@ -237,12 +244,18 @@ The capability is available via the following add-ons, available for Quarkus and
 
 BAMOE RBAC Data-Index Add-on:: Enforces role-based access on the Data Index GraphQL endpoint (`/graphql`).
 
-RBAC is a layered security feature. The {RBAC_ADDON_SHORT} controls what the user sees in the UI. Whereas the BAMOE RBAC Data-Index Add-on and the framework's built-in route security control what the different users of the _Business Service_ can call on the backend. To get a fully secure setup, customers should configure both.
+RBAC is a layered security feature. The {RBAC_ADDON_SHORT} controls what the user sees in the UI. Whereas the {PRODUCT_SHORT} RBAC Data-Index Add-on and the framework's built-in route security control what the different users of the _Business Service_ can call on the backend. To get a fully secure setup, customers should configure both.
 
-[#RBAC-permissions]
+NOTE: Quarkus Dev UI and Spring Boot Web Console are development tools and are not intended for production use. They do not call `/me`. Instead, they receive the full permission list and behave as if the user had every permission, so that all features are available during development.
+
+// Is this the right place to refer to the accelerator blocks, or better at the end?
+
+The four BAMOE workflow accelerator templates ship a full RBAC configuration block in their `application.properties` which is commented-out by default. To implement RBAC you simply uncomment the block, replace the role names, and add the matching add-on dependency. The accelerators cover every supported framework and build tool. 
+
+[#rbac-permissions]
 === RBAC Permissions
 
-A Permission is a token that grants access to a specific Management Console feature or GraphQL operation. The BAMOE RBAC Add-on ships with a fixed catalog of permissions:
+A Permission is a token that grants access to a specific Management Console feature or GraphQL operation. The {RBAC_ADDON_SHORT} ships with a fixed catalog of permissions:
 
 [%header,cols=4]
 [%autowidth]
@@ -260,7 +273,7 @@ A Permission is a token that grants access to a specific Management Console feat
 |N/A 
 
 | `process-instances:view` 
-| View the Process Instances page, details, variables, SVG, and timeline 
+| View the Process Instances page, details, variables, SVG and timeline 
 | `ProcessInstances`, `CountProcessInstances` 
 | read
 
@@ -275,12 +288,12 @@ A Permission is a token that grants access to a specific Management Console feat
 | read
 
 | `jobs:update` 
-| Cancel or reschedule jobs
+| Cancel or reschedule Jobs
 | `JobCancel`, `JobReschedule`
 | write
 
 | `tasks:view`
-| View the Tasks page and task details 
+| View the Tasks page and Task Details 
 | `UserTaskInstances`, `CountUserTaskInstances`
 | read
 
@@ -311,44 +324,14 @@ NOTE: The list of permissions is fixed and you cannot customize it in this relea
 
 `process-definitions:execute`, `pim:view`, and `pim:update` are not GraphQL operations, so they are not in the table; they are enforced on REST endpoints instead (starting a process, and the migration-plan endpoints). `tasks:impersonate` is not an operation either; it filters the `UserTaskInstances` results, described in xref:#user-task-filtering[User Task Filtering].
 
-=== Roles and the /me endpoint
-
-The {RBAC_ADDON_SHORT} maps your existing OIDC roles to permissions using the _Business Service_ `application.properties` file in the following way.
-
-[source, properties]
-----
-bamoe.rbac.permissions.<role>=<permission1>,<permission2>,...
-----
-
-After OIDC login, the Management Console calls a new `GET /me` endpoint exposed by the add-on. The response contains the user name, their roles, and the union of permissions across all roles as shown in the following example:
-
-[source, json]
-----
-{
-  "user": "alice",
-  "roles": ["managers"],
-  "permissions": [
-    "process-definitions:view",
-    "process-definitions:execute",
-    "process-instances:view",
-    "process-instances:update",
-    "tasks:impersonate"
-  ]
-}
-----
-
-The {MANAGEMENT_CONSOLE} then uses this list to drive its UI: hide menu items, hide buttons, block direct URL access, as shown in the table in xref:#RBAC-permissions[RBAC permissions].
-
-A role has no permissions until you configure them. The RBAC Data Audit Add-on layer works the same way, so the two layers agree by default (see xref:##graphql-rbac[Controlling GraphQL operations by role]). 
-
 === How it works
 
-The following sections describe the different phases of the RBAC system. 
+The following sections describe the different phases of the RBAC system once you have included the RBAC plug-in as part of your _Business Service_ dependencies. 
 
 *Phase 1 — Connection on adding a _Business Service_ to the Management Console*
 
 * The user enters the Business Service URL in the Management Console. 
-* The Management Console queries the Business Service's `/q/oidc/.well-known/openid-configuration` endpoint to discover which Identity Provider is configured. No IdP URL is entered manually — the Business Service advertises it. The user is redirected to the IdP login page, signs in, and is redirected back. 
+* The Management Console queries the Business Service's `/q/oidc/.well-known/openid-configuration` endpoint to discover which Identity Provider is configured. No IdP URL is entered manually — the _Business Service_ advertises it. The user is redirected to the IdP login page, signs in, and is redirected back. 
 * The Management Console exchanges that code for an access token and id token via a back-channel call to the IdP's token endpoint. The access token carries the user's roles in its claims and is sent on every subsequent request to the _Business Service_.
 
 *Phase 2 — Permission resolution on login and token refresh*
@@ -368,8 +351,212 @@ The following sections describe the different phases of the RBAC system.
 ** the RBAC Data-Index Add-on checks roles against the configured GraphQL operations (returning data, `errorType: FORBIDDEN` or a list filtered to the user's tasks for `UserTaskInstances` for GraphQL). 
 * The UI layer and the backend layer agree because both are driven by the same role-to-permission mappings in `application.properties`.
 
+=== Controlling the Management Console operations for your _Business Service_ by role 
+To limit access to your _Business Service_ functionality in Management Console, add the {RBAC_ADDON_SHORT} dependency to your _Business Service_:
+
+* Use this dependency on Quarkus: `com.ibm.bamoe:bamoe-addons-quarkus-rbac`
+
+* Use this dependency on Spring Boot: `com.ibm.bamoe:bamoe-addons-spring-boot-rbac`
+
+Both artifacts are part of the BAMOE BOM, so no explicit version is needed.
+
+THe OIDC roles must be mapped to {PRODUCT_SHORT} permissions (see xref:#rbac-permissions[RBAC Permissions]) using the _Business Service_ `application.properties` file in the following way.
+
+[source, properties]
+----
+bamoe.rbac.permissions.<role>=<permission1>,<permission2>,...
+----
+
+Once the dependency is on the classpath, following _Business Service_ deployment the add-on auto-registers and exposes `GET /me` and optionally validates that permissions are aligned with the Business Service's REST route security. After OIDC login, the {MANAGEMENT_CONSOLE} uses the response that contains the user name, role(s) and the union of permissions across the role(s), to drive its UI response, as shown in the following example:
+
+[source, json]
+----
+{
+  "user": "alice",
+  "roles": ["managers"],
+  "permissions": [
+    "process-definitions:view",
+    "process-definitions:execute",
+    "process-instances:view",
+    "process-instances:update",
+    "tasks:impersonate"
+  ]
+}
+----
+
+A role has no permissions until you configure them. The RBAC Data Audit Add-on layer works the same way, so the two layers agree by default (see xref:##graphql-rbac[Controlling GraphQL operations by role]). 
+
+Unknown permission names are silently skipped and a warning is logged at startup. Empty role names (for example `bamoe.rbac.permissions.=...`) are also skipped with a warning.
+
+==== Console behavior with different permissions
+
+The Overview page is always available to any authenticated user. The exact behavior depends on the Business Service's RBAC configuration:
+
+* Hide navigation entries for pages the user cannot view (anything controlled by a `*:view` permission).
+* Show an Access Denied page if the user navigates directly to a restricted URL.
+* Hide or deactivate action buttons the user cannot use (abort, retry, complete, etc.).
+* Hide the impersonation section on task forms when the user does not have `tasks:impersonate` permission.
+
+The following table describes different situations that may occur with RBAC configuration:
+
+[%header,cols=2]
+[%autowidth]
+|===
+| Situation
+| Behavior    
+
+| Add-on present, permissions configured for the user's role                      
+| Navigation, pages, and actions are filtered to match the user's permissions. Direct URL access to a restricted page shows the Access Denied page. 
+
+| Add-on present, but no `bamoe.rbac.permissions.*` configured
+| `/me` returns `permissions: []`. The Management Console treats RBAC as active and grants nothing. All sections except Overview are hidden. This is a misconfiguration.
+
+| Add-on is not present (`/me` returns 404)
+| The Management Console falls back to unrestricted access. All pages are visible, same behavior as before the capability.  
+
+| `/me` returns a non-404 error (401, 403, 500) during login 
+| Login fails with an error message.  
+
+| `/me` errors during a token refresh 
+| The error is swallowed, the existing permissions are kept, and a warning is logged. The user is not interrupted.
+|===
+
+==== Multiple Business Services in the All Runtimes view
+
+When the Management Console connects to multiple Business Services in the All Runtimes view:
+
+. The Management Console queries `/me` on each connected runtime.
+. The user's effective permissions in the All Runtimes view are the union of permissions across all connected services where the add-on is present.
+. Services without the add-on contribute nothing to the union.
+. Per-row filtering is still applied: in mixed listings, rows from a runtime where the user lacks a permission are filtered out.
+. If every runtime returns empty or undefined permissions, RBAC is treated as inactive in the All Runtimes view and behavior falls back to unrestricted access.
+
+[#impersonation]
+==== Impersonation
+
+The `tasks:impersonate` permission enables a user to act on a User Task on behalf of another user. In order for this to work the User Task API endpoints must be configured for authentication using the `kogito.security.auth.enabled=true` and the role must be listed both in the `kogito.security.auth.impersonation.allowed-for-roles` property (see xref:##authentication-usertask-api[Authentication in User Task API endpoints]) and in the {RBAC_ADDON_SHORT} permission map:
+
+[source,properties]
+----
+kogito.security.auth.enabled=true
+kogito.security.auth.impersonation.allowed-for-roles=managers
+bamoe.rbac.permissions.managers=tasks:impersonate,...
+----
+
+When startup validation is enabled (see xref:#startup-validation[Startup validation], the add-on cross-checks these two properties; if `tasks:impersonate` is granted to a role that is not in `kogito.security.auth.impersonation.allowed-for-roles`, the add-on filters the permission out of the `/me` response.
+
+[#startup-validation]
+==== Startup validation
+
+When `bamoe.rbac.validation.enabled` is set to `true`, the add-on validates the RBAC configuration at startup and on every `Get /me` request. This is to prevent the UI from advertising a permission that the backend does not actually enforce.
+
+==== On Quarkus
+
+Quarkus exposes route security through declarative `quarkus.http.auth.policy.*` and `quarkus.http.auth.permission.*` properties, which the {RBAC_ADDON_SHORT} can introspect. With validation enabled, the add-on checks each granted permission against:
+
+. The static routes used by the {MANAGEMENT_CONSOLE}, for example:
+** `pim:view` requires `GET /pim/plans` and `GET /pim/plan/*` to be secured for the user's role.
+** `pim:update` requires `POST /pim/migration`, `POST /pim/plan`, and `DELETE /pim/plan/*` to be secured for the user's role.
+** The `/svg/processes/*` route is associated with `pim:update`, `process-definitions:execute`, and `process-instances:view`.
+
+. The Auto-generated BPMN routes. At startup, the add-on enumerates all Process IDs registered on the _Business Service_ and validates the implicit routes:
+** `POST /{processId}` and `GET /{processId}/schema` &rarr; require `process-definitions:execute` coverage.
+** `GET /{processId}/{instanceId}` &rarr; requires `process-instances:view` coverage.
+** `DELETE /{processId}/{instanceId}` &rarr; requires `process-instances:update` coverage.
+** `GET /{processId}/{instanceId}/{taskName}/{taskId}/schema` &rarr; requires `tasks:view` coverage.
+
+. Impersonation, as described in xref:#impersonation[Impersonation].
+
+Any permission whose corresponding route is not actually protected for the user's role is filtered out of the `GET /me` response, and a warning is logged. The user is not blocked from logging in, but will not see the affected UI elements. User Task transitions are not validated by this mechanism, since the User Task subsystem performs its own role-based authorization (see xref:##authentication-usertask-api[Authentification in User Task API endpoints]).
+
+==== On Spring Boot
+
+Spring Boot does not expose route security declaratively. It is defined programmatically in a `SecurityFilterChain` bean and cannot be introspected at runtime. As a result, when `bamoe.rbac.validation.enabled` is set to `true` on Spring Boot, only impersonation is validated, and the {RBAC_ADDON_SHORT} logs a message at startup explaining this limitation.
+
+If you are using Spring Boot you will need to do the following to verify alignment:
+
+. Extract roles from the JWT using a `JwtAuthenticationConverter`. For Keycloak, this means reading the `realm_access.roles` claim. For other providers, the converter must be adapted accordingly.
+. Set the claim that holds the user name on the same converter, using `setPrincipalClaimName`. Spring Security reads the name from the `sub` claim by default, and Keycloak fills `sub` with a UUID. For Keycloak the login name is in the `preferred_username` claim. For other Identity Providers (Auth0, Okta or Azure AD) check which claim your provider uses for the login name and set that claim name instead.
+. Add `authorizeHttpRequests()` rules to restrict routes by role.
+. Connect the converter to `oauth2ResourceServer().jwt(...)`.
+
+[source,java]
+----
+@Bean
+public JwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(BamoeWebSecurityConfig::extractRealmRoles);
+    converter.setPrincipalClaimName("preferred_username");
+    return converter;
+}
+----
+
+The two settings fail in different ways. When the roles converter is not configured, `/me` reports no permissions and every route guarded by `hasAuthority` answers 403. When the principal claim is not configured, the permissions are correct but the user name remains a UUID, so any comparison against a task owner fails.
+The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBootWebSecurityConfig` class with an `extractRealmRoles` helper for Keycloak that customers can adapt. The pattern follows the official Spring Security 6.5 guidance:
+
+* https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html[Spring Security 6.5 - OAuth 2.0 Resource Server JWT] — wiring a custom `JwtAuthenticationConverter` into `oauth2ResourceServer().jwt(...)`.
+* https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Security - Authorize HttpServletRequests] — `authorizeHttpRequests()` rules using `hasAuthority` / `hasAnyAuthority`.
+* https://docs.spring.io/spring-boot/reference/web/spring-security.html[Spring Boot 3.5 - Spring Security] — the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property and associated Spring Boot auto-configuration.
+
+////
+=== Affected Management Console pages
+
+The screenshots below show the pages affected by RBAC and the permissions that control their elements.
+
+* Overview
+
+`process-instances:view` controls the metrics shown on the Overview page - pages-overview.png
+
+* Process Definitions
+
+`process-definitions:view` controls the page and navigation entry. `process-definitions:execute` controls the start action button, the form, and starting a new instance - pages-process-definitions.png
+
+* Process Instances
+
+`process-instances:view` controls the page, filters, and copy buttons. `process-instances:update` controls abort, retry, and skip buttons in both the list and the details page. The jobs section inside the instance details is additionally controlled by `jobs:view` and `jobs:update`.
+
+pages-process-instances.png
+
+pages-process-instances-detail-1.png
+
+pages-process-instances-detail-2.png
+
+* Jobs
+
+`jobs:view` controls the page, filters, and details. `jobs:update` controls "Cancel Selected" and "Reschedule".
+
+pages-jobs.png
+
+* Tasks
+
+`tasks:view` controls the page, filters, and details. `tasks:update` controls claim, complete, reassign, skip, release, fail, and any custom transition. `tasks:impersonate` controls the impersonation section of the task form.
+
+pages-tasks.png
+
+pages-tasks-details.png
+
+* Process Instance Migration (PIM)
+
+`pim:view` controls the plans page and filters. `pim:update` controls creating, deleting, and executing PIM plans.
+
+pages-advanced-pim.png
+////
+
+
 [#graphql-rbac]
 === Controlling GraphQL operations by role
+The Management Console (and any other GraphQL clients) talks to Data Index through the `/graphql` endpoint. By default, every authenticated user can run every GraphQL query and mutation. The {PRODUCT_SHORT} RBAC Data-Index Add-on checks the role of a user before each operation.
+
+You can use this add-on independently of the {RBAC_ADDON} to secure the GraphQL endpoints in your _Business Services_.
+
+Add the following dependency in Quarkus:
+
+`com.ibm.bamoe:bamoe-addons-quarkus-rbac-data-index`
+
+Add the following dependency in Spring Boot:
+
+`com.ibm.bamoe:bamoe-addons-spring-boot-rbac-data-index`
+
 Each GraphQL operation is controlled individually using the syntax:
 
 [source, properties]
@@ -392,11 +579,12 @@ Only users whose roles are part of that list can call the operation. Everyone el
 }
 ----
 
-Grant the same roles here that you grant with `bamoe.rbac.permissions.*`.
-
-Each operation is controlled by one permission. Grant every operation in a permission's row to the roles that hold that permission (the same roles you list in `bamoe.rbac.permissions.*`).
-
 A feature can also depend on an operation controlled by a different permission. The Process Instance Migration (PIM) pages read Process Definitions through the `ProcessDefinitions` query, so a user with `pim:view` or `pim:update` also needs `process-definitions:view` to load them. 
+
+// pim:view and pim:update are not available via GraphQL, should this be moved to Management Console?
+
+Each operation is controlled by one permission. Grant every operation in a permission's row to the roles that hold that permission which must be the same roles you list in `bamoe.rbac.permissions.*`.
+// What is a permission's row in this paragraph? Check regarding the original table split between GraphQL and Management Console
 
 Example:
 
@@ -412,7 +600,8 @@ bamoe.data-index.CountJobs.roles=managers,user
 bamoe.data-index.UserTaskInstances.roles=managers,user
 bamoe.data-index.CountUserTaskInstances.roles=managers,user
 
-# Only managers can mutate — process-instances:update
+# Only managers can mutate — 
+# process-instances:update
 bamoe.data-index.ProcessInstanceAbort.roles=managers
 bamoe.data-index.ProcessInstanceRetry.roles=managers
 bamoe.data-index.ProcessInstanceSkip.roles=managers
@@ -435,6 +624,11 @@ bamoe.data-index.UserTaskInstanceAttachmentUpdate.roles=managers
 bamoe.data-index.UserTaskInstanceAttachmentDelete.roles=managers
 ----
 
+=== Reference example
+
+The fastest path to a working RBAC setup is the `examples/process-security` example that ships in the BAMOE repository. It is a complete, runnable Business Service that exercises every part of the capability:
+
+...
 
 [#bus-services-tls-cert]
 == Configuring _Business Services_ with Passthrough Transport Layer Security (TLS)
