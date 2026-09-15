@@ -371,11 +371,14 @@ A Permission is a token that grants access to a specific Management Console feat
 | N/A
 |===
 
-Each permission protects multiple UI elements. For example, `process-instances:update` controls the abort, retry, skip, and variable-edit buttons across both the *Process Instances* page as well as the *Process Details* page.
+Each permission protects multiple UI elements. For example, `process-instances:update` controls the abort, retry, skip, and variable-edit buttons across both the *Process Instances* page as well as the *Process Details* page. 
+
+The following permissions are not applicable in GraphQL:
+
+* `process-definitions:execute`, `pim:view`, and `pim:update` are not GraphQL operations and they are enforced on the starting a process, and the migration-plan REST endpoints. 
+* `tasks:impersonate` is not an operation and filters the `UserTaskInstances` results as described in xref:#user-task-filtering[User Task Filtering].
 
 NOTE: The list of permissions is fixed and you cannot customize it in this release. 
-
-`process-definitions:execute`, `pim:view`, and `pim:update` are not GraphQL operations, so they are not in the table; they are enforced on REST endpoints instead (starting a process, and the migration-plan endpoints). `tasks:impersonate` is not an operation either; it filters the `UserTaskInstances` results, described in xref:#user-task-filtering[User Task Filtering].
 
 === How it works
 
@@ -445,7 +448,7 @@ The Overview page is always available to any authenticated user. The following l
 * Navigation to specific pages from the left side bar is available or not depending on the `*:view` permissions.
 * An Access Denied page if the user navigates directly to a restricted URL.
 * Action buttons are hidden or deactivated depending on the `*:execute` or `*:update` permissions the user has, for example to abort, retry, complete, etc.
-* The impersonation section on task forms is hidden when the user does not have `tasks:impersonate` permission.
+* The Impersonation section on task forms is hidden when the user does not have `tasks:impersonate` permission.
 
 The following table describes different situations that may occur with RBAC configuration and the {MANAGEMENT_CONSOLE}:
 
@@ -496,7 +499,7 @@ kogito.security.auth.impersonation.allowed-for-roles=managers
 bamoe.rbac.permissions.managers=tasks:impersonate,...
 ----
 
-When startup validation is enabled (see xref:#startup-validation[Startup validation], the add-on cross-checks these two properties; if `tasks:impersonate` is granted to a role that is not in `kogito.security.auth.impersonation.allowed-for-roles`, the add-on filters the permission out of the `/me` response.
+When startup validation is enabled (see xref:#startup-validation[Startup validation]), the add-on cross-checks these two properties; if `tasks:impersonate` is granted to a role that is not in `kogito.security.auth.impersonation.allowed-for-roles`, the add-on filters the permission out of the `/me` response.
 
 [#startup-validation]
 ==== Startup validation
@@ -551,9 +554,8 @@ The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBoot
 * https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Security - Authorize HttpServletRequests] — `authorizeHttpRequests()` rules using `hasAuthority` / `hasAnyAuthority`.
 * https://docs.spring.io/spring-boot/reference/web/spring-security.html[Spring Boot 3.5 - Spring Security] — the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property and associated Spring Boot auto-configuration.
 
-
 [#graphql-rbac]
-=== Controlling GraphQL operations by role
+=== Controlling access to GraphQL operations
 The Management Console (and any other GraphQL clients) talks to Data Index through the `/graphql` endpoint. By default, every authenticated user can run every GraphQL query and mutation. The {PRODUCT_SHORT} RBAC Data-Index Add-on checks the role of a user before each operation.
 
 You can use this add-on independently of the {RBAC_ADDON} to secure the GraphQL endpoints in your _Business Services_.
@@ -643,7 +645,7 @@ You can clone this example and adapt it for your own RBAC implementation on a ne
 
 The following table shows the common issues you may encounter when implementing Role-based access control for your _Business Services_.
 
-%header,cols=3]
+[%header,cols=3]
 [%autowidth]
 |===
 | Behavior

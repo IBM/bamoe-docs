@@ -30,10 +30,13 @@ To set up a plan and migrate Process Instances to new Process Definitions in you
 
 . Include the xref:../12-reference/maven-repository-libraries.adoc#PIM-addon-dependency[{PIM_ADDON_SHORT}] dependency in your _Business Service_ POM.
 
+////
+no longer necessary as we are talking to users migrating from 9.5.x
 NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the following steps before proceeding:
-+
+
 * Run the database migration scripts. For more information, see xref:https://www.ibm.com/docs/en/ibamoe/9.4.x?topic=upgrading-from-93x[Upgrading your stateful Workflow database].
 * Add the required PIM tables. For more information, see xref:../12-reference/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables].
+////
 
 . Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}.
 
@@ -42,8 +45,10 @@ NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the fol
 . When you are ready to migrate your production system, ensure you have isolated it from user interactions and that you have a recent backup.
 
 . Execute your PIM plan to migrate the Process Instances that are in a wait state, that match the defined criteria, to the new Process Definitions.
-+ You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
-+ During migration, the state of a Process Instance is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
++ 
+You can manage this step either in {MANAGEMENT_CONSOLE} or via REST API. 
++ 
+During migration, the state of a Process Instance is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
 
 If you are using Quarkus, your migrations can take time due to heavy database updates. You can configure the following transaction timeout in `application.properties`:
 
