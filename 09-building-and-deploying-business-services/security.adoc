@@ -154,6 +154,60 @@ Used to specify a list of roles or groups, authorized for identity impersonation
 
 If `kogito.security.auth.enabled=true` is absent, `kogito.security.auth.impersonation.allowed-for-roles` has no effect and any authenticated user can read another user's tasks through `GET /usertasks/instance?user=<other-user>`. This applies to both Quarkus and Spring Boot.
 
+=== JWT claim mapping for Spring Boot
+
+When `kogito.security.auth.enabled=true` is set, the {PRODUCT_SHORT} `SpringIdentityProvider` reads the authenticated user's name and roles from the Spring Security context to filter User Tasks. For this to work correctly with JWT-based authentication, the JWT claims must be mapped to the right values before `SpringIdentityProvider` is called.
+
+For Identity Providers that store roles in a flat top-level claim, use the following Spring Boot application properties:
+
+[source,properties]
+----
+spring.security.oauth2.resourceserver.jwt.principal-claim-name=<username-claim>
+spring.security.oauth2.resourceserver.jwt.authorities-claim-name=<roles-claim>
+spring.security.oauth2.resourceserver.jwt.authority-prefix=<prefix>
+----
+
+NOTE: For Microsoft Entra ID roles are in the `roles` claim, and for OKTA roles are in the `groups` claim.
+
+For Identity Providers that store roles in a nested path, provide a custom `JwtAuthenticationConverter`.
+
+For example, in Keycloak roles are stored in the nested `realm_access.roles` claim. Spring Boot 4.0.x has no property-based support for nested claim paths, so a `JwtAuthenticationConverter` bean must be configured in the application's security configuration class as shown below:
+
+[source,java]
+----
+@Bean
+public JwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    // Use preferred_username as the principal name
+    converter.setPrincipalClaimName("preferred_username");
+    // Extract roles from Keycloak's nested realm_access.roles claim
+    converter.setJwtGrantedAuthoritiesConverter(MySecurityConfig::extractRealmRoles);
+    return converter;
+}
+
+@SuppressWarnings("unchecked")
+private static Collection<GrantedAuthority> extractRealmRoles(Jwt jwt) {
+    Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+    if (realmAccess == null) {
+        return Collections.emptyList();
+    }
+    List<String> roles = (List<String>) realmAccess.getOrDefault("roles", Collections.emptyList());
+    return roles.stream()
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toList());
+}
+----
+
+Wire the converter into the `SecurityFilterChain`:
+
+[source,java]
+----
+.oauth2ResourceServer(oauth2 -> oauth2
+    .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtAuthenticationConverter())));
+----
+
+A complete working example is available in the `process-security` example delivered with the {PRODUCT_SHORT}, see xref:../05-getting-started/examples.adoc[Example Business Service projects].
+
 [#mgmt-console-oidc-proxy]
 == Connecting {MANAGEMENT_CONSOLE} to live _Business Services_
 For {MANAGEMENT_CONSOLE} to authenticate and connect to a _Business Service_ that is secured through an Identity Provider, the instance must make the Identity Provider URL available. Different solutions exist for Quarkus and Spring Boot.
@@ -349,7 +403,7 @@ The following sections describe the different phases of the RBAC system once it 
 ** the RBAC Data-Index Add-on checks roles against the configured GraphQL operations (returning data, `errorType: FORBIDDEN` or a list filtered to the user's tasks for `UserTaskInstances` for GraphQL). 
 * The UI layer and the backend layer agree because both are driven by the same role-to-permission mappings in `application.properties`.
 
-=== Controlling the Management Console operations for your _Business Service_ by role 
+=== Controlling access to Management Console operations 
 To limit access to your _Business Service_ functionality in Management Console, ensure your  _Business Service_ has the required {RBAC_ADDON_SHORT} dependency:
 
 * On Quarkus: `com.ibm.bamoe:bamoe-addons-quarkus-rbac`
@@ -449,7 +503,7 @@ When startup validation is enabled (see xref:#startup-validation[Startup validat
 
 When `bamoe.rbac.validation.enabled` is set to `true`, the add-on validates the RBAC configuration at startup and on every `Get /me` request. This is to prevent the UI from advertising a permission that the backend does not actually enforce.
 
-==== On Quarkus
+===== On Quarkus
 
 Quarkus exposes route security through declarative `quarkus.http.auth.policy.*` and `quarkus.http.auth.permission.*` properties, which the {RBAC_ADDON_SHORT} can introspect. With validation enabled, the add-on checks each granted permission against:
 
@@ -468,7 +522,7 @@ Quarkus exposes route security through declarative `quarkus.http.auth.policy.*` 
 
 Any permission whose corresponding route is not actually protected for the user's role is filtered out of the `GET /me` response, and a warning is logged. The user is not blocked from logging in, but will not see the affected UI elements. User Task transitions are not validated by this mechanism, since the User Task subsystem performs its own role-based authorization (see xref:##authentication-usertask-api[Authentification in User Task API endpoints]).
 
-==== On Spring Boot
+===== On Spring Boot
 
 Spring Boot does not expose route security declaratively. It is defined programmatically in a `SecurityFilterChain` bean and cannot be introspected at runtime. As a result, when `bamoe.rbac.validation.enabled` is set to `true` on Spring Boot, only impersonation is validated, and the {RBAC_ADDON_SHORT} logs a message at startup explaining this limitation.
 
@@ -497,34 +551,6 @@ The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBoot
 * https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Security - Authorize HttpServletRequests] — `authorizeHttpRequests()` rules using `hasAuthority` / `hasAnyAuthority`.
 * https://docs.spring.io/spring-boot/reference/web/spring-security.html[Spring Boot 3.5 - Spring Security] — the `spring.security.oauth2.resourceserver.jwt.issuer-uri` property and associated Spring Boot auto-configuration.
 
-=== Accessing a working sample
-
-You can find a full RBAC setup in the `examples/process-security` example that is included in the _Business Service_ project samples zip file (see xref:../05-getting-started/examples.adoc[Example Business Service projects]). It is a complete, runnable _Business Service_ that demonstrates every aspect of RBAC. 
-
-* Two roles are defined: `managers` (full access) and `user` (read-only).
-* Keycloak is wired as the OIDC provider.
-* Route security is fully declared in `application.properties` using `quarkus.http.auth.policy.*` and `quarkus.http.auth.permission.*`.
-* The BAMOE RBAC Add-on is installed and has `bamoe.rbac.validation.enabled=true`, so the startup validation is exercised.
-* The BAMOE RBAC Data-Index Add-on controls every GraphQL operation, with mutations restricted to `managers`.
-* `kogito.security.auth.impersonation.allowed-for-roles=managers` is set, so the `tasks:impersonate` permission and the `UserTaskInstances` filtering paths are both exercised.
-
-You can clone this example and adapt it for your own RBAC implementation on a new _Business Service_.
-
-=== Troubleshooting your RBAC configuration
-**The user sees only the Overview page after login.**
-The add-on is present but `bamoe.rbac.permissions.<role>=...` is not configured for any of the user's roles. Either add a permission mapping for one of the user's roles or remove the add-on dependency to fall back to unrestricted access.
-
-**A page is visible but actions are disabled even though the user is in the right group.**
-The Identity Provider may not be exposing the role in the JWT claim the framework reads. In Spring Boot with Keycloak, roles live in `realm_access.roles`, which Spring Security does not read by default. A `JwtAuthenticationConverter` is needed — see the official [Spring Security 6.5 - OAuth 2.0 Resource Server JWT: Extracting Authorities Manually](https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html#oauth2resourceserver-jwt-authorization-extraction) documentation.
-
-**Startup logs show `Permission '<x>' filtered out for user roles [...]`.**
-`bamoe.rbac.validation.enabled=true` is on and the add-on filtered the permission because the matching route is not secured for any of the user's roles. Either add a `quarkus.http.auth.permission.*` policy for the route (Quarkus) or align the `SecurityFilterChain` rules (Spring Boot). On Spring Boot, route-level filtering is **not** performed automatically; only impersonation is validated.
-
-**GraphQL requests return `errorType: FORBIDDEN`.**
-The RBAC Data-Index Add-on is in use and the user's role is not in the `bamoe.data-index.<OperationName>.roles` list. The error response includes the operation name and the BAMOE RBAC permission that controls it; use them to identify the missing role.
-
-**Tasks the user expects to see are missing from the Tasks page.**
-The Data-Index add-on filters `UserTaskInstances` per task assignment when the user does not have a role listed in `kogito.security.auth.impersonation.allowed-for-roles`. To see all tasks, the user must be granted an impersonation role.
 
 [#graphql-rbac]
 === Controlling GraphQL operations by role
@@ -607,11 +633,43 @@ bamoe.data-index.UserTaskInstanceAttachmentUpdate.roles=managers
 bamoe.data-index.UserTaskInstanceAttachmentDelete.roles=managers
 ----
 
-=== Reference example
+=== Accessing a working sample
 
-The fastest path to a working RBAC setup is the `examples/process-security` example that ships in the BAMOE repository. It is a complete, runnable Business Service that exercises every part of the capability:
+You can find a full RBAC setup in the `examples/process-security` example that is included in the _Business Service_ project samples zip file (see xref:../05-getting-started/examples.adoc[Example Business Service projects]). It is a complete, runnable _Business Service_ that demonstrates every aspect of RBAC. 
 
-...
+You can clone this example and adapt it for your own RBAC implementation on a new _Business Service_.
+
+=== Troubleshooting your RBAC configuration
+
+The following table shows the common issues you may encounter when implementing Role-based access control for your _Business Services_.
+
+%header,cols=3]
+[%autowidth]
+|===
+| Behavior
+| Configuration
+| Suggested solution 
+
+| The user sees only the Overview page after login                 
+| The add-on is present but `bamoe.rbac.permissions.<role>=...` is not configured for any of the user's roles
+| Either add a permission mapping for one of the roles that include your user or remove the add-on dependency to fall back to unrestricted access
+
+| A page is visible but actions are disabled even though the user is in the right group
+| The Identity Provider may not be exposing the role in the JWT claim the framework reads
+| In Spring Boot with Keycloak, roles reside in `realm_access.roles`, which Spring Security does not read by default. A `JwtAuthenticationConverter` is required (see https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html#oauth2resourceserver-jwt-authorization-extraction[Spring Security 6.5 - OAuth 2.0 Resource Server JWT: Extracting Authorities Manually documentation]
+
+| Startup logs show `Permission '<x>' filtered out for user roles [...]`
+| `bamoe.rbac.validation.enabled=true` is on and the add-on filtered the permission because the matching route is not secured for any of the user's roles
+| Either add a `quarkus.http.auth.permission.*` policy for the route (Quarkus) or align the `SecurityFilterChain` rules (Spring Boot). On Spring Boot, route-level filtering is not performed automatically; only impersonation is validated
+
+| GraphQL requests return `errorType: FORBIDDEN`
+| The RBAC Data-Index Add-on is in use and the user's role is not in the `bamoe.data-index.<OperationName>.roles` list
+| The error response includes the operation name and the BAMOE RBAC permission that controls it; use them to identify the missing role
+
+| Tasks the user expects to see are missing from the Tasks page
+| The Data-Index add-on filters `UserTaskInstances` per task assignment when the user does not have a role listed in `kogito.security.auth.impersonation.allowed-for-roles`
+| To see all tasks, the user must be granted an impersonation role
+|===
 
 [#bus-services-tls-cert]
 == Configuring _Business Services_ with Passthrough Transport Layer Security (TLS)
