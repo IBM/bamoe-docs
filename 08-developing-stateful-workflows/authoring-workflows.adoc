@@ -2,42 +2,59 @@
 include::../_partials/attributes.adoc[]
 include::../_styles/images.adoc[]
 
-This section describes how to create your BPMN workflows and configure your workflows in _Business service_ applications. 
+This section describes how to create your BPMN workflows and configure your workflows in _Business Service_ applications.
 
 [#workflow-bpmn-editor]
 == Authoring Workflow with the BPMN Editor
 
-Since version {VERSION_930}, {PRODUCT_SHORT} includes a new fully featured BPMN Editor, bringing faster startup times and backward compatibility with BPMN Editor (classic). Both BPMN Editors are available on {CANVAS}, {DEV_TOOLS}, and as a standalone JavaScript library.
+Since version {VERSION_930}, {PRODUCT_SHORT} includes a new fully featured BPMN Editor, bringing faster startup times and backward compatibility with the BPMN Editor (classic). Both BPMN Editors are available on {CANVAS}, {DEV_TOOLS}, and as a standalone JavaScript library.
 
-NOTE: The BPMN Editor is fully compatible with BPMN models created in {PRODUCT_SHORT} {VERSION_80X}, including Work Item Definition (WID) files. 
+NOTE: The BPMN Editor is fully compatible with BPMN models created in {PRODUCT_SHORT} {VERSION_80X}, including Work Item Definition (WID) files.
 
 The following lists the main elements of the BPMN Editor:
 
 .Editor page for a Workflow with highlighted elements of the BPMN Editor
 image::workflow/bpmn-editor-main-page.png[]
 
-. *Process Variables* → to edit process variables in a dedicated panel.
-. *Correlations* → to manage the correlations used to bind Process instances to messages.
-. *Properties Management* → to manage custom BPMN properties in a single panel
-. *Node palette* → to select and drag node types into your workflow including the *Data Object* button. Note that variations on the base elements can be selected after dragging a node type onto the Canvas.
-. *Group* and *Text annotations* buttons enable you to group and annotate elements of your BPMN.  
-. *Custom Tasks* (*Keyboard Shortcuts*) → to display custom tasks that have been integrated into the editor (e.g., AI and flexible process tasks as well as your custom work item handler tasks). The Keyboard button toggles a dialog containing the keyboard shortcuts. 
-. *Overlays* → to set graphical preferences and visual overlay elements that are not part of the BPMN file.
-. *Properties* → to manage the properties of the currently selected workflow element.
-. The *Zoom* *Fit view* and *toggle interactivity* buttons enable you to size the BPMN diagram and lock the diagram to inhibit changes. 
+Process Variables::
+To edit process variables in a dedicated panel.
+
+Correlations::
+To manage the correlations used to bind process instances to messages.
+
+Properties Management::
+To manage custom BPMN properties in a single panel.
+
+Node palette::
+To select and drag node types into your workflow, including the *Data Object* button. Note that variations on the base elements can be selected after dragging a node type onto the canvas.
+
+Group and Text annotations::
+To group and annotate elements of your BPMN diagram.
+
+Custom Tasks (Keyboard Shortcuts)::
+To display custom tasks that have been integrated into the editor (for example, AI and flexible process tasks as well as your custom work item handler tasks). The *Keyboard Shortcuts* button toggles a dialog containing the keyboard shortcuts.
+
+Overlays::
+To set graphical preferences and visual overlay elements that are not part of the BPMN file.
+
+Properties::
+To manage the properties of the currently selected workflow element.
+
+Zoom, Fit view, and toggle interactivity::
+To size the BPMN diagram and lock the diagram to inhibit changes.
 
 Developing Workflows through BPMN files is a complex subject and has many intricacies that are beyond the scope of this document.
-For more information, see BPMN-specific material, https://www.omg.org/spec/BPMN/2.0.2/PDF[Business Process Model And Notation (BPMN) specification].
+For more information, see BPMN-specific material, such as the https://www.omg.org/spec/BPMN/2.0.2/PDF[Business Process Model And Notation (BPMN) specification].
 
 == Invoking a Decision from a Workflow
 
 A common use case for a Workflow is to invoke Decisions as part of its logic.
-On your Workflow, create a new "Task" node and once on in the editor, change its type to Business Rule task.
+In your workflow, create a new Task node, and once placed in the editor, change its type to Business Rule task.
 
 .Node palette open for Task nodes inside the BPMN Editor
 image::workflow/decision-task.png[width=360]
 
-In the “Properties” panel under the section Implementation you can choose between DRL or DMN. Select the file you that contains the required Decision DMN and the model name space and name are automatically completed, as shown in this example:
+In the *Properties* panel under the *Implementation* section, choose between DRL or DMN. Select the file that contains the required decision DMN; the model namespace and name are completed automatically, as shown in this example:
 
 .Properties panel for a Business Rule Task inside a Workflow
 image::workflow/decision-in-workflow-props.png[width=360]
@@ -47,50 +64,79 @@ The result of the Decision will be the output of the Business Rule task.
 
 == Process Properties
 
-. Click anywhere in the diagram area and then click on the properties panel button to access the properties panel.
+. Click anywhere in the diagram area and then click the *Properties* panel button to access the properties panel.
 
 .BPMN Editor properties
 image::workflow/bpmn-process-props-panel.png[width=360]
 
 . Set the following properties:
- * *Name*: Provide a label for your process.
- * *Documentation* Provide a detailed description of the process.
- * *ID & Namespace* Specify an identifier that will be used for endpoints.
- * *Ad-hoc*: Specify if your process is ad-hoc (see xref:#case-management[Case Management])
- * *SLA Due Date* Provide a date within which the process must be completed, and which takes into account a business calendar of work time (see xref:#business-calendars[Business calendars]).
++
+*Name*::
+A label for your process.
+
+*Documentation*::
+A detailed description of the process.
+
+*ID & Namespace*::
+An identifier used for endpoints.
+
+*Ad-hoc*::
+Specifies whether your process is ad-hoc (see xref:#case-management[Case Management]).
+
+*SLA Due Date*::
+A date within which the process must be completed, taking into account a business calendar of work time (see xref:#business-calendars[Business calendars]).
 
 == Property and variable management
-You can manage all custom properties for your BPMN workflow using the Global Properties Management dialog. 
+You can manage all custom properties for your BPMN workflow using the Global Properties Management dialog.
 
 .Properties management dialog
 image::workflow/bpmn-props-mngmnt.png[width=360]
 
- Process Variables are used to pass information (data) from node to node, in order to be able to execute the Workflow in the Process Instance at runtime. You can create and manage Process Variables for your BPMN workflow using the Process Variables dialog where you can define the input/output relationship between nodes.
+Process Variables are used to pass information (data) from node to node, in order to execute the Workflow in the Process Instance at runtime. You can create and manage Process Variables for your BPMN workflow using the Process Variables dialog where you can define the input/output relationship between nodes.
 
 .Process variables dialog
 image::workflow/bpmn-process-vars.png[width=360]
 
 When you create a new variable:
 
-_Name_:: is the ID and name of the variable which can be referenced via scripts or the input/output of activities. 
+Name::
+The ID and name of the variable, which can be referenced via scripts or the input/output of activities.
 
-_Data type_:: refers to a Java type.
+Data type::
+A Java type.
 
-, and via I/O Assignments in BPMN Editor (classic). During migration, the state is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
+During migration, the state is preserved and Process and Task variables, Jobs schedules, and SLAs remain unchanged.
 
 == Define Workflow elements
 
 The following top level elements can be dragged out of the Node palette to define your workflow:
 
-* *Start Event*: Green circle indicating the starting point of the workflow.
-* *Intermediate Catch & Throw Events*: Yellow and Green circles to create catch and throw events that occur between the start and end points.
-* *End Events*: Red circle marking the end of the workflow.
-* *Tasks*: Empty rectangle representing any of the tasks or activities in the workflow (e.g., user task, gen AI task, milestone, ...).
-* *Call activity* Rectangle with embedded square representing a call to an activity that is external to the process definition, and could be a reusable element.  
-* *Subprocess*: Rectangle with a square to create subprocesses that remain part of the current process definition.
-* *Gateways*: Diamond shape for decision points.
-* *Lanes*: Checklist icon to organize tasks by roles or departments.
-* *Data Objects*: Document icon to specify the flow of data in your workflow.
+Start Event::
+Green circle indicating the starting point of the workflow.
+
+Intermediate Catch & Throw Events::
+Yellow and green circles to create catch and throw events that occur between the start and end points.
+
+End Events::
+Red circle marking the end of the workflow.
+
+Tasks::
+Empty rectangle representing any of the tasks or activities in the workflow (for example, user task, generative AI task, or milestone).
+
+Call Activity::
+Rectangle with an embedded square representing a call to an activity that is external to the process definition, and could be a reusable element.
+
+Subprocess::
+Rectangle with a square to create subprocesses that remain part of the current process definition.
+
+Gateways::
+Diamond shape for decision points.
+
+Lanes::
+Checklist icon to organize tasks by roles or departments.
+
+Data Objects::
+Document icon to specify the flow of data in your workflow.
 
 Each top level element you can create from the toolbar has variants that you can select using the menu accessed via the button on the bottom left corner of each element.
 
@@ -98,6 +144,97 @@ Each top level element you can create from the toolbar has variants that you can
 image::workflow/task-element-menu.png[width=360]
 
 For the conformance level of BPMN elements, see xref:../12-reference/bpmn.adoc[Reference → Business Process Model and Notation (BPMN)]
+
+[#dynamic-call-activity]
+== Calling sub-processes dynamically
+
+{PRODUCT_SHORT} supports dynamic invocation of reusable sub-processes through Call Activities. You can set the *Called Element* field to a process variable expression using the `#{variable_name}` syntax, and the Workflow Engine resolves the variable's value at runtime.
+
+NOTE: The `#{...}` expression syntax in `calledElement` is not part of the BPMN 2.0 specification. It is a {PRODUCT_SHORT}/Kogito extension for runtime process variable interpolation, consistent with the expression interpolation supported elsewhere in {PRODUCT_SHORT} BPMN properties.
+
+=== Configuring a dynamic Call Activity
+
+To configure a Call Activity to resolve its target at runtime, do the following steps:
+
+. In the BPMN Editor, open the *Process Variables* panel and add a new variable of type `String` to the parent process (for example, `targetProcess`). This variable will hold the ID of the sub-process to invoke.
+
+. Add a *Script Task* before the Call Activity to set the variable value:
++
+[source,java]
+----
+kcontext.setVariable("targetProcess", "my-subprocess-id");
+----
++
+Alternatively, you can supply the value through an incoming data mapping when starting the process instance.
+
+. Drag a *Call Activity* node from the node palette and connect it after the variable-setting task.
+
+. Select the Call Activity and, in the *Properties* panel, set the *Called Element* field to the expression:
++
+[source]
+----
+#{targetProcess}
+----
+
+. Optionally, configure *Data Associations* to map input and output variables to the sub-process using the data input/output sections.
+
+. Save and deploy the parent process. Ensure all sub-processes that may be invoked are deployed in the same application.
+
+The following BPMN XML shows the resulting `calledElement` attribute and its data input association:
+
+.Call Activity with dynamic calledElement
+[source,xml]
+----
+<bpmn2:callActivity id="DynamicCall" name="Call Sub-process Dynamically"
+    calledElement="#{subProcessName}">
+  <bpmn2:ioSpecification>
+    <bpmn2:dataInput id="subProcessName_input" name="subProcessName"/>
+  </bpmn2:ioSpecification>
+  <bpmn2:dataInputAssociation>
+    <bpmn2:sourceRef>subProcessName</bpmn2:sourceRef>
+    <bpmn2:targetRef>subProcessName_input</bpmn2:targetRef>
+  </bpmn2:dataInputAssociation>
+</bpmn2:callActivity>
+----
+
+=== Expression syntax
+
+The following expression formats are supported in the *Called Element* field:
+
+[%header,cols="2"]
+|===
+|Syntax
+|Description
+
+|`#{variableName}`
+|Resolves the value of `variableName` from the current process instance at runtime.
+
+|`staticId`
+|Fixed sub-process ID resolved at design time.
+|===
+
+NOTE: Only simple variable references are supported. Complex expressions (e.g., `#{a + b}`) are not supported.
+
+=== Error behavior
+
+[%header,cols="2"]
+|===
+|Condition
+|Behavior
+
+|Variable is `null` or empty
+|Runtime exception; process instance moves to error state.
+
+|No deployed sub-process matches the resolved ID
+|Runtime exception; can be caught by an Error Boundary Event on the Call Activity.
+
+|Syntax `#{}` with empty expression
+|Build-time validation error in the BPMN editor.
+|===
+
+IMPORTANT: All sub-processes that may be called dynamically must be deployed in the same application as the parent process.
+
+For guidance on migrating {PRODUCT_SHORT} v8 BPMN files that use this syntax, see xref:../04-upgrading/upgrading-80x-current/05-00-upgrading-projects/05-04-upgrading-individual-assets.adoc#dynamic-call-activity-migration[Upgrading individual assets → Dynamic Call Activity].
 
 == Using Script Tasks
 
@@ -124,18 +261,31 @@ The `kcontext` variable provides access to the process context within script tas
 
 You can access process variables in script tasks in two ways:
 
-* **Directly by name**: Process variables can be accessed directly by their variable name in the script. For example, if you have a process variable named `traveler`, you can access it directly as `traveler.getHotelId()`.
-* **Using `kcontext` methods**: You can also use the `kcontext` variable to access and modify process variables programmatically.
+* Directly by name: Process variables can be accessed directly by their variable name in the script. For example, if you have a process variable named `traveler`, you can access it directly as `traveler.getHotelId()`.
+* Using `kcontext` methods: You can also use the `kcontext` variable to access and modify process variables programmatically.
 
 You can use the following methods with `kcontext`:
 
-* `kcontext.getVariable("variableName")` - Reads the value of a process variable
-* `kcontext.setVariable("variableName", value)` - Sets or updates a process variable
-* `kcontext.getProcessInstance()` - Returns the process instance currently being executed
-* `kcontext.getNodeInstance()` - Returns the node instance currently being executed
-* `kcontext.getHeaders()` - Returns the headers associated with the process instance
-* `kcontext.getKogitoProcessRuntime()` - Returns the process runtime
-* `kcontext.getContextData()` - Returns context data as a map
+`kcontext.getVariable("variableName")`::
+Reads the value of a process variable.
+
+`kcontext.setVariable("variableName", value)`::
+Sets or updates a process variable.
+
+`kcontext.getProcessInstance()`::
+Returns the process instance currently being executed.
+
+`kcontext.getNodeInstance()`::
+Returns the node instance currently being executed.
+
+`kcontext.getHeaders()`::
+Returns the headers associated with the process instance.
+
+`kcontext.getKogitoProcessRuntime()`::
+Returns the process runtime.
+
+`kcontext.getContextData()`::
+Returns context data as a map.
 
 [source,java]
 ----
@@ -150,21 +300,19 @@ kcontext.setVariable("fullName", firstName + " " + lastName);
 [#case-management]
 == Using Flexible processes for Case Management
 
-{PRODUCT_SHORT} uses BPMN extensions to provide Case Management functionality through __flexible processes__. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes. 
+{PRODUCT_SHORT} uses BPMN extensions to provide Case Management functionality through _flexible processes_. A flexible process is any process definition that uses ad-hoc components or other features that enable the process to be executed more flexibly than traditional processes.
 
-An ad-hoc task can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime. 
+An ad-hoc task can be initiated dynamically during the execution of a business process, rather than being predefined in the process model. These tasks are particularly useful in scenarios where the workflow needs to accommodate unforeseen or exceptional activities that arise during runtime.
 
 A typical example of a case or flexible process is related to healthcare. A patient has a file that is accessible to the doctor and to any health professionals (or knowledge workers) who are assigned to the patient. These assigned workers take action and make different decisions and assessments until the patient is diagnosed and treated, completing the case or flexible process.
 
-In {PRODUCT_SHORT} a flexible process supports case-related usecases via the following basic components: 
+In {PRODUCT_SHORT}, a flexible process supports case-related use cases via the following basic components:
 
 * Optional start event which may or may not be explicit
-* Optional node connections, which may or may not connect
-all nodes
+* Optional node connections, which may or may not connect all nodes
 * Enabled `Ad-Hoc` process property set in the process definitions
 * One or more subprocesses which may or may not be ad-hoc subprocesses
-* Ad-hoc auto-start fragments, such as ad-hoc
-subprocesses or ad-hoc tasks
+* Ad-hoc auto-start fragments, such as ad-hoc subprocesses or ad-hoc tasks
 * Milestones that flag or trigger events
 * End event to terminate the process
 
@@ -178,13 +326,13 @@ image::workflow/adhoc-proc-props.png[Ad-hoc process properties,width=360]
 
 === Ad-hoc subprocesses
 
-An ad-hoc subprocess is similar to a Stage in Case Management. It contains embedded inner activities and is itself part of another process. It is a standard BPMN component and therefore supported by {PRODUCT_SHORT}. 
+An ad-hoc subprocess is similar to a Stage in Case Management. It contains embedded inner activities and is itself part of another process. It is a standard BPMN component and therefore supported by {PRODUCT_SHORT}.
 
 image::workflow/adhoc-sub-proc.png[Ad-hoc subprocess,width=240]
 
 === Ad-hoc auto-start fragments
 
-An ad-hoc auto-start fragment is any ad-hoc process, ad-hoc subprocess, or ad-hoc task with the AdHoc Autostart property enabled. This property enables the fragment to automatically start when the process is created instead of being started by the completion of the previous node or by a signal event.However, when this flag is not set, the only way to trigger the node execution is with a signal. Processes receive signals externally through the REST API, internally by using events or programmatically.
+An ad-hoc auto-start fragment is any ad-hoc process, ad-hoc subprocess, or ad-hoc task with the `Ad-Hoc Autostart` property enabled. This property enables the fragment to automatically start when the process is created instead of being started by the completion of the previous node or by a signal event. However, when this flag is not set, the only way to trigger the node execution is with a signal. Processes receive signals externally through the REST API, internally by using events, or programmatically.
 
 image::workflow/adhoc-auto-st.png[Ad-hoc auto-start properties,width=360]
 
@@ -197,22 +345,23 @@ image::workflow/adhoc-milestone.png[Ad-hoc milestone,width=240]
 
 === REST API requests as Signals
 
-A REST API request can serve as a signal event to trigger Milestones or to create and start ad-hoc fragments such as ad-hoc processes, ad-hoc subprocesses, or tasks. For non-flexible processes, an empty POST request for a process triggers the start node, whereas in a flexible process, the request creates the process instance. Similarly for ad-hoc tasks, an empty POST request instantiates the task node. All ad-hoc auto-start fragments with the `Ad-Hoc Autostart` property, are started automatically when the process is created.
+A REST API request can serve as a signal event to trigger Milestones or to create and start ad-hoc fragments such as ad-hoc processes, ad-hoc subprocesses, or tasks. For non-flexible processes, an empty POST request for a process triggers the start node, whereas in a flexible process, the request creates the process instance. Similarly for ad-hoc tasks, an empty POST request instantiates the task node. All ad-hoc auto-start fragments with the `Ad-Hoc Autostart` property are started automatically when the process is created.
 
 === Implementing flexible, one-off business cases
 
-An example application `flexible-process-quarkus` can be found in xref:../05-getting-started/examples.adoc[Example Business Service projects]. This example shows the use of flexible processes to implement a Case Management scneario using Ad-hoc subprocesses, Milestones, and a DMN Business Rule Task. 
+An example application `flexible-process-quarkus` can be found in xref:../05-getting-started/examples.adoc[Example Business Service projects]. This example shows the use of flexible processes to implement a Case Management scenario using ad-hoc subprocesses, Milestones, and a DMN Business Rule Task.
 
-== Correlating message events to a Message Event
-Correlations are used when multiple process instances are running concurrently and only one specific instance needs to be notified. Using a correlation you can bind process instances to messages that contain specific property values. 
+== Correlating message events to a process instance
 
-A dedicated dialog can be displayed through the Correlations toggle button. See xref:authoring-workflows.adoc#workflow-bpmn-editor[Editor presentation]. In this panel you can configure a Property that binds to one or more message types, as well as the Key values that will trigger the execution of a specific process instance. 
+Correlations are used when multiple process instances are running concurrently and only one specific instance needs to be notified. Using a correlation you can bind process instances to messages that contain specific property values.
+
+A dedicated dialog can be displayed through the *Correlations* toggle button. See xref:authoring-workflows.adoc#workflow-bpmn-editor[Editor presentation]. In this panel you can configure a Property that binds to one or more message types, as well as the Key values that will trigger the execution of a specific process instance.
 
 .Correlation dialog
 image::workflow/correlations-bmpn-dialog.png[width=360]
 
 Correlation ensures messages are routed only to process instances that match specific criteria based on message content.
 
-For more information on how correlation works at runtime see xref:event-driven-workflow.adoc[Working with Events].
+For more information on how correlation works at runtime, see xref:event-driven-workflow.adoc[Working with Events].
 
 
