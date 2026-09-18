@@ -2,20 +2,24 @@
 include::../_partials/attributes.adoc[]
 include::../_styles/images.adoc[]
 
-This section describes data access topics that you may need to take into accout and configure during development of your _Business Service_.
+This section describes data access topics that you may need to take into account and configure during development of your _Business Service_.
 
 [#transactions]
 == Transactional operations on Compact Architecture
-All the operations performed by the Process API layer on the Compact Architecture are transactional. In detail, all the endpoints are now compliant with the ACID properties, namely that in case of failure during a transaction, the action is undone, and any applied change is rolled back to  restore the consistent state that existed before the transactional operation started. This makes all the operations performed on the Compact Architecture reliable and safe. 
-Transactions are enabled as default choice on Compact Architecture projects.
+All operations performed by the Process API layer on the Compact Architecture are transactional. All endpoints are compliant with the ACID properties: if a failure occurs during a transaction, the action is undone and any applied change is rolled back to restore the consistent state that existed before the operation started. This makes all operations on the Compact Architecture reliable and safe.
 
-NOTE: The event subsystem in the BAMOE workflow engine does not have transactional support (see xref:../01-release-notes/known-limitations.adoc[the Known Limitations section])
+Transactions are enabled by default on Compact Architecture projects.
 
-It is possible to disable the default behavior and make the operation no longer transactional by configuring your project `application.properties` with one of the properties shown in the following table:
+[NOTE]
+====
+The event subsystem in the BAMOE workflow engine does not have transactional support. For more information, see xref:../01-release-notes/known-limitations.adoc[the Known Limitations section].
+====
+
+To disable the default behavior and make operations non-transactional, configure your project `application.properties` with one of the properties shown in the following table:
 
 [cols="1,1,1,1"]
 |===
-|*Property* |*Description* |*Type* |*Default* 
+|Property |Description |Type |Default
 
 |`kogito.transactionEnabled` |Globally sets transactions as enabled for the entire application |Boolean |true
 
@@ -26,9 +30,9 @@ It is possible to disable the default behavior and make the operation no longer 
 
 [#multithreading]
 == Multi-threaded access to a _Business Service_
-In an environment with multi-threaded access to a _Business Service_ the workflow engine needs to ensure proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
+In an environment with multi-threaded access to a _Business Service_, the workflow engine needs to ensure a proper state of the runtime data. If a process instance, or other entity, is accessed concurrently by multiple threads, it can lead to race conditions.
 
-Use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. You can enable optimistic locking using the following property in `application.properties`:
+Use optimistic locking to ensure that concurrent access of the same database entity (e.g., process instance) is correctly handled. Enable optimistic locking using the following property in `application.properties`:
 
 [source,properties]
 ----
@@ -36,20 +40,25 @@ Use optimistic locking to ensure that concurrent access of the same database ent
 kogito.persistence.optimistic.lock=true
 ----
 
-NOTE: This property has no impact if you have deactivated transactions by setting `kogito.transactionEnabled` to `false`. 
+[NOTE]
+====
+This property has no impact if you have deactivated transactions by setting `kogito.transactionEnabled` to `false`.
+====
 
-- With optimistic locking enabled, if a process instance is accessed concurrently by more than one thread, the workflow engine will throw an optimistic lock exception. This exception will then be handled by the fault-tolerance system and retried, ensuring data consistency at runtime.
+Optimistic locking enabled::
+If a process instance is accessed concurrently by more than one thread, the workflow engine throws an optimistic lock exception. This exception is then handled by the fault-tolerance system and retried, ensuring data consistency at runtime.
 +
-For more information on fault-tolerance settings see https://quarkus.io/guides/smallrye-fault-tolerance[the SmallRye Fault Tolerance for Quarkus] or https://resilience4j.readme.io/docs/getting-started-3[resilience4j for Spring Boot].
-+
-- With optimistic locking disabled, data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
+For more information on fault-tolerance settings, see https://quarkus.io/guides/smallrye-fault-tolerance[SmallRye Fault Tolerance for Quarkus] or https://resilience4j.readme.io/docs/getting-started-3[resilience4j for Spring Boot].
+
+Optimistic locking disabled::
+Data consistency cannot be guaranteed during concurrent access of the runtime data in the workflow engine.
 
 [#data-isolation-shared-databases]
 == Data isolation for shared databases
 
 In a Compact Architecture deployment, multiple _Business Services_ can share the same database instance. In versions of {PRODUCT_SHORT} prior to {VERSION_RM}, all persistence subsystems — Data-Index, Jobs Service, Data-Audit, User Task storage, and Process Instance storage — could read data from every _Business Service_ connected to that shared database, which could lead to data leakage between services.
 
-Starting with {PRODUCT_SHORT} {VERSION_RM}, you can enable *data isolation* with a single configuration property:
+Starting with {PRODUCT_SHORT} {VERSION_RM}, you can enable data isolation with a single configuration property:
 
 [source,properties]
 ----
@@ -58,7 +67,7 @@ kogito.persistence.data-isolation.enabled=true
 
 When enabled, each _Business Service_ automatically filters all database queries to return only its own data. Filtering occurs directly at the SQL level, without requiring additional network calls or external services.
 
-This feature is *opt-in and disabled by default*. Existing deployments are unaffected until you explicitly enable it.
+This feature is opt-in and disabled by default. Existing deployments are unaffected until you explicitly enable it.
 
 === Isolated subsystems
 
@@ -77,14 +86,14 @@ When data isolation is enabled, the following subsystems isolate their database 
 
 [NOTE]
 ====
-Data-Audit *custom user-defined queries* are not automatically isolated. When defining custom queries, you must explicitly filter results by the `(process_id, process_version)` and `(root_process_id, root_process_version)` column pairs to restrict results to the owning _Business Service_. For more details, see xref:data-audit-api.adoc[Data-Audit API].
+Data-Audit custom user-defined queries are not automatically isolated. When defining custom queries, you must explicitly filter results by the `(process_id, process_version)` and `(root_process_id, root_process_version)` column pairs to restrict results to the owning _Business Service_. For more details, see xref:data-audit-api.adoc[Data-Audit API].
 ====
 
 === When to use data isolation
 
-Data isolation is *optional*. It is designed for environments where multiple _Business Services_ deliberately share a single database tier to reduce infrastructure costs and operational overhead.
+Data isolation is optional. It is designed for environments where multiple _Business Services_ deliberately share a single database tier to reduce infrastructure costs and operational overhead.
 
-Data isolation is relevant only when *all four* of the following conditions are met simultaneously:
+Data isolation is relevant only when all four of the following conditions are met simultaneously:
 
 1. Persistence is enabled on the _Business Service_.
 2. Multiple _Business Services_ share the same database.
@@ -107,7 +116,7 @@ kogito.persistence.data-isolation.enabled=true
 
 No additional configuration is required. At startup, the _Business Service_ automatically discovers its deployed process definitions and applies filtering to all persistence queries.
 
-Data isolation is supported on both Quarkus (see xref:workflows-with-quarkus.adoc#enabling-data-isolation[Workflow services with Quarkus]) and Spring Boot (see xref:workflows-with-springboot.adoc#enabling-data-isolation[Workflow services with Spring Boot]) runtimes.
+Data isolation is supported on both Quarkus and Spring Boot. For more information, see xref:workflows-with-quarkus.adoc#enabling-data-isolation[Workflow services with Quarkus] and xref:workflows-with-springboot.adoc#enabling-data-isolation[Workflow services with Spring Boot] runtimes.
 
 ==== Horizontal scaling
 
@@ -121,15 +130,32 @@ Sub-process isolation is handled automatically. Sub-process instances are associ
 
 When upgrading existing deployments with shared databases to {PRODUCT_SHORT} {VERSION_RM}:
 
-* **Database schema updates**: The {VERSION_RM} database migration scripts add new process reference columns to the affected subsystem tables. The migration is backward compatible.
-* **Permissive filtering for pre-upgrade data**: For existing records that do not have the new column values populated, queries operate permissively and continue returning those rows across services until the process instances are updated or completed.
-* **Fresh deployments**: For strict, immediate data isolation from day one, a fresh database deployment is recommended rather than an in-place upgrade with active in-flight instances.
-* **Data Events payload**: Data Events emitted by the engine now include `processId`, `processVersion`, `rootProcessId`, and `rootProcessVersion` across all event types. Ensure downstream consumers are updated to handle the new fields.
-* **Process Instance Migration (PIM) add-on**: The {PIM_ADDON} has been extended to support migration of the Jobs Service schema as well as the new process reference columns introduced by data isolation. For more information, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Migrating in-flight Process Instances].
+Database schema updates::
+The {VERSION_RM} database migration scripts add new process reference columns to the affected subsystem tables. The migration is backward compatible.
+
+Permissive filtering for pre-upgrade data::
+For existing records that do not have the new column values populated, queries operate permissively and continue returning those rows across services until the process instances are updated or completed.
+
+Fresh deployments::
+For strict, immediate data isolation from day one, a fresh database deployment is recommended rather than an in-place upgrade with active in-flight instances.
+
+Data Events payload::
+Data Events emitted by the engine now include `processId`, `processVersion`, `rootProcessId`, and `rootProcessVersion` across all event types. Ensure downstream consumers are updated to handle the new fields.
+
+Process Instance Migration (PIM) add-on::
+The {PIM_ADDON} has been extended to support migration of the Jobs Service schema as well as the new process reference columns introduced by data isolation. For more information, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Migrating in-flight Process Instances].
 
 === API and Management Console interaction
 
-* **REST APIs**: Transparent to callers. No endpoint changes or special parameters are needed.
-* **GraphQL APIs**: Existing GraphQL types are extended with additive process version fields to allow the {MANAGEMENT_CONSOLE} to correctly distinguish models and versions across services.
-* **Management Console**: The {MANAGEMENT_CONSOLE} queries each _Business Service_ individually through its own endpoint and displays the isolated view exposed by that service.
-* **Performance**: Filtering is executed directly in SQL queries without extra network roundtrips. When disabled (`false`, the default), there is zero performance overhead.
+REST APIs::
+Transparent to callers. No endpoint changes or special parameters are needed.
+
+GraphQL APIs::
+Existing GraphQL types are extended with additive process version fields to allow the {MANAGEMENT_CONSOLE} to correctly distinguish models and versions across services.
+
+Management Console::
+The {MANAGEMENT_CONSOLE} queries each _Business Service_ individually through its own endpoint and displays the isolated view exposed by that service.
+
+Performance::
+Filtering is executed directly in SQL queries without extra network roundtrips. When disabled (`false`, the default), there is zero performance overhead.
+

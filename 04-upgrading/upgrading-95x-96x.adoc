@@ -30,7 +30,7 @@ To upgrade your {PRODUCT_SHORT} Dev environment to {VERSION}, you can use the De
 * {MVN_REPO}
 
 === Upgrade {CANVAS} and {MVN_REPO}
-It is recommended that you use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_94X}.
+Use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_94X}.
 
 Follow the steps in xref:../03-installing/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and {CANVAS} versions.
 
@@ -44,11 +44,11 @@ If you have customized your previous {CANVAS} installation, remember to apply th
 ====
 
 === Upgrade {DEV_TOOLS}
-{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors, it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded. See xref:../06-available-features/dev-environment/bamoe-developer-tools-for-vscode/index.adoc[{DEV_TOOLS}].
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic updates or manage them manually when notified. Due to version differences in the models supported by the BPMN, DMN, and Test Scenario editors, plan your upgrade carefully to avoid issues when running models in services that have not yet been upgraded. See xref:../06-available-features/dev-environment/bamoe-developer-tools-for-vscode/index.adoc[{DEV_TOOLS}].
 
 == Step 3: Upgrade your _Business Service(s)_ project(s)
 
-_Business Service(s)_ project(s) can be upgraded by changing their Maven dependencies and configuration files.  
+_Business Service(s)_ project(s) can be upgraded by changing their Maven dependencies and configuration files.
 
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}:
 
@@ -57,7 +57,7 @@ The following tools are required to upgrade your _Business Service_ projects to 
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} Dev environment with {MVN_REPO} @ {IMAGE_VERSION}
 
-Once your {PRODUCT_SHORT} Dev environment is upgraded, it is straightforward to upgrade your _Business Service(s)_ project(s) on {PRODUCT_SHORT} {VERSION_94X} to {PRODUCT_SHORT} version {VERSION}.
+Once your {PRODUCT_SHORT} Dev environment is upgraded, upgrading your _Business Service_ projects from {PRODUCT_SHORT} {VERSION_94X} to {PRODUCT_SHORT} version {VERSION} requires only minimal changes.
 
 The project structure is not changed, and updates only need to be made to the versions and the names of some dependencies and files. 
 
@@ -78,22 +78,22 @@ You can now continue developing your _Business Service_ project on {PRODUCT_SHOR
 
 == Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
 
-After upgrading your _Business Services_ source code (Step 3), you need to upgrade the components in your Runtime environment. 
+After upgrading your _Business Services_ source code (Step 3), upgrade the components in your Runtime environment.
 
 The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are available in the Runtime Helm charts for your selected offering (DMOE or PMOE), including the product specific licensing annotations.
 
 Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment].
 
-If you have stateful workflows in your _Business Services_ you will need to complete Step 6 to update your database. If you only have DMN and DRL in your _Business Services_ you can now deploy your upgraded _Business Services_.
+If you have stateful workflows in your _Business Services_, complete Step 6 to update your database. If you only have DMN and DRL in your _Business Services_, you can now deploy your upgraded _Business Services_.
 
 [#migrate-stateful-workflow-db]
 == Step 6: Upgrade your stateful Workflow database(s)
 
-If you have _Business Services_ that run stateful workflows in your system you will upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
+If you have _Business Services_ that run stateful workflows, upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
 
 The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
 
-You must upgrade your _Business Services_ and your database(s) together. 
+You must upgrade your _Business Services_ and your databases together.
 
 To upgrade safely:
 
@@ -111,11 +111,18 @@ Avoid using KIE Flyway for automatic database schema migration in production env
 
 When updating your stateful Workflow databases to {PRODUCT_SHORT} {VERSION_RM}, be aware of the following database schema and runtime behavioral changes:
 
-* **Schema additions**: The {VERSION_RM} database migration scripts introduce new process identification and version columns to support data isolation between _Business Services_ sharing a database. The migration is backward compatible.
-* **Permissive filtering for pre-upgrade data**: When data isolation (`kogito.persistence.data-isolation.enabled=true`) is enabled, pre-upgrade rows without the new column values populated are returned across all services permissively. This condition resolves as active process instances update or complete.
-* **Fresh deployment recommendation**: For immediate, strict data isolation boundaries from initial launch, deploying to a fresh database is recommended over an in-place migration of active shared databases.
-* **Data Events payload updates**: Data Events emitted by the Workflow Engine now include `processId`, `processVersion`, `rootProcessId`, and `rootProcessVersion` fields across all event types. Update downstream consumers expecting previous event payload formats accordingly.
+Schema additions::
+The {VERSION_RM} database migration scripts introduce new process identification and version columns to support data isolation between _Business Services_ sharing a database. The migration is backward compatible.
+
+Permissive filtering for pre-upgrade data::
+When data isolation (`kogito.persistence.data-isolation.enabled=true`) is enabled, pre-upgrade rows without the new column values populated are returned across all services permissively. This condition resolves as active process instances update or complete.
+
+Fresh deployment recommendation::
+For immediate, strict data isolation boundaries from initial launch, deploying to a fresh database is recommended over an in-place migration of active shared databases.
+
+Data Events payload updates::
+Data Events emitted by the Workflow Engine now include `processId`, `processVersion`, `rootProcessId`, and `rootProcessVersion` fields across all event types. Update downstream consumers expecting previous event payload formats accordingly.
 
 For more information, see xref:../09-building-and-deploying-business-services/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../08-developing-stateful-workflows/overview.adoc[Overview of stateful Workflows with Compact Architecture].
 
-Once you have installed your Runtime environment and updated the database for any stateful workflows in your system, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).
+Once you have installed your Runtime environment and updated the database for any stateful workflows, follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).
