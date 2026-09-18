@@ -38,7 +38,7 @@ NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the fol
 * Add the required PIM tables. For more information, see xref:../12-reference/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables].
 ////
 
-. Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}. 
+. Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}. If you are creating a Remote plan in you will need to include the `org.kie:kie-addons-quarkus-source-files` for Quarkus or org.kie:kie-addons-springboot-source-files for Spring Boot to see the option to select the Business Service Mapping. 
 
 . Test your migration plan on a duplicate of your production system. 
 
@@ -50,7 +50,7 @@ NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the fol
 
 .. Executing the required PIM plan via REST API. 
 
-.. Using the Installed and Remote plan functionality to deploy a new Business Service with all that is needed to manage migration when the service starts, see xref:#installed-migration-plans[Using installed migration plans to dynamically activate PIM migration]
+.. Using the Installed and Remote plan functionality to deploy a new Business Service with all that is needed to manage migration when the service starts, see xref:#auto-migration[Using installed migration plans to dynamically activate PIM migration]
 + 
 During migration, the state of a Process Instance is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
 
@@ -157,6 +157,8 @@ The endpoint returns the plan details, validation status, and warnings/errors if
 
 . You can use `GET /pim/plans` to retrieve all migration plans, and optionally filter using the `sourceProcessId` and `targetProcessId` as query parameters. 
 
+. You can use `GET /v1/migrations/plans/{planId}?detailed=true` to retrieve the source BPMN XML including the `sourceProcessXml` for Remote plans (see xref:#remote-migration-plan[Using Remote migration plans]). 
+
 === Managing migrations 
 You can use the following endpoints to execute and retrieve information on migrations with the PIM Add-on:
 
@@ -226,14 +228,22 @@ You can use `GET /pim/migration/processes/{processInstanceId}` to return the lis
 }
 ----
 
+You can use `GET /v1/migrations/plans/{planId}/export?includeSourceProcessXml=true` to download a plan as a self-contained JSON spec file that can be used as an Installed plan (see xref:##auto-migration[Automatic migration on startup using Installed plans]). 
+
+The server responds with `Content-Disposition: attachment; filename=<sourceId>-<srcVer>-to-<targetId>-
+<tgtVer>.json`. Setting `includeSourceProcessXml=true` embeds the BPMN XML in the file; this is useful when
+exporting a plan created in a staging environment to be installed on production.
+
+NOTE: Export is not available for Installed plans. Only Local and Remote plans can be exported via the REST API.
+
 [#remote-migration-plan]
 == Using Remote migration plans
 A *Remote* migration plan is one where the source and target Process Definitions are contained in different _Business Services_. You can use the `sourceProcessXml` field to provide the BPMN XML of the source process. PIM parses and validates the XML at plan-creation time and stores it in a dedicated table (bamoe_process_instance_migration_plan_remote_source_process_definitions). All subsequent migrations will use the stored XML so the original service does not need to be reachable on deployment.
 
-The target Process Definition must be deployed in the Business Service containing the new target BPMN Process Definition, as it contains the runtime that will execute the migrated instances.
-Remote process definitions are immutable.
+The target Process Definition must be deployed in the _Business Service_ containing the new target BPMN Process Definition because it contains the runtime that will execute the migrated instances. Remote Process Definitions are immutable.
 Once a REMOTE plan is created the stored XML cannot be changed. To update the source definition, delete the plan and create a new one.
-2.3 Creating a REMOTE migration plan
+
+=== Creating a Remote plan via API
 
 Include sourceProcessXml in the request body when you call POST /plans. The field must contain a valid, well-formed BPMN 2.0 document.
 
@@ -268,7 +278,9 @@ The response includes a planType field set to REMOTE:
   "updatedAt":            "2026-07-31T10:00:00Z"
 ----
 
-[#installed-migration-plans]
+For more information on creating a Remote plan in {MANAGEMENT_CONSOLE} see xref:../10-managing-and-monitoring-business-services/consoles.adoc#remote-plan-console[Creating a Remote plan]
+
+[#auto-migration]
 == Automatic migration on startup using Installed plans 
 Migration of in-flight Process Instances can be done manually (via the PIM REST API or the Management Console) or migration can be automatically triggered when an updated _Business Service_ with a new Process Definition is deployed. 
 

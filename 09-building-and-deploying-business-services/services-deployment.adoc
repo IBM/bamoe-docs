@@ -37,13 +37,9 @@ If you are using Microsoft SQL Server with a case-sensitive collation, some flyw
 
 When deployed _Business Services_ with workflows are used to create Process Instances and you subsequently make changes to the project or the BPMN files and re-deploy, there are a few things to be considered.
 
-You can directly deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs) and the next Process Instances that are created by your system will be created with the new BPMN. 
+You can directly deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However with stateful workflow, if the workflow sequence flow changes with new nodes, and/or new “paths” of execution, you cannot just update your BPMN file(s) in-place and deploy a new version of your application. You must consider how you want to manage long running Process Instances that may be in a wait state. 
 
-If the Sequence Flow of a stateful Workflow BPMN model changes with new nodes, and/or new “paths” of execution, you cannot just update your BPMN file(s) in-place and deploy a new version of your application. You must consider how you want to manage long running Process Instances that may be in a wait state. The recommended strategy to manage the evolution of the Process Definitions in your project is to update your Business Service making the necessary modifications to the Process Definition and create a new Business Service version. The end result is a Business Service that corresponds to each Process Definition update. For more information on how to manage the evolution of a _Business Service_ containing workflows in a Runtime system see xref:#cross-bs-migration[Using Cross Business Service migration to evolve Workflow] 
-
-[#cross-bs-migration]
-=== Using Cross Business Services to evolve Workflow
-The recommended strategy for evolving Process Definitions for long-running processes is the following:
+The recommended strategy is the following: 
 
 . Make required changes to the BPMN model in your _Business Service_.
 . Increment the BPMN Version property in {CANVAS} or the attribute in your BPMN file.
@@ -81,8 +77,21 @@ my-business-service/
             └── hiring.bpmn         # Process ID: "hiring", Version: "2.0"
 ----
 
-=== Managing workflow evolution within the same Business Service
- Process Definitions in the same Business Service, duplicating them under a new name (and with a different ID), so that new Process Instances can be created based on the new version, while old Process Instances can continue their original Sequence Flow. Certain Workflows may be active for a long period so you can use the {PIM_ADDON} to map the source BPMN to the target BPMN for nodes in a waiting state, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Managing and Monitoring _Business Services_ →  Migration Process Instances using PIM].
+=== Managing workflow evolution within the same Business Service deployment
+Instead of incrementing the version of your _Business Service_ and creating a new deployment, you can also manage evolution of your BPMN Process Definition within the same _Business Service_. To do this, you duplicate and modify the BPMN giving it a different ID within the same _Business Service_. You can then progressively migrate your in-flight processes with {PIM_ADDON_SHORT}, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Managing and Monitoring _Business Services_ →  Migration Process Instances using PIM]. This method involves you managing different endpoints in your client application and may result in you accumulating multiple versions of the same BPMN Process Definition in the same Business Service.
+
+[source,xml]
+----
+my-business-service/
+├── pom.xml                         # GAV -> org.example:my-business-service:3.0
+└── src/
+    └── main/
+        └── resources/
+            ├── application.properties
+            ├── hiring.bpmn          # Process ID: "hiring",  Version: "1.0"
+            ├── hiring2.bpmn         # Process ID: "hiring2", Version: "1.0"
+            └── hiring3.bpmn         # Process ID: "hiring3", Version: "1.0"
+----
 
 ////
 The pseudo-timeline below shows the safest strategy for evolving your Workflow models across many deployments.
