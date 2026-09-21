@@ -348,11 +348,32 @@ The PIM Plan will be validated, and any errors or warnings [1] will be listed in
 === Creating a Remote Plan
 To create a REMOTE plan using the Management Console UI, complete the following steps:
 
-. Ensure that your Business Service has the `org.kie:kie-addons-quarkus-source-files` dependencies for Quarkus or `org.kie:kie-addons-springboot-source-files` for Spring Boot to be able to select the _Business Service_ Mapping source mapping.  
+. Ensure that your _Business Service_ has the `org.kie:kie-addons-quarkus-source-files` dependencies for Quarkus or `org.kie:kie-addons-springboot-source-files` for Spring Boot, to be able to select the _Business Service_ Mapping source mapping.  
 . Select one _Business Service_ as the source and a different Business Service as the target. The plan type is
 automatically identified as REMOTE.
 . Map the source and target nodes in the usual way.
 . Click Create PIM Plan.
+
+image::console/remote-bs-create.png[Creating a new Remote plan by selecting different Source and Target Process Definitions]
+
+Once you confirm the creation of the PIM Plan, you can see a summary of the attributes of the new Remote plan. 
+
+image::console/remote-plan-confirm.png[Dialog confirming Remote plan creation with details]
+
+=== Exporting a plan to be used as an Installed plan
+
+To export a plan using the Management Console UI, complete the following steps:
+
+. In the Management Console, open the plan that you want to export.
+** For *Remote* plans, if you want to include the source process XML in the exported JSON file, select the Include Source Process XML checkbox before you click Export.
+** For LOCAL plans, the JSON file downloads automatically.
+. Click Export and a JSON file is downloaded, as shown in the following example:
+
+image::console/install-plan-json.png[JSOn file of the exported Installed migration plan]
+
+When `sourceProcessXml` is present the validator parses the XML in-process, builds a full node graph, and applies the same node-mapping validations as for *Local* plans. If the XML is malformed or the declared sourceProcessId / sourceProcessVersion do not match the content of the document, plan creation is rejected with a 400 Bad Request.
+
+See xref:migration-with-pim.adoc#auto-migration[Using installed migration plans to dynamically activate PIM migration]
 
 === Plan Execution
 

@@ -39,11 +39,11 @@ When deployed _Business Services_ with workflows are used to create Process Inst
 
 You can directly deploy a new version of your application if there are no changes to Workflow models (BPMN files) or if your BPMN files are Straight-Through Processes (STPs). However with stateful workflow, if the workflow sequence flow changes with new nodes, and/or new “paths” of execution, you cannot just update your BPMN file(s) in-place and deploy a new version of your application. You must consider how you want to manage long running Process Instances that may be in a wait state. 
 
-The recommended strategy is the following: 
+The recommended strategy for Process Definition evolution is **one Business Service, one version** and the following procedure describes how you can achieve this: 
 
 . Make required changes to the BPMN model in your _Business Service_.
 . Increment the BPMN Version property in {CANVAS} or the attribute in your BPMN file.
-. Update the GAV version of your _Business Service_ in the project POM.
+. Update the GAV version of your _Business Service_ in the project POM (optional).
 . Include the {PIM_ADDON_SHORT} in your _Business Service_ if not already part of the dependencies. 
 . Ensure the previous and new _Business Services_ are configured to use the same database connection, preferably with Data isolation enabled to avoid any confusion between instances created by the two different versions of the _Business Service_, see xref:../08-developing-stateful-workflows/database-considerations.adoc#data-isolation-shared-databases[Database considerations → Data isolation on shared databases].
 . Deploy the new _Business Service_ version. 
@@ -51,7 +51,7 @@ The recommended strategy is the following:
 + 
 The PIM migration plan will have been created and tested prior to this step on a staging system and can be run manually or via the Automatic migration on startup, see xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc[Migrating Process Instances using {PIM_ADDON_SHORT}]
 
-After deployment and before migration the old and new Business Service project structure would resemble this:
+After deployment and before migration the old and new _Business Service_ project structure would resemble this:
 
 **Business Service v1 (still running, holding live instances):**
 

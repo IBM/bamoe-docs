@@ -38,7 +38,7 @@ NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the fol
 * Add the required PIM tables. For more information, see xref:../12-reference/stateful-workflows-database-tables.adoc#ppim-db-tables[Reference → Stateful Workflows subsystem db tables].
 ////
 
-. Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}. If you are creating a Remote plan in you will need to include the `org.kie:kie-addons-quarkus-source-files` for Quarkus or org.kie:kie-addons-springboot-source-files for Spring Boot to see the option to select the Business Service Mapping. 
+. Create your plan by defining the source and target Process Definitions and explicit node mappings. This is easier to do in {MANAGEMENT_CONSOLE}. If you are creating a Remote plan in you will need to include the `org.kie:kie-addons-quarkus-source-files` for Quarkus or `org.kie:kie-addons-springboot-source-files` for Spring Boot to be able to select the Business Service Mapping. 
 
 . Test your migration plan on a duplicate of your production system. 
 
@@ -51,7 +51,7 @@ NOTE: If you are upgrading from {VERSION_930}, ensure you have completed the fol
 .. Executing the required PIM plan via REST API. 
 
 .. Using the Installed and Remote plan functionality to deploy a new Business Service with all that is needed to manage migration when the service starts, see xref:#auto-migration[Using installed migration plans to dynamically activate PIM migration]
-+ 
+
 During migration, the state of a Process Instance is preserved and Process and Task variables, Jobs schedules and SLAs remain unchanged. 
 
 If you are using Quarkus, your migrations can take time due to heavy database updates. You can configure the following transaction timeout in `application.properties`:
@@ -120,7 +120,37 @@ The following table describes the rules for *Explicit Node mappings*:
 If you want to automate or integrate migration in a larger process, rather than complete the migration using the UI, {PRODUCT_SHORT} exposes a REST API for Process Instance Migration, see xref:management-apis.adoc#process-instance-migration-addon[Management APIs Process → Process Instance Migration APIs]. 
 
 === Managing migration plans
-You can use the following endpoints to create and manage migration plans with the PIM Add-on:
+Migration plans can be *Local*, *Remote* or *Installed*. The main differences between each are detailed in the table below:
+
+[%header,cols=4]
+[%autowidth]
+|===
+|Type
+|Source Process Definition
+|REST-managed
+|Can be exported
+|When to use
+
+|*Local*
+|Deployed in the same _Business Service_
+|Yes
+|Yes
+|Standard migration between Process Definition versions within the same runtime deployment
+
+|*Remote*
+|Stored as BPMN XML in the database
+|Yes
+|Yes
+|Migration from a Process Definition version that has been updated to v2 and is no longer deployed, see xref:#remote-migration-plan[Using Remote migration plans]
+
+|*Installed*
+|Either local or embedded in the spec file
+|No (read-only)
+|No
+|GitOps / operator-driven migrations that must execute automatically on each deployment without REST API calls, see xref:#auto-migration [Automatic migration on startup using Installed plans [Using Remote migration plans]
+|===
+
+The following endpoints are used to create and manage migration plans with the PIM Add-on:
 
 . Create a new migration plan that defines how process instances move from a source process to a target process using `POST /pim/plan`, defining the following payload fields:
 +
@@ -157,7 +187,8 @@ The endpoint returns the plan details, validation status, and warnings/errors if
 
 . You can use `GET /pim/plans` to retrieve all migration plans, and optionally filter using the `sourceProcessId` and `targetProcessId` as query parameters. 
 
-. You can use `GET /v1/migrations/plans/{planId}?detailed=true` to retrieve the source BPMN XML including the `sourceProcessXml` for Remote plans (see xref:#remote-migration-plan[Using Remote migration plans]). 
+More endpoints are available for Remote and Installed PIM plans.
+//cross reference to be added
 
 === Managing migrations 
 You can use the following endpoints to execute and retrieve information on migrations with the PIM Add-on:
@@ -238,14 +269,16 @@ NOTE: Export is not available for Installed plans. Only Local and Remote plans c
 
 [#remote-migration-plan]
 == Using Remote migration plans
-A *Remote* migration plan is one where the source and target Process Definitions are contained in different _Business Services_. You can use the `sourceProcessXml` field to provide the BPMN XML of the source process. PIM parses and validates the XML at plan-creation time and stores it in a dedicated table (bamoe_process_instance_migration_plan_remote_source_process_definitions). All subsequent migrations will use the stored XML so the original service does not need to be reachable on deployment.
+A *Remote* migration plan is one where the source and target Process Definitions are contained in different _Business Service_ deployments. This enables you to manage the evolution of your Business Service Process Definitions as recommended in xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Evolving stateful Workflows across _Business Service_ deployments], namely **one Business Service, one version**.
 
-The target Process Definition must be deployed in the _Business Service_ containing the new target BPMN Process Definition because it contains the runtime that will execute the migrated instances. Remote Process Definitions are immutable.
+You can use the `sourceProcessXml` field to provide the BPMN XML of the source process. PIM parses and validates the XML at plan-creation time and stores it in a dedicated table: `bamoe_process_instance_migration_plan_remote_source_process_definitions`. All subsequent migrations will use the stored XML so the original service does not need to be reachable on deployment.
+
+The target Process Definition must be in the newly deployed _Business Service_ which contains the runtime that will execute the migrated instances. Remote Process Definitions are immutable.
 Once a REMOTE plan is created the stored XML cannot be changed. To update the source definition, delete the plan and create a new one.
 
 === Creating a Remote plan via API
 
-Include sourceProcessXml in the request body when you call POST /plans. The field must contain a valid, well-formed BPMN 2.0 document.
+Include sourceProcessXml in the request body when you call `POST /plans`. The field must contain a valid, well-formed BPMN 2.0 document.
 
 [source,json]
 ----
@@ -264,7 +297,7 @@ Content-Type: application/json
 }
 ----
 
-The response includes a planType field set to REMOTE:
+The response includes a `planType` field set to REMOTE:
 
 [source,json]
 ----
@@ -278,6 +311,8 @@ The response includes a planType field set to REMOTE:
   "updatedAt":            "2026-07-31T10:00:00Z"
 ----
 
+You can use `GET /v1/migrations/plans/{planId}?detailed=true` to retrieve the source BPMN XML including the `sourceProcessXml` for Remote plans. 
+
 For more information on creating a Remote plan in {MANAGEMENT_CONSOLE} see xref:../10-managing-and-monitoring-business-services/consoles.adoc#remote-plan-console[Creating a Remote plan]
 
 [#auto-migration]
@@ -286,7 +321,9 @@ Migration of in-flight Process Instances can be done manually (via the PIM REST 
 
 To do this you create an *Installed* migration plan, defined by a JSON spec file (e.g. 001-hiring-v1-to-v2.json ) that can be placed in a directory that is mounted into the pod. When a newly deployed _Business Service_ has the property `bamoe.pim.migrate-on-start.enabled=true` PIM reads all *.json files from that directory at startup, validates them as a batch, and executes the migrations.
 
-Installed plans differ from Local and Remote plans in the following ways:
+You can use `GET /v1/migrations/plans/{planId}/export?includeSourceProcessXml=true` to download a plan as a self-contained JSON spec file that can be used as an *Installed* plan. 
+
+Installed plans differ from *Local* and *Remote* plans in the following ways:
 
 * They cannot be created, updated, or deleted via the REST API. 
 * The lifecycle is entirely controlled through the spec
@@ -295,8 +332,30 @@ files on disk.
 filename and checksum already in the database it reuses the existing record (idempotent).
 * They are not exportable via the /export endpoint.
 
+=== Spec file format
+
+Each file must be valid JSON matching the PlanSpec schema:
+
+[source,JSON]
+----
+{
+  "sourceProcessId":      "hiring",
+  "sourceProcessVersion": "1.0",
+  "targetProcessId":      "hiring",
+  "targetProcessVersion": "2.0",
+  "nodeMapping": [
+    { "sourceId": "_node-A", "targetId": "_node-A" }
+  ]
+}
+----
+
+Files are processed in alphabetical order, so prefixing filenames with a numeric index gives deterministic ordering: 001-hiring-v1-to-v2.json, 002-approval-v2-to-v3.json, …
+
+You can use `GET /v1/migrations/plans/{planId}/export` to download a *Local* or *Remote* plan from an existing plan, as a ready-to-use spec file 
+Use .
+
 === The startup sequence
-When a new Business Service is deployed with the required settings for Automatic Migration on startup, the following sequence is followed to trigger migration in a multi-pod environment:
+When a new _Business Service_ is deployed with the required settings for Automatic Migration on startup, the following sequence is followed to trigger migration in a multi-pod environment:
 
 . Readiness gate: The pod's readiness probe reports NOT READY while migration is in progress, preventing traffic from
 reaching a pod that has not yet migrated its instances.
@@ -305,7 +364,7 @@ reaching a pod that has not yet migrated its instances.
 become waiters.
 . Batch validation: The executor validates all spec files as a group, checking for missing required fields, duplicate source
 coordinates, self-loop migrations, bidirectional cycles, and target processes not deployed in the current runtime.
-. Sequential execution: Each spec is registered as an Installed plan (or reused if already present) and
+. Sequential execution: Each spec is registered as an *Installed* plan (or reused if already present) and
 `migrateAllProcessInstances` is called in an independent transaction.
 . Lock release: The executor updates the lock row to SUCCESS or FAILURE and the readiness probe transitions
 accordingly. Waiter pods read the terminal status and unblock.
@@ -315,7 +374,7 @@ issue, clear the lock row, and redeploy.
 NOTE: Lock row must be cleared manually after a FAILURE. PIM does not automatically retry a failed startup migration. Delete the row from `bamoe_process_instance_migration_startup_lock` where `lock_key groupId:artifactId:version` before redeploying.
 
 === Enabling migration on startup for your Business Service
-The Automatic migration feature is disabled by default. To enable it for your Business Service you will need to set the following properties in the application.properties file:
+The Automatic migration feature is disabled by default. To enable it for your _Business Service_ you will need to set the following properties in the `application.properties` file:
 
 [%header,cols=4]
 [%autowidth]
@@ -327,18 +386,19 @@ The Automatic migration feature is disabled by default. To enable it for your Bu
 
 |`bamoe.pim.migrate-on-start.enabled`
 |boolean
-|false
+|`false`
 |Enables the migrate-on-start feature. Set to true to activate.
 
 |`bamoe.pim.migrate-on-start.plans-path`
 |string
-|/opt/pim/plans
+|`/opt/pim/plans`
 |Absolute path to the directory containing *.json spec files
 
 |`bamoe.pim.transaction-timeout`
-|int (seconds)
+|`int (seconds)`
 |3600
 |Quarkus only. Maximum wall-clock seconds for the migration transaction. Increase for large datasets.
+|===
 
 The following shows an example configuration for Quarkus:
 
@@ -358,3 +418,85 @@ The following shows an example configuration for Spring Boot:
 bamoe.pim.migrate-on-start.enabled=true
 bamoe.pim.migrate-on-start.plans-path=/opt/pim/plans
 ----
+
+=== Deploying Installed plans on Kubernetes/Open Shift
+
+In order to make your Installed migration plans available to new Business Service versions at deployment you will need to mount a ConfigMap or Secret that contains your spec files at the configured plans-path. You can see a simple example below:
+
+[source,JSON]
+----
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - name: business-service
+          env:
+            - name: BAMOE_PIM_MIGRATE_ON_START_ENABLED
+              value: "true"
+            - name: BAMOE_PIM_MIGRATE_ON_START_PLANS_PATH
+              value: /opt/pim/plans
+          volumeMounts:
+            - name: pim-plans
+              mountPath: /opt/pim/plans
+              readOnly: true
+      volumes:
+        - name: pim-plans
+          configMap:
+            name: my-pim-migration-plans
+----
+
+
+=== Health / readiness probe
+
+The {PIM_ADDON_SHORT} automatically registers a readiness check named `startup-migration` when the feature is enabled.
+
+[%header,cols=2]
+[%autowidth]
+|===
+|Migration status	
+|Readiness response
+
+|RUNNING	
+|DOWN — pod not yet ready to serve traffic
+
+|SUCCESS	 
+|UP - pod is ready
+
+|FAILURE	
+|DOWN — pod will shut down
+
+|disabled	
+|UP — feature off, always passes
+|===
+
+Rolling upgrades with migrate-on-start enabled.
+If you enable migrate-on-start on a deployment that uses rolling updates, the first pod to start becomes the migration executor. Subsequent pods will wait on the lock. Ensure your liveness probe timeout is longer than your expected worst-case migration duration to prevent premature restarts.
+
+=== Batch validation rules
+
+Before any migration is executed, PIM validates the full set of spec files together and reports all violations in a single error message. If any rule is violated the entire startup migration is aborted and the application shuts down:
+
+[%header,cols=2]
+[%autowidth]
+|===
+|Rule	
+|Description
+
+|Required fields	
+|All four coordinate fields (`sourceProcessId`, `sourceProcessVersion`, `targetProcessId`, targetProcessVersion``) must be present and non-blank.
+
+|Duplicate sources	
+|No two spec files may share the same sourceProcessId + sourceProcessVersion pair.
+
+|Self-loop	
+|Source and target coordinates must not be identical.
+
+|Bidirectional cycle	
+|The spec list must not contain specs A→B and B→A simultaneously.
+
+|Target process deployed	
+|Each target process must be deployed in the running Business Service at the declared version.
+|===
+
