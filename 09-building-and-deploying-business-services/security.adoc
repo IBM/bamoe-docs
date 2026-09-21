@@ -527,12 +527,12 @@ Any permission whose corresponding route is not actually protected for the user'
 
 ===== On Spring Boot
 
-Spring Boot does not expose route security declaratively. It is defined programmatically in a `SecurityFilterChain` bean and cannot be introspected at runtime. As a result, when `bamoe.rbac.validation.enabled` is set to `true` on Spring Boot, only impersonation is validated, and the {RBAC_ADDON_SHORT} logs a message at startup explaining this limitation.
+Spring Boot defines route security programmatically in a `SecurityFilterChain` bean, which cannot be introspected at runtime. As a result, when `bamoe.rbac.validation.enabled` is set to `true`, only impersonation is validated and the {RBAC_ADDON_SHORT} logs a message at startup explaining this limitation.
 
-If you are using Spring Boot you will need to do the following to verify alignment:
+To verify alignment, configure the following:
 
-. Extract roles from the JWT using a `JwtAuthenticationConverter`. For Keycloak, this means reading the `realm_access.roles` claim. For other providers, the converter must be adapted accordingly.
-. Set the claim that holds the user name on the same converter, using `setPrincipalClaimName`. Spring Security reads the name from the `sub` claim by default, and Keycloak fills `sub` with a UUID. For Keycloak the login name is in the `preferred_username` claim. For other Identity Providers (Auth0, Okta or Azure AD) check which claim your provider uses for the login name and set that claim name instead.
+. Extract roles from the JWT using a `JwtAuthenticationConverter`. For Keycloak, this means reading the `realm_access.roles` claim.
+. Set the claim that holds the user name using `setPrincipalClaimName`. Keycloak populates the `sub` claim with a UUID; the human-readable login name is in `preferred_username`. For other providers (Auth0, Okta, or Azure AD), use the claim that carries the login name.
 . Add `authorizeHttpRequests()` rules to restrict routes by role.
 . Connect the converter to `oauth2ResourceServer().jwt(...)`.
 
@@ -547,8 +547,27 @@ public JwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
 }
 ----
 
-The two settings fail in different ways. When the roles converter is not configured, `/me` reports no permissions and every route guarded by `hasAuthority` answers 403. When the principal claim is not configured, the permissions are correct but the user name remains a UUID, so any comparison against a task owner fails.
-The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBootWebSecurityConfig` class with an `extractRealmRoles` helper for Keycloak that customers can adapt. The pattern follows the official Spring Security 6.5 guidance:
+`setJwtGrantedAuthoritiesConverter` delegates role extraction to `extractRealmRoles`. For other providers (Auth0, Okta, or Azure AD), replace that method with one that reads the claim path your provider uses.
+
+`setPrincipalClaimName` sets the JWT claim used as the principal name. If your token already carries the login name in `sub`, this line can be omitted.
+
+Each setting has a distinct failure mode: without the roles converter, `/me` reports no permissions and every route guarded by `hasAuthority` answers 403; without the principal claim, permissions are correct but the user name remains a UUID, causing task-owner comparisons to fail.
+
+[source,java]
+----
+private static Collection<GrantedAuthority> extractRealmRoles(Jwt jwt) {
+    Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+    if (realmAccess == null) {
+        return Collections.emptyList();
+    }
+    List<String> roles = (List<String>) realmAccess.getOrDefault("roles", Collections.emptyList());
+    return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+}
+----
+
+`extractRealmRoles` reads `realm_access.roles` from the token. If the claim is absent, it returns an empty list rather than throwing an exception. Each role is mapped to a `SimpleGrantedAuthority`, which is what `hasAuthority()` and `hasAnyAuthority()` rules evaluate.
+
+The {PRODUCT_SHORT} Spring Boot accelerator templates include a `BamoeSpringBootWebSecurityConfig` class with an `extractRealmRoles` helper for Keycloak that you can adapt. The pattern follows the official Spring Security 6.5 guidance:
 
 * https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html[Spring Security 6.5 - OAuth 2.0 Resource Server JWT] — wiring a custom `JwtAuthenticationConverter` into `oauth2ResourceServer().jwt(...)`.
 * https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Spring Security - Authorize HttpServletRequests] — `authorizeHttpRequests()` rules using `hasAuthority` / `hasAnyAuthority`.
