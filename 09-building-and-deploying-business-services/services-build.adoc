@@ -152,24 +152,49 @@ mvn clean package -Dquarkus.container-image.build=true
 
 NOTE: Maven places all build artifacts in the `/target` directory, while Gradle places them in the `build/` directory. This behavior is consistent across all build modes.
 
-== Spring Boot 
+== Spring Boot
 
 === Maven
 
-Use standard Maven and Java commands to package and run the generated Spring Boot application.
+When building your _Business Service_ with Spring Boot and Maven, you can choose from multiple packaging and execution strategies:
 
-Use the following command for building the application:
+* Executable JAR (Fat JAR)
+* Container image (using Cloud Native Buildpacks)
+
+==== Building your _Business Service_ project by using standard executable JAR
+
+The `spring-boot-maven-plugin` repackages the compiled application and its dependencies into a single, executable archive.
+
+To package the application, run:
 
 [source,shell]
 ----
 mvn clean package
 ----
 
-Use the following command for running the application locally:
+The executable JAR is generated in the `target/` directory. You can run it with the following command:
 
 [source,shell]
 ----
-java -jar ./target/(name_of_the_application).jar
+java -jar ./target/<your-business-service-name>-<version>.jar
+----
+
+==== Building your _Business Service_ project by using Container image
+
+Spring Boot provides built-in support for building OCI-compliant container images directly through the `spring-boot-maven-plugin` using Cloud Native Buildpacks.
+
+To build a container image without needing a local Dockerfile, run:
+
+[source,shell]
+----
+mvn clean spring-boot:build-image -Dspring-boot.build-image.imageName=my-company/my-business-service:latest
+----
+
+To verify that the container image was created, run:
+
+[source,shell]
+----
+docker image ls
 ----
 
 === Gradle

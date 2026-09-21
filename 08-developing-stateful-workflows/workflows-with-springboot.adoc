@@ -204,7 +204,7 @@ spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver
 // Enabling jdbc persistence
 kogito.persistence.type=jdbc
 
-// Optional enable flyway for automated schema management
+// Optional: enable KIE Flyway for automatic schema creation in development
 kie.flyway.enabled=true
 ----
 
@@ -220,6 +220,25 @@ spring.datasource.url=jdbc:h2:mem:bamoe;NON_KEYWORDS=VALUE,KEY
 spring.datasource.username=bamoe
 spring.datasource.password=bamoe
 ----
+
+=== Setting up the database for stateful Workflows in development
+
+All stateful Workflows subsystems brought by {PRODUCT_SHORT} into your _Business Service_ project come with `KIE Flyway` migrations, a sandboxed Flyway-based mechanism that automatically creates the database schema for you during startup. This is convenient in development environments but is not suitable for production database instances.
+
+To enable this feature, add the following `kie.flyway.enabled` property to your `application.properties` project file, which is found in `src/main/resources`:
+
+[source,properties]
+----
+// Enable automatic schema creation in development
+kie.flyway.enabled=true
+----
+
+When enabled, your development database schema will be automatically created upon application startup for all included persistence subsystems (Process Instance, User Tasks, Data Index, Jobs Service, and Data Audit).
+
+[NOTE]
+====
+For production environments, set `kie.flyway.enabled=false` and manage your database schema using DDL scripts. For more information, see xref:../09-building-and-deploying-business-services/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on {DDLS}].
+====
 
 [#enabling-data-isolation]
 === Enabling data isolation for shared databases
@@ -367,7 +386,7 @@ image::workflow/spring-console-forms.png[Forms page]
 
 ==== Process Instance Migration
 
-If you have added the {PIM_ADDON} dependency to your _Business Service_ you can access the same PIM User Interface that is integrated in the {MANAGEMENT_CONSOLE}, to be able to manage the migration of in-flight Process Instances to updated Process Definitions, see xref:../10-managing-and-monitoring-business-services/consoles.adoc#process-instance-migration-ui[Managing live Workflows using {MANAGEMENT_CONSOLE}]
+If you have added the {PIM_ADDON} dependency to your _Business Service_ you can access the same PIM User Interface that is integrated in the {MANAGEMENT_CONSOLE}, to be able to manage the migration of in-flight Process Instances to updated Process Definitions, see xref:../10-managing-and-monitoring-business-services/consoles.adoc#process-instance-migration-ui[Managing live Workflows using {MANAGEMENT_CONSOLE}]. For more information about managing workflow versioning and deployment strategies, see xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Deploying Business Services → Evolving stateful Workflows across Business Service deployments].
 
 === Using the Swagger UI
 
@@ -401,3 +420,109 @@ spring.graphql.graphiql.path=/graphiql
 ----
 
 When enabled, to access the *GraphiQL UI*, in your browser navigate to `http://localhost:8080/graphiql`.
+
+== Hot-reload in Dev mode
+
+For medium to large sized Workflow services, recompiling and restarting the application upon code changes can be time-consuming. To simplify iterative development, you can use Spring Boot DevTools.
+
+To enable hot-reload:
+
+. Add the `org.springframework.boot:spring-boot-devtools` dependency to your project:
+* In Maven, add `org.springframework.boot:spring-boot-devtools` to the `<dependencies>` section of your `pom.xml`.
+* In Gradle, add `developmentOnly("org.springframework.boot:spring-boot-devtools")` to the `dependencies` block of your `build.gradle`.
+. _Business Services_ rely on automatic code generation driven by BPMN models executed by the `kogito-maven-plugin` (or `kogito-gradle-plugin`), trigger a compilation build when model or source changes are made:
+* In your IDE, trigger a project build / make project action.
+* In Maven, run `mvn compile`.
+* In Gradle, run `./gradlew compileJava compileSecondaryJava`.
+. Spring Boot DevTools detects classpath updates and automatically restarts the application context with the updated generated classes.
+
+== Debugging
+
+Debugging a Workflow service in Spring Boot follows the standard Java remote debugging setup:
+
+. Set up your IDE remote debug configuration:
+* Create a remote JVM debug configuration in your IDE (IntelliJ IDEA, VS Code, or Eclipse) on port `5005`.
+* Put a breakpoint in one of the generated or custom classes.
+. Start the application in debug mode using your preferred build tool.
+. Connect your IDE debugger to port `5005`.
+
+=== Starting the application in debug mode
+
+To start the application and allow the debugger to attach at any time (`suspend=n`):
+
+++++
+<div class="tabs-container">
+  <input type="radio" id="tab-dbg-mvn1" name="tabs-debug-run" checked>
+  <input type="radio" id="tab-dbg-gradle1" name="tabs-debug-run">
+
+  <div class="tabs-header">
+    <label for="tab-dbg-mvn1">Maven</label>
+    <label for="tab-dbg-gradle1">Gradle</label>
+  </div>
+
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+mvn clean spring-boot:run \
+  -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+----
+
+++++
+    </div>
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+./gradlew bootRun \
+  --jvm-args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+----
+
+++++
+    </div>
+  </div>
+</div>
+++++
+
+=== Blocking startup until debugger connects
+
+If you need to debug application startup logic, block the JVM startup until a debugger is attached (`suspend=y`):
+
+++++
+<div class="tabs-container">
+  <input type="radio" id="tab-dbg-mvn2" name="tabs-debug-suspend" checked>
+  <input type="radio" id="tab-dbg-gradle2" name="tabs-debug-suspend">
+
+  <div class="tabs-header">
+    <label for="tab-dbg-mvn2">Maven</label>
+    <label for="tab-dbg-gradle2">Gradle</label>
+  </div>
+
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+mvn clean spring-boot:run \
+  -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+----
+
+++++
+    </div>
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+./gradlew bootRun --debug-jvm
+----
+
+++++
+    </div>
+  </div>
+</div>
+++++

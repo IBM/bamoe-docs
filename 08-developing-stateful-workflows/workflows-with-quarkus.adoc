@@ -477,7 +477,7 @@ The Forms page displays all the available forms in the project. It is initially 
 To add custom forms (for the `hiring` Process Definition or `HR Interview` User Task for example), follow the steps in xref:../06-available-features/dev-environment/bamoe-developer-tools-for-vscode/form-generation.adoc[Form code generation functionality] and then place the generated forms in the `src/main/resources/custom-forms-dev` folder.
 
 ==== Process Instance Migration
-If you have added the {PIM_ADDON} dependency to your _Business Service_ you can access the same PIM User Interface that is integrated in the {MANAGEMENT_CONSOLE}, to be able to manage the migration of in-flight Process Instances to updated Process Definitions, see xref:../10-managing-and-monitoring-business-services/consoles.adoc#process-instance-migration-ui[Managing live Workflows using {MANAGEMENT_CONSOLE}]
+If you have added the {PIM_ADDON} dependency to your _Business Service_ you can access the same PIM User Interface that is integrated in the {MANAGEMENT_CONSOLE}, to be able to manage the migration of in-flight Process Instances to updated Process Definitions, see xref:../10-managing-and-monitoring-business-services/consoles.adoc#process-instance-migration-ui[Managing live Workflows using {MANAGEMENT_CONSOLE}]. For more information about managing workflow versioning and deployment strategies, see xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Deploying Business Services → Evolving stateful Workflows across Business Service deployments].
 
 [#swagger]
 === Using the Swagger UI
@@ -508,74 +508,101 @@ When enabled, to access the *GraphiQL UI*, in your browser navigate to `http://l
 
 NOTE: *GraphQL* UI is enabled by default when running in Quarkus Development mode.
 
-== Hot-reload in dev mode
+== Hot-reload in Dev mode
 
-For medium to large sized Workflow services, recompiling and restarting the application upon code changes could be cumbersome and time-consuming.
-To simplify development, Quarkus offers an embedded hot-reload feature.
+For medium to large sized Workflow services, recompiling and restarting the application upon code changes can be time-consuming. To simplify iterative development, Quarkus provides an embedded live reload feature in development mode.
 
-To trigger it, there are two steps:
+To use hot-reload:
 
-. Modify any source file (such as a BPMN definition, Java class, or configuration file).
-. Reload any page of the running application to see the changes applied immediately.
-
-This allows you to iteratively develop workflows without restarting the application.
+. Start the application in dev mode using `mvn quarkus:dev` (or `./gradlew quarkusDev`).
+. Modify any source file (such as a BPMN process definition, Java class, or configuration file).
+. Send a new HTTP request to an endpoint (such as via Swagger UI, curl, or {QUARKUS_DEV_UI}) or refresh the browser page.
+. Quarkus automatically detects the changes, re-executes the code generation plugins to update the workflow engine classes, recompiles the affected sources, and serves the request with the updated application state without restarting the JVM.
 
 == Debugging
 
 Debugging a Workflow service in Quarkus follows the standard Java remote debugging setup:
 
-. Create a remote debug configuration in your IDE on port `5005` (steps vary by IDE).
-. Start the application in dev mode by using one of the following commands:
-+
-++++
-  <div class="tabs-container">
-    <!-- Radio buttons for tab switching (hidden) -->
-    <input type="radio" id="tab1" name="tabs" checked>
-    <input type="radio" id="tab2" name="tabs">
-
-    <!-- Tab headers -->
-    <div class="tabs-header">
-      <label for="tab1">Maven</label>
-      <label for="tab2">Gradle</label>
-    </div>
-
-    <!-- Tab content panels -->
-    <div class="tabs-content">
-      <div class="tab-panel">
-        mvn clean compile quarkus:dev
-      </div>
-      <div class="tab-panel">
-        ./gradlew clean build quarkusDev
-      </div>
-    </div>
-  </div>
-++++
-+
-. Put a breakpoint in one of the generated or custom classes.
+. Set up your IDE remote debug configuration:
+* Create a remote JVM debug configuration in your IDE (IntelliJ IDEA, VS Code, or Eclipse) on port `5005`.
+* Put a breakpoint in one of the generated or custom classes.
+. Start the application in dev mode using your preferred build tool.
 . Connect your IDE debugger to port `5005`.
 
-It is also possible to block the compilation until a debugger is connected by using one of the following commands:
+=== Starting the application in dev mode
+
+To start the application and allow the debugger to attach at any time:
 
 ++++
-  <div class="tabs-container">
-    <!-- Radio buttons for tab switching (hidden) -->
-    <input type="radio" id="tab3" name="tabs" checked>
-    <input type="radio" id="tab4" name="tabs">
+<div class="tabs-container">
+  <input type="radio" id="tab-qdbg-mvn1" name="tabs-quarkus-dbg" checked>
+  <input type="radio" id="tab-qdbg-gradle1" name="tabs-quarkus-dbg">
 
-    <!-- Tab headers -->
-    <div class="tabs-header">
-      <label for="tab3">Maven</label>
-      <label for="tab4">Gradle</label>
+  <div class="tabs-header">
+    <label for="tab-qdbg-mvn1">Maven</label>
+    <label for="tab-qdbg-gradle1">Gradle</label>
+  </div>
+
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+mvn clean compile quarkus:dev
+----
+
+++++
     </div>
+    <div class="tab-panel">
+++++
 
-    <!-- Tab content panels -->
-    <div class="tabs-content">
-      <div class="tab-panel">
-        mvn clean compile quarkus:dev -Dsuspend
-      </div>
-      <div class="tab-panel">
-        ./gradlew clean build quarkusDev -Dsuspend 
-      </div>
+[source,shell]
+----
+./gradlew clean build quarkusDev
+----
+
+++++
     </div>
   </div>
+</div>
+++++
+
+=== Blocking startup until debugger connects
+
+If you need to debug application startup logic, block execution until a debugger is connected by using `-Dsuspend`:
+
+++++
+<div class="tabs-container">
+  <input type="radio" id="tab-qdbg-mvn2" name="tabs-quarkus-dbg-suspend" checked>
+  <input type="radio" id="tab-qdbg-gradle2" name="tabs-quarkus-dbg-suspend">
+
+  <div class="tabs-header">
+    <label for="tab-qdbg-mvn2">Maven</label>
+    <label for="tab-qdbg-gradle2">Gradle</label>
+  </div>
+
+  <div class="tabs-content">
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+mvn clean compile quarkus:dev -Dsuspend
+----
+
+++++
+    </div>
+    <div class="tab-panel">
+++++
+
+[source,shell]
+----
+./gradlew clean build quarkusDev -Dsuspend
+----
+
+++++
+    </div>
+  </div>
+</div>
 ++++
