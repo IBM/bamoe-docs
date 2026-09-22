@@ -190,13 +190,19 @@ The following expression formats are supported in the *Called Element* field:
 |Description
 
 |`#{variableName}`
-|Resolves the value of `variableName` from the current process instance at runtime.
+|Resolved at runtime from the current process instance scope.
+
+|`#{model.field}`
+|Nested property access — resolves a field on a Java model object held in a process variable. For example, `#{order.type}` reads the `type` field from the `order` variable.
+
+|`#{variableName}-suffix`
+|Mixed variant — the variable is resolved and concatenated with a static suffix. For example, `#{orderType}-process` with `orderType = "digital"` resolves to `digital-process`.
 
 |`staticId`
-|Fixed sub-process ID resolved at design time.
+|Static call — existing behavior, unchanged.
 |===
 
-NOTE: Only simple variable references are supported. Complex expressions (e.g., `#{a + b}`) are not supported.
+NOTE: Complex mathematical or boolean expressions (e.g., `#{a + b}`) are not supported in this context.
 
 === Error behavior
 
