@@ -2,7 +2,7 @@
 include::../_partials/attributes.adoc[]
 include::../_styles/images.adoc[]
 
-{MANAGEMENT_CONSOLE} is a web application used for viewing the state of all available _Business Services_ and managing and interacting with Process Instances:
+{MANAGEMENT_CONSOLE} is a web application used for viewing the state of all available _Business Services_ and managing and interacting with Process Instances.
 
 You can use {MANAGEMENT_CONSOLE} to manage and interact with Process Instances, complete User Tasks, and manage scheduled Jobs. For installation information see xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment]
 
@@ -19,7 +19,7 @@ To visualize the Process Instance execution path at the {MANAGEMENT_CONSOLE}, ad
 * *Process SVG add-on*: Enables the Process SVG diagram to visualize the Process Instance execution path.
 If this add-on is not enabled for your _Business Service_, the {MANAGEMENT_CONSOLE} does not display the diagram panel.
 
----
+To configure Role-based access to operations for each _Business Service_ in the {MANAGEMENT_CONSOLE} include the {RBAC_ADDON_SHORT}. The RBAC system utilizes role definitions already configured in your OIDC Identity provider, see xref:..09-building-and-deploying-business-services/security.adoc#rbac-config[Configuring Role-based access control (RBAC) for _Business Services_ at runtime]
 
 {MANAGEMENT_CONSOLE} consists of the following pages that allow you to interact with your Process Instances and data:
 
@@ -35,7 +35,7 @@ But before you can use these pages, you need to connect your _Business Service_ 
 
 == Connecting to a _Business Service_
 
-You will be connected to a  _Business Service_ by clicking the **+ Connect to a Business Service...** button and filling in the required information on the modal:
+You will be connected to a  _Business Service_ by clicking the **+ Connect to a Business Service...** button and filling in the required information on the dialog:
 
 - **Alias**: The name to give your connected _Business Service_ instance (can be anything that helps you identify it).
 - **URL**: The _Business Service_ root URL (E.g., http://localhost:8080).
@@ -49,20 +49,25 @@ More settings are available in the **Advanced OpenID Connect settings** section:
 
 If your _Business Service_ uses OpenID Connect authentication, you should be redirected to the Identity Provider (IdP) login page or, if you're already logged in, redirected back to the {MANAGEMENT_CONSOLE}. If your _Business Service_ is unsecured, it should connect directly.
 
-Once logged in, the management pages will be displayed in the side menu, listing Process Instances, Process Definitions, Jobs, and Tasks.
+Once logged in, the management pages will be displayed in the side menu, listing Process Instances, Process Definitions, Jobs, and Tasks. If you have set up a Role-based Access Control the menus and pages will depend on your role see xref:../09-building-and-deploying-business-services/security.adoc#rbac-console-ops[Controlling access to Management Console operations]
+
+////
+
+This is an animated Gif image that will need to be replace or moved. 
 
 image::runtime-services-modeling/mgmt-console-home-add-connection-modal-secured.gif[Image of {MANAGEMENT_CONSOLE} new connection modal]
+////
 
 [NOTE]
-For information on how to secure your _Business Service_ and expose the Identity Provider URL to the {MANAGEMENT_CONSOLE}, check xref:../09-building-and-deploying-business-services/security.adoc[Securing Business Service API endpoints]
+For information on how to secure your _Business Service_ and expose the Identity Provider URL to the {MANAGEMENT_CONSOLE}, check xref:../09-building-and-deploying-business-services/security.adoc[Securing _Business Services_]
 
-=== Pre-configured connected Business Services
+=== Pre-configured connected _Business Services_
 
-It is possible to set up a pre-configured list of Business Services, defined via the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES` environment variable. This allows users to connect to a pre-defined list of Business Services without having to configure each one manually. To learn how to set them up, check the xref:../03-installing/runtime-environment.adoc##pre-configured-business-services[Installing → Runtime Environment].
+It is possible to set up a pre-configured list of _Business Services_, defined via the `RUNTIME_TOOLS_MANAGEMENT_CONSOLE_MANAGED_BUSINESS_SERVICES` environment variable. This allows users to connect to a pre-defined list of _Business Services_ without having to configure each one manually. To learn how to set them up, check the xref:../03-installing/runtime-environment.adoc##pre-configured-business-services[Installing → Runtime Environment].
 
 On the first load, the Management Console creates authentication sessions for each Business Service listed in the environment variable.
 
-If a Business Service requires authentication, the Management Console display an "Authenticate" button, which will redirect to the login page for the Identity Provider configured in the Business Service, unless the user is already authenticated with the same Identity Provider (using the same `clientId`, `scopes`, and `audience`), in this case the same token is used for all matching Business Services.
+If a Business Service requires authentication, the Management Console display an "Authenticate" button, which will redirect to the login page for the Identity Provider configured in the Business Service, unless the user is already authenticated with the same Identity Provider (using the same `clientId`, `scopes`, and `audience`), in this case the same token is used for all matching _Business Services_.
 
 == Overview
 
@@ -92,7 +97,6 @@ The *Process Details* page consists of the following panels:
 image::runtime-services-modeling/mgmt-console-process-instances-details.png[Image of Process Instance details in {MANAGEMENT_CONSOLE}]
 
 === Process Diagram panel
---
 This panel enables you to explore the Process diagram and execution path of the related Process Instance.
 The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` resources using the {PRODUCT_SHORT} Process SVG add-on configuration included in the {MANAGEMENT_CONSOLE}.
 
@@ -100,10 +104,8 @@ The execution path is displayed when the {MANAGEMENT_CONSOLE} finds the `.svg` r
 image::runtime-services-modeling/mgmt-console-process-diagram-panel.png[Image of Process instance diagram panel]
 
 This panel includes various controls to view the Process diagram, such as *Selection*, *Pan*, *Zoom in*, *Zoom out*, and *Fit to viewer*.
---
 
 === Details panel
---
 This panel displays the basic Process Instance information and provides links to the related Process runtime UI.
 If the Process Instance is related to other Process Instances, then links to the parent and subprocess instances are also available in the *Details* panel.
 
@@ -120,10 +122,8 @@ The Details panel consists of the following fields:
 * *SLA due date*: Time reference for the SLA defined in the Process Instance, if available.
 * *Parent Process*: Parent Process Instance of the instance (if linked). You can click and navigate to the parent Process Instance.
 * *Sub Processes*: Subprocess of the instance (if linked). You can click and navigate to the subprocess Instances.
---
 
 === Process Variables panel
---
 The *Process Variables* panel displays the Process Instance domain data in a tree structure.
 When you hover the mouse over different elements, the available actions are displayed.
 
@@ -148,10 +148,8 @@ image::runtime-services-modeling/mgmt-console-process-variable-add.png[Steps to 
 If there are pending changes to be saved, the panel displays the *Changes are not saved yet* message.
 To save the changes that you made to the process variable, click *Save*, or click *Abort* to abort the changes.
 If you want to revert the changes, click the refresh icon.
---
 
 === Timeline panel
---
 The *Timeline* panel displays the list of node instances related to the Process Instance sorted by the start time.
 Each node consists of an icon indicating the state of the node, such as active, completed, or error.
 
@@ -160,25 +158,19 @@ Whereas the actions for an error node include retrying and skipping the node.
 The node actions in the *Timeline* panel are connected with the _Business Service_ to perform the requested action.
 
 If a node in the *Timeline* panel is associated with a job, then select the clock icon to view the job details or click the menu for additional job operations, such as *Job Reschedule* or *Job Cancel*. The same functionality is available for nodes with associated SLA timers.
---
 
 === Node Trigger panel
---
 The *Node Trigger* panel displays the list of all Process Definition nodes in a drop-down.
 When you select a node, the related information is displayed, such as *Node name*, *Node type*, and *Node id*.
 Click the *Trigger* button to trigger the selected node.
---
 
 === Jobs panel
---
 The *Jobs* panel displays the list of available jobs that are related to the Process Instance.
 
 You can reschedule or cancel a job that is in a scheduled or error state.
 You can also modify the expiration time for one-time jobs and repeat interval, repeat time, and expiration time for the periodic jobs.
---
 
 == Process Definitions
-
 The Process Definitions list page shows the list of process definitions available.
 
 image::runtime-services-modeling/mgmt-console-process-definitions-multi-runtime.png[Image of the Process Definitions page with multiple connected Businesss Services]
@@ -269,16 +261,17 @@ Fill the **User** and/or **Group** fields in the Impersonation form and click **
 
 To stop impersonating, click the **Reset** button.
 
-[NOTE]
-When viewing User Tasks from a secured _Business Service_ with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
+For more information on how to configure impersonation see xref:../09-building-and-deploying-business-services/security.adoc#impersonation[Securing _Business Services_ → Impersonation]
 
-=== Managing all connected Business Services at the same time
+NOTE: When viewing User Tasks from a secured _Business Service_ with a user without impersonation powers, only tasks assigned to the current user or user group can be submitted.
 
-On the home page, clicking on the *All Business Services* option will make it so that every page that lists resources (such as Process Instances, definitions, tasks, overview, etc) will fetch data from all connected Business Services at the same time.
+=== Managing all connected _Business Services_ at the same time
+
+On the home page, clicking on the *All Business Services* option will make it so that every page that lists resources (such as Process Instances, definitions, tasks, overview, etc) will fetch data from all connected _Business Services_ at the same time.
 
 image::runtime-services-modeling/mgmt-console-home-all-business-services.png[Image of the Home page with the All Business Services button, 400]
 
-This means that from a single Management Console instance, it's possible to manage multiple Business Services and obtain an aggregated view of all running Process Instances, as the Overview page groups Process Instances from matching process definitions, even if they are from different Business Services.
+This means that from a single Management Console instance, it's possible to manage multiple _Business Services_ and obtain an aggregated view of all running Process Instances, as the Overview page groups Process Instances from matching process definitions, even if they are from different _Business Services_.
 
 [#process-instance-migration-ui]
 == Process Instance Migration
@@ -332,7 +325,11 @@ When you select the source and target Process Definitions, the corresponding nod
 
 NOTE: Highlighting does not work with SVGs generated using the BPMN Editor (Classic).
 
+////
+
+This is an animated Gif image that will need to be replace or moved. 
 image::runtime-services-modeling/mgmt-console-pim-plan-create-filled.gif[PIM Create Plan being filled, 600]
+////
 
 After configuring the PIM Plan, click *Create PIM Plan*. A dialog will display a summary of the PIM Plan.
 
@@ -346,22 +343,34 @@ The PIM Plan will be validated, and any errors or warnings [1] will be listed in
 
 [#remote-plan-console]
 === Creating a Remote Plan
+A *Remote* migration plan is one where the source and target Process Definitions are contained in different _Business Service_ deployments. This enables you to manage the evolution of your Business Service Process Definitions as recommended in xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Evolving stateful Workflows across _Business Service_ deployments], namely **one Business Service, one version**.
+
 To create a REMOTE plan using the Management Console UI, complete the following steps:
 
-. Ensure that your _Business Service_ has the `org.kie:kie-addons-quarkus-source-files` dependencies for Quarkus or `org.kie:kie-addons-springboot-source-files` for Spring Boot, to be able to select the _Business Service_ Mapping source mapping.  
-. Select one _Business Service_ as the source and a different Business Service as the target. The plan type is
-automatically identified as REMOTE.
+. Add the following dependencies to your _Business Service_ to be able to select the _Business Service_ Mapping source mapping.:
+** `org.kie:kie-addons-quarkus-source-files` dependencies for Quarkus or, 
+** `org.kie:kie-addons-springboot-source-files` for Spring Boot,   
+. Connect to both the source and target _Business Services_ in the {MANAGEMENT_CONSOLE} and select *All Business Services* mode.
+** The *Source Business Service* field becomes editable. If you haven't selected *All Business Services* the field is read-only and pre-populated with the selected *Business Service*. 
+. Select the required Source _Business Service_. 
+. The **Target Business Service** is automatically populated with the currently selected _Business Service_, where the {PIM_ADDON_SHORT} is installed and where the migration will be executed. 
+** The plan type is automatically identified as REMOTE.
+** Node mapping options for the source Process Definition are loaded, including BPMN diagram highlighting if SVGs are available. 
 . Map the source and target nodes in the usual way.
 . Click Create PIM Plan.
 
 image::console/remote-bs-create.png[Creating a new Remote plan by selecting different Source and Target Process Definitions]
 
-Once you confirm the creation of the PIM Plan, you can see a summary of the attributes of the new Remote plan. 
+Once you confirm the creation of the PIM Plan, you can see a summary of the attributes of the new *Remote* plan. 
 
 image::console/remote-plan-confirm.png[Dialog confirming Remote plan creation with details]
 
-=== Exporting a plan to be used as an Installed plan
+You can now progress to executing the *Remote* migration plan. The PIM Plan Execution page now displays the plan name and its type which are populated from the PIM plan. Migrating across Business Service deployments is only supported in the **All Process Instances** Console mode. Fine-grained Process Instance selection is not available for this type of migration.
 
+For more information on migrating across Business Service deployments see xref:migration-with-pim.adoc#remote-migration-plan[Using Remote migration plans to migrate across Business Service deployments]
+
+[#export-plan-console]
+=== Exporting a plan to be used as an Installed plan
 To export a plan using the Management Console UI, complete the following steps:
 
 . In the Management Console, open the plan that you want to export.
@@ -369,14 +378,17 @@ To export a plan using the Management Console UI, complete the following steps:
 ** For LOCAL plans, the JSON file downloads automatically.
 . Click Export and a JSON file is downloaded, as shown in the following example:
 
-image::console/install-plan-json.png[JSOn file of the exported Installed migration plan]
+image::console/install-plan-json.png[JSON file of the exported Installed migration plan]
 
-When `sourceProcessXml` is present the validator parses the XML in-process, builds a full node graph, and applies the same node-mapping validations as for *Local* plans. If the XML is malformed or the declared sourceProcessId / sourceProcessVersion do not match the content of the document, plan creation is rejected with a 400 Bad Request.
+You can also use the Plan Overview page to view all plans, see their types and export them as shown in graphic below:
 
-See xref:migration-with-pim.adoc#auto-migration[Using installed migration plans to dynamically activate PIM migration]
+image::console/summary-plan-export.png[Plan Overview page showing plan type and enabling export]
+
+When `sourceProcessXml` is present the validator parses the XML in-process, builds a full node graph, and applies the same node-mapping validations as for *Local* plans. If the XML is malformed or the declared `sourceProcessId` / `sourceProcessVersion` do not match the content of the document, plan creation is rejected with a `400 Bad Request`.
+
+Once a plan is exported it can be used to automatically migrate on startup of a new _Business Service_ deployment, see xref:migration-with-pim.adoc#auto-migration[Using installed migration plans to dynamically activate PIM migration]
 
 === Plan Execution
-
 The images below show the PIM Plan execution page.
 
 image::runtime-services-modeling/mgmt-console-pim-plan-execute-1.png[Image of the PIM execution page 1, 600]
@@ -425,3 +437,5 @@ The summary includes:
 Clicking *Execute PIM Plan* starts the migration. Duration depends on the number of instances. After completion, a message displays the total number of successfully migrated instances.
 
 image::runtime-services-modeling/mgmt-console-pim-plan-execute-success.png[Image of the PIM execution success, 600]
+
+The plan execution screen now displays the plan name and its type, both read-only and populated from the PIM plan. Note that cross-Business Service migrations currently support only **All Process Instances** — fine-grained instance selection is a BAMOE Management Console limitation not yet available for this migration type.
