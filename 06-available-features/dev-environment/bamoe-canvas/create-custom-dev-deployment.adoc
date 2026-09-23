@@ -16,9 +16,9 @@ For convenience, one of the deployment options in {CANVAS} allows the user to in
 
 === Requirements:
 
-1. Have the xref:dev-deployment-upload-service.adoc[Dev Deployment Upload Service] binary installed and available globally, as {CANVAS} will override the default command from your image with `dev-deployment-upload-service && <CUSTOM_COMMAND>` (`<CUSTOM_COMMAND>` is defined in the UI when deploying the image);
-2. The image must expose port `8080`, and all services running on the container should listen to this port. This includes the `dev-deployment-upload-service`, which can be configured by setting the `DEV_DEPLOYMENT__UPLOAD_SERVICE_PORT` environment variable to `8080`;
-3. After {CANVAS} uploads the assets to the `dev-deployment-upload-service` listening inside your image, and the service finishes unzipping and placing the files in the configured directory, it is expected that an application will start and provide an endpoint `/q/health` that responds with **`HTTP 200`** so that {CANVAS} can acknowledge that the application started successfully and is running;
+. Have the xref:dev-deployment-upload-service.adoc[Dev Deployment Upload Service] binary installed and available globally, as {CANVAS} will override the default command from your image with `dev-deployment-upload-service && <CUSTOM_COMMAND>` (`<CUSTOM_COMMAND>` is defined in the UI when deploying the image);
+. The image must expose port `8080`, and all services running on the container should listen to this port. This includes the `dev-deployment-upload-service`, which can be configured by setting the `DEV_DEPLOYMENT__UPLOAD_SERVICE_PORT` environment variable to `8080`;
+. After {CANVAS} uploads the assets to the `dev-deployment-upload-service` listening inside your image, and the service finishes unzipping and placing the files in the configured directory, it is expected that an application will start and provide an endpoint `/q/health` that responds with **`HTTP 200`** so that {CANVAS} can acknowledge that the application started successfully and is running;
 
 === Example 1: Using the BAMOE Canvas Dev Deployment Base image
 
@@ -28,7 +28,7 @@ The `quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}` image is used as 
 
 [source,docker,subs="+attributes"]
 ----
-# Set the base image with Java 17, Maven, and the dev-deployment-upload-service.
+# Set the base image with Java 21, Maven, and the dev-deployment-upload-service.
 FROM quay.io/bamoe/canvas-dev-deployment-base:{IMAGE_VERSION}
 
 # Start as root to get elevated access.
@@ -58,14 +58,14 @@ ENTRYPOINT ["/bin/bash", "-c"]
 
 === Example 2: Using an OpenJDK base image
 
-Using the `icr.io/appcafe/ibm-semeru-runtimes:open-17-jdk-ubi-minimal` image as a base, create a Dev Deployment image that follows all the requirements listed above and results in a Quarkus app running with the project files uploaded by {CANVAS}.
+Using the `icr.io/appcafe/ibm-semeru-runtimes:open-21-jdk-ubi-minimal` image as a base, create a Dev Deployment image that follows all the requirements listed above and results in a Quarkus app running with the project files uploaded by {CANVAS}.
 
 ==== Containerfile
 
 [source,docker,subs="+attributes"]
 ----
-# Set the base image with Java 17 and Maven.
-FROM icr.io/appcafe/ibm-semeru-runtimes:open-17-jdk-ubi-minimal
+# Set the base image with Java 21 and Maven.
+FROM icr.io/appcafe/ibm-semeru-runtimes:open-21-jdk-ubi-minimal
 
 # Arguments and environment variables to define our user and home path.
 # Obs.: This can vary according to your base image.

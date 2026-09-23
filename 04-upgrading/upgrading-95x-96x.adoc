@@ -61,7 +61,7 @@ Once your {PRODUCT_SHORT} Dev environment is upgraded, upgrading your _Business 
 
 The project structure is not changed, and updates only need to be made to the versions and the names of some dependencies and files. 
 
-// Due to the update to Spring Boot versions that {PRODUCT_SHORT} {VERSION_RM} supports, a number of frameworks have been updated which may impact your _Business Services_ built with {VERSION_94X}. For more information, see xref:#Spring-updates[Breaking Spring Boot Framework changes] and the Spring Boot documentation (https://docs.spring.io/spring-boot/upgrading.html[Upgrading Spring Boot]).
+Due to the update to Quarkus {QUARKUS_VERSION}, there are some changes which may impact your _Business Services_ built with {VERSION}. For more information, see xref:##quarkus-333-breaking[Breaking Quarkus Framework changes]. 
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 
@@ -126,3 +126,71 @@ Data Events emitted by the Workflow Engine now include `processId`, `processVers
 For more information, see xref:../09-building-and-deploying-business-services/services-deployment.adoc#production-database-creation[Creating your database schema for stateful Workflows based on BAMOE Installation DDL scripts] and xref:../08-developing-stateful-workflows/overview.adoc[Overview of stateful Workflows with Compact Architecture].
 
 Once you have installed your Runtime environment and updated the database for any stateful workflows, follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).
+
+[#quarkus-333-breaking]
+== Breaking changes due to Quarkus framework updates
+
+The Quarkus version changed is part of the the {PRODUCT_SHORT} BOM. The changes and the actions you may need to take are described in the table below:
+
+[%header,cols=2]
+[%autowidth]
+|===
+|Change description
+|Action
+
+|The CORS configuration key has changed from `quarkus.http.cors` to `quarkus.http.cors.enabled`, including profile specific configuration.
+|Search projects for `quarkus.http.cors=`, update every occurrence, including profile-specific configurations.
+
+|Quarkus test artifacts are renamed*: from `*-junit5` to `*-junit`, due to change in underlying test framework has moved 
+|No action, handled by Quarkus migration tooling.
+
+|`@Specializes` is no longer accepted on a CDI bean and will cause the build to fail.
+|If a custom user task assignment strategy extends `BasicUserTaskAssignmentStrategy` and is annotated `@Specializes`, remove the annotation and its import.
+
+|The `quarkus-maven-plugin` requires `<extensions>true</extensions>` when the plugin is declared explicitly.
+|If the application declares the Quarkus Maven plugin explicitly, make sure it contains `<extensions>true</extensions>`.
+
+|The OIDC proxy Quarkiverse extension needs a compatible version.
+|Update the OIDC proxy extension version to a compatible version, which may not be the newest available version.
+
+|Multi-module Maven projects may need explicit dev-mode configuration
+|For multi-module Maven applications that use `quarkus:dev`, add the `quarkus.bootstrap.workspace-discovery=false` property to the `application.properties` of each runnable module.
+|===
+
+This upgrade does not require any changes to {PRODUCT_SHORT} API coordinates, artifact coordinates, or BPMN, DMN, or DRL asset formats.
+
+For Gradle projects, update the Quarkus test dependency:
+
+[source,properties]
+----
+// before
+testImplementation 'io.quarkus:quarkus-junit5'
+// after
+testImplementation 'io.quarkus:quarkus-junit'
+----
+
+Update `gradle.properties` as follows:
+
+[source,properties]
+----
+# before
+quarkusPlatformVersion=3.27.5.1
+quarkusPluginVersion=3.27.5.1
+quarkusOidcProxyVersion=0.3.2
+# after
+
+quarkusPlatformVersion=3.33.3.2
+quarkusPluginVersion=3.33.3.2
+quarkusOidcProxyVersion=0.5.0
+----
+
+`quarkusOidcProxyVersion` applies only to Gradle projects that use the OIDC proxy extension.
+
+For more information see the full set of migration guides to see all changes between the previous supported Quarkus version {QUARKUS_VERSION_94} and {QUARKUS_VERSION_96}:
+
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.28[Quarkus Migration Guide 3.28]
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.29[Quarkus Migration Guide 3.29]
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.30[Quarkus Migration Guide 3.30]
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.31[Quarkus Migration Guide 3.31]
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.32[Quarkus Migration Guide 3.32]
+* https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.33[Quarkus Migration Guide 3.33]

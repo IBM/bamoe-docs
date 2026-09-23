@@ -11,22 +11,22 @@ Version {VERSION} is now available. You can find information on fixes and known 
 == Modernized technology stack
 This version upgrades foundational technologies and brings support for new ones:
 
-* Quarkus 3.33 LTS
+* Quarkus {QUARKUS_VERSION} LTS (from {QUARKUS_VERSION_94} LTS)
 
 More information in xref:supported-environments.adoc[Learn more...].
 
+== Support for Quarkus {QUARKUS_VERSION} LTS
+{PRODUCT_SHORT} now supports Quarkus {QUARKUS_VERSION} LTS, as part of the commitment to be compatibile with the latest Quarkus ecosystem, to ensure long-term stability, security. As a result of this update, the most impactful change for for your {PRODUCT_SHORT} Business Services is CORS configuration key, the Quarkus test artifact names, one CDI annotation, the Quarkiverse OIDC proxy extension version, and a dev-mode setting for multi-module Maven projects. Most applications will continue to build and run without changes because the Quarkus version is provided through the {PRODUCT_SHORT} BOM. The Upgrade guide details the main impact of the changes in the Quarkus dev environment. xref:../04-upgrading/upgrading-95x-96x.adoc##quarkus-333-breaking[Learn more...]
 
 == Workflow versioning across Business Service deployments
-{PRODUCT_SHORT} {VERSION} supports the creation and deployment of a new _Business Service_ that contains a new version of the Process Definition while maintaining the same Process ID. The new Process Definition is uniquely identified with a Version number and the recommended strategy for managing the evolution of a _Business Service_ is **one Business Service, one version**. 
-
-In previous versions of {PRODUCT_SHORT} {VERSION_X} versioning was done by adding an updated Process with a new Process ID. This strategy meant that updating a workflow generated multiple IDs, and client applications had to be updated to use new endpoints (e.g., /hiring to /hiring2). xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
+{PRODUCT_SHORT} {VERSION} supports the creation and deployment of a new _Business Service_ that contains a new version of the Process Definition while maintaining the same Process ID. The new Process Definition is uniquely identified with a Version number. In previous versions of {PRODUCT_SHORT} {VERSION_X} versioning was done by adding an updated Process Definition with a new Process ID. This strategy meant that updating a workflow generated multiple IDs, and client applications had to be updated to use new endpoints (e.g., /hiring to /hiring2). The recommended strategy for managing the evolution of a _Business Service_ is nonw **one Business Service, one version**. xref:../09-building-and-deploying-business-services/services-deployment.adoc#evolving-deployed-workflows[Learn more...]
 
 The ability to manage multiple _Business Service_ versions with the same Process ID streamlines the migration of Process Instances to an updated Process Definition using the new {PIM_ADDON} functionality of *Remote* migration plans. xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc#remote-migration-plan[Learn more...]
 
 == Automatic execution of {PIM_ADDON} to migrate _Business Services_ on startup
 When deploying a new version of a _Business Service_ containing an updated Process Definition via a CI/CD pipeline there is often no simple way to migrate in-flight Process Instances to the new version. 
 
-To address this {PRODUCT_SHORT} {VERSION} can now automatically trigger the {PIM_ADDON} on Business Service startup using *Installed* migration plans specified in JSON files. This functionality enables you to use your existing CI/CD pipelines without the need for complex modifications. {PIM_ADDON_SHORT} automatically registers *Installed* plans and migrates all matching active Process Instances on deployment of a _Business Service_ containing an updated Process Definition. It uses distributed locking to guarantee exactly-once execution across replicas. xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc#auto-migration[Learn more...]
+To address this {PRODUCT_SHORT} {VERSION} can now automatically trigger the {PIM_ADDON} on at Business Service startup, using *Installed* migration plans specified in JSON files. This functionality enables you to use your existing CI/CD pipelines without the need for complex modifications. The {PIM_ADDON_SHORT} automatically registers *Installed* plans and migrates all matching active Process Instances on deployment of a _Business Service_ that contains an updated Process Definition version. It uses distributed locking to guarantee exactly-once execution across replicas. xref:../10-managing-and-monitoring-business-services/migration-with-pim.adoc#auto-migration[Learn more...]
 
 == Workflow engine - Data isolation for _Business Services_ connected to a single database
 
