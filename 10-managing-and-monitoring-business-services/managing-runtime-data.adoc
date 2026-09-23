@@ -108,7 +108,7 @@ To configure the Data source you will need to specify the mandatory and optional
 
 |QUARKUS_DATASOURCE_PASSWORD
 |String
-|"your_password"
+|"your_password", plaintext (default), see xref:#password-cred[Password credential modes] for other options
 |Mandatory
 
 |QUARKUS_DATASOURCE_JDBC_URL
@@ -162,6 +162,8 @@ To configure the Data source you will need to specify the mandatory and optional
 |Optional
 |===
 
+`QUARKUS_DATASOURCE_PASSWORD`:: "your_password" can be supplied as plaintext (default), as an AES-GCM encrypted expression, or omitted entirely when credentials are fetched from HashiCorp Vault, see xref:#password-cred[Password credential modes].
+
 `BAMOE_DATA_CLEANUP_TOOL_SUBSYSTEMS`:: refers to the {PRODUCT_SHORT} subsystems that needs to be considered for cleanup. This could be either `data-audit` or `data-audit,data-index`. By default, both subsystems are eligible for cleanup unless specified by selecting the component(s) you want. If you specify both subsystems make sure there is no space between the items in the list. Cleaning only `data-index` without `data-audit` is not supported.
 
 `BAMOE_DATA_CLEANUP_TOOL_BATCH_SIZE`:: refers to the number of process instances that is considered per delete transaction. Keep this at an ideal value and do not make this a very large number which could affect the performance of the database.
@@ -182,5 +184,94 @@ NOTE: If none of the these properties are specified then all the process instanc
 
 `QUARKUS_LOG_LEVEL:<log_level>`:: This property allows users to set the overall log level which by default is set to `INFO`. This accepts all Quarkus supported log levels as mentioned see xref:https://quarkus.io/guides/logging#use-log-levels[Quarkus log levels].
 
+[#password-cred]
+== Password credential modes
+ The {DATA_CLEANUP} container image now supports three ways to supply the database password at runtime: plaintext, an AES-GCM encrypted expression that is decrypted at startup, or dynamic retrieval from HashiCorp Vault. The mode is selected entirely through the `QUARKUS_DATASOURCE_PASSWORD` environment variables. No image rebuild is required to switch between them. All three modes are supported on all the databases supported by {PRODUCT_SHORT}, see xref:../01-release-notes/supported-environments.adoc[Supported environments].
 
+Configuring password credential modes to run container images may be necessary in your organization for the following reasons:
 
+* Your internal security policies or compliance requirements prohibit plaintext credentials in container environments or orchestration manifests.
+* Your organization already operates a centralized secret manager (HashiCorp Vault) and wants {DATA_CLEANUP} to consume credentials from it rather than duplicating them in a separate location.
+* The team requires the separation of the encrypted credential (which may be stored in configuration alongside the deployment manifest) from the decryption key (which is supplied only at runtime).
+
+In addition to the default of supplying credentials as plaintext, the two secure credential modes you can choose are:
+
+Encrypted mode (AES-GCM):: The password is supplied as an AES-GCM ciphertext expression in `QUARKUS_DATASOURCE_PASSWORD`. The decryption key is supplied separately at runtime through the `SMALLRYE_CONFIG_SECRET_HANDLER_AES_GCM_NOPADDING_ENCRYPTION_KEY` environment variable. The container decrypts the ciphertext transparently at startup using the SmallRye Config Crypto extension. The plaintext password never appears in configuration.
+
+Vault mode (HashiCorp Vault):: The password is not supplied in the container environment at all. Instead, the container is pointed to a HashiCorp Vault server through `VAULT_URL`, `VAULT_TOKEN`, and `VAULT_KV_PATH`, and `QUARKUS_DATASOURCE_CREDENTIALS_PROVIDER` is set to `bamoe-vault`. At startup, the container fetches the `username` and `password` values from the configured KV secret path and uses them for the database connection.
+
+The following sections provide more information on how to set up each mode. 
+
+=== Mode 1 — Plaintext (default, unchanged)
+The user supplies the database password directly. This is the default behavior. No additional configuration is required:
+
+[source,properties]
+----
+QUARKUS_PROFILE=<postgresql|mssql|oracle|db2>
+QUARKUS_DATASOURCE_USERNAME=<db-username>
+QUARKUS_DATASOURCE_PASSWORD=<db-password>
+QUARKUS_DATASOURCE_JDBC_URL=<jdbc-url>
+----
+
+=== Mode 2 — Encrypted (AES-GCM)
+To implement encryption using AES-GCM, you can do the following:
+
+. Generate an AES-GCM encrypted value for the password using the SmallRye Config encryptor. The following command uses the `jbang` runner to invoke the encryptor script:
++
+[source,bash]
+----
+jbang https://raw.githubusercontent.com/smallrye/smallrye-config/main/documentation/src/main/docs/config/secret-handlers/encryptor.java 
+      -s=<your-plaintext-password> 
+      -k=<your-encryption-key>
+----
++
+The script prints two lines: 
+** the ciphertext expression to use for the password, 
+** the exact key value to supply as the decryption key at runtime.
+
+. Set the password variable to the ciphertext expression and add the decryption key as a separate environment variable:
++
+[source,properties]
+----
+QUARKUS_PROFILE=<postgresql|mssql|oracle|db2>
+QUARKUS_DATASOURCE_USERNAME=<db-username>
+QUARKUS_DATASOURCE_PASSWORD=${aes-gcm-nopadding::<ciphertext>}
+QUARKUS_DATASOURCE_JDBC_URL=<jdbc-url>
+SMALLRYE_CONFIG_SECRET_HANDLER_AES_GCM_NOPADDING_ENCRYPTION_KEY=<encryption-key>
+----
+
+. Start the container. The DCT resolves the ciphertext at startup and connects to the database. 
+
+If an encrypted expression is present in `QUARKUS_DATASOURCE_PASSWORD` but the decryption key environment variable is missing, the container fails to start with the SmallRye Config error `SRCFG00014: The config property smallrye.config.secret-handler.aes-gcm-nopadding.encryption-key is required but it could not be found in any config source`. 
+
+When the AES-GCM encryption key or the database password changes, the ciphertext expression must be regenerated using the new key or password and the `QUARKUS_DATASOURCE_PASSWORD` value updated accordingly. There is no in-place key-rotation mechanism.
+
+Using this method, the plaintext password is never present in the configuration.
+
+=== Mode 3 — HashiCorp Vault
+
+To configure the {DATA_CLEANUP} container to a HashiCorp Vault server you can do the following: 
+
+. Store the database credentials in Vault at a KV path, using the keys `username` and `password`. For example, with the Vault CLI:
++
+[source,bash]
+----
+vault kv put secret/db username=<db-username> password=<db-password>
+----
+
+. Configure the DCT container to fetch credentials from Vault. Note that `QUARKUS_DATASOURCE_PASSWORD` is not set in this mode.
++
+[source,properties]
+----
+QUARKUS_PROFILE=<postgresql|mssql|oracle|db2>
+QUARKUS_DATASOURCE_USERNAME=<db-username>
+QUARKUS_DATASOURCE_JDBC_URL=<jdbc-url>
+QUARKUS_DATASOURCE_CREDENTIALS_PROVIDER=bamoe-vault
+VAULT_URL=<vault-server-url>
+VAULT_TOKEN=<vault-token>
+VAULT_KV_PATH=<kv-path>
+----
+
+. Start the container. The DCT connects to Vault at startup, fetches the password from the configured KV path, and uses it to connect to the database.
++
+If Vault mode is active but the Vault is unreachable at startup, the container fails to start with a connection error. It does not fall back to any other mode. 
