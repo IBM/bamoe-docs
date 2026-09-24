@@ -75,7 +75,7 @@ Create a new BAMOE v9 project using the Quarkus DMN accelerator. See the [main R
 
 For this tutorial, use the DMN accelerator:
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-dmn traffic-violation-v9
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-dmn traffic-violation-v9
 cd traffic-violation-v9
 ```
 

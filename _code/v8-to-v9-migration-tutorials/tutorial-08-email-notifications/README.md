@@ -314,7 +314,7 @@ For custom email notification implementations, you may need additional dependenc
 <dependency>
     <groupId>org.jbpm</groupId>
     <artifactId>jbpm-addons-quarkus-task-notification</artifactId>
-    <version>9.3.1-ibm-0006-patched</version>
+    <version>9.6.0-ibm-0004-patched</version>
 </dependency>
 <dependency>
     <groupId>io.quarkus</groupId>

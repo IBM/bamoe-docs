@@ -86,8 +86,8 @@ This tutorial provides a comprehensive guide for migrating BAMOE v8 applications
 **v9 Configuration:**
 ```xml
 <packaging>jar</packaging>
-<version.bamoe>9.3.1-ibm-0006</version.bamoe>
-<version.quarkus>3.20.3</version.quarkus>
+<version.bamoe>9.6.0-ibm-0004</version.bamoe>
+<version.quarkus>3.33.3.2</version.quarkus>
 <maven.compiler.release>17</maven.compiler.release>
 ```
 

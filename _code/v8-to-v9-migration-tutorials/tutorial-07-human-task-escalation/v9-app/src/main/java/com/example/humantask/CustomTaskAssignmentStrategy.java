@@ -17,7 +17,7 @@ import org.kie.kogito.usertask.impl.BasicUserTaskAssignmentStrategy;
  * - High priority tasks → managers
  * - Amount-based assignment for approval tasks
  */
-@Specializes
+
 @ApplicationScoped
 public class CustomTaskAssignmentStrategy extends BasicUserTaskAssignmentStrategy {
 
