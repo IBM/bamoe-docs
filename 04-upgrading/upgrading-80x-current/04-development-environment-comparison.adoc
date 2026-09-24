@@ -94,13 +94,15 @@ For more information see xref:../../03-installing/development-environment.adoc#m
 
 In {PRODUCT_SHORT} version {VERSION_80X}, user authentication was handled through a centralized login screen provided by Business Central. Authentication and user management were typically delegated to the application server, such as JBoss EAP or WildFly, using standard Java EE security mechanisms. This setup was tightly coupled to the deployment environment and often required administrative configuration on the server side.
 
-In {PRODUCT_SHORT} version {VERSION_RM}, authentication is decentralized and aligned with modern cloud-native practices. {CANVAS} and the {DEV_TOOLS}handle authentication differently, based on their integration with Git.
+In {PRODUCT_SHORT} version {VERSION_RM}, authentication is decentralized and aligned with modern cloud-native practices. {CANVAS} and the {DEV_TOOLS} handle authentication differently, based on their integration with Git.
 
 In {CANVAS}, authentication is handled externally by the Git repository, which means that {CANVAS} does not maintain its own user directory. When connecting to a Git repository, users must authenticate using credentials or a personal access token associated with their Git provider (e.g., GitHub, GitLab, or Bitbucket). For more information see xref:../../06-available-features/dev-environment/bamoe-canvas/connecting-accounts.adoc[Canvas → Connecting to AI, Git, and Cloud Providers].
 
 The {DEV_TOOLS} rely on your local Git configuration for authentication. When interacting with remote repositories, authentication is handled by the Git client, which may prompt for credentials, use SSH keys, or access stored tokens depending on your setup. This approach gives developers full control over how they authenticate and manage access to repositories, integrating with enterprise Git workflows and credential managers.
 
 By shifting authentication to Git, {PRODUCT_SHORT} version {VERSION_RM} eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
+
+To configure Role-based access to operations for each _Business Service_ in the {MANAGEMENT_CONSOLE} include the {RBAC_ADDON_SHORT}. The RBAC system utilizes role definitions already configured in your OIDC Identity provider, see xref:../../09-building-and-deploying-business-services/security.adoc#rbac-config[Configuring Role-based access control (RBAC) for _Business Services_ at runtime]
 
 == Building and deploying in development mode
 
@@ -123,4 +125,4 @@ The Standard Operating Environment (SOE) for {PRODUCT_SHORT} has evolved signifi
 To understand the specific differences in supported environments, refer to the official IBM compatibility reports:
 
 - https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=153E7E75477540829BD9AEBBC7ABB82C[{PRODUCT_SHORT} version 8.0.x]
-- https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=CE4ED421F86E480995B8AF3C0E4791EA&osPlatforms=spcrAllValues&duComponentIds=spcrAllValues&mandatoryCapIds=spcrAllValues&optionalCapIds=spcrAllValues[{PRODUCT_SHORT} version 9.3.x]
+- xref:../../01-release-notes/supported-environments.adoc[{PRODUCT_SHORT} {VERSION} supported environments]
