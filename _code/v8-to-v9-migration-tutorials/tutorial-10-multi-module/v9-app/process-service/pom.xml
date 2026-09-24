@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -17,11 +20,13 @@
     <description>Quarkus application with BPMN processes</description>
 
     <dependencies>
+
         <!-- Internal module dependencies -->
         <dependency>
             <groupId>com.example.multimodule</groupId>
             <artifactId>data-model</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.example.multimodule</groupId>
             <artifactId>business-rules</artifactId>
@@ -33,17 +38,18 @@
             <artifactId>bamoe-ilmt-compliance-quarkus-pamoe</artifactId>
         </dependency>
 
-        <!-- jBPM with Drools (includes both processes and rules) -->
+        <!-- jBPM with Drools -->
         <dependency>
             <groupId>org.jbpm</groupId>
             <artifactId>jbpm-with-drools-quarkus</artifactId>
         </dependency>
 
-        <!-- Quarkus Core (using RESTEasy classic stack for BAMOE compatibility) -->
+        <!-- Quarkus RESTEasy -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
@@ -54,18 +60,19 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-h2</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
         </dependency>
-        
+
         <!-- Flyway for database schema migration -->
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-addons-flyway</artifactId>
         </dependency>
 
-        <!-- Data-Index JPA for process instance tracking in dev-ui -->
+        <!-- Data-Index JPA -->
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
@@ -76,10 +83,12 @@
             <groupId>org.kie</groupId>
             <artifactId>kie-addons-quarkus-process-management</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-addons-quarkus-process-svg</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-addons-quarkus-source-files</artifactId>
@@ -91,7 +100,7 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
-        <!-- BAMOE Dev UI (Required for process instances visibility in dev-ui) -->
+        <!-- BAMOE Dev UI -->
         <dependency>
             <groupId>com.ibm.bamoe</groupId>
             <artifactId>bamoe-quarkus-devui</artifactId>
@@ -100,18 +109,22 @@
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Quarkus Maven Plugin -->
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -126,12 +139,15 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
+
+
 </project>
-
-

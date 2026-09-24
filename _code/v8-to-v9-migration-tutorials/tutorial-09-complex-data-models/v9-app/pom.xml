@@ -1,7 +1,10 @@
- <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
@@ -16,35 +19,32 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.release>17</maven.compiler.release>
+
         <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
         <version.maven-surefire-plugin>3.3.1</version.maven-surefire-plugin>
-        <version.bamoe>9.3.1-ibm-0006</version.bamoe>
-        <version.quarkus>3.20.3</version.quarkus>
+
+        <version.bamoe>9.6.0-ibm-0004</version.bamoe>
+        <version.quarkus>3.33.3.2</version.quarkus>
     </properties>
+
 
     <dependencyManagement>
         <dependencies>
-            <!-- Quarkus BOM -->
-            <dependency>
-                <groupId>io.quarkus.platform</groupId>
-                <artifactId>quarkus-bom</artifactId>
-                <version>${version.quarkus}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
-            <!-- BAMOE BOM -->
+            <!-- BAMOE Quarkus BOM -->
             <dependency>
                 <groupId>com.ibm.bamoe</groupId>
-                <artifactId>bamoe-bom</artifactId>
+                <artifactId>bamoe-quarkus-bom</artifactId>
                 <version>${version.bamoe}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+
         <!-- BAMOE ILMT -->
         <dependency>
             <groupId>com.ibm.bamoe</groupId>
@@ -62,6 +62,7 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
@@ -94,27 +95,31 @@
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- Kogito Testing -->
         <dependency>
             <groupId>org.kie.kogito</groupId>
             <artifactId>kogito-scenario-simulation</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Quarkus Maven Plugin -->
             <plugin>
-                <groupId>io.quarkus.platform</groupId>
+                <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${version.quarkus}</version>
                 <extensions>true</extensions>
@@ -128,6 +133,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven Compiler -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${version.maven-compiler-plugin}</version>
@@ -137,6 +144,8 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+
+            <!-- Maven Surefire -->
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${version.maven-surefire-plugin}</version>
@@ -147,10 +156,13 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
     <profiles>
+
+        <!-- Development profile -->
         <profile>
             <id>dev</id>
             <activation>
@@ -166,6 +178,8 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <!-- PostgreSQL profile -->
         <profile>
             <id>postgresql</id>
             <properties>
@@ -178,33 +192,8 @@
                 </dependency>
             </dependencies>
         </profile>
+
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

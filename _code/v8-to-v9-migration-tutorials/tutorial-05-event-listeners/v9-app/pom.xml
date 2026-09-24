@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+
 <!-- 
   IBM Confidential
   PID 5900-AR4
@@ -9,6 +10,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.example</groupId>
@@ -18,42 +20,43 @@
   <name>Event Listeners v9 Application</name>
   <description>BAMOE v9 Event Listeners Example</description>
 
+
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+
     <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
     <version.maven-surefire-plugin>3.3.1</version.maven-surefire-plugin>
 
     <!-- Versions -->
-    <version.bamoe>9.3.1-ibm-0006</version.bamoe>
-    <version.quarkus>3.20.3</version.quarkus>
+    <version.bamoe>9.6.0-ibm-0004</version.bamoe>
+    <version.quarkus>3.33.3.2</version.quarkus>
+
+
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <!-- Quarkus BOM -->
-      <dependency>
-        <groupId>io.quarkus.platform</groupId>
-        <artifactId>quarkus-bom</artifactId>
-        <version>${version.quarkus}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
 
-       <!-- BAMOE BOM manages all dependencies for Business Services -->
+
+      <!-- BAMOE Quarkus BOM -->
       <dependency>
         <groupId>com.ibm.bamoe</groupId>
-        <artifactId>bamoe-bom</artifactId>
+        <artifactId>bamoe-quarkus-bom</artifactId>
         <version>${version.bamoe}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
     </dependencies>
+
+
   </dependencyManagement>
 
   <dependencies>
+
 
     <!-- BAMOE ILMT (Required for IBM licensing) -->
     <dependency>
@@ -72,6 +75,7 @@
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-process-management</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-process-svg</artifactId>
@@ -85,6 +89,7 @@
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
@@ -101,6 +106,7 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-agroal</artifactId>
@@ -111,6 +117,7 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-jackson</artifactId>
@@ -125,19 +132,23 @@
     <!-- Testing -->
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
+      <artifactId>quarkus-junit</artifactId>
       <scope>test</scope>
     </dependency>
+
 
   </dependencies>
 
   <build>
     <plugins>
+
+
       <plugin>
-        <groupId>io.quarkus.platform</groupId>
+        <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
         <version>${version.quarkus}</version>
         <extensions>true</extensions>
+
         <executions>
           <execution>
             <goals>
@@ -148,6 +159,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${version.maven-compiler-plugin}</version>
@@ -157,6 +169,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${version.maven-surefire-plugin}</version>
@@ -167,28 +180,40 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+
     </plugins>
+
+
   </build>
 
   <profiles>
+
+
     <profile>
       <id>development</id>
+
       <properties>
         <quarkus.profile>dev</quarkus.profile>
       </properties>
+
       <dependencies>
+
         <!-- H2 Database for development -->
         <dependency>
           <groupId>io.quarkus</groupId>
           <artifactId>quarkus-jdbc-h2</artifactId>
         </dependency>
-        <!-- BAMOE Quarkus Dev UI -->  
+
+        <!-- BAMOE Quarkus Dev UI -->
         <dependency>
           <groupId>com.ibm.bamoe</groupId>
           <artifactId>bamoe-quarkus-devui</artifactId>
         </dependency>
+
       </dependencies>
     </profile>
+
+
   </profiles>
-  
+
 </project>

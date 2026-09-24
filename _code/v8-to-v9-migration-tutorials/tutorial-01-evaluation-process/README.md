@@ -111,7 +111,7 @@ Create a new BAMOE v9 project using the Quarkus Full accelerator (supports BPMN,
 
 For this tutorial, use the Quarkus Full accelerator for BPMN processes:
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-full evaluation-process-v9
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-full evaluation-process-v9
 cd evaluation-process-v9
 ```
 
@@ -143,7 +143,7 @@ Open `pom.xml` and locate the Testing section (around line 198):
 <!-- Testing -->
 <dependency>
   <groupId>io.quarkus</groupId>
-  <artifactId>quarkus-junit5</artifactId>
+  <artifactId>quarkus-junit</artifactId>
   <scope>test</scope>
 </dependency>
 ```

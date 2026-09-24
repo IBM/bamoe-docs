@@ -713,7 +713,7 @@ Missing configuration properties that ensure Swagger UI and endpoints are always
 **Required Configuration in [`application.properties`](v9-app/src/main/resources/application.properties):**
 ```properties
 # Swagger UI Configuration
-quarkus.http.cors=true
+quarkus.http.cors.enabled=true
 quarkus.http.cors.origins=*
 quarkus.dev-ui.cors.enabled=false
 quarkus.smallrye-openapi.path=/docs/openapi.json

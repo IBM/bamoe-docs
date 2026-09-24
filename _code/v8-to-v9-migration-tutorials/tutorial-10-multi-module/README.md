@@ -162,7 +162,7 @@ mvn dependency:tree
         <dependency>
             <groupId>com.ibm.bamoe</groupId>
             <artifactId>bamoe-quarkus-bom</artifactId>
-            <version>3.20.3</version>
+            <version>3.33.3.2</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

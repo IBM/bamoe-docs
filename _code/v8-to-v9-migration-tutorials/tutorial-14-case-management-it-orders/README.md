@@ -155,8 +155,8 @@ Create [`v9-app/pom.xml`](v9-app/pom.xml) with Quarkus dependencies:
     <version>1.0.0</version>
     
     <properties>
-        <version.quarkus>3.20.3</version.quarkus>
-        <version.bamoe>9.3.1-ibm-0006</version.bamoe>
+        <version.quarkus>3.33.3.2</version.quarkus>
+        <version.bamoe>9.6.0-ibm-0004</version.bamoe>
     </properties>
     
     <dependencies>

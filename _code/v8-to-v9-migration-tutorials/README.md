@@ -133,23 +133,23 @@ Use the one-liner command to clone the appropriate accelerator:
 
 **For DMN projects:**
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-dmn YOUR-PROJECT-NAME
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-dmn YOUR-PROJECT-NAME
 cd YOUR-PROJECT-NAME
 ```
 
 **For DRL (Rules) projects:**
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-drl YOUR-PROJECT-NAME
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-drl YOUR-PROJECT-NAME
 cd YOUR-PROJECT-NAME
 ```
 
 **Command breakdown:**
 - `git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git` - The public IBM accelerator repository
-- `-b 9.3.1-ibm-0006-quarkus-dmn` (or `-drl`) - The branch/tag for BAMOE 9.3.1
+- `-b 9.6.0-ibm-0004-quarkus-dmn` (or `-drl`) - The branch/tag for BAMOE 9.3.1
 - `YOUR-PROJECT-NAME` - Your project directory name (customize as needed)
 
 **Important:** Use the accelerator version that corresponds to your target BAMOE release:
-- For BAMOE 9.3.1: `9.3.1-ibm-0006-quarkus-dmn` or `9.3.1-ibm-0006-quarkus-drl`
+- For BAMOE 9.3.1: `9.6.0-ibm-0004-quarkus-dmn` or `9.6.0-ibm-0004-quarkus-drl`
 - For other versions, check available tags: `git ls-remote --tags git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git`
 
 #### Option B: Use BAMOE Canvas Web Interface

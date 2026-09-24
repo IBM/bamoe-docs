@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
-<!-- 
+
+<!--
   IBM Confidential
   PID 5900-AR4
-  Copyright IBM Corp. 2025  
+  Copyright IBM Corp. 2025
 -->
 
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.example.database</groupId>
@@ -23,64 +25,63 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+
     <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
     <version.maven-surefire-plugin>3.3.1</version.maven-surefire-plugin>
 
     <!-- Versions -->
-    <version.bamoe>9.3.1-ibm-0006</version.bamoe>
-    <version.quarkus>3.20.3</version.quarkus>
+    <version.bamoe>9.6.0-ibm-0004</version.bamoe>
+    <version.quarkus>3.33.3.2</version.quarkus>
 
     <!-- Version overrides for fixing security vulnerabilities -->
     <version.io.vertx>4.5.22</version.io.vertx>
     <version.org.apache.commons.lang3>3.18.0</version.org.apache.commons.lang3>
     <version.org.cyclonedx.java>11.0.1</version.org.cyclonedx.java>
     <version.org.lz4.java>1.11.2</version.org.lz4.java>
+
+
   </properties>
+
 
   <dependencyManagement>
     <dependencies>
-      <!-- Version overrides for transitive dependencies, to fix security vulnerabilities. -->
+
+
+      <!-- Version overrides for transitive dependencies, to fix security vulnerabilities -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
         <version>${version.io.vertx}</version>
       </dependency>
+
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${version.org.apache.commons.lang3}</version>
       </dependency>
+
       <dependency>
         <groupId>org.lz4</groupId>
         <artifactId>lz4-java</artifactId>
         <version>${version.org.lz4.java}</version>
       </dependency>
-      <!-- End of version overrides to fix security vulnerabilities. -->
 
-      <!-- Quarkus BOM -->
-      <dependency>
-        <groupId>io.quarkus.platform</groupId>
-        <artifactId>quarkus-bom</artifactId>
-        <version>${version.quarkus}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-       <!-- 
-         The BAMOE BOM manages all dependencies required to create
-         Business Services — including Apache KIE, Drools, jBPM, and Kogito
-       -->
+      <!-- BAMOE Quarkus BOM -->
       <dependency>
         <groupId>com.ibm.bamoe</groupId>
-        <artifactId>bamoe-bom</artifactId>
+        <artifactId>bamoe-quarkus-bom</artifactId>
         <version>${version.bamoe}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
     </dependencies>
+
+
   </dependencyManagement>
 
   <dependencies>
+
 
     <!-- BAMOE ILMT -->
     <dependency>
@@ -93,14 +94,17 @@
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-with-drools-quarkus</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-process-management</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-process-svg</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-source-files</artifactId>
@@ -111,11 +115,12 @@
       <groupId>org.kie</groupId>
       <artifactId>kie-addons-quarkus-persistence-jdbc</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-addons-quarkus-usertask-storage-jpa</artifactId>
     </dependency>
-    
+
     <!-- KIE Flyway for automatic schema creation -->
     <dependency>
       <groupId>org.kie</groupId>
@@ -127,12 +132,13 @@
       <groupId>org.kie</groupId>
       <artifactId>kogito-addons-quarkus-embedded-jobs</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kogito-addons-quarkus-embedded-jobs-jpa</artifactId>
     </dependency>
 
-    <!-- Data-Index Addon (Required for Dev UI process instance visibility) -->
+    <!-- Data-Index Addon -->
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kogito-addons-quarkus-data-index-jpa</artifactId>
@@ -143,10 +149,12 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-jackson</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-agroal</artifactId>
@@ -157,6 +165,7 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-h2</artifactId>
@@ -167,12 +176,13 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
 
-    <!-- BAMOE Dev UI (Required for task action buttons) -->
+    <!-- BAMOE Dev UI -->
     <dependency>
       <groupId>com.ibm.bamoe</groupId>
       <artifactId>bamoe-quarkus-devui</artifactId>
@@ -181,24 +191,30 @@
     <!-- Testing -->
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
+      <artifactId>quarkus-junit</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
 
+
   </dependencies>
 
   <build>
     <plugins>
+
+
+      <!-- Quarkus Maven Plugin -->
       <plugin>
-        <groupId>io.quarkus.platform</groupId>
+        <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
         <version>${version.quarkus}</version>
         <extensions>true</extensions>
+
         <executions>
           <execution>
             <goals>
@@ -208,13 +224,15 @@
             </goals>
           </execution>
         </executions>
-        <!-- Version overrides for transitive dependencies, to fix security vulnerabilities. -->
+
+        <!-- Version overrides for transitive dependencies -->
         <dependencies>
           <dependency>
             <groupId>org.cyclonedx</groupId>
             <artifactId>cyclonedx-core-java</artifactId>
             <version>${version.org.cyclonedx.java}</version>
           </dependency>
+
           <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-cyclonedx-generator</artifactId>
@@ -228,6 +246,8 @@
           </dependency>
         </dependencies>
       </plugin>
+
+      <!-- Maven Compiler -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${version.maven-compiler-plugin}</version>
@@ -237,6 +257,8 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
+      <!-- Maven Surefire -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${version.maven-surefire-plugin}</version>
@@ -247,6 +269,8 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+
+      <!-- Maven Failsafe -->
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${version.maven-surefire-plugin}</version>
@@ -266,10 +290,16 @@
           </execution>
         </executions>
       </plugin>
+
     </plugins>
+
+
   </build>
 
   <profiles>
+
+
+    <!-- Native -->
     <profile>
       <id>native</id>
       <activation>
@@ -281,6 +311,8 @@
         <quarkus.package.type>native</quarkus.package.type>
       </properties>
     </profile>
+
+    <!-- Development -->
     <profile>
       <id>dev</id>
       <activation>
@@ -296,6 +328,8 @@
         </dependency>
       </dependencies>
     </profile>
+
+    <!-- PostgreSQL -->
     <profile>
       <id>postgresql</id>
       <properties>
@@ -308,7 +342,8 @@
         </dependency>
       </dependencies>
     </profile>
-  </profiles>
-  
-</project>
 
+
+  </profiles>
+
+</project>

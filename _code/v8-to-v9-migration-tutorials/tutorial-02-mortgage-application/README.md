@@ -37,7 +37,7 @@ You can create your BAMOE v9 project using either:
 For this tutorial, use the Full accelerator (supports BPMN + DMN + DRL):
 
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-full mortgage-application-v9
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-full mortgage-application-v9
 cd mortgage-application-v9
 ```
 
@@ -102,8 +102,8 @@ The v9 Mortgage Application includes:
 - **Version:** `1.0.0-SNAPSHOT`
 - **Packaging:** `jar` (Quarkus application)
 - **Java Version:** 17
-- **BAMOE Version:** 9.3.1-ibm-0006
-- **Quarkus Version:** 3.20.3
+- **BAMOE Version:** 9.6.0-ibm-0004
+- **Quarkus Version:** 3.33.3.2
 
 **Process Details:**
 - **Process ID:** `MortgageApprovalProcess` 
@@ -193,7 +193,7 @@ Create a new BAMOE v9 project using the Quarkus Full accelerator. See the [main 
 
 For this tutorial, use the Full accelerator (BPMN + DMN + DRL):
 ```bash
-git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.3.1-ibm-0006-quarkus-full mortgage-application-v9
+git clone git@github.com:IBM/bamoe-canvas-quarkus-accelerator.git -b 9.6.0-ibm-0004-quarkus-full mortgage-application-v9
 cd mortgage-application-v9
 ```
 
@@ -434,7 +434,7 @@ Create `v9-app/src/main/resources/application.properties`:
 ```properties
 # Quarkus Configuration
 quarkus.http.port=8080
-quarkus.http.cors=true
+quarkus.http.cors.enabled=true
 
 # Database Configuration (H2 for development)
 quarkus.datasource.db-kind=h2
