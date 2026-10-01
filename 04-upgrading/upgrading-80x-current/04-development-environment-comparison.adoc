@@ -24,9 +24,9 @@ image::upgrade/04-development-environment-bamoe-canvas.png[{CANVAS}]
 
 {PRODUCT_SHORT} {CANVAS} is a web-based modeling environment designed for business users and analysts. Unlike Business Central, which bundles all functionality into a single interface, {CANVAS} offers a clean and focused interface for authoring and reviewing business assets. It supports both BPMN and DMN modeling, and provides a streamlined experience for non-technical users.
 
-{CANVAS} includes in-browser Git and file system capabilities, removing the need for an internal storage layer and enabling seamless integration with standard Git workflows. To support communication with external Git providers such as GitHub, GitLab, and Bitbucket, {CANVAS} uses the {PRODUCT_SHORT} CORS Proxy. Users can deploy development versions of their projects to Kubernetes or OpenShift environments using the {CANVAS} Dev Deployments feature.
+{CANVAS} includes in-browser Git and file system capabilities, removing the need for an internal storage layer and enabling seamless integration with standard Git workflows. {CANVAS} uses the {PRODUCT_SHORT} CORS Proxy to support communication with external Git providers such as GitHub, GitLab, and Bitbucket. Users can deploy development versions of their projects to Kubernetes or OpenShift environments using the {CANVAS} Dev Deployments feature.
 
-{CANVAS} also includes BAMOE Extended Services, which enables the DMN Runner, a live feedback tool that allows you to evaluate DMN models directly within the browser.
+{CANVAS} also includes {PRODUCT_SHORT} Extended Services, which enables the DMN Runner, a live feedback tool that allows you to evaluate DMN models directly within the browser.
 
 For detailed setup instructions, refer to the xref:../../03-installing/development-environment.adoc[Installing Dev Environment Helm Chart].
 
@@ -36,9 +36,9 @@ image::upgrade/04-development-environment-bamoe-developer-tools.png[{DEV_TOOLS}]
 
 {DEV_TOOLS} is a Visual Studio Code extension designed for developers who need to author, test, and maintain business automation assets. This extension includes graphical editors for BPMN models, DMN models, and Test Scenarios files. It also supports the generation of User Task forms, providing a comprehensive toolset for building _Business Service_ projects.
 
-Because it runs within VS Code, the extension stores files locally on your file system. This allows full integration with Git for version control and with Maven for building, testing, and packaging projects. Unlike Business Central, the {DEV_TOOLS} do not include a built-in Maven or Git repository. Instead, all required libraries are retrieved from the BAMOE Maven Repository, which can be deployed as a standalone container or installed locally in the `.m2` directory.
+Because it runs within VS Code, the extension stores files locally on your file system. This allows full integration with Git for version control and with Maven for building, testing, and packaging projects. Unlike Business Central, the {DEV_TOOLS} do not include a built-in Maven or Git repository. Instead, all required libraries are retrieved from the {MVN_REPO}, which can be deployed as a standalone container or installed locally in the `.m2` directory.
 
-To get started with the {DEV_TOOLS}, follow the setup instructions in the xref:../../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}]. For information on configuring the Maven repository, refer to the xref:../../03-installing/development-environment.adoc[Installing Dev Environment].
+To get started with the {DEV_TOOLS}, follow the instructions in the xref:../../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}]. For information on configuring the Maven repository, refer to the xref:../../03-installing/development-environment.adoc[Installing Dev Environment].
 
 == Creating projects
 
@@ -76,7 +76,7 @@ While {CANVAS} simplifies Git for business users, the {DEV_TOOLS} provide a more
 
 This setup also allows for advanced Git features such as branching strategies, submodules, and integration with CI/CD pipelines.
 
-For more information on connecting {CANVAS} to your git provider see xref:../../03-installing/development-environment.adoc#canvas-installation[Installing Canvas] and xref:../../06-available-features/dev-environment/bamoe-canvas/connecting-accounts.adoc[Canvas → Connecting to AI, Git, and Cloud Providers]
+For more information on connecting {CANVAS} to your Git provider see xref:../../03-installing/development-environment.adoc##canvas-gitrepo-config[Configuring {CANVAS} to work with supported Git providers] and xref:../../06-available-features/dev-environment/bamoe-canvas/connecting-accounts.adoc[Canvas → Connecting to AI, Git, and Cloud Providers]
 
 == Working with Maven and {MVN_REPO}
 
@@ -102,7 +102,7 @@ The {DEV_TOOLS} rely on your local Git configuration for authentication. When in
 
 By shifting authentication to Git, {PRODUCT_SHORT} version {VERSION_RM} eliminates the need for centralized user management within the platform itself, offering a more flexible and secure model that aligns with modern development environments.
 
-To configure Role-based access to operations for each _Business Service_ in the {MANAGEMENT_CONSOLE} include the {RBAC_ADDON_SHORT}. The RBAC system utilizes role definitions already configured in your OIDC Identity provider, see xref:../../09-building-and-deploying-business-services/security.adoc#rbac-config[Configuring Role-based access control (RBAC) for _Business Services_ at runtime]
+To configure Role-based access to operations for each _Business Service_ in the {MANAGEMENT_CONSOLE} in {VERSION} you can include the {RBAC_ADDON_SHORT}. The RBAC system utilizes role definitions already configured in your OIDC Identity provider, see xref:../../09-building-and-deploying-business-services/security.adoc#rbac-config[Configuring Role-based access control (RBAC) for _Business Services_ at runtime]
 
 == Building and deploying in development mode
 
