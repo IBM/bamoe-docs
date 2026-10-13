@@ -21,7 +21,7 @@ Table 1. Known limitations
 |No general workaround
 
 |Native compilation support for workflow projects.
-|Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_X} and earlier 9.x versions. Using certain dependencies (for example, data-index, jobs-service) might cause native builds to fail due to missing reflection metadata.
+|Workflow (BPMN) projects do not support native compilation in {PRODUCT_SHORT} {VERSION_X} and earlier 9.x versions. Using certain dependencies (for example, Data-Index, Jobs-Service) might cause native builds to fail due to missing reflection metadata.
 |{VERSION}
 |Do not use native compilation if your _Business Services_ include stateful workflow.
 
@@ -93,5 +93,8 @@ The following are the {VERSION} Accelerator references:
 |Switching between the BPMN Editor and BPMN Editor (classic) for the same file can cause elements to disappear. For example, gateway conditional expressions and Business Rule Tasks with DMN implementation properties set may be lost after opening and saving the file in the other editor.
 |{VERSION}
 |To avoid this issue, do not switch between the BPMN Editor and BPMN Editor (classic) for the same file. Complete all edits in one editor.
+
+|_Business Services_ compiled and built with JDK 17 deployed to canvas-dev-deployment-quarkus-blank-app may encounter issues. 
+|As the Java 17 {PRODUCT_SHORT} variant of the Canvas Dev Deployment feature is no longer shipped you may encounter unexpected issues if you try to run a _Business Service_ compiled and built with JDK 17 using a Canvas Dev Deployment. JDK 21 is generally backwards compatible with JDK 17, but if a _Business Service_ contains a hard Maven Java dependency (for example a build profile scoped exclusively to JDK 17 or a compiler toolchain configuration that pins to JDK 17) it could fail to build or behave unexpectedly at runtime. This scenario goes beyond simple bytecode compatibility and may affect users whose projects rely on JDK-17-specific Maven behavior or activated profiles.
 
 |===
