@@ -1,0 +1,41 @@
+= Using Accelerators in {DEV_TOOLS}
+include::../../_partials/attributes.adoc[]
+:imagesdir: ../../_images
+include::../../_styles/images.adoc[]
+
+You can apply an Accelerator to a folder in VS Code using the {DEV_TOOLS} commands. The default Accelerators are included in the {DEV_TOOLS} extension.
+
+[#devtools-prereqs]
+== Prerequisites
+
+* You have the {DEV_TOOLS} extension installed in VS Code. For installation instructions, see xref:../../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}].
+
+[#devtools-apply-accelerator]
+== Applying an Accelerator
+
+. Open a new or existing folder in VS Code.
+. _(optional)_ Create Business Automation assets, such as BPMN or DMN models.
+. Open the VS Code command palette:
+** On macOS: `CMD + SHIFT + P`
+** On Windows and Linux: `CTRL + SHIFT + P`
+. Type `BAMOE` to filter the available {DEV_TOOLS} commands.
+. Run the *Apply Accelerator* command.
+. Select the Accelerator you want to apply that matches your target runtime framework and build tool:
+** Choose a *Workflows* Accelerator if your project contains stateful Workflows (BPMN) together with Decisions, Rules, or spreadsheet Decision Tables.
+** Choose a *Decisions* Accelerator if your project contains only Decisions (DMN), Rules (DRL), or spreadsheet Decision Tables.
++
+For a description of each Accelerator, see xref:intro-accelerators.adoc#available-accelerators[Introducing Accelerators → Available Accelerators].
+
+After you complete the steps, your _Business Service_ project is ready in the currently open folder. A new Git repository is initialized if the folder is not already a Git repository. 
+
+Any existing Business Automation assets are moved to the locations defined by the Accelerator, and modifications in your staging environment are kept, so you remain in control of your development flow. For more information, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
+
+[#devtools-after-applying]
+== After applying an Accelerator
+
+After the Accelerator is applied, your folder contains a complete _Business Service_ project structure. Review the generated files and configure them for your use case:
+
+* Open `pom.xml` (Maven) or `build.gradle` (Gradle) and uncomment the dependency blocks for the optional capabilities your project requires. For more information, see xref:intro-accelerators.adoc#optional-blocks[Introducing Accelerators → Configuring optional capabilities].
+* Open `application.properties` and uncomment the configuration blocks for the features you want to enable.
+
+For a full description of the generated files, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].

@@ -1,0 +1,99 @@
+= Creating a custom Accelerator
+include::../../_partials/attributes.adoc[]
+:imagesdir: ../../_images
+include::../../_styles/images.adoc[]
+
+Organizations can create and publish their own Accelerators to standardize the _Business Service_ project structure across teams. A custom Accelerator is a public Git repository that contains a project skeleton configured with the conventions, dependencies, and settings used in your organization. Once registered, custom Accelerators are available in {CANVAS} and {DEV_TOOLS} for all users in your organization. 
+
+// In {CANVAS}, they appear alongside the built-in ones in the *Apply Accelerator* dropdown.
+
+Custom Accelerators can also bundle custom Dev Deployment options, so that your preferred deployment configuration is automatically offered when a developer applies the Accelerator in {CANVAS}.
+
+[#custom-accelerator-prereqs]
+== Prerequisites
+
+Before creating a custom Accelerator, review the default Accelerator structure to understand what to modify. The default Quarkus and Spring Boot Accelerators are published in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository]. Select the branch that corresponds to {VERSION} to browse the files. For other ways to access the Accelerator source files, see xref:intro-accelerators.adoc#accessing-accelerators[Introducing Accelerators → Accessing Accelerators].
+
+For a description of the key files that make up the Accelerator output, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
+
+Your custom Accelerator repository must be:
+
+* A public Git repository accessible via `git clone`.
+* Structured following the same layout as the default Accelerators so that {CANVAS} and {DEV_TOOLS} can apply it correctly.
+
+[#configure-custom-accelerator]
+== Registering a custom Accelerator in {CANVAS}
+
+Custom Accelerators are registered in {CANVAS} through the `KIE_SANDBOX_ACCELERATORS` environment variable, which controls the list of Accelerators available in {CANVAS}. The variable comes pre-configured with the default Accelerators and accepts an array of Accelerator configuration objects.
+
+You can register your custom Accelerator in two ways:
+
+* *Append* your definition to the existing default list so that both built-in and custom Accelerators are available.
+* *Replace* the default list entirely with your own definitions.
+
+To register a custom Accelerator, add a JSON entry to the `KIE_SANDBOX_ACCELERATORS` environment variable:
+
+[source,json,subs="attributes+"]
+----
+canvas:
+  env: "KIE_SANDBOX_ACCELERATORS"
+  value: |
+    [
+      {
+        "name": "Your Accelerator name",
+        "iconUrl": "https://link.to/your/logo/image",
+        "gitRepositoryUrl": "https://github.com/your-org/your-accelerator",
+        "gitRepositoryGitRef": "main",
+        "dmnDestinationFolder": "src/main/resources",
+        "bpmnDestinationFolder": "src/main/resources",
+        "otherFilesDestinationFolder": "src/main/resources",
+        "scesimDestinationFolder": "src/test/resources"
+      }
+    ]
+----
+
+[#devtools-register-custom-accelerator]
+== Registering a custom Accelerator in {DEV_TOOLS}
+
+{DEV_TOOLS} reads the list of available Accelerators from the `bamoe.accelerators.definitions` setting in the VS Code `settings.json` file. The setting accepts an `accelerators` array of Accelerator configuration objects, which use the same fields as described in configuration fields:
+
+[source,json]
+----
+{
+  "accelerators": [
+    {
+      "name": "Your Accelerator name",
+      "gitRepositoryUrl": "https://github.com/your-org/your-accelerator",
+      "gitRepositoryGitRef": "main",
+      "dmnDestinationFolder": "src/main/resources/dmn",
+      "bpmnDestinationFolder": "src/main/resources/bpmn",
+      "otherFilesDestinationFolder": "src/main/resources/others",
+      "scesimDestinationFolder": "src/test/resources/scesim"
+    }
+  ]
+}
+----
+
+[NOTE]
+====
+If you manually modified the `bamoe.accelerators.definitions` setting, updating the {DEV_TOOLS} extension does not refresh it. For more information, see xref:../../01-release-notes/known-limitations.adoc[Known limitations].
+====
+
+[#configuration-fields]
+=== Configuration fields
+
+**name**:: The display name of the Accelerator as it appears inside {CANVAS} and {DEV_TOOLS}.
+**iconUrl**:: _(Optional)_ A URL pointing to an image or logo displayed alongside the Accelerator name.
+**gitRepositoryUrl**:: The URL of the Git repository hosting your Accelerator. Must be a URL that can be used with `git clone`.
+**gitRepositoryGitRef**:: The branch, tag, or commit in your repository that contains the Accelerator. Accepts any value that can be used with `git checkout`.
+**dmnDestinationFolder**:: The folder (relative to the project root) where `.dmn` and `.pmml` files are placed when the Accelerator is applied.
+**bpmnDestinationFolder**:: The folder (relative to the project root) where `.bpmn` and `.bpmn2` files are placed when the Accelerator is applied.
+**otherFilesDestinationFolder**:: The folder (relative to the project root) where all other files are placed when the Accelerator is applied.
+**scesimDestinationFolder**:: The folder (relative to the project root) where `.scesim` test scenario files are placed when the Accelerator is applied.
+
+[NOTE]
+====
+The destination folder values in the example above reflect the standard Maven directory layout. Adjust them to match the directory structure defined by your Accelerator repository.
+====
+
+For information on setting {CANVAS} environment variables using the Helm chart configuration, see xref:../../03-installing/development-environment.adoc#helm-chart-config-ref[Installing → Development environment → Configuration reference for Dev environment Helm Charts].

@@ -1,0 +1,89 @@
+= Introducing Accelerators
+include::../../_partials/attributes.adoc[]
+:imagesdir: ../../_images
+include::../../_styles/images.adoc[]
+
+Accelerators are Git repositories that contain a skeleton of a _Business Service_ application. When applied to an existing folder containing Workflows (BPMN), Decisions (DMN), Rules (DRL), or spreadsheet Decision Tables, an Accelerator transforms it into a complete _Business Service_ project that can be built, tested, executed, and deployed with your preferred development framework.
+
+{PRODUCT_SHORT} provides pre-configured Accelerators for the cloud development frameworks it supports — Quarkus and Spring Boot, each available with Maven or Gradle. You can apply a built-in Accelerator from {CANVAS} or {DEV_TOOLS}. Organizations can also create their own custom Accelerators and make them available to their users, so that everyone in the organization starts from a consistent, pre-configured project structure.
+
+For other ways to start a _Business Service_ project from scratch, see xref:../../05-getting-started/project-setup.adoc[Getting started → _Business Service_ project setup].
+
+[#available-accelerators]
+== Available Accelerators
+
+{PRODUCT_SHORT} delivers two families of Accelerators depending on the type of automation assets in your project.
+
+Use one of the following Accelerators for _Business Services_ that contain stateful Workflows, together with Decisions, Rules, or spreadsheet Decision Tables:
+
+* **`Workflows (Quarkus + Maven)`**
+* **`Workflows (Spring Boot + Maven)`**
+* **`Workflows (Quarkus + Gradle)`**
+* **`Workflows (Spring Boot + Gradle)`**
+
+Use one of the following Accelerators for _Business Services_ that contain only Decisions, Rules, or spreadsheet Decision Tables:
+
+* **`Decisions (Quarkus + Maven)`**
+* **`Decisions (Spring Boot + Maven)`**
+* **`Decisions (Quarkus + Gradle)`**
+* **`Decisions (Spring Boot + Gradle)`**
+
+Choose the Accelerator that matches your target runtime framework and build tool.
+
+[#accessing-accelerators]
+== Accessing Accelerators
+
+The built-in Accelerators are available directly inside {CANVAS} and {DEV_TOOLS}. You can also access the Accelerator source files if you want to inspect their structure or use them as a baseline for a custom Accelerator:
+
+* *{CANVAS} and {DEV_TOOLS}* — built-in Accelerators are available from the *Apply Accelerator* dropdown inside {CANVAS} and from the {DEV_TOOLS} command palette in VS Code. For more information, see xref:using-accelerators-canvas.adoc[Using Accelerators in {CANVAS}] and xref:using-accelerators-devtools.adoc[Using Accelerators in {DEV_TOOLS}].
+* *Downloadable ZIP* — go to the xref:../../01-release-notes/whats-new-9-6.adoc#download-doc[Download documents] section in the release notes to download the Accelerators ZIP file containing all templates.
+* *Public GitHub repository* — go to the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] and select the branch that matches {VERSION} to browse, clone, or download individual Accelerators. For a description of the files you find in a cloned Accelerator, see <<project-output>>.
+* *Version-tagged GitHub releases* — the GitHub repository publishes releases that correspond to the {PRODUCT_SHORT} version.
+
+[#project-output]
+== Generated project structure
+
+When you apply an Accelerator to a folder containing your Workflows, Decisions, or Rules, your existing files are kept and the Accelerator adds the files needed to build and run a _Business Service_. The resulting project contains:
+
+* A `pom.xml` (Maven) or `build.gradle` (Gradle) pre-configured with the {PRODUCT_SHORT} BOM and the dependencies required for your chosen framework and build tool. The file includes commented and uncommented blocks for optional capabilities — for example, IBM License Metric Tool (ILMT) compliance libraries or role-based access control (RBAC) add-ons — that you can enable for your use case by removing the relevant comment markers.
+* An `application.properties` file pre-populated with the configuration properties needed to run the _Business Service_. Like the build file, it contains commented blocks for optional features that you can activate as needed.
+* A standard Maven or Gradle directory layout with your models placed in the folders defined by the Accelerator. For the default Accelerators, `.dmn` and `.pmml` files are placed in `src/main/resources/dmn`, `.bpmn` and `.bpmn2` files in `src/main/resources/bpmn`, `.scesim` files in `src/test/resources/scesim`, and all other files in `src/main/resources/others`.
+* A `README.md` file that you can update with the name and description of your _Business Service_ project.
+* A `.kie-sandbox/accelerator.yaml` file at the project root that records which Accelerator was applied. This file is used by {CANVAS} to track the applied Accelerator.
++
+[NOTE]
+====
+Do not modify the contents of the `accelerator.yaml` file. Modifying it may mislead users or break the {CANVAS} integration.
+====
+
+After applying an Accelerator, review the generated `pom.xml` and `application.properties` files and comment or uncomment the blocks that correspond to the capabilities your _Business Service_ requires. 
+
+You can use the default Accelerators from https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] as a baseline when creating or customizing your own Accelerator.
+
+[#optional-blocks]
+=== Configuring optional capabilities
+
+The generated files contain commented-out configuration for the following optional capabilities. Uncomment the configuration only for the capabilities that your _Business Service_ needs:
+
+[%header,cols="2,2,3"]
+|===
+|Capability |What to uncomment |More information
+
+|IBM License Metric Tool (ILMT) compliance libraries, required for non-containerized deployments
+|`pom.xml` or `build.gradle`: uncomment the ILMT dependency for your framework
+|xref:../../03-installing/licenses-and-tracking-usage/managing-license-entitlements.adoc[Managing your license entitlements]
+
+|Role-based access control (RBAC) add-ons, provided in the Workflows Accelerators
+|`pom.xml` or `build.gradle`: uncomment the dependencies. `application.properties`: uncomment the RBAC configuration block and replace the role names.
+|xref:../../09-building-and-deploying-business-services/security.adoc#rbac-config[Security → Configuring RBAC]
+
+|Passthrough Transport Layer Security (TLS)
+|`application.properties`: uncomment the TLS properties for your framework. For Workflows, also switch the `kogito.service.url`, `kogito.jobs-service.url`, and `kogito.data-index.url` properties to `https://`, as described in the inline note in the file.
+|xref:../../09-building-and-deploying-business-services/security.adoc#bus-services-tls-cert[Security → Configuring passthrough TLS]
+|===
+
+The Spring Boot Accelerators also include a `BamoeSpringBootWebSecurityConfig` class that you can adapt. For more information, see xref:../../09-building-and-deploying-business-services/security.adoc[Security]. The Workflows Accelerators already include the REST Service Call Task library, so you do not need to add a dependency. For more information, see xref:../../08-developing-stateful-workflows/work-item-handler-library/WIH-rest-service-call-task.adoc[REST Service Call Task WorkItemHandler].
+
+== Custom Accelerators
+
+Organizations can create custom Accelerators with their own project structure and configuration defaults and make them available to their users. For more information, see xref:custom-accelerators.adoc[Creating a custom Accelerator].

@@ -1,0 +1,46 @@
+= Using Accelerators in {CANVAS}
+include::../../_partials/attributes.adoc[]
+:imagesdir: ../../_images
+include::../../_styles/images.adoc[]
+
+You can apply an Accelerator to any project open in {CANVAS} directly from the editor toolbar. {CANVAS} provides a set of default Accelerators that you can apply to your project.
+
+[#canvas-prereqs]
+== Prerequisites
+
+* You have {CANVAS} running and accessible in your browser.
+* You have a project open in {CANVAS}. If you do not have a project yet, create one or import an existing one. For more information, see xref:../dev-environment/bamoe-canvas/creating-models.adoc[Creating models] and xref:../dev-environment/bamoe-canvas/importing-existing-projects.adoc[Importing existing projects].
+
+[#canvas-apply-accelerator]
+== Applying an Accelerator
+
+. Open the project in {CANVAS}. The editor toolbar is displayed at the top of the page.
+. In the toolbar, click the *Apply Accelerator* dropdown. The dropdown is available in the editor toolbar for both single-file and multi-file projects.
+. A list of available Accelerators is displayed. Select the Accelerator that matches your target runtime framework and build tool:
+** Choose a *Workflows* Accelerator if your project contains stateful Workflows (BPMN) together with Decisions, Rules, or spreadsheet Decision Tables.
+** Choose a *Decisions* Accelerator if your project contains only Decisions (DMN), Rules (DRL), or spreadsheet Decision Tables.
++
+For a description of each Accelerator, see xref:intro-accelerators.adoc#available-accelerators[Introducing Accelerators → Available Accelerators].
+. A dialog for the selected Accelerator opens. It describes the Accelerator as a template, shows the Git authentication used, the repository that hosts the Accelerator and its Git ref, and the folders your files will be moved to. For the default Accelerators, these are:
+** `.dmn` and `.pmml` files: `src/main/resources/dmn`
+** `.bpmn` and `.bpmn2` files: `src/main/resources/bpmn`
+** `.scesim` files: `src/test/resources/scesim`
+** All other files: `src/main/resources/others`
+. Click *Apply*. {CANVAS} moves your files to the folders shown in the dialog, generates the build and configuration files for the selected framework, and creates a new commit.
++
+Applying an Accelerator is permanent. Any changes you make after applying it may result in your files being in different directories. Click *Cancel* to close the dialog without applying the Accelerator.
+. After the Accelerator is applied, the Accelerator name is displayed as a label in the project header. Click the label to open a dialog that shows the contents of the `.kie-sandbox/accelerator.yaml` file created at the project root.
++
+[NOTE]
+====
+Do not modify the `accelerator.yaml` file. It is used by {CANVAS} to track the applied Accelerator, and modifying it may mislead users or break the {CANVAS} integration.
+====
+
+== After applying an Accelerator
+
+After the Accelerator is applied, your project contains a complete _Business Service_ project structure. Review the generated files and configure them for your use case:
+
+* Open `pom.xml` (Maven) or `build.gradle` (Gradle) and uncomment the dependency blocks for the optional capabilities your project requires, for example, ILMT compliance or, in the Workflows Accelerators, RBAC. For details, see xref:intro-accelerators.adoc#optional-blocks[Introducing Accelerators → Configuring optional capabilities].
+* Open `application.properties` and uncomment the configuration blocks for the features you want to enable.
+
+For a full description of the generated files, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
