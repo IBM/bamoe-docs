@@ -161,13 +161,13 @@ Add the following commented-out properties to your _Business Service_ `applicati
 #%mssql.quarkus.fault-tolerance.retry.jitter=150
 ----
 
-NOTE: If your _Business Service_ uses Spring Boot instead of Quarkus, Resilience4j's default retry behavior already handles transient deadlocks with a 500 ms backoff, so no additional retry configuration is required.
+NOTE: This configuration is not required in Spring Boot because Resilience4j's default retry behavior already handles transient deadlocks with a 500 ms backoff, see xref:workflows-with-springboot#transactions-mssql-spring[Workflow Services with Spring Boot → Transaction isolation settings for Microsoft SQL Server].
 
 === Configuring persistence for Oracle
 
 To configure Oracle persistence for your _Business Service_, you need to add the `io.quarkus:quarkus-jdbc-oracle` dependency.
 
-Add the following configuration properties required in your `application.properties`:
+You will also need to add the following configuration properties in your `application.properties`:
 
 [source,properties]
 ----
@@ -181,11 +181,26 @@ quarkus.datasource.jdbc.url=jdbc:oracle:thin:@//oracle:1521/FREEPDB1
 kogito.persistence.type=jdbc
 ----
 
+In the Runtime environment where Flyway is deactivated, or if {PRODUCT_SHORT} is using tables in shared schema you will need to set the following permissions:
+
+CREATE SESSION:: allows the application user to connect.
+GRANT SELECT, INSERT, UPDATE, DELETE:: object privileges on required tables. 
+
+In this mode, {PRODUCT_SHORT} only consumes existing objects. 
+
+In the Dev environment with Flyway enabled, you will also need to set the following permissions to enable {PRODUCT_SHORT} to fully manage its schema objects: 
+
+CREATE TABLE:: required so Flyway/Hibernate can create persistence tables.
+CREATE SEQUENCE:: needed for ID generation sequences.
+
+Indexes are automatically allowed on tables the user owns, so no extra `GRANT` is needed.
+
+
 ==== {PRODUCT_SHORT} mappings for Oracle
 
 Additionally, if the _Business Service_ includes User Tasks or Jobs Service, you need to add the `com.ibm.bamoe:bamoe-oracle-mappings` dependency, which includes the Hibernate ORM mappings that remap some of the JPA entities used in both components and ensure the correct behavior. The mappings contained are:
 
-`META-INF/bamoe-user-task-orm.xml`:: This file remaps some entities from the jbpm-usertask-storage-jpa component.
+`META-INF/bamoe-user-task-orm.xml`:: This file remaps some entities from the `jbpm-usertask-storage-jpa` component.
 `META-INF/bamoe-job-service-orm.xml`:: This file remaps some entities from the job-service component.
 `com.ibm.bamoe:bamoe-oracle-mappings`:: Required database-specific mappings to ensure persistence layer works correctly with that database's dialect and limitations. 
 
