@@ -4,9 +4,7 @@ include::../_styles/images.adoc[]
 
 This section describes the steps you must take to upgrade your {PRODUCT_SHORT} installation and _Business Services_ projects developed in version {VERSION_95x}.
 
-See the following sections if you are upgrading from a version prior to this:
-
-* xref:index.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
+See xref:index.adoc[Upgrading from a previous version of {PRODUCT_SHORT}] if you are upgrading from a version prior to this.
 
 This guide walks you through upgrading your:
 
@@ -18,11 +16,11 @@ This guide walks you through upgrading your:
 
 == Step 1: Download product archives
 
-Start by downloading the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program]. 
+Download the product archives from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program], as required. For more information on {PRODUCT_SHORT} deliverables see xref:../01-release-notes/whats-new-9-6.adoc#download-doc[Release Notes → Download documents]
 
 == Step 2: Upgrade your {PRODUCT_SHORT} Dev environment
 
-To upgrade your {PRODUCT_SHORT} Dev environment to {VERSION}, you can use the Dev environment Helm chart to install the updated component containers you require. The Dev helm chart includes the following component containers:
+To upgrade your {PRODUCT_SHORT} Dev environment to {VERSION}, you can use the Dev environment Helm chart to install the component containers you require:
 
 * {CANVAS}
 * {EXT_SERVICES}
@@ -30,13 +28,13 @@ To upgrade your {PRODUCT_SHORT} Dev environment to {VERSION}, you can use the De
 * {MVN_REPO}
 
 === Upgrade {CANVAS} and {MVN_REPO}
-Use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_94X}.
+Use the https://docs.openshift.com/container-platform/4.19/applications/deployments/route-based-deployment-strategies.html#deployments-blue-green_route-based-deployment-strategies[blue-green deployment strategy] for Maven artifacts to be available for both your current version and {PRODUCT_SHORT} version {VERSION_95X}.
 
-Follow the steps in xref:../03-installing/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new {MVN_REPO} and {CANVAS} versions.
-
-If you decide to uninstall the previous individual containers and replace with the Dev environment Helm chart, the {VERSION} version of {CANVAS} is a drop-in replacement for the {VERSION_95X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+Follow the steps in xref:../03-installing/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new versions of the {MVN_REPO} and {CANVAS} containers.
 
 You can import projects into the newly installed version (see xref:../06-available-components/dev-environment/bamoe-canvas/importing-existing-projects.adoc[{CANVAS} → Importing existing projects]) as long as the DNS domains between installations are different. If the DNS domains between installations are the same, your imported projects automatically show up in the new installation when you open it in your browser.
+
+The {VERSION} version of {CANVAS} is a drop-in replacement for the {VERSION_95X} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
 [NOTE]
 ====
@@ -52,14 +50,30 @@ _Business Service(s)_ project(s) can be upgraded by changing their Maven depende
 
 The following tools are required to upgrade your _Business Service_ projects to {PRODUCT_SHORT} version {VERSION}:
 
-- https://openjdk.org[JDK 21] is installed.
-- https://maven.apache.org[Apache Maven latest version] is installed.
+* https://openjdk.org[JDK 21] is installed (or other version required for your _Business Service_). JDK 21 is required for the {PRODUCT_SHORT} components but _Business Services_ can be developed in other versions.
+* https://maven.apache.org[Apache Maven latest version] is installed.
 - https://code.visualstudio.com/download[Visual Studio Code IDE] latest version installed.
 - Upgraded {PRODUCT_SHORT} Dev environment with {MVN_REPO} @ {IMAGE_VERSION}
 
-Once your {PRODUCT_SHORT} Dev environment is upgraded, upgrading your _Business Service_ projects from {PRODUCT_SHORT} {VERSION_94X} to {PRODUCT_SHORT} version {VERSION} requires only minimal changes.
+Once your {PRODUCT_SHORT} Dev environment is upgraded, upgrading your _Business Service_ projects from {PRODUCT_SHORT} {VERSION_95X} to {PRODUCT_SHORT} version {VERSION} requires only minimal changes.
 
-The project structure is not changed, and updates only need to be made to the versions and the names of some dependencies and files. 
+The project structure is not changed, and updates only need to be made to the versions and the names of some dependencies and files. For example you will need to upgrade the {PRODUCT_SHORT} BOM in the project POM file to {BOM_VERSION}:
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>com.ibm.bamoe</groupId>
+  <artifactId>bamoe-quarkus-bom</artifactId>
+  <version>{BOM_VERSION}</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+----
+
+This example shows the Quarkus specific BOM. You may have a different framework specific BOM:
+
+* `bamoe-spring-boot-bom` for Spring Boot projects
+* `bamoe-embedded-bom` for Embedded mode projects
 
 Due to the update to Quarkus {QUARKUS_VERSION}, there are some changes which may impact your _Business Services_ built with {VERSION}. For more information, see xref:##quarkus-333-breaking[Breaking Quarkus Framework changes]. 
 
@@ -78,9 +92,9 @@ You can now continue developing your _Business Service_ project on {PRODUCT_SHOR
 
 == Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
 
-After upgrading your _Business Services_ source code (Step 3), upgrade the components in your Runtime environment.
+After upgrading your _Business Services_ source code, upgrade the components in your Runtime environment.
 
-The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are available in the Runtime Helm charts for your selected offering (DMOE or PMOE), including the product specific licensing annotations.
+The {MANAGEMENT_CONSOLE} and {MCP_SERVER} component containers are available in the Runtime Helm charts for your selected offering (DMOE or PMOE).
 
 Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment].
 
@@ -91,9 +105,9 @@ If you have stateful workflows in your _Business Services_, complete Step 6 to u
 
 If you have _Business Services_ that run stateful workflows, upgrade your runtime database using the database migration scripts included in the `bamoe-{VERSION}-db-utils.zip` archive.
 
-The archive provides scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
+You will find scripts named `from--$PREVIOUS_RELEASE--to--$CURRENT_RELEASE.sql` for each subsystem in a _Business Service_ that uses the Compact Architecture (Data-Index, Data-Audit, Embedded Jobs Service, User Tasks, and Runtime Persistence).
 
-You must upgrade your _Business Services_ and your databases together.
+_Business Services_ and the database they used must be upgraded together.
 
 To upgrade safely:
 
@@ -130,7 +144,7 @@ Once you have installed your Runtime environment and updated the database for an
 [#quarkus-333-breaking]
 == Breaking changes due to Quarkus framework updates
 
-The Quarkus version changed is part of the the {PRODUCT_SHORT} BOM. The changes and the actions you may need to take are described in the table below:
+The Quarkus version change is part of the {PRODUCT_SHORT} BOM. The changes and the actions you may need to take are described in the table below:
 
 [%header,cols=2]
 [%autowidth]
@@ -161,7 +175,7 @@ This upgrade does not require any changes to {PRODUCT_SHORT} API coordinates, ar
 
 For Gradle projects, update the Quarkus test dependency:
 
-[source,properties]
+[source,java]
 ----
 // before
 testImplementation 'io.quarkus:quarkus-junit5'

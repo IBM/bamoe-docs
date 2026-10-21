@@ -6,37 +6,96 @@ This section describes the steps you must take to apply a patch to your {PRODUCT
 
 See the following sections if you are upgrading from a version prior to this:
 
-* xref:../03-installing/index.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
+* xref:index.adoc[Upgrading from a previous version of {PRODUCT_SHORT}]
 
-{PRODUCT_SHORT} provides automated update tools to apply patch updates to the components in your Dev and Runtime environments. It is important to maintain your patch updates in order to benefit from the security fixes and bug corrections. 
+It is important to maintain your patch updates in order to benefit from the security fixes and bug corrections. 
 
 This guide walks you through patching your:
 
 * {PRODUCT_SHORT} Dev environment with {MVN_REPO}, {CANVAS}, and {DEV_TOOLS}
 
+* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER}.
+
 * _Business Service(s)_ project(s)
 
-* {PRODUCT_SHORT} Runtime environment with {MANAGEMENT_CONSOLE}, {MCP_SERVER} and upgraded versions of your _Business Services_
+== Step 1: Download required product archives
 
-== Step 1: Download product archives
+Download the new versions of the {PRODUCT} deliverables from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program], as required.
 
-Download the new versions of your currently installed components from {PRODUCT_PASSPORT_ADVANTAGE_LINK}[IBM Passport Advantage], or via the {DEV_PROGRAM_PAGE_LINK}[IBM Business Automation Manager Open Editions Developer Program].
+== Step 2: Patch your development and runtime environments
 
-// is there an upgrade tool or does the helm chart have an automatic upgrade mechanism?
+If you installed development or runtime environment containers with the {PRODUCT_SHORT} Dev and Runtime Helm charts, you can apply a patch by running `helm upgrade` against your existing Helm release, see xref:##upgrade-helm-chart[Upgrading using Dev and Runtime Environment Helm charts]
 
-== Step 2: Patch your Dev environment
+If you did not use the Helm charts to install containers, see:
 
-Follow the steps in xref:../03-installing/development-environment.adoc[Installing → Dev Environment Helm chart] to install the new versions of {MVN_REPO}, {CANVAS} and {MCP_SERVER}.
+* xref:../03-installing/development-environment.adoc[Installing → Development Environment] to install new versions of {MVN_REPO} and {CANVAS}.
 
-The {VERSION} version of {CANVAS} is a drop-in replacement for the {VERSION_950} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
+* xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment] to install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}.
+
+=== Upgrade {DEV_TOOLS}
+
+{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors, it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded. See xref:../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}].
+
+[#upgrade-helm-chart]
+=== Upgrade Dev and Runtime Environment containers using Helm charts
+
+Follow this procedure to upgrade your Dev environment using `helm upgrade`. 
+
+. Find the name and namespace of your existing release:
++
+[source,console]
+----
+helm list --all-namespaces
+----
+
+. Pull the new chart version and upgrade the release. The following example upgrades the {PRODUCT_DM} Dev environment on OpenShift:
++
+[source,console,subs="+attributes"]
+----
+helm pull oci://quay.io/bamoe/dmoe-dev-environment-helm-chart --version={IMAGE_VERSION} --untar
+helm upgrade my-bamoe-dev-env ./dmoe-dev-environment-helm-chart \
+  --namespace $NAMESPACE \
+  --values ./dmoe-dev-environment-helm-chart/values-openshift.yaml \
+  --set global.openshiftRouteDomain="$YOUR_OCP_ROUTE_DOMAIN"
+----
++
+The following example upgrades the {PRODUCT_DM} Runtime environment on OpenShift:
++
+[source,console,subs="+attributes"]
+----
+helm pull oci://quay.io/bamoe/dmoe-runtime-environment-helm-chart --version={IMAGE_VERSION} --untar
+helm upgrade my-bamoe-runtime-environment ./dmoe-runtime-environment-helm-chart \
+  --namespace $NAMESPACE \
+  --values ./dmoe-runtime-environment-helm-chart/values-openshift.yaml \
+  --set global.openshiftRouteDomain="$YOUR_OCP_ROUTE_DOMAIN"
+----
++
+Where:
++
+* Replace `dmoe-` with `pamoe-` in the chart names if you are working with {PRODUCT_PAM}.
+* Replace `my-bamoe-dev-env` and `my-bamoe-runtime-environment` with the release names returned by `helm list`.
+
+. Verify the upgrade:
++
+[source,console]
+----
+helm history my-bamoe-dev-env --namespace $NAMESPACE
+helm history my-bamoe-runtime-environment --namespace $NAMESPACE
+----
 
 [NOTE]
 ====
-If you have customized your previous {CANVAS} installation, remember to apply the same environment variables to the new installation. The same applies for customized container images for {CANVAS} Dev Deployments.
+If you have customized any containers in your previous Dev environment installation, `helm upgrade` does not automatically keep the values you originally specified. You will need to pass the same environment variable values to keep your configuration during upgrade.
 ====
 
-=== Upgrade {DEV_TOOLS}
-{DEV_TOOLS} versions are managed by the Extension update mechanism in VS Code. You can set automatic update or manage it manually when notified. Because of version differences in the models supported by the BPMN, DMN, and Test Scenario editors, it is recommended to choose when you upgrade to avoid issues when running models in services that have not been upgraded when the tools are upgraded. See xref:../06-available-components/dev-environment/bamoe-developer-tools-for-vscode/index.adoc[{DEV_TOOLS}].
+If an upgrade does not produce the expected result, you can return to the previous revision using the following command:
+
+[source.bash]
+----
+helm rollback <RELEASE_NAME> <REVISION> --namespace $NAMESPACE`
+----
+
+The {VERSION} version of {CANVAS} is a drop-in replacement for the {VERSION_960} version. The projects you saved to your browser before the upgrade can simply be opened after installing the new version. 
 
 == Step 3: Upgrade your _Business Service(s)_ project(s)
 
@@ -44,19 +103,23 @@ _Business Service(s)_ project(s) can be upgraded by changing their Maven depende
 
 The project structure is not changed. You need to update the versions, names of selected dependencies and files.
 
-[start=1]
-. Upgrade the {PRODUCT_SHORT} BOM in the project POM file to {BOM_VERSION}:
+* Upgrade the {PRODUCT_SHORT} BOM in the project POM file to {BOM_VERSION}:
 +
 [source,xml,subs="+attributes"]
 ----
 <dependency>
   <groupId>com.ibm.bamoe</groupId>
-  <artifactId>bamoe-bom</artifactId>
+  <artifactId>bamoe-quarkus-bom</artifactId>
   <version>{BOM_VERSION}</version>
   <type>pom</type>
   <scope>import</scope>
 </dependency>
 ----
++
+This example shows the Quarkus specific BOM. You may have a different framework specific BOM:
++
+* `bamoe-spring-boot-bom` for Spring Boot projects
+* `bamoe-embedded-bom` for Embedded mode projects
 
 == Step 4: Verify the upgrade of your _Business Service(s)_ project(s)
 To verify that your upgrade is successful, rebuild the project using Maven's standard command or any other customized build command you might have in your project.
@@ -68,12 +131,4 @@ mvn clean package
 
 You will get Maven streaming text with the message `Build Success` at the end if your upgrade was successful. 
 
-You can now continue developing your _Business Service_ project on {PRODUCT_SHORT} version {VERSION}.
-
-== Step 5: Upgrade your {PRODUCT_SHORT} Runtime environment
-
-After upgrading your _Business Services_ source code (Step 3), you need to upgrade the components in your Runtime environment.
-
-Install new versions of {MANAGEMENT_CONSOLE} and {MCP_SERVER}, by following the steps in xref:../03-installing/runtime-environment.adoc[Installing → Runtime Environment].
-
-Once you have upgraded your Runtime environment, you can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).
+You can follow the standard guidance on how to deploy upgraded versions of your _Business Services_ and manage them in the runtime environment, (see xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables] and xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]).
