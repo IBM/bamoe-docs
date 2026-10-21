@@ -12,28 +12,43 @@ Custom Accelerators can also bundle custom Dev Deployment options, so that your 
 [#custom-accelerator-prereqs]
 == Prerequisites
 
-Before creating a custom Accelerator, review the default Accelerator structure to understand what to modify. The default Quarkus and Spring Boot Accelerators are published in the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository]. Select the branch that corresponds to {VERSION} to browse the files. For other ways to access the Accelerator source files, see xref:intro-accelerators.adoc#accessing-accelerators[Introducing Accelerators → Accessing Accelerators].
+* Access to a Git hosting service (such as GitHub, GitLab, or Bitbucket) where you can publish a public repository accessible via `git clone`.
+* Familiarity with the standard Accelerator project structure. For more information, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
 
-For a description of the key files that make up the Accelerator output, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
+[#creating-custom-accelerator-repo]
+== Creating a custom Accelerator repository
 
-Your custom Accelerator repository must be:
+To create a custom Accelerator, set up a public Git repository that contains your organization's standardized project structure and configuration.
 
-* A public Git repository accessible via `git clone`.
-* Structured following the same layout as the default Accelerators so that {CANVAS} and {DEV_TOOLS} can apply it correctly.
+The recommended approach is to start from an existing default Accelerator:
+
+. Access a default Accelerator baseline:
++
+* Clone the branch that matches your runtime framework and build tool from the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository].
+* Alternatively, download the Accelerators ZIP file from the xref:../../01-release-notes/whats-new-9-6.adoc#download-doc[Download documents] section in the release notes and extract the template you want to customize.
+. Create a new public Git repository and push the baseline template files to it.
+. Customize the files to match your organization's conventions:
++
+* Update `pom.xml` (Maven) or `build.gradle` (Gradle) with your organization's internal dependencies, plugin configurations, and repository mirrors.
+* Update `application.properties` with default properties, profiles, and service endpoints.
+* _Optional_: Adjust directory layouts or add optional scaffolding, such as custom Dev Deployment descriptors (see xref:../bamoe-canvas/create-custom-dev-deployment.adoc#_bundling_custom_dev_deployments_with_accelerators[Bundling Custom Dev Deployments with Accelerators]).
+. Commit and push the changes to your custom Accelerator repository.
 
 [#configure-custom-accelerator]
 == Registering a custom Accelerator in {CANVAS}
 
-Custom Accelerators are registered in {CANVAS} through the `KIE_SANDBOX_ACCELERATORS` environment variable, which controls the list of Accelerators available in {CANVAS}. The variable comes pre-configured with the default Accelerators and accepts an array of Accelerator configuration objects.
+Custom Accelerators are registered through the `KIE_SANDBOX_ACCELERATORS` environment variable in the {CANVAS} Helm chart configuration. The variable comes pre-configured with the default Accelerators and accepts an array of Accelerator configuration objects.
 
-You can register your custom Accelerator in two ways:
+For details on configuring {CANVAS} environment variables using the Helm chart configuration, see xref:../../03-installing/development-environment.adoc#helm-chart-config-ref[Installing → Development environment → Configuration reference for Dev environment Helm Charts].
+
+You can configure the `KIE_SANDBOX_ACCELERATORS` variable in two ways:
 
 * *Append* your definition to the existing default list so that both built-in and custom Accelerators are available.
 * *Replace* the default list entirely with your own definitions.
 
-To register a custom Accelerator, add a JSON entry to the `KIE_SANDBOX_ACCELERATORS` environment variable:
+To register a custom Accelerator, add a JSON entry to the `KIE_SANDBOX_ACCELERATORS` environment variable in your Helm chart values:
 
-[source,json,subs="attributes+"]
+[source,yaml,subs="attributes+"]
 ----
 canvas:
   env: "KIE_SANDBOX_ACCELERATORS"
@@ -55,7 +70,7 @@ canvas:
 [#devtools-register-custom-accelerator]
 == Registering a custom Accelerator in {DEV_TOOLS}
 
-{DEV_TOOLS} reads the list of available Accelerators from the `bamoe.accelerators.definitions` setting in the VS Code `settings.json` file. The setting accepts an `accelerators` array of Accelerator configuration objects, which use the same fields as described in configuration fields:
+Developers can register custom Accelerators in their local VS Code environment. {DEV_TOOLS} reads the list of available Accelerators from the `bamoe.accelerators.definitions` setting in the VS Code `settings.json` file. The setting accepts an `accelerators` array of Accelerator configuration objects:
 
 [source,json]
 ----
@@ -95,5 +110,3 @@ If you manually modified the `bamoe.accelerators.definitions` setting, updating 
 ====
 The destination folder values in the example above reflect the standard Maven directory layout. Adjust them to match the directory structure defined by your Accelerator repository.
 ====
-
-For information on setting {CANVAS} environment variables using the Helm chart configuration, see xref:../../03-installing/development-environment.adoc#helm-chart-config-ref[Installing → Development environment → Configuration reference for Dev environment Helm Charts].

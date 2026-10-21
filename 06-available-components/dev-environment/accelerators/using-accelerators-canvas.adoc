@@ -9,7 +9,7 @@ You can apply an Accelerator to any project open in {CANVAS} directly from the e
 == Prerequisites
 
 * You have {CANVAS} running and accessible in your browser.
-* You have a project open in {CANVAS}. If you do not have a project yet, create one or import an existing one. For more information, see xref:../dev-environment/bamoe-canvas/creating-models.adoc[Creating models] and xref:../dev-environment/bamoe-canvas/importing-existing-projects.adoc[Importing existing projects].
+* You have a project open in {CANVAS}. If you do not have a project yet, create one or import an existing one. For more information, see xref:../bamoe-canvas/creating-models.adoc[Creating models] and xref:../bamoe-canvas/importing-existing-projects.adoc[Importing existing projects].
 
 [#canvas-apply-accelerator]
 == Applying an Accelerator
@@ -21,14 +21,9 @@ You can apply an Accelerator to any project open in {CANVAS} directly from the e
 ** Choose a *Decisions* Accelerator if your project contains only Decisions (DMN), Rules (DRL), or spreadsheet Decision Tables.
 +
 For a description of each Accelerator, see xref:intro-accelerators.adoc#available-accelerators[Introducing Accelerators → Available Accelerators].
-. A dialog for the selected Accelerator opens. It describes the Accelerator as a template, shows the Git authentication used, the repository that hosts the Accelerator and its Git ref, and the folders your files will be moved to. For the default Accelerators, these are:
-** `.dmn` and `.pmml` files: `src/main/resources/dmn`
-** `.bpmn` and `.bpmn2` files: `src/main/resources/bpmn`
-** `.scesim` files: `src/test/resources/scesim`
-** All other files: `src/main/resources/others`
-. Click *Apply*. {CANVAS} moves your files to the folders shown in the dialog, generates the build and configuration files for the selected framework, and creates a new commit.
+. In a dialog for the selected Accelerator, click *Apply*. {CANVAS} moves your files to the destination folders, generates the build and configuration files for the selected framework, and creates a new commit.
 +
-Applying an Accelerator is permanent. Any changes you make after applying it may result in your files being in different directories. Click *Cancel* to close the dialog without applying the Accelerator.
+Applying an Accelerator is permanent and cannot be undone within {CANVAS}. If you do not want to apply the Accelerator, click *Cancel* to close the dialog.
 . After the Accelerator is applied, the Accelerator name is displayed as a label in the project header. Click the label to open a dialog that shows the contents of the `.kie-sandbox/accelerator.yaml` file created at the project root.
 +
 [NOTE]
@@ -38,9 +33,11 @@ Do not modify the `accelerator.yaml` file. It is used by {CANVAS} to track the a
 
 == After applying an Accelerator
 
-After the Accelerator is applied, your project contains a complete _Business Service_ project structure. Review the generated files and configure them for your use case:
+After applying an Accelerator, you can continue authoring models in {CANVAS} and test their execution using Dev Deployments. For more information, see xref:../bamoe-canvas/dev-deployments.adoc[Dev Deployments].
 
-* Open `pom.xml` (Maven) or `build.gradle` (Gradle) and uncomment the dependency blocks for the optional capabilities your project requires. For more information, see xref:intro-accelerators.adoc#optional-blocks[Introducing Accelerators → Configuring optional capabilities].
-* Open `application.properties` and uncomment the configuration blocks for the features you want to enable.
+Because {CANVAS} is designed for visual modeling and does not include an in-browser code editor, you cannot view or edit project configuration files such as `pom.xml` or `application.properties` directly in {CANVAS}. To review and customize the full project structure and configuration files, you can share the project:
 
-For a full description of the generated files, see xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
+* *Export as ZIP* — download all project files by selecting *Share* → *Download "All files"*.
+* *Sync with a Git repository* — push your project to a remote repository by selecting *Share* → *<Git Provider>*.
+
+You can then open the project in {DEV_TOOLS} for VS Code, where you can modify `pom.xml`, configure `application.properties`, and build, test, and deploy the complete _Business Service_. For more information, see xref:using-accelerators-devtools.adoc[Using Accelerators in {DEV_TOOLS}] and xref:intro-accelerators.adoc#project-output[Introducing Accelerators → Generated project structure].
