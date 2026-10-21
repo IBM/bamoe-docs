@@ -30,6 +30,8 @@ Use one of the following Accelerators for _Business Services_ that contain only 
 
 Choose the Accelerator that matches your target runtime framework and build tool.
 
+You can also use the default Accelerators from the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] as a baseline when creating or customizing your own Accelerator. For more information, see xref:custom-accelerators.adoc[Creating a custom Accelerator].
+
 [#accessing-accelerators]
 == Accessing Accelerators
 
@@ -37,8 +39,7 @@ The built-in Accelerators are available directly inside {CANVAS} and {DEV_TOOLS}
 
 * *{CANVAS} and {DEV_TOOLS}* — built-in Accelerators are available from the *Apply Accelerator* dropdown inside {CANVAS} and from the {DEV_TOOLS} command palette in VS Code. For more information, see xref:using-accelerators-canvas.adoc[Using Accelerators in {CANVAS}] and xref:using-accelerators-devtools.adoc[Using Accelerators in {DEV_TOOLS}].
 * *Downloadable ZIP* — go to the xref:../../01-release-notes/whats-new-9-6.adoc#download-doc[Download documents] section in the release notes to download the Accelerators ZIP file containing all templates.
-* *Public GitHub repository* — go to the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] and select the branch that matches {VERSION} to browse, clone, or download individual Accelerators. For a description of the files you find in a cloned Accelerator, see <<project-output>>.
-* *Version-tagged GitHub releases* — the GitHub repository publishes releases that correspond to the {PRODUCT_SHORT} version.
+* *Public GitHub repository* — go to the https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] and select the branch or tag that matches {VERSION} to browse, clone, or download individual Accelerators.
 
 [#project-output]
 == Generated project structure
@@ -47,7 +48,11 @@ When you apply an Accelerator to a folder containing your Workflows, Decisions, 
 
 * A `pom.xml` (Maven) or `build.gradle` (Gradle) pre-configured with the {PRODUCT_SHORT} BOM and the dependencies required for your chosen framework and build tool. The file includes commented and uncommented blocks for optional capabilities — for example, IBM License Metric Tool (ILMT) compliance libraries or role-based access control (RBAC) add-ons — that you can enable for your use case by removing the relevant comment markers.
 * An `application.properties` file pre-populated with the configuration properties needed to run the _Business Service_. Like the build file, it contains commented blocks for optional features that you can activate as needed.
-* A standard Maven or Gradle directory layout with your models placed in the folders defined by the Accelerator. For the default Accelerators, `.dmn` and `.pmml` files are placed in `src/main/resources/dmn`, `.bpmn` and `.bpmn2` files in `src/main/resources/bpmn`, `.scesim` files in `src/test/resources/scesim`, and all other files in `src/main/resources/others`.
+* A standard Maven or Gradle directory layout with your models placed in the folders defined by the Accelerator. For the default Accelerators, files are moved to the following folders:
+** `.dmn` and `.pmml` files: `src/main/resources/dmn`
+** `.bpmn` and `.bpmn2` files: `src/main/resources/bpmn`
+** `.scesim` files: `src/test/resources/scesim`
+** All other files: `src/main/resources/others`
 * A `README.md` file that you can update with the name and description of your _Business Service_ project.
 * A `.kie-sandbox/accelerator.yaml` file at the project root that records which Accelerator was applied. This file is used by {CANVAS} to track the applied Accelerator.
 +
@@ -56,9 +61,7 @@ When you apply an Accelerator to a folder containing your Workflows, Decisions, 
 Do not modify the contents of the `accelerator.yaml` file. Modifying it may mislead users or break the {CANVAS} integration.
 ====
 
-After applying an Accelerator, review the generated `pom.xml` and `application.properties` files and comment or uncomment the blocks that correspond to the capabilities your _Business Service_ requires. 
-
-You can use the default Accelerators from https://github.com/IBM/bamoe-canvas-quarkus-accelerator[IBM Business Automation Manager Open Editions Accelerators repository] as a baseline when creating or customizing your own Accelerator.
+After applying an Accelerator, you can review and edit the generated `pom.xml` (or `build.gradle`) and `application.properties` files in {DEV_TOOLS} for VS Code or in {CANVAS} if the project is shared with a Git repository, commenting or uncommenting the blocks that correspond to the capabilities your _Business Service_ requires.
 
 ////
 [#optional-blocks]
