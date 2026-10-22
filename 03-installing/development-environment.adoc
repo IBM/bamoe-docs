@@ -934,7 +934,7 @@ For more information on how to implement this in the Runtime environment Helm ch
 [#canvas-gitrepo-config]
 == Configuring {CANVAS} to work with supported Git providers
 
-To integrate GitHub, GitHub Enterprise Server, GitLab, or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable using the `canvas.env` Helm configuration parameter (see xref:#helm-chart-config-ref[Configuration reference for Dev environment Helm Charts]). 
+To integrate GitHub, GitHub Enterprise Server, GitLab (including self-hosted), or Bitbucket Data Center with {Canvas}, you must configure the `KIE_SANDBOX_AUTH_PROVIDERS` environment variable using the `canvas.env` Helm configuration parameter (see xref:#helm-chart-config-ref[Configuration reference for Dev environment Helm Charts]). 
 
 Example configuration:
 
@@ -966,6 +966,8 @@ canvas:
 *group*:: Categorizes the provider for grouping similar services.
 *disableEncoding* (GitLab only):: If set to true, adds Accept-Encoding.
 *insecurelyDisableTlsCertificateValidation* (BitBucket Data Center only):: If set to true, skips TLS certificate validation.
+
+The Canvas container reads the environment variable on startup and writes it into the `env.json`. If you add your specific provider and want to maintain the default Authentication providers you must duplicate the default entries in the environment variable. In a local installation you can append your specific provider directly to the `https://<canvas-host>/env.json` before restarting.
 
 After completing the configuration, you can access the features provided by each integration. For more information see xref:../06-available-components/dev-environment/bamoe-canvas/connecting-accounts.adoc[Connecting to Git and Cloud providers].
 
