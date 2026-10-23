@@ -4,7 +4,7 @@ include::../../../_partials/attributes.adoc[]
 :imagesdir: ../../../_images
 include::../../../_styles/images.adoc[]
 
-This guide explains how to migrate custom WorkItemHandlers from {PRODUCT_SHORT} v8 to BAMOE v9. It outlines the key differences in APIs, registration mechanisms, and execution models. For more information on creating a custom work item handler in {PRODUCT_SHORT} {VERSION_RM} see xref:../../../08-developing-stateful-workflows/authoring-workflows.adoc#custom-wih[Developing stateful Workflows → Authoring Workflows with BPMN].
+This guide explains how to migrate custom WorkItemHandlers from {PRODUCT_SHORT} v8 to {PRODUCT_SHORT} v9. It outlines the key differences in APIs, registration mechanisms, and execution models. For more information on creating a custom work item handler in {PRODUCT_SHORT} {VERSION_RM} see xref:../../../08-developing-stateful-workflows/extending-workflow-engine.adoc#custom-wih[Extending the Workflow Engine -> Creating a custom WorkItemHandler].
 
 == What is a custom Work Item in {PRODUCT_SHORT}?
 
@@ -12,17 +12,17 @@ In {PRODUCT_SHORT}, a Work Item represents a task or activity in a process that 
 
 Custom Tasks can also define visual and runtime properties for the node on the process model, enhancing both modeling and execution flexibility.
 
-== Differences between BAMOE 8 and 9
+== Differences between {PRODUCT_SHORT} 8 and 9
 
 === API and lifecycle changes
 
-In BAMOE v8, custom WorkItemHandlers implemented the interface `org.kie.api.runtime.process.WorkItemHandler` and used the methods `+executeWorkItem(...)+` and `+abortWorkItem(...)+`.
+In {PRODUCT_SHORT} v8, custom WorkItemHandlers implemented the interface `org.kie.api.runtime.process.WorkItemHandler` and used the methods `+executeWorkItem(...)+` and `+abortWorkItem(...)+`.
 
-In BAMOE v9, these methods are no longer supported. Instead, handlers must extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.:
+In {PRODUCT_SHORT} v9, these methods are no longer supported. Instead, handlers must extend `org.kie.kogito.process.workitems.impl.DefaultKogitoWorkItemHandler` and override the `+activateWorkItemHandler(...)+` and `+abortWorkItemHandler(...)+` lifecycle methods to define the behavior of your Custom Task.:
 
 The new model is based on phases and transitions, which provide more flexibility and better integration with the Kogito runtime.
 
-For more information about `KogitoWorkItemHandler`, see xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-12-database-integration/README.md[Tutorial 12: Database Integration — BAMOE v8 to v9 Migration].
+For more information about `KogitoWorkItemHandler`, see xref:{BAMOE_DOCS_TUTORIALS_DOCS_LINK}/tutorial-12-database-integration/README.md[Tutorial 12: Database Integration — {PRODUCT_SHORT} v8 to v9 Migration].
 
 === Registration changes
 
@@ -44,7 +44,7 @@ public class CustomWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
 
 === Annotation support
 
-The `@Wid` annotation used in BAMOE v8 is no longer supported in BAMOE v9. Instead, Work Item Definitions must be provided as `.wid` files and placed in the root directory of your project or in the same folder as your BPMN file, see xref:../../../08-developing-stateful-workflows/authoring-workflows.adoc#custom-wih[Authoring Workflows with BPMN → Creating a custom Work Item Handler]
+The `@Wid` annotation used in {PRODUCT_SHORT} v8 is no longer supported in {PRODUCT_SHORT} v9. Instead, Work Item Definitions must be provided as `.wid` files and placed in the root directory of your project or in the same folder as your BPMN file, see xref:../../../08-developing-stateful-workflows/authoring-workflows.adoc#custom-wih[Extending the Workflow Engine → Creating a custom WorkItemHandler]
 
 === Retry mechanisms
 In {PRODUCT_SHORT} {VERSION_80X} there were two different mechanisms for handling retry logic in Custom WorkItemHandlers:
