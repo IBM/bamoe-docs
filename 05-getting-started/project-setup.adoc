@@ -2,66 +2,78 @@
 include::../_partials/attributes.adoc[]
 include::../_styles/images.adoc[]
 
-_Business Services_ are microservice Java applications built on top of Quarkus or Spring Boot, containing {PRODUCT_SHORT} runtime libraries and Business Automation assets such as Workflows (BPMN), Decisions (DMN), Rules (DRL), and spreadsheet Decision Tables (XLS or XLSX), following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard directory layout]. If you are using Gradle, follow https://docs.gradle.org/9.2.1/userguide/organizing_gradle_projects.html[Gradle's standard directory layout]. 
+_Business Services_ are microservice Java applications built on top of Quarkus or Spring Boot, containing {PRODUCT_SHORT} runtime libraries and Business Automation assets such as Workflows (BPMN), Decisions (DMN), Rules (DRL), and spreadsheet Decision Tables (XLS or XLSX), following https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html[Maven's standard directory layout]. If you are using Gradle, follow https://docs.gradle.org/9.2.1/userguide/organizing_gradle_projects.html[Gradle's standard directory layout].
 
 [#gs-accelerators]
-== Introducing Accelerators
+== Setting up a _Business Service_ project with Accelerators
 
-Instead of creating a _Business Service_ project from scratch, you can use an Accelerator — a pre-configured project template for Quarkus or Spring Boot with Maven or Gradle — to instantly scaffold the project structure around your existing Decisions and Workflows. Accelerators can be applied directly from {CANVAS} or {DEV_TOOLS}, and organizations can also publish custom Accelerators to standardize project setup across teams.
+Instead of creating a _Business Service_ project from scratch, you can use an Accelerator — a pre-configured project template for Quarkus or Spring Boot with Maven or Gradle — to generate the complete project structure, including build files, configuration, and directory layout.
+
+You can use Accelerators to set up your project in one of the following ways:
+
+* Create new Decisions and/or Workflows on {CANVAS}, then apply an Accelerator.
+* Open a new or existing folder in VS Code with {DEV_TOOLS} installed, and apply an Accelerator.
+* (Advanced) Create a Java project manually, adding dependencies to the _Business Service_ project configuration file, using Accelerators as a reference.
 
 For the full list of available Accelerators, how to access them, and more information, see xref:../06-available-components/dev-environment/accelerators/intro-accelerators.adoc[Accelerators → Introducing Accelerators].
 
 [#starting-project-canvas]
 == Starting on {CANVAS}
 
-Before you create a new _Business Service_ project on {CANVAS}, make sure you have installed {CANVAS} on your device. 
+Before you create a new _Business Service_ project on {CANVAS}, make sure you have installed {CANVAS} on your device.
 
 To install {CANVAS}, follow instructions provided by your organization or install {CANVAS} locally. For more information on local installation, see xref:../03-installing/development-environment.adoc[Installing → Development Environment].
 
 To create a new _Business Service_ project on {CANVAS}, see xref:../06-available-components/dev-environment/accelerators/using-accelerators-canvas.adoc[Accelerators → Using Accelerators in {CANVAS}].
 
-=== Using {DEV_TOOLS} after starting on {CANVAS}
+=== Continuing development in {DEV_TOOLS}
 
-If you want to continue developing on {DEV_TOOLS} after starting on {CANVAS}, you can do one of the following:
+After applying an Accelerator in {CANVAS}, you need to open the project in {DEV_TOOLS} for VS Code to continue developing your _Business Service_. {CANVAS} is designed for visual modeling and does not include a code editor, so tasks such as editing `pom.xml`, configuring `application.properties`, adding Java classes, and running local builds must be done in {DEV_TOOLS}.
+
+To bring the project into {DEV_TOOLS}, transfer it from {CANVAS} using one of the following methods:
 
 * Create a new Git repository in your Git provider of choice directly in {CANVAS}, then clone it locally.
-* Download your newly created _Business Services_ project from {CANVAS} as a .zip file and unpack it on your device.
+* Download your newly created _Business Service_ project from {CANVAS} as a `.zip` file and unpack it on your device.
 
 [#starting-project-vscode]
 == Starting on {DEV_TOOLS}
 
-To install {DEV_TOOLS} in the VS Code, see xref:../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}].
+To install {DEV_TOOLS} in VS Code, see xref:../03-installing/development-environment.adoc#dev-tools-install[Installing {DEV_TOOLS}].
 
-To create a new _Business Service_ project on {DEV_TOOLS}, see xref:../06-available-components/dev-environment/accelerators/using-accelerators-devtools.adoc[Accelerators → Using Accelerators in {DEV_TOOLS}].
+When starting on {DEV_TOOLS}, you can choose one of the following approaches:
+
+* *Start with your Business Automation assets first* — open a new or existing folder in VS Code, create your BPMN and/or DMN files using the visual editors provided by {DEV_TOOLS}, then apply an Accelerator to generate the full project structure around them. For more information, see xref:../06-available-components/dev-environment/accelerators/using-accelerators-devtools.adoc[Accelerators → Using Accelerators in {DEV_TOOLS}].
+* *Clone an Accelerator and add your assets* — clone the desired Accelerator repository branch directly from GitHub to get a ready-to-build project structure, then create your BPMN, DMN, and other Business Automation assets directly within the project. For more information, see xref:../06-available-components/dev-environment/accelerators/intro-accelerators.adoc#accessing-accelerators[Accelerators → Accessing Accelerators].
 
 == (Advanced) Manually creating a Java project
 
 If you have your own preferences when creating new projects, create your Java project manually. You can decide which {PRODUCT_SHORT} dependencies you need based on xref:../12-reference/maven-repository-libraries.adoc[Reference → {MVN_REPO} libraries].
 
-If you are planning on running Decisions, Rules, and/or spreadsheet Decision Tables on embedded Java mode using programmatic {PRODUCT_SHORT} Java API, see xref:../07-developing-decisions-rules-and-test-scenarios/embedded-dmn-drl.adoc[Decisions and Rules _Business Services_ in embedded Java mode].
+If you plan to run Decisions, Rules, and/or spreadsheet Decision Tables in embedded Java mode using the programmatic {PRODUCT_SHORT} Java API, see xref:../07-developing-decisions-rules-and-test-scenarios/embedded-dmn-drl.adoc[Decisions and Rules _Business Services_ in embedded Java mode].
 
 == Next steps
 
-After you have created a _Business Service_ project on {PRODUCT_SHORT}, you can do the following actions:
+After you create a _Business Service_ project on {PRODUCT_SHORT}, complete the following actions in {DEV_TOOLS}:
 
-. Update the README.md file with the name and description of your _Business Service_ project.
+. Create your Business Automation artifacts — such as BPMN Workflows, DMN Decisions, DRL Rules, and spreadsheet Decision Tables — if you have not already added them to the project.
+. Update the `README.md` file in {DEV_TOOLS} with the name and description of your _Business Service_ project.
 . Check your {MVN_REPO} installation to be able to build your _Business Service_ project locally. For more information, see xref:../03-installing/development-environment.adoc[Installing → Development Environment].
 
-For more information on quick project set up, see:
+For more information on quick project setup, see:
 
-- xref:decision-microservice.adoc[Decision service in 15 minutes]
-- xref:business-rule-microservice.adoc[Rule service in 15 minutes]
-- xref:orchestrating.adoc[Orchestrating Decisions and Rules with Workflows in 15 minutes]
-- xref:deploying-to-openshift.adoc[Deploying your first Business Service to OpenShift using Quarkus]
+* xref:decision-microservice.adoc[Decision service in 15 minutes]
+* xref:business-rule-microservice.adoc[Rule service in 15 minutes]
+* xref:orchestrating.adoc[Orchestrating Decisions and Rules with Workflows in 15 minutes]
+* xref:deploying-to-openshift.adoc[Deploying your first Business Service to OpenShift using Quarkus]
 
 For more information on authoring business logic, see:
 
-- xref:../07-developing-decisions-rules-and-test-scenarios/authoring-decisions.adoc[Authoring Decisions with DMN]
-- xref:../07-developing-decisions-rules-and-test-scenarios/authoring-rules.adoc[Authoring Rules with DRL and spreadsheet Decision Tables]
-- xref:../07-developing-decisions-rules-and-test-scenarios/authoring-scesim.adoc[Authoring unit tests with Test Scenarios]
-- xref:../08-developing-stateful-workflows/authoring-workflows.adoc[Authoring Workflows with BPMN]
+* xref:../07-developing-decisions-rules-and-test-scenarios/authoring-decisions.adoc[Authoring Decisions with DMN]
+* xref:../07-developing-decisions-rules-and-test-scenarios/authoring-rules.adoc[Authoring Rules with DRL and spreadsheet Decision Tables]
+* xref:../07-developing-decisions-rules-and-test-scenarios/authoring-scesim.adoc[Authoring unit tests with Test Scenarios]
+* xref:../08-developing-stateful-workflows/authoring-workflows.adoc[Authoring Workflows with BPMN]
 
 For more information on building and deploying, see:
 
-- xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables]
-- xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]
+* xref:../09-building-and-deploying-business-services/services-build.adoc[Building Business Services executables]
+* xref:../09-building-and-deploying-business-services/services-deployment.adoc[Deploying Business Services]
